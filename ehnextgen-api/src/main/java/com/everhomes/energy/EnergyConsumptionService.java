@@ -25,6 +25,11 @@ public interface EnergyConsumptionService {
     void changeEnergyMeter(ChangeEnergyMeterCommand cmd);
 
     /**
+     * meter转dto
+     */
+    EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter);
+
+    /**
      * 修改表记
      * @param cmd   cmd
      * @return  返回表记DTO

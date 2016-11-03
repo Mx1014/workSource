@@ -178,7 +178,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return toEnergyMeterDTO(meter);
     }
 
-    private EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter) {
+    @Override
+    public EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter) {
         EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
 
         // 表的类型
@@ -210,8 +211,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
         EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
         dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
-
-        // 当前最大量程
 
         return dto;
     }
@@ -284,6 +283,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void changeEnergyMeter(ChangeEnergyMeterCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+
     }
 
     @Override
