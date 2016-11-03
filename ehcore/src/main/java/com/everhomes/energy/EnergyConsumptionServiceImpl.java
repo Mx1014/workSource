@@ -1,6 +1,44 @@
 package com.everhomes.energy;
 
-import com.everhomes.configuration.ConfigurationProvider;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_BEFORE_TODAY;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_NOT_EXIST;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
@@ -22,37 +60,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
+ 
 
 /**
  * 能耗管理service
@@ -66,8 +74,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
 	SimpleDateFormat monthSF = new SimpleDateFormat("yyyyMM");
     
+	@Autowired
+	private CommunityProvider communityProvider;
+	
     @Autowired
     private EnergyDateStatisticProvider energyDateStatisticProvider;
+
+    @Autowired
+    private EnergyCountStatisticProvider energyCountStatisticProvider;
 
     @Autowired
     private EnergyMonthStatisticProvider energyMonthStatisticProvider;
@@ -697,9 +711,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
   	  	Timestamp dayBeforeYestBegin = getDayBegin(cal);
 		for(EnergyMeter meter : meters){
 			//拿前天的度数
-			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),yesterdayBegin,dayBeforeYestBegin);
-			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),todayBegin,yesterdayBegin);
-			BigDecimal ReadingAnchor = dayBeforeYestLastLog.getReading();
+			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
+			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,todayBegin);
+			//默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
+			BigDecimal ReadingAnchor = meter.getStartReading();
+			BigDecimal dayLastReading = meter.getStartReading();
+			BigDecimal dayCurrReading = meter.getStartReading();
+			if(null != dayBeforeYestLastLog){
+				ReadingAnchor = dayBeforeYestLastLog.getReading();
+				dayLastReading =  dayBeforeYestLastLog.getReading();
+			}
+
+			if(null != yesterdayLastLog){
+				dayCurrReading = yesterdayLastLog.getReading(); 
+			}
 			//拿出单个表前一天所有的读表记录
 			List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);
 			/**读表用量差*/
@@ -725,7 +750,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 				}
 			}
 			//计算当天走了多少字 量程+昨天最后一次读数-锚点
-			amount = amount.add(yesterdayLastLog.getReading().subtract(ReadingAnchor));
+			amount = amount.add(dayCurrReading.subtract(ReadingAnchor));
 			//获取公式,计算当天的费用
 			EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
 			EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
@@ -766,8 +791,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
 			dayStat.setMeterRate(rateSetting.getSettingValue());
 			dayStat.setMeterPrice(priceSetting.getSettingValue());
-			dayStat.setLastReading(dayBeforeYestLastLog.getReading());
-			dayStat.setCurrentReading(yesterdayLastLog.getReading());
+			dayStat.setLastReading(dayLastReading);
+			dayStat.setCurrentReading(dayCurrReading);
 			dayStat.setCurrentAmount(realAmount);
 			dayStat.setCurrentCost(realCost);
 			dayStat.setResetMeterFlag(resetFlag);
@@ -810,5 +835,32 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
 			energyMonthStatisticProvider.createEnergyMonthStatistic(monthStat);
 		}
-	}
+		//总量记录表 -用sql汇总
+		List<EnergyCountStatistic> countStats = energyMonthStatisticProvider.listEnergyCountStatistic(monthSF.format(monthBegin));
+		if(null != countStats){
+			List<Long> comIds = new ArrayList<Long>();
+			for(EnergyCountStatistic cs : countStats){
+
+				cs.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+				cs.setCreatorUid(UserContext.current().getUser().getId());
+				cs.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				energyCountStatisticProvider.createEnergyCountStatistic(cs);
+				comIds.add(cs.getCommunityId());
+			}
+			//各项目月水电能耗情况-同比
+			for(Long comId : comIds){
+				Community com = communityProvider.findCommunityById(comId);
+				EnergyYoyStatistic yoy = new EnergyYoyStatistic();
+				yoy.setNamespaceId(com.getNamespaceId());
+				yoy.setCommunityId(com.getId());
+				yoy.setAreaSize(com.getAreaSize());
+				yoy.setDateStr(monthSF.format(monthBegin));
+				//TODO: 通过sql计算每一个值
+			}
+			
+		}
+		 
+	} 
+	
 }

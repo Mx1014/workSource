@@ -14,7 +14,10 @@ import com.everhomes.server.schema.tables.records.EhEnergyMeterReadingLogsRecord
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -107,13 +110,43 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
     }
 
     @Override
-    public List<EnergyMeterReadingLog> listMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin) {
-        return null;
+    public List<EnergyMeterReadingLog> listMeterReadingLogByDate(Long meterId, Timestamp startBegin, Timestamp endBegin) {
+    	 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+
+         SelectQuery<EhEnergyMeterReadingLogsRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_READING_LOGS);
+ 
+         query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId)); 
+         query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.between(startBegin , endBegin)); 
+         query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode())); 
+         List<EnergyMeterReadingLog> objs = query.fetch().map((r) -> {
+             return ConvertHelper.convert(r, EnergyMeterReadingLog.class);
+         });
+         if(objs == null || objs.size() == 0)
+        	 return null;
+         return objs;
     }
 
     @Override
     public EnergyMeterReadingLog getLastMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin) {
-        return null;
+    	try {
+            EnergyMeterReadingLog[] result = new EnergyMeterReadingLog[1];
+            DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+            SelectConditionStep<Record> step =  context.select().from(Tables.EH_ENERGY_METER_READING_LOGS)
+            .where(Tables.EH_ENERGY_METER_READING_LOGS.ID.eq(id))
+            .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
+            if(null != startBegin)
+            	step = step.and(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.greaterOrEqual(startBegin));
+            if(null != endBegin)
+            	step = step.and(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.lessOrEqual(endBegin));
+            result[0] = step.fetchAny().map((r) -> {
+                    return ConvertHelper.convert(r, EnergyMeterReadingLog.class);
+                });
+
+            return result[0];
+            } catch (Exception ex) {
+                //fetchAny() maybe return null
+                return null;
+            }
     }
 
     @Override
