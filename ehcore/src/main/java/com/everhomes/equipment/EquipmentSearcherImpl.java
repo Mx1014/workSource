@@ -171,12 +171,14 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         List<EquipmentsDTO> dtos = new ArrayList<EquipmentsDTO>();
         for(Long id : ids) {
         	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(id);
-        	EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
-        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-    		if(group != null)
-    			dto.setTargetName(group.getName());
-
-    		dtos.add(dto);
+        	if(equipment != null) {
+	        	EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
+	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+	    		if(group != null)
+	    			dto.setTargetName(group.getName());
+	
+	    		dtos.add(dto);
+        	}
         }
         
         response.setEquipment(dtos);

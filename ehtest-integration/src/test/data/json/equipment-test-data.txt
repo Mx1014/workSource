@@ -374,5 +374,17 @@
 		"review_result":0,
 		"create_time":"2016-7-30 14:58:38"
 	}
+  ],
+  'eh_equipment_inspection_templates': [
+  {
+		"id":1,
+		"owner_type":"PM",
+		"owner_id":1000750,
+		"name":"raganya",
+		"creator_uid":211304,
+		"create_time":"2016-10-26 16:48:54",
+		"status":1,
+		"delete_uid":0
+	}
   ]
 }
