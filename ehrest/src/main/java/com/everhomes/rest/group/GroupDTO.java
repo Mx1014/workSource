@@ -35,6 +35,7 @@ import com.everhomes.util.StringHelper;
  * <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
  * <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
  * <li>operatorName: 操作人</li>
+ * <li>joinTime: 加入时间</li>
  * </ul>
  */
 public class GroupDTO {
@@ -63,6 +64,7 @@ public class GroupDTO {
     private String creatorName;
     private String creatorFamilyName;
     private String operatorName;
+    private Timestamp joinTime;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -76,7 +78,15 @@ public class GroupDTO {
     
     private Byte approvalStatus;
     
-    public String getOperatorName() {
+    public Timestamp getJoinTime() {
+		return joinTime;
+	}
+
+	public void setJoinTime(Timestamp joinTime) {
+		this.joinTime = joinTime;
+	}
+
+	public String getOperatorName() {
 		return operatorName;
 	}
 

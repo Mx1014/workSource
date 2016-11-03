@@ -282,9 +282,6 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private GroupSettingProvider groupSettingProvider;
     
-    @Autowired
-    private LocaleStringService localeService;
-    
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
@@ -675,8 +672,14 @@ public class GroupServiceImpl implements GroupService {
              query.addConditions(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.GROUP.getCode()));
              if(null != cmd.getCategoryId())
             	 query.addConditions(Tables.EH_GROUPS.CATEGORY_ID.eq(cmd.getCategoryId()));
-             if(!StringUtils.isEmpty(cmd.getKeywords()))
-            	 query.addConditions(Tables.EH_GROUPS.TAG.eq(cmd.getKeywords()));
+             if(!StringUtils.isEmpty(cmd.getKeywords())){
+            	 // 俱乐部搜索时，模糊查询group的name, add by tt, 20161103
+            	 if (GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(cmd.getPrivateFlag())) {
+            		 query.addConditions(Tables.EH_GROUPS.NAME.like("%"+cmd.getKeywords()+"%"));
+            	 }else {
+            		 query.addConditions(Tables.EH_GROUPS.TAG.eq(cmd.getKeywords()));
+				}
+             }
              if(!StringUtils.isEmpty(cmd.getPrivateFlag()))
             	 query.addConditions(Tables.EH_GROUPS.PRIVATE_FLAG.eq(cmd.getPrivateFlag()));
              
@@ -764,12 +767,48 @@ public class GroupServiceImpl implements GroupService {
                 }
                 if(tmpGroup != null && Byte.valueOf(GroupPrivacy.PUBLIC.getCode()).equals(tmpGroup.getPrivateFlag()) && Byte.valueOf(GroupAdminStatus.ACTIVE.getCode()).equals(tmpGroup.getStatus())) {
                     groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
-                } else {
+                } 
+                // 审核中的俱乐部也要显示，add by tt, 20161103
+                else if (tmpGroup != null && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(tmpGroup.getPrivateFlag()) 
+                		&& GroupAdminStatus.INACTIVE == GroupAdminStatus.fromCode(tmpGroup.getStatus()) && ApprovalStatus.WAITING_FOR_APPROVING == ApprovalStatus.fromCode(tmpGroup.getApprovalStatus())) {
+                	groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
+				}
+                else {
                     LOGGER.error("The group is not found, userId=" + operatorId + ", groupId=" + userGroup.getGroupId());
                 }
             }
         }
-
+        
+        // 添加排序，先按审核中、创建者、管理员及成员的顺序进行排列，再按俱乐部加入时间倒序排列，add by tt, 20161103
+        groupDtoList.sort((g1, g2)->{
+        	if (ApprovalStatus.WAITING_FOR_APPROVING == ApprovalStatus.fromCode(g1.getApprovalStatus()) && ApprovalStatus.WAITING_FOR_APPROVING != ApprovalStatus.fromCode(g2.getApprovalStatus())) {
+				return -1;
+			}
+        	if (ApprovalStatus.WAITING_FOR_APPROVING != ApprovalStatus.fromCode(g1.getApprovalStatus()) && ApprovalStatus.WAITING_FOR_APPROVING == ApprovalStatus.fromCode(g2.getApprovalStatus())) {
+				return 1;
+			}
+			if (g1.getCreatorUid().longValue() == operatorId && g2.getCreatorUid().longValue() != operatorId) {
+				return -1;
+			}
+			if (g1.getCreatorUid().longValue() != operatorId && g2.getCreatorUid().longValue() == operatorId) {
+				return 1;
+			}
+			if (RoleConstants.ResourceAdmin == g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin != g2.getMemberRole()) {
+				return -1;
+			}
+			if (RoleConstants.ResourceAdmin != g1.getMemberRole().longValue() && RoleConstants.ResourceAdmin == g2.getMemberRole()) {
+				return 1;
+			}
+			if (g1.getJoinTime().getTime() > g2.getJoinTime().getTime()) {
+				return -1;
+			}
+			if (g1.getJoinTime().getTime() < g2.getJoinTime().getTime()) {
+				return 1;
+			}
+		
+        	return 0;
+        });
+        
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("List public groups, operatorId=" + operatorId + ", userId=" + cmd.getUserId() + ", size=" + size 
@@ -1602,6 +1641,15 @@ public class GroupServiceImpl implements GroupService {
                 if(cmd.getStatus() != null) {
                     query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
                 }
+                
+                // 俱乐部的成员需要按创建者、管理员、成员的顺序按加入时间倒序排列，add by tt, 20161103
+                if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+                	if (TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.FALSE) {
+						query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
+					}
+					query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
+				}
+                
                 return query;
             });
         
@@ -2420,7 +2468,7 @@ public class GroupServiceImpl implements GroupService {
                 groupDto.setCategoryName(category.getName());
         }
         
-        //添加操作者
+        //添加操作者,add by tt, 20161103
         if (group.getOperatorUid() != null) {
 			groupDto.setOperatorName(getUserName(group.getOperatorUid()));
 		}
@@ -2462,6 +2510,7 @@ public class GroupServiceImpl implements GroupService {
             groupDto.setMuteNotificationFlag(member.getMuteNotificationFlag());
             groupDto.setMemberStatus(member.getMemberStatus());
             groupDto.setMemberRole(member.getMemberRole());
+            groupDto.setJoinTime(member.getCreateTime());
             
             if(GroupPostFlag.fromCode(group.getPostFlag()) == GroupPostFlag.ALL||
             		member.getMemberRole().longValue() == Role.ResourceAdmin || 
@@ -4171,17 +4220,28 @@ public class GroupServiceImpl implements GroupService {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		Long groupId = cmd.getGroupId();
+		Group group = checkGroupExists(userId, groupId);
 		GroupMember oldCreator = checkTransferPrivilegeParameters(userId, groupId);
+		GroupMember newCreator = checkGroupMemberExists(cmd.getUserId(), groupId);
 		
 		dbProvider.execute(t->{
 			//转移权限
-			GroupMember newCreator = transferPrivilegeToUser(oldCreator, cmd.getUserId(), groupId);
+			transferPrivilegeToUser(oldCreator, newCreator, group);
 			//发消息
 			sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
 			sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
 			
 			return null;
 		});
+	}
+
+	private GroupMember checkGroupMemberExists(Long userId, Long groupId) {
+		GroupMember newCreator = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), userId);
+		if (newCreator == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "not exist group member, userId = "+userId+", groupId"+groupId);
+		}
+		return newCreator;
 	}
 
 	//发给除了新创建者以外的所有成员
@@ -4222,7 +4282,7 @@ public class GroupServiceImpl implements GroupService {
         sendMessageToUser(newCreator.getMemberId(), notifyTextForApplicant, null);
 	}
 
-	private GroupMember transferPrivilegeToUser(GroupMember fromUser, Long toUserId, Long groupId) {
+	private void transferPrivilegeToUser(GroupMember fromUser, GroupMember toUser, Group group) {
 		//把创建者自己变成普通用户
 		fromUser.setMemberRole(RoleConstants.ResourceUser);
 		fromUser.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -4230,19 +4290,15 @@ public class GroupServiceImpl implements GroupService {
 		groupProvider.updateGroupMember(fromUser);
 		
 		//修改group的创建者为新创建者
-		Group group = groupProvider.findGroupById(groupId);
-		group.setCreatorUid(toUserId);
+		group.setCreatorUid(toUser.getMemberId());
 		group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		groupProvider.updateGroup(group);
 		
 		//修改原普通成员为创建者
-		GroupMember newCreator = groupProvider.findGroupMemberByMemberInfo(groupId, EhUsers.class.getSimpleName(), toUserId);
-		newCreator.setMemberRole(RoleConstants.ResourceCreator);
-		newCreator.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		newCreator.setOperatorUid(fromUser.getMemberId());
-		groupProvider.updateGroupMember(newCreator);
-		
-		return newCreator;
+		toUser.setMemberRole(RoleConstants.ResourceCreator);
+		toUser.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		toUser.setOperatorUid(fromUser.getMemberId());
+		groupProvider.updateGroupMember(toUser);
 	}
 	
 	@Override
@@ -4361,10 +4417,17 @@ public class GroupServiceImpl implements GroupService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
 		}
-		GroupSetting groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(cmd.getNamespaceId());
-		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
+		return getGroupParameters(cmd.getNamespaceId());
 	}
 
+	private GroupParametersResponse getGroupParameters(Integer namespaceId) {
+		GroupSetting groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
+		if (groupSetting == null) {
+			return new GroupParametersResponse(namespaceId, TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), 1);
+		}
+		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
+	}
+	
 	@Override
 	public CreateGroupCategoryResponse createGroupCategory(CreateGroupCategoryCommand cmd) {
 		User user = UserContext.current().getUser();
@@ -4521,6 +4584,10 @@ public class GroupServiceImpl implements GroupService {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		Group group = checkGroupExists(userId, cmd.getGroupId());
+		if (group.getStatus().byteValue() != GroupAdminStatus.INACTIVE.getCode() || group.getApprovalStatus() == null || group.getApprovalStatus().byteValue() != ApprovalStatus.WAITING_FOR_APPROVING.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "group status error, userId = "+userId+", groupId"+cmd.getGroupId());
+		}
 		
 		dbProvider.execute((s)->{
 			group.setStatus(GroupAdminStatus.ACTIVE.getCode());
@@ -4557,11 +4624,6 @@ public class GroupServiceImpl implements GroupService {
 	                ErrorCodes.ERROR_INVALID_PARAMETER, "not exist group, userId = "+userId+", groupId"+groupId);
 		}
 		
-		if (group.getStatus().byteValue() != GroupAdminStatus.INACTIVE.getCode() || group.getApprovalStatus() == null || group.getApprovalStatus().byteValue() != ApprovalStatus.WAITING_FOR_APPROVING.getCode()) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
-	                ErrorCodes.ERROR_INVALID_PARAMETER, "group status error, userId = "+userId+", groupId"+groupId);
-		}
-		
 		return group;
 	}
 
@@ -4570,6 +4632,10 @@ public class GroupServiceImpl implements GroupService {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		Group group = checkGroupExists(userId, cmd.getGroupId());
+		if (group.getStatus().byteValue() != GroupAdminStatus.INACTIVE.getCode() || group.getApprovalStatus() == null || group.getApprovalStatus().byteValue() != ApprovalStatus.WAITING_FOR_APPROVING.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "group status error, userId = "+userId+", groupId"+cmd.getGroupId());
+		}
 		
 		dbProvider.execute((s)->{
 			group.setStatus(GroupAdminStatus.INACTIVE.getCode());
@@ -4614,13 +4680,7 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	private Integer getRemainBroadcastCount(Integer namespaceId, Long groupId) {
-		Integer availableCount = null;
-		GroupSetting groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
-		if (groupSetting == null || groupSetting.getBroadcastCount() == null) {
-			availableCount = 1;
-		}else{
-			availableCount = groupSetting.getBroadcastCount();
-		}
+		Integer availableCount = getGroupParameters(namespaceId).getBroadcastCount();
 		
 		Integer usedCount = broadcastProvider.selectBroadcastCountToday(namespaceId, BroadcastOwnerType.GROUP.getCode(), groupId);
 		

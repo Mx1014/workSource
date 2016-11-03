@@ -72,7 +72,7 @@ public class NamespacesProviderImpl implements NamespacesProvider {
 							.orderBy(t1.ID)
 							.fetchOne();
 		if(record != null){
-			return ConvertHelper.convert(record, NamespaceInfoDTO.class);
+			return RecordHelper.convert(record, NamespaceInfoDTO.class);
 		}
 		return null;
 	}
