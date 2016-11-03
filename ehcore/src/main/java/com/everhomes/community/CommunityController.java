@@ -213,6 +213,7 @@ public class CommunityController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createResourceCategory(CreateResourceCategoryCommand cmd) {
         RestResponse response =  new RestResponse();
+        communityService.createResourceCategory(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -226,6 +227,7 @@ public class CommunityController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse updateResourceCategory(UpdateResourceCategoryCommand cmd) {
         RestResponse response =  new RestResponse();
+        communityService.updateResourceCategory(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -239,6 +241,7 @@ public class CommunityController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse deleteResourceCategory(DeleteResourceCategoryCommand cmd) {
         RestResponse response =  new RestResponse();
+        communityService.deleteResourceCategory(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -252,6 +255,7 @@ public class CommunityController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd) {
         RestResponse response =  new RestResponse();
+        communityService.createResourceCategoryAssignment(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -265,6 +269,7 @@ public class CommunityController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd) {
         RestResponse response =  new RestResponse();
+        communityService.deleteResourceCategoryAssignment(cmd);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -303,8 +308,8 @@ public class CommunityController extends ControllerBase {
     @RequestMapping("listCommunitiesByCategory")
     @RestReturn(value=ListCommunitiesByKeywordCommandResponse.class)
     public RestResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
-
-        RestResponse response =  new RestResponse();
+    	ListCommunitiesByKeywordCommandResponse resp = communityService.listCommunitiesByCategory(cmd);
+        RestResponse response =  new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

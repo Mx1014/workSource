@@ -24,4 +24,6 @@ public interface ServiceModuleProvider {
 
 	List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetIdAndOwnerId(String ownerType, Long ownerId, String targetType, Long targetId, Long organizationId);
 
+
+	List<ServiceModule> listServiceModule(Integer level);
 }

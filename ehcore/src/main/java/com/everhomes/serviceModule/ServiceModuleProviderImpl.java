@@ -6,8 +6,10 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.serviceModule.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhServiceModules;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
@@ -15,6 +17,7 @@ import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
@@ -34,9 +37,6 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 
 	@Autowired
 	private DbProvider dbProvider;
-	
-	@Autowired
-    private ShardingProvider shardingProvider;
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
@@ -155,53 +155,25 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));
 			return null;
 		});
+
 		return results;
 	}
 
-	//	@Override
-//	//@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})
-//	public List<WebMenuPrivilege> listWebMenuByPrivilegeIds(
-//			List<Long> privilegeIds, WebMenuPrivilegeShowFlag showFlag) {
-//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//		SelectQuery<EhWebMenuPrivilegesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_PRIVILEGES);
-//		Condition cond = null;
-//		cond = Tables.EH_WEB_MENU_PRIVILEGES.PRIVILEGE_ID.in(privilegeIds);
-//
-//		if(null != showFlag){
-//			cond = cond.and(Tables.EH_WEB_MENU_PRIVILEGES.SHOW_FLAG.eq(showFlag.getCode()));
-//		}
-//		query.addConditions(cond);
-//		query.addOrderBy(Tables.EH_WEB_MENU_PRIVILEGES.SORT_NUM);
-//		return query.fetch().map((r) -> {
-//			return ConvertHelper.convert(r, WebMenuPrivilege.class);
-//		});
-//	}
-//
-//	@Override
-//	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
-//	public List<WebMenu> listWebMenuByMenuIds(
-//			List<Long> menuIds) {
-//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//		SelectQuery<EhWebMenusRecord> query = context.selectQuery(Tables.EH_WEB_MENUS);
-//		Condition cond = Tables.EH_WEB_MENUS.STATUS.eq(WebMenuStatus.ACTIVE.getCode());
-//		cond = cond.and(Tables.EH_WEB_MENUS.ID.in(menuIds));
-//		query.addConditions(cond);
-//		query.addOrderBy(Tables.EH_WEB_MENUS.SORT_NUM);
-//		return query.fetch().map((r) -> {
-//			return ConvertHelper.convert(r, WebMenu.class);
-//		});
-//	}
-//
-//	@Override
-//	//@Caching(evict = {@CacheEvict(value="listWebMenuByType", key="'webMenuByMenuIds'")})
-//	public List<WebMenuScope> listWebMenuScopeByOwnerId(String ownerType, Long ownerId) {
-//		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-//		SelectQuery<EhWebMenuScopesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_SCOPES);
-//		Condition cond = Tables.EH_WEB_MENU_SCOPES.OWNER_TYPE.eq(ownerType);
-//		cond = cond.and(Tables.EH_WEB_MENU_SCOPES.OWNER_ID.eq(ownerId));
-//		query.addConditions(cond);
-//		return query.fetch().map((r) -> {
-//			return ConvertHelper.convert(r, WebMenuScope.class);
-//		});
-//	}
+	@Override
+	public List<ServiceModule> listServiceModule(Integer level) {
+		List<ServiceModule> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
+		SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
+		
+		Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
+		if(null != level)
+			cond = cond.and(Tables.EH_SERVICE_MODULES.LEVEL.eq(level));
+		
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModule.class));
+			return null;
+		});
+		return results;
+	}
 }

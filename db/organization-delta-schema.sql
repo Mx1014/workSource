@@ -215,7 +215,7 @@ CREATE TABLE `eh_organization_job_position_maps` (
 -- DROP TABLE IF EXISTS `eh_service_modules`;
 CREATE TABLE `eh_service_modules` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `name` BIGINT NOT NULL COMMENT 'organization',
+  `name` VARCHAR(64) DEFAULT NULL,
   `parent_id` BIGINT NOT NUll,
   `path` VARCHAR(128) NOT NUll,
   `type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: park, 1: organization, 3:manager',
