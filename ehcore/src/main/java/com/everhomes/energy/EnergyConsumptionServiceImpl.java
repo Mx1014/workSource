@@ -10,8 +10,49 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.MeterFormulaVariable;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.energy.*;
+import com.everhomes.rest.approval.TrueOrFalseFlag;  
+import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
+import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterCommand;
+import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
+import com.everhomes.rest.energy.EnergyCategoryDefault;
+import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
+import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
+import com.everhomes.rest.energy.EnergyLocaleStringCode;
+import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
+import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
+import com.everhomes.rest.energy.EnergyMeterDTO;
+import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
+import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
+import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
+import com.everhomes.rest.energy.EnergyMeterSettingType;
+import com.everhomes.rest.energy.EnergyMeterStatus;
+import com.everhomes.rest.energy.EnergyMeterType;
+import com.everhomes.rest.energy.EnergyStatByYearDTO;
+import com.everhomes.rest.energy.EnergyStatCommand;
+import com.everhomes.rest.energy.EnergyStatDTO;
+import com.everhomes.rest.energy.EnergyStatisticType;
+import com.everhomes.rest.energy.GetEnergyMeterCommand;
+import com.everhomes.rest.energy.ImportEnergyMeterCommand;
+import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
+import com.everhomes.rest.energy.ListEnergyFormulasCommand;
+import com.everhomes.rest.energy.ListMeterCategoriesCommand;
+import com.everhomes.rest.energy.ListMeterChangeLogCommand;
+import com.everhomes.rest.energy.ReadEnergyMeterCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
+import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
+import com.everhomes.rest.energy.SearchEnergyMeterResponse;
+import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand; 
+import com.everhomes.rest.energy.*; 
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
@@ -68,6 +109,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     
 	@Autowired
 	private CommunityProvider communityProvider;
+	
+	@Autowired
+	private EnergyYoyStatisticProvider energyYoyStatisticProvider;
 	
     @Autowired
     private EnergyDateStatisticProvider energyDateStatisticProvider;
@@ -905,6 +949,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
   	  	Timestamp monthEnd = getDayBegin(cal);
   	  	cal.set(Calendar.DAY_OF_MONTH, 1);
   	  	Timestamp monthBegin = getDayBegin(cal);
+  	  	cal.add(Calendar.YEAR, -1);
+  	  	Timestamp lastYear = getDayBegin(cal);
 		for(EnergyMeter meter : meters){
 
 			//取月初的上次度数和月末的当前读数
@@ -944,6 +990,57 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 				yoy.setAreaSize(com.getAreaSize());
 				yoy.setDateStr(monthSF.format(monthBegin));
 				//TODO: 通过sql计算每一个值
+				//本月-水费-账单项目-应收
+				yoy.setWaterReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.WATER.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+				//本月-水费-账单项目-应付
+				yoy.setWaterPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.WATER.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+				
+				yoy.setWaterBurdenAmount(yoy.getWaterPayableAmount().subtract(yoy.getWaterReceivableAmount()));
+				yoy.setWaterAverageAmount(com.getAreaSize() == null ? null:yoy.getWaterBurdenAmount().divide(new BigDecimal(com.getAreaSize())));
+				
+
+				//本月-电费-账单项目-应收
+				yoy.setElectricReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+				//本月-电费-账单项目-应付
+				yoy.setElectricPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+				
+				yoy.setElectricBurdenAmount(yoy.getElectricPayableAmount().subtract(yoy.getElectricReceivableAmount()));
+				yoy.setElectricAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())));
+				
+
+
+				//去年本月-水费-账单项目-应收
+				yoy.setWaterLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear),EnergyMeterType.WATER.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+				//去年本月-水费-账单项目-应付
+				yoy.setWaterLastPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear),EnergyMeterType.WATER.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+				
+				yoy.setWaterLastBurdenAmount(yoy.getWaterLastPayableAmount().subtract(yoy.getWaterLastReceivableAmount()));
+				yoy.setWaterLastAverageAmount(com.getAreaSize() == null ? null:yoy.getWaterLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())));
+
+				
+				//去年本月-电费-账单项目-应收
+				yoy.setElectricLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear),EnergyMeterType.ELECTRIC.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+				//去年本月-电费-账单项目-应付
+				yoy.setElectricLastPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear),EnergyMeterType.ELECTRIC.getCode()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+				
+				yoy.setElectricLastBurdenAmount(yoy.getElectricLastPayableAmount().subtract(yoy.getElectricLastReceivableAmount()));
+				yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())));
+				
+
+				yoy.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+				yoy.setCreatorUid(UserContext.current().getUser().getId());
+				yoy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				
+				energyYoyStatisticProvider.createEnergyYoyStatistic(yoy);
 			}
 			
 		}

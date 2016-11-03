@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
@@ -18,4 +19,6 @@ public interface EnergyCountStatisticProvider {
 	List<EnergyCountStatistic> queryEnergyCountStatistics(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	BigDecimal getSumAmount(String statdate, Byte meterType,Byte categoryType, long categoryId );
+ 
 }
