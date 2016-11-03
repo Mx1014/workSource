@@ -915,8 +915,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 				yoy.setElectricPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
-				yoy.setElectricLastBurdenAmount(yoy.getElectricLastPayableAmount().subtract(yoy.getElectricLastReceivableAmount()));
-				yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())));
+				yoy.setElectricBurdenAmount(yoy.getElectricPayableAmount().subtract(yoy.getElectricReceivableAmount()));
+				yoy.setElectricAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())));
 				
 
 
