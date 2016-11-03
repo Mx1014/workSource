@@ -178,7 +178,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         SearchEnergyMeterReadingLogsResponse response = new SearchEnergyMeterReadingLogsResponse();
         if (logs.size() > pageSize) {
             logs.remove(logs.size() - 1);
-            response.setNextPageAnchor(logs.size());
+            response.setNextPageAnchor((long) logs.size());
         }
         response.setLogs(logs);
         return response;

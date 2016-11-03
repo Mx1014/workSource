@@ -1,44 +1,8 @@
 package com.everhomes.energy;
 
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_BEFORE_TODAY;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
@@ -60,6 +24,36 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
  
 
 /**
