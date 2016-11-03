@@ -2925,7 +2925,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	private List<OrganizationDTO> listUserRelateDepartment(Long orgId) {
 		User user = UserContext.current().getUser();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		 
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		
