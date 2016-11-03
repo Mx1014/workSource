@@ -1,11 +1,9 @@
 package com.everhomes.rest.acl;
 
 
-import com.everhomes.discover.ItemType;
-import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.util.StringHelper;
-import com.sun.istack.internal.NotNull;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**

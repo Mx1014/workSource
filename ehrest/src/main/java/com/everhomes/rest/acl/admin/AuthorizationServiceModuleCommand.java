@@ -3,8 +3,8 @@ package com.everhomes.rest.acl.admin;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-import com.sun.istack.internal.NotNull;
 
+import javax.validation.constraints.NotNull;
 import java.util.List;
 
 /**
