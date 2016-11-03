@@ -2479,7 +2479,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(null != dto.getResult() && null != EquipmentTaskResult.fromStatus(dto.getResult()))
 			row.createCell(++i).setCellValue(EquipmentTaskResult.fromStatus(dto.getResult()).getName());
 		
-		if(dto.getProcessExpireTime() != null) {
+		if(dto.getProcessTime() != null) {
 			row.createCell(++i).setCellValue(dto.getProcessTime().toString());
 			row.createCell(++i).setCellValue(dto.getOperatorName());
 		} else {
