@@ -198,6 +198,27 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertTrue(myResponse.getMeters().size() > 0);
     }
 
+    //6. 更改表记状态(删除,报废)
+    @Test
+    public void testUpdateEnergyMeterStatus() {
+        logon();
+        getMeter();
+        EhEnergyMetersRecord meter = context().selectFrom(EH_ENERGY_METERS).fetchAny();
+        UpdateEnergyMeterStatusCommand cmd = new UpdateEnergyMeterStatusCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setMeterId(meter.getId());
+        cmd.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+
+        RestResponseBase response = httpClientService.restPost(UPDATE_ENERGY_METER_STATUS_URL, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        DSLContext context = dbProvider.getDslContext();
+        EhEnergyMetersRecord record = context.selectFrom(Tables.EH_ENERGY_METERS).where(Tables.EH_ENERGY_METERS.ID.eq(meter.getId())).fetchOne();
+
+        assertEquals("The status should be 1", EnergyCommonStatus.INACTIVE.getCode(), record.getStatus());
+    }
+
     //6. 批量修改表记属性
     @Test
     public void testBatchUpdateEnergyMeterSettings() {
@@ -405,7 +426,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertNull("The created formula should be null.", newFormula);
     }
 
-    //20. setting记录列表
+    //15. setting记录列表
     @Test
     public void testListEnergyMeterSettingLogs() {
         logon();

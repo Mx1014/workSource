@@ -235,6 +235,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         String meterType = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_TYPE, String.valueOf(meter.getMeterType()), currLocale(), "");
         dto.setMeterType(meterType);
 
+        // 表的状态
+        String meterStatus = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_STATUS, String.valueOf(meter.getStatus()), currLocale(), "");
+        dto.setStatus(meterStatus);
+
         // 账单项目
         EnergyMeterCategory billCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getBillCategoryId());
         dto.setBillCategory(billCategory.getName());
