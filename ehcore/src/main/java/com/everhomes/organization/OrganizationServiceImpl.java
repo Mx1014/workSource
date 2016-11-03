@@ -7636,16 +7636,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		map.put("nickName", UserContext.current().getUser().getNickName());
 		NamespaceInfoDTO namespaceInfo = namespacesProvider.findNamespaceByid(UserContext.getCurrentNamespaceId());
 		String appName = "左邻";
-		if(null != namespaceInfo)
+		if(null != namespaceInfo && namespaceInfo.getName() != null)
 			appName = namespaceInfo.getName();
 		map.put("appName", appName);
 		map.put("verifyUrl", verifyUrl);
-		LOGGER.debug("namespaceInfo:"+namespaceInfo);
-		LOGGER.debug("appname:"+appName);
+		LOGGER.debug("namespaceInfo:"+namespaceInfo); 
 		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
-				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件");
-		LOGGER.debug("TITLE:"+mailSubject+"TEXT:"+mailText);
+				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件"); 
 		Email email = new EmailBuilder()
 	    .from(appName, "zuolin@zuolin.com")
 	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
