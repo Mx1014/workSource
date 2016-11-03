@@ -21,4 +21,14 @@ public interface EnergyMeterCategoryProvider {
      * 获取表记分类列表
      */
     List<EnergyMeterCategory> listMeterCategories(Integer namespaceId, Byte categoryType);
+
+    /**
+     * 新建分类
+     */
+    long createEnergyMeterCategory(EnergyMeterCategory category);
+
+    /**
+     * 更新分类
+     */
+    void updateEnergyMeterCategory(EnergyMeterCategory category);
 }

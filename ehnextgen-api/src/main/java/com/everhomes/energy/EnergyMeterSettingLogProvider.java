@@ -3,6 +3,7 @@ package com.everhomes.energy;
 import com.everhomes.rest.energy.EnergyMeterSettingType;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * Created by xq.tian on 2016/10/31.
@@ -28,4 +29,6 @@ public interface EnergyMeterSettingLogProvider {
      * @return 返回其中一条数据
      */
     EnergyMeterSettingLog findSettingByFormulaId(Integer namespaceId, Long formulaId);
+
+    List<EnergyMeterSettingLog> listEnergyMeterSettingLogs(Integer namespaceId, Long meterId, Byte settingType);
 }

@@ -2,12 +2,18 @@ package com.everhomes.energy;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterCategoriesDao;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterCategories;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_CATEGORIES;
@@ -21,8 +27,8 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     @Autowired
     private DbProvider dbProvider;
 
-    // @Autowired
-    // private SequenceProvider sequenceProvider;
+    @Autowired
+    private SequenceProvider sequenceProvider;
 
     @Override
     public EnergyMeterCategory findById(Integer namespaceId, Long id) {
@@ -47,6 +53,23 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
                 .and(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(categoryType))
                 .fetchInto(EnergyMeterCategory.class);
+    }
+
+    @Override
+    public long createEnergyMeterCategory(EnergyMeterCategory category) {
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnergyMeterCategories.class));
+        category.setId(id);
+        category.setCreatorUid(UserContext.current().getUser().getId());
+        category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        rwDao().insert(category);
+        return id;
+    }
+
+    @Override
+    public void updateEnergyMeterCategory(EnergyMeterCategory category) {
+        category.setUpdateUid(UserContext.current().getUser().getId());
+        category.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        rwDao().update(category);
     }
 
     private DSLContext context() {

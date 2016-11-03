@@ -14,7 +14,6 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.*;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -45,10 +44,9 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -124,6 +122,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMeterDefaultSettingProvider defaultSettingProvider;
+
+    @Autowired
+    private EnergyMeterFormulaVariableProvider meterFormulaVariableProvider;
 
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
@@ -425,22 +426,95 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyMeterFormulaDTO createEnergyMeterFormula(CreateEnergyMeterFormulaCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+
+        // 预处理公式的表达式
+        String processedExpression = this.processFormulaExpression(cmd.getExpression());
+        // 检查公式的合法性
+        this.checkFormulaExpressionValid(processedExpression);
+
+        EnergyMeterFormula formula = new EnergyMeterFormula();
+        formula.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+        formula.setExpression(processedExpression);
+        formula.setName(cmd.getName());
+        formula.setFormulaType(cmd.getFormulaType());
+        formula.setNamespaceId(UserContext.getCurrentNamespaceId());
+        meterFormulaProvider.createEnergyMeterFormula(formula);
+        return toEnergyMeterFormulaDTO(formula);
+    }
+
+    private void checkFormulaExpressionValid(String processedExpression) {
+        if (processedExpression == null) {
+            LOGGER.error("The energy meter formula format error");
+            throw errorWith(SCOPE, ERR_METER_FORMULA_ERROR, "The energy meter error");
+        }
+        ScriptEngineManager manager = new ScriptEngineManager();
+        ScriptEngine engine = manager.getEngineByName("js");
+
+        engine.put(MeterFormulaVariable.AMOUNT.getCode(), 1);
+        engine.put(MeterFormulaVariable.PRICE.getCode(), 2);
+        engine.put(MeterFormulaVariable.TIMES.getCode(), 3);
+
+        try {
+            engine.eval(processedExpression);
+        } catch (Exception e) {
+            LOGGER.error("The energy meter formula format error, expression = {}", processedExpression);
+            throw errorWith(SCOPE, ERR_METER_FORMULA_ERROR, "The energy meter formula format error, expression = %s", processedExpression);
+        }
+    }
+
+    private String processFormulaExpression(String inputExpression) {
+        List<EnergyMeterFormulaVariable> variables = meterFormulaVariableProvider.listMeterFormulaVariables();
+        String processedExpression = inputExpression;
+        for (EnergyMeterFormulaVariable var : variables) {
+            Pattern pattern = Pattern.compile("(\\[\\[" + var.getDisplayName() + "\\]\\])");
+            Matcher matcher = pattern.matcher(processedExpression);
+            while (matcher.find()) {
+                int start = matcher.start(1);
+                int end = matcher.end(1);
+                processedExpression = new StringBuilder(processedExpression).replace(start, end, var.getName()).toString();
+                matcher = pattern.matcher(processedExpression);
+            }
+        }
+        return processedExpression;
     }
 
     @Override
     public EnergyMeterCategoryDTO createEnergyMeterCategory(CreateEnergyMeterCategoryCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeterCategory category = new EnergyMeterCategory();
+        category.setNamespaceId(UserContext.getCurrentNamespaceId());
+        category.setName(cmd.getName());
+        category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
+        category.setCategoryType(cmd.getCategoryType());
+        category.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+        meterCategoryProvider.createEnergyMeterCategory(category);
+        return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
     }
 
     @Override
     public EnergyMeterCategoryDTO updateEnergyMeterCategory(UpdateEnergyMeterCategoryCommand cmd) {
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
+        if (category != null) {
+            category.setName(cmd.getName());
+            meterCategoryProvider.updateEnergyMeterCategory(category);
+        }
+        return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
     }
 
     @Override
     public void deleteEnergyMeterCategory(DeleteEnergyMeterCategoryCommand cmd) {
-
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
+        if (category != null) {
+            category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+            meterCategoryProvider.updateEnergyMeterCategory(category);
+        }
     }
 
     @Override
@@ -566,11 +640,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public void deleteEnergyMeterFormula(DeleteEnergyFormulaCommand cmd) {
+    public void deleteEnergyMeterFormula(DeleteEnergyMeterFormulaCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), cmd.getFormulaId());
         if (formula != null) {
+            // 查看当前公式是否被引用, 被引用则无法删除
             EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(currNamespaceId(), formula.getId());
             if (settingLog != null) {
                 LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
@@ -582,6 +657,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
+    public List<EnergyMeterSettingLogDTO> listEnergyMeterSettingLogs(ListEnergyMeterSettingLogsCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
+        return logs.stream().map(this::toEnergyMeterSettingLogDTO).collect(Collectors.toList());
+    }
+
+    private EnergyMeterSettingLogDTO toEnergyMeterSettingLogDTO(EnergyMeterSettingLog log) {
+        EnergyMeterSettingLogDTO dto = ConvertHelper.convert(log, EnergyMeterSettingLogDTO.class);
+        if (log.getFormulaId() != null) {
+            EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), log.getFormulaId());
+            dto.setFormulaName(formula.getName());
+        }
+        return dto;
+    }
+
+    /*@Override
     public SearchEnergyMeterReadingLogsResponse listEnergyMeterReadingLogsByMeter(ListEnergyMeterReadingLogsByMeterCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
@@ -593,7 +685,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         response.setLogs(logs.stream().map(this::toEnergyMeterReadingLogDTO).collect(Collectors.toList()));
         return response;
-    }
+    }*/
 
     private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
         return ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
@@ -609,7 +701,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyFormulaVariableDTO> listEnergyFormulaVariables() {
-        return null;
+        List<EnergyMeterFormulaVariable> variables = meterFormulaVariableProvider.listMeterFormulaVariables();
+        return variables.stream().map(r -> ConvertHelper.convert(r, EnergyFormulaVariableDTO.class)).collect(Collectors.toList());
     }
 
     @Override

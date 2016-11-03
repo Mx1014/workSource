@@ -2,9 +2,11 @@ package com.everhomes.energy;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterFormulasDao;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
@@ -59,6 +61,16 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
         formula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         formula.setStatus(EnergyCommonStatus.INACTIVE.getCode());
         rwDao().update(formula);
+    }
+
+    @Override
+    public long createEnergyMeterFormula(EnergyMeterFormula formula) {
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnergyMeterFormulas.class));
+        formula.setId(id);
+        formula.setCreatorUid(UserContext.current().getUser().getId());
+        formula.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        rwDao().insert(formula);
+        return id;
     }
 
     private DSLContext context() {

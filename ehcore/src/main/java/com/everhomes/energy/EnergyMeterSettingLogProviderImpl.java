@@ -16,6 +16,7 @@ import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
 import java.time.LocalDateTime;
+import java.util.List;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_SETTING_LOGS;
 
@@ -74,6 +75,17 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
                 .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.FORMULA_ID.eq(formulaId))
                 .fetchAnyInto(EnergyMeterSettingLog.class);
+    }
+
+    @Override
+    public List<EnergyMeterSettingLog> listEnergyMeterSettingLogs(Integer namespaceId, Long meterId, Byte settingType) {
+        return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType))
+                .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.desc())
+                .fetchInto(EnergyMeterSettingLog.class);
     }
 
     private DSLContext context() {

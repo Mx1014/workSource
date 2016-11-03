@@ -3,8 +3,11 @@ package com.everhomes.test.junit.energy;
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.energy.*;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEnergyMeterFormulasDao;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeters;
+import com.everhomes.server.schema.tables.records.EhEnergyMeterFormulasRecord;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterSettingLogsRecord;
 import com.everhomes.server.schema.tables.records.EhEnergyMetersRecord;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
@@ -48,6 +51,8 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     private static final String BATCH_UPDATE_ENERGY_METER_SETTINGS_URL = "/energy/batchUpdateEnergyMeterSettings";
     //7. 搜索读表记录
     private static final String SEARCH_ENERGY_METER_READING_LOGS_URL = "/energy/searchEnergyMeterReadingLogs";
+    //7. 搜索读表记录
+    private static final String LIST_ENERGY_METER_READING_LOGS_URL = "/energy/listEnergyMeterReadingLogsByMeter";
     //8. 删除读表记录(只能删除当天的记录)
     private static final String DELETE_ENERGY_METER_READING_LOG_URL = "/energy/deleteEnergyMeterReadingLog";
     //9. 修改表记的默认属性值
@@ -84,6 +89,10 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     private static final String READ_ENERGY_METER_URL = "/energy/readEnergyMeter";
     //25. 获取表信息
     private static final String GET_ENERGY_METER_URL = "/energy/getEnergyMeter";
+    //26. 删除公式
+    private static final String DELETE_ENERGY_METER_FORMULA_URL = "/energy/deleteEnergyMeterFormula";
+    //20. setting记录列表
+    private static final String LIST_ENERGY_METER_SETTING_LOGS_URL = "/energy/listEnergyMeterSettingLogs";
 
     @Autowired
     private SearchProvider searchProvider;
@@ -288,12 +297,13 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
     //9. 根据id获取读表记录
     @Test
-    public void testListEnergyMeterReadingLogs() {
+    public void testSearchEnergyMeterReadingLogs2() {
         logon();
         bulkReadingLogData();
-        ListEnergyMeterReadingLogsByMeterCommand cmd = new ListEnergyMeterReadingLogsByMeterCommand();
+        SearchEnergyMeterReadingLogsCommand cmd = new SearchEnergyMeterReadingLogsCommand();
         cmd.setOrganizationId(1L);
-        cmd.setMeterId(1L);
+        cmd.setCommunityId(1L);
+        cmd.setMeterId(2L);
         cmd.setPageAnchor(0L);
         cmd.setPageSize(10);
 
@@ -304,7 +314,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         SearchEnergyMeterReadingLogsResponse myResponse = response.getResponse();
         assertNotNull(myResponse);
 
-        assertTrue(myResponse.getLogs().size() == 1);
+        assertTrue(myResponse.getLogs().size() == 2);
     }
 
     //10. 删除读表记录(只能删除当天的记录)
@@ -320,24 +330,118 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         // assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
     }
 
+    //11. 删除公式
+    @Test
+    public void testDeleteEnergyMeterFormula() {
+        logon();
+        DeleteEnergyMeterFormulaCommand cmd = new DeleteEnergyMeterFormulaCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setFormulaId(1L);
+
+        RestResponseBase response = httpClientService.restPost(DELETE_ENERGY_METER_FORMULA_URL, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        EhEnergyMeterFormulasDao dao = new EhEnergyMeterFormulasDao(dbProvider.getDslContext().configuration());
+        EhEnergyMeterFormulas formula = dao.findById(1L);
+        assertEquals("The deleted formula status should be inactive", formula.getStatus(), EnergyCommonStatus.INACTIVE.getCode());
+    }
+
+    //12. 删除公式失败
+    @Test
+    public void testDeleteEnergyMeterFormula1() {
+        logon();
+        DeleteEnergyMeterFormulaCommand cmd = new DeleteEnergyMeterFormulaCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setFormulaId(2L);
+
+        RestResponseBase response = httpClientService.restPost(DELETE_ENERGY_METER_FORMULA_URL, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        // assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        EhEnergyMeterFormulasDao dao = new EhEnergyMeterFormulasDao(dbProvider.getDslContext().configuration());
+        EhEnergyMeterFormulas formula = dao.findById(2L);
+        assertEquals("The deleted formula status should be inactive", formula.getStatus(), EnergyCommonStatus.ACTIVE.getCode());
+    }
+
+    //13. 新建计算公式
+    @Test
+    public void testCreateEnergyMeterFormula() {
+        logon();
+        CreateEnergyMeterFormulaCommand cmd = new CreateEnergyMeterFormulaCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setName("新建的公式1");
+        cmd.setExpression("[[单价]]*[[倍率]]*[[读表用量差]]+(2*[[单价]])");
+        cmd.setFormulaType((byte)1);
+
+        CreateEnergyMeterFormulaRestResponse response = httpClientService.restPost(CREATE_ENERGY_METER_FORMULA_URL, cmd, CreateEnergyMeterFormulaRestResponse.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        EhEnergyMeterFormulasRecord newFormula = context().selectFrom(Tables.EH_ENERGY_METER_FORMULAS)
+                .where(Tables.EH_ENERGY_METER_FORMULAS.NAME.eq("新建的公式1"))
+                .and(Tables.EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq((byte) 1)).fetchAny();
+
+        assertNotNull("The created formula should be not null.", newFormula);
+    }
+
+    //14. 新建计算公式, 格式错误
+    @Test
+    public void testCreateEnergyMeterFormula1() {
+        logon();
+        CreateEnergyMeterFormulaCommand cmd = new CreateEnergyMeterFormulaCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setName("新建的公式1");
+        cmd.setExpression("[[单价]]*[[倍率]]*[[读表用量差]]+(2*[[单价]])1");// 公式结构错误,无法计算
+        cmd.setFormulaType((byte)1);
+
+        CreateEnergyMeterFormulaRestResponse response = httpClientService.restPost(CREATE_ENERGY_METER_FORMULA_URL, cmd, CreateEnergyMeterFormulaRestResponse.class);
+        assertNotNull(response);
+
+        EhEnergyMeterFormulasRecord newFormula = context().selectFrom(Tables.EH_ENERGY_METER_FORMULAS)
+                .where(Tables.EH_ENERGY_METER_FORMULAS.NAME.eq("新建的公式1"))
+                .and(Tables.EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq((byte) 1)).fetchAny();
+
+        assertNull("The created formula should be null.", newFormula);
+    }
+
+    //20. setting记录列表
+    @Test
+    public void testListEnergyMeterSettingLogs() {
+        logon();
+        ListEnergyMeterSettingLogsCommand cmd = new ListEnergyMeterSettingLogsCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setMeterId(1L);
+        cmd.setSettingType((byte)1);
+
+        // ListEnergyMeterSettingLogsRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_SETTING_LOGS_URL, cmd, ListEnergyMeterSettingLogsRestResponse.class);
+        // assertNotNull(response);
+        // assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        //
+        // ListEnergyMeterSettingLogsResponse myResponse = response.getResponse();
+        // assertNotNull(myResponse);
+
+
+    }
+
     private void bulkReadingLogData() {
         searchProvider.clearType("energyMeterReadingLog");
         searchProvider.bulk("energyMeterReadingLog", "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"1\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"communityId\" : 1, \"meterId\":1,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
                 "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"2\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"communityId\" : 1, \"meterId\":2,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
                 "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"3\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"communityId\" : 1, \"meterId\":1,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
                 "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"4\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824100\" }\n" +
+                "{ \"communityId\" : 1, \"meterId\":1,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
                 "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"5\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小黑\",\"operateTime\":\"1478069824200\" }\n" +
+                "{ \"communityId\" : 1, \"meterId\":2,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
                 "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"6\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824300\" }\n" +
+                "{ \"communityId\" : 1, \"meterId\":1,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
                 "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"7\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
+                "{ \"communityId\" : 1, \"meterId\":1,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }\n" +
                 "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"8\" } }\n" +
-                "{ \"communityId\" : 1, \"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }");
+                "{ \"communityId\" : 1, \"meterId\":1,\"meterType\":1,\"billCategoryId\":1,\"serviceCategoryId\":1,\"reading\":222.22,\"resetFlag\":1,\"meterName\":\"电表1\",\"meterNumber\":\"123\",\"operatorName\":\"小红\",\"operateTime\":\"1478069824400\" }");
     }
 
 
