@@ -2,6 +2,7 @@ package com.everhomes.rest.acl;
 
 
 import com.everhomes.util.StringHelper;
+import com.sun.istack.internal.NotNull;
 
 /**
  * <ul>
@@ -12,14 +13,19 @@ import com.everhomes.util.StringHelper;
  */
 public class DeleteAuthorizationServiceModuleCommand {
 
+	@NotNull
 	private String ownerType;
 
+	@NotNull
 	private Long ownerId;
-	
+
+	@NotNull
 	private String resourceType;
-	
+
+	@NotNull
 	private Long resourceId;
 
+	@NotNull
 	private Long organizationId;
 	
 

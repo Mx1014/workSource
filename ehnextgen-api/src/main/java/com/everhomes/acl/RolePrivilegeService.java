@@ -6,8 +6,7 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
-import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -214,4 +213,25 @@ public interface RolePrivilegeService {
 	 * @param cmd
      */
 	void authorizationServiceModule(AuthorizationServiceModuleCommand cmd);
+
+	/**
+	 * 机构业务模块授权列表
+	 * @param cmd
+	 * @return
+     */
+	List<AuthorizationServiceModuleDTO> listAuthorizationServiceModules(ListAuthorizationServiceModuleCommand cmd);
+
+	/**
+	 * 机构人员业务模块授权列表
+	 * @param cmd
+	 * @return
+     */
+	List<AuthorizationServiceModuleMembersDTO> listAuthorizationServiceModuleMembers(ListAuthorizationServiceModuleCommand cmd);
+
+
+	/**
+	 * 删除授权的业务模块
+ 	 * @param cmd
+     */
+	void deleteAuthorizationServiceModule(DeleteAuthorizationServiceModuleCommand cmd);
 }

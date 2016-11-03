@@ -62,6 +62,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("authorizationServiceModule")
     @RestReturn(value=String.class)
     public RestResponse authorizationServiceModule(@Valid AuthorizationServiceModuleCommand cmd) {
+        rolePrivilegeService.authorizationServiceModule(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -102,7 +103,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listAuthorizationServiceModules")
     @RestReturn(value=AuthorizationServiceModuleDTO.class, collection = true)
     public RestResponse listAuthorizationServiceModules(@Valid ListAuthorizationServiceModuleCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.listAuthorizationServiceModules(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -142,7 +143,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listAuthorizationServiceModuleMembers")
     @RestReturn(value=AuthorizationServiceModuleMembersDTO.class, collection = true)
     public RestResponse listAuthorizationServiceModuleMembers(@Valid ListAuthorizationServiceModuleCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(rolePrivilegeService.listAuthorizationServiceModuleMembers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -183,6 +184,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteAuthorizationServiceModule")
     @RestReturn(value=String.class)
     public RestResponse deleteAuthorizationServiceModule(@Valid DeleteAuthorizationServiceModuleCommand cmd) {
+        rolePrivilegeService.deleteAuthorizationServiceModule(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

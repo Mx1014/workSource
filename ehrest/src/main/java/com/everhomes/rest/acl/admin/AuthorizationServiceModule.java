@@ -17,6 +17,7 @@ import java.util.List;
  */
 public class AuthorizationServiceModule {
 
+	@NotNull
 	private Byte allModuleFlag;
 
 	@ItemType(Long.class)

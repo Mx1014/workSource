@@ -140,9 +140,25 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		return results;
 	}
 
+	@Override
+	public List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetIdAndOwnerId(String ownerType, Long ownerId, String targetType, Long targetId, Long organizationId) {
+		List<ServiceModuleAssignment> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType));
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(ownerId));
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));
+			return null;
+		});
+		return results;
+	}
 
-
-//	@Override
+	//	@Override
 //	//@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})
 //	public List<WebMenuPrivilege> listWebMenuByPrivilegeIds(
 //			List<Long> privilegeIds, WebMenuPrivilegeShowFlag showFlag) {

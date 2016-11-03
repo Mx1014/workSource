@@ -2,6 +2,7 @@ package com.everhomes.acl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
+import java.sql.Array;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -66,14 +67,16 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.serviceModule.ServiceModuleAssignment;
-import com.everhomes.serviceModule.ServiceModulePrivilege;
-import com.everhomes.serviceModule.ServiceModulePrivilegeType;
-import com.everhomes.serviceModule.ServiceModuleProvider;
+import com.everhomes.serviceModule.*;
+import com.everhomes.settings.PaginationConfigHelper;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
@@ -172,6 +175,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private ServiceModuleProvider serviceModuleProvider;
+
+	@Autowired
+	private CommunityProvider communityProvider;
+
+	@Autowired
+	private ConfigurationProvider configProvider;
 	
 	
 	@Override
@@ -185,7 +194,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		//获取用户在机构范围内的所有权限
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-		
+
+
 		if(null == privilegeIds){
 			res.setMenus(new ArrayList<WebMenuDTO>());
 			return res;
@@ -1282,16 +1292,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<OrganizationContactDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 
-		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
-		if(null == entityType){
-			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params ownerType error.");
-		}
-
 		List<OrganizationContactDTO> contactDTOs = new ArrayList<>();
 
-		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(entityType.getCode());
+		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(cmd.getOwnerType());
 		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(cmd.getOwnerId()));
 		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(cmd.getModuleId()));
 
@@ -1374,6 +1377,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 
+		/**
+		 * 权限删除
+		 */
 		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getUserId());
 		for (Acl acl : acls){
 		}
@@ -1400,6 +1406,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 
+		/**
+		 * 权限删除
+		 */
 		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getUserId());
 		for (Acl acl : acls){
 		}
@@ -1417,10 +1426,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		List<ServiceModulePrivilege> serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
 
-		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getUserId());
-		for (Acl acl : acls){
-		}
-
 		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(entityType.getCode());
 		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(cmd.getOwnerId()));
 		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(cmd.getModuleId()));
@@ -1433,24 +1438,177 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			serviceModuleProvider.deleteServiceModuleAssignmentById(serviceModuleAssignment.getId());
 		}
 
+		/**
+		 * 权限删除
+		 */
+		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getUserId());
+		for (Acl acl : acls){
+		}
 	}
 
 	@Override
 	public void authorizationServiceModule(AuthorizationServiceModuleCommand cmd) {
 
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+
 		List<AuthorizationServiceModule> serviceModuleAuthorizations = cmd.getServiceModuleAuthorizations();
 
 		dbProvider.execute((TransactionStatus status) -> {
 
-			for (AuthorizationServiceModule authorizationServiceModule:serviceModuleAuthorizations) {
-				if(null == authorizationServiceModule.getAllModuleFlag() || 0 == authorizationServiceModule.getAllModuleFlag()){
-					
+			for (AuthorizationServiceModule authorizationServiceModule: serviceModuleAuthorizations) {
+
+				List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(authorizationServiceModule.getResourceType(), authorizationServiceModule.getResourceId(),cmd.getTargetType(),cmd.getTargetId(), cmd.getOrganizationId());
+				for (ServiceModuleAssignment assignment: assignments) {
+					serviceModuleProvider.deleteServiceModuleAssignmentById(assignment.getId());
 				}
+
+				//业务模块授权
+				if(0 == authorizationServiceModule.getAllModuleFlag()){
+					if(null != authorizationServiceModule.getModuleIds()){
+						for (Long moduleId: authorizationServiceModule.getModuleIds()) {
+							ServiceModuleAssignment assignment = new ServiceModuleAssignment();
+							assignment.setModuleId(moduleId);
+							assignment.setOrganizationId(cmd.getOrganizationId());
+							assignment.setNamespaceId(namespaceId);
+							assignment.setTargetType(cmd.getTargetType());
+							assignment.setTargetId(cmd.getTargetId());
+							assignment.setOwnerType(authorizationServiceModule.getResourceType());
+							assignment.setOwnerId(authorizationServiceModule.getResourceId());
+							assignment.setCreateUid(user.getId());
+							serviceModuleProvider.createServiceModuleAssignment(assignment);
+						}
+					}
+				}else{
+					ServiceModuleAssignment assignment = new ServiceModuleAssignment();
+					assignment.setModuleId(1L); //0 代表全部业务
+					assignment.setOrganizationId(cmd.getOrganizationId());
+					assignment.setNamespaceId(namespaceId);
+					assignment.setTargetType(cmd.getTargetType());
+					assignment.setTargetId(cmd.getTargetId());
+					assignment.setOwnerType(authorizationServiceModule.getResourceType());
+					assignment.setOwnerId(authorizationServiceModule.getResourceId());
+					assignment.setCreateUid(user.getId());
+					serviceModuleProvider.createServiceModuleAssignment(assignment);
+				}
+
+				/**
+				 * 业务模块权限授权
+				 */
 			}
 
 			return null;
 		});
 
+	}
+
+	@Override
+	public List<AuthorizationServiceModuleDTO> listAuthorizationServiceModules(ListAuthorizationServiceModuleCommand cmd) {
+		List<AuthorizationServiceModuleDTO> dtos = new ArrayList<>();
+		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(cmd.getOwnerId());
+		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(EntityType.ORGANIZATIONS.getCode()));
+		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(cmd.getOrganizationId()));
+		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignments(condition, cmd.getOrganizationId());
+		String key = "";
+		AuthorizationServiceModuleDTO dto = null;
+		for (ServiceModuleAssignment assignment: assignments) {
+			if(key.equals(assignment.getOwnerType() + assignment.getOwnerId())){
+				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
+				if(null == dto.getServiceModules()){
+					dto.setServiceModules(new ArrayList<>());
+				}
+				dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+			}else{
+				if(null != dto){
+					dtos.add(dto);
+				}
+				dto = new AuthorizationServiceModuleDTO();
+				dto.setAllModuleFlag((byte)0);
+				if(0L == assignment.getModuleId()){
+					dto.setAllModuleFlag((byte)1);
+				}
+				dto.setResourceId(assignment.getOwnerId());
+				dto.setResourceType(assignment.getOwnerType());
+				if(EntityType.COMMUNITY == EntityType.fromCode(assignment.getOwnerType())){
+					Community community = communityProvider.findCommunityById(dto.getResourceId());
+					if(null == community){
+						LOGGER.debug("community is null...");
+					}else{
+						dto.setResourceName(community.getName());
+					}
+				}
+				key = assignment.getOwnerType() + assignment.getOwnerId(); // 拼装Key
+			}
+		}
+		return dtos;
+	}
+
+	@Override
+	public List<AuthorizationServiceModuleMembersDTO> listAuthorizationServiceModuleMembers(ListAuthorizationServiceModuleCommand cmd){
+		List<AuthorizationServiceModuleMembersDTO> dtos = new ArrayList<>();
+		List<ServiceModuleAssignment> resourceAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOwnerId());
+
+		if(0 != resourceAssignments.size()){
+			List<AuthorizationServiceModuleDTO> authorizationServiceModuleDTOs = this.listAuthorizationServiceModules(cmd);
+
+			int pageSize = PaginationConfigHelper.getPageSize(configProvider, 100000);
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			Organization orgCommoand = new Organization();
+			orgCommoand.setId(cmd.getOrganizationId());
+			orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+			List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null ,orgCommoand, null ,null , locator, pageSize);
+
+			for (OrganizationMember member: organizationMembers) {
+				if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(member.getTargetType())){
+					AuthorizationServiceModuleMembersDTO dto = ConvertHelper.convert(member, AuthorizationServiceModuleMembersDTO.class);
+					List<AuthorizationServiceModuleDTO> authorizationDTOs = new ArrayList<>();
+					authorizationDTOs.addAll(authorizationServiceModuleDTOs);
+					for (AuthorizationServiceModuleDTO authorizationDTO: authorizationDTOs) {
+						List<ServiceModuleAssignment> userAssignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(authorizationDTO.getResourceType(), authorizationDTO.getResourceId(),EntityType.USER.getCode(), member.getTargetId(), cmd.getOwnerId());
+
+						//如果个人有自己的分配业务模块则取自己的
+						if(0 != userAssignments.size()){
+							List<ServiceModuleDTO> serviceModules = new ArrayList<>();
+							for (ServiceModuleAssignment userAssignment:userAssignments) {
+								if(0L == userAssignment.getModuleId()){
+									authorizationDTO.setAllModuleFlag((byte)1); // 加入moduleId是0 代表全部业务
+									break;
+								}
+								ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(userAssignment.getModuleId());
+								serviceModules.add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+							}
+							authorizationDTO.setServiceModules(serviceModules);
+						}
+					}
+					dto.setAuthorizationServiceModules(authorizationDTOs);
+					dtos.add(dto);
+				}
+
+			}
+
+		}
+		return dtos;
+	}
+
+	@Override
+	public void deleteAuthorizationServiceModule(DeleteAuthorizationServiceModuleCommand cmd) {
+		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
+		if(null == entityType){
+			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
+					"params ownerType error.");
+		}
+
+		List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(cmd.getResourceType(),cmd.getResourceId(),EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(),cmd.getOwnerId());
+
+		//业务模块删除
+		for (ServiceModuleAssignment serviceModuleAssignment:serviceModuleAssignments ) {
+			serviceModuleProvider.deleteServiceModuleAssignmentById(serviceModuleAssignment.getId());
+		}
+
+		/**
+		 * 权限删除
+		 */
 	}
 
 	/**
