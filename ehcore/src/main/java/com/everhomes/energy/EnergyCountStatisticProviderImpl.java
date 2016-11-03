@@ -1,8 +1,11 @@
 package com.everhomes.energy;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record1;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -12,6 +15,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.energy.EnergyCategoryType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyCountStatisticsDao;
@@ -99,4 +103,26 @@ public class EnergyCountStatisticProviderImpl implements EnergyCountStatisticPro
 
     private void prepareObj(EnergyCountStatistic obj) {
     }
+
+	@Override
+	public BigDecimal getSumAmount(String statdate,Byte meterType, Byte categoryType, long categoryId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		SelectConditionStep<Record1<BigDecimal>> step = context.select(Tables.EH_ENERGY_COUNT_STATISTICS.AMOUNT.sum()).where(Tables.EH_ENERGY_COUNT_STATISTICS.DATE_STR.eq(statdate));
+		if(null != meterType)
+			step = step.and(Tables.EH_ENERGY_COUNT_STATISTICS.METER_TYPE.eq(meterType));
+		if(null!= categoryType){
+			if(categoryType.equals(EnergyCategoryType.BILL.getCode())){
+				step = step.and(Tables.EH_ENERGY_COUNT_STATISTICS.STATISTIC_TYPE.eq(categoryType));
+				step = step.and(Tables.EH_ENERGY_COUNT_STATISTICS.BILL_CATEGORY_ID.eq(categoryId));
+				}
+			else if(categoryType.equals(EnergyCategoryType.SERVICE.getCode())){
+				step = step.and(Tables.EH_ENERGY_COUNT_STATISTICS.STATISTIC_TYPE.eq(categoryType));
+				step = step.and(Tables.EH_ENERGY_COUNT_STATISTICS.SERVICE_CATEGORY_ID.eq(categoryId));
+				}
+		}
+		BigDecimal result = step.fetchAny().value1();
+		if(result != null)
+			return result ;
+		return new BigDecimal(0);
+	}
 }
