@@ -218,7 +218,7 @@ CREATE TABLE `eh_service_modules` (
   `name` VARCHAR(64) DEFAULT NULL,
   `parent_id` BIGINT NOT NUll,
   `path` VARCHAR(128) NOT NUll,
-  `type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: park, 1: organization, 3:manager',
+  `type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: park, 1: organization, 2:manager',
   `level` INTEGER NOT NULL DEFAULT '0',
   `status` TINYINT NOT NULL DEFAULT '2' COMMENT '0: inactive, 2: active',
   `default_order` INTEGER NULL COMMENT 'order number',
