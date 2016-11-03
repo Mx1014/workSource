@@ -24,6 +24,7 @@ public class AuthorizationServiceModuleMembersDTO {
 	private Byte     contactType;
 	private String   contactToken;
 
+	@ItemType(AuthorizationServiceModuleDTO.class)
 	private List<AuthorizationServiceModuleDTO> authorizationServiceModules;
 
 	public Long getId() {
