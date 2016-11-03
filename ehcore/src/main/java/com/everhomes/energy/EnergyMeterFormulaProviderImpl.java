@@ -2,12 +2,16 @@ package com.everhomes.energy;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterFormulasDao;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_FORMULAS;
@@ -44,8 +48,17 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
     public List<EnergyMeterFormula> listMeterFormulas(Integer namespaceId, Byte formulaType) {
         return context().selectFrom(EH_ENERGY_METER_FORMULAS)
                 .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_FORMULAS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(formulaType))
                 .fetchInto(EnergyMeterFormula.class);
+    }
+
+    @Override
+    public void deleteFormula(EnergyMeterFormula formula) {
+        formula.setUpdateUid(UserContext.current().getUser().getId());
+        formula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        formula.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+        rwDao().update(formula);
     }
 
     private DSLContext context() {

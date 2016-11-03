@@ -21,7 +21,7 @@ public class ReadEnergyMeterCommand {
     @NotNull private Long communityId;
     @NotNull private Long meterId;
     private Byte resetMeterFlag;
-    @NotNull private BigDecimal lastReading;
+    private BigDecimal lastReading;
     @NotNull private BigDecimal currReading;
 
     public Long getOrganizationId() {

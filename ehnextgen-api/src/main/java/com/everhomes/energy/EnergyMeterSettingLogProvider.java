@@ -1,8 +1,8 @@
 package com.everhomes.energy;
 
-import java.sql.Timestamp;
-
 import com.everhomes.rest.energy.EnergyMeterSettingType;
+
+import java.sql.Timestamp;
 
 /**
  * Created by xq.tian on 2016/10/31.
@@ -21,4 +21,11 @@ public interface EnergyMeterSettingLogProvider {
 
 	EnergyMeterSettingLog findCurrentSettingByMeterId(Integer namespaceId, Long meterId, EnergyMeterSettingType settingType,
 			Timestamp statDate);
+
+    /**
+     * 查询引用传入的公式的setting
+     * @param formulaId 需要查询的公式id
+     * @return 返回其中一条数据
+     */
+    EnergyMeterSettingLog findSettingByFormulaId(Integer namespaceId, Long formulaId);
 }

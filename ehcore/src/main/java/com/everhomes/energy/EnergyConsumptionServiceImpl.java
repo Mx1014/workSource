@@ -1,44 +1,8 @@
 package com.everhomes.energy;
 
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_BEFORE_TODAY;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
-
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
@@ -46,7 +10,7 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.MeterFormulaVariable;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.approval.TrueOrFalseFlag;  
 import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
 import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
 import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
@@ -87,9 +51,11 @@ import com.everhomes.rest.energy.SearchEnergyMeterResponse;
 import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
 import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
+import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand; 
+import com.everhomes.rest.energy.*; 
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -99,6 +65,36 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
  
 
 /**
@@ -127,6 +123,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMonthStatisticProvider energyMonthStatisticProvider;
+
     @Autowired
     private DbProvider dbProvider;
  
@@ -135,6 +132,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     
     @Autowired
     private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
 
     @Autowired
     private UserProvider userProvider;
@@ -165,6 +165,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMeterReadingLogSearcher readingLogSearcher;
+
+    @Autowired
+    private EnergyMeterDefaultSettingProvider defaultSettingProvider;
 
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
@@ -219,7 +222,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return toEnergyMeterDTO(meter);
     }
 
-    private EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter) {
+    @Override
+    public EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter) {
         EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
 
         // 表的类型
@@ -251,8 +255,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
         EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
         dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
-
-        // 当前最大量程
 
         return dto;
     }
@@ -325,6 +327,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void changeEnergyMeter(ChangeEnergyMeterCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+
     }
 
     @Override
@@ -344,6 +347,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+
+        // 第一次读表的时候判断读数与起始读数的大小
+        if (meter.getLastReading() == null) {
+            if (cmd.getCurrReading().doubleValue() < meter.getStartReading().doubleValue()) {
+                LOGGER.error("Current reading less then meter start reading, meterId = ", meter.getId());
+                throw errorWith(SCOPE, ERR_CURR_READING_LESS_THEN_START_READING, "Current reading less then meter start reading, meterId = %s", meter.getId());
+            }
+        }
         EnergyMeterReadingLog log = new EnergyMeterReadingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setReading(cmd.getCurrReading());
@@ -356,6 +367,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         dbProvider.execute(r -> {
             meterReadingLogProvider.createEnergyMeterReadingLog(log);
             meter.setLastReading(log.getReading());
+            meter.setLastReadTime(Timestamp.valueOf(LocalDateTime.now()));
             meterProvider.updateEnergyMeter(meter);
             return true;
         });
@@ -431,14 +443,27 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         if (log.getOperateTime().toLocalDateTime().toLocalDate().isBefore(LocalDate.now())) {
             LOGGER.error("The energy meter reading log operate time is before today, id = {}", cmd.getLogId());
-            throw errorWith(SCOPE, ERR_METER_READING_LOG_BEFORE_TODAY, "The energy meter reading log operate time is before today, id = {}", cmd.getLogId());
+            throw errorWith(SCOPE, ERR_METER_READING_LOG_BEFORE_TODAY, "The energy meter reading log operate time is before today, id = %s", cmd.getLogId());
         }
         meterReadingLogProvider.deleteEnergyMeterReadingLog(log);
         readingLogSearcher.deleteById(log.getId());
     }
 
     @Override
-    public EnergyMeterSettingLogDTO updateEnergyMeterDefaultSetting(UpdateEnergyMeterDefaultSettingCommand cmd) {
+    public EnergyMeterDefaultSettingDTO updateEnergyMeterDefaultSetting(UpdateEnergyMeterDefaultSettingCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeterDefaultSetting setting = defaultSettingProvider.findById(currNamespaceId(), cmd.getSettingId());
+        if (setting != null) {
+            if (cmd.getFormulaId() != null) {
+                setting.setFormulaId(cmd.getFormulaId());
+            }
+            if (cmd.getSettingValue() != null) {
+                setting.setSettingValue(cmd.getSettingValue());
+            }
+            defaultSettingProvider.updateEnergyMeterDefaultSetting(setting);
+            return ConvertHelper.convert(setting, EnergyMeterDefaultSettingDTO.class);
+        }
         return null;
     }
 
@@ -584,13 +609,46 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
     }
 
+    @Override
+    public void deleteEnergyMeterFormula(DeleteEnergyFormulaCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), cmd.getFormulaId());
+        if (formula != null) {
+            EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(currNamespaceId(), formula.getId());
+            if (settingLog != null) {
+                LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
+                throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+            } else {
+                meterFormulaProvider.deleteFormula(formula);
+            }
+        }
+    }
+
+    @Override
+    public SearchEnergyMeterReadingLogsResponse listEnergyMeterReadingLogsByMeter(ListEnergyMeterReadingLogsByMeterCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getPageAnchor(), pageSize + 1);
+        SearchEnergyMeterReadingLogsResponse response = new SearchEnergyMeterReadingLogsResponse();
+        if (logs.size() > pageSize) {
+            response.setNextPageAnchor(logs.get(logs.size() - 1).getCreateTime().getTime() + 1);
+        }
+        response.setLogs(logs.stream().map(this::toEnergyMeterReadingLogDTO).collect(Collectors.toList()));
+        return response;
+    }
+
     private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
         return ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
     }
 
     @Override
-    public EnergyMeterDefaultSettingDTO listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
-        return null;
+    public List<EnergyMeterDefaultSettingDTO> listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeterDefaultSetting> settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
+        return settings.stream().map(r -> ConvertHelper.convert(r, EnergyMeterDefaultSettingDTO.class)).collect(Collectors.toList());
     }
 
     @Override
@@ -634,7 +692,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     public Timestamp getDayBegin( Calendar cal) {
-    	 
+
     	  cal.set(Calendar.HOUR_OF_DAY, 0);
     	  cal.set(Calendar.SECOND, 0);
     	  cal.set(Calendar.MINUTE, 0);
@@ -784,7 +842,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
 		}
 	}
-	
+
 	/**
 	 * 每月1日  早上3点10分刷前一个月的读表
 	 * */
@@ -793,7 +851,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void caculateEnergyMonthStat(){
 		//查出所有的表
 		List<EnergyMeter> meters = meterProvider.listEnergyMeters();
-		Calendar cal = Calendar.getInstance(); 
+		Calendar cal = Calendar.getInstance();
   	  	cal.add(Calendar.DAY_OF_MONTH, -1);
   	  	Timestamp monthEnd = getDayBegin(cal);
   	  	cal.set(Calendar.DAY_OF_MONTH, 1);
@@ -801,7 +859,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
   	  	cal.add(Calendar.YEAR, -1);
   	  	Timestamp lastYear = getDayBegin(cal);
 		for(EnergyMeter meter : meters){
-			
+
 			//取月初的上次度数和月末的当前读数
 			EnergyDateStatistic monthEndStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(new Date(monthEnd.getTime()));
 			EnergyMonthStatistic monthStat = ConvertHelper.convert(monthEndStat, EnergyMonthStatistic.class);
@@ -811,10 +869,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			//统计sum 用量和费用
 			monthStat.setCurrentAmount(energyDateStatisticProvider.getSumAmountBetweenDate(new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
 			monthStat.setCurrentCost(energyDateStatisticProvider.getSumCostBetweenDate(new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
-			//delete 
+			//delete
 			energyMonthStatisticProvider.deleteEnergyMonthStatisticByDate(meter.getId(), monthSF.format(monthBegin));
 			//写数据库
-			 
+
 			energyMonthStatisticProvider.createEnergyMonthStatistic(monthStat);
 		}
 		//总量记录表 -用sql汇总

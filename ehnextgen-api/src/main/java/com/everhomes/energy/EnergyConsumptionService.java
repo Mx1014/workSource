@@ -25,6 +25,11 @@ public interface EnergyConsumptionService {
     void changeEnergyMeter(ChangeEnergyMeterCommand cmd);
 
     /**
+     * meter转dto
+     */
+    EnergyMeterDTO toEnergyMeterDTO(EnergyMeter meter);
+
+    /**
      * 修改表记
      * @param cmd   cmd
      * @return  返回表记DTO
@@ -76,7 +81,7 @@ public interface EnergyConsumptionService {
      * @param cmd   cmd
      * @return  EnergyMeterSettingLogDTO
      */
-    EnergyMeterSettingLogDTO updateEnergyMeterDefaultSetting(UpdateEnergyMeterDefaultSettingCommand cmd);
+    EnergyMeterDefaultSettingDTO updateEnergyMeterDefaultSetting(UpdateEnergyMeterDefaultSettingCommand cmd);
 
     /**
      * 创建计算公式
@@ -152,7 +157,7 @@ public interface EnergyConsumptionService {
     /**
      * 获取默认设置属性
      */
-    EnergyMeterDefaultSettingDTO listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd);
+    List<EnergyMeterDefaultSettingDTO> listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd);
 
     /**
      * 公式变量列表
@@ -177,5 +182,14 @@ public interface EnergyConsumptionService {
     EnergyMeterDTO getEnergyMeter(GetEnergyMeterCommand cmd);
 
 	void caculateEnergyMonthStat();
- 
+
+    /**
+     * 删除公式
+     */
+    void deleteEnergyMeterFormula(DeleteEnergyFormulaCommand cmd);
+
+    /**
+     * 根据表记获取读表记录
+     */
+    SearchEnergyMeterReadingLogsResponse listEnergyMeterReadingLogsByMeter(ListEnergyMeterReadingLogsByMeterCommand cmd);
 }

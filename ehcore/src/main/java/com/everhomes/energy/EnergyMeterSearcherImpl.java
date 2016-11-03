@@ -2,8 +2,6 @@ package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.rest.energy.EnergyLocaleStringCode;
-import com.everhomes.rest.energy.EnergyMeterDTO;
 import com.everhomes.rest.energy.SearchEnergyMeterCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -11,7 +9,6 @@ import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -48,6 +45,9 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
 
     @Autowired
     private LocaleStringService localeStringService;
+
+    @Autowired
+    private EnergyConsumptionService energyConsumptionService;
 
     @Override
     public void deleteById(Long id) {
@@ -160,17 +160,17 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             response.setNextPageAnchor(ids.size());
         }
         List<EnergyMeter> meters = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), ids);
-        response.setMeters(meters.stream().map(this::toMeterDTO).collect(Collectors.toList()));
+        response.setMeters(meters.stream().map(energyConsumptionService::toEnergyMeterDTO).collect(Collectors.toList()));
         return response;
     }
 
-    private EnergyMeterDTO toMeterDTO(EnergyMeter meter) {
+    /*private EnergyMeterDTO toMeterDTO(EnergyMeter meter) {
         EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
         String meterStatusLocale = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_STATUS,
                 String.valueOf(meter.getStatus()), UserContext.current().getUser().getLocale(), "");
         dto.setStatus(meterStatusLocale);
         return dto;
-    }
+    }*/
 
     @Override
     public String getIndexType() {

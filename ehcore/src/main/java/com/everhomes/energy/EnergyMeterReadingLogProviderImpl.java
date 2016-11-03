@@ -158,6 +158,21 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
                 .limit(pageSize).fetchInto(EnergyMeterReadingLog.class);
     }
 
+    @Override
+    public List<EnergyMeterReadingLog> listMeterReadingLogs(Integer namespaceId, Long meterId, Long pageAnchor, int pageSize) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhEnergyMeterReadingLogsRecord> query = context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId)).getQuery();
+        if (pageAnchor != null) {
+            query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.le(new Timestamp(pageAnchor)));
+        }
+        query.addOrderBy(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.desc());
+        query.addLimit(pageSize);
+        return query.fetchInto(EnergyMeterReadingLog.class);
+    }
+
     private void prepareObj(EnergyMeterReadingLog log) {
 
     }

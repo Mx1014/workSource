@@ -21,4 +21,6 @@ public interface EnergyMeterFormulaProvider {
      * 获取公式列表
      */
     List<EnergyMeterFormula> listMeterFormulas(Integer namespaceId, Byte formulaType);
+
+    void deleteFormula(EnergyMeterFormula formula);
 }
