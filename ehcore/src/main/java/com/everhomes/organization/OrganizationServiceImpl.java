@@ -85,7 +85,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -148,7 +148,6 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
@@ -163,7 +162,6 @@ import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
-import com.everhomes.rest.rentalv2.AmorpmFlag;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -223,7 +221,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private DbProvider dbProvider;
 
 	@Autowired
-	private NamespacesProvider namespacesProvider;
+	private NamespaceProvider namespaceProvider;
 	
 	@Autowired
 	LocaleStringService localeStringService;
@@ -7634,13 +7632,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		String locale = "zh_CN";
 		map.put("nickName", UserContext.current().getUser().getNickName());
-		NamespaceInfoDTO namespaceInfo = namespacesProvider.findNamespaceByid(UserContext.getCurrentNamespaceId());
+		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
 		String appName = "左邻";
-		if(null != namespaceInfo && namespaceInfo.getName() != null)
-			appName = namespaceInfo.getName();
+		if(null != namespace && namespace.getName() != null)
+			appName = namespace.getName();
 		map.put("appName", appName);
-		map.put("verifyUrl", verifyUrl);
-		LOGGER.debug("namespaceInfo:"+namespaceInfo); 
+		map.put("verifyUrl", verifyUrl); 
 		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
 				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件"); 
