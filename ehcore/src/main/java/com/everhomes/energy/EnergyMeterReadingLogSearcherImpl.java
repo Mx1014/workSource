@@ -97,7 +97,10 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             builder.field("billCategoryId", meter.getBillCategoryId());
             builder.field("serviceCategoryId", meter.getServiceCategoryId());
             builder.field("reading", readingLog.getReading());
-            builder.field("oldReading", readingLog.getOldMeterReading());
+            BigDecimal oldMeterReading = readingLog.getOldMeterReading();
+            if (oldMeterReading != null) {// 换表会有旧表读数
+                builder.field("oldReading", oldMeterReading);
+            }
             builder.field("resetFlag", readingLog.getResetMeterFlag());
             builder.field("changeFlag", readingLog.getChangeMeterFlag());
             builder.field("meterName", meter.getName());

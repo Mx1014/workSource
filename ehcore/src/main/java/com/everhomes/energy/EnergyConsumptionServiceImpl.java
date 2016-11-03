@@ -199,6 +199,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("The energy meter formula is not exist, id = {}", cmd.getCostFormulaId());
             throw errorWith(SCOPE, ERR_METER_FORMULA_NOT_EXIST, "The energy meter formula is not exist, id = %s", cmd.getCostFormulaId());
         }
+        if (cmd.getStartReading().doubleValue() > cmd.getMaxReading().doubleValue()) {
+            LOGGER.error("The energy meter start reading is greater then max reading");
+            throw errorWith(SCOPE, ERR_METER_START_GREATER_THEN_MAX, "The energy meter start reading is greater then max reading");
+        }
 
         EnergyMeter meter = ConvertHelper.convert(cmd, EnergyMeter.class);
         meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
