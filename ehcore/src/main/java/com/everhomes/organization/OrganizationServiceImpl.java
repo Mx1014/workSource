@@ -7640,7 +7640,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			appName = namespaceInfo.getName();
 		map.put("appName", appName);
 		map.put("verifyUrl", verifyUrl);
-		
+		LOGGER.debug("namespaceInfo:"+namespaceInfo);
+		LOGGER.debug("appname:"+appName);
 		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
 				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件");
