@@ -414,14 +414,11 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         cmd.setMeterId(1L);
         cmd.setSettingType((byte)1);
 
-        // ListEnergyMeterSettingLogsRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_SETTING_LOGS_URL, cmd, ListEnergyMeterSettingLogsRestResponse.class);
-        // assertNotNull(response);
-        // assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-        //
-        // ListEnergyMeterSettingLogsResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
+        ListEnergyMeterSettingLogsRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_SETTING_LOGS_URL, cmd, ListEnergyMeterSettingLogsRestResponse.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+        assertTrue(response.getResponse().size() == 1);
     }
 
     private void bulkReadingLogData() {

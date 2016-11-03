@@ -11,12 +11,15 @@ import com.everhomes.server.schema.tables.daos.EhEnergyMeterChangeLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterChangeLogs;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterChangeLogsRecord;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 @Repository
@@ -36,6 +39,8 @@ public class EnergyMeterChangeLogProviderImpl implements EnergyMeterChangeLogPro
 					long id = sequenceProvider.getNextSequence(key);
 	        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 	        obj.setId(id);
+            obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            obj.setCreatorUid(UserContext.current().getUser().getId());
 	        prepareObj(obj);
 	        EhEnergyMeterChangeLogsDao dao = new EhEnergyMeterChangeLogsDao(context.configuration());
 	        dao.insert(obj);
@@ -101,6 +106,17 @@ public class EnergyMeterChangeLogProviderImpl implements EnergyMeterChangeLogPro
         return null;
     }
 
+    @Override
+    public List<EnergyMeterChangeLog> listEnergyMeterChangeLogsByMeter(Integer namespaceId, Long meterId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_CHANGE_LOGS)
+                .where(Tables.EH_ENERGY_METER_CHANGE_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_METER_CHANGE_LOGS.METER_ID.eq(meterId))
+                .orderBy(Tables.EH_ENERGY_METER_CHANGE_LOGS.CREATE_TIME.desc())
+                .fetchInto(EnergyMeterChangeLog.class);
+    }
+
     private void prepareObj(EnergyMeterChangeLog obj) {
-	    }
+
+    }
 }

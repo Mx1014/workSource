@@ -211,7 +211,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             updateCmd.setRate(cmd.getRate());
             updateCmd.setCostFormulaId(cmd.getCostFormulaId());
             updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
-            updateCmd.setStartTime(DateHelper.currentGMTTime().getTime());
+            updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
             updateCmd.setMeterId(meter.getId());
             this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
@@ -329,6 +329,45 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
+        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+
+        // 创建读表记录
+        EnergyMeterReadingLog log = new EnergyMeterReadingLog();
+        log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+        log.setReading(cmd.getNewReading());
+        log.setCommunityId(cmd.getCommunityId());
+        log.setMeterId(meter.getId());
+        log.setNamespaceId(currNamespaceId());
+        log.setOldMeterReading(cmd.getOldReading());
+        log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        log.setOperatorId(UserContext.current().getUser().getId());
+
+        // 设置表记的信息
+        meter.setLastReading(cmd.getNewReading());
+        meter.setMaxReading(cmd.getMaxReading());
+        meter.setLastReadTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        dbProvider.execute(r -> {
+            meterReadingLogProvider.createEnergyMeterReadingLog(log);
+            meterProvider.updateEnergyMeter(meter);
+
+            // 创建换表记录
+            EnergyMeterChangeLog changeLog = new EnergyMeterChangeLog();
+            changeLog.setNamespaceId(currNamespaceId());
+            changeLog.setMaxReading(cmd.getMaxReading());
+            changeLog.setNewReading(cmd.getNewReading());
+            changeLog.setOldReading(cmd.getOldReading());
+            changeLog.setMeterId(cmd.getMeterId());
+            changeLog.setReadingLogId(log.getId());
+            changeLog.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+            changeLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            changeLog.setCreatorUid(UserContext.current().getUser().getId());
+
+            meterChangeLogProvider.createEnergyMeterChangeLog(changeLog);
+            return true;
+        });
+        // 添加读表记录的索引
+        readingLogSearcher.feedDoc(log);
     }
 
     @Override
@@ -671,8 +710,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyMeterChangeLogDTO> listEnergyMeterChangeLogs(ListMeterChangeLogCommand cmd) {
-
-        return null;
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        List<EnergyMeterChangeLog> logs = meterChangeLogProvider.listEnergyMeterChangeLogsByMeter(currNamespaceId(), cmd.getMeterId());
+        return logs.stream().map(r -> ConvertHelper.convert(r, EnergyMeterChangeLogDTO.class)).collect(Collectors.toList());
     }
 
     @Override
