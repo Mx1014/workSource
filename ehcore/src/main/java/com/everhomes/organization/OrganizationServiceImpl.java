@@ -7588,7 +7588,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
 		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,cmd.getCommunityId());
 		//TODO: 判断邮箱是否被使用
-		OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(cmd.getEmail());
+		OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(UserContext.getCurrentNamespaceId(),cmd.getEmail());
 		if(null != member ){
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_REPEAT,
 					"email already exists");
@@ -7644,6 +7644,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
 				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件");
+		LOGGER.debug("TITLE:"+mailSubject+"TEXT:"+mailText);
 		Email email = new EmailBuilder()
 	    .from(appName, "zuolin@zuolin.com")
 	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
