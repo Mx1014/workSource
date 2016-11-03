@@ -4713,11 +4713,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public void createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId){
+	public OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId){
 		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 		
-		this.dbProvider.execute((TransactionStatus status) -> {
+		return this.dbProvider.execute((TransactionStatus status) -> {
 			OrganizationMember m = member;
 			
 			if(null == m){
@@ -4778,13 +4778,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 				aclProvider.deleteRoleAssignment(cmd.getAssignmentId());
 			
 			
-			
-			SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
-			roleCmd.setRoleId(roleId);
-			roleCmd.setTargetId(m.getTargetId());
-			roleCmd.setOrganizationId(cmd.getOrganizationId());
-			this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
-			
+
+			if(null != roleId){
+				SetAclRoleAssignmentCommand roleCmd = new SetAclRoleAssignmentCommand();
+				roleCmd.setRoleId(roleId);
+				roleCmd.setTargetId(m.getTargetId());
+				roleCmd.setOrganizationId(cmd.getOrganizationId());
+				this.setAclRoleAssignmentRole(roleCmd, EntityType.USER);
+			}
+
 			OrganizationDetail detail = organizationProvider.findOrganizationDetailByOrganizationId(cmd.getOrganizationId());
 			if(null == detail){
 				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
@@ -4793,7 +4795,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				detail.setContact(cmd.getAccountPhone());
 				organizationProvider.updateOrganizationDetail(detail);
 			}
-			return null;
+			return m;
 		});
 	}
 	

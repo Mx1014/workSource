@@ -2,6 +2,7 @@ package com.everhomes.rest.acl.admin;
 
 
 import com.everhomes.util.StringHelper;
+import com.sun.istack.internal.NotNull;
 
 /**
  * <ul>
@@ -10,9 +11,17 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class DeleteOrganizationAdminCommand {
-	
+
+	@NotNull
+	private String ownerType;
+
+	@NotNull
+	private Long ownerId;
+
+	@NotNull
 	private Long organizationId;
-	
+
+	@NotNull
 	private Long userId;
 	
 
@@ -38,7 +47,21 @@ public class DeleteOrganizationAdminCommand {
 		this.userId = userId;
 	}
 
+	public String getOwnerType() {
+		return ownerType;
+	}
 
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
 
 	@Override
     public String toString() {

@@ -185,7 +185,7 @@ public interface OrganizationService {
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
-	void createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
 	OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
 	List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd);
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
@@ -351,4 +351,5 @@ public interface OrganizationService {
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
+
 }

@@ -2,6 +2,7 @@ package com.everhomes.rest.acl.admin;
 
 
 import com.everhomes.util.StringHelper;
+import com.sun.istack.internal.NotNull;
 
 /**
  * <ul>
@@ -12,13 +13,16 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class CreateServiceModuleAdminCommand {
-	
+
+	@NotNull
 	private Long organizationId;
-	
+
+	@NotNull
 	private String contactToken;
 	
 	private String contactName;
 
+	@NotNull
 	private Long moduleId;
 	
 	public Long getOrganizationId() {

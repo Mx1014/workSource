@@ -282,7 +282,6 @@ public class AclAdminController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
     	rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
-    	rolePrivilegeService.checkAdministrators(cmd.getOrganizationId());
     	rolePrivilegeService.createOrganizationSuperAdmin(cmd);
     	RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

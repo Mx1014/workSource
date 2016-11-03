@@ -6,25 +6,13 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
-import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
-import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
-import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
-import com.everhomes.rest.acl.admin.ListAclRolesCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
-import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
-import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
 import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
@@ -168,5 +156,62 @@ public interface RolePrivilegeService {
 	 * @param response
 	 */
 	void exportRoleAssignmentPersonnelXls(ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, HttpServletResponse response);
-	
+
+	/**
+	 * 创建公司管理员
+	 * @param cmd
+     */
+	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd);
+
+	/**
+	 * 创建业务模块管理员
+	 * @param cmd
+     */
+	void createServiceModuleAdmin(CreateServiceModuleAdminCommand cmd);
+
+
+	/**
+	 * 业务模块管理员列表
+	 * @param cmd
+	 * @return
+     */
+	List<OrganizationContactDTO> listServiceModuleAdministrators(ListServiceModuleAdministratorsCommand cmd);
+
+	/**
+	 * 超级管理员列表
+	 * @param cmd
+	 * @return
+     */
+	List<OrganizationContactDTO> listOrganizationSuperAdministrators(ListServiceModuleAdministratorsCommand cmd);
+
+	/**
+	 * 公司管理员列表
+	 * @param cmd
+	 * @return
+     */
+	List<OrganizationContactDTO> listOrganizationAdministrators(ListServiceModuleAdministratorsCommand cmd);
+
+	/**
+	 * 删除超级管理员
+	 * @param cmd
+     */
+	void deleteOrganizationSuperAdministrators(DeleteOrganizationAdminCommand cmd);
+
+	/**
+	 * 删除公司管理员
+	 * @param cmd
+	 */
+	void deleteOrganizationAdministrators(DeleteOrganizationAdminCommand cmd);
+
+	/**
+	 * 删除业务模块管理员
+	 * @param cmd
+     */
+	void deleteServiceModuleAdministrators(DeleteServiceModuleAdministratorsCommand cmd);
+
+	/**
+	 * 业务模块授权
+	 * @param cmd
+     */
+	void authorizationServiceModule(AuthorizationServiceModuleCommand cmd);
 }

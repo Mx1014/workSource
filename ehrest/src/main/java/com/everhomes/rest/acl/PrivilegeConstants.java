@@ -60,4 +60,10 @@ public interface PrivilegeConstants {
     public static final long AclinkInnerManager = 725L;
     
     public static final long OfficialActivity = 310L;
+
+    //超级管理员权限
+    public static final long ORGANIZATION_SUPER_ADMIN = 0L;
+
+    //公司管理员权限
+    public static final long ORGANIZATION_ADMIN = 0L;
 }

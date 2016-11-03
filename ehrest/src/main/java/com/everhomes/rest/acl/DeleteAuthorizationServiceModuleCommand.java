@@ -11,6 +11,10 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class DeleteAuthorizationServiceModuleCommand {
+
+	private String ownerType;
+
+	private Long ownerId;
 	
 	private String resourceType;
 	
@@ -44,6 +48,22 @@ public class DeleteAuthorizationServiceModuleCommand {
 
 	public void setResourceId(Long resourceId) {
 		this.resourceId = resourceId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
 	}
 
 	@Override

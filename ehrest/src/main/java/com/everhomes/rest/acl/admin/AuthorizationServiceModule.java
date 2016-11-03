@@ -3,6 +3,7 @@ package com.everhomes.rest.acl.admin;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+import com.sun.istack.internal.NotNull;
 
 import java.util.List;
 
@@ -21,8 +22,10 @@ public class AuthorizationServiceModule {
 	@ItemType(Long.class)
 	private List<Long> moduleIds;
 
+	@NotNull
 	private String resourceType;
 
+	@NotNull
 	private Long resourceId;
 
 	public Byte getAllModuleFlag() {
