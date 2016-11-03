@@ -1,26 +1,16 @@
 // @formatter:off
 package com.everhomes.serviceModule;
 
-import com.everhomes.acl.WebMenu;
-import com.everhomes.acl.WebMenuPrivilege;
-import com.everhomes.acl.WebMenuPrivilegeProvider;
-import com.everhomes.acl.WebMenuScope;
-import com.everhomes.activity.ActivityVideo;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
-import com.everhomes.rest.acl.WebMenuStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhActivityVideoDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
-import com.everhomes.server.schema.tables.pojos.EhActivityVideo;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
-import com.everhomes.server.schema.tables.pojos.EhServiceModulePrivileges;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
@@ -91,6 +81,13 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
+	public ServiceModule findServiceModuleById(Long id) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		EhServiceModulesDao dao = new EhServiceModulesDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceModule.class);
+	}
+
+	@Override
 	public List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition, Long organizationId) {
 		List<ServiceModuleAssignment> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -100,13 +97,49 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 			cond = cond.and(condition);
 		}
 		query.addConditions(cond);
-		query.addOrderBy(Tables.EH_SERVICE_MODULE_PRIVILEGES.DEFAULT_ORDER);
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE);
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID);
 		query.fetch().map((r) -> {
 			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));
 			return null;
 		});
 		return results;
 	}
+
+	@Override
+	public List<ServiceModuleAssignment> listResourceAssignments(String targetType, Long targetId, Long organizationId) {
+		List<ServiceModuleAssignment> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
+		query.addConditions(cond);
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE);
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));
+			return null;
+		});
+		return results;
+	}
+
+	@Override
+	public List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetId(String targetType, Long targetId, Long organizationId) {
+		List<ServiceModuleAssignment> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));
+			return null;
+		});
+		return results;
+	}
+
 
 
 //	@Override

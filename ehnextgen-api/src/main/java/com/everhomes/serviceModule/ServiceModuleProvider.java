@@ -1,10 +1,6 @@
 // @formatter:off
 package com.everhomes.serviceModule;
 
-import com.everhomes.acl.WebMenu;
-import com.everhomes.acl.WebMenuPrivilege;
-import com.everhomes.acl.WebMenuScope;
-import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
 import org.jooq.Condition;
 
 import java.util.List;
@@ -19,4 +15,10 @@ public interface ServiceModuleProvider {
 	List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition, Long organizationId);
 
 	void deleteServiceModuleAssignmentById(Long id);
+
+	ServiceModule findServiceModuleById(Long id);
+
+	List<ServiceModuleAssignment> listResourceAssignments(String targetType, Long targetId, Long organizationId);
+
+	List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetId(String targetType, Long targetId, Long organizationId);
 }
