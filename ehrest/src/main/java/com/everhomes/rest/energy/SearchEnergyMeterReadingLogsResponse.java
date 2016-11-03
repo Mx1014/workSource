@@ -13,15 +13,15 @@ import java.util.List;
  */
 public class SearchEnergyMeterReadingLogsResponse {
 
-    private Integer nextPageAnchor;
+    private Long nextPageAnchor;
     @ItemType(EnergyMeterReadingLogDTO.class)
     private List<EnergyMeterReadingLogDTO> logs;
 
-    public Integer getNextPageAnchor() {
+    public Long getNextPageAnchor() {
         return nextPageAnchor;
     }
 
-    public void setNextPageAnchor(Integer nextPageAnchor) {
+    public void setNextPageAnchor(Long nextPageAnchor) {
         this.nextPageAnchor = nextPageAnchor;
     }
 

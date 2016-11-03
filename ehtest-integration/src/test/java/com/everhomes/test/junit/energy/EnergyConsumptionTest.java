@@ -286,6 +286,40 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertTrue(myResponse.getLogs().size() == 1);
     }
 
+    //9. 根据id获取读表记录
+    @Test
+    public void testListEnergyMeterReadingLogs() {
+        logon();
+        bulkReadingLogData();
+        ListEnergyMeterReadingLogsByMeterCommand cmd = new ListEnergyMeterReadingLogsByMeterCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setMeterId(1L);
+        cmd.setPageAnchor(0L);
+        cmd.setPageSize(10);
+
+        SearchEnergyMeterReadingLogsRestResponse response = httpClientService.restPost(SEARCH_ENERGY_METER_READING_LOGS_URL, cmd, SearchEnergyMeterReadingLogsRestResponse.class);
+        assertNotNull(response);
+        assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        SearchEnergyMeterReadingLogsResponse myResponse = response.getResponse();
+        assertNotNull(myResponse);
+
+        assertTrue(myResponse.getLogs().size() == 1);
+    }
+
+    //10. 删除读表记录(只能删除当天的记录)
+    @Test
+    public void testDeleteEnergyMeterReadingLog() {
+        logon();
+        DeleteEnergyMeterReadingLogCommand cmd = new DeleteEnergyMeterReadingLogCommand();
+        cmd.setOrganizationId(1L);
+        cmd.setLogId(1L);
+
+        RestResponseBase response = httpClientService.restPost(DELETE_ENERGY_METER_READING_LOG_URL, cmd, RestResponseBase.class);
+        assertNotNull(response);
+        // assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+    }
+
     private void bulkReadingLogData() {
         searchProvider.clearType("energyMeterReadingLog");
         searchProvider.bulk("energyMeterReadingLog", "{ \"index\" : { \"_index\" : \"everhomesv3\", \"_type\" : \"energyMeterReadingLog\", \"_id\" : \"1\" } }\n" +

@@ -3,6 +3,7 @@ package com.everhomes.energy;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.rest.energy.EnergyMeterSettingType;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterSettingLogsDao;
@@ -45,6 +46,7 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
         return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
                 .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.START_TIME.le(Timestamp.valueOf(LocalDateTime.now())))
                 .and(EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(Timestamp.valueOf(LocalDateTime.now())))
@@ -57,12 +59,23 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
         return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
                 .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.START_TIME.le(statDate))
                 .and(EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(statDate))
                 .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.desc())
                 .fetchAnyInto(EnergyMeterSettingLog.class);
     }
+
+    @Override
+    public EnergyMeterSettingLog findSettingByFormulaId(Integer namespaceId, Long formulaId) {
+        return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
+                .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .and(EH_ENERGY_METER_SETTING_LOGS.FORMULA_ID.eq(formulaId))
+                .fetchAnyInto(EnergyMeterSettingLog.class);
+    }
+
     private DSLContext context() {
         return dbProvider.getDslContext(AccessSpec.readOnly());
     }

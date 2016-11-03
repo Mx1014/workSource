@@ -1,8 +1,24 @@
 package com.everhomes.energy;
 
+import java.util.List;
+
 /**
  * Created by xq.tian on 2016/10/25.
  */
 public interface EnergyMeterDefaultSettingProvider {
 
+    /**
+     * 根据id获取默认设置
+     */
+    EnergyMeterDefaultSetting findById(Integer namespaceId, Long id);
+
+    /**
+     * 更新默认设置
+     */
+    void updateEnergyMeterDefaultSetting(EnergyMeterDefaultSetting setting);
+
+    /**
+     * 默认设置列表
+     */
+    List<EnergyMeterDefaultSetting> listDefaultSetting(Integer namespaceId, Byte meterType);
 }

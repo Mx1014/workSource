@@ -118,6 +118,16 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>获取一个表记的读表记录</p>
+     * <b>URL: /energy/listEnergyMeterReadingLogsByMeter</b>
+     */
+    @RestReturn(SearchEnergyMeterReadingLogsResponse.class)
+    @RequestMapping("listEnergyMeterReadingLogsByMeter")
+    public RestResponse listEnergyMeterReadingLogsByMeter(ListEnergyMeterReadingLogsByMeterCommand cmd) {
+        return response(energyConsumptionService.listEnergyMeterReadingLogsByMeter(cmd));
+    }
+
+    /**
      * <p>删除读表记录(只能删除当天的记录)</p>
      * <b>URL: /energy/deleteEnergyMeterReadingLog</b>
      */
@@ -132,7 +142,7 @@ public class EnergyConsumptionController extends ControllerBase {
      * <p>修改表记的默认属性值</p>
      * <b>URL: /energy/updateEnergyMeterDefaultSetting</b>
      */
-    @RestReturn(EnergyMeterSettingLogDTO.class)
+    @RestReturn(EnergyMeterDefaultSettingDTO.class)
     @RequestMapping("updateEnergyMeterDefaultSetting")
     public RestResponse updateEnergyMeterDefaultSetting(UpdateEnergyMeterDefaultSettingCommand cmd) {
         return response(energyConsumptionService.updateEnergyMeterDefaultSetting(cmd));
@@ -228,6 +238,17 @@ public class EnergyConsumptionController extends ControllerBase {
     @RequestMapping("listEnergyMeterFormulas")
     public RestResponse listEnergyMeterFormulas(ListEnergyFormulasCommand cmd) {
         return response(energyConsumptionService.listEnergyMeterFormulas(cmd));
+    }
+
+    /**
+     * <p>删除公式</p>
+     * <b>URL: /energy/deleteEnergyMeterFormula</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("deleteEnergyMeterFormula")
+    public RestResponse deleteEnergyMeterFormula(DeleteEnergyFormulaCommand cmd) {
+        energyConsumptionService.deleteEnergyMeterFormula(cmd);
+        return success();
     }
 
     /**
