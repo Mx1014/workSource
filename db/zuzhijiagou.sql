@@ -226,7 +226,7 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1093', '10044', '60000', '业务�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1094', '10043', '60100', '管理员管理', '1', '1', '管理员管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1095', '10044', '60200', '业务授权', '1', '1', '业务授权 全部权限', '710');
 
-
+delete from eh_web_menus;
 INSERT INTO `eh_web_menus` VALUES ('10000', '信息发布', '0', 'fa fa-volume-up', null, '1', '2', '/10000', 'park', '100');
 INSERT INTO `eh_web_menus` VALUES ('10100', '论坛/公告', '10000', null, 'forum_notice', '0', '2', '/10000/10100', 'park', '110');
 INSERT INTO `eh_web_menus` VALUES ('10400', '广告管理', '10000', null, null, '0', '2', '/10000/10400', 'park', '140');
