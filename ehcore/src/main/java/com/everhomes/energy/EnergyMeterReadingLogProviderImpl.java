@@ -132,7 +132,7 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
             EnergyMeterReadingLog[] result = new EnergyMeterReadingLog[1];
             DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
             SelectConditionStep<Record> step =  context.select().from(Tables.EH_ENERGY_METER_READING_LOGS)
-            .where(Tables.EH_ENERGY_METER_READING_LOGS.ID.eq(id))
+            .where(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(id))
             .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
             if(null != startBegin)
             	step = step.and(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.greaterOrEqual(startBegin));

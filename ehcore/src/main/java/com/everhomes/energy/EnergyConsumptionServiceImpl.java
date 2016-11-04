@@ -23,6 +23,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
+
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +39,7 @@ import javax.script.ScriptException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -47,6 +49,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.regex.Matcher;
@@ -771,8 +774,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     	result.setDayBurdenStats(new ArrayList<DayStatDTO>());
     	BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
     	BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
-    	for(DayStatDTO receivableDay : receivableDTO.getDayBillStats()){
-    		DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), receivableDay.getStatDate());
+    	Set<Long> statDates = new HashSet<Long>();
+    	if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
+    		receivableDTO.getDayBillStats().stream().forEach(r->{
+    			statDates.add(r.getStatDate()); 
+    		});
+    	if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
+    		payableDTO.getDayBillStats().stream().forEach(r->{
+    			statDates.add(r.getStatDate()); 
+    		});
+    	
+    	for(Long statDate: statDates){
+    		
+    		DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
+    		DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), statDate);
     		DayStatDTO burdenDay = new DayStatDTO();
     		//应收减应付
     		burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
@@ -894,12 +909,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    		meterDTO.getDayStats().add(dayDTO);
 	    	}
 	    	 
-	    	//最终计算实际负担  和同比
+	    	//最终计算实际负担  和同比  
 	    	result.setLastYearPayableStats(new ArrayList<DayStatDTO>());
 	    	result.setDayBurdenStats(new ArrayList<DayStatDTO>());
 	    	BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
 	    	BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
-	    	for(DayStatDTO receivableDay : receivableDTO.getDayBillStats()){
+	    	Set<Long> statDates = new HashSet<Long>();
+	    	if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
+	    		receivableDTO.getDayBillStats().stream().forEach(r->{
+	    			statDates.add(r.getStatDate()); 
+	    		});
+	    	if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
+	    		payableDTO.getDayBillStats().stream().forEach(r->{
+	    			statDates.add(r.getStatDate()); 
+	    		});
+	    	
+	    	for(Long statDate: statDates){
+	    		
+	    		DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
 	    		DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), receivableDay.getStatDate());
 	    		DayStatDTO burdenDay = new DayStatDTO();
 	    		DayStatDTO lastYearDTO = new DayStatDTO();
@@ -1275,20 +1302,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
 			Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
 			//查看是否有换表,是否有归零
-			for(EnergyMeterReadingLog log : meterReadingLogs){
-
-				//有归零 量程设置为最大值-锚点,锚点设置为0
-				if(TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
-					resetFlag = TrueOrFalseFlag.TRUE.getCode();
-					amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
-					ReadingAnchor = new BigDecimal(0);
-				}
-				//有换表 量程加上旧表读数-锚点,锚点重置为新读数
-				if(TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
-					changeFlag = TrueOrFalseFlag.TRUE.getCode();
-					EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
-					amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
-					ReadingAnchor = changeLog.getNewReading();
+			if(meterReadingLogs != null){
+				for(EnergyMeterReadingLog log : meterReadingLogs){
+	
+					//有归零 量程设置为最大值-锚点,锚点设置为0
+					if(TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
+						resetFlag = TrueOrFalseFlag.TRUE.getCode();
+						amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
+						ReadingAnchor = new BigDecimal(0);
+					}
+					//有换表 量程加上旧表读数-锚点,锚点重置为新读数
+					if(TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
+						changeFlag = TrueOrFalseFlag.TRUE.getCode();
+						EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+						amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
+						ReadingAnchor = changeLog.getNewReading();
+					}
 				}
 			}
 			//计算当天走了多少字 量程+昨天最后一次读数-锚点
@@ -1298,6 +1327,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
 			EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
 			EnergyMeterSettingLog costSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
+			if(amountSetting == null || rateSetting == null || priceSetting == null || costSetting == null)
+				continue;
 			String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
 			String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 

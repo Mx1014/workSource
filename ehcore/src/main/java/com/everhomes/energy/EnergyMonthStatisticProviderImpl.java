@@ -154,7 +154,7 @@ public class EnergyMonthStatisticProviderImpl implements EnergyMonthStatisticPro
 				.groupBy(Tables.EH_ENERGY_MONTH_STATISTICS.NAMESPACE_ID, Tables.EH_ENERGY_MONTH_STATISTICS.COMMUNITY_ID,
 						Tables.EH_ENERGY_MONTH_STATISTICS.METER_TYPE, Tables.EH_ENERGY_MONTH_STATISTICS.DATE_STR,
 						Tables.EH_ENERGY_MONTH_STATISTICS.BILL_CATEGORY_ID);
-		step.fetch().map((r) -> {
+		step2.fetch().map((r) -> {
 			EnergyCountStatistic e = new EnergyCountStatistic();
 			e.setNamespaceId((Integer) r.getValue(0));
 			e.setCommunityId((Long) r.getValue(1));
