@@ -60,7 +60,7 @@ const mapDispatchToProps = (dispatch, ownProps) => ({
     }
 });
 
-export default ApiPanel = connect(
+export default connect(
     mapStateToProps,
     mapDispatchToProps
 )(ApiPanel);

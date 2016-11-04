@@ -58,12 +58,6 @@ export function apiAction(uri, commandObject, headers) {
     }
 }
 
-export function loadNavigationData() {
-    return (dispatch, getState) => {
-        return dispatch(fetchApiList());
-    }
-}
-
 export function setSandboxCurrentApi(uri) {
     return {
         type: SANDBOX_SET_CURRENT,
@@ -88,11 +82,5 @@ export function appendToConsole(text) {
 export function clearConsole() {
     return {
         type: CONSOLE_CLEAR
-    }
-}
-
-export function initConsole() {
-    return (dispatch, getState) => {
-        return dispatch(appendToConsole('Core-Server API portal started at ' + new Date().toLocaleString()));
     }
 }
