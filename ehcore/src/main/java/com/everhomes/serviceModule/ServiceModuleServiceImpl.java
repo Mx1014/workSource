@@ -89,7 +89,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 			for(ServiceModuleScope s: scopes) {
 				if(s.getModuleId().equals(m.getId())) {
 					result.add(m);
-					continue;
+					continue outer;
 				}
 			}
 		}
