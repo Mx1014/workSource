@@ -39,6 +39,13 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     }
 
     @Override
+    public EnergyMeterCategory findById( Long id) {
+        return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
+                .where(EH_ENERGY_METER_CATEGORIES.ID.eq(id))
+                .fetchOneInto(EnergyMeterCategory.class);
+    }
+
+    @Override
     public EnergyMeterCategory findByName(Integer namespaceId, String name) {
         return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
                 .where(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId))

@@ -6,146 +6,182 @@ import java.math.BigDecimal;
 
 /**
  * <ul>
- *     <li>communityName: 小区名字</li>
- *     <li>dateStr: 日期</li>
- *     <li>waterReceivableAmount: 水表应收数量</li>
- *     <li>waterReceivableCost: 水表应收费用 </li>
- *     <li>waterBurdenAmount: 水表负担数量 </li>
- *     <li>waterBurdenCost: 水表负担费用</li>
- *     <li>elecReceivableAmount: 电表应收数量</li>
- *     <li>elecReceivableCost: 电表应收费用</li>
- *     <li>elecBurdenAmount: 电表负担数量</li>
- *     <li>elecBurdenCost: 电表负担费用</li>
- *     <li>areaSize: 面积</li>
- *     <li>waterAverageAmount: 每平用水量</li>
- *     <li>elecAverageAmount: 每平用电量</li>
+ * 年度水电用量收支对比表
+ * <li>dateStr: 日期字符串格式 201606</li>
+ * <li>waterReceivableAmount: 水表应收数量</li>
+ * <li>waterPayableAmount: 水表应付量</li>
+ * <li>waterBurdenAmount: 水表负担数量</li>
+ * <li>waterReceivableCost: 水表应收费用</li>
+ * <li>waterPayableCost: 水表应付费用</li>
+ * <li>waterBurdenCost: 水表实际负担费用</li>
+ * <li>electricReceivableAmount: 电表应收数量</li>
+ * <li>electricPayableAmount: 电表应付量</li>
+ * <li>electricBurdenAmount: 电表负担数量</li>
+ * <li>electricReceivableCost: 电表应收费用</li>
+ * <li>electricPayableCost: 电表应付费用</li>
+ * <li>electricBurdenCost: 电表实际负担费用</li>
  * </ul>
  */
 public class EnergyStatByYearDTO {
 
-    private String communityName;
-    private String dateStr;
+	private String dateStr;
+	private BigDecimal waterReceivableAmount;
+	private BigDecimal waterPayableAmount;
+	private BigDecimal waterBurdenAmount;
+	private BigDecimal waterAverageAmount;
 
-    private BigDecimal waterReceivableAmount;
-    private BigDecimal waterReceivableCost;
-    private BigDecimal waterBurdenAmount;
-    private BigDecimal waterBurdenCost;
+	private BigDecimal waterReceivableCost;
+	private BigDecimal waterPayableCost;
+	private BigDecimal waterBurdenCost;
 
-    private BigDecimal elecReceivableAmount;
-    private BigDecimal elecReceivableCost;
-    private BigDecimal elecBurdenAmount;
-    private BigDecimal elecBurdenCost;
+	private BigDecimal electricReceivableAmount;
+	private BigDecimal electricPayableAmount;
+	private BigDecimal electricBurdenAmount;
+	private BigDecimal electricAverageAmount;
 
-    private BigDecimal areaSize;
-    private BigDecimal waterAverageAmount;
-    private BigDecimal elecAverageAmount;
+	private BigDecimal electricReceivableCost;
+	private BigDecimal electricPayableCost;
+	private BigDecimal electricBurdenCost;
 
-    public BigDecimal getWaterReceivableAmount() {
-        return waterReceivableAmount;
-    }
+	public EnergyStatByYearDTO() {
+		this.waterReceivableAmount = new BigDecimal(0);
+		this.waterPayableAmount = new BigDecimal(0);
+		this.waterBurdenAmount = new BigDecimal(0);
+		this.waterAverageAmount = new BigDecimal(0);
+		this.waterReceivableCost = new BigDecimal(0);
+		this.waterPayableCost = new BigDecimal(0);
+		this.waterBurdenCost = new BigDecimal(0);
+		this.electricReceivableAmount = new BigDecimal(0);
+		this.electricPayableAmount = new BigDecimal(0);
+		this.electricBurdenAmount = new BigDecimal(0);
+		this.electricAverageAmount = new BigDecimal(0);
+		this.electricReceivableCost = new BigDecimal(0);
+		this.electricPayableCost = new BigDecimal(0);
+		this.electricBurdenCost = new BigDecimal(0);
+	}
 
-    public void setWaterReceivableAmount(BigDecimal waterReceivableAmount) {
-        this.waterReceivableAmount = waterReceivableAmount;
-    }
+	public String getDateStr() {
+		return dateStr;
+	}
 
-    public BigDecimal getWaterReceivableCost() {
-        return waterReceivableCost;
-    }
+	public void setDateStr(String dateStr) {
+		this.dateStr = dateStr;
+	}
 
-    public String getCommunityName() {
-        return communityName;
-    }
+	public BigDecimal getWaterReceivableAmount() {
+		return waterReceivableAmount;
+	}
 
-    public void setCommunityName(String communityName) {
-        this.communityName = communityName;
-    }
+	public void setWaterReceivableAmount(BigDecimal waterReceivableAmount) {
+		this.waterReceivableAmount = waterReceivableAmount;
+	}
 
-    public void setWaterReceivableCost(BigDecimal waterReceivableCost) {
-        this.waterReceivableCost = waterReceivableCost;
-    }
+	public BigDecimal getWaterPayableAmount() {
+		return waterPayableAmount;
+	}
 
-    public BigDecimal getWaterBurdenAmount() {
-        return waterBurdenAmount;
-    }
+	public void setWaterPayableAmount(BigDecimal waterPayableAmount) {
+		this.waterPayableAmount = waterPayableAmount;
+	}
 
-    public void setWaterBurdenAmount(BigDecimal waterBurdenAmount) {
-        this.waterBurdenAmount = waterBurdenAmount;
-    }
+	public BigDecimal getWaterBurdenAmount() {
+		return waterBurdenAmount;
+	}
 
-    public String getDateStr() {
-        return dateStr;
-    }
+	public void setWaterBurdenAmount(BigDecimal waterBurdenAmount) {
+		this.waterBurdenAmount = waterBurdenAmount;
+	}
 
-    public void setDateStr(String dateStr) {
-        this.dateStr = dateStr;
-    }
+	public BigDecimal getWaterReceivableCost() {
+		return waterReceivableCost;
+	}
 
-    public BigDecimal getWaterBurdenCost() {
-        return waterBurdenCost;
-    }
+	public void setWaterReceivableCost(BigDecimal waterReceivableCost) {
+		this.waterReceivableCost = waterReceivableCost;
+	}
 
-    public void setWaterBurdenCost(BigDecimal waterBurdenCost) {
-        this.waterBurdenCost = waterBurdenCost;
-    }
+	public BigDecimal getWaterPayableCost() {
+		return waterPayableCost;
+	}
 
-    public BigDecimal getElecReceivableAmount() {
-        return elecReceivableAmount;
-    }
+	public void setWaterPayableCost(BigDecimal waterPayableCost) {
+		this.waterPayableCost = waterPayableCost;
+	}
 
-    public void setElecReceivableAmount(BigDecimal elecReceivableAmount) {
-        this.elecReceivableAmount = elecReceivableAmount;
-    }
+	public BigDecimal getWaterBurdenCost() {
+		return waterBurdenCost;
+	}
 
-    public BigDecimal getElecReceivableCost() {
-        return elecReceivableCost;
-    }
+	public void setWaterBurdenCost(BigDecimal waterBurdenCost) {
+		this.waterBurdenCost = waterBurdenCost;
+	}
 
-    public void setElecReceivableCost(BigDecimal elecReceivableCost) {
-        this.elecReceivableCost = elecReceivableCost;
-    }
+	public BigDecimal getElectricReceivableAmount() {
+		return electricReceivableAmount;
+	}
 
-    public BigDecimal getElecBurdenAmount() {
-        return elecBurdenAmount;
-    }
+	public void setElectricReceivableAmount(BigDecimal electricReceivableAmount) {
+		this.electricReceivableAmount = electricReceivableAmount;
+	}
 
-    public void setElecBurdenAmount(BigDecimal elecBurdenAmount) {
-        this.elecBurdenAmount = elecBurdenAmount;
-    }
+	public BigDecimal getElectricPayableAmount() {
+		return electricPayableAmount;
+	}
 
-    public BigDecimal getElecBurdenCost() {
-        return elecBurdenCost;
-    }
+	public void setElectricPayableAmount(BigDecimal electricPayableAmount) {
+		this.electricPayableAmount = electricPayableAmount;
+	}
 
-    public void setElecBurdenCost(BigDecimal elecBurdenCost) {
-        this.elecBurdenCost = elecBurdenCost;
-    }
+	public BigDecimal getElectricBurdenAmount() {
+		return electricBurdenAmount;
+	}
 
-    public BigDecimal getWaterAverageAmount() {
-        return waterAverageAmount;
-    }
+	public void setElectricBurdenAmount(BigDecimal electricBurdenAmount) {
+		this.electricBurdenAmount = electricBurdenAmount;
+	}
 
-    public void setWaterAverageAmount(BigDecimal waterAverageAmount) {
-        this.waterAverageAmount = waterAverageAmount;
-    }
+	public BigDecimal getElectricReceivableCost() {
+		return electricReceivableCost;
+	}
 
-    public BigDecimal getElecAverageAmount() {
-        return elecAverageAmount;
-    }
+	public void setElectricReceivableCost(BigDecimal electricReceivableCost) {
+		this.electricReceivableCost = electricReceivableCost;
+	}
 
-    public void setElecAverageAmount(BigDecimal elecAverageAmount) {
-        this.elecAverageAmount = elecAverageAmount;
-    }
+	public BigDecimal getElectricPayableCost() {
+		return electricPayableCost;
+	}
 
-    public BigDecimal getAreaSize() {
-        return areaSize;
-    }
+	public void setElectricPayableCost(BigDecimal electricPayableCost) {
+		this.electricPayableCost = electricPayableCost;
+	}
 
-    public void setAreaSize(BigDecimal areaSize) {
-        this.areaSize = areaSize;
-    }
+	public BigDecimal getElectricBurdenCost() {
+		return electricBurdenCost;
+	}
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public void setElectricBurdenCost(BigDecimal electricBurdenCost) {
+		this.electricBurdenCost = electricBurdenCost;
+	}
+
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
+
+	public BigDecimal getWaterAverageAmount() {
+		return waterAverageAmount;
+	}
+
+	public void setWaterAverageAmount(BigDecimal waterAverageAmount) {
+		this.waterAverageAmount = waterAverageAmount;
+	}
+
+	public BigDecimal getElectricAverageAmount() {
+		return electricAverageAmount;
+	}
+
+	public void setElectricAverageAmount(BigDecimal electricAverageAmount) {
+		this.electricAverageAmount = electricAverageAmount;
+	}
 }

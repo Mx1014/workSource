@@ -2,7 +2,10 @@ package com.everhomes.energy;
 
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -98,4 +101,18 @@ public class EnergyYoyStatisticProviderImpl implements EnergyYoyStatisticProvide
 
     private void prepareObj(EnergyYoyStatistic obj) {
     }
+
+	@Override
+	public List<EnergyYoyStatistic> listenergyYoyStatistics(Integer currentNamespaceId, String dateStr) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly()); 
+		List<EnergyYoyStatistic> result =  context.select().from(Tables.EH_ENERGY_YOY_STATISTICS)
+				.where(Tables.EH_ENERGY_YOY_STATISTICS.NAMESPACE_ID.eq(currentNamespaceId))
+				.and(Tables.EH_ENERGY_YOY_STATISTICS.DATE_STR.eq(dateStr))
+				.orderBy(Tables.EH_ENERGY_YOY_STATISTICS.COMMUNITY_ID.asc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, EnergyYoyStatistic.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
+	}
 }

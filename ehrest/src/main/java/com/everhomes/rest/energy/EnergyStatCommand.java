@@ -9,9 +9,9 @@ import java.util.List;
  * <ul>
  *     <li>organizationId: 组织id</li>
  *     <li>communityId: 小区id</li>
- *     <li>billCategoryId: 表记分类项目id</li>
- *     <li>serviceCategoryId: 表记分类id</li>
- *     <li>dateStr: 时间</li>
+ *     <li>billCategoryIds: 表记分类项目ids</li>
+ *     <li>serviceCategoryIds: 性质-表记分类ids</li>
+ *     <li>statDate: 查询时间</li>
  *     <li>statBills: 统计项目id列表 {@link com.everhomes.rest.energy.EnergyStatBill}</li>
  *     <li>meterType: 表记类型 {@link com.everhomes.rest.energy.EnergyMeterType}</li>
  * </ul>
@@ -20,70 +20,87 @@ public class EnergyStatCommand {
 
     private Long organizationId;
     private Long communityId;
-    private Long billCategoryId;
-    private Long serviceCategoryId;
-    private String dateStr;
+    @ItemType(Long.class)
+    private List<Long> billCategoryIds;
+    @ItemType(Long.class)
+    private List<Long>serviceCategoryIds;
+    private Long statDate;
     @ItemType(Byte.class)
     private List<Byte> statBills;
     private Byte meterType;
+ 
 
     public Long getOrganizationId() {
-        return organizationId;
-    }
+		return organizationId;
+	}
 
-    public void setOrganizationId(Long organizationId) {
-        this.organizationId = organizationId;
-    }
 
-    public Long getCommunityId() {
-        return communityId;
-    }
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
+	}
 
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
 
-    public Long getBillCategoryId() {
-        return billCategoryId;
-    }
+	public Long getCommunityId() {
+		return communityId;
+	}
 
-    public void setBillCategoryId(Long billCategoryId) {
-        this.billCategoryId = billCategoryId;
-    }
 
-    public Long getServiceCategoryId() {
-        return serviceCategoryId;
-    }
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
 
-    public void setServiceCategoryId(Long serviceCategoryId) {
-        this.serviceCategoryId = serviceCategoryId;
-    }
 
-    public Byte getMeterType() {
-        return meterType;
-    }
+	public List<Long> getBillCategoryIds() {
+		return billCategoryIds;
+	}
 
-    public void setMeterType(Byte meterType) {
-        this.meterType = meterType;
-    }
 
-    public String getDateStr() {
-        return dateStr;
-    }
+	public void setBillCategoryIds(List<Long> billCategoryIds) {
+		this.billCategoryIds = billCategoryIds;
+	}
 
-    public void setDateStr(String dateStr) {
-        this.dateStr = dateStr;
-    }
 
-    public List<Byte> getStatBills() {
-        return statBills;
-    }
+	public List<Long> getServiceCategoryIds() {
+		return serviceCategoryIds;
+	}
 
-    public void setStatBills(List<Byte> statBills) {
-        this.statBills = statBills;
-    }
 
-    @Override
+	public void setServiceCategoryIds(List<Long> serviceCategoryIds) {
+		this.serviceCategoryIds = serviceCategoryIds;
+	}
+
+
+	public Long getStatDate() {
+		return statDate;
+	}
+
+
+	public void setStatDate(Long statDate) {
+		this.statDate = statDate;
+	}
+
+
+	public List<Byte> getStatBills() {
+		return statBills;
+	}
+
+
+	public void setStatBills(List<Byte> statBills) {
+		this.statBills = statBills;
+	}
+
+
+	public Byte getMeterType() {
+		return meterType;
+	}
+
+
+	public void setMeterType(Byte meterType) {
+		this.meterType = meterType;
+	}
+
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

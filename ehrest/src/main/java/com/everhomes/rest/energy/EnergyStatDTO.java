@@ -8,71 +8,40 @@ import java.util.List;
 
 /**
  * <ul>
- *     <li>meterList: 表记读数列表 {@link com.everhomes.rest.energy.EnergyStatMeterDTO}</li>
- *     <li>serviceList: 性质列表 {@link com.everhomes.rest.energy.EnergyStatMeterCategoryServiceDTO}</li>
- *     <li>billList: 项目列表 {@link com.everhomes.rest.energy.EnergyStatMeterCategoryBillDTO}</li>
- *     <li>burdenAmountList: 负担量列表</li>
- *     <li>burdenCostList: 负担费用列表</li>
+ *     <li>billDayStats: {@link com.everhomes.rest.energy.BillStatDTO}</li> 
+ *     <li>dayBurdenStats: 实际负担 list</li> 
  * </ul>
  */
 public class EnergyStatDTO {
 
-    @ItemType(EnergyStatMeterDTO.class)
-    private List<EnergyStatMeterDTO> meterList;
+    @ItemType(BillStatDTO.class)
+    private List<BillStatDTO> billDayStats;
 
-    @ItemType(EnergyStatMeterCategoryServiceDTO.class)
-    private List<EnergyStatMeterCategoryServiceDTO> serviceList;
-
-    @ItemType(EnergyStatMeterCategoryBillDTO.class)
-    private List<EnergyStatMeterCategoryBillDTO> billList;
-
-    @ItemType(BigDecimal.class)
-    private List<BigDecimal> burdenAmountList;
-    @ItemType(BigDecimal.class)
-    private List<BigDecimal> burdenCostList;
-
-    public List<EnergyStatMeterDTO> getMeterList() {
-        return meterList;
-    }
-
-    public void setMeterList(List<EnergyStatMeterDTO> meterList) {
-        this.meterList = meterList;
-    }
-
-    public List<EnergyStatMeterCategoryServiceDTO> getServiceList() {
-        return serviceList;
-    }
-
-    public void setServiceList(List<EnergyStatMeterCategoryServiceDTO> serviceList) {
-        this.serviceList = serviceList;
-    }
-
-    public List<EnergyStatMeterCategoryBillDTO> getBillList() {
-        return billList;
-    }
-
-    public void setBillList(List<EnergyStatMeterCategoryBillDTO> billList) {
-        this.billList = billList;
-    }
-
-    public List<BigDecimal> getBurdenAmountList() {
-        return burdenAmountList;
-    }
-
-    public void setBurdenAmountList(List<BigDecimal> burdenAmountList) {
-        this.burdenAmountList = burdenAmountList;
-    }
-
-    public List<BigDecimal> getBurdenCostList() {
-        return burdenCostList;
-    }
-
-    public void setBurdenCostList(List<BigDecimal> burdenCostList) {
-        this.burdenCostList = burdenCostList;
-    }
-
+    @ItemType(DayStatDTO.class)
+    private List<DayStatDTO> dayBurdenStats;  
+  
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+	public List<BillStatDTO> getBillDayStats() {
+		return billDayStats;
+	}
+
+
+	public void setBillDayStats(List<BillStatDTO> billDayStats) {
+		this.billDayStats = billDayStats;
+	}
+
+
+	public List<DayStatDTO> getDayBurdenStats() {
+		return dayBurdenStats;
+	}
+
+
+	public void setDayBurdenStats(List<DayStatDTO> dayBurdenStats) {
+		this.dayBurdenStats = dayBurdenStats;
+	}
 }

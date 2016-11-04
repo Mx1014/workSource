@@ -295,7 +295,7 @@ public class EnergyConsumptionController extends ControllerBase {
      * <p>各项目月水电能耗情况（与去年同期相比)</p>
      * <b>URL: /energy/getEnergyStatisticByYoy</b>
      */
-    @RestReturn(value = EnergyStatByYearDTO.class, collection = true)
+    @RestReturn(value = EnergyCommunityYoyStatDTO.class, collection = true)
     @RequestMapping("getEnergyStatisticByYoy")
     public RestResponse getEnergyStatisticByYoy(EnergyStatCommand cmd) {
        return response(energyConsumptionService.getEnergyStatisticByYoy(cmd));

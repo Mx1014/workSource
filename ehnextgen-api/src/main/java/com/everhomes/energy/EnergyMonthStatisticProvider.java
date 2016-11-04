@@ -23,4 +23,7 @@ public interface EnergyMonthStatisticProvider {
 
 	List<EnergyCountStatistic> listEnergyCountStatistic(String monthStr);
 
+	List<EnergyMonthStatistic> listEnergyMonthStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
+			List<Long> serviceCategoryIds, String yearStr);
+
 }

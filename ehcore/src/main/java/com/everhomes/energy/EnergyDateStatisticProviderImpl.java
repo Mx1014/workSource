@@ -4,7 +4,10 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -14,6 +17,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.officecubicle.OfficeCubicleSpace;
+import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyDateStatisticsDao;
@@ -148,5 +153,30 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 				.orderBy(Tables.EH_ENERGY_DATE_STATISTICS.CREATE_TIME.desc())
 				.fetchOne().value1() ;
 		return result;
+	}
+
+	@Override
+	public List<EnergyDateStatistic> listEnergyDateStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
+			List<Long> serviceCategoryIds, Date startDate, Date endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_ENERGY_DATE_STATISTICS);
+		Condition condition = Tables.EH_ENERGY_DATE_STATISTICS.METER_TYPE.eq(meterType);
+		if (null != communityId)
+			condition = condition.and(Tables.EH_ENERGY_DATE_STATISTICS.COMMUNITY_ID.eq(communityId)); 
+		if (null != billCategoryIds)
+			condition = condition.and(Tables.EH_ENERGY_DATE_STATISTICS.BILL_CATEGORY_ID.in(billCategoryIds)); 
+		if (null != serviceCategoryIds)
+			condition = condition.and(Tables.EH_ENERGY_DATE_STATISTICS.SERVICE_CATEGORY_ID.in(serviceCategoryIds)); 
+		if (null != startDate)
+			condition = condition.and(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.greaterOrEqual(startDate) ); 
+		if (null != endDate)
+			condition = condition.and(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.lessOrEqual(endDate)); 
+		step.where(condition);
+		List<EnergyDateStatistic> result = step.orderBy(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.asc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, EnergyDateStatistic.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
 	}
 }

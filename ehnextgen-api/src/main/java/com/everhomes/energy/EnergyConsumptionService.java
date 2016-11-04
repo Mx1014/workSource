@@ -1,8 +1,10 @@
 package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
+
 import org.springframework.web.multipart.MultipartFile;
 
+import java.text.ParseException;
 import java.util.List;
 
 /**
@@ -128,6 +130,7 @@ public interface EnergyConsumptionService {
      * 水电能耗每月报表
      * @param cmd   cmd
      * @return  EnergyStatDTO
+     * @throws ParseException 
      */
     EnergyStatDTO getEnergyStatByMonth(EnergyStatCommand cmd);
 
@@ -141,7 +144,7 @@ public interface EnergyConsumptionService {
      * 各项目月水电能耗情况（与去年同期相比)
      * @param cmd   cmd
      */
-    List<EnergyStatByYearDTO> getEnergyStatisticByYoy(EnergyStatCommand cmd);
+    List<EnergyCommunityYoyStatDTO> getEnergyStatisticByYoy(EnergyStatCommand cmd);
 
     /**
      * 换表记录列表
