@@ -5,6 +5,7 @@ import com.everhomes.rest.energy.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
+import java.util.Date;
 import java.util.List;
 
 /**
@@ -172,19 +173,13 @@ public interface EnergyConsumptionService {
      */
     List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListEnergyMeterCategoriesCommand cmd);
  
-    
-    /**
-     * 计算前一天的读表数据
-     * */
-	void caculateEnergyDayStat();
- 
+     
 
     /**
      * 根据id获取表记信息
      */
     EnergyMeterDTO getEnergyMeter(GetEnergyMeterCommand cmd);
 
-	void caculateEnergyMonthStat();
 
     /**
      * 删除公式
@@ -195,4 +190,14 @@ public interface EnergyConsumptionService {
      * 获取setting记录列表
      */
     List<EnergyMeterSettingLogDTO> listEnergyMeterSettingLogs(ListEnergyMeterSettingLogsCommand cmd);
+
+    /**
+     * 计算某一天的读表数据
+     * */
+	void caculateEnergyDayStatByDate(Date date);
+
+    /**
+     * 计算某一月的读表数据
+     * */  
+	void caculateEnergyMonthStatByDate(Date date);
 }

@@ -1,11 +1,14 @@
 package com.everhomes.energy;
 
+import java.util.Date;
+
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.energy.*;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -313,5 +316,27 @@ public class EnergyConsumptionController extends ControllerBase {
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
+    }
+    
+
+    /**
+     * <p>测试:计算某一天的度数费用到日报表</p>
+     * <b>URL: /energy/caculateEnergyDayStatByDate</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("caculateEnergyDayStatByDate")
+    public RestResponse caculateEnergyDayStatByDate(Long cacuDate) {
+    	energyConsumptionService.caculateEnergyDayStatByDate(new Date(cacuDate));
+    	return success();
+    }
+    /**
+     * <p>测试:汇总某一个月的度数费用到月报表</p>
+     * <b>URL: /energy/caculateEnergyMonthStatByDate</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("caculateEnergyMonthStatByDate")
+    public RestResponse caculateEnergyMonthStatByDate(Long cacuDate) {
+    	energyConsumptionService.caculateEnergyMonthStatByDate(new Date(cacuDate));
+    	return success();
     }
 }

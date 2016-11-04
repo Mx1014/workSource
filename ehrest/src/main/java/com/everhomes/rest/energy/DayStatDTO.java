@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>lastReading: 上次读数</li>
  *     <li>currentReading: 本次读数</li>
  *     <li>currentAmount: 本次用量</li>
- *     <li>currentAmount: 本次费用</li>
+ *     <li>currentCost: 本次费用</li>
  * </ul>
  */
 public class DayStatDTO {
