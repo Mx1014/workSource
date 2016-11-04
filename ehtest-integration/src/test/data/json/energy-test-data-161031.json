@@ -24,7 +24,7 @@
       "id": 1,
       "namespace_id": 0,
       "name": "费用计算公式1",
-      "expression": "[[price]]*[[amount]]*[[rate]]+10",
+      "expression": "p*a*t+10",
       "formula_type": 1,
       "status": 2
     },
@@ -32,8 +32,24 @@
       "id": 2,
       "namespace_id": 0,
       "name": "用量计算公式1",
-      "expression": "[[amount]]*[[rate]]",
+      "expression": "a*t",
       "formula_type": 2,
+      "status": 2
+    },
+    {
+      "id": 3,
+      "namespace_id": 0,
+      "name": "用量计算公式2",
+      "expression": "a*t*1.5",
+      "formula_type": 2,
+      "status": 2
+    },
+    {
+      "id": 4,
+      "namespace_id": 0,
+      "name": "费用计算公式2",
+      "expression": "p*a*t+20",
+      "formula_type": 1,
       "status": 2
     }
   ],
