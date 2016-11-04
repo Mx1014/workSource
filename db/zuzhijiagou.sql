@@ -488,3 +488,240 @@ SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1001,0,1,now() FROM `eh_web_menu_privileges` WHERE id >= 10001 and id <= 10048;
 
+INSERT INTO `eh_web_menu_privileges` VALUES ('1', '10001', '10000', '发帖', '1', '1', '发公告和任务贴', '10');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('2', '10006', '11000', '推送消息', '1', '1', '推送消息', '20');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('3', '340', '10900', '行业动态', '1', '1', '行业动态  全部权限', '16');
+INSERT INTO `eh_web_menu_privileges` VALUES ('4', '315', '10700', '路演直播', '1', '1', '路演直播  全部权限', '16');
+
+-- 任务管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('5', '306', '20110', '接受，拒绝任务', '0', '1', '接受，拒绝任务', '30');
+INSERT INTO `eh_web_menu_privileges` VALUES ('6', '307', '20110', '任务处理', '0', '1', '修改任务状态', '40');
+INSERT INTO `eh_web_menu_privileges` VALUES ('7', '303', '20110', '查询报修任务帖子', '1', '1', '查询报修任务帖子', '50');
+INSERT INTO `eh_web_menu_privileges` VALUES ('8', '304', '20110', '查看求助任务帖子', '1', '1', '查看求助任务帖子', '60');
+INSERT INTO `eh_web_menu_privileges` VALUES ('9', '305', '20110', '查看所有任务帖子', '1', '1', '查看所有任务帖子', '70');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('10', '306', '20120', '接受，拒绝任务', '0', '1', '接受，拒绝任务', '79');
+INSERT INTO `eh_web_menu_privileges` VALUES ('11', '303', '20120', '查询报修任务帖子', '1', '1', '查询报修任务帖子', '81');
+INSERT INTO `eh_web_menu_privileges` VALUES ('12', '305', '20120', '查看所有任务帖子', '1', '1', '查看所有任务帖子', '83');
+INSERT INTO `eh_web_menu_privileges` VALUES ('13', '304', '20120', '查看求助任务帖子', '1', '1', '查看求助任务帖子', '82');
+INSERT INTO `eh_web_menu_privileges` VALUES ('14', '307', '20120', '任务处理', '0', '1', '修改任务状态', '80');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('15', '309', '20130', '任务统计', '1', '1', '任务统计', '88');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('16', '904', '20140', '查看所有任务', '1', '1', '任务管理 查看所有任务', '603');
+INSERT INTO `eh_web_menu_privileges` VALUES ('17', '805', '20140', '查看我的任务', '1', '1', '任务管理 查看我的任务', '603');
+INSERT INTO `eh_web_menu_privileges` VALUES ('18', '331', '20140', '分派任务', '0', '1', '分派任务 全部权限', '604');
+INSERT INTO `eh_web_menu_privileges` VALUES ('19', '332', '20140', '完成任务', '0', '1', '完成任务 全部权限', '605');
+INSERT INTO `eh_web_menu_privileges` VALUES ('20', '333', '20140', '关闭任务', '0', '1', '关闭任务 全部权限', '606');
+INSERT INTO `eh_web_menu_privileges` VALUES ('21', '920', '20140', '完成回访', '0', '1', '完成回访 全部权限', '606');
+INSERT INTO `eh_web_menu_privileges` VALUES ('22', '936', '20150', '服务录入', '1', '1', '任务管理 服务录入', '606');
+INSERT INTO `eh_web_menu_privileges` VALUES ('23', '937', '20160', '执行人员设置', '1', '1', '任务管理 执行人员设置', '606');
+INSERT INTO `eh_web_menu_privileges` VALUES ('24', '905', '20170', '服务类型设置', '1', '1', '服务类型设置 全部权限', '604');
+INSERT INTO `eh_web_menu_privileges` VALUES ('25', '906', '20180', '分类设置', '1', '1', '分类设置 全部权限', '605');
+INSERT INTO `eh_web_menu_privileges` VALUES ('26', '907', '20190', '统计', '1', '1', '统计 全部权限', '606');
+
+-- 门派管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('27', '408', '32000', '门牌管理', '1', '1', '门牌管理操作', '100');
+-- 企业管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('28', '401', '33000', '企业列表', '1', '1', '查询企业列表', '110');
+INSERT INTO `eh_web_menu_privileges` VALUES ('29', '402', '33000', '增加企业', '0', '1', '增加企业', '120');
+INSERT INTO `eh_web_menu_privileges` VALUES ('30', '403', '33000', '删除企业', '0', '1', '删除企业', '130');
+INSERT INTO `eh_web_menu_privileges` VALUES ('31', '404', '33000', '修改企业', '0', '1', '修改企业', '140');
+INSERT INTO `eh_web_menu_privileges` VALUES ('32', '405', '33000', '开通企业管理员', '0', '1', '开通企业管理员', '150');
+-- 用户管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('33', '406', '34000', '用户列表', '1', '1', '查询用户列表', '160');
+-- 停车：
+INSERT INTO `eh_web_menu_privileges` VALUES ('34', '556', '40810', '充值项管理列表', '1', '1', '查询充值项管理列表', '170');
+INSERT INTO `eh_web_menu_privileges` VALUES ('35', '512', '40810', '增加停车充值项', '0', '1', '增加停车充值项', '180');
+INSERT INTO `eh_web_menu_privileges` VALUES ('36', '513', '40810', '删除停车充值项', '0', '1', '删除停车充值项', '190');
+INSERT INTO `eh_web_menu_privileges` VALUES ('37', '557', '40820', '设置活动规则', '1', '1', '设置活动规则', '200');
+INSERT INTO `eh_web_menu_privileges` VALUES ('38', '515', '40840', '缴费记录', '1', '1', '查询缴费记录', '210');
+INSERT INTO `eh_web_menu_privileges` VALUES ('39', '516', '40830', '月卡申请记录', '1', '1', '查询月卡申请记录', '220');
+INSERT INTO `eh_web_menu_privileges` VALUES ('41', '514', '40830', '设置月卡申请参数', '0', '1', '设置月卡申请参数', '230');
+INSERT INTO `eh_web_menu_privileges` VALUES ('42', '517', '40830', '发放月卡', '0', '1', '发放月卡', '240');
+INSERT INTO `eh_web_menu_privileges` VALUES ('43', '518', '40830', '领取月卡', '0', '1', '领取月卡', '250');
+-- 场所预订：
+INSERT INTO `eh_web_menu_privileges` VALUES ('44', '526', '41310', '设置通用设置', '1', '1', '设置通用设置', '260');
+INSERT INTO `eh_web_menu_privileges` VALUES ('45', '527', '41320', '查询场所', '1', '1', '查询场所', '270');
+INSERT INTO `eh_web_menu_privileges` VALUES ('46', '528', '41320', '添加/修改具体场所', '0', '1', '添加/修改具体场所', '280');
+INSERT INTO `eh_web_menu_privileges` VALUES ('47', '530', '41320', '添加具体场所预订规则', '0', '1', '添加具体场所预订规则', '290');
+INSERT INTO `eh_web_menu_privileges` VALUES ('48', '531', '41320', '删除场所规则', '0', '1', '删除场所规则', '300');
+INSERT INTO `eh_web_menu_privileges` VALUES ('49', '532', '41320', '查询具体场所商品信息', '0', '1', '查询具体场所商品信息', '310');
+INSERT INTO `eh_web_menu_privileges` VALUES ('50', '533', '41320', '添加具体场所商品信息', '0', '1', '添加具体场所商品信息', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ('51', '534', '41320', '删除具体场所商品信息', '0', '1', '删除具体场所商品信息', '330');
+INSERT INTO `eh_web_menu_privileges` VALUES ('52', '535', '41320', '删除具体场所', '0', '1', '删除具体场所', '340');
+INSERT INTO `eh_web_menu_privileges` VALUES ('53', '529', '41330', '查询预定详情', '1', '1', '查询预定详情', '260');
+-- 招租管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('54', '536', '40110', '招租信息列表', '1', '1', '查看招租信息列表', '260');
+INSERT INTO `eh_web_menu_privileges` VALUES ('55', '539', '40110', '增删改招租信息', '0', '1', '增删改招租信息', '340');
+INSERT INTO `eh_web_menu_privileges` VALUES ('56', '537', '40120', '查看入驻申请', '1', '1', '查看入驻申请', '260');
+INSERT INTO `eh_web_menu_privileges` VALUES ('57', '538', '40120', '删除入驻申请', '0', '1', '删除入驻申请', '340');
+-- 服务热线：
+INSERT INTO `eh_web_menu_privileges` VALUES ('58', '554', '40300', '查看服务热线', '1', '1', '查看服务热线信息', '350');
+INSERT INTO `eh_web_menu_privileges` VALUES ('59', '555', '40300', '增加删除服务热线', '0', '1', '增加删除服务热线', '360');
+-- 服务联盟:
+INSERT INTO `eh_web_menu_privileges` VALUES ('60', '540', '40500', '查看服务联盟', '1', '1', '查看服务联盟信息', '370');
+INSERT INTO `eh_web_menu_privileges` VALUES ('61', '541', '40500', '增删改服务联盟信息', '0', '1', '增删改服务联盟信息', '380');
+INSERT INTO `eh_web_menu_privileges` VALUES ('62', '540', '40510', '类型管理', '1', '1', '备品备件 全部权限', '603');
+INSERT INTO `eh_web_menu_privileges` VALUES ('63', '541', '40520', '机构管理', '1', '1', '任务列表 全部权限', '604');
+INSERT INTO `eh_web_menu_privileges` VALUES ('64', '450', '40530', '消息推送设置', '1', '1', '消息推送设置  全部权限', '606');
+INSERT INTO `eh_web_menu_privileges` VALUES ('65', '451', '40540', '申请记录', '1', '1', '申请记录  全部权限', '607');
+-- 创客空间：
+INSERT INTO `eh_web_menu_privileges` VALUES ('66', '542', '40600', '查看创客空间', '1', '1', '查看创客空间信息', '390');
+INSERT INTO `eh_web_menu_privileges` VALUES ('67', '543', '40600', '删除修改创客空间', '0', '1', '删除修改创客空间', '400');
+-- 组织架构：
+INSERT INTO `eh_web_menu_privileges` VALUES ('68', '600', '50110', '组织架构列表', '1', '1', '查看组织架构列表', '410');
+INSERT INTO `eh_web_menu_privileges` VALUES ('69', '601', '50110', '增删改组织架构', '0', '1', '增删改组织架构', '420');
+-- 管理员管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('70', '604', '60100', '查看管理员信息', '1', '1', '查看管理员信息', '430');
+INSERT INTO `eh_web_menu_privileges` VALUES ('71', '605', '60100', '管理员的增删改', '0', '1', '管理员的增删改', '440');
+
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('50', '606', '52200', '查看角色与权限', '1', '1', '角色与权限查看', '450');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('51', '607', '52200', '角色与权限的增删改', '0', '1', '角色与权限的增删改', '460');
+-- 人员管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('72', '608', '50400', '成员列表', '1', '1', '成员列表查看', '470');
+INSERT INTO `eh_web_menu_privileges` VALUES ('73', '609', '50400', '成员的增删改', '0', '1', '成员的增删改', '480');
+INSERT INTO `eh_web_menu_privileges` VALUES ('74', '610', '50400', '设置角色', '0', '1', '设置角色', '490');
+-- 视频会议：
+INSERT INTO `eh_web_menu_privileges` VALUES ('75', '548', '50710', '查看账号', '1', '1', '查看账号', '610');
+INSERT INTO `eh_web_menu_privileges` VALUES ('76', '549', '50710', '分配账号', '0', '1', '分配账号', '620');
+INSERT INTO `eh_web_menu_privileges` VALUES ('77', '550', '50710', '更换用户', '0', '1', '更换用户', '630');
+INSERT INTO `eh_web_menu_privileges` VALUES ('78', '551', '50720', '我的订单', '1', '1', '查看我的订单', '640');
+INSERT INTO `eh_web_menu_privileges` VALUES ('79', '552', '50720', '查看账号信息', '0', '1', '查看账号信息', '650');
+INSERT INTO `eh_web_menu_privileges` VALUES ('80', '553', '50720', '查看开票信息', '0', '1', '查看开票信息', '660');
+INSERT INTO `eh_web_menu_privileges` VALUES ('81', '560', '50730', '会议官网', '1', '1', '查看会议官网', '641');
+
+-- 楼栋管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('82', '391', '31000', '楼栋的增删改', '0', '1', '楼栋的增删改', '91');
+INSERT INTO `eh_web_menu_privileges` VALUES ('83', '390', '31000', '楼栋列表', '1', '1', '楼栋列表', '90');
+
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('87', '616', '53100', '管辖范围管理', '1', '1', '管辖范围管理，包括管辖的小区楼栋查询，添加，删除', '545');
+-- 认证管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('84', '621', '50500', '审批认证', '0', '1', '审批同意，拒绝', '770');
+INSERT INTO `eh_web_menu_privileges` VALUES ('85', '620', '50500', '审批列表', '1', '1', '绩效统计 全部权限', '760');
+-- 项目信息：
+INSERT INTO `eh_web_menu_privileges` VALUES ('86', '380', '30500', '查看区信息', '1', '1', '查看区信息', '88');
+INSERT INTO `eh_web_menu_privileges` VALUES ('87', '381', '30500', '修改区信息', '0', '1', '修改区信息', '89');
+-- 客户资料：
+INSERT INTO `eh_web_menu_privileges` VALUES ('88', '420', '37000', '客户资料', '1', '1', '客户资料  全部权限', '200');
+-- 车辆管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('89', '421', '40900', '车辆管理', '1', '1', '车辆管理  全部权限', '201');
+-- 用户认证：
+INSERT INTO `eh_web_menu_privileges` VALUES ('90', '409', '35000', '用户认证', '1', '1', '用户认证', '165');
+INSERT INTO `eh_web_menu_privileges` VALUES ('91', '410', '35000', '认证审核', '0', '1', '拒绝，同意', '166');
+-- 业主管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('92', '411', '40900', '业主管理', '1', '1', '业主管理 全部权限', '167');
+-- 大堂门禁：
+INSERT INTO `eh_web_menu_privileges` VALUES ('93', '720', '41010', '门禁管理', '1', '1', '门禁管理', '345');
+INSERT INTO `eh_web_menu_privileges` VALUES ('94', '721', '41040', '用户授权', '1', '1', '用户授权', '346');
+INSERT INTO `eh_web_menu_privileges` VALUES ('95', '722', '41050', '访客授权', '1', '1', '访客授权', '347');
+INSERT INTO `eh_web_menu_privileges` VALUES ('96', '723', '41020', '版本管理', '1', '1', '版本管理', '346');
+INSERT INTO `eh_web_menu_privileges` VALUES ('97', '724', '41030', '门禁分组', '1', '1', '门禁分组', '346');
+INSERT INTO `eh_web_menu_privileges` VALUES ('98', '731', '41060', '门禁日志', '1', '1', '公共 门禁日志', '348');
+
+-- 服务预约：
+INSERT INTO `eh_web_menu_privileges` VALUES ('99', '519', '41410', '查询通用设置', '1', '1', '查询通用设置', '348');
+INSERT INTO `eh_web_menu_privileges` VALUES ('100', '520', '41410', '通用设置', '0', '1', '通用设置', '348');
+INSERT INTO `eh_web_menu_privileges` VALUES ('101', '521', '41420', '查询服务类型', '1', '1', '查询服务类型', '349');
+INSERT INTO `eh_web_menu_privileges` VALUES ('102', '522', '41420', '服务类型的增删改', '0', '1', '服务类型的增删改', '349');
+INSERT INTO `eh_web_menu_privileges` VALUES ('103', '523', '41430', '查询预约详情', '1', '1', '查询预约详情', '350');
+INSERT INTO `eh_web_menu_privileges` VALUES ('104', '525', '41440', '查询数据统计', '1', '1', '数据统计', '350');
+
+-- 公司门禁：
+INSERT INTO `eh_web_menu_privileges` VALUES ('105', '725', '50810', '门禁管理', '1', '1', '门禁管理', '780');
+INSERT INTO `eh_web_menu_privileges` VALUES ('106', '726', '50840', '用户授权', '1', '1', '用户授权', '810');
+INSERT INTO `eh_web_menu_privileges` VALUES ('107', '727', '50850', '访客授权', '1', '1', '访客授权', '820');
+INSERT INTO `eh_web_menu_privileges` VALUES ('108', '728', '50820', '版本管理', '1', '1', '版本管理', '790');
+INSERT INTO `eh_web_menu_privileges` VALUES ('109', '729', '50830', '门禁分组', '1', '1', '门禁分组', '800');
+INSERT INTO `eh_web_menu_privileges` VALUES ('110', '730', '50860', '门禁日志', '1', '1', '门禁日志', '801');
+
+-- wifi热点：
+INSERT INTO `eh_web_menu_privileges` VALUES ('111', '715', '41100', 'Wifi热点', '1', '1', 'Wifi热点', '401');
+-- 物业缴费：
+INSERT INTO `eh_web_menu_privileges` VALUES ('112', '713', '20410', '缴费记录', '1', '1', '缴费记录', '341');
+INSERT INTO `eh_web_menu_privileges` VALUES ('113', '714', '20420', '设置', '1', '1', '设置', '342');
+-- 活动管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('114', '200', '10600', '活动管理', '1', '1', '查询活动贴以及发布活动', '15');
+INSERT INTO `eh_web_menu_privileges` VALUES ('115', '310', '10600', '官方活动', '0', '1', '官方活动', '16');
+-- 新闻管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('116', '220', '10800', '新闻管理', '1', '1', '新闻管理  全部权限', '16');
+-- 园区简介：
+INSERT INTO `eh_web_menu_privileges` VALUES ('117', '570', '41600', '园区简介', '1', '1', '园区简介', '350');
+
+-- 一卡通：
+INSERT INTO `eh_web_menu_privileges` VALUES ('118', '760', '41210', '开卡用户', '1', '1', '开卡用户 全部权限', '345');
+INSERT INTO `eh_web_menu_privileges` VALUES ('119', '761', '41220', '充值记录', '1', '1', '充值记录 全部权限', '346');
+INSERT INTO `eh_web_menu_privileges` VALUES ('120', '762', '41230', '消费记录', '1', '1', '消费记录 全部权限', '347');
+-- 运营统计：
+INSERT INTO `eh_web_menu_privileges` VALUES ('121', '716', '40750', '日活统计', '1', '1', '日活统计  全部权限', '16');
+
+-- 工位预定
+INSERT INTO `eh_web_menu_privileges` VALUES ('122', '558', '40210', '空间管理', '1', '1', '空间管理 全部权限', '341');
+INSERT INTO `eh_web_menu_privileges` VALUES ('166', '559', '40220', '预订详情', '1', '1', '预订详情 全部权限', '342');
+-- 资源预订：
+INSERT INTO `eh_web_menu_privileges` VALUES ('123', '565', '40410', '默认参数', '1', '1', '默认参数  全部权限', '343');
+INSERT INTO `eh_web_menu_privileges` VALUES ('124', '566', '40420', '资源发布', '1', '1', '资源发布 全部权限', '344');
+INSERT INTO `eh_web_menu_privileges` VALUES ('125', '567', '40430', '预定详情', '1', '1', '预定详情  全部权限', '345');
+INSERT INTO `eh_web_menu_privileges` VALUES ('126', '568', '40440', '退款处理', '1', '1', '退款处理 全部权限', '346');
+-- 结算管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('127', '770', '40700', '结算管理', '1', '1', '结算管理', '349');
+-- 园区报
+INSERT INTO `eh_web_menu_privileges` VALUES ('128', '780', '41510', '园区报管理', '1', '1', '园区报管理  全部权限', '346');
+INSERT INTO `eh_web_menu_privileges` VALUES ('129', '781', '41520', '约稿须知', '1', '1', '约稿须知 全部权限', '347');
+-- 广告管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('130', '830', '10400', '广告管理', '1', '1', '广告管理  全部权限', '577');
+
+-- 设备巡检：
+INSERT INTO `eh_web_menu_privileges` VALUES ('131', '800', '20811', '标准列表', '1', '1', '标准列表  全部权限', '600');
+INSERT INTO `eh_web_menu_privileges` VALUES ('132', '801', '20812', '设备关联审批', '1', '1', '设备关联审批 全部权限', '601');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('133', '802', '20821', '设备列表', '1', '1', '设备列表 全部权限', '602');
+INSERT INTO `eh_web_menu_privileges` VALUES ('134', '803', '20822', '备品备件', '1', '1', '备品备件 全部权限', '603');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('135', '804', '20831', '任务列表', '1', '1', '任务列表 全部权限', '604');
+INSERT INTO `eh_web_menu_privileges` VALUES ('136', '950', '20840', '巡检项资料库管理', '1', '1', '巡检项资料库管理', '801');
+INSERT INTO `eh_web_menu_privileges` VALUES ('137', '951', '20841', '巡检项设置', '1', '1', '巡检项设置', '641');
+-- 品质核查：
+INSERT INTO `eh_web_menu_privileges` VALUES ('138', '751', '20611', '行为规范', '1', '1', '行为规范 全部权限', '700');
+INSERT INTO `eh_web_menu_privileges` VALUES ('139', '752', '20612', '绩效统计', '1', '1', '绩效统计 全部权限', '710');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('140', '753', '20621', '参考标准', '1', '1', '参考标准 全部权限', '720');
+INSERT INTO `eh_web_menu_privileges` VALUES ('141', '754', '20622', '类型管理', '1', '1', '类型管理 全部权限', '730');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('142', '755', '20631', '任务列表', '1', '1', '任务列表 全部权限', '740');
+INSERT INTO `eh_web_menu_privileges` VALUES ('143', '756', '20632', '任务审阅', '1', '1', '任务审阅 全部权限', '750');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('144', '757', '20640', '修改记录', '1', '1', '修改记录 全部权限', '760');
+
+-- 考勤管理：
+INSERT INTO `eh_web_menu_privileges` VALUES ('145', '790', '50610', '规则管理', '1', '1', '规则管理  全部权限', '570');
+INSERT INTO `eh_web_menu_privileges` VALUES ('146', '790', '50611', '规则管理', '1', '1', '规则管理  全部权限', '100');
+INSERT INTO `eh_web_menu_privileges` VALUES ('147', '791', '50612', '时间管理', '1', '1', '时间管理 全部权限', '110');
+INSERT INTO `eh_web_menu_privileges` VALUES ('148', '792', '50613', '地点管理', '1', '1', '地点管理 全部权限', '120');
+INSERT INTO `eh_web_menu_privileges` VALUES ('149', '793', '50614', 'wifi管理', '1', '1', 'wifi管理 全部权限', '130');
+INSERT INTO `eh_web_menu_privileges` VALUES ('150', '794', '50615', '排班管理', '1', '1', '排班管理 全部权限', '140');
+
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('151', '822', '50620', '审批规则设置', '1', '1', '审批规则设置 全部权限', '571'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('152', '822', '50621', '审批规则', '1', '1', '审批规则 全部权限', '210');
+INSERT INTO `eh_web_menu_privileges` VALUES ('153', '823', '50622', '审批人设置', '1', '1', '审批人设置 全部权限', '220');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('154', '795', '50630', '考勤规则配置', '1', '1', '考勤规则配置 全部权限', '572'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('155', '795', '50631', '通用设置', '1', '1', '通用设置 全部权限', '310');
+INSERT INTO `eh_web_menu_privileges` VALUES ('156', '796', '50632', '个人设置', '1', '1', '个人设置 全部权限', '320');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('157', '797', '50640', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('158', '797', '50641', '打卡详情', '1', '1', '打卡详情 全部权限', '410');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('159', '798', '50650', '异常处理', '1', '1', '异常处理 全部权限', '574'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('160', '798', '50651', '异常申请', '1', '1', '异常申请 全部权限', '510');
+INSERT INTO `eh_web_menu_privileges` VALUES ('161', '799', '50652', '请假申请', '1', '1', '请假申请 全部权限', '520');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('163', '820', '50661', '考勤统计', '1', '1', '考勤统计  全部权限', '610');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('164', '821', '50670', '请假类型设置', '1', '1', '请假类型设置 全部权限', '576'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('165', '821', '50671', '类型设置', '1', '1', '类型设置 全部权限', '710');
+
