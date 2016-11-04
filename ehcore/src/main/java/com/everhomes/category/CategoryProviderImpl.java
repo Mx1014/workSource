@@ -91,7 +91,7 @@ public class CategoryProviderImpl implements CategoryProvider {
     }
 
     @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
-            @CacheEvict(value="listChildCategory"),
+            @CacheEvict(value="listChildCategory",allEntries=true),
             @CacheEvict(value="listDescendantCategory"),
             @CacheEvict(value="listAllCategory"),
             @CacheEvict(value="listBusinessSubCategories")})

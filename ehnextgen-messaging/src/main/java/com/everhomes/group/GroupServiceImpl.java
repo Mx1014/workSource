@@ -1008,6 +1008,16 @@ public class GroupServiceImpl implements GroupService {
                     EntityType.USER.getCode(), member.getInviterUid());
                 sendGroupNotificationForInviteToJoinGroupFreely(group, inviter, member);
             }
+            
+            //俱乐部可以重复申请加入，这里只改变申请理由，其它不变, add by tt, 20161104
+            if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) 
+            		&& GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+                member.setRequestorComment(cmd.getRequestText());
+            	member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());  //有可能被拒绝了重复加入
+            	groupProvider.updateGroupMember(member);
+            	sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
+			}
+            
         }
     }
     
@@ -1469,6 +1479,10 @@ public class GroupServiceImpl implements GroupService {
                 
                 GroupMember revoker = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                     EntityType.USER.getCode(), operatorUid);
+                // 俱乐部移除成员时不发消息，add by tt, 20161104
+                if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+    				return;
+    			}
                 sendGroupNotificationForRevokeGroupMember(group, revoker, member);
             }
             
@@ -1735,7 +1749,10 @@ public class GroupServiceImpl implements GroupService {
                 member.setMemberRole(Role.ResourceAdmin);
                 this.groupProvider.updateGroupMember(member);
             }
-            
+            // 俱乐部设为管理员时不用发消息，add by tt, 20161104
+            if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+				return;
+			}
             GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), operatorId);
             sendGroupNotificationForInviteToBeGroupAdminFreely(group, inviter, member);
         } else {
@@ -1854,7 +1871,10 @@ public class GroupServiceImpl implements GroupService {
                 deleteUserGroupOpRequest(groupId, targetUid, operator.getId(), cmd.getRevokeText());
                 return null;
             });
-            
+            // 俱乐部取消管理员时不用发消息，add by tt, 20161104
+            if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+				return;
+			}
             GroupMember revoker = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), operatorId);
             sendGroupNotificationForRevokeGroupAdmin(group, revoker, member);
         } else {
@@ -2952,6 +2972,10 @@ public class GroupServiceImpl implements GroupService {
         if(group.getPrivateFlag().equals(GroupPrivacy.PRIVATE.getCode())) {
             this.sendGroupNotificationPrivateForReqToJoinGroupFreely(group, member);
         } else {
+        	//加入俱乐部时，如果不需要审核，不发消息，add by tt, 20161104
+        	if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+				return;
+			}
             this.sendGroupNotificationPublicForReqToJoinGroupFreely(group, member);
         }
     }
@@ -2966,19 +2990,35 @@ public class GroupServiceImpl implements GroupService {
             String locale = user.getLocale();
             
             // send notification to who is requesting to join the group
+            // 加入需要审核的俱乐部时，不给申请者发消息，add by tt, 20161104
             String scope = GroupNotificationTemplateCode.SCOPE;
-            int code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_REQ_FOR_APPLICANT;
-            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-            sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+            int code = 0;
+            if (GroupDiscriminator.GROUP != GroupDiscriminator.fromCode(group.getDiscriminator()) || GroupPrivacy.PUBLIC != GroupPrivacy.fromCode(group.getPrivateFlag())) {
+            	code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_REQ_FOR_APPLICANT;
+            	String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            	sendGroupNotificationToIncludeUser(group.getId(), member.getMemberId(), notifyTextForApplicant);
+			}
             
             // send notification to all administrators in the group
+            
             code = GroupNotificationTemplateCode.GROUP_AUTH_JOIN_REQ_FOR_OPERATOR;
+            // 如果是俱乐部，则按以下模板发送消息，add by tt, 20161104
+            if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+				map.put("reason", member.getRequestorComment());
+				code = GroupNotificationTemplateCode.GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN;
+			}
             String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
             List<Long> includeList = getGroupAdminIncludeList(group.getId(), member.getMemberId(), null);
             if(includeList.size() > 0) {
                 QuestionMetaObject metaObject = createGroupQuestionMetaObject(group, member, null);
-                sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, 
-                    MetaObjectType.GROUP_INVITE_TO_JOIN, metaObject);
+                // 下面的应该写错了，这里不影响以前逻辑的情况下，把俱乐部的metaObjectType换成GROUP_REQUEST_TO_JOIN，add by tt, 20161104
+                if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+                	sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, 
+                            MetaObjectType.GROUP_REQUEST_TO_JOIN, metaObject);
+                }else {
+                	sendGroupNotification(group.getId(), includeList, null, notifyTextForAdmin, 
+                			MetaObjectType.GROUP_INVITE_TO_JOIN, metaObject);
+				}
             }
         } catch(Exception e) {
             LOGGER.error("Failed to send notification, groupId=" + group.getId() + ", memberId=" + member.getMemberId(), e);
@@ -3119,7 +3159,19 @@ public class GroupServiceImpl implements GroupService {
             LOGGER.error("The opeartor or requestor should not be null, opeartor=" + opeartor + ", requestor=" + requestor);
             return;
         }
-        
+        //加入俱乐部通过时，只给申请者发消息通过了，add by tt, 20161104
+    	if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+    		Map<String, Object> map = new HashMap<String, Object>();
+            map.put("groupName", group.getName());
+            String locale = getLocale();
+            
+            String scope = GroupNotificationTemplateCode.SCOPE;
+            int code = GroupNotificationTemplateCode.GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            sendGroupNotificationToIncludeUser(group.getId(), requestor.getMemberId(), notifyTextForApplicant);
+    		
+			return;
+		}
         // send notification to the applicant
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("groupName", group.getName());
@@ -3150,7 +3202,20 @@ public class GroupServiceImpl implements GroupService {
             LOGGER.error("The opeartor or requestor should not be null, opeartor=" + opeartor + ", requestor=" + requestor);
             return;
         }
-        
+        //加入俱乐部被拒绝时，只给申请者发消息拒绝了，add by tt, 20161104
+    	if (GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())) {
+    		Map<String, Object> map = new HashMap<String, Object>();
+            map.put("groupName", group.getName());
+            String locale = getLocale();
+            
+            String scope = GroupNotificationTemplateCode.SCOPE;
+            int code = GroupNotificationTemplateCode.GROUP_MEMBER_REJECT_REQUEST_TO_JOIN;
+            String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+            sendGroupNotificationToIncludeUser(group.getId(), requestor.getMemberId(), notifyTextForApplicant);
+    		
+			return;
+		}
+    	
         // send notification to the applicant
         Map<String, Object> map = new HashMap<String, Object>();
         map.put("groupName", group.getName());

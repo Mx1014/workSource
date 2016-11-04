@@ -52,6 +52,11 @@ public interface GroupNotificationTemplateCode {
     static final int GROUP_MEMBER_TO_CREATOR_WHEN_REJECTED = 41;  //你创建“${groupName}”的申请被拒绝
     static final int GROUP_MEMBER_TO_ALL_WHEN_DELETE = 42;  //你加入的“${groupName}”已解散
     static final int GROUP_NOT_ALLOW_TO_CREATE_GROUP = 43;  //不允许创建${clubPlaceholderName}
+    static final int GROUP_MEMBER_TO_ADMIN_WHEN_REQUEST_TO_JOIN = 44;  //${userName}申请加入“${groupName}”，理由：${reason}
+    static final int GROUP_MEMBER_APPROVE_REQUEST_TO_JOIN = 45;  //你加入“${groupName}”的申请已通过
+    static final int GROUP_MEMBER_REJECT_REQUEST_TO_JOIN = 46;  //你加入“${groupName}”的申请被拒绝
+
+
 
 
     
