@@ -1,19 +1,18 @@
 package com.everhomes.energy;
 
-import java.util.Date;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.energy.*;
-
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import java.util.Date;
 
 /**
  * 能耗管理
@@ -325,18 +324,18 @@ public class EnergyConsumptionController extends ControllerBase {
      */
     @RestReturn(value = String.class)
     @RequestMapping("caculateEnergyDayStatByDate")
-    public RestResponse caculateEnergyDayStatByDate(Long cacuDate) {
-    	energyConsumptionService.caculateEnergyDayStatByDate(new Date(cacuDate));
+    public RestResponse caculateEnergyDayStatByDate(EnergyStatCommand cmd ) {
+    	energyConsumptionService.caculateEnergyDayStatByDate(new Date(cmd.getStatDate()));
     	return success();
     }
     /**
      * <p>测试:汇总某一个月的度数费用到月报表</p>
      * <b>URL: /energy/caculateEnergyMonthStatByDate</b>
-     */
+   +  */
     @RestReturn(value = String.class)
     @RequestMapping("caculateEnergyMonthStatByDate")
-    public RestResponse caculateEnergyMonthStatByDate(Long cacuDate) {
-    	energyConsumptionService.caculateEnergyMonthStatByDate(new Date(cacuDate));
+    public RestResponse caculateEnergyMonthStatByDate(EnergyStatCommand cmd) {
+    	energyConsumptionService.caculateEnergyMonthStatByDate(new Date(cmd.getStatDate()));
     	return success();
     }
 }
