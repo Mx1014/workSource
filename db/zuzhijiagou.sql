@@ -266,6 +266,7 @@ INSERT INTO `eh_web_menus` VALUES ('20612', '绩效统计', '20610', null, 'perf
 INSERT INTO `eh_web_menus` VALUES ('20620', '作业标准', '20600', null, null, '1', '2', '/20000/20600/20620', 'park', '265');
 INSERT INTO `eh_web_menus` VALUES ('20621', '参考标准', '20620', null, 'reference_standard', '0', '2', '/20000/20600/20620/20621', 'park', '266');
 INSERT INTO `eh_web_menus` VALUES ('20622', '类型管理', '20620', null, 'type_management', '0', '2', '/20000/20600/20620/20622', 'park', '267');
+INSERT INTO `eh_web_menus` VALUES ('20623', '绩效统计', '20620', null, 'performance_statistics', '0', '2', '/20000/20600/20620/20623', 'park', '268');
 
 INSERT INTO `eh_web_menus` VALUES ('20630', '任务列表', '20600', null, null, '1', '2', '/20000/20600/20630', 'park', '269');
 INSERT INTO `eh_web_menus` VALUES ('20631', '任务列表', '20630', null, 'task_list', '0', '2', '/20000/20600/20630/20631', 'park', '270');
@@ -361,7 +362,7 @@ INSERT INTO `eh_web_menus` VALUES ('41420', '服务类型', '41400', null, 'serv
 INSERT INTO `eh_web_menus` VALUES ('41430', '预约详情', '41400', null, 'service_detail', '0', '2', '/40000/41400/41430', 'park', '497');
 INSERT INTO `eh_web_menus` VALUES ('41440', '数据统计', '41400', null, 'service_statistics', '0', '2', '/40000/41400/41440', 'park', '498');
 
-INSERT INTO `eh_web_menus` VALUES ('41600', '园区简介', '40000', null, 'settlement_management', '0', '2', '/40000/41600', 'park', '502');
+INSERT INTO `eh_web_menus` VALUES ('41600', '园区简介', '40000', null, 'park-intro', '0', '2', '/40000/41600', 'park', '502');
 
 
 INSERT INTO `eh_web_menus` VALUES ('50000', '内部管理', '0', 'fa fa-group', null, '1', '2', '/50000', 'park', '505');
