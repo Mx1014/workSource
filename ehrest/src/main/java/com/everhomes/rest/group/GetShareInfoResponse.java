@@ -3,6 +3,7 @@ package com.everhomes.rest.group;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -25,6 +26,7 @@ public class GetShareInfoResponse {
 	private String groupName;
 	private String groupAvatarUrl;
 	private String groupDescription;
+	@ItemType(String.class)
 	private List<String> groupMemberAvatarList;
 	private String clubPlaceholderName;
 	
