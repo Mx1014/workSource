@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>ownerType: 所属实体类型</li>
  * <li>ownerId:  所属实体id</li>
+ * <li>parentId:  父id</li>
  * </ul>
  */
 public class ListResourceCategoryCommand {
@@ -15,6 +16,8 @@ public class ListResourceCategoryCommand {
     private String ownerType;
 
     private Long ownerId;
+    
+    private Long parentId;
 
     public ListResourceCategoryCommand() {
     }
@@ -39,4 +42,12 @@ public class ListResourceCategoryCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 }

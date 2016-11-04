@@ -21,6 +21,8 @@ import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListResourceCategoryCommand;
+import com.everhomes.rest.community.ResourceCategoryDTO;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
@@ -145,4 +147,8 @@ public interface CommunityService {
 	void deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd);
 	
 	ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd);
+	
+	List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd);
+	
+	List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd);
 }

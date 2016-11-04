@@ -20,14 +20,18 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 	@Override
 	public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
 		List<ServiceModule> list = serviceModuleProvider.listServiceModule(cmd.getLevel());
-		List<ServiceModuleDTO> result = list.stream().map(r ->{
+		List<ServiceModuleDTO> temp = list.stream().map(r ->{
 			ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
 			return dto;
 		}).collect(Collectors.toList());
+		List<ServiceModuleDTO> result = new ArrayList<ServiceModuleDTO>();
 		
-		result.stream().forEach(s -> {
-			getChildCategories(result, s);
-		});
+		for(ServiceModuleDTO s: temp) {
+			getChildServiceModules(temp, s);
+			if(s.getParentId() == 0) {
+				result.add(s);
+			}
+		}
 		
 		return result;
 	}
@@ -36,25 +40,29 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 	public List<ServiceModuleDTO> listTreeServiceModules(ListServiceModulesCommand cmd) {
 		
 		List<ServiceModule> list = serviceModuleProvider.listServiceModule(null);
-		List<ServiceModuleDTO> result = list.stream().map(r ->{
+		List<ServiceModuleDTO> temp = list.stream().map(r ->{
 			ServiceModuleDTO dto = ConvertHelper.convert(r, ServiceModuleDTO.class);
 			return dto;
 		}).collect(Collectors.toList());
 		
-		result.stream().forEach(s -> {
-			getChildCategories(result, s);
-		});
-		
+		List<ServiceModuleDTO> result = new ArrayList<ServiceModuleDTO>();
+
+		for(ServiceModuleDTO s: temp) {
+			getChildServiceModules(temp, s);
+			if(s.getParentId() == 0) {
+				result.add(s);
+			}
+		}
 		return result;
 	}
 
-	private ServiceModuleDTO getChildCategories(List<ServiceModuleDTO> list, ServiceModuleDTO dto){
+	private ServiceModuleDTO getChildServiceModules(List<ServiceModuleDTO> list, ServiceModuleDTO dto){
 		
 		List<ServiceModuleDTO> childrens = new ArrayList<ServiceModuleDTO>();
 		
 		for (ServiceModuleDTO serviceModuleDTO : list) {
 			if(dto.getId().equals(serviceModuleDTO.getParentId())){
-				childrens.add(getChildCategories(list, serviceModuleDTO));
+				childrens.add(getChildServiceModules(list, serviceModuleDTO));
 			}
 		}
 		dto.setServiceModules(childrens);

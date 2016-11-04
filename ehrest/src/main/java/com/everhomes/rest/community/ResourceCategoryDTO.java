@@ -14,6 +14,8 @@ import java.util.List;
  * </ul>
  */
 public class ResourceCategoryDTO {
+	
+	private Long id;
 
 	private String name;
 
@@ -65,5 +67,13 @@ public class ResourceCategoryDTO {
 
 	public void setCategoryDTOs(List<ResourceCategoryDTO> categoryDTOs) {
 		this.categoryDTOs = categoryDTOs;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

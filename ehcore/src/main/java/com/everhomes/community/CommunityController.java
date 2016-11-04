@@ -282,7 +282,8 @@ public class CommunityController extends ControllerBase {
     @RequestMapping("listResourceCategories")
     @RestReturn(value=ResourceCategoryDTO.class, collection = true)
     public RestResponse listResourceCategories(ListResourceCategoryCommand cmd) {
-        RestResponse response =  new RestResponse();
+    	List<ResourceCategoryDTO> list = communityService.listResourceCategories(cmd);
+        RestResponse response = new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -295,7 +296,9 @@ public class CommunityController extends ControllerBase {
     @RequestMapping("listTreeResourceCategoryAssignments")
     @RestReturn(value=ResourceCategoryDTO.class, collection = true)
     public RestResponse listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd) {
-        RestResponse response =  new RestResponse();
+    	List<ResourceCategoryDTO> list = communityService.listTreeResourceCategoryAssignments(cmd);
+
+        RestResponse response =  new RestResponse(list);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

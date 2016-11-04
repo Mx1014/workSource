@@ -91,6 +91,9 @@ import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
 import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListResourceCategoryCommand;
+import com.everhomes.rest.community.ResourceCategoryAssignmentDTO;
+import com.everhomes.rest.community.ResourceCategoryDTO;
 import com.everhomes.rest.community.ResourceCategoryErrorCode;
 import com.everhomes.rest.community.ResourceCategoryStatus;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
@@ -2487,8 +2490,11 @@ public class CommunityServiceImpl implements CommunityService {
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name);
 			checkResourceCategoryExsit(category);
 		}else{
+			ResourceCategory parentCategory = communityProvider.findResourceCategoryById(parentId);
+			checkResourceCategoryIsNull(parentCategory);
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, parentId, name);
 			checkResourceCategoryExsit(category);
+			category.setPath(parentCategory.getPath() + "/" + name);
 		}
 		
 		category = new ResourceCategory();
@@ -2496,11 +2502,11 @@ public class CommunityServiceImpl implements CommunityService {
 		category.setCreatorUid(UserContext.current().getUser().getId());   
 		category.setName(name);
 		category.setNamespaceId(namespaceId);
-		category.setPath("/" + name);
+		
 		category.setParentId(parentId);
 		category.setStatus(ResourceCategoryStatus.ACTIVE.getCode());
 		category.setOwnerType(ownerType);
-		category.setOwnerType(ownerType);
+		category.setOwnerId(ownerId);
 		communityProvider.createResourceCategory(category);
 		
 	}
@@ -2515,6 +2521,11 @@ public class CommunityServiceImpl implements CommunityService {
 		checkResourceCategoryIsNull(category);
 		
 		category.setName(cmd.getName());
+		String path = category.getPath();
+		path = path.substring(0, path.lastIndexOf("/"));
+
+		category.setPath(path + "/" + cmd.getName());
+		category.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 		communityProvider.updateResourceCategory(category);
 	}
 
@@ -2662,5 +2673,73 @@ public class CommunityServiceImpl implements CommunityService {
     	}
 		
 		return response;
+	}
+	
+	@Override
+	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
+		String path = null;
+		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
+		if(null != cmd.getParentId()) {
+			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
+			checkResourceCategoryIsNull(resourceCategory);
+			path = resourceCategory.getPath();
+		}
+		
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, path)
+			.stream().map(r -> {
+				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
+				
+				return dto;
+			}).collect(Collectors.toList());
+		
+		for(ResourceCategoryDTO s: temp) {
+			getChildCategories(temp, s);
+			if(s.getParentId() == parentId) {
+				result.add(s);
+			}
+		}
+		
+		return result;
+	}
+	
+	@Override
+	public List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd) {
+		List<ResourceCategoryDTO> list = listResourceCategories(cmd);
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+
+		setresourceDTOs(list, namespaceId);
+		
+		return list;
+	}
+	
+	private void setresourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
+		for(ResourceCategoryDTO r: list) {
+			List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(r.getId(), namespaceId);
+			List<ResourceCategoryAssignmentDTO> resourceDTOs = resourceCategoryAssignments.stream().map(ra -> {
+				ResourceCategoryAssignmentDTO dto = ConvertHelper.convert(ra, ResourceCategoryAssignmentDTO.class);
+				Community community = communityProvider.findCommunityById(ra.getResourceId());
+				dto.setResourceName(community.getName());
+				return dto;
+			}).collect(Collectors.toList());
+			setresourceDTOs(r.getCategoryDTOs(), namespaceId);
+			r.setResourceDTOs(resourceDTOs);
+		}
+	}
+	
+	private ResourceCategoryDTO getChildCategories(List<ResourceCategoryDTO> list, ResourceCategoryDTO dto){
+		
+		List<ResourceCategoryDTO> childrens = new ArrayList<ResourceCategoryDTO>();
+		
+		for (ResourceCategoryDTO resourceCategoryDTO : list) {
+			if(dto.getId().equals(resourceCategoryDTO.getParentId())){
+				childrens.add(getChildCategories(list, resourceCategoryDTO));
+			}
+		}
+		dto.setCategoryDTOs(childrens);
+		
+		return dto;
 	}
 }

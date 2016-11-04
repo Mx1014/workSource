@@ -152,7 +152,7 @@ CREATE TABLE `eh_resource_categories` (
   `name` VARCHAR(64) NOT NULL COMMENT 'resource categry name',
   `owner_type` VARCHAR(32) NOT NULL,
   `owner_id` BIGINT NOT NULL,
-  `parent_id` BIGINT NOT NUll,
+  `parent_id` BIGINT NOT NUll DEFAULT 0,
   `path` VARCHAR(128) NOT NUll,
   `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0: inactive, 2: active',
   `create_time` DATETIME DEFAULT NULL,
