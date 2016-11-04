@@ -10,6 +10,7 @@ import java.util.List;
  * <ul>
  *     <li>billDayStats: {@link com.everhomes.rest.energy.BillStatDTO}</li> 
  *     <li>dayBurdenStats: 实际负担 list</li> 
+ *     <li>lastYearPayableStats: 去年同期应付list</li> 
  * </ul>
  */
 public class EnergyStatDTO {
@@ -19,6 +20,9 @@ public class EnergyStatDTO {
 
     @ItemType(DayStatDTO.class)
     private List<DayStatDTO> dayBurdenStats;  
+
+    @ItemType(DayStatDTO.class)
+    private List<DayStatDTO> lastYearPayableStats;  
   
     @Override
     public String toString() {
@@ -43,5 +47,15 @@ public class EnergyStatDTO {
 
 	public void setDayBurdenStats(List<DayStatDTO> dayBurdenStats) {
 		this.dayBurdenStats = dayBurdenStats;
+	}
+
+
+	public List<DayStatDTO> getLastYearPayableStats() {
+		return lastYearPayableStats;
+	}
+
+
+	public void setLastYearPayableStats(List<DayStatDTO> lastYearPayableStats) {
+		this.lastYearPayableStats = lastYearPayableStats;
 	}
 }

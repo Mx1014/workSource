@@ -936,22 +936,35 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    		meterDTO.getDayStats().add(dayDTO);
 	    	}
 	    	 
-	    	//最终计算实际负担 
+	    	//最终计算实际负担  和同比
+	    	result.setLastYearPayableStats(new ArrayList<DayStatDTO>());
 	    	result.setDayBurdenStats(new ArrayList<DayStatDTO>());
 	    	BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
 	    	BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
 	    	for(DayStatDTO receivableDay : receivableDTO.getDayBillStats()){
 	    		DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), receivableDay.getStatDate());
 	    		DayStatDTO burdenDay = new DayStatDTO();
+	    		DayStatDTO lastYearDTO = new DayStatDTO();
 	    		//应收减应付
+	    		burdenDay.setStatDate(receivableDay.getStatDate());
 	    		burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
 	    		burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
 	    		result.getDayBurdenStats().add(burdenDay);
+	    		result.getLastYearPayableStats().add(lastYearDTO);
+	    		lastYearDTO.setStatDate(receivableDay.getStatDate());
+	    		//得到去年的字符串
+	        	Calendar lastYear = Calendar.getInstance();
+	        	lastYear.setTime(new Date(receivableDay.getStatDate())); 
+	        	lastYear.add(Calendar.YEAR,-1);
+	        	lastYearDTO.setCurrentAmount(energyCountStatisticProvider.getSumAmount(monthSF.format(lastYear.getTime()),cmd.getMeterType()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
+	        	lastYearDTO.setCurrentCost(energyCountStatisticProvider.getSumCost(monthSF.format(lastYear.getTime()),cmd.getMeterType()
+						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
 	    	}
     	} catch (ParseException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error(e.getLocalizedMessage());
 		}
+    	
     	return result ;
     }
 

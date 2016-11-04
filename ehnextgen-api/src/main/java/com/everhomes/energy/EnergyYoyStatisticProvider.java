@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.sql.Date;
 import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
@@ -19,5 +20,7 @@ public interface EnergyYoyStatisticProvider {
 			ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<EnergyYoyStatistic>  listenergyYoyStatistics(Integer currentNamespaceId, String dateStr);
+
+	EnergyYoyStatistic getEnergyYoyStatisticByCommuniytyAndDate(Long communityId, Date date);
 
 }
