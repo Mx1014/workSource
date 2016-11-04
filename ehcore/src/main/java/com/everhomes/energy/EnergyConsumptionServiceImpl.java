@@ -1,18 +1,43 @@
 package com.everhomes.energy;
 
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_CURR_READING_LESS_THEN_START_READING;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_FORMULA_HAS_BEEN_REFERENCE;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_CATEGORY_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_BEFORE_TODAY;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_READING_LOG_NOT_EXIST;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.ERR_METER_START_GREATER_THEN_MAX;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.SCOPE;
-import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
-import static com.everhomes.util.RuntimeErrorException.errorWith;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.approval.MeterFormulaVariable;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.energy.*;
+import com.everhomes.search.EnergyMeterReadingLogSearcher;
+import com.everhomes.search.EnergyMeterSearcher;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.MySheetContentsHandler;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import org.apache.commons.lang.math.NumberUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
+import javax.script.ScriptEngine;
+import javax.script.ScriptEngineManager;
+import javax.script.ScriptException;
+import javax.validation.ConstraintViolation;
+import javax.validation.Validation;
+import javax.validation.Validator;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -29,90 +54,8 @@ import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.script.ScriptEngine;
-import javax.script.ScriptEngineManager;
-import javax.script.ScriptException;
-import javax.validation.ConstraintViolation;
-import javax.validation.Validation;
-import javax.validation.Validator;
-
-import org.apache.commons.lang.math.NumberUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Service;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.db.DbProvider;
-import com.everhomes.locale.LocaleString;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.approval.MeterFormulaVariable;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.energy.*;
-import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
-import com.everhomes.rest.energy.BillStatDTO;
-import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
-import com.everhomes.rest.energy.DayStatDTO;
-import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.DeleteEnergyMeterFormulaCommand;
-import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
-import com.everhomes.rest.energy.EnergyCategoryDefault;
-import com.everhomes.rest.energy.EnergyCommonStatus;
-import com.everhomes.rest.energy.EnergyCommunityYoyStatDTO;
-import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
-import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
-import com.everhomes.rest.energy.EnergyLocaleStringCode;
-import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
-import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
-import com.everhomes.rest.energy.EnergyMeterDTO;
-import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
-import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
-import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
-import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
-import com.everhomes.rest.energy.EnergyMeterSettingType;
-import com.everhomes.rest.energy.EnergyMeterStatus;
-import com.everhomes.rest.energy.EnergyMeterType;
-import com.everhomes.rest.energy.EnergyStatByYearDTO;
-import com.everhomes.rest.energy.EnergyStatCommand;
-import com.everhomes.rest.energy.EnergyStatDTO;
-import com.everhomes.rest.energy.EnergyStatisticType;
-import com.everhomes.rest.energy.GetEnergyMeterCommand;
-import com.everhomes.rest.energy.ImportEnergyMeterCommand;
-import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
-import com.everhomes.rest.energy.ListEnergyMeterSettingLogsCommand;
-import com.everhomes.rest.energy.MeterStatDTO;
-import com.everhomes.rest.energy.ReadEnergyMeterCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
-import com.everhomes.rest.energy.SearchEnergyMeterResponse;
-import com.everhomes.rest.energy.ServiceStatDTO;
-import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand;
-import com.everhomes.search.EnergyMeterReadingLogSearcher;
-import com.everhomes.search.EnergyMeterSearcher;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.excel.MySheetContentsHandler;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.SAXHandlerEventUserModel;
+import static com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode.*;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * 能耗管理service
@@ -535,7 +478,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 setting.setSettingValue(cmd.getSettingValue());
             }
             defaultSettingProvider.updateEnergyMeterDefaultSetting(setting);
-            return ConvertHelper.convert(setting, EnergyMeterDefaultSettingDTO.class);
+            return toEnergyMeterDefaultSettingDTO(setting);
         }
         return null;
     }
@@ -659,14 +602,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocaleStringCode.SCOPE_METER_TYPE, result.getC(), currLocale());
             if (meterTypeLocale != null) {
                 meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
+            } else {
+                LOGGER.error("Import energy meter error, error field meterType");
+                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field meterType");
             }
             EnergyMeterCategory category = meterCategoryProvider.findByName(currNamespaceId(), result.getD());
             if (category != null) {
                 meter.setBillCategoryId(category.getId());
+            } else {
+                LOGGER.error("Import energy meter error, error field meterType");
+                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
             }
             category = meterCategoryProvider.findByName(currNamespaceId(), result.getE());
             if (category != null) {
                 meter.setServiceCategoryId(category.getId());
+            } else {
+                LOGGER.error("Import energy meter error, error field meterType");
+                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
             }
             if (NumberUtils.isNumber(result.getF())) {
                 meter.setMaxReading(new BigDecimal(result.getF()));
@@ -683,10 +635,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeterFormula formula = meterFormulaProvider.findByName(currNamespaceId(), result.getJ());
             if (formula != null) {
                 meter.setAmountFormulaId(formula.getId());
+            } else {
+                LOGGER.error("Import energy meter error, error field meterType");
+                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
             }
             formula = meterFormulaProvider.findByName(currNamespaceId(), result.getK());
             if (formula != null) {
                 meter.setCostFormulaId(formula.getId());
+            } else {
+                LOGGER.error("Import energy meter error, error field meterType");
+                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
             }
             dbProvider.execute(r -> {
                 meterProvider.createEnergyMeter(meter);
@@ -714,16 +672,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     public ArrayList processorExcel(MultipartFile file) {
-        MySheetContentsHandler sheetContenthandler = new MySheetContentsHandler();
+        MySheetContentsHandler sheetContentHandler = new MySheetContentsHandler();
         try {
-            SAXHandlerEventUserModel userModel = new SAXHandlerEventUserModel(sheetContenthandler);
+            SAXHandlerEventUserModel userModel = new SAXHandlerEventUserModel(sheetContentHandler);
             userModel.processASheets(file.getInputStream(), 0);
         } catch (Exception e) {
             LOGGER.error("Process excel error.", e);
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
                     "Process excel error.");
         }
-        return sheetContenthandler.getResultList();
+        return sheetContentHandler.getResultList();
     }
 	/**
 	* 获取月份起始日期
@@ -1161,7 +1119,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         List<EnergyMeterDefaultSetting> settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
-        return settings.stream().map(r -> ConvertHelper.convert(r, EnergyMeterDefaultSettingDTO.class)).collect(Collectors.toList());
+        return settings.stream().map(this::toEnergyMeterDefaultSettingDTO).collect(Collectors.toList());
+    }
+
+    private EnergyMeterDefaultSettingDTO toEnergyMeterDefaultSettingDTO(EnergyMeterDefaultSetting setting) {
+        EnergyMeterDefaultSettingDTO dto = ConvertHelper.convert(setting, EnergyMeterDefaultSettingDTO.class);
+        if (setting.getFormulaId() != null) {
+            EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), setting.getFormulaId());
+            dto.setFormulaName(formula.getName());
+            dto.setFormulaType(formula.getFormulaType());
+        }
+        // 表的类型
+        String meterType = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_TYPE, String.valueOf(setting.getMeterType()), currLocale(), "");
+        dto.setMeterType(meterType);
+        return dto;
     }
 
     @Override
