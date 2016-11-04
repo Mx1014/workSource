@@ -3656,7 +3656,7 @@ public class PunchServiceImpl implements PunchService {
 	public PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
 		//如果有个人规则就返回个人规则
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
-		if (null == map){
+		if (null == map || map.getPunchRuleId() == null){
 			//没有个人规则,向上递归找部门规则
 			if(!ownerType.equals(PunchOwnerType.ORGANIZATION.getCode()))
 				return null;
@@ -3675,7 +3675,7 @@ public class PunchServiceImpl implements PunchService {
 	public ApprovalRule getApprovalRule(String ownerType, Long ownerId,Long userId){
 		//如果有个人规则就返回个人规则
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
-		if (null == map){
+		if (null == map || map.getReviewRuleId() == null ){
 			//没有个人规则,向上递归找部门规则
 			if(!ownerType.equals(PunchOwnerType.ORGANIZATION.getCode()))
 				return null;
