@@ -13,14 +13,15 @@ import com.everhomes.server.schema.tables.EhServiceModules;
 import com.everhomes.server.schema.tables.daos.EhServiceModuleAssignmentsDao;
 import com.everhomes.server.schema.tables.daos.EhServiceModulesDao;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
+import com.everhomes.server.schema.tables.pojos.EhServiceModuleScopes;
 import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
+import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -160,7 +161,7 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
-	public List<ServiceModule> listServiceModule(Integer level) {
+	public List<ServiceModule> listServiceModule(Integer level, Byte type) {
 		List<ServiceModule> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModules.class));
 		SelectQuery<EhServiceModulesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULES);
@@ -168,10 +169,33 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		Condition cond = Tables.EH_SERVICE_MODULES.STATUS.eq(ServiceModuleStatus.ACTIVE.getCode());
 		if(null != level)
 			cond = cond.and(Tables.EH_SERVICE_MODULES.LEVEL.eq(level));
+		if(null != type)
+			cond = cond.and(Tables.EH_SERVICE_MODULES.TYPE.eq(type));
 		
 		query.addConditions(cond);
 		query.fetch().map((r) -> {
 			results.add(ConvertHelper.convert(r, ServiceModule.class));
+			return null;
+		});
+		return results;
+	}
+	
+	@Override
+	public List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy) {
+		List<ServiceModuleScope> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhServiceModuleScopes.class));
+		SelectQuery<EhServiceModuleScopesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_SCOPES);
+		
+		Condition cond = Tables.EH_SERVICE_MODULE_SCOPES.NAMESPACE_ID.eq(namespaceId);
+		if(null != ownerId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.OWNER_ID.eq(ownerId));
+		if(!StringUtils.isBlank(ownerType))
+			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.APPLY_POLICY.eq(applyPolicy));
+		if(null != ownerId)
+			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.OWNER_ID.eq(ownerId));
+		query.addConditions(cond);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModuleScope.class));
 			return null;
 		});
 		return results;

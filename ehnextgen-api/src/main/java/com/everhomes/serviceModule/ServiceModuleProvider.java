@@ -25,5 +25,7 @@ public interface ServiceModuleProvider {
 	List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetIdAndOwnerId(String ownerType, Long ownerId, String targetType, Long targetId, Long organizationId);
 
 
-	List<ServiceModule> listServiceModule(Integer level);
+	List<ServiceModule> listServiceModule(Integer level, Byte type);
+	
+	List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy);
 }
