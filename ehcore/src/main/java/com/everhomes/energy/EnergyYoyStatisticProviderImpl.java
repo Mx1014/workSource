@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import java.sql.Date;
 import java.util.List;
 
 import org.jooq.Condition;
@@ -113,6 +114,20 @@ public class EnergyYoyStatisticProviderImpl implements EnergyYoyStatisticProvide
 		});
 		if (null != result && result.size() > 0)
 			return result;
+		return null;
+	}
+
+	@Override
+	public EnergyYoyStatistic getEnergyYoyStatisticByCommuniytyAndDate(Long communityId, String date) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly()); 
+		List<EnergyYoyStatistic> result =  context.select().from(Tables.EH_ENERGY_YOY_STATISTICS)
+				.where(Tables.EH_ENERGY_YOY_STATISTICS.COMMUNITY_ID.eq(communityId))
+				.and(Tables.EH_ENERGY_YOY_STATISTICS.DATE_STR.eq(date))
+				.orderBy(Tables.EH_ENERGY_YOY_STATISTICS.COMMUNITY_ID.asc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, EnergyYoyStatistic.class);
+		});
+		if (null != result && result.size() > 0)
+			return result.get(0);
 		return null;
 	}
 }

@@ -20,7 +20,7 @@ public interface EnergyYoyStatisticProvider {
 			ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<EnergyYoyStatistic>  listenergyYoyStatistics(Integer currentNamespaceId, String dateStr);
-
-	EnergyYoyStatistic getEnergyYoyStatisticByCommuniytyAndDate(Long communityId, Date date);
+ 
+	EnergyYoyStatistic getEnergyYoyStatisticByCommuniytyAndDate(Long communityId, String date);
 
 }
