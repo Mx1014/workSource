@@ -77,10 +77,12 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModule.*;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -140,10 +142,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
@@ -1251,7 +1249,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"",privilegeIds);
+		//this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"",privilegeIds);
 
 		/**
 		 * 分配模块
@@ -1314,16 +1312,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<OrganizationContactDTO> listOrganizationSuperAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 
-		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
-		if(null == entityType){
-			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params ownerType error.");
-		}
-
 		List<Long> roles = new ArrayList<Long>();
 		roles.add(RoleConstants.PM_SUPER_ADMIN);
-		List<OrganizationContactDTO> contactDTOs = new ArrayList<>();
 		ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
 		command.setRoleIds(roles);
 		command.setOrganizationId(cmd.getOrganizationId());
@@ -1337,16 +1327,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<OrganizationContactDTO> listOrganizationAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 
-		EntityType entityType = EntityType.fromCode(cmd.getOwnerType());
-		if(null == entityType){
-			LOGGER.error("params ownerType error, cmd="+ cmd.getOwnerType());
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER,
-					"params ownerType error.");
-		}
-
 		List<Long> roles = new ArrayList<Long>();
 		roles.add(RoleConstants.ENTERPRISE_SUPER_ADMIN);
-		List<OrganizationContactDTO> contactDTOs = new ArrayList<>();
 		ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
 		command.setRoleIds(roles);
 		command.setOrganizationId(cmd.getOrganizationId());
@@ -1505,23 +1487,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<AuthorizationServiceModuleDTO> listAuthorizationServiceModules(ListAuthorizationServiceModuleCommand cmd) {
 		List<AuthorizationServiceModuleDTO> dtos = new ArrayList<>();
-		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(cmd.getOwnerId());
-		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(EntityType.ORGANIZATIONS.getCode()));
+		Condition condition = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(EntityType.ORGANIZATIONS.getCode());
 		condition = condition.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(cmd.getOrganizationId()));
-		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignments(condition, cmd.getOrganizationId());
+		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignments(condition, cmd.getOwnerId());
 		String key = "";
 		AuthorizationServiceModuleDTO dto = null;
 		for (ServiceModuleAssignment assignment: assignments) {
 			if(key.equals(assignment.getOwnerType() + assignment.getOwnerId())){
 				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
-				if(null == dto.getServiceModules()){
-					dto.setServiceModules(new ArrayList<>());
-				}
 				dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
 			}else{
-				if(null != dto){
-					dtos.add(dto);
-				}
 				dto = new AuthorizationServiceModuleDTO();
 				dto.setAllModuleFlag((byte)0);
 				if(0L == assignment.getModuleId()){
@@ -1537,6 +1512,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setResourceName(community.getName());
 					}
 				}
+
+				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
+				dto.setServiceModules(new ArrayList<>());
+				dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+				dtos.add(dto);
 				key = assignment.getOwnerType() + assignment.getOwnerId(); // 拼装Key
 			}
 		}
@@ -1561,8 +1541,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			for (OrganizationMember member: organizationMembers) {
 				if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(member.getTargetType())){
 					AuthorizationServiceModuleMembersDTO dto = ConvertHelper.convert(member, AuthorizationServiceModuleMembersDTO.class);
-					List<AuthorizationServiceModuleDTO> authorizationDTOs = new ArrayList<>();
-					authorizationDTOs.addAll(authorizationServiceModuleDTOs);
+					List<AuthorizationServiceModuleDTO> authorizationDTOs = CopyUtils.deepCopyList(authorizationServiceModuleDTOs);
 					for (AuthorizationServiceModuleDTO authorizationDTO: authorizationDTOs) {
 						List<ServiceModuleAssignment> userAssignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(authorizationDTO.getResourceType(), authorizationDTO.getResourceId(),EntityType.USER.getCode(), member.getTargetId(), cmd.getOwnerId());
 

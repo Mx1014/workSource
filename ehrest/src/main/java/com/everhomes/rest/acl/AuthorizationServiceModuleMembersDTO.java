@@ -4,6 +4,7 @@ package com.everhomes.rest.acl;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -16,7 +17,7 @@ import java.util.List;
  * <li>authorizationServiceModules：授权的业务模块，参考{@link com.everhomes.rest.acl.AuthorizationServiceModuleDTO}</li>
  * </ul>
  */
-public class AuthorizationServiceModuleMembersDTO {
+public class AuthorizationServiceModuleMembersDTO implements Serializable {
 
 	private Long     id;
 	private Long     organizationId;
