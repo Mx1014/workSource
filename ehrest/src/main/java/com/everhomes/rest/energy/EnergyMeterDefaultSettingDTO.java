@@ -2,19 +2,23 @@ package com.everhomes.rest.energy;
 
 import com.everhomes.util.StringHelper;
 
+import java.math.BigDecimal;
+
 /**
  * <ul>
  *     <li>id: id</li>
  *     <li>name: 属性名称</li>
  *     <li>settingValue: 属性值</li>
+ *     <li>formulaName: 公式名称</li>
  *     <li>formulaType: 公式类型 {@link com.everhomes.rest.energy.EnergyFormulaType}</li>
  * </ul>
  */
-public class EnergyMeterDefaultSettingDTO{
+public class EnergyMeterDefaultSettingDTO {
 
     private Long id;
     private String name;
-    private String settingValue;
+    private BigDecimal settingValue;
+    private String formulaName;
     private String meterType;
     private Byte formulaType;
 
@@ -30,12 +34,20 @@ public class EnergyMeterDefaultSettingDTO{
         return name;
     }
 
-    public String getSettingValue() {
+    public BigDecimal getSettingValue() {
         return settingValue;
     }
 
-    public void setSettingValue(String settingValue) {
+    public void setSettingValue(BigDecimal settingValue) {
         this.settingValue = settingValue;
+    }
+
+    public String getFormulaName() {
+        return formulaName;
+    }
+
+    public void setFormulaName(String formulaName) {
+        this.formulaName = formulaName;
     }
 
     public void setName(String name) {
