@@ -11,12 +11,14 @@ import java.math.BigDecimal;
  * <li>waterReceivableAmount: 水表应收数量</li>
  * <li>waterPayableAmount: 水表应付量</li>
  * <li>waterBurdenAmount: 水表负担数量</li>
+ * <li>waterAverageAmount: 水表每平负担数量</li>
  * <li>waterReceivableCost: 水表应收费用</li>
  * <li>waterPayableCost: 水表应付费用</li>
  * <li>waterBurdenCost: 水表实际负担费用</li>
  * <li>electricReceivableAmount: 电表应收数量</li>
  * <li>electricPayableAmount: 电表应付量</li>
  * <li>electricBurdenAmount: 电表负担数量</li>
+ * <li>electricAverageAmount: 电表每平负担数量</li>
  * <li>electricReceivableCost: 电表应收费用</li>
  * <li>electricPayableCost: 电表应付费用</li>
  * <li>electricBurdenCost: 电表实际负担费用</li>
