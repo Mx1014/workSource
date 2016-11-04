@@ -5,10 +5,13 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.Record7;
 import org.jooq.Record8;
 import org.jooq.SelectHavingStep;
+import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -167,5 +170,31 @@ public class EnergyMonthStatisticProviderImpl implements EnergyMonthStatisticPro
 		if(result.size() == 0)
 			return null;
 		return result;
+	}
+
+	@Override
+	public List<EnergyMonthStatistic> listEnergyMonthStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
+			List<Long> serviceCategoryIds, String yearStr) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(Tables.EH_ENERGY_MONTH_STATISTICS);
+		Condition condition = Tables.EH_ENERGY_MONTH_STATISTICS.METER_TYPE.eq(meterType);
+		if (null != communityId)
+			condition = condition.and(Tables.EH_ENERGY_MONTH_STATISTICS.COMMUNITY_ID.eq(communityId)); 
+		if (null != billCategoryIds)
+			condition = condition.and(Tables.EH_ENERGY_MONTH_STATISTICS.BILL_CATEGORY_ID.in(billCategoryIds)); 
+		if (null != serviceCategoryIds)
+			condition = condition.and(Tables.EH_ENERGY_MONTH_STATISTICS.SERVICE_CATEGORY_ID.in(serviceCategoryIds)); 
+		if (null != yearStr){
+			//取今年所有和去年12月
+			condition = condition.and(Tables.EH_ENERGY_MONTH_STATISTICS.DATE_STR.like(yearStr+"%")
+					.or(Tables.EH_ENERGY_MONTH_STATISTICS.DATE_STR.like((Integer.valueOf(yearStr)-1)+"12"))  );  
+		}
+		step.where(condition);
+		List<EnergyMonthStatistic> result = step.orderBy(Tables.EH_ENERGY_MONTH_STATISTICS.DATE_STR.asc()).fetch().map((r) -> {
+			return ConvertHelper.convert(r, EnergyMonthStatistic.class);
+		});
+		if (null != result && result.size() > 0)
+			return result;
+		return null;
 	}
 }

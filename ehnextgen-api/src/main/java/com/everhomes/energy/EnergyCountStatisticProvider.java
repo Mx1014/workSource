@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.energy.EnergyStatByYearDTO;
 
 public interface EnergyCountStatisticProvider {
 
@@ -20,5 +21,8 @@ public interface EnergyCountStatisticProvider {
 			ListingQueryBuilderCallback queryBuilderCallback);
 
 	BigDecimal getSumAmount(String statdate, Byte meterType,Byte categoryType, long categoryId );
- 
+
+	BigDecimal getSumCost(String statdate, Byte meterType, Byte categoryType, long categoryId);
+
+	 
 }

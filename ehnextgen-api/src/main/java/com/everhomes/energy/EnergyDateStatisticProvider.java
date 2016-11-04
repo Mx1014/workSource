@@ -27,5 +27,9 @@ public interface EnergyDateStatisticProvider {
 	BigDecimal getSumAmountBetweenDate(Date begin, Date end);
 
 	BigDecimal getSumCostBetweenDate(Date begin, Date end);
+ 
+
+	List<EnergyDateStatistic> listEnergyDateStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
+			List<Long> serviceCategoryIds, Date startDate, Date endDate);
 
 }
