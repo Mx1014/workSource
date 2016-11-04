@@ -95,5 +95,47 @@
       "status": 2,
       "create_time": "2016-11-01 18:26:27"
     }
+  ],
+  "eh_energy_meter_setting_logs": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "meter_id": 1,
+      "setting_type": 1,
+      "formula_id": 2,
+      "status": 2
+    }
+  ],
+  "eh_energy_meter_formula_variables": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "name": "p",
+      "display_name": "单价",
+      "description": "当期单价",
+      "status": 2,
+      "creator_uid": 1,
+      "create_time": "2016-11-01 19:06:09"
+    },
+    {
+      "id": 2,
+      "namespace_id": 0,
+      "name": "t",
+      "display_name": "倍率",
+      "description": "当期倍率",
+      "status": 2,
+      "creator_uid": 1,
+      "create_time": "2016-11-01 19:06:12"
+    },
+    {
+      "id": 3,
+      "namespace_id": 0,
+      "name": "a",
+      "display_name": "读表用量差",
+      "description": "每日或每月读表差",
+      "status": 2,
+      "creator_uid": 1,
+      "create_time": "2016-11-01 19:06:13"
+    }
   ]
 }

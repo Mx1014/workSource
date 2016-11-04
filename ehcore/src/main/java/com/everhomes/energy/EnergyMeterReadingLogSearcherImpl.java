@@ -20,6 +20,9 @@ import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.SearchHit;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -89,11 +92,15 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             XContentBuilder builder = XContentFactory.jsonBuilder();
             builder.startObject();
             builder.field("communityId", readingLog.getCommunityId());
+            builder.field("meterId", meter.getId());
             builder.field("meterType", meter.getMeterType());
             builder.field("billCategoryId", meter.getBillCategoryId());
             builder.field("serviceCategoryId", meter.getServiceCategoryId());
             builder.field("reading", readingLog.getReading());
-            builder.field("oldReading", readingLog.getOldMeterReading());
+            BigDecimal oldMeterReading = readingLog.getOldMeterReading();
+            if (oldMeterReading != null) {// 换表会有旧表读数
+                builder.field("oldReading", oldMeterReading);
+            }
             builder.field("resetFlag", readingLog.getResetMeterFlag());
             builder.field("changeFlag", readingLog.getChangeMeterFlag());
             builder.field("meterName", meter.getName());
@@ -147,6 +154,9 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         if (cmd.getServiceCategoryId() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("serviceCategoryId", cmd.getServiceCategoryId()));
         }
+        if (cmd.getMeterId() != null) {
+            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("meterId", cmd.getMeterId()));
+        }
         RangeFilterBuilder rangeTime = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
             rangeTime.gte(cmd.getStartTime());
@@ -156,7 +166,6 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         }
         if (cmd.getEndTime() != null || cmd.getEndTime() != null) {
             fb = FilterBuilders.andFilter(fb, rangeTime);
-
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -165,12 +174,15 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             anchor = cmd.getPageAnchor();
         }
 
+        FieldSortBuilder sort = SortBuilders.fieldSort("operateTime").order(SortOrder.DESC);
+
         FilteredQueryBuilder filteredQuery = QueryBuilders.filteredQuery(qb, fb);
         WrapperQueryBuilder query = new WrapperQueryBuilder(filteredQuery.toString());
 
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setFrom(anchor.intValue() * pageSize)
                 .setSize(pageSize + 1)
+                .addSort(sort)
                 .setQuery(query);
 
         SearchResponse rsp = builder.execute().actionGet();
@@ -191,7 +203,10 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             EnergyMeterReadingLogDTO dto = new EnergyMeterReadingLogDTO();
             Map<String, Object> source = hit.getSource();
             dto.setReading(BigDecimal.valueOf((Double) source.get("reading")));
-            dto.setOldReading(BigDecimal.valueOf((Double) source.get("oldReading")));
+            Object oldReading = source.get("oldReading");
+            if (oldReading != null) {
+                dto.setOldReading(BigDecimal.valueOf((Double) oldReading));
+            }
             dto.setId(Long.valueOf(hit.getId()));
             dto.setMeterName((String) source.get("meterName"));
             dto.setResetMeterFlag(Byte.valueOf(source.get("resetFlag")+""));

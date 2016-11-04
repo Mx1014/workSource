@@ -9,14 +9,14 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>maxReading: 最大量程</li>
- *     <li>changeTime: 换表时间</li>
+ *     <li>operateTime: 换表时间</li>
  * </ul>
  */
 public class EnergyMeterChangeLogDTO {
 
     private Long id;
     private BigDecimal maxReading;
-    private Timestamp changeTime;
+    private Timestamp operateTime;
 
     public Long getId() {
         return id;
@@ -34,12 +34,12 @@ public class EnergyMeterChangeLogDTO {
         this.maxReading = maxReading;
     }
 
-    public Timestamp getChangeTime() {
-        return changeTime;
+    public Timestamp getOperateTime() {
+        return operateTime;
     }
 
-    public void setChangeTime(Timestamp changeTime) {
-        this.changeTime = changeTime;
+    public void setOperateTime(Timestamp operateTime) {
+        this.operateTime = operateTime;
     }
 
     @Override

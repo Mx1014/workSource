@@ -8,39 +8,29 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>organizationId: 组织id</li>
  *     <li>meterId: 表记id</li>
- *     <li>pageAnchor: 下页锚点</li>
- *     <li>pageSize: 每页数量</li>
+ *     <li>settingType: 设置类型{@link com.everhomes.rest.energy.EnergyMeterSettingType}</li>
  * </ul>
  */
-public class ListEnergyMeterReadingLogsByMeterCommand {
+public class ListEnergyMeterSettingLogsCommand {
 
     @NotNull private Long organizationId;
     @NotNull private Long meterId;
-    private Long pageAnchor;
-    private Integer pageSize;
+    @NotNull private Byte settingType;
 
     public Long getOrganizationId() {
         return organizationId;
     }
 
-    public Long getPageAnchor() {
-        return pageAnchor;
-    }
-
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
-    }
-
-    public Integer getPageSize() {
-        return pageSize;
-    }
-
-    public void setPageSize(Integer pageSize) {
-        this.pageSize = pageSize;
-    }
-
     public void setOrganizationId(Long organizationId) {
         this.organizationId = organizationId;
+    }
+
+    public Byte getSettingType() {
+        return settingType;
+    }
+
+    public void setSettingType(Byte settingType) {
+        this.settingType = settingType;
     }
 
     public Long getMeterId() {

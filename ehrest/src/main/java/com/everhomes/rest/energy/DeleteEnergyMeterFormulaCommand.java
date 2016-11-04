@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
  *     <li>formulaId: 公式id</li>
  * </ul>
  */
-public class DeleteEnergyFormulaCommand {
+public class DeleteEnergyMeterFormulaCommand {
 
     @NotNull private Long organizationId;
     @NotNull private Long formulaId;

@@ -1,9 +1,9 @@
 package com.everhomes.energy;
 
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 /**
  * Created by xq.tian on 2016/10/25.
@@ -23,4 +23,8 @@ public interface EnergyMeterChangeLogProvider {
 
 	EnergyMeterChangeLog getEnergyMeterChangeLogByLogId(Long id);
 
+    /**
+     * 查询表记的换表记录
+     */
+    List<EnergyMeterChangeLog> listEnergyMeterChangeLogsByMeter(Integer namespaceId, Long meterId);
 }

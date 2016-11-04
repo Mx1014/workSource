@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 /**
  * <ul>
  *     <li>organizationId: 组织id</li>
+ *     <li>communityId: 小区id</li>
  *     <li>oldReading: 旧表读数</li>
  *     <li>newReading: 新表读数</li>
  *     <li>maxReading: 新表最大量程</li>
@@ -17,6 +18,7 @@ import java.math.BigDecimal;
 public class ChangeEnergyMeterCommand {
 
     @NotNull private Long organizationId;
+    @NotNull private Long communityId;
     @NotNull private BigDecimal oldReading;
     @NotNull private BigDecimal newReading;
     private BigDecimal maxReading;
@@ -32,6 +34,14 @@ public class ChangeEnergyMeterCommand {
 
     public BigDecimal getOldReading() {
         return oldReading;
+    }
+
+    public Long getCommunityId() {
+        return communityId;
+    }
+
+    public void setCommunityId(Long communityId) {
+        this.communityId = communityId;
     }
 
     public void setOldReading(BigDecimal oldReading) {

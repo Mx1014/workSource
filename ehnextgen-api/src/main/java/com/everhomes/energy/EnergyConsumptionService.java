@@ -189,10 +189,10 @@ public interface EnergyConsumptionService {
     /**
      * 删除公式
      */
-    void deleteEnergyMeterFormula(DeleteEnergyFormulaCommand cmd);
+    void deleteEnergyMeterFormula(DeleteEnergyMeterFormulaCommand cmd);
 
     /**
-     * 根据表记获取读表记录
+     * 获取setting记录列表
      */
-    SearchEnergyMeterReadingLogsResponse listEnergyMeterReadingLogsByMeter(ListEnergyMeterReadingLogsByMeterCommand cmd);
+    List<EnergyMeterSettingLogDTO> listEnergyMeterSettingLogs(ListEnergyMeterSettingLogsCommand cmd);
 }
