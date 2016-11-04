@@ -5,16 +5,22 @@ import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterFormulasDao;
+import com.everhomes.server.schema.tables.daos.EhEnergyMeterReadingLogsDao;
+import com.everhomes.server.schema.tables.daos.EhEnergyMeterSettingLogsDao;
+import com.everhomes.server.schema.tables.daos.EhEnergyMetersDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterReadingLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeters;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.test.core.search.SearchProvider;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RandomGenerator;
 import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.jooq.Result;
+import org.jooq.impl.DSL;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -769,6 +775,101 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
         assertTrue(response.getResponse().size() == 1);
+    }
+
+    //24. 生成数据
+    @Test
+    public void initStatData() {
+        logon();
+        List<EhEnergyMeters> meters = initEnergyMeter();
+        initEnergyMeterReadingLogs(meters);
+        initEnergyMeterChangeLogs(meters);
+        initEnergyMeterSettingLogs(meters);
+    }
+
+    private void initEnergyMeterSettingLogs(List<EhEnergyMeters> meters) {
+        Long id = context().select(DSL.max(Tables.EH_ENERGY_METER_SETTING_LOGS.ID)).from(Tables.EH_ENERGY_METER_SETTING_LOGS).fetchOneInto(Long.class);
+        for (EhEnergyMeters meter : meters) {
+            for (EnergyMeterSettingType settingType : EnergyMeterSettingType.values()) {
+                for (int i = 1; i < 5; i++) {
+                    EhEnergyMeterSettingLogs log = new EhEnergyMeterSettingLogs();
+                    log.setId(++id);
+                    log.setMeterId(meter.getId());
+                    log.setSettingType(settingType.getCode());
+                    log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                    log.setStartTime(Timestamp.valueOf(LocalDateTime.now().plusDays(20).plusDays(i)));
+                    log.setEndTime(Timestamp.valueOf(LocalDateTime.now().plusDays(20).plusDays(i+1)));
+                    log.setFormulaId(3L);
+                    log.setSettingValue(new BigDecimal("1.6"));
+                    EhEnergyMeterSettingLogsDao dao = new EhEnergyMeterSettingLogsDao(context().configuration());
+                    dao.insert(log);
+                }
+            }
+        }
+    }
+
+    private void initEnergyMeterChangeLogs(List<EhEnergyMeters> meters) {
+
+    }
+
+    private void initEnergyMeterReadingLogs(List<EhEnergyMeters> meters) {
+        // Byte[] arr = {TrueOrFalseFlag.FALSE.getCode(), TrueOrFalseFlag.FALSE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.FALSE.getCode()};
+        Long id = context().select(DSL.max(Tables.EH_ENERGY_METER_READING_LOGS.ID)).from(Tables.EH_ENERGY_METER_READING_LOGS).fetchOneInto(Long.class);
+        for (EhEnergyMeters meter : meters) {
+            int lastReading = 0;
+            for (int i = 1; i < 10; i++) {
+                EhEnergyMeterReadingLogs log = new EhEnergyMeterReadingLogs();
+                log.setId(++id);
+                log.setMeterId(meter.getId());
+                log.setCreateTime(Timestamp.valueOf(LocalDateTime.now().plusDays(20).plusDays(i)));
+                log.setCreateTime(log.getCreateTime());
+                log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                // int changeFlag = RandomGenerator.getRandomNumberBetween(0, arr.length);
+                // log.setChangeMeterFlag((byte)changeFlag);
+                int reading = RandomGenerator.getRandomNumberBetween(lastReading, meter.getMaxReading().intValue());
+                log.setChangeMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                log.setReading(new BigDecimal(reading));
+                if (reading < lastReading) {
+                    log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                }
+                lastReading = reading;
+                EhEnergyMeterReadingLogsDao dao = new EhEnergyMeterReadingLogsDao(context().configuration());
+                dao.insert(log);
+            }
+        }
+    }
+
+    private List<EhEnergyMeters> initEnergyMeter() {
+        List<EhEnergyMeters> metersList = new ArrayList<>();
+
+        Result<EhEnergyMeterCategoriesRecord> billCategories = context().selectFrom(Tables.EH_ENERGY_METER_CATEGORIES)
+                .where(Tables.EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(EnergyCategoryType.BILL.getCode()))
+                .fetch();
+        Result<EhEnergyMeterCategoriesRecord> serviceCategories = context().selectFrom(Tables.EH_ENERGY_METER_CATEGORIES)
+                .where(Tables.EH_ENERGY_METER_CATEGORIES.CATEGORY_TYPE.eq(EnergyCategoryType.SERVICE.getCode()))
+                .fetch();
+
+        Long id = context().select(DSL.max(Tables.EH_ENERGY_METERS.ID)).from(Tables.EH_ENERGY_METERS).fetchOneInto(Long.class);
+        for (EhEnergyMeterCategoriesRecord billCategory : billCategories) {
+            for (EhEnergyMeterCategoriesRecord serviceCategory : serviceCategories) {
+                for (int i = 1; i < 5; i++) {
+                    EhEnergyMeters meter = new EhEnergyMeters();
+                    meter.setBillCategoryId(billCategory.getId());
+                    meter.setServiceCategoryId(serviceCategory.getId());
+                    meter.setName("水表"+i);
+                    meter.setMaxReading(new BigDecimal(10000L+i*10));
+                    meter.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                    meter.setMeterNumber("W:number:"+i);
+                    meter.setStartReading(new BigDecimal(100-i));
+                    meter.setId(++id);
+
+                    EhEnergyMetersDao dao = new EhEnergyMetersDao(context().configuration());
+                    dao.insert(meter);
+                    metersList.add(meter);
+                }
+            }
+        }
+        return metersList;
     }
 
     private void bulkReadingLogData() {
