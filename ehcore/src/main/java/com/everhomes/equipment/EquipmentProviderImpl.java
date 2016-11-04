@@ -766,6 +766,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
 		
 		Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
+		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+		con2 = con2.and(con3);
 //		con2 = con2.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
 //		
 //		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
@@ -1409,7 +1412,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
 			task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 		
-		task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+		task.setStatus(EquipmentTaskStatus.NONE.getCode());
 		task.setResult(EquipmentTaskResult.NONE.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
