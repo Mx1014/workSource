@@ -60,4 +60,4 @@ const mapStateToProps = (state, ownProps) => {
     });
 }
 
-export default ApiDoc = connect(mapStateToProps)(ApiDoc);
+export default connect(mapStateToProps)(ApiDoc);

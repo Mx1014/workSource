@@ -1,7 +1,6 @@
 import React, { PropTypes, Component} from 'react'
-import ReactDOM from 'react-dom'
 
-import Header from '../components/header'
+import Header from './../components/header'
 
 import layoutStyles from '../shared/style/layout.css'
 import styles from '../shared/style/app.css'

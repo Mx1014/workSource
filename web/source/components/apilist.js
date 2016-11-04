@@ -2,7 +2,7 @@ import React, {PropTypes, Component} from 'react'
 
 import styles from '../shared/style/app.css'
 
-export class ApiList extends Component {
+export default class ApiList extends Component {
     render() {
         let {items, onItemClick} = this.props;
 
