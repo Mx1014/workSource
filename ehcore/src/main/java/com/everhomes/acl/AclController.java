@@ -208,7 +208,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationSuperAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationSuperAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAdministrators(cmd));
+        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSuperAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -221,7 +221,7 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
-        RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAdministrators(cmd));
+        RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

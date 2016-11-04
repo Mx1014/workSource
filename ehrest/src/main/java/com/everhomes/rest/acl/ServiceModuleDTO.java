@@ -2,6 +2,7 @@ package com.everhomes.rest.acl;
 
 import com.everhomes.discover.ItemType;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ import java.util.List;
  * <li>serviceModules: 子业务模块</li>
  * </ul>
  */
-public class ServiceModuleDTO {
+public class ServiceModuleDTO implements Serializable {
 	private Long id;
 
 	private String name;

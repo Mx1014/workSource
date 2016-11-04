@@ -4,6 +4,7 @@ package com.everhomes.rest.acl;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.io.Serializable;
 import java.util.List;
 
 /**
@@ -15,7 +16,7 @@ import java.util.List;
  * <li>resourceName:  资源名称</li>
  * </ul>
  */
-public class AuthorizationServiceModuleDTO {
+public class AuthorizationServiceModuleDTO implements Serializable{
 
 	private Byte allModuleFlag;
 
