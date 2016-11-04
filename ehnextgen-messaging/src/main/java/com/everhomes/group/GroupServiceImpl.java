@@ -104,6 +104,8 @@ import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
 import com.everhomes.rest.group.GetGroupParametersCommand;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
+import com.everhomes.rest.group.GetShareInfoCommand;
+import com.everhomes.rest.group.GetShareInfoResponse;
 import com.everhomes.rest.group.GroupAdminNotificationTemplateCode;
 import com.everhomes.rest.group.GroupCardDTO;
 import com.everhomes.rest.group.GroupCategoryOwnerType;
@@ -174,6 +176,7 @@ import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -2492,6 +2495,8 @@ public class GroupServiceImpl implements GroupService {
         if (group.getOperatorUid() != null) {
 			groupDto.setOperatorName(getUserName(group.getOperatorUid()));
 		}
+        
+        groupDto.setShareUrl(getShareUrl(group));
         //groupDto.setBehaviorTime(DateHelper.getDateDisplayString(TimeZone.getTimeZone("GMT"),
         //    group.getBehaviorTime().getTime()));
         //groupDto.setCreatorUid(group.getCreatorUid());
@@ -2509,7 +2514,19 @@ public class GroupServiceImpl implements GroupService {
         return groupDto;
     }
     
-    private void memberInfoToGroupDTO(long uid, GroupDTO groupDto, Group group) {
+    private String getShareUrl(Group group) {
+    	String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
+		String shareUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.CLUB_SHARE_URL, "");
+		if (homeUrl.length() == 0 || shareUrl.length() == 0) {
+			LOGGER.error("Invalid home url or content url, homeUrl=" + homeUrl + ", contentUrl=" + shareUrl);
+			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
+					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
+		} else {
+			return homeUrl + shareUrl + "?namespaceId=" + group.getNamespaceId()+"&groupId="+group.getId()+"&realm=";
+		}
+	}
+
+	private void memberInfoToGroupDTO(long uid, GroupDTO groupDto, Group group) {
         //
         // compute member role ourselves instead of using GroupUserRoleResolver,
         // it is more efficient to do in this way due to the reason that
@@ -4751,4 +4768,10 @@ public class GroupServiceImpl implements GroupService {
 		
 		return availableCount >= usedCount ? availableCount - usedCount : 0;
 	}
+
+	@Override
+	public GetShareInfoResponse getShareInfo(GetShareInfoCommand cmd) {
+		return null;
+	}
+	
 }

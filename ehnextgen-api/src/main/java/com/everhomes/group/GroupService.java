@@ -28,6 +28,8 @@ import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
 import com.everhomes.rest.group.GetGroupParametersCommand;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
+import com.everhomes.rest.group.GetShareInfoCommand;
+import com.everhomes.rest.group.GetShareInfoResponse;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.group.GroupMemberSnapshotDTO;
@@ -224,5 +226,6 @@ public interface GroupService {
 	GetClubPlaceholderNameResponse getClubPlaceholderName(GetClubPlaceholderNameCommand cmd);
 	RestResponse createAGroup(CreateGroupCommand cmd);
 	GetRemainBroadcastCountResponse getRemainBroadcastCount(GetRemainBroadcastCountCommand cmd);
+	GetShareInfoResponse getShareInfo(GetShareInfoCommand cmd);
 
 }

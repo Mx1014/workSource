@@ -43,6 +43,8 @@ import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
 import com.everhomes.rest.group.GetGroupParametersCommand;
 import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
 import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
+import com.everhomes.rest.group.GetShareInfoCommand;
+import com.everhomes.rest.group.GetShareInfoResponse;
 import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupMemberDTO;
 import com.everhomes.rest.group.GroupMemberSnapshotDTO;
@@ -900,5 +902,16 @@ public class GroupController extends ControllerBase {
 	@RestReturn(GetRemainBroadcastCountResponse.class)
 	public RestResponse getRemainBroadcastCount(GetRemainBroadcastCountCommand cmd){
 		return new RestResponse(groupService.getRemainBroadcastCount(cmd));
+	}
+	
+	/**
+	 * <p>17.获取分享信息</p>
+	 * <b>URL: /group/getShareInfo</b>
+	 */
+	@RequireAuthentication(false)
+	@RequestMapping("getShareInfo")
+	@RestReturn(GetShareInfoResponse.class)
+	public RestResponse getShareInfo(GetShareInfoCommand cmd){
+		return new RestResponse(groupService.getShareInfo(cmd));
 	}
 }

@@ -36,6 +36,7 @@ import com.everhomes.util.StringHelper;
  * <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
  * <li>operatorName: 操作人</li>
  * <li>joinTime: 加入时间</li>
+ * <li>shareUrl: 分享链接</li>
  * </ul>
  */
 public class GroupDTO {
@@ -65,6 +66,7 @@ public class GroupDTO {
     private String creatorFamilyName;
     private String operatorName;
     private Timestamp joinTime;
+    private String shareUrl;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -78,7 +80,15 @@ public class GroupDTO {
     
     private Byte approvalStatus;
     
-    public Timestamp getJoinTime() {
+    public String getShareUrl() {
+		return shareUrl;
+	}
+
+	public void setShareUrl(String shareUrl) {
+		this.shareUrl = shareUrl;
+	}
+
+	public Timestamp getJoinTime() {
 		return joinTime;
 	}
 
