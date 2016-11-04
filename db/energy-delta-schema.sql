@@ -77,7 +77,7 @@ CREATE TABLE `eh_energy_meter_categories` (
   `name`          VARCHAR(255) COMMENT 'name',
   `status`        TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
   `category_type` TINYINT COMMENT '1: bill, 2: service',
-  `delete_flag`   TINYINT COMMENT '0: can delete, 1: can not delete',
+  `delete_flag`   TINYINT COMMENT '0: can not delete, 1: can delete',
   `creator_uid`   BIGINT,
   `create_time`   DATETIME,
   `update_uid`    BIGINT,

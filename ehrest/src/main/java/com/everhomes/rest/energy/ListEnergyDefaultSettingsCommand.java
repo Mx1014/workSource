@@ -13,7 +13,7 @@ import javax.validation.constraints.NotNull;
 public class ListEnergyDefaultSettingsCommand {
 
     @NotNull private Long organizationId;
-    @NotNull private Byte meterType;
+    private Byte meterType;
 
     public Long getOrganizationId() {
         return organizationId;

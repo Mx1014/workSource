@@ -196,7 +196,7 @@ public class EnergyConsumptionController extends ControllerBase {
      */
     @RestReturn(value = EnergyMeterCategoryDTO.class, collection = true)
     @RequestMapping("listEnergyMeterCategories")
-    public RestResponse listEnergyMeterCategories(ListMeterCategoriesCommand cmd) {
+    public RestResponse listEnergyMeterCategories(ListEnergyMeterCategoriesCommand cmd) {
         return response(energyConsumptionService.listEnergyMeterCategories(cmd));
     }
 
@@ -216,7 +216,7 @@ public class EnergyConsumptionController extends ControllerBase {
      */
     @RestReturn(value = EnergyMeterChangeLogDTO.class, collection = true)
     @RequestMapping("listEnergyMeterChangeLogs")
-    public RestResponse listEnergyMeterChangeLogs(ListMeterChangeLogCommand cmd) {
+    public RestResponse listEnergyMeterChangeLogs(ListEnergyMeterChangeLogsCommand cmd) {
        return response(energyConsumptionService.listEnergyMeterChangeLogs(cmd));
     }
 
@@ -236,7 +236,7 @@ public class EnergyConsumptionController extends ControllerBase {
      */
     @RestReturn(value = EnergyMeterFormulaDTO.class, collection = true)
     @RequestMapping("listEnergyMeterFormulas")
-    public RestResponse listEnergyMeterFormulas(ListEnergyFormulasCommand cmd) {
+    public RestResponse listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         return response(energyConsumptionService.listEnergyMeterFormulas(cmd));
     }
 
@@ -257,7 +257,7 @@ public class EnergyConsumptionController extends ControllerBase {
      */
     @RestReturn(value = EnergyMeterDefaultSettingDTO.class, collection = true)
     @RequestMapping("listEnergyDefaultSettings")
-    public RestResponse getEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
+    public RestResponse listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
         return response(energyConsumptionService.listEnergyDefaultSettings(cmd));
     }
 

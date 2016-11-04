@@ -10,49 +10,8 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.MeterFormulaVariable;
-import com.everhomes.rest.approval.TrueOrFalseFlag;  
-import com.everhomes.rest.energy.BatchUpdateEnergyMeterSettingsCommand;
-import com.everhomes.rest.energy.ChangeEnergyMeterCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterCommand;
-import com.everhomes.rest.energy.CreateEnergyMeterFormulaCommand;
-import com.everhomes.rest.energy.DeleteEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.DeleteEnergyMeterReadingLogCommand;
-import com.everhomes.rest.energy.EnergyCategoryDefault;
-import com.everhomes.rest.energy.EnergyCommonStatus;
-import com.everhomes.rest.energy.EnergyConsumptionServiceErrorCode;
-import com.everhomes.rest.energy.EnergyFormulaVariableDTO;
-import com.everhomes.rest.energy.EnergyLocaleStringCode;
-import com.everhomes.rest.energy.EnergyMeterCategoryDTO;
-import com.everhomes.rest.energy.EnergyMeterChangeLogDTO;
-import com.everhomes.rest.energy.EnergyMeterDTO;
-import com.everhomes.rest.energy.EnergyMeterDefaultSettingDTO;
-import com.everhomes.rest.energy.EnergyMeterFormulaDTO;
-import com.everhomes.rest.energy.EnergyMeterReadingLogDTO;
-import com.everhomes.rest.energy.EnergyMeterSettingLogDTO;
-import com.everhomes.rest.energy.EnergyMeterSettingType;
-import com.everhomes.rest.energy.EnergyMeterStatus;
-import com.everhomes.rest.energy.EnergyMeterType;
-import com.everhomes.rest.energy.EnergyStatByYearDTO;
-import com.everhomes.rest.energy.EnergyStatCommand;
-import com.everhomes.rest.energy.EnergyStatDTO;
-import com.everhomes.rest.energy.EnergyStatisticType;
-import com.everhomes.rest.energy.GetEnergyMeterCommand;
-import com.everhomes.rest.energy.ImportEnergyMeterCommand;
-import com.everhomes.rest.energy.ListEnergyDefaultSettingsCommand;
-import com.everhomes.rest.energy.ListEnergyFormulasCommand;
-import com.everhomes.rest.energy.ListMeterCategoriesCommand;
-import com.everhomes.rest.energy.ListMeterChangeLogCommand;
-import com.everhomes.rest.energy.ReadEnergyMeterCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsCommand;
-import com.everhomes.rest.energy.SearchEnergyMeterReadingLogsResponse;
-import com.everhomes.rest.energy.SearchEnergyMeterResponse;
-import com.everhomes.rest.energy.UpdateEnergyMeterCategoryCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterDefaultSettingCommand;
-import com.everhomes.rest.energy.UpdateEnergyMeterStatusCommand; 
-import com.everhomes.rest.energy.*; 
+import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.energy.*;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
@@ -85,7 +44,10 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.List;
+import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -249,22 +211,25 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         // 当前价格
         EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE);
-        dto.setPrice(priceLog.getSettingValue());
+        dto.setPrice(priceLog != null ? priceLog.getSettingValue() : null);
 
         // 当前倍率
         EnergyMeterSettingLog rateLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE);
-        dto.setRate(rateLog.getSettingValue());
+        dto.setRate(rateLog != null ? rateLog.getSettingValue() : null);
 
         // 当前费用公式名称
         EnergyMeterSettingLog costLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.COST_FORMULA);
-        EnergyMeterFormula costFormula = meterFormulaProvider.findById(currNamespaceId(), costLog.getFormulaId());
-        dto.setCostFormula(toEnergyMeterFormulaDTO(costFormula));
+        if (costLog != null) {
+            EnergyMeterFormula costFormula = meterFormulaProvider.findById(currNamespaceId(), costLog.getFormulaId());
+            dto.setCostFormula(toEnergyMeterFormulaDTO(costFormula));
+        }
 
         // 当前用量公式名称
         EnergyMeterSettingLog amountLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA);
-        EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
-        dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
-
+        if (amountLog != null) {
+            EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
+            dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
+        }
         return dto;
     }
 
@@ -347,6 +312,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         log.setMeterId(meter.getId());
         log.setNamespaceId(currNamespaceId());
         log.setOldMeterReading(cmd.getOldReading());
+        log.setChangeMeterFlag(TrueOrFalseFlag.TRUE.getCode());
         log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         log.setOperatorId(UserContext.current().getUser().getId());
 
@@ -603,8 +569,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
         if (category != null) {
-            category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
-            meterCategoryProvider.updateEnergyMeterCategory(category);
+            if (category.getDeleteFlag() == TrueOrFalseFlag.TRUE.getCode()) {
+                category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
+                meterCategoryProvider.updateEnergyMeterCategory(category);
+            } else {
+                LOGGER.info("Default energy meter can not delete, categoryId = {}", category.getId());
+                throw errorWith(SCOPE, ERR_METER_CATEGORY_CAN_NOT_DELETE, "Default energy meter can not delete");
+            }
         }
     }
 
@@ -717,7 +688,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public List<EnergyMeterChangeLogDTO> listEnergyMeterChangeLogs(ListMeterChangeLogCommand cmd) {
+    public List<EnergyMeterChangeLogDTO> listEnergyMeterChangeLogs(ListEnergyMeterChangeLogsCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         List<EnergyMeterChangeLog> logs = meterChangeLogProvider.listEnergyMeterChangeLogsByMeter(currNamespaceId(), cmd.getMeterId());
@@ -725,7 +696,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyFormulasCommand cmd) {
+    public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(currNamespaceId(), cmd.getFormulaType());
@@ -799,7 +770,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
-    public List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListMeterCategoriesCommand cmd) {
+    public List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListEnergyMeterCategoriesCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(currNamespaceId(), cmd.getCategoryType());

@@ -1,7 +1,6 @@
 package com.everhomes.energy;
 
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.energy.SearchEnergyMeterCommand;
 import com.everhomes.rest.energy.SearchEnergyMeterResponse;
 import com.everhomes.search.AbstractElasticSearch;
@@ -43,8 +42,8 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
     @Autowired
     private EnergyMeterProvider meterProvider;
 
-    @Autowired
-    private LocaleStringService localeStringService;
+    // @Autowired
+    // private LocaleStringService localeStringService;
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
@@ -120,11 +119,6 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("meterNumber", 5.0f)
                     .field("name", 2.0f);
-
-            // builder.setHighlighterFragmentSize(60);
-            // builder.setHighlighterNumOfFragments(8);
-            // builder.addHighlightedField("contactToken")
-            //         .addHighlightedField("contactName");
         }
 
         FilterBuilder fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());

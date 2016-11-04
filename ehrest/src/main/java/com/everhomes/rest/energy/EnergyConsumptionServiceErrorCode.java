@@ -16,5 +16,6 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_CURR_READING_LESS_THEN_START_READING = 10007;// 当前读表数小于起始读数
     int ERR_FORMULA_HAS_BEEN_REFERENCE = 10008;// 公式被引用,无法删除
     int ERR_METER_START_GREATER_THEN_MAX = 10009;// 起始读数大于最大量程
+    int ERR_METER_CATEGORY_CAN_NOT_DELETE = 10010;// 默认分类无法删除
 
 }

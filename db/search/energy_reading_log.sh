@@ -12,7 +12,7 @@ curl -XPUT "http://$ELASTIC/$INDEX/_mapping/energyMeterReadingLog" -d '
             "communityId":{"type":"long"},
             "billCategoryId":{"type":"long"},
             "serviceCategoryId":{"type":"long"},
-            "operateTime":{"type":"date"},
+            "operateTime":{"type":"long"},
             "reading":{"type":"double"},
             "meterType":{"type":"byte"},
             "changeFlag":{"type":"byte"},

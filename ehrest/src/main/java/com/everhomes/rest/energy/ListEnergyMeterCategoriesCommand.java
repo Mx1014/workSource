@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
  *     <li>categoryType: 分类类型 {@link com.everhomes.rest.energy.EnergyCategoryType}</li>
  * </ul>
  */
-public class ListMeterCategoriesCommand {
+public class ListEnergyMeterCategoriesCommand {
 
     @NotNull private Long organizationId;
     @NotNull private Byte categoryType;

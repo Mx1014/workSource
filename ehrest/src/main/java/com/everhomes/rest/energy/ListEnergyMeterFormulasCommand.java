@@ -7,13 +7,13 @@ import javax.validation.constraints.NotNull;
 /**
  * <ul>
  *     <li>organizationId: 组织id</li>
- *     <li>meterId: 表记id</li>
+ *     <li>formulaType: 公式类型 {@link com.everhomes.rest.energy.EnergyFormulaType}</li>
  * </ul>
  */
-public class ListMeterChangeLogCommand {
+public class ListEnergyMeterFormulasCommand {
 
     @NotNull private Long organizationId;
-    @NotNull private Long meterId;
+    @NotNull private Byte formulaType;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -23,12 +23,12 @@ public class ListMeterChangeLogCommand {
         this.organizationId = organizationId;
     }
 
-    public Long getMeterId() {
-        return meterId;
+    public Byte getFormulaType() {
+        return formulaType;
     }
 
-    public void setMeterId(Long meterId) {
-        this.meterId = meterId;
+    public void setFormulaType(Byte formulaType) {
+        this.formulaType = formulaType;
     }
 
     @Override

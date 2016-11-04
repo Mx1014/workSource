@@ -1,4 +1,24 @@
 {
+  "eh_energy_meters": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "community_id": 1,
+      "name": "电表1",
+      "meter_number": "88888888",
+      "meter_type": 2,
+      "bill_category_id": 5,
+      "service_category_id": 2,
+      "max_reading": 100000,
+      "start_reading": 100,
+      "rate": 2.00,
+      "price": 1.6,
+      "cost_formula_id": 2,
+      "amount_formula_id": 1,
+      "last_reading": 2222,
+      "status": 2
+    }
+  ],
   "eh_energy_meter_formulas": [
     {
       "id": 1,
@@ -136,6 +156,53 @@
       "status": 2,
       "creator_uid": 1,
       "create_time": "2016-11-01 19:06:13"
+    }
+  ],
+  "eh_energy_meter_default_settings": [
+    {
+      "id": 1,
+      "namespace_id": 0,
+      "meter_type": 1,
+      "setting_type": 1,
+      "name": "单价",
+      "setting_value": 1.60,
+      "status": 2
+    },
+    {
+      "id": 2,
+      "namespace_id": 0,
+      "meter_type": 1,
+      "setting_type": 2,
+      "name": "倍率",
+      "setting_value": 1.00,
+      "status": 2
+    },
+    {
+      "id": 3,
+      "namespace_id": 0,
+      "meter_type": 1,
+      "setting_type": 3,
+      "name": "用量计算公式",
+      "formula_id": 1,
+      "status": 2
+    },
+    {
+      "id": 4,
+      "namespace_id": 0,
+      "meter_type": 1,
+      "setting_type": 4,
+      "name": "费用计算公式",
+      "formula_id": 2,
+      "status": 2
+    },
+    {
+      "id": 5,
+      "namespace_id": 0,
+      "meter_type": 2,
+      "setting_type": 4,
+      "name": "费用计算公式",
+      "formula_id": 2,
+      "status": 2
     }
   ]
 }

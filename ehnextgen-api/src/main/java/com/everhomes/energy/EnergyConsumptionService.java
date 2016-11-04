@@ -146,13 +146,13 @@ public interface EnergyConsumptionService {
     /**
      * 换表记录列表
      */
-    List<EnergyMeterChangeLogDTO> listEnergyMeterChangeLogs(ListMeterChangeLogCommand cmd);
+    List<EnergyMeterChangeLogDTO> listEnergyMeterChangeLogs(ListEnergyMeterChangeLogsCommand cmd);
 
     /**
      * 获取能耗的计算公式列表
      * @param cmd   公式类型参数, {@link com.everhomes.rest.energy.EnergyFormulaType}
      */
-    List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyFormulasCommand cmd);
+    List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd);
 
     /**
      * 获取默认设置属性
@@ -167,7 +167,7 @@ public interface EnergyConsumptionService {
     /**
      * 获取表记分类列表
      */
-    List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListMeterCategoriesCommand cmd);
+    List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListEnergyMeterCategoriesCommand cmd);
  
     
     /**
