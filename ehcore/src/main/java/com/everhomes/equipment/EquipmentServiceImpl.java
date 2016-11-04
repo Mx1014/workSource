@@ -18,7 +18,9 @@ import java.util.Calendar;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 
 
@@ -346,6 +348,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -358,6 +361,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -1326,12 +1330,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		equipmentSearcher.feedDoc(equipment);
 		
-		EquipmentQrCodeTokenDTO qrCodeToken = new EquipmentQrCodeTokenDTO();
-		qrCodeToken.setEquipmentId(equipment.getId());
-		qrCodeToken.setOwnerId(equipment.getOwnerId());
-		qrCodeToken.setOwnerType(equipment.getOwnerType());
-		qrCodeToken.setUpdateTime(equipment.getUpdateTime());
-		String tokenString = WebTokenGenerator.getInstance().toWebToken(qrCodeToken);
+//		EquipmentQrCodeTokenDTO qrCodeToken = new EquipmentQrCodeTokenDTO();
+//		qrCodeToken.setEquipmentId(equipment.getId());
+//		qrCodeToken.setOwnerId(equipment.getOwnerId());
+//		qrCodeToken.setOwnerType(equipment.getOwnerType());
+//		qrCodeToken.setUpdateTime(equipment.getUpdateTime());
+//		String tokenString = WebTokenGenerator.getInstance().toWebToken(qrCodeToken);
+		String tokenString = UUID.randomUUID().toString();
 		equipment.setQrCodeToken(tokenString);
 		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 		
@@ -2330,17 +2335,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public VerifyEquipmentLocationResponse verifyEquipmentLocation(VerifyEquipmentLocationCommand cmd) {
 
-		WebTokenGenerator webToken = WebTokenGenerator.getInstance();
-		EquipmentQrCodeTokenDTO qrCodeToken = webToken.fromWebToken(cmd.getQrCodeToken(), EquipmentQrCodeTokenDTO.class);
+//		WebTokenGenerator webToken = WebTokenGenerator.getInstance();
+//		EquipmentQrCodeTokenDTO qrCodeToken = webToken.fromWebToken(cmd.getQrCodeToken(), EquipmentQrCodeTokenDTO.class);
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentByQrCodeToken(cmd.getQrCodeToken());
 		
-		if(!qrCodeToken.getEquipmentId().equals(cmd.getEquipmentId())) {
+		if(equipment == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST,
+ 				"设备不存在");
+		}
+		
+		if(!equipment.getId().equals(cmd.getEquipmentId())) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
 					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_QRCODE,
  				"二维码和任务设备不对应");
 		}
 		
-		EquipmentInspectionEquipments equipment = verifyEquipment(qrCodeToken.getEquipmentId(), 
-				qrCodeToken.getOwnerType(), qrCodeToken.getOwnerId());
 		
 		if(equipment.getLongitude() == null || equipment.getLatitude() == null ) {
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,

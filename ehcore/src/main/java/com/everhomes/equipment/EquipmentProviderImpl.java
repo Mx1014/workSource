@@ -1431,4 +1431,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTasks.class, t.getId());
 	}
 
+	@Override
+	public EquipmentInspectionEquipments findEquipmentByQrCodeToken(
+			String qrCodeToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.QR_CODE_TOKEN.eq(qrCodeToken));
+		 
+		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionEquipments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
+
 }

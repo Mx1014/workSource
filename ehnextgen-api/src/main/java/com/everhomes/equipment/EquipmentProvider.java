@@ -93,4 +93,6 @@ public interface EquipmentProvider {
 	void closeExpiredReviewTasks();
 	void closeReviewTasks(EquipmentInspectionTasks task);
 	void closeTask(EquipmentInspectionTasks task);
+	
+	EquipmentInspectionEquipments findEquipmentByQrCodeToken(String qrCodeToken);
 }
