@@ -1251,11 +1251,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	 * 每天早上0点10分刷前一天的读表
 	 * */
 	@Scheduled(cron = "0 10 0 * * ?")
-	@Override
     public void caculateEnergyDayStat(){
+		//刷今天的
+		caculateEnergyDayStatByDate(DateHelper.currentGMTTime());
+	}
+		
+	@Override
+	public void caculateEnergyDayStatByDate(java.util.Date date){
 		//查出所有的表
 		List<EnergyMeter> meters = meterProvider.listEnergyMeters();
 		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
 		Timestamp todayBegin = getDayBegin(cal);
   	  	cal.add(Calendar.DAY_OF_MONTH, -1);
   	  	Timestamp yesterdayBegin = getDayBegin(cal);
@@ -1360,11 +1366,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	 * 每月1日  早上3点10分刷前一个月的读表
 	 * */
 	@Scheduled(cron = "0 10 3 1 * ?")
-	@Override
     public void caculateEnergyMonthStat(){
+		caculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+	}
+		
+	@Override
+	public void caculateEnergyMonthStatByDate(java.util.Date date){
 		//查出所有的表
 		List<EnergyMeter> meters = meterProvider.listEnergyMeters();
 		Calendar cal = Calendar.getInstance();
+		cal.setTime(date);
   	  	cal.add(Calendar.DAY_OF_MONTH, -1);
   	  	Timestamp monthEnd = getDayBegin(cal);
   	  	cal.set(Calendar.DAY_OF_MONTH, 1);
