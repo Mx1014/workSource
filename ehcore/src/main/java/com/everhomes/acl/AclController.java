@@ -49,6 +49,21 @@ public class AclController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /acl/createOrganizationSuperAdmin</b>
+     * <p>创建超级管理员</p>
+     */
+    @RequestMapping("createOrganizationSuperAdmin")
+    @RestReturn(value=String.class)
+    public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+//        rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getupdateOrganizationSuperAdminCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
+        rolePrivilegeService.createOrganizationSuperAdmin(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /acl/createServiceModuleAdmin</b>
      * <p>创建业务模块管理员</p>
      */
