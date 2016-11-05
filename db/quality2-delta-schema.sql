@@ -1,13 +1,13 @@
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '';
-ALTER TABLE eh_quality_inspection_standards ADD COLUMN `review_status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: waiting for approval, 2: reviewed';
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `review_result` TINYINT NOT NULL DEFAULT '0' COMMENT '0:none, 1: qualified, 2: unqualified';
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `reviewer_uid` BIGINT NOT NULL DEFAULT '0';
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `review_time` DATETIME;
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT '0';
 
-ALTER TABLE eh_quality_inspection_standards ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT 0;
-ALTER TABLE eh_quality_inspection_standards ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '';
+ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '';
+ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id';
 
 DROP TABLE IF EXISTS `eh_quality_inspection_standard_specification_map`;
 CREATE TABLE `eh_quality_inspection_standard_specification_map` (
