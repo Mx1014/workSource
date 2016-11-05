@@ -2596,8 +2596,8 @@ public class CommunityServiceImpl implements CommunityService {
     				"ResourceType cannot be null.");
         }
 		
-    	ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
-		checkResourceCategoryIsNull(category);
+//    	ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
+//		checkResourceCategoryIsNull(category);
 		
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
