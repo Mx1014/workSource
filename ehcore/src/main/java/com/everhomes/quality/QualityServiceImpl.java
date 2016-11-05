@@ -196,7 +196,6 @@ public class QualityServiceImpl implements QualityService {
 		standard.setOwnerId(cmd.getOwnerId());
 		standard.setStandardNumber(cmd.getStandardNumber());
 		standard.setName(cmd.getName());
-		standard.setCategoryId(cmd.getCategoryId());
 		standard.setDescription(cmd.getDescription());
 		standard.setCreatorUid(user.getId());
 		standard.setOperatorUid(user.getId());
@@ -880,6 +879,13 @@ public class QualityServiceImpl implements QualityService {
             	}
         	}
         	
+        	if(r.getCreatorUid() != null && r.getCreatorUid() != 0) {
+        		List<OrganizationMember> creator = organizationProvider.listOrganizationMembersByUId(r.getCreatorUid());
+            	if(creator != null && creator.size() > 0) {
+            		dto.setCreatorName(creator.get(0).getContactName());
+            	}
+        	}
+        	
         	return dto;
         }).filter(task->task!=null).collect(Collectors.toList());
 		return dtoList;
@@ -1180,9 +1186,6 @@ public class QualityServiceImpl implements QualityService {
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
 			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-			task.setCategoryId(standard.getCategoryId());
-			QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
-			task.setCategoryPath(category.getPath());
 			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
 				
 				task.setExecutiveGroupId(executiveGroup.getGroupId());
@@ -1513,8 +1516,6 @@ public class QualityServiceImpl implements QualityService {
 		standardDto.setExecutiveGroup(executiveGroup);
 		standardDto.setReviewGroup(reviewGroup);
 		
-		QualityInspectionCategories category = verifiedCategoryById(standard.getCategoryId());
-		standardDto.setCategoryName(category.getName());
 		return standardDto;
 	}
 
@@ -1956,6 +1957,9 @@ public class QualityServiceImpl implements QualityService {
 		
 		task.setOwnerType(cmd.getOwnerType());
 		task.setOwnerId(cmd.getOwnerId());
+		task.setTargetId(cmd.getTargetId());
+		task.setTargetType(cmd.getTargetType());
+		task.setCreatorUid(user.getId());
 		task.setTaskName(cmd.getName());
 		task.setTaskType((byte) 1);
 		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());

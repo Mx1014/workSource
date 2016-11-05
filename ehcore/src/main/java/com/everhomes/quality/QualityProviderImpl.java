@@ -46,6 +46,7 @@ import java.util.Map;
 
 
 
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -57,6 +58,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -111,6 +113,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.quality.QualityProvider;
+import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
 import com.everhomes.rest.quality.QualityInspectionLogDTO;
@@ -319,7 +322,7 @@ public class QualityProviderImpl implements QualityProvider {
 		standard.setId(id);
 		standard.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		standard.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		standard.setStatus(QualityStandardStatus.ACTIVE.getCode());
+		standard.setStatus(QualityStandardStatus.WAITING.getCode());
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionStandards.class, id));
         EhQualityInspectionStandardsDao dao = new EhQualityInspectionStandardsDao(context.configuration());
@@ -1093,6 +1096,7 @@ public class QualityProviderImpl implements QualityProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionStandardsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARDS);
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
 		
 		List<QualityInspectionStandards> result = new ArrayList<QualityInspectionStandards>();
 		query.fetch().map((r) -> {
