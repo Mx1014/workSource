@@ -15,8 +15,6 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 标准所属的主体，如QA</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>description: 具体内容</li>
- *  <li>categoryId: category表的id</li>
- *  <li>categoryName: 所属类型名称</li>
  *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
  *  <li>executiveGroup: 执行业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>reviewGroup: 审阅业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
@@ -27,6 +25,11 @@ import com.everhomes.util.StringHelper;
  *  <li>updateTime: 更新该标准的时间</li>
  *  <li>deleterUid: 删除该标准的用户id</li>
  *  <li>deleteTime: 删除该标准的时间</li>
+ *  <li>targetId: 标准所属的项目id</li>
+ *  <li>targetType: 标准所属项目类型</li>
+ *  <li>reviewResult: 标准审阅结果 com.everhomes.rest.equipment.ReviewResult</li>
+ *  <li>reviewerUid: 标准审阅人id</li>
+ *  <li>reviewTime: 标准审阅时间</li>
  * </ul>
  */
 
@@ -43,10 +46,6 @@ public class QualityStandardsDTO {
 	private String standardNumber;
 	
 	private String description;
-	
-	private Long categoryId;
-	
-	private String categoryName;
 	
 	@ItemType(RepeatSettingsDTO.class)
 	private RepeatSettingsDTO repeat;
@@ -70,6 +69,18 @@ public class QualityStandardsDTO {
 	private Long deleterUid;
 	
 	private Timestamp deleteTime;
+	
+	private Long targetId;
+	
+	private String targetType;
+	
+	private Byte reviewResult;
+	
+	private Long reviewerUid;
+	
+	private Timestamp reviewTime;
+	
+//	private List<>
 	
 	public Long getId() {
 		return id;
@@ -213,6 +224,46 @@ public class QualityStandardsDTO {
 
 	public void setDeleteTime(Timestamp deleteTime) {
 		this.deleteTime = deleteTime;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Byte getReviewResult() {
+		return reviewResult;
+	}
+
+	public void setReviewResult(Byte reviewResult) {
+		this.reviewResult = reviewResult;
+	}
+
+	public Long getReviewerUid() {
+		return reviewerUid;
+	}
+
+	public void setReviewerUid(Long reviewerUid) {
+		this.reviewerUid = reviewerUid;
+	}
+
+	public Timestamp getReviewTime() {
+		return reviewTime;
+	}
+
+	public void setReviewTime(Timestamp reviewTime) {
+		this.reviewTime = reviewTime;
 	}
 
 	@Override

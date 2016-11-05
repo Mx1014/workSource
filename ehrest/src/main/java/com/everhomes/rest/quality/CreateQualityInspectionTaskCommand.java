@@ -11,8 +11,11 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>ownerId: 任务所属的主体id</li>
  *  <li>ownerType: 任务所属的主体，com.everhomes.rest.quality.OwnerType</li>
+ *  <li>targetId: 任务所属的项目id</li>
+ *  <li>targetType: 任务所属的项目，com.everhomes.rest.quality.OwnerType</li>
  *  <li>name: 任务名称</li>
  *  <li>categoryId: category表中的id</li>
+ *  <li>executorId: 执行人uid</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>executiveExpireTime: 任务截止时间</li>
  * </ul>
@@ -41,6 +44,8 @@ public class CreateQualityInspectionTaskCommand {
 	private StandardGroupDTO group;
 
 	private Long executiveExpireTime;
+	
+	private Long executorId;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -99,6 +104,36 @@ public class CreateQualityInspectionTaskCommand {
 
 	public void setExecutiveExpireTime(Long executiveExpireTime) {
 		this.executiveExpireTime = executiveExpireTime;
+	}
+
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+
+	public Long getExecutorId() {
+		return executorId;
+	}
+
+
+	public void setExecutorId(Long executorId) {
+		this.executorId = executorId;
 	}
 
 
