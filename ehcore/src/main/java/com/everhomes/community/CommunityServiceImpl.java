@@ -2559,16 +2559,26 @@ public class CommunityServiceImpl implements CommunityService {
     				"ResourceType cannot be null.");
         }
 		
-    	ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
-		checkResourceCategoryIsNull(category);
-		
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
 		if(null != rca) {
-			rca.setResourceCategryId(category.getId());
-			communityProvider.updateResourceCategoryAssignment(rca);
+			if(null != cmd.getResourceCategoryId()) {
+				ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
+				checkResourceCategoryIsNull(category);
+				rca.setResourceCategryId(category.getId());
+				communityProvider.updateResourceCategoryAssignment(rca);
+			}else{
+				communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
+			}
 		}else{
+			if(null == cmd.getResourceCategoryId()) {
+	        	LOGGER.error("CategoryId cannot be null.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"CategoryId cannot be null.");
+	        }
+			ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
+			checkResourceCategoryIsNull(category);
 			rca = new ResourceCategoryAssignment();
 			rca.setCreateTime(new Timestamp(System.currentTimeMillis()));
 			rca.setCreatorUid(UserContext.current().getUser().getId());
