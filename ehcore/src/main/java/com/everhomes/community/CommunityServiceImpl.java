@@ -2688,7 +2688,7 @@ public class CommunityServiceImpl implements CommunityService {
 //			path = resourceCategory.getPath();
 //		}
 		
-		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, null)
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null)
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
 				
