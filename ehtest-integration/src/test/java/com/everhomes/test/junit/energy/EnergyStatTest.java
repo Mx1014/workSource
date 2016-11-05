@@ -118,11 +118,11 @@ public class EnergyStatTest extends BaseLoginAuthTestCase{
         String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
 
-        jsonFilePath = "data/json/energy-test-data-161031.json";
-        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
-        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+//        jsonFilePath = "data/json/energy-test-data-161031.json";
+//        fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+//        dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
         
-        jsonFilePath = "data/json/energy-reading-log-test-data-161104.json";
+        jsonFilePath = "data/json/energy-reading-log-3-test-data-161104.json";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
     }

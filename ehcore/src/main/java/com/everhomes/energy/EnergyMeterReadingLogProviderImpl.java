@@ -138,7 +138,7 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
             	step = step.and(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.greaterOrEqual(startBegin));
             if(null != endBegin)
             	step = step.and(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.lessOrEqual(endBegin));
-            result[0] = step.fetchAny().map((r) -> {
+            result[0] = step.orderBy(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.desc()).fetchAny().map((r) -> {
                     return ConvertHelper.convert(r, EnergyMeterReadingLog.class);
                 });
 
@@ -155,6 +155,7 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
         return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
                 .where(Tables.EH_ENERGY_METER_READING_LOGS.ID.ge(pageAnchor))
                 .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .orderBy(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.asc())
                 .limit(pageSize).fetchInto(EnergyMeterReadingLog.class);
     }
 

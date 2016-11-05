@@ -5,7 +5,8 @@ import java.math.BigDecimal;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
- *     <li>statDate: 日期</li>
+ *     <li>statDate: 日期时间戳</li>
+ *     <li>dateStr: 日期字符串</li>
  *     <li>lastReading: 上次读数</li>
  *     <li>currentReading: 本次读数</li>
  *     <li>currentAmount: 本次用量</li>
@@ -15,6 +16,7 @@ import com.everhomes.util.StringHelper;
 public class DayStatDTO {
  
 	private Long statDate;
+	private String dateStr;
     private BigDecimal lastReading;
     private BigDecimal currentReading;
     private BigDecimal currentAmount;
@@ -80,5 +82,11 @@ public class DayStatDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getDateStr() {
+		return dateStr;
+	}
+	public void setDateStr(String dateStr) {
+		this.dateStr = dateStr;
+	}
  
 }
