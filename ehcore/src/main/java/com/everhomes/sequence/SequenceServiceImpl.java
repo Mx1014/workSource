@@ -930,6 +930,30 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhServiceAllianceReservationRequests.class, Tables.EH_SERVICE_ALLIANCE_RESERVATION_REQUESTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_RESERVATION_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_RESERVATION_REQUESTS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhResourceCategories.class, Tables.EH_RESOURCE_CATEGORIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RESOURCE_CATEGORIES.ID.max()).from(Tables.EH_RESOURCE_CATEGORIES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhResourceCategoryAssignments.class, Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.ID.max()).from(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhOrganizationJobPositions.class, Tables.EH_ORGANIZATION_JOB_POSITIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ORGANIZATION_JOB_POSITIONS.ID.max()).from(Tables.EH_ORGANIZATION_JOB_POSITIONS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhServiceModules.class, Tables.EH_SERVICE_MODULES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_MODULES.ID.max()).from(Tables.EH_SERVICE_MODULES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhServiceModulePrivileges.class, Tables.EH_SERVICE_MODULE_PRIVILEGES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_MODULE_PRIVILEGES.ID.max()).from(Tables.EH_SERVICE_MODULE_PRIVILEGES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhServiceModuleAssignments.class, Tables.EH_SERVICE_MODULE_ASSIGNMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ID.max()).from(Tables.EH_SERVICE_MODULE_ASSIGNMENTS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
