@@ -184,15 +184,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
 		User user = UserContext.current().getUser();
-		
-		
+
 		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		
 		ListWebMenuResponse res = new ListWebMenuResponse();
 		
 		//获取用户在机构范围内的所有权限
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-
 
 		if(null == privilegeIds){
 			res.setMenus(new ArrayList<WebMenuDTO>());
@@ -235,6 +233,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		
 		return res;
 	}
+
+
 
 	@Override
 	public List<ListWebMenuPrivilegeDTO> listWebMenuPrivilege(ListWebMenuPrivilegeCommand cmd) {
@@ -731,7 +731,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
     		privileges = privilegeIds;
     	}
-    	
+
+
+
     	return privileges;
     }
     
@@ -1463,7 +1465,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					}
 				}else{
 					ServiceModuleAssignment assignment = new ServiceModuleAssignment();
-					assignment.setModuleId(1L); //0 代表全部业务
+					assignment.setModuleId(0L); //0 代表全部业务
 					assignment.setOrganizationId(cmd.getOrganizationId());
 					assignment.setNamespaceId(namespaceId);
 					assignment.setTargetType(cmd.getTargetType());
@@ -1578,16 +1580,45 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					"params ownerType error.");
 		}
 
-		List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(cmd.getResourceType(),cmd.getResourceId(),EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(),cmd.getOwnerId());
+		dbProvider.execute((TransactionStatus status) -> {
+			//删除部门的授权
+			List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(cmd.getResourceType(),cmd.getResourceId(),EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(),cmd.getOwnerId());
+			//业务模块删除
+			for (ServiceModuleAssignment serviceModuleAssignment:serviceModuleAssignments ) {
+				serviceModuleProvider.deleteServiceModuleAssignmentById(serviceModuleAssignment.getId());
+			}
 
-		//业务模块删除
-		for (ServiceModuleAssignment serviceModuleAssignment:serviceModuleAssignments ) {
-			serviceModuleProvider.deleteServiceModuleAssignmentById(serviceModuleAssignment.getId());
-		}
+			/**
+			 * 权限删除
+			 */
 
-		/**
-		 * 权限删除
-		 */
+
+			int pageSize = PaginationConfigHelper.getPageSize(configProvider, 100000);
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			Organization orgCommoand = new Organization();
+			orgCommoand.setId(cmd.getOrganizationId());
+			orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+			List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(null ,orgCommoand, null ,null , locator, pageSize);
+
+			//删除部门下所有人员的授权
+			for (OrganizationMember member:organizationMembers) {
+				if(OrganizationMemberTargetType.USER == OrganizationMemberTargetType.fromCode(member.getTargetType())){
+					List<ServiceModuleAssignment> memberAssignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(cmd.getResourceType(),cmd.getResourceId(),EntityType.USER.getCode(),member.getTargetId(),cmd.getOwnerId());
+					for (ServiceModuleAssignment assignment:memberAssignments) {
+						serviceModuleProvider.deleteServiceModuleAssignmentById(assignment.getId());
+					}
+
+					/**
+					 * 权限删除
+					 */
+				}
+			}
+			return null;
+		});
+
+
+
+
 	}
 
 	/**
