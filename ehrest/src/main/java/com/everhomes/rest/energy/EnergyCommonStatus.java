@@ -4,11 +4,12 @@ package com.everhomes.rest.energy;
  * <ul>
  * <li>INACTIVE(0): 删除</li>
  * <li>ACTIVE(2): 正常</li>
+ * <li>DISABLED(3): 禁用</li>
  * </ul>
  */
 public enum EnergyCommonStatus {
 
-    INACTIVE((byte) 0), WAITING_FOR_APPROVAL((byte) 1), ACTIVE((byte) 2);
+    INACTIVE((byte) 0), WAITING_FOR_APPROVAL((byte) 1), ACTIVE((byte) 2), DISABLED((byte)3);
 
     private Byte code;
 

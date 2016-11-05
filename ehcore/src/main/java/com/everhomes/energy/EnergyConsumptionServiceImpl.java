@@ -45,10 +45,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -205,11 +202,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         // 账单项目
         EnergyMeterCategory billCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getBillCategoryId());
-        dto.setBillCategory(billCategory.getName());
+        dto.setBillCategory(billCategory != null ? billCategory.getName() : null);
 
         // 分类
         EnergyMeterCategory serviceCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getServiceCategoryId());
-        dto.setServiceCategory(serviceCategory.getName());
+        dto.setServiceCategory(serviceCategory != null ? serviceCategory.getName() : null);
 
         // 当前价格
         EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE);
@@ -232,7 +229,66 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
             dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
         }
+
+        // 抄表提示, 判断今天是否读表
+        Timestamp lastReadTime = meter.getLastReadTime();
+        if (lastReadTime != null && (lastReadTime.getTime() - Date.valueOf(LocalDate.now()).getTime() >= 0)) {
+            dto.setTodayReadStatus(TrueOrFalseFlag.TRUE.getCode());
+        }
+
+        // 日读表差
+        // this.processDayPrompt(meter, dto);
+        // 月读表差
+        // this.processMonthPrompt(meter, dto);
         return dto;
+    }
+
+    private void processDayPrompt(EnergyMeter meter, EnergyMeterDTO dto) {
+        Timestamp lastReadTime = meter.getLastReadTime();
+        EnergyMeterDefaultSetting dayPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.DAY_PROMPT);
+        if (lastReadTime != null && dayPromptSetting != null && Objects.equals(dayPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
+            LocalDateTime lastReadDateTime = lastReadTime.toLocalDateTime();
+            Date date = Date.valueOf(LocalDate.of(lastReadDateTime.getYear(), lastReadDateTime.getMonthValue(), lastReadDateTime.getDayOfMonth()).minusDays(1));
+
+            EnergyDateStatistic statistic = energyDateStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), date);
+            if (statistic != null) {
+                // EnergyMeterReadingLog log = meterReadingLogProvider.findLastReadingLogByMeterId(currNamespaceId(), meter.getId());
+                // meter.getMaxReading().subtract(log.)
+                // if (log.getResetMeterFlag() == TrueOrFalseFlag.TRUE.getCode()) {
+                //
+                // }
+
+                EnergyMeterSettingLog amountFormula = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(),
+                        meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA, new Timestamp(date.getTime()));
+
+                EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(),
+                        meter.getId(), EnergyMeterSettingType.PRICE, new Timestamp(date.getTime()));
+
+                EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(),
+                        meter.getId(), EnergyMeterSettingType.RATE, new Timestamp(date.getTime()));
+
+                EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), amountFormula.getFormulaId());
+
+                ScriptEngineManager manager = new ScriptEngineManager();
+                ScriptEngine engine = manager.getEngineByName("js");
+
+                engine.put(MeterFormulaVariable.AMOUNT.getCode(), statistic.getCurrentAmount());
+                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+
+                BigDecimal amount = null;
+                try {
+                    String amountStr = engine.eval(formula.getExpression()).toString();
+                    amount = new BigDecimal(amountStr);
+                } catch (Exception e) {
+                    LOGGER.error("The energy meter formula format error, expression = {}", formula.getExpression());
+                    throw errorWith(SCOPE, ERR_METER_FORMULA_ERROR, "The energy meter formula format error, expression = %s", formula.getExpression());
+                }
+                // if ()
+
+            }
+        }
+        EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
     }
 
     @Override
@@ -270,8 +326,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setStartTime(new Timestamp(cmd.getStartTime()));
-        Timestamp endTime = cmd.getEndTime() == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): new Timestamp(cmd.getEndTime());
-        log.setEndTime(endTime);
+        // Timestamp endTime = cmd.getEndTime() == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): new Timestamp(cmd.getEndTime());
+        if (cmd.getEndTime() != null) {
+            log.setEndTime(new Timestamp(cmd.getEndTime()));
+        }
         log.setMeterId(cmd.getMeterId());
         log.setSettingType(settingType.getCode());
         log.setNamespaceId(currNamespaceId());
@@ -476,6 +534,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             if (cmd.getSettingValue() != null) {
                 setting.setSettingValue(cmd.getSettingValue());
+            }
+            if (cmd.getSettingStatus() != null && (Objects.equals(setting.getSettingType(), EnergyMeterSettingType.DAY_PROMPT.getCode())
+                    || Objects.equals(setting.getSettingType(), EnergyMeterSettingType.MONTH_PROMPT.getCode()))) {
+                setting.setStatus(cmd.getSettingStatus());
             }
             defaultSettingProvider.updateEnergyMeterDefaultSetting(setting);
             return toEnergyMeterDefaultSettingDTO(setting);
@@ -1137,6 +1199,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private EnergyMeterDefaultSettingDTO toEnergyMeterDefaultSettingDTO(EnergyMeterDefaultSetting setting) {
         EnergyMeterDefaultSettingDTO dto = ConvertHelper.convert(setting, EnergyMeterDefaultSettingDTO.class);
+        dto.setSettingStatus(setting.getStatus());
         if (setting.getFormulaId() != null) {
             EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), setting.getFormulaId());
             dto.setFormulaName(formula.getName());

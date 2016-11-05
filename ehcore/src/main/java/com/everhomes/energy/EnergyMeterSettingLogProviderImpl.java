@@ -10,7 +10,10 @@ import com.everhomes.server.schema.tables.daos.EhEnergyMeterSettingLogsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
+import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
@@ -44,26 +47,38 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
 
     @Override
     public EnergyMeterSettingLog findCurrentSettingByMeterId(Integer namespaceId, Long meterId, EnergyMeterSettingType settingType) {
+        // end_time 为null和不为null时两种情况
+        Field<Condition> endTimeCaseWhenThen = DSL.decode()
+                .when(EH_ENERGY_METER_SETTING_LOGS.END_TIME.isNull(), DSL.trueCondition())
+                .when(EH_ENERGY_METER_SETTING_LOGS.END_TIME.isNotNull(), EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(Timestamp.valueOf(LocalDateTime.now())))
+                .as("endTimeCaseWhenThen");
+
         return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
                 .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.START_TIME.le(Timestamp.valueOf(LocalDateTime.now())))
-                .and(EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(Timestamp.valueOf(LocalDateTime.now())))
+                .and(endTimeCaseWhenThen.isTrue())
                 .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.desc())
                 .fetchAnyInto(EnergyMeterSettingLog.class);
     }
 
     @Override
     public EnergyMeterSettingLog findCurrentSettingByMeterId(Integer namespaceId, Long meterId, EnergyMeterSettingType settingType ,Timestamp statDate) {
+        // end_time 为null和不为null时两种情况
+        Field<Condition> endTimeCaseWhenThen = DSL.decode()
+                .when(EH_ENERGY_METER_SETTING_LOGS.END_TIME.isNull(), DSL.trueCondition())
+                .when(EH_ENERGY_METER_SETTING_LOGS.END_TIME.isNotNull(), EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(statDate))
+                .as("endTimeCaseWhenThen");
+
         return context().selectFrom(EH_ENERGY_METER_SETTING_LOGS)
                 .where(EH_ENERGY_METER_SETTING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.START_TIME.le(statDate))
-                .and(EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(statDate))
+                .and(endTimeCaseWhenThen.isTrue())
                 .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.desc())
                 .fetchAnyInto(EnergyMeterSettingLog.class);
     }

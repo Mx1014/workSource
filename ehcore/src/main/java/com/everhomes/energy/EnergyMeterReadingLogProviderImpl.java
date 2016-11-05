@@ -151,11 +151,21 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
 
     @Override
     public List<EnergyMeterReadingLog> listMeterReadingLogs(long pageAnchor, int pageSize) {
-        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
                 .where(Tables.EH_ENERGY_METER_READING_LOGS.ID.ge(pageAnchor))
                 .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .limit(pageSize).fetchInto(EnergyMeterReadingLog.class);
+    }
+
+    @Override
+    public EnergyMeterReadingLog findLastReadingLogByMeterId(Integer namespaceId, Long meterId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId))
+                .orderBy(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.desc())
+                .fetchAnyInto(EnergyMeterReadingLog.class);
     }
 
     /*@Override

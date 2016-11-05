@@ -3,6 +3,7 @@ package com.everhomes.energy;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.rest.energy.EnergyCommonStatus;
+import com.everhomes.rest.energy.EnergyMeterSettingType;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterDefaultSettingsDao;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterDefaultSettingsRecord;
 import com.everhomes.user.UserContext;
@@ -52,8 +53,16 @@ public class EnergyMeterDefaultSettingProviderImpl implements EnergyMeterDefault
         if (meterType != null) {
             query.addConditions(EH_ENERGY_METER_DEFAULT_SETTINGS.METER_TYPE.eq(meterType));
         }
-        query.addConditions(EH_ENERGY_METER_DEFAULT_SETTINGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
+        query.addConditions(EH_ENERGY_METER_DEFAULT_SETTINGS.STATUS.ne(EnergyCommonStatus.INACTIVE.getCode()));
         return query.fetchInto(EnergyMeterDefaultSetting.class);
+    }
+
+    @Override
+    public EnergyMeterDefaultSetting findBySettingType(Integer namespaceId, EnergyMeterSettingType settingType) {
+        return context().selectFrom(EH_ENERGY_METER_DEFAULT_SETTINGS)
+                .where(EH_ENERGY_METER_DEFAULT_SETTINGS.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_DEFAULT_SETTINGS.SETTING_TYPE.eq(settingType.getCode()))
+                .fetchAnyInto(EnergyMeterDefaultSetting.class);
     }
 
     private DSLContext context() {

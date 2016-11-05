@@ -1,5 +1,7 @@
 package com.everhomes.energy;
 
+import com.everhomes.rest.energy.EnergyMeterSettingType;
+
 import java.util.List;
 
 /**
@@ -21,4 +23,6 @@ public interface EnergyMeterDefaultSettingProvider {
      * 默认设置列表
      */
     List<EnergyMeterDefaultSetting> listDefaultSetting(Integer namespaceId, Byte meterType);
+
+    EnergyMeterDefaultSetting findBySettingType(Integer namespaceId, EnergyMeterSettingType settingType);
 }

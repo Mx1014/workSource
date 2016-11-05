@@ -789,18 +789,55 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
     private void initEnergyMeterSettingLogs(List<EhEnergyMeters> meters) {
         Long id = context().select(DSL.max(Tables.EH_ENERGY_METER_SETTING_LOGS.ID)).from(Tables.EH_ENERGY_METER_SETTING_LOGS).fetchOneInto(Long.class);
+        Result<EhEnergyMeterFormulasRecord> amountFormula = context().selectFrom(Tables.EH_ENERGY_METER_FORMULAS)
+                .where(Tables.EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(EnergyFormulaType.AMOUNT.getCode())).fetch();
+        Result<EhEnergyMeterFormulasRecord> costFormula = context().selectFrom(Tables.EH_ENERGY_METER_FORMULAS)
+                .where(Tables.EH_ENERGY_METER_FORMULAS.FORMULA_TYPE.eq(EnergyFormulaType.COST.getCode())).fetch();
         for (EhEnergyMeters meter : meters) {
             for (EnergyMeterSettingType settingType : EnergyMeterSettingType.values()) {
-                for (int i = 1; i < 5; i++) {
+                for (int i = 0; i < 10; i++) {
                     EhEnergyMeterSettingLogs log = new EhEnergyMeterSettingLogs();
                     log.setId(++id);
                     log.setMeterId(meter.getId());
                     log.setSettingType(settingType.getCode());
                     log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-                    log.setStartTime(Timestamp.valueOf(LocalDateTime.now().plusDays(20).plusDays(i)));
-                    log.setEndTime(Timestamp.valueOf(LocalDateTime.now().plusDays(20).plusDays(i+1)));
-                    log.setFormulaId(3L);
-                    log.setSettingValue(new BigDecimal("1.6"));
+                    int endTime = RandomGenerator.getRandomNumberBetween(1, 31);
+                    log.setEndTime(Timestamp.valueOf(LocalDateTime.of(2016, 10, 1, 0, 0).plusDays(-1).plusDays(i).plusDays(endTime)));
+                    log.setStartTime(Timestamp.valueOf(LocalDateTime.of(2016, 10, 1, 0, 0).plusDays(-1).plusDays(RandomGenerator.getRandomNumberBetween(1, endTime))));
+                    if (settingType == EnergyMeterSettingType.AMOUNT_FORMULA) {
+                        int idx = RandomGenerator.getRandomNumberBetween(0, amountFormula.size()-1);
+                        log.setFormulaId(amountFormula.get(idx).getId());
+                    } else if (settingType == EnergyMeterSettingType.COST_FORMULA) {
+                        int idx = RandomGenerator.getRandomNumberBetween(0, costFormula.size()-1);
+                        log.setFormulaId(costFormula.get(idx).getId());
+                    } else if (settingType == EnergyMeterSettingType.PRICE) {
+                        log.setSettingValue(new BigDecimal(RandomGenerator.getRandomNumberBetween(1, 4)));
+                    } else {
+                        log.setSettingValue(new BigDecimal(RandomGenerator.getRandomNumberBetween(2, 4)));
+                    }
+                    EhEnergyMeterSettingLogsDao dao = new EhEnergyMeterSettingLogsDao(context().configuration());
+                    dao.insert(log);
+                }
+                for (int i = 0; i < 10; i++) {
+                    EhEnergyMeterSettingLogs log = new EhEnergyMeterSettingLogs();
+                    log.setId(++id);
+                    log.setMeterId(meter.getId());
+                    log.setSettingType(settingType.getCode());
+                    log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                    int endTime = RandomGenerator.getRandomNumberBetween(1, 31);
+                    log.setEndTime(Timestamp.valueOf(LocalDateTime.of(2015, 10, 1, 0, 0).plusDays(-1).plusDays(i).plusDays(endTime)));
+                    log.setStartTime(Timestamp.valueOf(LocalDateTime.of(2015, 10, 1, 0, 0).plusDays(-1).plusDays(RandomGenerator.getRandomNumberBetween(1, endTime))));
+                    if (settingType == EnergyMeterSettingType.AMOUNT_FORMULA) {
+                        int idx = RandomGenerator.getRandomNumberBetween(0, amountFormula.size()-1);
+                        log.setFormulaId(amountFormula.get(idx).getId());
+                    } else if (settingType == EnergyMeterSettingType.COST_FORMULA) {
+                        int idx = RandomGenerator.getRandomNumberBetween(0, costFormula.size()-1);
+                        log.setFormulaId(costFormula.get(idx).getId());
+                    } else if (settingType == EnergyMeterSettingType.PRICE) {
+                        log.setSettingValue(new BigDecimal(RandomGenerator.getRandomNumberBetween(1, 4)));
+                    } else {
+                        log.setSettingValue(new BigDecimal(RandomGenerator.getRandomNumberBetween(2, 4)));
+                    }
                     EhEnergyMeterSettingLogsDao dao = new EhEnergyMeterSettingLogsDao(context().configuration());
                     dao.insert(log);
                 }
@@ -817,16 +854,37 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         Long id = context().select(DSL.max(Tables.EH_ENERGY_METER_READING_LOGS.ID)).from(Tables.EH_ENERGY_METER_READING_LOGS).fetchOneInto(Long.class);
         for (EhEnergyMeters meter : meters) {
             int lastReading = 0;
-            for (int i = 1; i < 10; i++) {
+            for (int i = 0; i < 31; i++) {
                 EhEnergyMeterReadingLogs log = new EhEnergyMeterReadingLogs();
                 log.setId(++id);
                 log.setMeterId(meter.getId());
-                log.setCreateTime(Timestamp.valueOf(LocalDateTime.now().plusDays(20).plusDays(i)));
+                log.setCommunityId(1L);
+                log.setCreateTime(Timestamp.valueOf(LocalDateTime.of(2016, 10, 1, 0, 0).plusDays(-1).plusDays(i)));
                 log.setCreateTime(log.getCreateTime());
                 log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
                 // int changeFlag = RandomGenerator.getRandomNumberBetween(0, arr.length);
                 // log.setChangeMeterFlag((byte)changeFlag);
-                int reading = RandomGenerator.getRandomNumberBetween(lastReading, meter.getMaxReading().intValue());
+                int reading = RandomGenerator.getRandomNumberBetween(lastReading > 100 ? lastReading - 10 : lastReading, meter.getMaxReading().intValue());
+                log.setChangeMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                log.setReading(new BigDecimal(reading));
+                if (reading < lastReading) {
+                    log.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                }
+                lastReading = reading;
+                EhEnergyMeterReadingLogsDao dao = new EhEnergyMeterReadingLogsDao(context().configuration());
+                dao.insert(log);
+            }
+            for (int i = 0; i < 31; i++) {
+                EhEnergyMeterReadingLogs log = new EhEnergyMeterReadingLogs();
+                log.setId(++id);
+                log.setMeterId(meter.getId());
+                log.setCommunityId(1L);
+                log.setCreateTime(Timestamp.valueOf(LocalDateTime.of(2015, 10, 1, 0, 0).plusDays(-1).plusDays(i)));
+                log.setCreateTime(log.getCreateTime());
+                log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+                // int changeFlag = RandomGenerator.getRandomNumberBetween(0, arr.length);
+                // log.setChangeMeterFlag((byte)changeFlag);
+                int reading = RandomGenerator.getRandomNumberBetween(lastReading > 100 ? lastReading - 10 : lastReading, meter.getMaxReading().intValue());
                 log.setChangeMeterFlag(TrueOrFalseFlag.FALSE.getCode());
                 log.setReading(new BigDecimal(reading));
                 if (reading < lastReading) {
@@ -857,9 +915,10 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
                     meter.setBillCategoryId(billCategory.getId());
                     meter.setServiceCategoryId(serviceCategory.getId());
                     meter.setName("水表"+i);
+                    meter.setCommunityId(1L);
                     meter.setMaxReading(new BigDecimal(10000L+i*10));
                     meter.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-                    meter.setMeterNumber("W:number:"+i);
+                    meter.setMeterNumber("W:132456789:"+id);
                     meter.setStartReading(new BigDecimal(100-i));
                     meter.setId(++id);
 
