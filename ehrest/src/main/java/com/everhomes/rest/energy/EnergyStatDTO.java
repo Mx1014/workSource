@@ -11,6 +11,9 @@ import java.util.List;
  *     <li>billDayStats: {@link com.everhomes.rest.energy.BillStatDTO}</li> 
  *     <li>dayBurdenStats: 实际负担 list</li> 
  *     <li>lastYearPayableStats: 去年同期应付list</li> 
+ *     <li>communityName: 物业服务中心</li> 
+ *     <li>meterType: 类型</li> 
+ *     <li>dateStr: 日期或年度</li> 
  * </ul>
  */
 public class EnergyStatDTO {
@@ -23,7 +26,13 @@ public class EnergyStatDTO {
 
     @ItemType(DayStatDTO.class)
     private List<DayStatDTO> lastYearPayableStats;  
-  
+    
+    private String communityName ;
+
+    private String meterType;
+    
+    private String dateStr ;
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -57,5 +66,35 @@ public class EnergyStatDTO {
 
 	public void setLastYearPayableStats(List<DayStatDTO> lastYearPayableStats) {
 		this.lastYearPayableStats = lastYearPayableStats;
+	} 
+
+
+	public String getDateStr() {
+		return dateStr;
+	}
+
+
+	public void setDateStr(String dateStr) {
+		this.dateStr = dateStr;
+	}
+
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
+
+	public String getMeterType() {
+		return meterType;
+	}
+
+
+	public void setMeterType(String meterType) {
+		this.meterType = meterType;
 	}
 }

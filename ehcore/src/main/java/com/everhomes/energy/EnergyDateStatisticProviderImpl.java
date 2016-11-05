@@ -107,12 +107,13 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 	}
 
 	@Override
-	public EnergyDateStatistic getEnergyDateStatisticByStatDate(Date statDate) {
+	public EnergyDateStatistic getEnergyDateStatisticByStatDate(Long meterId,Date statDate) {
 		try {
 			EnergyDateStatistic[] result = new EnergyDateStatistic[1];
 			DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
 			result[0] = context.select().from(Tables.EH_ENERGY_DATE_STATISTICS).where(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.eq(statDate))
+					.and(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId))
 					.orderBy(Tables.EH_ENERGY_DATE_STATISTICS.CREATE_TIME.desc())
 					.fetchAny().map((r) -> {
 						return ConvertHelper.convert(r, EnergyDateStatistic.class);
@@ -126,11 +127,12 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 	}
 
 	@Override
-	public BigDecimal getSumAmountBetweenDate(Date begin, Date end) {
+	public BigDecimal getSumAmountBetweenDate(Long meterId,Date begin, Date end) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
 		BigDecimal result  = context.select(Tables.EH_ENERGY_DATE_STATISTICS.CURRENT_AMOUNT.sum()).from(Tables.EH_ENERGY_DATE_STATISTICS)
 				.where(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.between(begin, end))
+				.and(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId)) 
 				.orderBy(Tables.EH_ENERGY_DATE_STATISTICS.CREATE_TIME.desc())
 				.fetchOne().value1() ;
 		return result;
@@ -138,11 +140,12 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 	}
 
 	@Override
-	public BigDecimal getSumCostBetweenDate(Date begin, Date end) {
+	public BigDecimal getSumCostBetweenDate(Long meterId ,Date begin, Date end) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 
 		BigDecimal result  = context.select(Tables.EH_ENERGY_DATE_STATISTICS.CURRENT_COST.sum()).from(Tables.EH_ENERGY_DATE_STATISTICS)
 				.where(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.between(begin, end))
+				.and(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId))
 				.orderBy(Tables.EH_ENERGY_DATE_STATISTICS.CREATE_TIME.desc())
 				.fetchOne().value1() ;
 		return result;

@@ -108,7 +108,9 @@ public class EnergyCountStatisticProviderImpl implements EnergyCountStatisticPro
 	@Override
 	public BigDecimal getSumAmount(String statdate,Byte meterType, Byte categoryType, long categoryId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		SelectConditionStep<Record1<BigDecimal>> step = context.select(Tables.EH_ENERGY_COUNT_STATISTICS.AMOUNT.sum()).where(Tables.EH_ENERGY_COUNT_STATISTICS.DATE_STR.eq(statdate));
+		SelectConditionStep<Record1<BigDecimal>> step = context.select(Tables.EH_ENERGY_COUNT_STATISTICS.AMOUNT.sum())
+				.from(Tables.EH_ENERGY_COUNT_STATISTICS)
+				.where(Tables.EH_ENERGY_COUNT_STATISTICS.DATE_STR.eq(statdate));
 		if(null != meterType)
 			step = step.and(Tables.EH_ENERGY_COUNT_STATISTICS.METER_TYPE.eq(meterType));
 		if(null!= categoryType){
@@ -130,7 +132,9 @@ public class EnergyCountStatisticProviderImpl implements EnergyCountStatisticPro
 	@Override
 	public BigDecimal getSumCost(String statdate,Byte meterType, Byte categoryType, long categoryId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		SelectConditionStep<Record1<BigDecimal>> step = context.select(Tables.EH_ENERGY_COUNT_STATISTICS.COST.sum()).where(Tables.EH_ENERGY_COUNT_STATISTICS.DATE_STR.eq(statdate));
+		SelectConditionStep<Record1<BigDecimal>> step = context.select(Tables.EH_ENERGY_COUNT_STATISTICS.COST.sum())
+				.from(Tables.EH_ENERGY_COUNT_STATISTICS)
+				.where(Tables.EH_ENERGY_COUNT_STATISTICS.DATE_STR.eq(statdate));
 		if(null != meterType)
 			step = step.and(Tables.EH_ENERGY_COUNT_STATISTICS.METER_TYPE.eq(meterType));
 		if(null!= categoryType){

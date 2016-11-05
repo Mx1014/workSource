@@ -49,7 +49,7 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
     public EnergyMeterSettingLog findCurrentSettingByMeterId(Integer namespaceId, Long meterId, EnergyMeterSettingType settingType) {
         // end_time 为null和不为null时两种情况
         Field<Condition> endTimeCaseWhenThen = DSL.decode()
-                .when(EH_ENERGY_METER_SETTING_LOGS.END_TIME.isNull(), DSL.trueCondition())
+                .when(EH_ENERGY_METER_SETTING_LOGS.END_TIME.isNull(), DSL.condition(true))
                 .when(EH_ENERGY_METER_SETTING_LOGS.END_TIME.isNotNull(), EH_ENERGY_METER_SETTING_LOGS.END_TIME.ge(Timestamp.valueOf(LocalDateTime.now())))
                 .as("endTimeCaseWhenThen");
 

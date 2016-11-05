@@ -21,16 +21,20 @@ public interface EnergyDateStatisticProvider {
 			ListingQueryBuilderCallback queryBuilderCallback);
 
 	void deleteEnergyDateStatisticByDate(Long meterId, Date date);
+ 
 
-	EnergyDateStatistic getEnergyDateStatisticByStatDate(Date statDate);
+	BigDecimal getSumAmountBetweenDate(Long meterId, Date begin, Date end);
 
-	BigDecimal getSumAmountBetweenDate(Date begin, Date end);
-
-	BigDecimal getSumCostBetweenDate(Date begin, Date end);
+	BigDecimal getSumCostBetweenDate(Long meterId ,Date begin, Date end);
  
 
 	List<EnergyDateStatistic> listEnergyDateStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
 			List<Long> serviceCategoryIds, Date startDate, Date endDate);
 
+<<<<<<< HEAD
     EnergyDateStatistic findByMeterAndDate(Integer namespaceId, Long meterId, Date date);
+=======
+	EnergyDateStatistic getEnergyDateStatisticByStatDate(Long meterId, Date statDate);
+
+>>>>>>> ca4b010df84e3bea1d2da0ab096f086431d59df0
 }
