@@ -150,5 +150,7 @@ public interface CommunityService {
 	
 	List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd);
 	
+	List<ResourceCategoryDTO> listTreeResourceCategories(ListResourceCategoryCommand cmd);
+	
 	List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd);
 }

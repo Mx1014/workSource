@@ -288,6 +288,20 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /community/listTreeResourceCategories</b>
+     * <p>分类列表</p>
+     */
+    @RequestMapping("listTreeResourceCategories")
+    @RestReturn(value=ResourceCategoryDTO.class, collection = true)
+    public RestResponse listTreeResourceCategories(ListResourceCategoryCommand cmd) {
+    	List<ResourceCategoryDTO> list = communityService.listTreeResourceCategories(cmd);
+        RestResponse response = new RestResponse(list);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /community/listTreeResourceCategoryAssignments</b>

@@ -2679,30 +2679,30 @@ public class CommunityServiceImpl implements CommunityService {
 	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
-		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
-		String path = null;
-		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
-		if(null != cmd.getParentId()) {
-			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
-			checkResourceCategoryIsNull(resourceCategory);
-			path = resourceCategory.getPath();
-		}
+//		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
+//		String path = null;
+//		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
+//		if(null != cmd.getParentId()) {
+//			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
+//			checkResourceCategoryIsNull(resourceCategory);
+//			path = resourceCategory.getPath();
+//		}
 		
-		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, path)
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, null)
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
 				
 				return dto;
 			}).collect(Collectors.toList());
 		
-		for(ResourceCategoryDTO s: temp) {
-			getChildCategories(temp, s);
-			if(s.getParentId() == parentId) {
-				result.add(s);
-			}
-		}
+//		for(ResourceCategoryDTO s: temp) {
+//			getChildCategories(temp, s);
+//			if(s.getParentId() == parentId) {
+//				result.add(s);
+//			}
+//		}
 		
-		return result;
+		return temp;
 	}
 	
 	@Override
@@ -2741,5 +2741,36 @@ public class CommunityServiceImpl implements CommunityService {
 		dto.setCategoryDTOs(childrens);
 		
 		return dto;
+	}
+
+
+	@Override
+	public List<ResourceCategoryDTO> listTreeResourceCategories(ListResourceCategoryCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
+		String path = null;
+		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
+		if(null != cmd.getParentId()) {
+			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
+			checkResourceCategoryIsNull(resourceCategory);
+			path = resourceCategory.getPath();
+		}
+		
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, path)
+			.stream().map(r -> {
+				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
+				
+				return dto;
+			}).collect(Collectors.toList());
+		
+		for(ResourceCategoryDTO s: temp) {
+			getChildCategories(temp, s);
+			if(s.getParentId() == parentId) {
+				result.add(s);
+			}
+		}
+		
+		return result;
 	}
 }
