@@ -90,6 +90,8 @@ public enum EntityType {
             return FAMILY;
         else if(code.equalsIgnoreCase(POST.getCode()))
             return POST;
+        else if(code.equalsIgnoreCase(ORGANIZATIONS.getCode()))
+            return ORGANIZATIONS;
         else if(code.equalsIgnoreCase("EhFamilies"))
             return FAMILY;
         else if(code.equalsIgnoreCase("EhFleaMarkets"))
