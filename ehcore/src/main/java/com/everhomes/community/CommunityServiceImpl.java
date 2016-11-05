@@ -2602,7 +2602,8 @@ public class CommunityServiceImpl implements CommunityService {
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
-		communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
+		if(null != rca)
+			communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
 		
 	}
 	
