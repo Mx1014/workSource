@@ -1305,7 +1305,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 					Tables.EH_COMMUNITIES.ID.eq(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_ID));
 			cond = cond.and(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_CATEGRY_ID.eq(categoryId));
 		}
-		if(StringUtils.isEmpty(keyword)){
+		if(!StringUtils.isEmpty(keyword)){
 			cond = cond.and(Tables.EH_COMMUNITIES.NAME.like('%'+keyword+'%').or(Tables.EH_COMMUNITIES.ALIAS_NAME.like('%'+keyword+'%')));
 		}
 		query.orderBy(Tables.EH_COMMUNITIES.ID.asc());
