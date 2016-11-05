@@ -25,6 +25,12 @@ public class CreateQualityInspectionTaskCommand {
 	@NotNull
 	private String ownerType;
 
+	@NotNull
+	private Long targetId;
+	
+	@NotNull
+	private String targetType;
+	
 	private String name;
 	
 	@NotNull

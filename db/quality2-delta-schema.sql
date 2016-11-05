@@ -6,6 +6,9 @@ ALTER TABLE eh_quality_inspection_standards ADD COLUMN `reviewer_uid` BIGINT NOT
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `review_time` DATETIME;
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT '0';
 
+ALTER TABLE eh_quality_inspection_standards ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE eh_quality_inspection_standards ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '';
+
 DROP TABLE IF EXISTS `eh_quality_inspection_standard_specification_map`;
 CREATE TABLE `eh_quality_inspection_standard_specification_map` (
   `id` BIGINT NOT NULL COMMENT 'id', 
