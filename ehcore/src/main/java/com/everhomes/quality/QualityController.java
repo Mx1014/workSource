@@ -414,67 +414,67 @@ public class QualityController extends ControllerBase {
 		return response;
 	}
 	
-	/**
-	 * <b>URL: /quality/reviewQualityStandard</b>
-	 * <p>审核标准</p>
-	 */
-	@RequestMapping("reviewQualityStandard")
-	@RestReturn(value = String.class)
-	public RestResponse reviewQualityStandard(ReviewReviewQualityStandardCommand cmd) {
-		
-		qualityService.reviewQualityStandard(cmd);
-		
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /quality/createQualitySpecification</b>
-	 * <p>创建品质核查类型/规范 </p>
-	 */
-	@RequestMapping("createQualitySpecification")
-	@RestReturn(value = String.class)
-	public RestResponse createQualitySpecification(CreateQualitySpecificationCommand cmd) {
-		
-		qualityService.createQualitySpecification(cmd);
-		
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /quality/updateQualitySpecification</b>
-	 * <p>修改品质核查类型/规范 </p>
-	 */
-	@RequestMapping("updateQualitySpecification")
-	@RestReturn(value = String.class)
-	public RestResponse updateQualitySpecification(UpdateQualityCategoryCommand cmd) {
-		
-		qualityService.updateQualitySpecification(cmd);
-		
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /quality/deleteQualitySpecification</b>
-	 * <p>删除品质核查类型/规范 </p>
-	 */
-	@RequestMapping("deleteQualitySpecification")
-	@RestReturn(value = String.class)
-	public RestResponse deleteQualitySpecification(DeleteQualityCategoryCommand cmd) {
-		
-		qualityService.deleteQualitySpecification(cmd);
-		
-		RestResponse response = new RestResponse();
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+//	/**
+//	 * <b>URL: /quality/reviewQualityStandard</b>
+//	 * <p>审核标准</p>
+//	 */
+//	@RequestMapping("reviewQualityStandard")
+//	@RestReturn(value = String.class)
+//	public RestResponse reviewQualityStandard(ReviewReviewQualityStandardCommand cmd) {
+//		
+//		qualityService.reviewQualityStandard(cmd);
+//		
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//	/**
+//	 * <b>URL: /quality/createQualitySpecification</b>
+//	 * <p>创建品质核查类型/规范 </p>
+//	 */
+//	@RequestMapping("createQualitySpecification")
+//	@RestReturn(value = String.class)
+//	public RestResponse createQualitySpecification(CreateQualitySpecificationCommand cmd) {
+//		
+//		qualityService.createQualitySpecification(cmd);
+//		
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//	/**
+//	 * <b>URL: /quality/updateQualitySpecification</b>
+//	 * <p>修改品质核查类型/规范 </p>
+//	 */
+//	@RequestMapping("updateQualitySpecification")
+//	@RestReturn(value = String.class)
+//	public RestResponse updateQualitySpecification(UpdateQualityCategoryCommand cmd) {
+//		
+//		qualityService.updateQualitySpecification(cmd);
+//		
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
+//	
+//	/**
+//	 * <b>URL: /quality/deleteQualitySpecification</b>
+//	 * <p>删除品质核查类型/规范 </p>
+//	 */
+//	@RequestMapping("deleteQualitySpecification")
+//	@RestReturn(value = String.class)
+//	public RestResponse deleteQualitySpecification(DeleteQualityCategoryCommand cmd) {
+//		
+//		qualityService.deleteQualitySpecification(cmd);
+//		
+//		RestResponse response = new RestResponse();
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+//		return response;
+//	}
 }
