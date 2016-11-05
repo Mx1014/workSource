@@ -69,7 +69,7 @@ public class CommunityDTO {
     private Timestamp updateTime;
     private Double areaSize;
 
-    private Long categoryName;
+    private String categoryName;
 
     private Long categoryId;
     
@@ -319,11 +319,11 @@ public class CommunityDTO {
 		this.areaSize = areaSize;
 	}
 
-    public Long getCategoryName() {
+    public String getCategoryName() {
         return categoryName;
     }
 
-    public void setCategoryName(Long categoryName) {
+    public void setCategoryName(String categoryName) {
         this.categoryName = categoryName;
     }
 

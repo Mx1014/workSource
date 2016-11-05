@@ -2656,6 +2656,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int namespaceId =UserContext.getCurrentNamespaceId(null);
 
 		List<Community> list = communityProvider.listCommunitiesByCategory(cmd.getCityId(), cmd.getAreaId(), 
 				cmd.getCategoryId(), cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
@@ -2664,7 +2665,15 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		if(list.size() > 0){
 			List<CommunityDTO> resultList = list.stream().map((c) -> {
-				return ConvertHelper.convert(c, CommunityDTO.class);
+				CommunityDTO dto = ConvertHelper.convert(c, CommunityDTO.class);
+				ResourceCategoryAssignment ra = communityProvider.findResourceCategoryAssignment(c.getId(), EntityType.COMMUNITY.getCode(), namespaceId);
+				if(null != ra) {
+					ResourceCategory category = communityProvider.findResourceCategoryById(ra.getResourceCategryId());
+					dto.setCategoryId(category.getId());
+					dto.setCategoryName(category.getName());
+				}
+				
+				return dto;
 			}).collect(Collectors.toList());
     		response.setRequests(resultList);
     		if(list.size() != pageSize){
