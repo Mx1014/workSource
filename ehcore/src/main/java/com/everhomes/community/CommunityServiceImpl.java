@@ -2485,19 +2485,21 @@ public class CommunityServiceImpl implements CommunityService {
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		Long parentId = cmd.getParentId();
 		ResourceCategory category = null;
+		ResourceCategory parentCategory = null;
 		if(null == parentId){
 			
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name);
 			checkResourceCategoryExsit(category);
 		}else{
-			ResourceCategory parentCategory = communityProvider.findResourceCategoryById(parentId);
+			parentCategory = communityProvider.findResourceCategoryById(parentId);
 			checkResourceCategoryIsNull(parentCategory);
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, parentId, name);
 			checkResourceCategoryExsit(category);
-			category.setPath(parentCategory.getPath() + "/" + name);
+			
 		}
 		
 		category = new ResourceCategory();
+		category.setPath(parentCategory.getPath() + "/" + name);
 		category.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		category.setCreatorUid(UserContext.current().getUser().getId());   
 		category.setName(name);
