@@ -326,8 +326,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		GetPrivilegesDTO dto = new GetPrivilegesDTO();
 		User user = UserContext.current().getUser();
-
-		List<Long> privileges = rolePrivilegeService.getUserCommunityPrivileges(cmd.getCommunityId(), user.getId());
+		
+		List<Long> privileges = new ArrayList<Long>();
+		if(null != cmd.getCommunityId()){
+			privileges.addAll(rolePrivilegeService.getUserCommunityPrivileges(cmd.getCommunityId(), user.getId()));
+		}
 
 		List<Long> organizationPrivileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 		privileges.addAll(organizationPrivileges);
