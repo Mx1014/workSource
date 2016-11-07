@@ -1175,7 +1175,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 			// agree or reject
 			result = l.getNickName()
 					+ localeStringProvider.find(ApprovalStatus.class.getSimpleName(), l.getApprovalStatus().toString(), UserContext
-							.current().getUser().getLocale());
+							.current().getUser().getLocale()).getText();
 		}
 		return result;
 	}
