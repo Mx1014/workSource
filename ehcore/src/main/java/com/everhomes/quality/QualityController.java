@@ -16,9 +16,15 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.quality.QualityService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.quality.CountScoresCommand;
+import com.everhomes.rest.quality.CountScoresResponse;
+import com.everhomes.rest.quality.CountTasksCommand;
+import com.everhomes.rest.quality.CountTasksResponse;
 import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
+import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.GetGroupMembersCommand;
@@ -27,6 +33,8 @@ import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
+import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
 import com.everhomes.rest.quality.ListQualityStandardsResponse;
 import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
@@ -41,8 +49,10 @@ import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityStandardsDTO;
 import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
+import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
 import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
+import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateFactorCommand;
 
@@ -414,67 +424,115 @@ public class QualityController extends ControllerBase {
 		return response;
 	}
 	
-//	/**
-//	 * <b>URL: /quality/reviewQualityStandard</b>
-//	 * <p>审核标准</p>
-//	 */
-//	@RequestMapping("reviewQualityStandard")
-//	@RestReturn(value = String.class)
-//	public RestResponse reviewQualityStandard(ReviewReviewQualityStandardCommand cmd) {
-//		
-//		qualityService.reviewQualityStandard(cmd);
-//		
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
-//	/**
-//	 * <b>URL: /quality/createQualitySpecification</b>
-//	 * <p>创建品质核查类型/规范 </p>
-//	 */
-//	@RequestMapping("createQualitySpecification")
-//	@RestReturn(value = String.class)
-//	public RestResponse createQualitySpecification(CreateQualitySpecificationCommand cmd) {
-//		
-//		qualityService.createQualitySpecification(cmd);
-//		
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
-//	/**
-//	 * <b>URL: /quality/updateQualitySpecification</b>
-//	 * <p>修改品质核查类型/规范 </p>
-//	 */
-//	@RequestMapping("updateQualitySpecification")
-//	@RestReturn(value = String.class)
-//	public RestResponse updateQualitySpecification(UpdateQualityCategoryCommand cmd) {
-//		
-//		qualityService.updateQualitySpecification(cmd);
-//		
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
-//	
-//	/**
-//	 * <b>URL: /quality/deleteQualitySpecification</b>
-//	 * <p>删除品质核查类型/规范 </p>
-//	 */
-//	@RequestMapping("deleteQualitySpecification")
-//	@RestReturn(value = String.class)
-//	public RestResponse deleteQualitySpecification(DeleteQualityCategoryCommand cmd) {
-//		
-//		qualityService.deleteQualitySpecification(cmd);
-//		
-//		RestResponse response = new RestResponse();
-//		response.setErrorCode(ErrorCodes.SUCCESS);
-//		response.setErrorDescription("OK");
-//		return response;
-//	}
+	/**
+	 * <b>URL: /quality/reviewQualityStandard</b>
+	 * <p>审核标准</p>
+	 */
+	@RequestMapping("reviewQualityStandard")
+	@RestReturn(value = String.class)
+	public RestResponse reviewQualityStandard(ReviewReviewQualityStandardCommand cmd) {
+		
+		qualityService.reviewQualityStandard(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/createQualitySpecification</b>
+	 * <p>创建品质核查类型/规范 </p>
+	 */
+	@RequestMapping("createQualitySpecification")
+	@RestReturn(value = String.class)
+	public RestResponse createQualitySpecification(CreateQualitySpecificationCommand cmd) {
+		
+		qualityService.createQualitySpecification(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/updateQualitySpecification</b>
+	 * <p>修改品质核查类型/规范 </p>
+	 */
+	@RequestMapping("updateQualitySpecification")
+	@RestReturn(value = String.class)
+	public RestResponse updateQualitySpecification(UpdateQualitySpecificationCommand cmd) {
+		
+		qualityService.updateQualitySpecification(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/deleteQualitySpecification</b>
+	 * <p>删除品质核查类型/规范 </p>
+	 */
+	@RequestMapping("deleteQualitySpecification")
+	@RestReturn(value = String.class)
+	public RestResponse deleteQualitySpecification(DeleteQualitySpecificationCommand cmd) {
+		
+		qualityService.deleteQualitySpecification(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/listQualityCategories</b>
+	 * <p>查看品质核查类型/规范</p>
+	 */
+	@RequestMapping("listQualityCategories")
+	@RestReturn(value = ListQualitySpecificationsResponse.class)
+	public RestResponse listQualitySpecifications(ListQualitySpecificationsCommand cmd) {
+		
+		ListQualitySpecificationsResponse specifications = qualityService.listQualitySpecifications(cmd);
+		
+		RestResponse response = new RestResponse(specifications);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/countScores</b>
+	 * <p>分数统计</p>
+	 */
+	@RequestMapping("countScores")
+	@RestReturn(value = CountScoresResponse.class)
+	public RestResponse countScores(CountScoresCommand cmd) {
+		
+		CountScoresResponse scores = qualityService.countScores(cmd);
+		
+		RestResponse response = new RestResponse(scores);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/countTasks</b>
+	 * <p>任务数统计</p>
+	 */
+	@RequestMapping("countTasks")
+	@RestReturn(value = CountTasksResponse.class)
+	public RestResponse countTasks(CountTasksCommand cmd) {
+		
+		CountTasksResponse tasks = qualityService.countTasks(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

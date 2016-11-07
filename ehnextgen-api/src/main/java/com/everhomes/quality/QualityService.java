@@ -6,9 +6,15 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.quality.CountScoresCommand;
+import com.everhomes.rest.quality.CountScoresResponse;
+import com.everhomes.rest.quality.CountTasksCommand;
+import com.everhomes.rest.quality.CountTasksResponse;
 import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
+import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.GetGroupMembersCommand;
@@ -17,6 +23,8 @@ import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
+import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
 import com.everhomes.rest.quality.ListQualityStandardsResponse;
 import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
@@ -31,8 +39,10 @@ import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityStandardsDTO;
 import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
+import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
 import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
+import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateFactorCommand;
 
@@ -70,4 +80,12 @@ public interface QualityService {
 	List<OrganizationDTO> listUserRelateOrgGroups();
 	ListQualityInspectionLogsResponse listQualityInspectionLogs(ListQualityInspectionLogsCommand cmd);
 	QualityInspectionTaskDTO createQualityInspectionTask(CreateQualityInspectionTaskCommand cmd);
+	
+	void reviewQualityStandard(ReviewReviewQualityStandardCommand cmd);
+	void createQualitySpecification(CreateQualitySpecificationCommand cmd);
+	void updateQualitySpecification(UpdateQualitySpecificationCommand cmd);
+	void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd);
+	ListQualitySpecificationsResponse listQualitySpecifications(ListQualitySpecificationsCommand cmd);
+	CountScoresResponse countScores(CountScoresCommand cmd);
+	CountTasksResponse countTasks(CountTasksCommand cmd);
 }

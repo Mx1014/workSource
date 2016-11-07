@@ -69,9 +69,15 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.quality.CountScoresCommand;
+import com.everhomes.rest.quality.CountScoresResponse;
+import com.everhomes.rest.quality.CountTasksCommand;
+import com.everhomes.rest.quality.CountTasksResponse;
 import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
+import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.EvaluationDTO;
@@ -82,6 +88,8 @@ import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
+import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
 import com.everhomes.rest.quality.ListQualityStandardsResponse;
 import com.everhomes.rest.quality.ListQualityInspectionTasksCommand;
@@ -111,9 +119,11 @@ import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.quality.QualityTaskType;
 import com.everhomes.rest.quality.ReportRectifyResultCommand;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
+import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
 import com.everhomes.rest.quality.StandardGroupDTO;
 import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
+import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateFactorCommand;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
@@ -1990,6 +2000,54 @@ public class QualityServiceImpl implements QualityService {
 		
 		return dtos.get(0);
 		
+	}
+
+	@Override
+	public void reviewQualityStandard(ReviewReviewQualityStandardCommand cmd) {
+		
+		QualityInspectionStandards standard = qualityProvider.findStandardById(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
+		standard.setReviewResult(cmd.getReviewResult());
+		standard.setReviewerUid(UserContext.current().getUser().getId());
+		standard.setReviewTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		
+		qualityProvider.updateQualityInspectionStandards(standard);
+	}
+
+	@Override
+	public void createQualitySpecification(CreateQualitySpecificationCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateQualitySpecification(UpdateQualitySpecificationCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void deleteQualitySpecification(DeleteQualitySpecificationCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public ListQualitySpecificationsResponse listQualitySpecifications(
+			ListQualitySpecificationsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CountScoresResponse countScores(CountScoresCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public CountTasksResponse countTasks(CountTasksCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

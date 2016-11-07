@@ -6,15 +6,19 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>ownerId: 标准所属组织等的id</li>
- *  <li>ownerType: 标准所属组织类型，如enterprise</li>
- *  <li>targetId: 标准所属的项目id</li>
- *  <li>targetType: 标准所属项目类型</li>
+ *  <li>ownerId: 任务所属组织等的id</li>
+ *  <li>ownerType: 任务所属组织类型，如enterprise</li>
+ *  <li>targetId: 任务所属项目等的id</li>
+ *  <li>targetType: 任务所属项目类型，如community</li>
+ *  <li>specificationId: 父类型id  </li>
+ *  <li>startTime: 起始月份  </li>
+ *  <li>endTime: 截止月份  </li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>
  */
-public class ListQualityStandardsCommand {
+public class CountScoresCommand {
+
 	@NotNull
 	private Long ownerId;
 	
@@ -25,10 +29,16 @@ public class ListQualityStandardsCommand {
 	
 	private String targetType;
 	
+	private Long specificationId;
+	
+	private Long startTime;
+	
+	private Long endTime;
+	
 	private Long pageAnchor;
 	
 	private Integer pageSize;
-	
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
@@ -61,6 +71,30 @@ public class ListQualityStandardsCommand {
 		this.targetType = targetType;
 	}
 
+	public Long getSpecificationId() {
+		return specificationId;
+	}
+
+	public void setSpecificationId(Long specificationId) {
+		this.specificationId = specificationId;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
@@ -76,7 +110,7 @@ public class ListQualityStandardsCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

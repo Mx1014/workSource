@@ -47,6 +47,7 @@ import java.util.Map;
 
 
 
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -58,6 +59,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -171,12 +173,12 @@ public class QualityProviderImpl implements QualityProvider {
 	
 	@Autowired
 	private DbProvider dbProvider;
-
-	@Autowired
-    private ShardingProvider shardingProvider;
 	
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+	private ShardingProvider shardingProvider;
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
@@ -197,7 +199,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public void createVerificationTasks(QualityInspectionTasks task) {
 		
-		long id = this.shardingProvider.allocShardableContentId(EhQualityInspectionTasks.class).second();
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionTasks.class));
 		
 		task.setId(id);
 		task.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -591,7 +593,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public void createQualityInspectionTaskRecords(QualityInspectionTaskRecords record) {
 
-		long id = this.shardingProvider.allocShardableContentId(EhQualityInspectionTaskRecords.class).second();
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionTaskRecords.class));
 		
 		record.setId(id);
 		record.setProcessTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1221,7 +1223,7 @@ public class QualityProviderImpl implements QualityProvider {
 	@Override
 	public void createQualityInspectionLogs(QualityInspectionLogs log) {
 
-		long id = this.shardingProvider.allocShardableContentId(EhQualityInspectionLogs.class).second();
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionLogs.class));
 		
 		log.setId(id);
 		log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -1233,6 +1235,28 @@ public class QualityProviderImpl implements QualityProvider {
         dao.insert(log);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionLogs.class, null);
+	}
+
+	@Override
+	public QualityInspectionStandards findStandardById(Long id,
+			String ownerType, Long ownerId, String targetType, Long targetId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionStandardsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.ID.eq(id));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.eq(targetId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_TYPE.eq(targetType));
+		 
+		List<QualityInspectionStandards> result = new ArrayList<QualityInspectionStandards>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionStandards.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
 	}
 
 }

@@ -15,10 +15,10 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerType: 标准所属的主体，如QA</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>description: 具体内容</li>
- *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
- *  <li>executiveGroup: 执行业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
- *  <li>reviewGroup: 审阅业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
- *  <li>status: 标准状态 com.everhomes.rest.quality.QualityStandardStatus</li>
+ *  <li>repeat: 执行周期 {@link com.everhomes.rest.quality.RepeatSettingDTO}</li>
+ *  <li>executiveGroup: 执行业务组信息{@link com.everhomes.rest.quality.StandardGroupDTO}</li>
+ *  <li>reviewGroup: 审阅业务组信息 {@link com.everhomes.rest.quality.StandardGroupDTO}</li>
+ *  <li>status: 标准状态 {@link com.everhomes.rest.quality.QualityStandardStatus}</li>
  *  <li>creatorUid: 创建该标准的用户id</li>
  *  <li>createTime: 创建该标准的时间</li>
  *  <li>operatorUid: 最后对该标准进行修改的用户id</li>
@@ -27,9 +27,10 @@ import com.everhomes.util.StringHelper;
  *  <li>deleteTime: 删除该标准的时间</li>
  *  <li>targetId: 标准所属的项目id</li>
  *  <li>targetType: 标准所属项目类型</li>
- *  <li>reviewResult: 标准审阅结果 com.everhomes.rest.equipment.ReviewResult</li>
+ *  <li>reviewResult: 标准审阅结果 {@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>reviewerUid: 标准审阅人id</li>
  *  <li>reviewTime: 标准审阅时间</li>
+ *  <li>specifications: 标准关联的规范 参考{@link com.everhomes.rest.quality.QualityInspectionSpecificationDTO}</li>
  * </ul>
  */
 
@@ -80,7 +81,7 @@ public class QualityStandardsDTO {
 	
 	private Timestamp reviewTime;
 	
-//	private List<>
+	private List<QualityInspectionSpecificationDTO> specifications;
 	
 	public Long getId() {
 		return id;
@@ -248,6 +249,15 @@ public class QualityStandardsDTO {
 
 	public void setReviewTime(Timestamp reviewTime) {
 		this.reviewTime = reviewTime;
+	}
+
+	public List<QualityInspectionSpecificationDTO> getSpecifications() {
+		return specifications;
+	}
+
+	public void setSpecifications(
+			List<QualityInspectionSpecificationDTO> specifications) {
+		this.specifications = specifications;
 	}
 
 	@Override
