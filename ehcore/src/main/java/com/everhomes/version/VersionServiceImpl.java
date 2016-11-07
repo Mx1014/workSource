@@ -432,8 +432,10 @@ public class VersionServiceImpl implements VersionService {
 		
 		VersionInfoDTO versionInfoDTO = new VersionInfoDTO();
 		versionInfoDTO.setAppName(appName);
-		versionInfoDTO.setIconUrl(iconUrl);
-		
+		Map<String, String> params = new HashMap<String, String>();
+		params.put("homeurl", this.configurationProvider.getValue(ConfigConstants.HOME_URL, ""));
+		versionInfoDTO.setIconUrl(StringHelper.interpolate(iconUrl, params));
+		versionInfoDTO.setDownloadUrl(StringHelper.interpolate(downloadUrl, params));
 		
 		return versionInfoDTO;
 	} 
