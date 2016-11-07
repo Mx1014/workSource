@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -31,7 +30,6 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 import org.jooq.*;
@@ -2491,5 +2489,37 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return results;
+	}
+
+	@Override
+	public List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId) {
+		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.ORGANIZATION_ID.eq(organizationId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
+			return null;
+		});
+		return results;
+	}
+
+	@Override
+	public void deleteOrganizationJobPositionMapById(Long id){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationJobPositionMapsDao dao = new EhOrganizationJobPositionMapsDao(context.configuration());
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationJobPositionMaps.class, id);
+	}
+
+	@Override
+	public void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationJobPositionMapsDao dao = new EhOrganizationJobPositionMapsDao(context.configuration());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationJobPositionMaps.class));
+		organizationJobPositionMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationJobPositionMap.setId(id);
+		dao.insert(organizationJobPositionMap);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationJobPositionMaps.class, null);
 	}
 }

@@ -3,6 +3,7 @@ package com.everhomes.test.junit.acl;
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.acl.DeleteAuthorizationServiceModuleCommand;
 import com.everhomes.rest.acl.DeleteServiceModuleAdministratorsCommand;
+import com.everhomes.schema.tables.pojos.EhAcls;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
@@ -15,6 +16,8 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.everhomes.schema.Tables.EH_ACLS;
 
 /**
  * Created by sfyan on 2016/11/3.
@@ -50,22 +53,31 @@ public class DeleteAuthorizationServiceModuleTest extends BaseLoginAuthTestCase 
         assertTrue("The user info should be get from server, response=" +
                 StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-//        List<EhAclRoleAssignments> resultAcl = new ArrayList<>();
-//
         DSLContext context = dbProvider.getDslContext();
-//        context.select().from(EH_ACL_ROLE_ASSIGNMENTS)
-//                .where(EH_ACL_ROLE_ASSIGNMENTS.OWNER_TYPE.eq("EhOrganizations"))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.OWNER_ID.eq(1000750L))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.TARGET_TYPE.eq("EhUsers"))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.TARGET_ID.eq(10001L))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.ROLE_ID.eq(1005L))
-//                .fetch().map((r) -> {
-//            resultAcl.add(ConvertHelper.convert(r, EhAclRoleAssignments.class));
-//            return null;
-//        });
-//        assertNotNull("The reponse of getting acl role assignments info may not be null", resultAcl);
-//        assertEquals(1, resultAcl.size());
+        List<EhAcls> resultAcls = new ArrayList<>();
+        context.select().from(EH_ACLS)
+                .where(EH_ACLS.OWNER_TYPE.eq("EhCommunities"))
+                .and(EH_ACLS.OWNER_ID.eq(24210090697425926L))
+                .and(EH_ACLS.ROLE_TYPE.eq("EhOrganizations"))
+                .and(EH_ACLS.ROLE_ID.eq(1000751L))
+                .fetch().map((r) -> {
+            resultAcls.add(ConvertHelper.convert(r, EhAcls.class));
+            return null;
+        });
+        assertEquals(0, resultAcls.size());
+
+        List<EhAcls> resultAcls1 = new ArrayList<>();
+        context.select().from(EH_ACLS)
+                .where(EH_ACLS.OWNER_TYPE.eq("EhCommunities"))
+                .and(EH_ACLS.OWNER_ID.eq(24210090697425926L))
+                .and(EH_ACLS.ROLE_TYPE.eq("EhUsers"))
+                .and(EH_ACLS.ROLE_ID.eq(10010L))
+                .and(EH_ACLS.PRIVILEGE_ID.eq(2L))
+                .fetch().map((r) -> {
+            resultAcls1.add(ConvertHelper.convert(r, EhAcls.class));
+            return null;
+        });
+        assertEquals(0, resultAcls1.size());
 
         List<EhServiceModuleAssignments> results = new ArrayList<>();
 
@@ -74,7 +86,6 @@ public class DeleteAuthorizationServiceModuleTest extends BaseLoginAuthTestCase 
                 .and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(24210090697425926L))
                 .and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq("EhOrganizations"))
                 .and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(1000751L))
-                .and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.eq(2L))
                 .fetch().map((r) -> {
             results.add(ConvertHelper.convert(r, EhServiceModuleAssignments.class));
             return null;
@@ -109,6 +120,10 @@ public class DeleteAuthorizationServiceModuleTest extends BaseLoginAuthTestCase 
         dbProvider.loadJsonFileToDatabase(file, false);
 
         filePath= "data/json/service_module_assignments-test-data_161017.txt";
+        file = dbProvider.getAbsolutePathFromClassPath(filePath);
+        dbProvider.loadJsonFileToDatabase(file, false);
+
+        filePath= "data/json/acl_role_assignments-test-data_161017.txt";
         file = dbProvider.getAbsolutePathFromClassPath(filePath);
         dbProvider.loadJsonFileToDatabase(file, false);
 

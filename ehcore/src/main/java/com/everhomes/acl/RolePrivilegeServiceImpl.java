@@ -2,7 +2,6 @@ package com.everhomes.acl;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.sql.Array;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -82,7 +81,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
@@ -160,9 +158,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	private WebMenuPrivilegeProvider webMenuPrivilegeProvider;
 	
 	@Autowired
-	private OrganizationRoleMapProvider organizationRoleMapProvider;
-	
-	@Autowired
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
@@ -179,7 +174,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Autowired
 	private ConfigurationProvider configProvider;
-	
+
 	
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -403,10 +398,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		User user = UserContext.current().getUser();
 
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
-		Long roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
-		if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
-			roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
-		}
+		Long roleId = RoleConstants.PM_SUPER_ADMIN;
 
 		CreateOrganizationAccountCommand command = new CreateOrganizationAccountCommand();
 		command.setOrganizationId(org.getId());
@@ -420,7 +412,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"",privilegeIds);
+		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",privilegeIds);
 
 	}
 
@@ -557,7 +549,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				aclProvider.deleteRoleAssignment(roleAssignment.getId());
 			}
 		}
-		
 	}
 	
 	
@@ -662,7 +653,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		});
 	}
 	
-	
+
+
+
 	 /**
      * 获取用户的权限列表
      * @param module
@@ -680,7 +673,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	for (RoleAssignment role : userRoles) {
     		roleIds.add(role.getRoleId());
 		}
-    	
+
     	if(!StringUtils.isEmpty(module)){
     		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
     		if(null == s){
@@ -731,30 +724,39 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
     		privileges = privilegeIds;
     	}
-
-
-
+		privileges.addAll(getResourceAclPrivilegeIdsByRole(organizationId, userId));
     	return privileges;
     }
-    
-    
+
+    private List<Long> getResourceAclPrivilegeIdsByRole(Long organizationId, Long userId){
+		List<Long> privilegeIds = new ArrayList<>();
+		AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
+		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(),organizationId, descriptor);
+		if(null != acls){
+			for (Acl acl :acls) {
+				privilegeIds.add(acl.getPrivilegeId());
+			}
+		}
+		return privilegeIds;
+	}
+
     @Override
     public boolean checkAdministrators(Long organizationId) {
     	User user = UserContext.current().getUser();
-    	
+
     	Organization org = organizationProvider.findOrganizationById(organizationId);
-    	
+
     	if(null == org){
     		return false;
     	}
-    	
+
     	List<RoleAssignment> userRoles = this.getUserRoles(organizationId, user.getId());
-    	
+
     	List<Long> roleIds = new ArrayList<Long>();
     	for (RoleAssignment role : userRoles) {
     		roleIds.add(role.getRoleId());
 		}
-    	
+
     	if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.ENTERPRISE){
     		if(roleIds.contains(RoleConstants.ENTERPRISE_SUPER_ADMIN) || roleIds.contains(RoleConstants.ENTERPRISE_ORDINARY_ADMIN)){
     			return true;
@@ -764,23 +766,24 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     			return true;
     		}
     	}
-    	
+
     	return false;
     }
-    
+
     @Override
+	@Deprecated
     public boolean checkAuthority(String ownerType, Long ownerId, Long privilegeId){
     	User user = UserContext.current().getUser();
-    	
+
     	List<Long> privileges = this.getUserPrivileges(null, ownerId, user.getId());
-    	
+
     	if(!privileges.contains(privilegeId)){
     		this.returnNoPrivileged(privileges, user);
     	}
-    	
+
     	return true;
     }
-    
+
     @Override
     public void exportRoleAssignmentPersonnelXls(
     		ExcelRoleExcelRoleAssignmentPersonnelCommand cmd,
@@ -984,25 +987,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		return result;
     }
-    
-    private List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){
-    	List<String> groupTypes = new ArrayList<String>();
-    	groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-    	groupTypes.add(OrganizationGroupType.GROUP.getCode());
-    	
+
+	@Override
+    public List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){
     	Organization org = organizationProvider.findOrganizationById(organizationId);
-    	
     	String path = org.getPath();
-    	
     	String[] orgIds = path.split("/");
-    	
     	List<RoleAssignment> userRoles = null;
     	for (String orgId : orgIds) {
-    		
     		if(StringUtils.isEmpty(orgId)){
     			continue;
     		}
-    		
     		if(null == userRoles){
     			userRoles = this.getUserRoles(Long.parseLong(orgId), userId);
     		}else{
@@ -1227,7 +1222,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		/**
 		 * 分配权限
 		 */
-		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"",privilegeIds);
+		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",privilegeIds);
 	}
 
 	@Override
@@ -1241,17 +1236,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setAccountPhone(cmd.getContactToken());
 		OrganizationMember member = organizationService.createOrganizationAccount(command, null);
 
-		List<ServiceModulePrivilege> serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
-
-		List<Long> privilegeIds = new ArrayList<>();
-		for (ServiceModulePrivilege serviceModulePrivilege: serviceModulePrivileges) {
-			privilegeIds.add(serviceModulePrivilege.getPrivilegeId());
-		}
-
 		/**
 		 * 分配权限
 		 */
-		//this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"",privilegeIds);
+		assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(), cmd.getModuleId().toString(),cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
 
 		/**
 		 * 分配模块
@@ -1269,7 +1257,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	}
 
-	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String biaoshi,  List<Long> privilegeIds){
+	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds){
 		User user = UserContext.current().getUser();
 		if(null != privilegeIds){
 			for (Long privilegeId: privilegeIds) {
@@ -1280,12 +1268,36 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				acl.setOwnerType(ownerType);
 				acl.setOwnerId(ownerId);
 				acl.setPrivilegeId(privilegeId);
-				//缺少type  和 标示字段
+				acl.setRoleType(targetType);
+				acl.setScope(ownerType + ownerId + "." + scope);
 				aclProvider.createAcl(acl);
 			}
 		}else{
 			LOGGER.debug("assignment privileges is null");
 		}
+	}
+
+	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
+
+		List<ServiceModulePrivilege> serviceModulePrivileges = null;
+		if(0L == moduleId){
+			List<ServiceModuleScope> moduleScopes = serviceModuleProvider.listServiceModuleScopes(UserContext.getCurrentNamespaceId(), null, null, null);
+			List<Long> moduleIds = new ArrayList<>();
+			for (ServiceModuleScope moduleScope:moduleScopes) {
+				moduleIds.add(moduleScope.getModuleId());
+			}
+			serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, privilegeType);
+		}else{
+			serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, privilegeType);
+		}
+
+
+		List<Long> privilegeIds = new ArrayList<>();
+		for (ServiceModulePrivilege serviceModulePrivilege: serviceModulePrivileges) {
+			privilegeIds.add(serviceModulePrivilege.getPrivilegeId());
+		}
+
+		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, privilegeIds);
 	}
 
 
@@ -1364,9 +1376,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		/**
 		 * 权限删除
 		 */
-		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getUserId());
-		for (Acl acl : acls){
-		}
+		List<Long> privilegeIds = new ArrayList<>();
+		privilegeIds.add(PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
+		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), null, privilegeIds);
+
 
 	}
 
@@ -1393,9 +1406,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		/**
 		 * 权限删除
 		 */
-		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getUserId());
-		for (Acl acl : acls){
-		}
+		List<Long> privilegeIds = new ArrayList<>();
+		privilegeIds.add(PrivilegeConstants.ORGANIZATION_ADMIN);
+		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), null, privilegeIds);
 
 	}
 
@@ -1425,9 +1438,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		/**
 		 * 权限删除
 		 */
-		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getUserId());
-		for (Acl acl : acls){
-		}
+		this.deleteAcls(entityType.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getUserId(), cmd.getModuleId(), null);
 	}
 
 	@Override
@@ -1461,6 +1472,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							assignment.setOwnerId(authorizationServiceModule.getResourceId());
 							assignment.setCreateUid(user.getId());
 							serviceModuleProvider.createServiceModuleAssignment(assignment);
+
+							/**
+							 * 业务模块权限授权
+							 */
+							this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + moduleId, moduleId,ServiceModulePrivilegeType.SUPER);
 						}
 					}
 				}else{
@@ -1474,11 +1490,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					assignment.setOwnerId(authorizationServiceModule.getResourceId());
 					assignment.setCreateUid(user.getId());
 					serviceModuleProvider.createServiceModuleAssignment(assignment);
+
+					/**
+					 * 业务模块权限授权
+					 */
+					this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
 				}
 
-				/**
-				 * 业务模块权限授权
-				 */
+
+
 			}
 
 			return null;
@@ -1591,7 +1611,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			/**
 			 * 权限删除
 			 */
-
+			this.deleteAcls(cmd.getResourceType(), cmd.getResourceId(), EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId());
 
 			int pageSize = PaginationConfigHelper.getPageSize(configProvider, 100000);
 			CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -1611,14 +1631,50 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					/**
 					 * 权限删除
 					 */
+					this.deleteAcls(cmd.getResourceType(), cmd.getResourceId(), EntityType.USER.getCode(),member.getTargetId());
 				}
 			}
 			return null;
 		});
 
+	}
+
+	/**
+	 * 删除权限
+	 * @param resourceType
+	 * @param resourceId
+	 * @param targetType
+	 * @param targetId
+     */
+	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds){
+		if(null != moduleId){
+			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.SUPER);
+			if(null == privilegeIds){
+				privilegeIds = new ArrayList<>();
+			}
+			for (ServiceModulePrivilege privilege: privileges) {
+				privilegeIds.add(privilege.getPrivilegeId());
+			}
+		}
+		AclRoleDescriptor descriptor = new AclRoleDescriptor(targetType, targetId);
+		List<Acl> acls = aclProvider.getResourceAclByRole(resourceType,resourceId, descriptor);
+		if(null != acls){
+			for (Acl acl :acls) {
+				if(null == privilegeIds){
+					aclProvider.deleteAcl(acl.getId());
+				}else{
+					if(privilegeIds.contains(acl.getPrivilegeId())){
+						aclProvider.deleteAcl(acl.getId());
+					}
+				}
+
+			}
+		}
+	}
 
 
-
+	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId){
+		deleteAcls(resourceType, resourceId, targetType, targetId, null, null);
 	}
 
 	/**
@@ -1629,7 +1685,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
 				"non-privileged.");
     }
-    
+
+
+
+
     public static void main(String[] args) {
 	}
 }

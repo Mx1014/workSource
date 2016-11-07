@@ -30,5 +30,37 @@
       "privilege_type": "1",
       "privilege_id": "5"
     }
+  ],
+  "eh_service_module_scopes": [
+    {
+      "id": "1",
+      "namespace_id": "0",
+      "module_id": "1",
+      "apply_policy": "2"
+    },
+    {
+      "id": "2",
+      "namespace_id": "0",
+      "module_id": "2",
+      "apply_policy": "2"
+    },
+    {
+      "id": "3",
+      "namespace_id": "0",
+      "module_id": "3",
+      "apply_policy": "2"
+    },
+    {
+      "id": "4",
+      "namespace_id": "0",
+      "module_id": "4",
+      "apply_policy": "2"
+    },
+    {
+      "id": "5",
+      "namespace_id": "0",
+      "module_id": "5",
+      "apply_policy": "2"
+    }
   ]
 }

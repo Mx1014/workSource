@@ -234,4 +234,12 @@ public interface RolePrivilegeService {
  	 * @param cmd
      */
 	void deleteAuthorizationServiceModule(DeleteAuthorizationServiceModuleCommand cmd);
+
+	/**
+	 * 获取用户全部角色
+	 * @param organizationId
+	 * @param userId
+     * @return
+     */
+	List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId);
 }

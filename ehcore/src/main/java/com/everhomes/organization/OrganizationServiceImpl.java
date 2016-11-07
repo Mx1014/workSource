@@ -226,15 +226,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ASSIGNMENT_EXISTS,
 					"organization group type error");
 		}
-
 		Organization organization  = ConvertHelper.convert(cmd, Organization.class);
-		
 		Organization parOrg = this.checkOrganization(cmd.getParentId());
-		
-		User user = UserContext.current().getUser();
-		
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
+
 		//default show navi, add by sfyan 20160505
 		if(null == cmd.getNaviFlag()){
 			cmd.setNaviFlag(OrganizationNaviFlag.SHOW_NAVI.getCode());
@@ -247,47 +241,171 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organization.setNamespaceId(parOrg.getNamespaceId());
 		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		if(OrganizationGroupType.ENTERPRISE.getCode().equals(parOrg.getGroupType())){
-			organization.setDirectlyEnterpriseId(parOrg.getId());
-		}else{
-			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
-		}
-		
 		Organization org = dbProvider.execute((TransactionStatus status) -> {
 			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-				//添加子公司的时候默认给公司添加圈 sfyan 20160706
-				Group group = new Group();
-				group.setName(cmd.getName());
-				group.setDisplayName(cmd.getName());
-				group.setEnterpriseAddress(cmd.getAddress());
-				
-				group.setDescription(cmd.getName());
-				group.setStatus(OrganizationStatus.ACTIVE.getCode());
-				
-				group.setCreatorUid(user.getId());
-				
-				group.setNamespaceId(namespaceId);
-				
-				group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
-				groupProvider.createGroup(group);
-				
-				organization.setGroupId(group.getId());
+				this.createChildrenEnterprise(organization,cmd.getAddress(), cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds());
+			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.JOB_POSITION){
+				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
 				organizationProvider.createOrganization(organization);
-				
-				OrganizationDetail enterprise = new OrganizationDetail();
-				enterprise.setOrganizationId(organization.getId());
-				enterprise.setAddress(cmd.getAddress());
-				enterprise.setCreateTime(organization.getCreateTime());
-				organizationProvider.createOrganizationDetail(enterprise);
-			}else{
+
+				//更新通用岗位
+				this.updateOrganizationJobPositionMap(organization, cmd.getJobPositionIds());
+
+				//更新组人员
+				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), organization);
+			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.JOB_LEVEL){
+				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+				// 增加职级大小
+				organization.setSize(cmd.getSize());
 				organizationProvider.createOrganization(organization);
+				//更新组人员
+				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), organization);
+			}else if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.GROUP){
+				organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
+
+				organizationProvider.createOrganization(organization);
+				// 创建经理群组
+				Organization managerGroup = this.createManagerGroup(organization, organization.getDirectlyEnterpriseId());
+
+				// 更新经理群组人员
+				this.batchUpdateOrganizationMember(cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds(), managerGroup);
 			}
 			return organization;
 		});
 		
 		return ConvertHelper.convert(org, OrganizationDTO.class);
 	}
-	
+
+	/**
+	 * 更新机构岗位和通用岗位的关系
+	 * @param organization
+	 * @param jobPositionIds
+     */
+	private void updateOrganizationJobPositionMap(Organization organization, List<Long> jobPositionIds){
+		if(null == jobPositionIds){
+			LOGGER.debug("organization job position is null");
+			return;
+		}
+
+		// 删除原有的
+		List<OrganizationJobPositionMap> jobPositionMaps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+		for (OrganizationJobPositionMap jobPositionMap: jobPositionMaps) {
+			organizationProvider.deleteOrganizationJobPositionMapById(jobPositionMap.getId());
+		}
+
+		// 添加通用岗位
+		for (Long jobPositionId: jobPositionIds) {
+			OrganizationJobPositionMap jobPositionMap = new OrganizationJobPositionMap();
+			jobPositionMap.setOrganizationId(organization.getId());
+			jobPositionMap.setNamespaceId(organization.getNamespaceId());
+			jobPositionMap.setJobPositionId(jobPositionId);
+			jobPositionMap.setCreatorUid(UserContext.current().getUser().getId());
+		}
+	}
+
+	/**
+	 * 创建子公司
+	 * @param organization
+	 * @param address
+	 * @param addManagerMemberIds
+	 * @param delManagerMemberIds
+     */
+	private void createChildrenEnterprise(Organization organization, String address, List<Long> addManagerMemberIds, List<Long> delManagerMemberIds){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		organization.setDirectlyEnterpriseId(0L);
+		//添加子公司的时候默认给公司添加圈 sfyan 20160706
+		Group group = new Group();
+		group.setName(organization.getName());
+		group.setDisplayName(organization.getName());
+		group.setEnterpriseAddress(address);
+
+		group.setDescription(organization.getName());
+		group.setStatus(OrganizationStatus.ACTIVE.getCode());
+
+		group.setCreatorUid(organization.getId());
+
+		group.setNamespaceId(namespaceId);
+
+		group.setDiscriminator(GroupDiscriminator.ENTERPRISE.getCode());
+		groupProvider.createGroup(group);
+
+		//创建公司
+		organization.setGroupId(group.getId());
+		organizationProvider.createOrganization(organization);
+
+		// 创建公司详情
+		OrganizationDetail enterprise = new OrganizationDetail();
+		enterprise.setOrganizationId(organization.getId());
+		enterprise.setAddress(address);
+		enterprise.setCreateTime(organization.getCreateTime());
+		organizationProvider.createOrganizationDetail(enterprise);
+
+		// 创建经理群组
+		Organization managerGroup = this.createManagerGroup(organization, organization.getId());
+
+		// 更新经理群组人员
+		this.batchUpdateOrganizationMember(addManagerMemberIds, delManagerMemberIds, managerGroup);
+	}
+
+	/**
+	 * 更新组人员
+	 * @param addMemberIds
+	 * @param delMemberIds
+	 * @param organization
+     */
+	private void batchUpdateOrganizationMember(List<Long> addMemberIds, List<Long> delMemberIds, Organization organization){
+		if(null != delMemberIds){
+			for (Long memberId: delMemberIds) {
+				organizationProvider.deleteOrganizationMemberById(memberId);
+			}
+		}else{
+			LOGGER.debug("delete members is null");
+		}
+
+		if(null != addMemberIds){
+			for (Long memberId: addMemberIds) {
+				OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
+				if(null != member){
+					member.setOrganizationId(organization.getId());
+					organizationProvider.createOrganizationMember(member);
+				}
+			}
+		}else{
+			LOGGER.debug("add members is null");
+		}
+
+	}
+
+	/**
+	 * 创建经理组
+	 * @param organization
+	 * @param enterpriseId
+     * @return
+     */
+	private Organization createManagerGroup(Organization organization, Long enterpriseId){
+		Organization managerGroup = null;
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(OrganizationGroupType.MANAGER.getCode());
+		List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organization.getId(), groupTypes);
+		if(0 < managerGroups.size()){
+			managerGroup = managerGroups.get(1);
+		}else{
+			managerGroup = new Organization();
+			managerGroup.setNamespaceId(organization.getNamespaceId());
+			managerGroup.setName(organization.getName() + "经理组");
+			managerGroup.setGroupType(OrganizationGroupType.MANAGER.getCode());
+			managerGroup.setDirectlyEnterpriseId(enterpriseId);
+			managerGroup.setParentId(organization.getId());
+			managerGroup.setShowFlag(organization.getShowFlag());
+			managerGroup.setPath(organization.getPath());
+			managerGroup.setLevel(organization.getLevel()+1);
+			managerGroup.setOrganizationType(organization.getOrganizationType());
+			managerGroup.setStatus(OrganizationStatus.ACTIVE.getCode());
+			organizationProvider.createOrganization(managerGroup);
+		}
+		return managerGroup;
+	}
+
 	@Override
 	public void setAclRoleAssignmentRole(
 			SetAclRoleAssignmentCommand cmd, EntityType entityType) {
@@ -338,14 +456,41 @@ public class OrganizationServiceImpl implements OrganizationService {
 		parOrg.setShowFlag(cmd.getNaviFlag());
 		parOrg.setName(cmd.getName());
 		
-		if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-			OrganizationDetail enterprise = organizationProvider.findOrganizationDetailByOrganizationId(parOrg.getId());
-			if(null != enterprise){
-				enterprise.setAddress(cmd.getAddress());
-				organizationProvider.updateOrganizationDetail(enterprise);
+		Organization org = dbProvider.execute((TransactionStatus status) -> {
+			if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+				OrganizationDetail enterprise = organizationProvider.findOrganizationDetailByOrganizationId(parOrg.getId());
+				if(null != enterprise){
+					enterprise.setAddress(cmd.getAddress());
+					organizationProvider.updateOrganizationDetail(enterprise);
+				}
+
+				// 创建经理群组
+				Organization managerGroup = this.createManagerGroup(parOrg, parOrg.getId());
+
+				// 更新经理群组人员
+				this.batchUpdateOrganizationMember(cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds(), managerGroup);
+
+			}else if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.JOB_POSITION){
+
+				//更新通用岗位
+				this.updateOrganizationJobPositionMap(parOrg, cmd.getJobPositionIds());
+
+				//更新组人员
+				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), parOrg);
+			}else if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.JOB_LEVEL){
+				// 增加职级大小
+				parOrg.setSize(cmd.getSize());
+				//更新组人员
+				this.batchUpdateOrganizationMember(cmd.getAddMemberIds(), cmd.getDelMemberIds(), parOrg);
+			}else if(OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(parOrg.getGroupType()) == OrganizationGroupType.GROUP){
+				// 创建经理群组
+				Organization managerGroup = this.createManagerGroup(parOrg, parOrg.getDirectlyEnterpriseId());
+				// 更新经理群组人员
+				this.batchUpdateOrganizationMember(cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds(), managerGroup);
 			}
-			
-		}
+			return parOrg;
+		});
+
 		organizationProvider.updateOrganization(parOrg);
 	}
 	
@@ -1490,6 +1635,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypeList.add(OrganizationGroupType.JOB_POSITION.getCode());
+		groupTypeList.add(OrganizationGroupType.JOB_LEVEL.getCode());
 		
 		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypeList);
 		organizations.add(organization);

@@ -153,7 +153,7 @@ public class AclAdminController extends ControllerBase {
     public RestResponse listAclRoles(ListAclRolesCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
     	List<Role> roles = this.aclProvider.getRolesByApp(cmd.getAppId());
     	List<RoleDTO> roleDto = new ArrayList<RoleDTO>();

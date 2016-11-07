@@ -234,7 +234,7 @@ CREATE TABLE `eh_service_module_scopes` (
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
   `module_id` BIGINT DEFAULT NULL,
   `module_name` VARCHAR(64) DEFAULT NULL,
-  `owner_type` VARCHAR(64) NOT NULL,
+  `owner_type` VARCHAR(64) DEFAULT NULL,
   `owner_id` BIGINT DEFAULT NULL,
   `default_order` INTEGER NULL COMMENT 'order number',
   `apply_policy` TINYINT NOT NULL DEFAULT '0' COMMENT '0: delete , 1: override, 2: revert',

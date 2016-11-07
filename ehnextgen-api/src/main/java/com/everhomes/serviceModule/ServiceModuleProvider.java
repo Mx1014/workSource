@@ -28,4 +28,6 @@ public interface ServiceModuleProvider {
 	List<ServiceModule> listServiceModule(Integer level, Byte type);
 	
 	List<ServiceModuleScope> listServiceModuleScopes(Integer namespaceId, String ownerType, Long ownerId, Byte applyPolicy);
+
+	List<ServiceModulePrivilege> listServiceModulePrivileges(List<Long> moduleIds, ServiceModulePrivilegeType privilegeType);
 }

@@ -3,7 +3,7 @@ package com.everhomes.test.junit.acl;
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.acl.admin.AuthorizationServiceModule;
 import com.everhomes.rest.acl.admin.AuthorizationServiceModuleCommand;
-import com.everhomes.rest.acl.admin.CreateServiceModuleAdminCommand;
+import com.everhomes.schema.tables.pojos.EhAcls;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
@@ -16,6 +16,8 @@ import org.junit.Test;
 
 import java.util.ArrayList;
 import java.util.List;
+
+import static com.everhomes.schema.Tables.EH_ACLS;
 
 /**
  * Created by sfyan on 2016/11/3.
@@ -80,22 +82,58 @@ public class AuthorizationServiceModuleTest extends BaseLoginAuthTestCase {
         assertTrue("The user info should be get from server, response=" +
                 StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
-//        List<EhAclRoleAssignments> resultAcl = new ArrayList<>();
-//
         DSLContext context = dbProvider.getDslContext();
-//        context.select().from(EH_ACL_ROLE_ASSIGNMENTS)
-//                .where(EH_ACL_ROLE_ASSIGNMENTS.OWNER_TYPE.eq("EhOrganizations"))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.OWNER_ID.eq(1000750L))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.TARGET_TYPE.eq("EhUsers"))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.TARGET_ID.eq(10001L))
-//                .and(EH_ACL_ROLE_ASSIGNMENTS.ROLE_ID.eq(1005L))
-//                .fetch().map((r) -> {
-//            resultAcl.add(ConvertHelper.convert(r, EhAclRoleAssignments.class));
-//            return null;
-//        });
-//        assertNotNull("The reponse of getting acl role assignments info may not be null", resultAcl);
-//        assertEquals(1, resultAcl.size());
+
+        List<EhAcls> resultAcls = new ArrayList<>();
+        context.select().from(EH_ACLS)
+                .where(EH_ACLS.ROLE_TYPE.eq("EhOrganizations"))
+                .and(EH_ACLS.ROLE_ID.eq(1000751L))
+                .fetch().map((r) -> {
+            resultAcls.add(ConvertHelper.convert(r, EhAcls.class));
+            return null;
+        });
+        assertNotNull("The reponse of getting acl role assignments info may not be null", resultAcls);
+        assertEquals(10, resultAcls.size());
+
+        List<EhAcls> resultAcls1 = new ArrayList<>();
+        context.select().from(EH_ACLS)
+                .where(EH_ACLS.OWNER_TYPE.eq("EhCommunities"))
+                .and(EH_ACLS.OWNER_ID.eq(24210090697425925L))
+                .and(EH_ACLS.ROLE_TYPE.eq("EhOrganizations"))
+                .and(EH_ACLS.ROLE_ID.eq(1000751L))
+                .fetch().map((r) -> {
+            resultAcls1.add(ConvertHelper.convert(r, EhAcls.class));
+            return null;
+        });
+        assertNotNull("The reponse of getting acl role assignments info may not be null", resultAcls1);
+        assertEquals(2, resultAcls1.size());
+
+        List<EhAcls> resultAcls2 = new ArrayList<>();
+        context.select().from(EH_ACLS)
+                .where(EH_ACLS.OWNER_TYPE.eq("EhCommunities"))
+                .and(EH_ACLS.OWNER_ID.eq(24210090697425926L))
+                .and(EH_ACLS.ROLE_TYPE.eq("EhOrganizations"))
+                .and(EH_ACLS.ROLE_ID.eq(1000751L))
+                .fetch().map((r) -> {
+            resultAcls2.add(ConvertHelper.convert(r, EhAcls.class));
+            return null;
+        });
+        assertNotNull("The reponse of getting acl role assignments info may not be null", resultAcls2);
+        assertEquals(3, resultAcls2.size());
+
+        List<EhAcls> resultAcls3 = new ArrayList<>();
+        context.select().from(EH_ACLS)
+                .where(EH_ACLS.OWNER_TYPE.eq("EhCommunities"))
+                .and(EH_ACLS.OWNER_ID.eq(24210090697425927L))
+                .and(EH_ACLS.ROLE_TYPE.eq("EhOrganizations"))
+                .and(EH_ACLS.ROLE_ID.eq(1000751L))
+                .fetch().map((r) -> {
+            resultAcls3.add(ConvertHelper.convert(r, EhAcls.class));
+            return null;
+        });
+        assertNotNull("The reponse of getting acl role assignments info may not be null", resultAcls3);
+        assertEquals(5, resultAcls3.size());
+
 
         List<EhServiceModuleAssignments> resultModuleAssignments = new ArrayList<>();
 

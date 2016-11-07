@@ -226,4 +226,10 @@ public interface OrganizationProvider {
     void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+
+	List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId);
+
+	void deleteOrganizationJobPositionMapById(Long id);
+
+	void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap);
 }

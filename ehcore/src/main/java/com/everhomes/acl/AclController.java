@@ -55,7 +55,6 @@ public class AclController extends ControllerBase {
     @RequestMapping("createOrganizationSuperAdmin")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
-//        rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getupdateOrganizationSuperAdminCode(), cmd.getOrganizationId(), PrivilegeConstants.OrgAdminUpdate);
         rolePrivilegeService.createOrganizationSuperAdmin(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

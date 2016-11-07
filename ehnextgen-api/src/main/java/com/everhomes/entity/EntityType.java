@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.entity;
 
+import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhAddresses;
@@ -57,7 +58,8 @@ public enum EntityType {
     APPURLS(EhAppUrls.class.getSimpleName()),
     NEWS(EhNews.class.getSimpleName()),
     IMPERSONATION(EhUserImpersonations.class.getSimpleName()),
-    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName());
+    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName()),
+    ROLE(EhAclRoles.class.getSimpleName());
     private String code;
     
     private EntityType(String code) {
@@ -92,6 +94,8 @@ public enum EntityType {
             return POST;
         else if(code.equalsIgnoreCase(ORGANIZATIONS.getCode()))
             return ORGANIZATIONS;
+        else if(code.equalsIgnoreCase(ROLE.getCode()))
+            return ROLE;
         else if(code.equalsIgnoreCase("EhFamilies"))
             return FAMILY;
         else if(code.equalsIgnoreCase("EhFleaMarkets"))

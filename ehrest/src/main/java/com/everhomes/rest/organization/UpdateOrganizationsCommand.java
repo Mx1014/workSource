@@ -29,6 +29,8 @@ public class UpdateOrganizationsCommand {
 	
 	private Byte naviFlag;
 
+	private Integer size;
+
 	@ItemType(Long.class)
 	private List<Long> addManagerMemberIds;
 
@@ -123,5 +125,13 @@ public class UpdateOrganizationsCommand {
 
 	public void setDelMemberIds(List<Long> delMemberIds) {
 		this.delMemberIds = delMemberIds;
+	}
+
+	public Integer getSize() {
+		return size;
+	}
+
+	public void setSize(Integer size) {
+		this.size = size;
 	}
 }

@@ -62,6 +62,25 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
+	public List<ServiceModulePrivilege> listServiceModulePrivileges(List<Long> moduleIds, ServiceModulePrivilegeType privilegeType) {
+		List<ServiceModulePrivilege> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModulePrivilegesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_PRIVILEGES);
+		Condition cond = Tables.EH_SERVICE_MODULE_PRIVILEGES.MODULE_ID.in(moduleIds);
+		if(null != privilegeType){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_PRIVILEGES.PRIVILEGE_TYPE.eq(privilegeType.getCode()));
+		}
+		query.addConditions(cond);
+		query.addOrderBy(Tables.EH_SERVICE_MODULE_PRIVILEGES.DEFAULT_ORDER);
+
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModulePrivilege.class));
+			return null;
+		});
+		return results;
+	}
+
+	@Override
 	public Long createServiceModuleAssignment(ServiceModuleAssignment serviceModuleAssignment) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceModuleAssignments.class));
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhServiceModuleAssignments.class));
@@ -187,12 +206,13 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		SelectQuery<EhServiceModuleScopesRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_SCOPES);
 		
 		Condition cond = Tables.EH_SERVICE_MODULE_SCOPES.NAMESPACE_ID.eq(namespaceId);
+		if(!StringUtils.isEmpty(ownerType))
+			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.OWNER_TYPE.eq(ownerType));
 		if(null != ownerId)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.OWNER_ID.eq(ownerId));
-		if(!StringUtils.isBlank(ownerType))
+		if(null != applyPolicy)
 			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.APPLY_POLICY.eq(applyPolicy));
-		if(null != ownerId)
-			cond = cond.and(Tables.EH_SERVICE_MODULE_SCOPES.OWNER_ID.eq(ownerId));
+
 		query.addConditions(cond);
 		query.fetch().map((r) -> {
 			results.add(ConvertHelper.convert(r, ServiceModuleScope.class));
