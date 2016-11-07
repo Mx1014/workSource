@@ -47,7 +47,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipments> listEquipments(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, 
-			List<String> targetType, List<Long> targetId, CrossShardListingLocator locator, Integer pageSize);
+			List<String> targetType, List<Long> targetId, Integer offset, Integer pageSize);
 	
 	List<EquipmentInspectionEquipmentParameters> listParametersByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> listAttachmentsByEquipmentId(Long equipmentId, Byte attachmentType);

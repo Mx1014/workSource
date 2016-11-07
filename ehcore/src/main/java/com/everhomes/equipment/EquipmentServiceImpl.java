@@ -2847,8 +2847,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		User user = UserContext.current().getUser();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
+//        CrossShardListingLocator locator = new CrossShardListingLocator();
+//        locator.setAnchor(cmd.getPageAnchor());
+		if(null == cmd.getPageAnchor()) {
+			cmd.setPageAnchor(0L);
+		}
+		Integer offset = cmd.getPageAnchor().intValue();
         
         List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
       
@@ -2867,7 +2871,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		if(isAdmin) {
-			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), null, null, locator, pageSize + 1);
+			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), null, null, offset, pageSize + 1);
 		} else {
 			List<OrganizationDTO> groupDtos = listUserRelateDepartment(cmd.getOwnerId());
 			List<String> targetTypes = new ArrayList<String>();
@@ -2879,12 +2883,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 			if(targetIds.size() > 0) {
-				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), targetTypes, targetIds, locator, pageSize + 1);
+				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), targetTypes, targetIds, offset, pageSize + 1);
 			}
 		}
         if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
-        	response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
+        	response.setNextPageAnchor((long) (offset + 1));
         }
         
         
