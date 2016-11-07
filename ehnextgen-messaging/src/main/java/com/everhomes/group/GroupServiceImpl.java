@@ -4413,7 +4413,26 @@ public class GroupServiceImpl implements GroupService {
 	}
 
 	private void checkCreateBroadcastPrivilege(Long userId, String ownerType, Long ownerId) {
-		
+		BroadcastOwnerType broadcastOwnerType = BroadcastOwnerType.fromCode(ownerType);
+		switch (broadcastOwnerType) {
+		case GROUP:
+			Group group = groupProvider.findGroupById(ownerId);
+			if (group == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"not exist group!");
+			}
+			Integer remainCount = getRemainBroadcastCount(group.getNamespaceId(), group.getId());
+			if (remainCount <= 0) {
+				throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_BEYOND_BROADCAST_COUNT,
+						"beyond avalable count!");
+			}
+			
+			break;
+
+		default:
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"owner type error!");
+		}
 	}
 
 	private void checkCreateBroadcastParameters(Long userId, CreateBroadcastCommand cmd) {
@@ -4799,9 +4818,6 @@ public class GroupServiceImpl implements GroupService {
 				User user = userProvider.findUserById(gm.getMemberId());
 				String memberAvatar = getUrl(user.getAvatar());
 				groupMemberAvatarList.add(memberAvatar);
-				if (groupMemberAvatarList.size() >= 8) {
-					break;
-				}
 			}
 		}
 		response.setGroupMemberAvatarList(groupMemberAvatarList);

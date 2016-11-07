@@ -37,4 +37,5 @@ public interface GroupServiceErrorCode {
     
     
     static final int ERROR_GROUP_CATEGORY_NAME_EXIST = 10031; // 分类已存在
+    static final int ERROR_GROUP_BEYOND_BROADCAST_COUNT = 10032; // 今天广播发送次数已用完
 }

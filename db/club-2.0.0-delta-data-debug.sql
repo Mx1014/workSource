@@ -1,6 +1,7 @@
 -- 俱乐部相关配置， add by tt, 20161102
 select max(id) into @id from `eh_locale_strings`;
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'group', '10031', 'zh_CN', '名称已存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'group', '10032', 'zh_CN', '今天广播发送次数已用完');
 
 select max(id) into @id from `eh_locale_templates`;
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES (@id:=@id+1, 'group.notification', 36, 'zh_CN', '俱乐部发消息', '${newCreator}已成为“${groupName}”的创建者', 0);
