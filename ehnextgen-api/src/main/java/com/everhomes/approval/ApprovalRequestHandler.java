@@ -6,6 +6,7 @@ import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
 import com.everhomes.rest.approval.RequestDTO;
 
 public interface ApprovalRequestHandler {
@@ -30,6 +31,10 @@ public interface ApprovalRequestHandler {
 	String processMessageToNextLevelBody(ApprovalRequest approvalRequest);
 
 	String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest approvalRequest);
+
+	ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
+			ListApprovalLogAndFlowOfRequestBySceneResponse result,
 			ApprovalRequest approvalRequest);
 	
 }

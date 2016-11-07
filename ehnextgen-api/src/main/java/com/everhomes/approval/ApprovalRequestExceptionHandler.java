@@ -33,6 +33,7 @@ import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -335,4 +336,14 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		
 		return result;
 	}
+	@Override
+	public ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
+			ListApprovalLogAndFlowOfRequestBySceneResponse result,
+			ApprovalRequest approvalRequest) { 
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		result.setPunchDate( content.getPunchDate() );
+		result.setExceptionRequestType(content.getExceptionRequestType()); 
+		return null;
+	}
+	
 }

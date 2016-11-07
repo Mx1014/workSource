@@ -17,6 +17,7 @@ import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
 import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
@@ -189,6 +190,14 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 			
 		}
 		return punchDetail;
+	}
+
+	@Override
+	public ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
+			ListApprovalLogAndFlowOfRequestBySceneResponse result,
+			ApprovalRequest approvalRequest) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }
