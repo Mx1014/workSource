@@ -189,6 +189,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.version.VersionInfoDTO;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.GroupSearcher;
@@ -211,6 +212,7 @@ import com.everhomes.util.SortOrder;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.version.VersionService;
 import com.google.gson.Gson;
 
 @Component
@@ -245,6 +247,9 @@ public class GroupServiceImpl implements GroupService {
     
     @Autowired
     private ConfigurationProvider configProvider;
+    
+    @Autowired
+    private VersionService versionService;
     
     @Autowired
     GroupSearcher groupSearcher;
@@ -2518,9 +2523,9 @@ public class GroupServiceImpl implements GroupService {
     	String homeUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.HOME_URL, "");
 		String shareUrl = configProvider.getValue(group.getNamespaceId(), ConfigConstants.CLUB_SHARE_URL, "");
 		if (homeUrl.length() == 0 || shareUrl.length() == 0) {
-			LOGGER.error("Invalid home url or content url, homeUrl=" + homeUrl + ", contentUrl=" + shareUrl);
-			throw RuntimeErrorException.errorWith(NewsServiceErrorCode.SCOPE,
-					NewsServiceErrorCode.ERROR_NEWS_CONTENT_URL_INVALID, "Invalid home url or content url");
+			LOGGER.error("Invalid home url or share url, homeUrl=" + homeUrl + ", shareUrl=" + shareUrl);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_GENERAL_EXCEPTION, "Invalid home url or share url");
 		} else {
 			return homeUrl + shareUrl + "?namespaceId=" + group.getNamespaceId()+"&groupId="+group.getId()+"&realm=";
 		}
@@ -4771,11 +4776,50 @@ public class GroupServiceImpl implements GroupService {
 
 	@Override
 	public GetShareInfoResponse getShareInfo(GetShareInfoCommand cmd) {
+		if (cmd.getNamespaceId() == null || cmd.getGroupId() == null || StringUtils.isEmpty(cmd.getRealm())) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters, cmd"+cmd);
+		}
+		GetShareInfoResponse response = new GetShareInfoResponse();
+		VersionInfoDTO versionInfoDTO = versionService.getVersionInfo(cmd.getRealm());
+		response.setAppName(versionInfoDTO.getAppName());
+		response.setAppIconUrl(versionInfoDTO.getIconUrl());
+		response.setDownloadUrl(versionInfoDTO.getDownloadUrl());
 		
+		Group group = groupProvider.findGroupById(cmd.getGroupId());
+		response.setGroupName(group.getName());
+		response.setGroupDescription(group.getDescription());
+		response.setGroupAvatarUrl(getUrl(group.getAvatar()));
 		
+        ListingLocator locator = new ListingLocator(group.getId());
+        List<GroupMember> groupMembers = groupProvider.listGroupMembers(locator, 10000);
+        List<String> groupMemberAvatarList = new ArrayList<>();
+        if (groupMembers != null) {
+			for (GroupMember gm : groupMembers) {
+				User user = userProvider.findUserById(gm.getMemberId());
+				String memberAvatar = getUrl(user.getAvatar());
+				groupMemberAvatarList.add(memberAvatar);
+				if (groupMemberAvatarList.size() >= 8) {
+					break;
+				}
+			}
+		}
+		response.setGroupMemberAvatarList(groupMemberAvatarList);
 		
+		response.setClubPlaceholderName(getClubPlaceholderName(cmd.getNamespaceId()));
 		
-		return null;
+		return response;
 	}
 	
+	private String getUrl(String uri){
+		if (StringUtils.isEmpty(uri)) {
+			return "";
+		}
+		try{
+            String url = contentServerService.parserUri(uri, EntityType.GROUP.getCode(), null);
+            return url;
+        }catch(Exception e){
+        }
+		return "";
+	}
 }
