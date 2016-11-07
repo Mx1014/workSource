@@ -709,9 +709,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		map.put("category",
 				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 		String[] times = timeTotal.split("\\.");
-		map.put("day", times[0]);
-		map.put("hour", times[1]);
-		map.put("min", times[2]);
+		map.put("day", times[0].equals("0")?"":times[0]+"天");
+		map.put("hour", times[1].equals("0")?"":times[1]+"小时");
+		map.put("min", times[2].equals("0")?"":times[2]+"分钟");
 		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
 		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
 		map.put("endDate", mmDDSF.format(new Date(endTime)));
@@ -747,9 +747,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		map.put("category",
 				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 		String[] times = timeTotal.split("\\.");
-		map.put("day", times[0]);
-		map.put("hour", times[1]);
-		map.put("min", times[2]);
+		map.put("day", times[0].equals("0")?"":times[0]+"天");
+		map.put("hour", times[1].equals("0")?"":times[1]+"小时");
+		map.put("min", times[2].equals("0")?"":times[2]+"分钟");
 		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
 		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
 		map.put("endDate", mmDDSF.format(new Date(endTime)));
