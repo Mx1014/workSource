@@ -4771,6 +4771,10 @@ public class GroupServiceImpl implements GroupService {
 
 	@Override
 	public GetShareInfoResponse getShareInfo(GetShareInfoCommand cmd) {
+		
+		
+		
+		
 		return null;
 	}
 	

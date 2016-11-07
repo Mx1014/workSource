@@ -40,6 +40,8 @@ CREATE TABLE `eh_broadcasts` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 版本url表添加图标的链接地址, add by tt, 20161107
+ALTER TABLE `eh_version_urls`	ADD COLUMN `icon_url` VARCHAR(50);
 
 
 

@@ -408,4 +408,12 @@ public class VersionServiceImpl implements VersionService {
 	private String getUpgradeUrl(){
 		return configurationProvider.getValue(ConfigConstants.UPGRADE_URL, "");
 	}
+	
+	public VersionInfoDTO getVersionInfo(String realm) {
+		VersionRealm versionRealm= versionProvider.findVersionRealmByName(realm);
+		
+		
+		
+		return null;
+	} 
 }
