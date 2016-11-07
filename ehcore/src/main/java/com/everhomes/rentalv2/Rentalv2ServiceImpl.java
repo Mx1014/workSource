@@ -4059,7 +4059,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(null == defaultRule.getAutoAssign())
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter AutoAssign   is null");
-			
+			resource.setResourceCounts(defaultRule.getSiteCounts());
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
 			resource.setAutoAssign(defaultRule.getAutoAssign());
 			resource.setMultiUnit(defaultRule.getMultiUnit());
