@@ -4135,29 +4135,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				addSingleRules.add(signleCmd);
 			}
 
-			
-			//建立了resource之后才有id 
-			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-				HashSet<String> siteNumberSet = new HashSet<>();
-				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
-					if( null!=defaultRule.getSiteNumbers())
-						for(String number : defaultRule.getSiteNumbers()){
-							siteNumberSet.add(number);
-							RentalResourceNumber resourceNumber = new RentalResourceNumber();
-							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-							resourceNumber.setOwnerId(resource.getId());
-							resourceNumber.setResourceNumber(number);
-							this.rentalProvider.createRentalResourceNumber(resourceNumber);
-						}
-				}
-				else
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
-				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
-					
-			} 
 			seqNum.set(0L);
 			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
@@ -4181,6 +4158,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setCellEndId(cellBeginId+seqNum.get());
 			
 			Long siteId = rentalProvider.createRentalSite(resource);
+
+			
+			//建立了resource之后才有id 
+			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				HashSet<String> siteNumberSet = new HashSet<>();
+				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
+					if( null!=defaultRule.getSiteNumbers())
+						for(String number : defaultRule.getSiteNumbers()){
+							siteNumberSet.add(number);
+							RentalResourceNumber resourceNumber = new RentalResourceNumber();
+							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+							resourceNumber.setOwnerId(siteId);
+							resourceNumber.setResourceNumber(number);
+							this.rentalProvider.createRentalResourceNumber(resourceNumber);
+						}
+				}
+				else
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
+				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
+					
+			} 
 			if(cmd.getOwners() != null){
 				for(SiteOwnerDTO dto:cmd.getOwners()){
 					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);
