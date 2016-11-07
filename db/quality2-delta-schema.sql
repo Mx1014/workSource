@@ -4,10 +4,13 @@ ALTER TABLE eh_quality_inspection_standards ADD COLUMN `review_result` TINYINT N
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `reviewer_uid` BIGINT NOT NULL DEFAULT '0';
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `review_time` DATETIME;
 ALTER TABLE eh_quality_inspection_standards ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT '0';
+ALTER TABLE eh_quality_inspection_standards DROP COLUMN `category_id`;
 
 ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '';
 ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id';
+ALTER TABLE eh_quality_inspection_tasks CHANGE category_id specification_id BIGINT NOT NULL DEFAULT '0' COMMENT 'reference to the id of eh_quality_inspection_specifications';
+ALTER TABLE eh_quality_inspection_tasks CHANGE category_path specification_path VARCHAR(128) COMMENT 'reference to the path of eh_quality_inspection_specifications';
 
 DROP TABLE IF EXISTS `eh_quality_inspection_standard_specification_map`;
 CREATE TABLE `eh_quality_inspection_standard_specification_map` (
@@ -32,7 +35,7 @@ CREATE TABLE `eh_quality_inspection_specifications` (
   `scope_id` BIGINT,
   `parent_id` BIGINT NOT NULL DEFAULT '0',
   `name` VARCHAR(64) NOT NULL,
-  `path` VARCHAR(128) DEFAULT NULL,
+  `path` VARCHAR(128),
   `score` DOUBLE NOT NULL DEFAULT '0',
   `description` TEXT COMMENT 'content data',
   `weight` DOUBLE NOT NULL DEFAULT '0',
@@ -41,7 +44,7 @@ CREATE TABLE `eh_quality_inspection_specifications` (
   `apply_policy` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: add, 1: modify, 2: delete',
   `refer_id` BIGINT NOT NULL DEFAULT '0',
   `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id',
-  `create_time` DATETIME DEFAULT NULL,
+  `create_time` DATETIME,
   `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for approval, 2: active',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
