@@ -953,6 +953,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("createChildrenOrganizationJobPosition")
 	@RestReturn(value=String.class)
 	public RestResponse createChildrenOrganizationJobPosition(@Valid CreateOrganizationCommand cmd) {
+		organizationService.createChildrenOrganizationJobPosition(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1005,6 +1006,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("createOrganizationJobPosition")
 	@RestReturn(value=String.class)
 	public RestResponse createOrganizationJobPosition(@Valid CreateOrganizationJobPositionCommand cmd) {
+		organizationService.createOrganizationJobPosition(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1042,7 +1044,7 @@ public class OrganizationController extends ControllerBase {
 	 * <p>通用岗位列表</p>
 	 */
 	@RequestMapping("listOrganizationJobPositions")
-	@RestReturn(value=OrganizationJobPositionDTO.class, collection = true)
+	@RestReturn(value=ListOrganizationJobPositionResponse.class)
 	public RestResponse listOrganizationJobPositions(@Valid ListOrganizationJobPositionCommand cmd) {
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

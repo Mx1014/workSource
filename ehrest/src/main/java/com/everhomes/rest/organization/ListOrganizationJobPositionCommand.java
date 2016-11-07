@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 所属实体类型</li>
  * <li>ownerId: 所属实体id</li>
  * <li>keywords: 关键字搜索</li>
+ * <li>pageAnchor: 瞄</li>
+ * <li>pageSize: 每页条数</li>
  * </ul>
  */
 public class ListOrganizationJobPositionCommand {
@@ -18,6 +20,10 @@ public class ListOrganizationJobPositionCommand {
     private Long ownerId;
 
     private String keywords;
+    
+    private Long pageAnchor;
+    
+    private Integer pageSize;
 
 
     public ListOrganizationJobPositionCommand() {
@@ -47,7 +53,23 @@ public class ListOrganizationJobPositionCommand {
         this.keywords = keywords;
     }
 
-    @Override
+    public Long getPageAnchor() {
+		return pageAnchor;
+	}
+
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -41,5 +41,6 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_ASSIGNMENT_EXISTS=400004; //人员角色已存在
     static final int ERROR_MOBILE_NUM = 500003; //手机号错误
 
-   
+    int ERROR_ORG_JOB_POSITION_EXISTS = 600001; //通用岗位已存在
+    
 }

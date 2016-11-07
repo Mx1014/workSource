@@ -7592,5 +7592,126 @@ public class OrganizationServiceImpl implements OrganizationService {
                 userId, namespaceId, oranizationId);
         }
 	}
+
+	@Override
+	public void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd) {
+		
+	}
+
+	@Override
+	public ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd) {
+		ListOrganizationJobPositionResponse response = new ListOrganizationJobPositionResponse();
+		
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+
+		List<OrganizationJobPosition> list = organizationProvider.listOrganizationJobPositions(cmd.getOwnerType(), cmd.getOwnerId(), 
+				cmd.getKeywords(), cmd.getPageAnchor(), cmd.getPageSize());
+		
+		if(list.size() > 0){
+			response.setRequests(list.stream().map(r -> {
+				OrganizationJobPositionDTO dto = ConvertHelper.convert(r, OrganizationJobPositionDTO.class);
+				return dto;
+			}).collect(Collectors.toList()));
+			
+			if(list.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        	}
+		}
+		
+		return response;
+	}
+	
+	@Override
+	public void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		if(null == cmd.getName()) {
+        	LOGGER.error("Name cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Name cannot be null.");
+        }
+		
+		OrganizationJobPosition organizationJobPosition = organizationProvider.findOrganizationJobPositionByName(
+				cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
+		
+		if(null != organizationJobPosition) {
+        	LOGGER.error("OrganizationJobPosition in existing.");
+    		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_JOB_POSITION_EXISTS,
+    				"OrganizationJobPosition in existing.");
+        }
+		
+		User user = UserContext.current().getUser();
+		
+		organizationJobPosition = new OrganizationJobPosition();
+		organizationJobPosition.setName(cmd.getName());
+		organizationJobPosition.setCreatorUid(user.getId());
+		organizationJobPosition.setNamespaceId(user.getNamespaceId());
+		organizationJobPosition.setOwnerId(cmd.getOwnerId());
+		organizationJobPosition.setOwnerType(cmd.getOwnerType());
+		organizationJobPosition.setStatus(OrganizationJobPositionStatus.ACTIVE.getCode());
+		organizationProvider.createOrganizationJobPosition(organizationJobPosition);
+		
+	}
+	
+	@Override
+	public void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd) {
+		
+		if(null == cmd.getId()) {
+        	LOGGER.error("Id cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Id cannot be null.");
+        }
+		
+		OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+		organizationJobPosition.setName(cmd.getName());
+		organizationProvider.updateOrganizationJobPosition(organizationJobPosition);
+		
+	}
+	
+	@Override
+	public void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
+		
+		if(null == cmd.getId()) {
+        	LOGGER.error("Id cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Id cannot be null.");
+        }
+		
+		OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
+		organizationJobPosition.setStatus(OrganizationJobPositionStatus.INACTIVE.getCode());
+		organizationProvider.updateOrganizationJobPosition(organizationJobPosition);
+		
+	}
+	
+	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
+		if(null == ownerId) {
+        	LOGGER.error("OwnerId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OwnerId cannot be null.");
+        }
+    	
+    	if(StringUtils.isEmpty(ownerType)) {
+        	LOGGER.error("OwnerType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OwnerType cannot be null.");
+        }
+	}
+	
+	private OrganizationJobPosition checkOrganizationJobPositionIsNull(Long id){
+		
+		OrganizationJobPosition organizationJobPosition = organizationProvider.findOrganizationJobPositionById(id);
+
+		if(null == organizationJobPosition) {
+        	LOGGER.error("OrganizationJobPosition not found, id={}", id);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"OrganizationJobPosition not found.");
+        }
+		
+		return organizationJobPosition;
+	}
 	
 }
