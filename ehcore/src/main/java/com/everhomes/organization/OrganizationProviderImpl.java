@@ -2546,6 +2546,85 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		organizationJobPositionMap.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organizationJobPositionMap.setId(id);
 		dao.insert(organizationJobPositionMap);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationJobPositionMaps.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationJobPositionMaps.class, null);
 	}
+
+	@Override
+	public void createOrganizationJobPosition(OrganizationJobPosition organizationJobPosition) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
+		
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationJobPositions.class));
+		organizationJobPosition.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationJobPosition.setId(id);
+		dao.insert(organizationJobPosition);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationJobPositions.class, null);
+	}
+	
+	@Override
+	public void updateOrganizationJobPosition(OrganizationJobPosition organizationJobPosition) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
+		
+		organizationJobPosition.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		dao.update(organizationJobPosition);
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationJobPositions.class, null);
+	}
+	
+	@Override
+	public OrganizationJobPosition findOrganizationJobPositionById(Long id) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
+		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
+		
+		return ConvertHelper.convert(dao.findById(id), OrganizationJobPosition.class);
+	}
+	
+	@Override
+	public OrganizationJobPosition findOrganizationJobPositionByName(String ownerType, Long ownerId, String name) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
+		SelectQuery<EhOrganizationJobPositionsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITIONS);
+		
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.NAME.eq(name));
+		
+		return ConvertHelper.convert(query.fetchOne(), OrganizationJobPosition.class);
+	}
+	
+	@Override
+	public List<OrganizationJobPosition> listOrganizationJobPositions(String ownerType, Long ownerId, String keyword,
+			Long pageAnchor, Integer pageSize) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
+		SelectQuery<EhOrganizationJobPositionsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITIONS);
+		
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.OWNER_TYPE.eq(ownerType));
+		if(!StringUtils.isEmpty(keyword))
+			query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.NAME.like("%" + keyword + "%"));
+		if(null != pageAnchor && pageAnchor != 0) {
+			query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITIONS.ID.gt(pageAnchor));
+		}
+		if(null != pageSize)
+			query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_ORGANIZATION_JOB_POSITIONS.ID.asc());
+		return query.fetch().stream().map(r -> ConvertHelper.convert(query.fetchOne(), OrganizationJobPosition.class))
+				.collect(Collectors.toList());
+	}
+	
+	@Override
+	public void deleteOrganizationJobPositionById(Long id) {
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizationJobPositions.class));
+		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
+		dao.deleteById(id);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationJobPositions.class, null);
+	}
+	
 }

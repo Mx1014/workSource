@@ -231,4 +231,17 @@ public interface OrganizationProvider {
 	void deleteOrganizationJobPositionMapById(Long id);
 
 	void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap);
+	
+	void createOrganizationJobPosition(OrganizationJobPosition organizationJobPosition);
+	
+	void updateOrganizationJobPosition(OrganizationJobPosition organizationJobPosition);
+	
+	OrganizationJobPosition findOrganizationJobPositionById(Long id);
+	
+	OrganizationJobPosition findOrganizationJobPositionByName(String ownerType, Long ownerId, String name);
+	
+	void deleteOrganizationJobPositionById(Long id);
+	
+	List<OrganizationJobPosition> listOrganizationJobPositions(String ownerType, Long ownerId, String keyword,
+			Long pageAnchor, Integer pageSize);
 }

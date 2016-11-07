@@ -352,4 +352,13 @@ public interface OrganizationService {
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
 
+	void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd);
+	
+	void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd);
+	
+	void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
+	
+	void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	
+	ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd);
 }
