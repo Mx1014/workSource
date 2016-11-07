@@ -31,6 +31,10 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 -- 审批错误提示，added by wh ,2016-10-20 
 SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'time.unit', 'day', 'zh_CN', '天');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'time.unit', 'hour', 'zh_CN', '小时');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'time.unit', 'min', 'zh_CN', '分钟');
+
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'approval', '10022', 'zh_CN', '所选日期已提交过加班申请，请重新选择');
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'ApprovalStatus', '0', 'zh_CN', '待审批');
@@ -38,6 +42,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'ApprovalStatus', '2', 'zh_CN', '已驳回');
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'approval.type', '3', 'zh_CN', '加班');
+
 
 
 -- 广场加入我的审批

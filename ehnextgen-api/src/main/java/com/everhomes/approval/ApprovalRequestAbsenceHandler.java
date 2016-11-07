@@ -24,6 +24,7 @@ import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
+import com.everhomes.rest.approval.ApprovalTypeTemplatCode;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BasicDescriptionDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
@@ -709,9 +710,12 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		map.put("category",
 				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 		String[] times = timeTotal.split("\\.");
-		map.put("day", times[0].equals("0")?"":times[0]+"天");
-		map.put("hour", times[1].equals("0")?"":times[1]+"小时");
-		map.put("min", times[2].equals("0")?"":times[2]+"分钟");
+		map.put("day", times[0].equals("0")?"":times[0]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale()).getText());
+		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale()).getText());
+		map.put("min", times[2].equals("0")?"":times[2]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale()).getText());
 		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
 		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
 		map.put("endDate", mmDDSF.format(new Date(endTime)));
@@ -747,9 +751,12 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		map.put("category",
 				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
 		String[] times = timeTotal.split("\\.");
-		map.put("day", times[0].equals("0")?"":times[0]+"天");
-		map.put("hour", times[1].equals("0")?"":times[1]+"小时");
-		map.put("min", times[2].equals("0")?"":times[2]+"分钟");
+		map.put("day", times[0].equals("0")?"":times[0]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale()).getText());
+		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale()).getText());
+		map.put("min", times[2].equals("0")?"":times[2]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale()).getText());
 		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
 		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
 		map.put("endDate", mmDDSF.format(new Date(endTime)));
