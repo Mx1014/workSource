@@ -343,6 +343,8 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		result.setPunchDate( content.getPunchDate() );
 		result.setExceptionRequestType(content.getExceptionRequestType()); 
+		result.setPunchDetail(content.getPunchDetail());
+		result.setPunchStatusName(content.getPunchStatusName());
 		return null;
 	}
 	

@@ -16,6 +16,8 @@ import com.everhomes.util.StringHelper;
  * <li>approvalLogAndFlowOfRequestList: 申请的审批日志 与审批流程列表，参考{@link com.everhomes.rest.approval.ApprovalLogAndFlowOfRequestDTO}</li>
  * <li>punchDate: 异常申请字段:打卡日期</li>
  * <li>exceptionRequestType: 异常申请字段:异常类型</li>
+ * <li>punchDetail:  异常申请字段 打卡详情</li>
+ * <li>punchStatusName: 异常申请字段: 打卡状态名</li>
  * </ul>
  */
 public class ListApprovalLogAndFlowOfRequestBySceneResponse {
@@ -28,6 +30,8 @@ public class ListApprovalLogAndFlowOfRequestBySceneResponse {
 
 	private Long punchDate;
 	private Byte exceptionRequestType;
+	private String punchDetail;
+	private String punchStatusName;
 	public ListApprovalLogAndFlowOfRequestBySceneResponse(){
 		
 	}
@@ -92,5 +96,21 @@ public class ListApprovalLogAndFlowOfRequestBySceneResponse {
 
 	public void setExceptionRequestType(Byte exceptionRequestType) {
 		this.exceptionRequestType = exceptionRequestType;
+	}
+
+	public String getPunchDetail() {
+		return punchDetail;
+	}
+
+	public void setPunchDetail(String punchDetail) {
+		this.punchDetail = punchDetail;
+	}
+
+	public String getPunchStatusName() {
+		return punchStatusName;
+	}
+
+	public void setPunchStatusName(String punchStatusName) {
+		this.punchStatusName = punchStatusName;
 	}
 }
