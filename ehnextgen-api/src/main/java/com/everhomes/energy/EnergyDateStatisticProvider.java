@@ -31,10 +31,7 @@ public interface EnergyDateStatisticProvider {
 	List<EnergyDateStatistic> listEnergyDateStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
 			List<Long> serviceCategoryIds, Date startDate, Date endDate);
 
-<<<<<<< HEAD
     EnergyDateStatistic findByMeterAndDate(Integer namespaceId, Long meterId, Date date);
-=======
-	EnergyDateStatistic getEnergyDateStatisticByStatDate(Long meterId, Date statDate);
 
->>>>>>> ca4b010df84e3bea1d2da0ab096f086431d59df0
+	EnergyDateStatistic getEnergyDateStatisticByStatDate(Long meterId, Date statDate);
 }
