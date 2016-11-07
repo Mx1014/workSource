@@ -99,7 +99,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         int pageSize = 200;
         long pageAnchor = 0;
         List<EnergyMeter> meters = meterProvider.listEnergyMeters(pageAnchor, pageSize);
-        while (meters != null && meters.size() >= 0) {
+        while (meters != null && meters.size() > 0) {
             bulkUpdate(meters);
             pageAnchor += (meters.size() + 1);
             meters = meterProvider.listEnergyMeters(pageAnchor, pageSize);

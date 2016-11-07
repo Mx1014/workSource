@@ -180,8 +180,8 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
     public EnergyDateStatistic findByMeterAndDate(Integer namespaceId, Long meterId, Date date) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_ENERGY_DATE_STATISTICS)
-                .where(Tables.EH_ENERGY_DATE_STATISTICS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId))
+                // .where(Tables.EH_ENERGY_DATE_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .where(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId))
                 .and(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.eq(date))
                 .fetchAnyInto(EnergyDateStatistic.class);
     }

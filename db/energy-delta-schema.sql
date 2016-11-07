@@ -111,7 +111,7 @@ CREATE TABLE `eh_energy_meter_setting_logs` (
 CREATE TABLE `eh_energy_meter_default_settings` (
   `id`            BIGINT  NOT NULL,
   `namespace_id`  INTEGER NOT NULL DEFAULT 0,
-  `meter_type`    TINYINT COMMENT '1:WATER, 2: ELECTRIC',
+  `meter_type`    TINYINT COMMENT '1:WATER, 2: ELECTRIC, 3: ALL',
   `setting_type`  TINYINT COMMENT '1: price, 2: rate, 3: amountFormula, 4: costFormula, 5: dayPrompt, 6: monthPrompt etc',
   `name`          VARCHAR(255) COMMENT 'setting name',
   `setting_value` DECIMAL(10, 2) COMMENT 'if setting_type is price or rate have this value',

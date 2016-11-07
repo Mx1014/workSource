@@ -247,7 +247,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         // 日读表差
         this.processDayPrompt(meter, dto);
         // 月读表差
-        // this.processMonthPrompt(meter, dto);
+        this.processMonthPrompt(meter, dto);
         return dto;
     }
 
@@ -260,17 +260,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             Date lastReadingTimeLastDayBegin = Date.valueOf(LocalDate.of(lastReadDateTime.getYear(), lastReadDateTime.getMonthValue(), lastReadDateTime.getDayOfMonth()).minusDays(1));
 
             EnergyDateStatistic statistic = energyDateStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), Date.valueOf(lastReadDateTime.toLocalDate()));
-            // if (statistic == null) {
-            //     statistic = energyDateStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), lastReadingTimeLastDayBegin);
-            // }
             if (statistic != null) {
-                // Calendar cal = Calendar.getInstance();
-                // cal.setTime(lastReadingTimeLastDayBegin);
-                // Timestamp lastReadingTimeLastDay = getDayBegin(cal);
-                // cal.add(Calendar.DAY_OF_MONTH, -1);
-                // Timestamp lastLastReadingTime = getDayBegin(cal);
-                // cal.add(Calendar.DAY_OF_MONTH, -1);
-
                 // 上次读表前一天的最后一条读表记录
                 EnergyMeterReadingLog lastLastReadingLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(), null, new Timestamp(lastReadingTimeLastDayBegin.getTime()));
                 // 上次读表记录
@@ -334,7 +324,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     LOGGER.error("The energy meter error");
                     throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
                 }
-                System.out.println(realAmount);
                 if (realAmount.doubleValue() > 0) {
                     BigDecimal percent = realAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
                     if (percent.doubleValue() >= dayPromptSetting.getSettingValue().doubleValue()) {
@@ -343,7 +332,27 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 }
             }
         }
-        // EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
+    }
+
+    private void processMonthPrompt(EnergyMeter meter, EnergyMeterDTO dto) {
+        Timestamp lastReadTime = meter.getLastReadTime();
+        EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
+        if (lastReadTime != null && monthPromptSetting != null && Objects.equals(monthPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
+            LocalDateTime lastReadDateTime = lastReadTime.toLocalDateTime();
+            // lastReadingTime 前一月的开始
+            Date lastReadingTimeLastMonthBegin = Date.valueOf(LocalDate.of(lastReadDateTime.getYear(), lastReadDateTime.getMonth().minus(1), 1));
+
+            EnergyMonthStatistic statistic = energyMonthStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), "" + lastReadDateTime.toLocalDate().getYear() + lastReadDateTime.toLocalDate().getMonthValue());
+            if (statistic != null) {
+                BigDecimal thisMonthAmount = energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(), lastReadingTimeLastMonthBegin, Date.valueOf(LocalDate.now()));
+                if (thisMonthAmount.doubleValue() > 0) {
+                    BigDecimal percent = thisMonthAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
+                    if (percent.doubleValue() >= monthPromptSetting.getSettingValue().doubleValue()) {
+                        dto.setMonthPrompt(monthPromptSetting.getSettingValue());
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -574,7 +583,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("The energy meter reading log operate time is before today, id = {}", cmd.getLogId());
             throw errorWith(SCOPE, ERR_METER_READING_LOG_BEFORE_TODAY, "The energy meter reading log operate time is before today, id = %s", cmd.getLogId());
         }
-        meterReadingLogProvider.deleteEnergyMeterReadingLog(log);
+
+        dbProvider.execute(r -> {
+            EnergyMeterReadingLog lastReadingLog = meterReadingLogProvider.findLastReadingLogByMeterId(currNamespaceId(), log.getMeterId());
+            meterReadingLogProvider.deleteEnergyMeterReadingLog(log);
+
+            // 删除的记录是最后一条, 把表记的lastReading修改成新的最后一次读数
+            if (Objects.equals(lastReadingLog.getId(), log.getId())) {
+                EnergyMeter meter = meterProvider.findById(currNamespaceId(), log.getMeterId());
+                lastReadingLog = meterReadingLogProvider.findLastReadingLogByMeterId(currNamespaceId(), log.getMeterId());
+                if (lastReadingLog != null) {
+                    meter.setLastReading(lastReadingLog.getReading());
+                } else {
+                    meter.setLastReading(null);
+                }
+                meterProvider.updateEnergyMeter(meter);
+            }
+            return true;
+        });
         readingLogSearcher.deleteById(log.getId());
     }
 
@@ -584,14 +610,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeterDefaultSetting setting = defaultSettingProvider.findById(currNamespaceId(), cmd.getSettingId());
         if (setting != null) {
-            if (cmd.getFormulaId() != null) {
+            boolean isPromptType = Stream.of(EnergyMeterSettingType.MONTH_PROMPT, EnergyMeterSettingType.DAY_PROMPT)
+                    .anyMatch(type -> EnergyMeterSettingType.fromCode(setting.getSettingType()) == type);
+            // 抄表提示类型
+            if (isPromptType) {
+                setting.setStatus(cmd.getSettingStatus());
+                setting.setSettingValue(cmd.getSettingValue());
+            } else if (cmd.getFormulaId() != null) {
+                // 公式类型
                 setting.setFormulaId(cmd.getFormulaId());
             } else if (cmd.getSettingValue() != null) {
+                // 价格及倍率类型
                 setting.setSettingValue(cmd.getSettingValue());
-            }
-            if (cmd.getSettingStatus() != null && (Objects.equals(setting.getSettingType(), EnergyMeterSettingType.DAY_PROMPT.getCode())
-                    || Objects.equals(setting.getSettingType(), EnergyMeterSettingType.MONTH_PROMPT.getCode()))) {
-                setting.setStatus(cmd.getSettingStatus());
             }
             defaultSettingProvider.updateEnergyMeterDefaultSetting(setting);
             return toEnergyMeterDefaultSettingDTO(setting);
@@ -614,7 +644,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         formula.setExpression(processedExpression);
         formula.setName(cmd.getName());
         formula.setFormulaType(cmd.getFormulaType());
-        formula.setNamespaceId(UserContext.getCurrentNamespaceId());
+        formula.setNamespaceId(currNamespaceId());
+        formula.setDisplayExpression(cmd.getExpression());
         meterFormulaProvider.createEnergyMeterFormula(formula);
         return toEnergyMeterFormulaDTO(formula);
     }
@@ -660,7 +691,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeterCategory category = new EnergyMeterCategory();
-        category.setNamespaceId(UserContext.getCurrentNamespaceId());
+        category.setNamespaceId(currNamespaceId());
         category.setName(cmd.getName());
         category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
         category.setCategoryType(cmd.getCategoryType());
@@ -1322,14 +1353,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }*/
 
     private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
-        return ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
+        EnergyMeterFormulaDTO dto = ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
+        dto.setExpression(formula.getDisplayExpression());
+        return dto;
     }
 
     @Override
     public List<EnergyMeterDefaultSettingDTO> listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterDefaultSetting> settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
+        List<EnergyMeterDefaultSetting> settings = new ArrayList<>();
+        if (cmd.getMeterType() != null) {
+            settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
+        } else {
+            List<EnergyMeterDefaultSetting> waterSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.WATER.getCode());
+            List<EnergyMeterDefaultSetting> elecSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.ELECTRIC.getCode());
+            settings.addAll(waterSettings);
+            settings.addAll(elecSettings);
+        }
         return settings.stream().map(this::toEnergyMeterDefaultSettingDTO).collect(Collectors.toList());
     }
 
@@ -1680,6 +1721,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			
 		}
 		 
-	} 
-	
+	}
+
+    @Override
+    public void syncEnergyMeterReadingLogIndex() {
+        readingLogSearcher.syncFromDb();
+    }
+
+    @Override
+    public void syncEnergyMeterIndex() {
+        meterSearcher.syncFromDb();
+    }
+
 }

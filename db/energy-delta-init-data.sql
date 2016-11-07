@@ -7,6 +7,41 @@ INSERT INTO `eh_energy_meter_formula_variables` (`id`, `namespace_id`, `name`, `
 VALUES ('3', '0', 'a', '读表用量差', '每日或每月读表差', '2', '1', '2016-11-01 19:06:13');
 
 
+--
+-- 字符串
+--
+SET @eh_locale_strings_id = (SELECT max(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10001', 'zh_CN', '表记不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10002', 'zh_CN', '表记分类不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10003', 'zh_CN', '公式不能计算');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10004', 'zh_CN', '公式格式错误');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10005', 'zh_CN', '读表记录不存在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10006', 'zh_CN', '只允许删除今天的读表记录');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10008', 'zh_CN', '公式被引用,无法删除');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10009', 'zh_CN', '起始读数大于最大量程');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10010', 'zh_CN', '默认分类无法删除');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10011', 'zh_CN', '导入失败,请检查数据准确性');
+
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.type', '1', 'zh_CN', '水表');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.type', '2', 'zh_CN', '电表');
+
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.status', '2', 'zh_CN', '正常');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.status', '3', 'zh_CN', '已报废');
+
 
 
 -- 带单添加

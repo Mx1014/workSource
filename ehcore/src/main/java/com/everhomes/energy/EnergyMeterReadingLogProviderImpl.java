@@ -165,6 +165,7 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
         return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
                 .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .orderBy(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.desc())
                 .fetchAnyInto(EnergyMeterReadingLog.class);
     }

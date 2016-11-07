@@ -121,7 +121,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         int pageSize = 200;
         long pageAnchor = 0;
         List<EnergyMeterReadingLog> logs = readingLogProvider.listMeterReadingLogs(pageAnchor, pageSize);
-        while (logs != null && logs.size() >= 0) {
+        while (logs != null && logs.size() > 0) {
             bulkUpdate(logs);
             pageAnchor += (logs.size() + 1);
             logs = readingLogProvider.listMeterReadingLogs(pageAnchor, pageSize);
@@ -209,9 +209,11 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             }
             dto.setId(Long.valueOf(hit.getId()));
             dto.setMeterName((String) source.get("meterName"));
-            dto.setResetMeterFlag(Byte.valueOf(source.get("resetFlag")+""));
-            dto.setOperateTime(new Timestamp(Long.valueOf(source.get("operateTime")+"")));
-            dto.setOperatorName((String) source.get("operatorName"));
+            Object resetFlag = source.get("resetFlag");
+            dto.setResetMeterFlag(resetFlag != null ? Byte.valueOf(resetFlag.toString()) : null);
+            Object operateTime = source.get("operateTime");
+            dto.setOperateTime(operateTime != null ? new Timestamp(Long.valueOf(operateTime.toString())) : null);
+            dto.setOperatorName((String)source.get("operatorName"));
             dto.setMeterNumber((String)source.get("meterNumber"));
 
             dtoList.add(dto);

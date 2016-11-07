@@ -107,12 +107,12 @@ db.tx.timeout: 600
 # ElasticSearch configuration
 #
 elastic:    
-    index: everhomesv31x
+    index: everhomesv3
     nodes:
         hosts: elasticsearch
         ports: 9300
         httpports: 9200
-        
+cluster.name: elasticsearch79
 #
 # for API code generation
 #

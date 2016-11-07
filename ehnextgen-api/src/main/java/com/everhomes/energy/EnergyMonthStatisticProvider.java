@@ -1,10 +1,9 @@
 package com.everhomes.energy;
 
-import java.sql.Timestamp;
-import java.util.List;
-
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+
+import java.util.List;
 
 public interface EnergyMonthStatisticProvider {
 
@@ -26,4 +25,5 @@ public interface EnergyMonthStatisticProvider {
 	List<EnergyMonthStatistic> listEnergyMonthStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
 			List<Long> serviceCategoryIds, String yearStr);
 
+    EnergyMonthStatistic findByMeterAndDate(Integer namespaceId, Long meterId, String dateStr);
 }

@@ -254,6 +254,28 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>同步表记索引</p>
+     * <b>URL: /energy/syncEnergyMeterIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyMeterIndex")
+    public RestResponse syncEnergyMeterIndex() {
+        energyConsumptionService.syncEnergyMeterIndex();
+        return success();
+    }
+
+    /**
+     * <p>同步读表记录索引</p>
+     * <b>URL: /energy/syncEnergyMeterReadingLogIndex</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("syncEnergyMeterReadingLogIndex")
+    public RestResponse syncEnergyMeterReadingLogIndex() {
+        energyConsumptionService.syncEnergyMeterReadingLogIndex();
+        return success();
+    }
+
+    /**
      * <p>获取默认设置</p>
      * <b>URL: /energy/listEnergyDefaultSettings</b>
      */

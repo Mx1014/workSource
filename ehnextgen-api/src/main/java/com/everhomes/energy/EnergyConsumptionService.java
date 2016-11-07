@@ -200,4 +200,8 @@ public interface EnergyConsumptionService {
      * 计算某一月的读表数据
      * */  
 	void caculateEnergyMonthStatByDate(Date date);
+
+    void syncEnergyMeterReadingLogIndex();
+
+    void syncEnergyMeterIndex();
 }
