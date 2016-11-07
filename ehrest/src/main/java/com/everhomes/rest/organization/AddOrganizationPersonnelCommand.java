@@ -43,6 +43,9 @@ public class AddOrganizationPersonnelCommand {
 	private List<Long> departmentIds;
 
 	@ItemType(Long.class)
+	private List<Long> groupIds;
+
+	@ItemType(Long.class)
 	private List<Long> jobPositionIds;
 	
 
@@ -128,6 +131,14 @@ public class AddOrganizationPersonnelCommand {
 
 	public void setJobPositionIds(List<Long> jobPositionIds) {
 		this.jobPositionIds = jobPositionIds;
+	}
+
+	public List<Long> getGroupIds() {
+		return groupIds;
+	}
+
+	public void setGroupIds(List<Long> groupIds) {
+		this.groupIds = groupIds;
 	}
 
 	@Override

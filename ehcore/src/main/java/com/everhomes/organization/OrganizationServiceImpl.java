@@ -488,10 +488,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				// 更新经理群组人员
 				this.batchUpdateOrganizationMember(cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds(), managerGroup);
 			}
+
+			organizationProvider.updateOrganization(parOrg);
 			return parOrg;
 		});
-
-		organizationProvider.updateOrganization(parOrg);
 	}
 	
 	@Override
@@ -5395,7 +5395,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 				groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
 				dto.setGroups(groups);
 			}
-			
+
+			//岗位
+			dto.setJobPositions(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(),org.getPath()));
+
+			//职级
+			dto.setJobLevels(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_LEVEL, dto.getContactToken(),org.getPath()));
+
+
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
 				User user = userProvider.findUserById(dto.getTargetId());
 				if(null != user){
@@ -5436,11 +5443,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>(); 
 		
 		List<String> groupTypeList = new ArrayList<String>();
-		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
-		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-		
+		groupTypeList.add(organizationGroupType.getCode());
 		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypeList);
-
 		List<Long> deptIds = new ArrayList<Long>();
 		for (Organization organization : depts) {
 			deptIds.add(organization.getId());
@@ -5511,7 +5515,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(0 == orgs.size()){
 			return res;
 		}
-		res.setDtos(this.convertOrgRole(orgs, org));
+		res.setDtos(this.convertOrg(orgs, org));
 		return res;
 	}
 	
@@ -5524,7 +5528,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(0 == orgs.size()){
 			return res;
 		}
-		res.setDtos(this.convertOrgRole(orgs, org));
+		res.setDtos(this.convertOrg(orgs, org));
 		return res;
 	}
 	
@@ -5574,7 +5578,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 	}
 	
-	private List<OrganizationDTO> convertOrgRole(List<Organization> orgs, Organization org){
+	private List<OrganizationDTO> convertOrg(List<Organization> orgs, Organization org){
 		Long orgId = null;
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(org.getGroupType().equals(OrganizationGroupType.ENTERPRISE.getCode())){
@@ -5599,7 +5603,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		roles.addAll(aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), orgId));
 		
-	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
+//	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
 	    Long ownerId = orgId;
 		List<OrganizationDTO> rganizationDTOs = orgs.stream().map(r->{ 
@@ -5612,23 +5616,50 @@ public class OrganizationServiceImpl implements OrganizationService {
 				return dto;
 			}
 			Organization depart = deptMaps.get(dto.getParentId());
-			List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.ORGANIZATIONS.getCode(), dto.getId());
+//			List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.ORGANIZATIONS.getCode(), dto.getId());
 			if(null != depart) dto.setParentName(depart.getName());
-			if(null != resources && resources.size() > 0){
-				List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
-				for (RoleAssignment resource : resources) {
-					Role role = roleMap.get(resource.getRoleId());
-					if(null != role)
-						roleDTOs.add(ConvertHelper.convert(role, RoleDTO.class));
-				}
-				dto.setRoles(roleDTOs);
-			}
+			//暂时屏蔽机构角色
+//			if(null != resources && resources.size() > 0){
+//				List<RoleDTO> roleDTOs = new ArrayList<RoleDTO>();
+//				for (RoleAssignment resource : resources) {
+//					Role role = roleMap.get(resource.getRoleId());
+//					if(null != role)
+//						roleDTOs.add(ConvertHelper.convert(role, RoleDTO.class));
+//				}
+//				dto.setRoles(roleDTOs);
+//			}
+
+			//机构经理
+			dto.setManagers(getOrganizationManagers(r.getId()));
 			return dto;
 		}).collect(Collectors.toList());
-		
+
 		return rganizationDTOs;
 	}
-	
+
+	/**
+	 * 获取机构经理
+	 * @param organizationId
+	 * @return
+     */
+	private List<OrganizationManagerDTO> getOrganizationManagers(Long organizationId){
+		List<OrganizationManagerDTO>  dtos = new ArrayList<>();
+		//机构经理
+		List<String> types = new ArrayList<>();
+		types.add(OrganizationGroupType.MANAGER.getCode());
+		List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organizationId, types);
+		if(0 < managerGroups.size()){
+			List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null,organizationId,OrganizationMemberStatus.ACTIVE, null);
+			members.stream().map(m -> {
+				OrganizationManagerDTO managerDTO = ConvertHelper.convert(m, OrganizationManagerDTO.class);
+				managerDTO.setMemberId(m.getId());
+				dtos.add(managerDTO);
+				return null;
+			});
+		}
+		return dtos;
+	}
+
 	/**
 	 * 转换map
 	 * @param roles
@@ -7257,6 +7288,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
 		List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+		List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
 		
 		Long finalOrganizationId = organizationId;
 		String finalGroupType = groupType;
@@ -7264,6 +7296,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		dbProvider.execute((TransactionStatus status) -> {
 			
 			List<Long> departmentIds = cmd.getDepartmentIds();
+
+			List<Long> groupIds = cmd.getGroupIds();
 
 			List<Long> jobPositionIds = cmd.getJobPositionIds();
 			
@@ -7305,27 +7339,50 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 
 			// 重新把成员添加到公司多个部门
-			for (Long childOrganizationId : departmentIds) {
-				Organization group = checkOrganization(childOrganizationId);
+			for (Long departmentId : departmentIds) {
+				Organization group = checkOrganization(departmentId);
 
 				organizationMember.setGroupPath(group.getPath());
 
-				organizationMember.setOrganizationId(childOrganizationId);
+				organizationMember.setOrganizationId(departmentId);
 
 				organizationProvider.createOrganizationMember(organizationMember);
 
-				if(OrganizationGroupType.fromCode(finalGroupType) == OrganizationGroupType.GROUP){
-					groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
-				}else if(OrganizationGroupType.fromCode(finalGroupType) == OrganizationGroupType.DEPARTMENT){
-					departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
-				}
+				departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
 			}
 
+			// 重新把成员添加到公司多个群组
+			for (Long groupId : groupIds) {
+				Organization group = checkOrganization(groupId);
+
+				organizationMember.setGroupPath(group.getPath());
+
+				organizationMember.setOrganizationId(groupId);
+
+				organizationProvider.createOrganizationMember(organizationMember);
+
+				groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
+			}
+
+			// 重新把成员添加到公司多个群组
+			for (Long jobPositionId : jobPositionIds) {
+				Organization group = checkOrganization(jobPositionId);
+
+				organizationMember.setGroupPath(group.getPath());
+
+				organizationMember.setOrganizationId(jobPositionId);
+
+				organizationProvider.createOrganizationMember(organizationMember);
+
+				jobPositions.add(ConvertHelper.convert(group, OrganizationDTO.class));
+			}
 
 
 			dto.setGroups(groups);
 			
 			dto.setDepartments(departments);
+
+			dto.setJobPositions(jobPositions);
 			
 			return null;
 		});
@@ -7536,9 +7593,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization orgCommoand = new Organization();
 		orgCommoand.setId(org.getId());
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-		orgCommoand.setGroupType(org.getGroupType());
+		VisibleFlag visibleFlag = VisibleFlag.SHOW;
+		if(VisibleFlag.ALL == VisibleFlag.fromCode(cmd.getVisibleFlag())){
+			visibleFlag = null;
+		}
 
-		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(),VisibleFlag.SHOW, locator, pageSize);
+		if(null != VisibleFlag.fromCode(cmd.getVisibleFlag())){
+			visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
+		}
+
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(),visibleFlag, locator, pageSize);
 
 		//转拼音
 		organizationMembers = convertPinyin(organizationMembers);
