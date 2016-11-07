@@ -4,7 +4,7 @@ package com.everhomes.rest.energy;
  * <ul>
  * <li>INACTIVE(0): 删除</li>
  * <li>ACTIVE(2): 正常</li>
- * <li>DISABLED(3): 禁用</li>
+ * <li>DISABLED(3): 禁用(如果是修改抄表提示的开启及禁用状态则传递次参数)</li>
  * </ul>
  */
 public enum EnergyCommonStatus {

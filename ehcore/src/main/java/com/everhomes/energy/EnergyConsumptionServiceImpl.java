@@ -245,7 +245,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
 
         // 日读表差
-        // this.processDayPrompt(meter, dto);
+        this.processDayPrompt(meter, dto);
         // 月读表差
         // this.processMonthPrompt(meter, dto);
         return dto;
@@ -256,47 +256,94 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterDefaultSetting dayPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.DAY_PROMPT);
         if (lastReadTime != null && dayPromptSetting != null && Objects.equals(dayPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
             LocalDateTime lastReadDateTime = lastReadTime.toLocalDateTime();
-            Date date = Date.valueOf(LocalDate.of(lastReadDateTime.getYear(), lastReadDateTime.getMonthValue(), lastReadDateTime.getDayOfMonth()).minusDays(1));
+            // lastReadingTime 前一天的开始
+            Date lastReadingTimeLastDayBegin = Date.valueOf(LocalDate.of(lastReadDateTime.getYear(), lastReadDateTime.getMonthValue(), lastReadDateTime.getDayOfMonth()).minusDays(1));
 
-            EnergyDateStatistic statistic = energyDateStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), date);
+            EnergyDateStatistic statistic = energyDateStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), Date.valueOf(lastReadDateTime.toLocalDate()));
+            // if (statistic == null) {
+            //     statistic = energyDateStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), lastReadingTimeLastDayBegin);
+            // }
             if (statistic != null) {
-                // EnergyMeterReadingLog log = meterReadingLogProvider.findLastReadingLogByMeterId(currNamespaceId(), meter.getId());
-                // meter.getMaxReading().subtract(log.)
-                // if (log.getResetMeterFlag() == TrueOrFalseFlag.TRUE.getCode()) {
-                //
-                // }
+                // Calendar cal = Calendar.getInstance();
+                // cal.setTime(lastReadingTimeLastDayBegin);
+                // Timestamp lastReadingTimeLastDay = getDayBegin(cal);
+                // cal.add(Calendar.DAY_OF_MONTH, -1);
+                // Timestamp lastLastReadingTime = getDayBegin(cal);
+                // cal.add(Calendar.DAY_OF_MONTH, -1);
 
-                EnergyMeterSettingLog amountFormula = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(),
-                        meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA, new Timestamp(date.getTime()));
+                // 上次读表前一天的最后一条读表记录
+                EnergyMeterReadingLog lastLastReadingLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(), null, new Timestamp(lastReadingTimeLastDayBegin.getTime()));
+                // 上次读表记录
+                EnergyMeterReadingLog lastReadingLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(), null, meter.getLastReadTime());
 
-                EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(),
-                        meter.getId(), EnergyMeterSettingType.PRICE, new Timestamp(date.getTime()));
+                // 读表用量差
+                BigDecimal amount = new BigDecimal(0);
 
-                EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(),
-                        meter.getId(), EnergyMeterSettingType.RATE, new Timestamp(date.getTime()));
+                // 默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
+                BigDecimal readingAnchor = meter.getStartReading();
+                BigDecimal dayCurrReading = meter.getStartReading();
+                if(null != lastLastReadingLog){
+                    readingAnchor = lastLastReadingLog.getReading();
+                }
+                if(null != lastReadingLog){
+                    dayCurrReading = lastReadingLog.getReading();
+                }
 
-                EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), amountFormula.getFormulaId());
+                // 拿出单个表前一天所有的读表记录
+                List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(), new Timestamp(lastReadingTimeLastDayBegin.getTime()), meter.getLastReadTime());
+
+                // 查看是否有换表,是否有归零
+                if(meterReadingLogs != null){
+                    for(EnergyMeterReadingLog log : meterReadingLogs){
+
+                        //有归零 量程设置为最大值-锚点,锚点设置为0
+                        if(log.getResetMeterFlag()!=null && TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag()){
+                            amount = amount.add(meter.getMaxReading().subtract(readingAnchor));
+                            readingAnchor = new BigDecimal(0);
+                        }
+                        //有换表 量程加上旧表读数-锚点,锚点重置为新读数
+                        if(log.getChangeMeterFlag() != null && TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag()){
+                            EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+                            amount = amount.add(changeLog.getOldReading().subtract(readingAnchor));
+                            readingAnchor = changeLog.getNewReading();
+                        }
+                    }
+                }
+                //计算当天走了多少字 量程+昨天最后一次读数 - 锚点
+                amount = amount.add(dayCurrReading.subtract(readingAnchor));
+
+                //获取公式,计算当天的费用
+                EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE, meter.getLastReadTime());
+                EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE , meter.getLastReadTime());
+                EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA , meter.getLastReadTime());
+
+                String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
 
                 ScriptEngineManager manager = new ScriptEngineManager();
                 ScriptEngine engine = manager.getEngineByName("js");
 
-                engine.put(MeterFormulaVariable.AMOUNT.getCode(), statistic.getCurrentAmount());
+                engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
                 engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
                 engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
 
-                BigDecimal amount = null;
+                BigDecimal realAmount;
                 try {
-                    String amountStr = engine.eval(formula.getExpression()).toString();
-                    amount = new BigDecimal(amountStr);
-                } catch (Exception e) {
-                    LOGGER.error("The energy meter formula format error, expression = {}", formula.getExpression());
-                    throw errorWith(SCOPE, ERR_METER_FORMULA_ERROR, "The energy meter formula format error, expression = %s", formula.getExpression());
+                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
+                } catch (ScriptException e) {
+                    e.printStackTrace();
+                    LOGGER.error("The energy meter error");
+                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
                 }
-                // if ()
-
+                System.out.println(realAmount);
+                if (realAmount.doubleValue() > 0) {
+                    BigDecimal percent = realAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
+                    if (percent.doubleValue() >= dayPromptSetting.getSettingValue().doubleValue()) {
+                        dto.setDayPrompt(dayPromptSetting.getSettingValue());
+                    }
+                }
             }
         }
-        EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
+        // EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
     }
 
     @Override
@@ -430,13 +477,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId());
 
-        // 第一次读表的时候判断读数与起始读数的大小
+        /*// 第一次读表的时候判断读数与起始读数的大小
         if (meter.getLastReading() == null) {
             if (cmd.getCurrReading().doubleValue() < meter.getStartReading().doubleValue()) {
                 LOGGER.error("Current reading less then meter start reading, meterId = ", meter.getId());
                 throw errorWith(SCOPE, ERR_CURR_READING_LESS_THEN_START_READING, "Current reading less then meter start reading, meterId = %s", meter.getId());
             }
-        }
+        }*/
         EnergyMeterReadingLog log = new EnergyMeterReadingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setReading(cmd.getCurrReading());
@@ -539,8 +586,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if (setting != null) {
             if (cmd.getFormulaId() != null) {
                 setting.setFormulaId(cmd.getFormulaId());
-            }
-            if (cmd.getSettingValue() != null) {
+            } else if (cmd.getSettingValue() != null) {
                 setting.setSettingValue(cmd.getSettingValue());
             }
             if (cmd.getSettingStatus() != null && (Objects.equals(setting.getSettingType(), EnergyMeterSettingType.DAY_PROMPT.getCode())
