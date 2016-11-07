@@ -101,7 +101,7 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 			exceptionRequest.setReason(a.getReason()); 
 			exceptionRequest.setRequestInfo(processRequestDate(a.getEffectiveDate())+
 					localeStringProvider.find(ApprovalTypeTemplateCode.SCOPE, a.getApprovalType().toString(), UserContext.current()
-							.getUser().getLocale())+ a.getHourLength()+"小时");
+							.getUser().getLocale()).getText()+ a.getHourLength()+"小时");
 			PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(a.getEffectiveDate()));
 			
 			String punchDetail = processPunchDetail(pdl);
