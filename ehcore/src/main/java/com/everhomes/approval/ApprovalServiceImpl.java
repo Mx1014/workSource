@@ -1303,7 +1303,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
 		ListApprovalLogAndFlowOfRequestBySceneResponse result = new ListApprovalLogAndFlowOfRequestBySceneResponse(approvalRequest.getApprovalType(),approvalRequest.getApprovalStatus(),
 				handler.ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest) ,listApprovalLogAndFlow(approvalRequest));
-		return handler.processListApprovalLogAndFlowOfRequestBySceneResponse(result, approvalRequest);
+		handler.processListApprovalLogAndFlowOfRequestBySceneResponse(result, approvalRequest);
+		return result ;
 		
 	}
 
