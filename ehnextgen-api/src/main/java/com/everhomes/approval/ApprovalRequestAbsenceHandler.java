@@ -16,15 +16,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleStringProvider;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
-import com.everhomes.rest.approval.ApprovalTypeTemplatCode;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
 import com.everhomes.rest.approval.BasicDescriptionDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
@@ -765,4 +762,29 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 		
 		return result;
 	}
+	
+
+	
+	@Override
+	public BriefApprovalRequestDTO processApprovalRequestByScene(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		String timeTotal = null;
+
+		Long fromTime = null;
+		Long endTime =null ;
+		if (approvalRequest.getTimeFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+			List<TimeRange> timeRangeList = briefApprovalRequestDTO.getTimeRangeList();
+			for (TimeRange timeRange : timeRangeList) {
+				timeTotal = calculateTimeTotal(timeTotal, timeRange.getActualResult());
+				if(null == fromTime || fromTime > timeRange.getFromTime())
+					fromTime = timeRange.getFromTime();
+				if(null == endTime || endTime < timeRange.getEndTime())
+					endTime = timeRange.getEndTime();
+			}
+		}
+		briefApprovalRequestDTO.setDescription(timeTotal);
+		briefApprovalRequestDTO.setTitle(ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest));
+		return briefApprovalRequestDTO;
+	}
+	
 }

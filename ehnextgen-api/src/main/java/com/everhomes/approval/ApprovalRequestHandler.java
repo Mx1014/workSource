@@ -36,5 +36,8 @@ public interface ApprovalRequestHandler {
 	ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
 			ListApprovalLogAndFlowOfRequestBySceneResponse result,
 			ApprovalRequest approvalRequest);
+
+	BriefApprovalRequestDTO processApprovalRequestByScene(
+			ApprovalRequest approvalRequest);
 	
 }

@@ -347,5 +347,12 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		result.setPunchStatusName(content.getPunchStatusName());
 		return null;
 	}
-	
+
+	@Override
+	public BriefApprovalRequestDTO processApprovalRequestByScene(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		  
+		briefApprovalRequestDTO.setTitle(ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest  ));
+		return briefApprovalRequestDTO;
+	}
 }

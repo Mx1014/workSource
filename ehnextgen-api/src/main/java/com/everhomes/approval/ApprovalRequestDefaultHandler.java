@@ -199,5 +199,11 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	public BriefApprovalRequestDTO processApprovalRequestByScene(
+			ApprovalRequest approvalRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

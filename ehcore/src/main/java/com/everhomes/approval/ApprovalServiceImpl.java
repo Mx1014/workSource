@@ -1400,7 +1400,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalRequestHandler handler = getApprovalRequestHandler(cmd.getApprovalType());
 
 		List<BriefApprovalRequestDTO> resultList = approvalRequestList.stream().map(a -> {
-			BriefApprovalRequestDTO briefApprovalRequestDTO = handler.processBriefApprovalRequest(a);
+			BriefApprovalRequestDTO briefApprovalRequestDTO = handler.processApprovalRequestByScene(a);
 			return briefApprovalRequestDTO;
 		}).collect(Collectors.toList());
 

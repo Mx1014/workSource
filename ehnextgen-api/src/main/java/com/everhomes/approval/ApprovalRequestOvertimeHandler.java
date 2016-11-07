@@ -206,4 +206,12 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		
 		return result;
 	}
+
+	@Override
+	public BriefApprovalRequestDTO processApprovalRequestByScene(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		  
+		briefApprovalRequestDTO.setTitle(ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest));
+		return briefApprovalRequestDTO;
+	}
 }
