@@ -1301,8 +1301,10 @@ public class ApprovalServiceImpl implements ApprovalService {
 
 		ApprovalRequest approvalRequest = checkApprovalRequestExist(ownerInfo, cmd.getRequestToken());
 		ApprovalRequestHandler handler = getApprovalRequestHandler(approvalRequest.getApprovalType());
-		return new ListApprovalLogAndFlowOfRequestBySceneResponse(approvalRequest.getApprovalType(),approvalRequest.getApprovalStatus(),
+		ListApprovalLogAndFlowOfRequestBySceneResponse result = new ListApprovalLogAndFlowOfRequestBySceneResponse(approvalRequest.getApprovalType(),approvalRequest.getApprovalStatus(),
 				handler.ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest) ,listApprovalLogAndFlow(approvalRequest));
+		return handler.processListApprovalLogAndFlowOfRequestBySceneResponse(result, approvalRequest);
+		
 	}
 
 	@Override
