@@ -116,6 +116,7 @@ import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
 import com.everhomes.rest.approval.ListMyApprovalsBySceneCommand;
+import com.everhomes.rest.approval.ListTargetUsersCommand;
 import com.everhomes.rest.approval.RejectApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.RequestDTO;
@@ -140,6 +141,7 @@ import com.everhomes.rest.news.AttachmentDescriptor;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
@@ -161,13 +163,15 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
 
+import freemarker.core.ReturnInstruction.Return;
+
 @Component
 public class ApprovalServiceImpl implements ApprovalService {
-
+	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApprovalServiceImpl.class);
 	@Autowired
 	private NamespaceProvider namespaceProvider;
-
+	 
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 
@@ -2183,6 +2187,17 @@ public class ApprovalServiceImpl implements ApprovalService {
 		cmd2.setReason(cmd.getReason());
 		this.rejectApprovalRequest(cmd2);
 		
+	}
+
+	@Override
+	public List<OrganizationMemberDTO> listTargetUsers(
+			ListTargetUsersCommand cmd) {
+		List<PunchRuleOwnerMap> maps = this.punchProvider.queryPunchRuleOwnerMaps(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getListType());
+		if (null == maps )
+			return null;
+		
+		return organizationService.listOrganizationMemberDTOs(cmd.getOwnerId(),
+				maps.stream().map(r ->r.getTargetId()).collect(Collectors.toList())  );
 	}
 
 }

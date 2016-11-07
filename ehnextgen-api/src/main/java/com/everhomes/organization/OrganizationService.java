@@ -351,4 +351,6 @@ public interface OrganizationService {
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
+	List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,
+			List<Long> memberUids);
 }

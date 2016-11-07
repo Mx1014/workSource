@@ -225,5 +225,6 @@ public interface OrganizationProvider {
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
     void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
 
-	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId); 
+	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
 }

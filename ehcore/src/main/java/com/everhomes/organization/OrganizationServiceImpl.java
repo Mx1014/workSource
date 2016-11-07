@@ -5214,15 +5214,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 	                + ", enterpriseId=" + member.getOrganizationId() + ", status=" + member.getStatus() + ", removeFromDb=" + member.getStatus());
 	        }
 	}
+	@Override
+	public List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,List<Long> memberUids ){
 
-
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationMembers(orgId, memberUids);
+		Organization org = this.checkOrganization(orgId); 
+		return this.convertDTO(organizationMembers, org);
+		
+	}
 	/**
 	 * 补充返回用户信息，部门 角色
 	 * @param organizationMembers
 	 * @param org
 	 * @return
      */
-	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
+	public List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		

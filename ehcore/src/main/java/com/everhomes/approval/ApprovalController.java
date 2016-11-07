@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.approval;
 
+import java.util.List;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -45,6 +47,7 @@ import com.everhomes.rest.approval.ListBriefApprovalFlowCommand;
 import com.everhomes.rest.approval.ListBriefApprovalFlowResponse;
 import com.everhomes.rest.approval.ListBriefApprovalRuleCommand;
 import com.everhomes.rest.approval.ListBriefApprovalRuleResponse;
+import com.everhomes.rest.approval.ListTargetUsersCommand;
 import com.everhomes.rest.approval.RejectApprovalRequestCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryCommand;
 import com.everhomes.rest.approval.UpdateApprovalCategoryResponse;
@@ -55,6 +58,7 @@ import com.everhomes.rest.approval.UpdateApprovalFlowLevelResponse;
 import com.everhomes.rest.approval.UpdateApprovalRuleCommand;
 import com.everhomes.rest.approval.UpdateApprovalRuleResponse;
 import com.everhomes.rest.approval.UpdateTargetApprovalRuleCommand;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 
 @RestDoc("approval controller")
 @RestController
@@ -369,4 +373,15 @@ public class ApprovalController extends ControllerBase {
 		return new RestResponse();
 	}
 	
+	/**
+	 * 
+	 * <p>28. 获取特殊设置个人接口</p>
+	 * <b>URL: /approval/listTargetUsers</b>
+	 */
+	@RequestMapping("listTargetUsers")
+	@RestReturn(value = OrganizationMemberDTO.class, collection = true)
+	public RestResponse listTargetUsers(ListTargetUsersCommand cmd){
+		List<OrganizationMemberDTO> result = approvalService.listTargetUsers(cmd);
+		return new RestResponse(result);
+	}
 }

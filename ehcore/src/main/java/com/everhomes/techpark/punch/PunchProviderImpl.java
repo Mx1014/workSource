@@ -2,7 +2,6 @@ package com.everhomes.techpark.punch;
 
 import java.sql.Date;
 import java.sql.Time;
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -35,9 +34,9 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.approval.ListTargetType;
 import com.everhomes.rest.techpark.punch.DateStatus;
 import com.everhomes.rest.techpark.punch.PunchDayLogDTO;
-import com.everhomes.rest.techpark.punch.PunchExceptionRequestDTO;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -1787,7 +1786,31 @@ long id = sequenceProvider.getNextSequence(key);
         	return null;
         return objs;
     }
+    @Override
+    public List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(String ownerType,Long ownerId,String listType) { 
+    	// DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class));
+    			DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
+    			SelectQuery<EhPunchRuleOwnerMapRecord> query = context
+    					.selectQuery(Tables.EH_PUNCH_RULE_OWNER_MAP); 
+    			query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_ID.eq(ownerId));
+    			query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_TYPE.eq(ownerType));
+    			if(ListTargetType.APPROVAL.getCode().equals(listType)){
+    				query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.REVIEW_RULE_ID.isNotNull());
+    			} 
+    			if(ListTargetType.PUNCH.getCode().equals(listType)){
+    				query.addConditions(Tables.EH_PUNCH_RULE_OWNER_MAP.PUNCH_RULE_ID.isNotNull());
+    			} 
+    			List<PunchRuleOwnerMap> result = new ArrayList<>();
+    			query.fetch().map((r) -> {
+    				result.add(ConvertHelper.convert(r, PunchRuleOwnerMap.class));
+    				return null;
+    			});
+    			if (null != result && result.size() > 0)
+    				return result;
+    			return null;
+    }
+    
     private void prepareObj(PunchRuleOwnerMap obj) {
     }
 
