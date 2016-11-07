@@ -115,19 +115,30 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
 				
 				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-		if(null!= approvalType)
+		if(null!= approvalType){
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType));
+			if(approvalType.equals(ApprovalType.EXCEPTION.getCode())){
+				if (fromDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.greaterOrEqual(fromDate));
+				}
+				
+				if (endDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.lessOrEqual(endDate));
+				}
+			}
+			else if(approvalType.equals(ApprovalType.OVERTIME.getCode())){
+				if (fromDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(new Date(fromDate)));
+				}
+				
+				if (endDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lessOrEqual(new Date(endDate)));
+				}
+			}
+		}
 		if (categoryId != null) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(categoryId));
-		}
-		
-		if (fromDate != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.ge(fromDate));
-		}
-		
-		if (endDate != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.le(endDate));
-		}
+		} 
 		
 		step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
 		
