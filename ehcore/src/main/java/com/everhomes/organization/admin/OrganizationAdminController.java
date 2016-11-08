@@ -7,6 +7,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.organization.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -877,14 +878,14 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>导入机构成员信息</p>
      */
     @RequestMapping("importOrganizationPersonnelData")
-    @RestReturn(value = String.class)
+    @RestReturn(value = ImportOrganizationPersonnelDataResponse.class)
     public RestResponse importOrganizationPersonnelData(@Valid ImportOrganizationPersonnelDataCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files) {
 //        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
         User manaUser = UserContext.current().getUser();
         Long userId = manaUser.getId();
         //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         if (null == files || null == files[0]) {
-            LOGGER.error("files is null。userId=" + userId);
+            LOGGER.error("files is null, userId=" + userId);
             throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PARAMS,
                     "files is null");
         }

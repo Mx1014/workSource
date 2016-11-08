@@ -48,6 +48,9 @@ public class AddOrganizationPersonnelCommand {
 	@ItemType(Long.class)
 	private List<Long> jobPositionIds;
 	
+	@ItemType(Long.class)
+	private List<Long> jobLevelIds;
+	
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -140,6 +143,15 @@ public class AddOrganizationPersonnelCommand {
 	public void setGroupIds(List<Long> groupIds) {
 		this.groupIds = groupIds;
 	}
+
+	public List<Long> getJobLevelIds() {
+		return jobLevelIds;
+	}
+
+	public void setJobLevelIds(List<Long> jobLevelIds) {
+		this.jobLevelIds = jobLevelIds;
+	}
+
 
 	@Override
     public String toString() {
