@@ -91,7 +91,9 @@ public class OrganizationDTO {
 
 	@ItemType(OrganizationManagerDTO.class)
 	private List<OrganizationManagerDTO> managers;
-	
+
+	private String pathName;
+
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
 	}
@@ -349,6 +351,14 @@ public class OrganizationDTO {
 
 	public void setManagers(List<OrganizationManagerDTO> managers) {
 		this.managers = managers;
+	}
+
+	public String getPathName() {
+		return pathName;
+	}
+
+	public void setPathName(String pathName) {
+		this.pathName = pathName;
 	}
 
 	@Override

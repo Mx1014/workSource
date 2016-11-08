@@ -1520,9 +1520,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}else{
 				dto = new AuthorizationServiceModuleDTO();
 				dto.setAllModuleFlag((byte)0);
-				if(0L == assignment.getModuleId()){
-					dto.setAllModuleFlag((byte)1);
-				}
+
 				dto.setResourceId(assignment.getOwnerId());
 				dto.setResourceType(assignment.getOwnerType());
 				if(EntityType.COMMUNITY == EntityType.fromCode(assignment.getOwnerType())){
@@ -1533,11 +1531,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setResourceName(community.getName());
 					}
 				}
-
-				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
 				dto.setServiceModules(new ArrayList<>());
-				dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
-				dtos.add(dto);
+				if(0L == assignment.getModuleId()){
+					dto.setAllModuleFlag((byte)1);
+				}else{
+					ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
+					dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+					dtos.add(dto);
+				}
+
 				key = assignment.getOwnerType() + assignment.getOwnerId(); // 拼装Key
 			}
 		}
