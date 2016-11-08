@@ -251,8 +251,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organization.setOrganizationType(parOrg.getOrganizationType());
 		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
 		organization.setNamespaceId(parOrg.getNamespaceId());
-		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
 		Organization org = dbProvider.execute((TransactionStatus status) -> {
 			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				this.createChildrenEnterprise(organization,cmd.getAddress(), cmd.getAddManagerMemberIds(), cmd.getDelManagerMemberIds());
@@ -312,6 +311,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			jobPositionMap.setNamespaceId(organization.getNamespaceId());
 			jobPositionMap.setJobPositionId(jobPositionId);
 			jobPositionMap.setCreatorUid(UserContext.current().getUser().getId());
+			organizationProvider.createOrganizationJobPositionMap(jobPositionMap);
 		}
 	}
 
@@ -400,7 +400,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		groupTypes.add(OrganizationGroupType.MANAGER.getCode());
 		List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organization.getId(), groupTypes);
 		if(0 < managerGroups.size()){
-			managerGroup = managerGroups.get(1);
+			managerGroup = managerGroups.get(0);
 		}else{
 			managerGroup = new Organization();
 			managerGroup.setNamespaceId(organization.getNamespaceId());
@@ -7493,47 +7493,50 @@ System.out.println();
 			}
 
 			//没有部门要添加
-			if(null == departmentIds || 0 == departmentIds.size()){
-				return null;
+			if(null != departmentIds){
+				// 重新把成员添加到公司多个部门
+				for (Long departmentId : departmentIds) {
+					Organization group = checkOrganization(departmentId);
+
+					organizationMember.setGroupPath(group.getPath());
+
+					organizationMember.setOrganizationId(departmentId);
+
+					organizationProvider.createOrganizationMember(organizationMember);
+
+					departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
 			}
 
-			// 重新把成员添加到公司多个部门
-			for (Long departmentId : departmentIds) {
-				Organization group = checkOrganization(departmentId);
 
-				organizationMember.setGroupPath(group.getPath());
+			if(null != groupIds){
+				// 重新把成员添加到公司多个群组
+				for (Long groupId : groupIds) {
+					Organization group = checkOrganization(groupId);
 
-				organizationMember.setOrganizationId(departmentId);
+					organizationMember.setGroupPath(group.getPath());
 
-				organizationProvider.createOrganizationMember(organizationMember);
+					organizationMember.setOrganizationId(groupId);
 
-				departments.add(ConvertHelper.convert(group, OrganizationDTO.class));
+					organizationProvider.createOrganizationMember(organizationMember);
+
+					groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
 			}
 
-			// 重新把成员添加到公司多个群组
-			for (Long groupId : groupIds) {
-				Organization group = checkOrganization(groupId);
+			if(null != jobPositionIds){
+				// 重新把成员添加到公司多个群组
+				for (Long jobPositionId : jobPositionIds) {
+					Organization group = checkOrganization(jobPositionId);
 
-				organizationMember.setGroupPath(group.getPath());
+					organizationMember.setGroupPath(group.getPath());
 
-				organizationMember.setOrganizationId(groupId);
+					organizationMember.setOrganizationId(jobPositionId);
 
-				organizationProvider.createOrganizationMember(organizationMember);
+					organizationProvider.createOrganizationMember(organizationMember);
 
-				groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
-			}
-
-			// 重新把成员添加到公司多个群组
-			for (Long jobPositionId : jobPositionIds) {
-				Organization group = checkOrganization(jobPositionId);
-
-				organizationMember.setGroupPath(group.getPath());
-
-				organizationMember.setOrganizationId(jobPositionId);
-
-				organizationProvider.createOrganizationMember(organizationMember);
-
-				jobPositions.add(ConvertHelper.convert(group, OrganizationDTO.class));
+					jobPositions.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
 			}
 			//重新把成员添加到公司多个职级
 			for (Long jobLevelId : jobLevelIds) {

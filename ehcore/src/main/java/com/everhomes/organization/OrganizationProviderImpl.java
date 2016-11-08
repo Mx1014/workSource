@@ -66,6 +66,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		// long id = shardingProvider.allocShardableContentId(EhOrganizations.class).second();
 	    long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizations.class));
 		organization.setId(id);
+		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		organization.setPath(organization.getPath() + "/" + id);
 		// DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, id));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
