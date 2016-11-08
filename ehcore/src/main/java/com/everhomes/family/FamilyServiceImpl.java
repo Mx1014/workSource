@@ -932,34 +932,39 @@ public class FamilyServiceImpl implements FamilyService {
     //
     private void autoApproveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
         if (addressId != null) {
-            User memberUser = userProvider.findUserById(memberUid);
-            UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
-            if (memberUser != null && userIdentifier != null) {
-                List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId,
-                        memberUser.getCommunityId(), userIdentifier.getIdentifierToken());
-                if (pmOwners != null && pmOwners.size() > 0) {
-                    for (CommunityPmOwner owner : pmOwners) {
-                        OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
-                                namespaceId, owner.getId(), addressId);
-                        if (ownerAddress != null) {
-                            if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
-                                ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-                                propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+            Address address = addressProvider.findAddressById(addressId);
+            if (address != null) {
+                User memberUser = userProvider.findUserById(memberUid);
+                UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
+                if (memberUser != null && userIdentifier != null) {
+                    List<CommunityPmOwner> pmOwners = propertyMgrProvider.listCommunityPmOwnersByToken(namespaceId,
+                            address.getCommunityId(), userIdentifier.getIdentifierToken());
+                    if (pmOwners != null && pmOwners.size() > 0) {
+                        for (CommunityPmOwner owner : pmOwners) {
+                            OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
+                                    namespaceId, owner.getId(), addressId);
+                            if (ownerAddress != null) {
+                                if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
+                                    ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                                    propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                                }
+                            }
+                            // 不存在ownerAddress, 创建ownerAddress记录
+                            else {
+                                propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                                        memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
                             }
                         }
-                        // 不存在ownerAddress, 创建ownerAddress记录
-                        else {
-                            propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
-                                    memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
-                        }
                     }
-                }
-                // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
-                else {
-                    long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
-                    // 创建ownerAddress
-                    propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
-                            memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
+                    // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
+                    else {
+                        // 只传递communityId
+                        memberUser.setCommunityId(address.getCommunityId());
+                        long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
+                        // 创建ownerAddress
+                        propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                                memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
+                    }
                 }
             }
         }
