@@ -1,5 +1,7 @@
 package com.everhomes.dbsync;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -16,6 +18,12 @@ public class DatabaseQuery {
     
     private Long pageAnchor;
     private Integer pageSize;
+    
+    public DatabaseQuery() {
+        this.conditions = new ArrayList<String>();
+        this.inputs = new HashMap<String, String>();
+        this.orders = new ArrayList<String>();
+    }
 
     public String getName() {
         return name;
@@ -40,6 +48,10 @@ public class DatabaseQuery {
     public void setConditions(List<String> conditions) {
         this.conditions = conditions;
     }
+    
+    public void addCondition(String condition) {
+        this.conditions.add(condition);
+    }
 
     public Map<String, String> getInputs() {
         return inputs;
@@ -47,6 +59,10 @@ public class DatabaseQuery {
 
     public void setInputs(Map<String, String> inputs) {
         this.inputs = inputs;
+    }
+    
+    public void putInput(String key, String value) {
+        this.inputs.put(key, value);
     }
 
     public Long getPageAnchor() {

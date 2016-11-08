@@ -178,62 +178,35 @@ public class NashornObjectServiceImpl implements NashornObjectService {
         table2.addField("id");
         table2.addField("nick_name");
         
-        DataGraph graph1 = new DataGraph();
-        graph1.setTable(table2);
+        DataGraph graph2 = new DataGraph();
+        graph2.setTable(table2);
         
         GraphRefer belong = new GraphRefer();
-        belong.setGraph(graph);
+        belong.setGraph(graph2);
         belong.setParentField("user_id");
         belong.setChildField("id");
         belong.setAsName("user");
-        belong.setJoinType(NJoinType.INNER_JOIN.toString());
+        belong.setJoinType(NJoinType.INNER_JOIN.getCode());
         
         graph.addRefer(belong);
         
         return graph;
     }
     
-    public Result<Record> query(DatabaseQuery query) {     
+    @Override
+    public Result<Record> query(DatabaseQuery query) {
+        DatabaseQueryProcess process = new DatabaseQueryProcess(this, query);
+        try {
+            Result<Record> records = process.processQuery();
+            return records;
+        } catch (Exception e) {
+            LOGGER.error("query failed", e);
+        }
         return null;
     }
     
     @Override
-    public void queryTest() {
-        String tableName = "eh_door_user_permission";
-        List<String> sfields = new ArrayList<String>();
-        sfields.add("id");
-        sfields.add("user_id");
-        sfields.add("namespace_id");
-        
-        String tableName2 = "eh_users";
-        
-        DataTable table = ehcoreDatabaseService.getTableMeta(tableName);
-        DataTable table2 = ehcoreDatabaseService.getTableMeta(tableName2);
-        
-        List<Field<?>> fields = table.getFields(sfields);
-        fields.add(table2.getField("uuid"));
-        
-//        String sql = DSL.using(configure())
-//                .select(fields)
-//                .from(table.getTableJOOQ())
-//                .join(table2.getTableJOOQ())
-//                .on(DSL.row(table.getFieldObject("user_id")).eq(table2.getFieldObject("id")))
-//                .where(table.getFieldObject("user_id").eq("227281"))
-//                .orderBy(table.getField("id").asc()).getSQL(true);
-//        LOGGER.info("sql=" + sql);
-        
-        Result<Record> records = DSL.using(configure())
-        .select(fields)
-        .from(table.getTableJOOQ())
-        .join(table2.getTableJOOQ())
-        .on(DSL.row(table.getFieldObject("user_id")).eq(table2.getFieldObject("id")))
-        .where("user_id=?", "227281")
-//        .where(table.getFieldObject("user_id").eq("227281"))
-        .orderBy(table.getField("id").asc())
-        .fetch();
-        
-        if(records.size() > 0) {
-            LOGGER.info("records[0]=" + records.get(0));    
-        }
+    public Field<?> getTableField(String name) throws Exception {
+        return ehcoreDatabaseService.getTableField(name);
     }
 }

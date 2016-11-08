@@ -1,10 +1,11 @@
 package com.everhomes.dbsync;
 
 import java.io.File;
-import java.io.InputStream;
 
 import org.jooq.Configuration;
-import org.springframework.core.io.Resource;
+import org.jooq.Field;
+import org.jooq.Record;
+import org.jooq.Result;
 
 public interface NashornObjectService {
     void put(NashornObject nobj) throws Exception;
@@ -17,6 +18,7 @@ public interface NashornObjectService {
     File getResource(String name);
     String getResourceAsStream(String name);
     DataTable getTableMeta(String tableName);
-    void queryTest();
     DataGraph getGraph(String name);
+    Result<Record> query(DatabaseQuery query);
+    Field<?> getTableField(String name) throws Exception;
 }

@@ -51,8 +51,4 @@ public class GraphRefer {
         this.joinType = joinType;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
 }

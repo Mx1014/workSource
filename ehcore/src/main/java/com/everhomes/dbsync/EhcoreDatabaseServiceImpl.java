@@ -79,4 +79,27 @@ public class EhcoreDatabaseServiceImpl implements EhcoreDatabaseService {
     public DataTable getTableMeta(String tableName) {
         return tableMap.get(tableName);
     }
+    
+    @Override
+    public Field<?> getTableField(String name) throws Exception {
+        String tableName = null;
+        String fieldName = null;
+        String[] ns = name.split(".");
+        if(ns.length == 3) {
+            tableName = ns[1].trim();
+            fieldName = ns[2].trim();
+        } else if(ns.length == 2) {
+            tableName = ns[0].trim();
+            fieldName = ns[1].trim();            
+        } else {
+            throw new Exception("field=" + name + " not found!");
+        }
+        
+        DataTable dt = getTableMeta(tableName);
+        if(dt == null) {
+            throw new Exception("tableName=" + tableName + " not found");
+        }
+        
+        return dt.getField(fieldName);
+    }
 }

@@ -16,6 +16,9 @@ public class DataGraph {
     }
     
     public String getGraphName() {
+        if(graphName == null || graphName.isEmpty()) {
+            return this.table.getTableName();
+        }
         return graphName;
     }
     public void setGraphName(String graphName) {
@@ -38,10 +41,5 @@ public class DataGraph {
     
     public void addRefer(GraphRefer refer) {
         this.refer.add(refer);
-    }
-    
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
     }
 }

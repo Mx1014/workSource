@@ -8,6 +8,8 @@ import java.sql.Connection;
 import java.sql.SQLException;
 import java.util.List;
 import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import javax.script.Bindings;
 import javax.script.ScriptEngine;
@@ -37,6 +39,7 @@ import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.dbsync.DataTable;
+import com.everhomes.dbsync.DatabaseQuery;
 import com.everhomes.dbsync.NashornHttpObject;
 import com.everhomes.dbsync.NashornObjectService;
 import com.everhomes.dbsync.NashornProcessService;
@@ -148,12 +151,38 @@ public class NashornTest extends LoginAuthTestCase {
     }
     
     @Test
-    public void testJooQSchema() {
-//        EhDoorUserPermission ep = EhDoorUserPermission.EH_DOOR_USER_PERMISSION;
-//        DataTable dt = nashornObjectService.getTableMeta(ep.getName());
-//        LOGGER.info("dt=" + StringHelper.toJsonString(dt));
+    public void testQuery() {
+        DatabaseQuery query = new DatabaseQuery();
+        query.setGraphName("door_user");
+        query.addCondition("eh_users.id = $userId");
+        query.putInput("userId", "227281");
         
-        nashornObjectService.queryTest();
+        Result<Record> records = nashornObjectService.query(query);
+        if(records.size() > 0) {
+            LOGGER.info("records[0] = " + records.get(0));
+        }
+    }
+    
+    @Test
+    public void testPattern() {
+        Pattern pParam = Pattern.compile("\\$\\w+");
+        String sql = "eh_users.id = $id and eh_door_user_permission.user_id = $user_id;a";
+        String newSql = "";
+        int start = 0;
+        Matcher m = pParam.matcher(sql);
+        while(m.find()) {
+            newSql += sql.substring(start, m.start());
+            newSql += "?";
+            start = m.end();
+            String sub = sql.substring(m.start(), m.end());
+            LOGGER.info("sub=" + sub);
+        }
+        
+        if(start > 0) {
+            newSql += sql.substring(start, sql.length());
+        }
+        
+        LOGGER.info("newSql=" + newSql);
     }
     
     @Test

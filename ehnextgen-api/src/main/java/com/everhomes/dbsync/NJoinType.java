@@ -1,7 +1,7 @@
 package com.everhomes.dbsync;
 
 public enum NJoinType {
-    NO_JOIN("no_join"), INNER_JOIN("inner_join"), LEFT_OUTER_JOIN("left_outer_join"), RIGHT_OUTER_JOIN("righ_outer_join");
+    NO_JOIN("NO_JOIN"), INNER_JOIN("INNER_JOIN"), LEFT_OUTER_JOIN("LEFT_OUTER_JOIN"), RIGHT_OUTER_JOIN("RIGHT_OUTER_JOIN");
     
     private String code;
     private NJoinType(String code) {

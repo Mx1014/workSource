@@ -54,13 +54,15 @@ public class DataTable {
         return this.fieldJOOQMap.get(name);
     }
     
-    public List<Field<?>> getFields(List<String> names) {
+    public List<Field<?>> getFields(List<String> names) throws Exception {
         List<Field<?>> fields = new ArrayList<Field<?>>();
         for(String name : names) {
             Field<?> field = getField(name);
-            if(field != null) {
-                fields.add(field);    
+            if(field == null) {
+                throw new Exception("field=" + name + " not found");
             }
+            
+            fields.add(field);
             
         }
         return fields;
