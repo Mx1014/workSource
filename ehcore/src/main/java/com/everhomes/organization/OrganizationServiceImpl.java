@@ -4253,7 +4253,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			member.setOrganizationId(cmd.getOrganizationId());
 			member.setTargetType(OrganizationMemberTargetType.USER.getCode());
 			member.setTargetId(cmd.getTargetId());
-			// modify by wh 2016年11月8日  app说要用WAITING_FOR_ACCEPTANCE而不能用 WAITING_FOR_APPROVAL
+			// modify by wh 2016年11月8日  戴云说要用WAITING_FOR_ACCEPTANCE而不能用 WAITING_FOR_APPROVAL
 			member.setStatus(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
 			
 			organizationProvider.createOrganizationMember(member);
