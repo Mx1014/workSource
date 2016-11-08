@@ -4339,7 +4339,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid ruleId   parameter in the command");
 		
 		
-		if(null!=rs.getAutoAssign() && rs.getAutoAssign().equals(NormalFlag.NEED)){
+		if(null!=rs.getAutoAssign() && rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 			cmd.setCounts(1.0);
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
