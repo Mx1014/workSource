@@ -7083,39 +7083,57 @@ System.out.println();
         row1.setRowStyle(style);
         row1.createCell(0).setCellValue("工号");
         row1.createCell(1).setCellValue("姓名");
-        row1.createCell(2).setCellValue("手机号");
-        row1.createCell(3).setCellValue("部门");
-        row1.createCell(4).setCellValue("角色");
+        row1.createCell(2).setCellValue("性别");
+        row1.createCell(3).setCellValue("手机号");
+        row1.createCell(4).setCellValue("部门");
+        row1.createCell(5).setCellValue("职级");
+        row1.createCell(6).setCellValue("岗位");
         
         for (OrganizationMemberDTO member : members) {
         	XSSFRow row = sheet.createRow(rowNum ++);
         	row.setRowStyle(style);
         	row.createCell(0).setCellValue(String.valueOf(member.getEmployeeNo()));
-        	row.createCell(1).setCellValue(String.valueOf(member.getContactName()));
-            row.createCell(2).setCellValue(String.valueOf(member.getContactToken()));
+        	row.createCell(1).setCellValue(member.getContactName());
+        	row.createCell(2).setCellValue(null==member.getGender()?"":member.getGender()==1?"男":"女");
+            row.createCell(3).setCellValue(member.getContactToken());
             List<OrganizationDTO> departments = member.getDepartments();
             String departmentStr = "";
             if(null != departments){
             	 for (OrganizationDTO department : departments) {
-                 	departmentStr += "|" + department.getName();
+                 	departmentStr += "," + department.getName();
      			}
             }
            
             if(!StringUtils.isEmpty(departmentStr)){
             	departmentStr = departmentStr.substring(1);
             }
-            row.createCell(3).setCellValue(departmentStr);
-            List<RoleDTO> roles = member.getRoles();
-            String roleStr = "";
-            if(null != roles){
-            	for (RoleDTO role : roles) {
-                	roleStr += "|" + role.getName();
-    			}
+            row.createCell(4).setCellValue(departmentStr);
+           
+            List<OrganizationDTO> jobPositions = member.getJobPositions();
+            String jobPositionStr = "";
+            if(null != jobPositions){
+            	 for (OrganizationDTO jobPosition : jobPositions) {
+            		 jobPositionStr += "," + jobPosition.getName();
+     			}
             }
-            if(!StringUtils.isEmpty(roleStr)){
-            	roleStr = roleStr.substring(1);
+           
+            if(!StringUtils.isEmpty(jobPositionStr)){
+            	jobPositionStr = jobPositionStr.substring(1);
             }
-            row.createCell(4).setCellValue(roleStr);
+            row.createCell(5).setCellValue(jobPositionStr);
+            
+            List<OrganizationDTO> jobLevels = member.getJobLevels();
+            String jobLevelStr = "";
+            if(null != jobLevels){
+            	 for (OrganizationDTO jobLevel : jobLevels) {
+            		 jobLevelStr += "," + jobLevel.getName();
+     			}
+            }
+           
+            if(!StringUtils.isEmpty(jobLevelStr)){
+            	jobLevelStr = jobLevelStr.substring(1);
+            }
+            row.createCell(6).setCellValue(jobLevelStr);
 		}
         
         return wb;
