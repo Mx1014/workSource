@@ -2,6 +2,8 @@ package com.everhomes.dbsync;
 
 import java.io.File;
 import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Scanner;
 
 import org.jooq.Configuration;
@@ -10,12 +12,14 @@ import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectOnConditionStep;
+import org.jooq.SelectOnStep;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
@@ -25,7 +29,6 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Ehcore;
-import com.everhomes.server.schema.Keys;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.util.StringHelper;
 
@@ -35,6 +38,9 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     
     @Autowired
     private SequenceProvider sequenceProvider;
+    
+    @Autowired
+    private EhcoreDatabaseService ehcoreDatabaseService;
     
     private NashornObject[] nobjs;      //TODO use CocurrentHashmap instead ?
     private final int MAX = 1024*10;    //10K
@@ -147,7 +153,87 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     }
     
     @Override
+    public DataTable getTableMeta(String tableName) {
+        return ehcoreDatabaseService.getTableMeta(tableName);
+    }
+    
+    @Override
     public void log(String str) {
         LOGGER.info("from js: " + str);
+    }
+    
+    @Override
+    public DataGraph getGraph(String name) {
+        DataGraph graph = new DataGraph();
+        GraphTable table1 = new GraphTable();
+        table1.setTableName("eh_door_user_permission");
+        table1.addField("id");
+        table1.addField("user_id");
+        table1.addField("namespace_id");
+        graph.setTable(table1);
+        
+        GraphTable table2 = new GraphTable();
+        table2.setTableName("eh_users");
+        table2.addField("uuid");
+        table2.addField("id");
+        table2.addField("nick_name");
+        
+        DataGraph graph1 = new DataGraph();
+        graph1.setTable(table2);
+        
+        GraphRefer belong = new GraphRefer();
+        belong.setGraph(graph);
+        belong.setParentField("user_id");
+        belong.setChildField("id");
+        belong.setAsName("user");
+        belong.setJoinType(NJoinType.INNER_JOIN.toString());
+        
+        graph.addRefer(belong);
+        
+        return graph;
+    }
+    
+    public Result<Record> query(DatabaseQuery query) {     
+        return null;
+    }
+    
+    @Override
+    public void queryTest() {
+        String tableName = "eh_door_user_permission";
+        List<String> sfields = new ArrayList<String>();
+        sfields.add("id");
+        sfields.add("user_id");
+        sfields.add("namespace_id");
+        
+        String tableName2 = "eh_users";
+        
+        DataTable table = ehcoreDatabaseService.getTableMeta(tableName);
+        DataTable table2 = ehcoreDatabaseService.getTableMeta(tableName2);
+        
+        List<Field<?>> fields = table.getFields(sfields);
+        fields.add(table2.getField("uuid"));
+        
+//        String sql = DSL.using(configure())
+//                .select(fields)
+//                .from(table.getTableJOOQ())
+//                .join(table2.getTableJOOQ())
+//                .on(DSL.row(table.getFieldObject("user_id")).eq(table2.getFieldObject("id")))
+//                .where(table.getFieldObject("user_id").eq("227281"))
+//                .orderBy(table.getField("id").asc()).getSQL(true);
+//        LOGGER.info("sql=" + sql);
+        
+        Result<Record> records = DSL.using(configure())
+        .select(fields)
+        .from(table.getTableJOOQ())
+        .join(table2.getTableJOOQ())
+        .on(DSL.row(table.getFieldObject("user_id")).eq(table2.getFieldObject("id")))
+        .where("user_id=?", "227281")
+//        .where(table.getFieldObject("user_id").eq("227281"))
+        .orderBy(table.getField("id").asc())
+        .fetch();
+        
+        if(records.size() > 0) {
+            LOGGER.info("records[0]=" + records.get(0));    
+        }
     }
 }

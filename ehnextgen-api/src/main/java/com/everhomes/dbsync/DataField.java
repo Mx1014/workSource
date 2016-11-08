@@ -4,12 +4,13 @@ import com.everhomes.util.StringHelper;
 
 public class DataField {
     private String name;
-    private DataType dataType;
+    private NDataType dataType;
     private String sqlType;
     private Boolean allowNull;
     private Boolean primaryKey;
     private Boolean autoIncrement;
     private Boolean isDefault;
+    private String comment;
     
     public String getName() {
         return name;
@@ -35,10 +36,10 @@ public class DataField {
     public void setAutoIncrement(Boolean autoIncrement) {
         this.autoIncrement = autoIncrement;
     }
-    public DataType getDataType() {
+    public NDataType getDataType() {
         return dataType;
     }
-    public void setDataType(DataType dataType) {
+    public void setDataType(NDataType dataType) {
         this.dataType = dataType;
     }
     public String getSqlType() {
@@ -52,6 +53,13 @@ public class DataField {
     }
     public void setIsDefault(Boolean isDefault) {
         this.isDefault = isDefault;
+    }
+
+    public String getComment() {
+        return comment;
+    }
+    public void setComment(String comment) {
+        this.comment = comment;
     }
     @Override
     public String toString() {

@@ -16,4 +16,7 @@ public interface NashornObjectService {
     void log(String str);
     File getResource(String name);
     String getResourceAsStream(String name);
+    DataTable getTableMeta(String tableName);
+    void queryTest();
+    DataGraph getGraph(String name);
 }

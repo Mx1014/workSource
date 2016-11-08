@@ -36,10 +36,12 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.db.DbProvider;
+import com.everhomes.dbsync.DataTable;
 import com.everhomes.dbsync.NashornHttpObject;
 import com.everhomes.dbsync.NashornObjectService;
 import com.everhomes.dbsync.NashornProcessService;
 import com.everhomes.user.base.LoginAuthTestCase;
+import com.everhomes.util.StringHelper;
 import com.everhomes.server.schema.Ehcore;
 import com.everhomes.server.schema.Keys;
 import com.everhomes.server.schema.Tables;
@@ -147,13 +149,11 @@ public class NashornTest extends LoginAuthTestCase {
     
     @Test
     public void testJooQSchema() {
-        List<Table<?>> tables = Ehcore.EHCORE.getTables();
-        for(Table<?> table : tables) {
-            Field<?>[] fields = table.fields();
-            Field<?> field = fields[0];
-            LOGGER.info("table=" + table.getName() + " fields=" + fields[0]);
-//            LOGGER.info(" schema= " + table.getSchema());
-        }
+//        EhDoorUserPermission ep = EhDoorUserPermission.EH_DOOR_USER_PERMISSION;
+//        DataTable dt = nashornObjectService.getTableMeta(ep.getName());
+//        LOGGER.info("dt=" + StringHelper.toJsonString(dt));
+        
+        nashornObjectService.queryTest();
     }
     
     @Test

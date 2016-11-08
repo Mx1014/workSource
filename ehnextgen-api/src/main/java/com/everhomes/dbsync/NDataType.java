@@ -1,10 +1,10 @@
 package com.everhomes.dbsync;
 
-public enum DataType {
+public enum NDataType {
     STRING("string"), INTEGER("integer"), DOUBLE("double"), DATE("date"), DATETIME("datetime"), BINARY("binary");
     
     private String code;
-    private DataType(String code) {
+    private NDataType(String code) {
         this.code = code;
     }
     
@@ -12,9 +12,9 @@ public enum DataType {
         return this.code;
     }
     
-    public static DataType fromCode(String code) {
-        DataType[] values = DataType.values();
-        for(DataType value : values) {
+    public static NDataType fromCode(String code) {
+        NDataType[] values = NDataType.values();
+        for(NDataType value : values) {
             if(value.code.equals(code)) {
                 return value;
             }
