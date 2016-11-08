@@ -788,8 +788,9 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 	
 	
 -- 添加储能域空间的“新的月卡发放通知排队用户申请月卡成功”申请模板
+DELETE FROM `eh_locale_templates` WHERE `namespace_id`=999990 AND `scope`='park.notification' AND  `code`=1 AND `locale`='zh_CN';
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999990, 'park.notification', 1, 'zh_CN', '新的月卡发放通知排队用户申请月卡成功', '月卡申请成功，请携带公司出具的工作证明（含公司名称、姓名、手机号、车牌号等信息）于+截止时间+前，前往储能物业管理处办理月卡，超过该时间视为自动放弃。');
+	VALUES(999990, 'park.notification', 1, 'zh_CN', '新的月卡发放通知排队用户申请月卡成功', '月卡申请成功，请携带公司出具的工作证明（含公司名称、姓名、手机号、车牌号等信息）于“${deadline}”前，前往储能物业管理处办理月卡，超过该时间视为自动放弃。');
 	
 	
 	

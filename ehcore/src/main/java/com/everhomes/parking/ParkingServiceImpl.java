@@ -566,13 +566,14 @@ public class ParkingServiceImpl implements ParkingService {
     	if(LOGGER.isDebugEnabled()) {
     	    LOGGER.debug("Issue parking cards, requestIds=[{}]", strBuilder.toString());
     	}
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
     	Map<String, Object> map = new HashMap<String, Object>();
 		String deadline = deadline(parkingLot.getCardReserveDays());
 	    map.put("deadline", deadline);
 		String scope = ParkingNotificationTemplateCode.SCOPE;
 		int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
 		String locale = "zh_CN";
-		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId, scope, code, locale, map, "");
 		list.forEach(applier -> {
 			sendMessageToUser(applier.getRequestorUid(), notifyTextForApplicant);
 		});
