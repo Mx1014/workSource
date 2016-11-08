@@ -967,6 +967,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("updateChildrenOrganizationJobPosition")
 	@RestReturn(value=String.class)
 	public RestResponse updateChildrenOrganizationJobPosition(@Valid UpdateOrganizationsCommand cmd) {
+		organizationService.updateChildrenOrganizationJobPosition(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -980,6 +981,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("deleteChildrenOrganizationJobPosition")
 	@RestReturn(value=String.class)
 	public RestResponse deleteChildrenOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
+		organizationService.deleteChildrenOrganizationJobPosition(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -991,9 +993,10 @@ public class OrganizationController extends ControllerBase {
 	 * <p>子机构岗位列表</p>
 	 */
 	@RequestMapping("listChildrenOrganizationJobPositions")
-	@RestReturn(value=ChildrenOrganizationJobPositionDTO.class, collection = true)
+	@RestReturn(value=ListChildrenOrganizationJobPositionResponse.class)
 	public RestResponse listChildrenOrganizationJobPositions(@Valid ListAllChildrenOrganizationsCommand cmd) {
-		RestResponse response = new RestResponse();
+		ListChildrenOrganizationJobPositionResponse resp = organizationService.listChildrenOrganizationJobPositions(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1020,6 +1023,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("updateOrganizationJobPosition")
 	@RestReturn(value=String.class)
 	public RestResponse updateOrganizationJobPosition(@Valid UpdateOrganizationJobPositionCommand cmd) {
+		organizationService.updateOrganizationJobPosition(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1033,6 +1037,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("deleteOrganizationJobPosition")
 	@RestReturn(value=String.class)
 	public RestResponse deleteOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
+		organizationService.deleteOrganizationJobPosition(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1046,7 +1051,8 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("listOrganizationJobPositions")
 	@RestReturn(value=ListOrganizationJobPositionResponse.class)
 	public RestResponse listOrganizationJobPositions(@Valid ListOrganizationJobPositionCommand cmd) {
-		RestResponse response = new RestResponse();
+		ListOrganizationJobPositionResponse resp = organizationService.listOrganizationJobPositions(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1060,6 +1066,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("createChildrenOrganizationJobLevel")
 	@RestReturn(value=String.class)
 	public RestResponse createChildrenOrganizationJobLevel(@Valid CreateOrganizationCommand cmd) {
+		organizationService.createChildrenOrganizationJobLevel(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1073,6 +1080,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("updateChildrenOrganizationJobLevel")
 	@RestReturn(value=String.class)
 	public RestResponse updateChildrenOrganizationJobLevel(@Valid UpdateOrganizationsCommand cmd) {
+		organizationService.updateChildrenOrganizationJobLevel(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1086,6 +1094,7 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("deleteChildrenOrganizationJobLevel")
 	@RestReturn(value=String.class)
 	public RestResponse deleteChildrenOrganizationJobLevel(@Valid DeleteOrganizationIdCommand cmd) {
+		organizationService.deleteChildrenOrganizationJobLevel(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -1097,9 +1106,10 @@ public class OrganizationController extends ControllerBase {
 	 * <p>子机构职级列表</p>
 	 */
 	@RequestMapping("listChildrenOrganizationJobLevels")
-	@RestReturn(value=ChildrenOrganizationJobLevelDTO.class, collection = true)
+	@RestReturn(value=ListChildrenOrganizationJobLevelResponse.class)
 	public RestResponse listChildrenOrganizationJobLevels(@Valid ListAllChildrenOrganizationsCommand cmd) {
-		RestResponse response = new RestResponse();
+		ListChildrenOrganizationJobLevelResponse resp = organizationService.listChildrenOrganizationJobLevels(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

@@ -244,4 +244,6 @@ public interface OrganizationProvider {
 	
 	List<OrganizationJobPosition> listOrganizationJobPositions(String ownerType, Long ownerId, String keyword,
 			Long pageAnchor, Integer pageSize);
+	
+	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
 }

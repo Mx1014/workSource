@@ -1647,9 +1647,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
-	public List<Organization> listOrganizationByGroupTypes(Long parentId,
-			List<String> groupTypes) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+	public List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
 
 		List<Organization> result  = new ArrayList<Organization>();
 		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
@@ -1670,6 +1669,39 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return result;
 	}
 
+	@Override
+	public List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
+
+		List<Organization> result  = new ArrayList<Organization>();
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		
+		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
+
+		if(null != pageAnchor && pageAnchor != 0)
+			query.addConditions(Tables.EH_ORGANIZATIONS.ID.gt(pageAnchor));
+		if(null != parentId)
+			query.addConditions(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(parentId));
+		if(!StringUtils.isEmpty(keyword)) {
+			query.addJoin(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS, Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.ORGANIZATION_ID));
+			query.addJoin(Tables.EH_ORGANIZATION_JOB_POSITIONS, Tables.EH_ORGANIZATION_JOB_POSITIONS.ID.eq(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.JOB_POSITION_ID));
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like("%"+keyword+"%").or(Tables.EH_ORGANIZATION_JOB_POSITIONS.NAME.like("%"+keyword+"%")));
+
+		}
+		if(null != pageSize)
+			query.addLimit(pageSize);
+		
+		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.asc());
+		
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, Organization.class));
+			return null;
+		});
+		
+		return result;
+	}
+	
 	@Override
 	public void createOrganizationDetail(OrganizationDetail organizationDetail) {
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationDetails.class));

@@ -361,4 +361,18 @@ public interface OrganizationService {
 	void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
 	
 	ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd);
+	
+	void updateChildrenOrganizationJobPosition(UpdateOrganizationsCommand cmd);
+	
+	void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	
+	void createChildrenOrganizationJobLevel(CreateOrganizationCommand cmd);
+	
+	void updateChildrenOrganizationJobLevel(UpdateOrganizationsCommand cmd);
+
+	void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
+	
+	ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd);
+	
+	ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd);
 }

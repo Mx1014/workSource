@@ -89,6 +89,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -106,7 +107,9 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 import java.io.*;
 import java.sql.Timestamp;
@@ -7658,11 +7661,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd) {
-		
-	}
-
-	@Override
 	public ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd) {
 		ListOrganizationJobPositionResponse response = new ListOrganizationJobPositionResponse();
 		
@@ -7692,12 +7690,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		
-		if(null == cmd.getName()) {
-        	LOGGER.error("Name cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Name cannot be null.");
-        }
+		checkName(cmd.getName());
 		
 		OrganizationJobPosition organizationJobPosition = organizationProvider.findOrganizationJobPositionByName(
 				cmd.getOwnerType(), cmd.getOwnerId(), cmd.getName());
@@ -7723,12 +7716,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd) {
-		
-		if(null == cmd.getId()) {
-        	LOGGER.error("Id cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Id cannot be null.");
-        }
+		checkId(cmd.getId());
 		
 		OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
 		organizationJobPosition.setName(cmd.getName());
@@ -7739,16 +7727,28 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
 		
-		if(null == cmd.getId()) {
-        	LOGGER.error("Id cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Id cannot be null.");
-        }
+		checkId(cmd.getId());
 		
 		OrganizationJobPosition organizationJobPosition = checkOrganizationJobPositionIsNull(cmd.getId());
 		organizationJobPosition.setStatus(OrganizationJobPositionStatus.INACTIVE.getCode());
 		organizationProvider.updateOrganizationJobPosition(organizationJobPosition);
 		
+	}
+	
+	private void checkName(String name) {
+		if(StringUtils.isEmpty(name)) {
+        	LOGGER.error("Name cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Name cannot be null.");
+        }
+	}
+	
+	private void checkId(Long id) {
+		if(null == id) {
+        	LOGGER.error("Id cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Id cannot be null.");
+        }
 	}
 	
 	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
@@ -7777,5 +7777,117 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		return organizationJobPosition;
 	}
+
+	@Override
+	public void createChildrenOrganizationJobLevel(CreateOrganizationCommand cmd) {
+		checkName(cmd.getName());
+		cmd.setGroupType(OrganizationGroupType.JOB_LEVEL.getCode());
+		createChildrenOrganization(cmd);		
+	}
+
+	@Override
+	public void updateChildrenOrganizationJobLevel(UpdateOrganizationsCommand cmd) {
+		updateChildrenOrganization(cmd);
+		
+	}
+
+	@Override
+	public void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd) {
+		deleteOrganization(cmd);
+		
+	}
+
+	@Override
+	public ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd) {
+		
+		checkId(cmd.getId());
+		Organization organization = organizationProvider.findOrganizationById(cmd.getId());
+		if(null == organization) {
+			LOGGER.error("Organization not found, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Organization not found.");
+		}
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		ListChildrenOrganizationJobLevelResponse response = new ListChildrenOrganizationJobLevelResponse();
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+		List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, null, cmd.getPageAnchor(), pageSize);
+		
+		if(list.size() > 0){
+			response.setRequests(list.stream().map(r -> {
+				ChildrenOrganizationJobLevelDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobLevelDTO.class);
+				dto.setParentName(organization.getName());
+				return dto;
+			}).collect(Collectors.toList()));
+			
+			if(list.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        	}
+		}
+		return response;
+	}
 	
+	@Override
+	public void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd) {
+//		checkOwnerIdAndOwnerType(cmd.getownerType, ownerId);
+		checkName(cmd.getName());
+		cmd.setGroupType(OrganizationGroupType.JOB_POSITION.getCode());
+		createChildrenOrganization(cmd);
+	}
+	
+	@Override
+	public void updateChildrenOrganizationJobPosition(UpdateOrganizationsCommand cmd) {
+		updateChildrenOrganization(cmd);
+	}
+	
+	@Override
+	public void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd) {
+		deleteOrganization(cmd);
+	}
+
+	@Override
+	public ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd) {
+		checkId(cmd.getId());
+		Organization organization = organizationProvider.findOrganizationById(cmd.getId());
+		if(null == organization) {
+			LOGGER.error("Organization not found, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Organization not found.");
+		}
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		ListChildrenOrganizationJobPositionResponse response = new ListChildrenOrganizationJobPositionResponse();
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+		List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+		
+		if(list.size() > 0){
+			response.setRequests(list.stream().map(r -> {
+				ChildrenOrganizationJobPositionDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobPositionDTO.class);
+				dto.setParentName(organization.getName());
+				List<OrganizationJobPositionMap> organizationJobPositionMaps = organizationProvider.listOrganizationJobPositionMaps(r.getId());
+				List<OrganizationJobPositionDTO> organizationJobPositionDTOs = new ArrayList<OrganizationJobPositionDTO>();
+				organizationJobPositionMaps.stream().map(o -> {
+					OrganizationJobPosition organizationJobPosition = organizationProvider.findOrganizationJobPositionById(o.getJobPositionId());
+					organizationJobPositionDTOs.add(ConvertHelper.convert(organizationJobPosition, OrganizationJobPositionDTO.class));
+					return null;
+				}).collect(Collectors.toList());
+				dto.setJobPositions(organizationJobPositionDTOs);
+				return dto;
+			}).collect(Collectors.toList()));
+			
+			if(list.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        	}
+		}
+		return response;
+	}
 }
+
