@@ -54,6 +54,8 @@ public class BuildingDTO {
 	
 	private String managerNickName;
     
+	private String managerContact;
+	
     private String managerAvatar;
     
     private String managerAvatarUrl;
@@ -322,6 +324,14 @@ public class BuildingDTO {
 
 	public void setPosterUrl(String posterUrl) {
 		this.posterUrl = posterUrl;
+	}
+
+	public String getManagerContact() {
+		return managerContact;
+	}
+
+	public void setManagerContact(String managerContact) {
+		this.managerContact = managerContact;
 	}
 	
 	
