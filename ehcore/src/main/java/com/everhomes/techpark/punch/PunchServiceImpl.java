@@ -4499,138 +4499,142 @@ public class PunchServiceImpl implements PunchService {
 					"Invalid target type or  Id parameter in the command");
 		}
 		// TODO 删除之前的规则
-		
-		//建立所有规则
-		PunchRule pr = new PunchRule();
-		pr.setOwnerId(cmd.getOwnerId());
-		pr.setOwnerType(cmd.getOwnerType());
-		pr.setName(cmd.getTargetId()+"rule");
-		pr.setCreatorUid(UserContext.current().getUser().getId());
-		pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-				.getTime()));
-		//time rule
-		if(null != cmd.getTimeRule()){
-			PunchTimeRule ptr = convertPunchTimeRule(cmd.getTimeRule());
-			ptr.setOwnerId(cmd.getOwnerId());
-			ptr.setOwnerType(cmd.getOwnerType());
-			this.punchProvider.createPunchTimeRule(ptr);
-			pr.setTimeRuleId(ptr.getId());
-		}
-		//location rule 
-		if(null != cmd.getLocationRule()){
-			PunchLocationRule obj = ConvertHelper.convert( cmd.getLocationRule(), PunchLocationRule.class);
-			obj.setOwnerId(cmd.getOwnerId());
-			obj.setOwnerType(cmd.getOwnerType());
-			obj.setName(cmd.getTargetId()+"rule");
-			obj.setCreatorUid(UserContext.current().getUser().getId());
-			obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+		coordinationProvider.getNamedLock(
+				CoordinationLocks.UPDATE_APPROVAL_TARGET_RULE.getCode() + cmd.getTargetId()).enter(
+				() -> {
+			//建立所有规则
+			PunchRule pr = new PunchRule();
+			pr.setOwnerId(cmd.getOwnerId());
+			pr.setOwnerType(cmd.getOwnerType());
+			pr.setName(cmd.getTargetId()+"rule");
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
-			this.punchProvider.createPunchLocationRule(obj); 
-			if(null !=  cmd.getLocationRule().getPunchGeoPoints()){ 
-				for (PunchGeoPointDTO punchGeopointDTO :  cmd.getLocationRule().getPunchGeoPoints()) {
-					PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
-					punchGeopoint.setOwnerType(cmd.getOwnerType());
-					punchGeopoint.setOwnerId(cmd.getOwnerId()); 
-					punchGeopoint.setLocationRuleId(obj.getId());
-					punchGeopoint.setCreatorUid(UserContext.current().getUser().getId());
-					punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					punchGeopoint.setGeohash(GeoHashUtils.encode(
-							punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
-					punchProvider.createPunchGeopoint(punchGeopoint);
-				}
+			//time rule
+			if(null != cmd.getTimeRule()){
+				PunchTimeRule ptr = convertPunchTimeRule(cmd.getTimeRule());
+				ptr.setOwnerId(cmd.getOwnerId());
+				ptr.setOwnerType(cmd.getOwnerType());
+				this.punchProvider.createPunchTimeRule(ptr);
+				pr.setTimeRuleId(ptr.getId());
 			}
-			pr.setLocationRuleId(obj.getId());
-		}
-		//wifi rule 
-		if(null != cmd.getWifiRule()){
-			PunchWifiRule obj = ConvertHelper.convert(cmd, PunchWifiRule.class);
-			obj.setOwnerId(cmd.getOwnerId());
-			obj.setOwnerType(cmd.getOwnerType());
-			obj.setName(cmd.getTargetId()+"rule");
-			obj.setCreatorUid(UserContext.current().getUser().getId());
-			obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			this.punchProvider.createPunchWifiRule(obj); 
-			if(null != cmd.getWifiRule().getWifis()) {
-				for (PunchWiFiDTO dto : cmd.getWifiRule().getWifis()) {
-					PunchWifi punchWifi = ConvertHelper.convert(dto, PunchWifi.class);
-					punchWifi.setOwnerType(cmd.getOwnerType());
-					punchWifi.setOwnerId(cmd.getOwnerId());  
-					punchWifi.setCreatorUid(UserContext.current().getUser().getId());
-					punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					punchWifi.setWifiRuleId(obj.getId());
-					punchProvider.createPunchWifi(punchWifi);
+			//location rule 
+			if(null != cmd.getLocationRule()){
+				PunchLocationRule obj = ConvertHelper.convert( cmd.getLocationRule(), PunchLocationRule.class);
+				obj.setOwnerId(cmd.getOwnerId());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setName(cmd.getTargetId()+"rule");
+				obj.setCreatorUid(UserContext.current().getUser().getId());
+				obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				this.punchProvider.createPunchLocationRule(obj); 
+				if(null !=  cmd.getLocationRule().getPunchGeoPoints()){ 
+					for (PunchGeoPointDTO punchGeopointDTO :  cmd.getLocationRule().getPunchGeoPoints()) {
+						PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
+						punchGeopoint.setOwnerType(cmd.getOwnerType());
+						punchGeopoint.setOwnerId(cmd.getOwnerId()); 
+						punchGeopoint.setLocationRuleId(obj.getId());
+						punchGeopoint.setCreatorUid(UserContext.current().getUser().getId());
+						punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						punchGeopoint.setGeohash(GeoHashUtils.encode(
+								punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+						punchProvider.createPunchGeopoint(punchGeopoint);
+					}
 				}
+				pr.setLocationRuleId(obj.getId());
 			}
-			pr.setWifiRuleId(obj.getId());
-		}
-		//workday rule 
-		if(null != cmd.getWorkdayRule()){
-			PunchWorkdayRule obj = converDTO2WorkdayRule( cmd.getWorkdayRule());
-			obj.setOwnerId(cmd.getOwnerId());
-			obj.setOwnerType(cmd.getOwnerType());
-			obj.setName(cmd.getTargetId()+"rule");
-			this.punchProvider.createPunchWorkdayRule(obj); 
-			if(null !=  cmd.getWorkdayRule().getWorkdays()) {
-				for (Long date :  cmd.getWorkdayRule().getWorkdays()) {
-					PunchHoliday holiday = new PunchHoliday();
-					holiday.setOwnerType(cmd.getOwnerType());
-					holiday.setOwnerId(cmd.getOwnerId());  
-					holiday.setCreatorUid(UserContext.current().getUser().getId());
-					holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					holiday.setWorkdayRuleId(obj.getId());
-					holiday.setRuleDate(new java.sql.Date(date));
-					holiday.setStatus(DateStatus.WORKDAY.getCode());
-					this.punchProvider.createPunchHoliday(holiday);
-							
+			//wifi rule 
+			if(null != cmd.getWifiRule()){
+				PunchWifiRule obj = ConvertHelper.convert(cmd, PunchWifiRule.class);
+				obj.setOwnerId(cmd.getOwnerId());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setName(cmd.getTargetId()+"rule");
+				obj.setCreatorUid(UserContext.current().getUser().getId());
+				obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				this.punchProvider.createPunchWifiRule(obj); 
+				if(null != cmd.getWifiRule().getWifis()) {
+					for (PunchWiFiDTO dto : cmd.getWifiRule().getWifis()) {
+						PunchWifi punchWifi = ConvertHelper.convert(dto, PunchWifi.class);
+						punchWifi.setOwnerType(cmd.getOwnerType());
+						punchWifi.setOwnerId(cmd.getOwnerId());  
+						punchWifi.setCreatorUid(UserContext.current().getUser().getId());
+						punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						punchWifi.setWifiRuleId(obj.getId());
+						punchProvider.createPunchWifi(punchWifi);
+					}
 				}
+				pr.setWifiRuleId(obj.getId());
 			}
-			if(null !=  cmd.getWorkdayRule().getHolidays()) {
-				for (Long date :  cmd.getWorkdayRule().getHolidays()) {
-					PunchHoliday holiday = new PunchHoliday();
-					holiday.setOwnerType(cmd.getOwnerType());
-					holiday.setOwnerId(cmd.getOwnerId());  
-					holiday.setCreatorUid(UserContext.current().getUser().getId());
-					holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-					holiday.setWorkdayRuleId(obj.getId());
-					holiday.setRuleDate(new java.sql.Date(date));
-					holiday.setStatus(DateStatus.HOLIDAY.getCode());
-					this.punchProvider.createPunchHoliday(holiday);
+			//workday rule 
+			if(null != cmd.getWorkdayRule()){
+				PunchWorkdayRule obj = converDTO2WorkdayRule( cmd.getWorkdayRule());
+				obj.setOwnerId(cmd.getOwnerId());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setName(cmd.getTargetId()+"rule");
+				this.punchProvider.createPunchWorkdayRule(obj); 
+				if(null !=  cmd.getWorkdayRule().getWorkdays()) {
+					for (Long date :  cmd.getWorkdayRule().getWorkdays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(UserContext.current().getUser().getId());
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.WORKDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+								
+					}
 				}
+				if(null !=  cmd.getWorkdayRule().getHolidays()) {
+					for (Long date :  cmd.getWorkdayRule().getHolidays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(UserContext.current().getUser().getId());
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.HOLIDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+					}
+				}
+				pr.setWorkdayRuleId(obj.getId());
 			}
-			pr.setWorkdayRuleId(obj.getId());
-		}
-		
-
-		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getTargetType(), cmd.getTargetId());
-
-		if(null == map ){
-			map = ConvertHelper.convert(cmd, PunchRuleOwnerMap.class);
-			map.setCreatorUid(UserContext.current().getUser().getId());
-			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			this.punchProvider.createPunchRule(pr);
-			map.setPunchRuleId(pr.getId());
-			this.punchProvider.createPunchRuleOwnerMap(map);
-		}else{
-			if(null == map.getPunchRuleId())
+			
+	
+			PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getTargetType(), cmd.getTargetId());
+	
+			if(null == map ){
+				map = ConvertHelper.convert(cmd, PunchRuleOwnerMap.class);
+				map.setCreatorUid(UserContext.current().getUser().getId());
+				map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
 				this.punchProvider.createPunchRule(pr);
-			else{
-				PunchRule oldPr = this.punchProvider.getPunchRuleById(map.getPunchRuleId());
-				if(null == oldPr)
+				map.setPunchRuleId(pr.getId());
+				this.punchProvider.createPunchRuleOwnerMap(map);
+			}else{
+				if(null == map.getPunchRuleId())
 					this.punchProvider.createPunchRule(pr);
 				else{
-					pr.setId(oldPr.getId());
-					this.punchProvider.updatePunchRule(pr);
+					PunchRule oldPr = this.punchProvider.getPunchRuleById(map.getPunchRuleId());
+					if(null == oldPr)
+						this.punchProvider.createPunchRule(pr);
+					else{
+						pr.setId(oldPr.getId());
+						this.punchProvider.updatePunchRule(pr);
+					}
 				}
+				map.setCreatorUid(UserContext.current().getUser().getId());
+				map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				map.setPunchRuleId(pr.getId());
+				this.punchProvider.updatePunchRuleOwnerMap(map);
 			}
-			map.setCreatorUid(UserContext.current().getUser().getId());
-			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			map.setPunchRuleId(pr.getId());
-			this.punchProvider.updatePunchRuleOwnerMap(map);
-		}
+			 return null;
+		});
 		 
 	}
 	@Override

@@ -1147,9 +1147,9 @@ public class ApprovalServiceImpl implements ApprovalService {
 			for (int i = 0; i < nickNames.size(); i++) {
 				if (i > 0) {
 					if (i == nickNames.size() - 1) {
-						nickNameString.append("、");
-					} else {
 						nickNameString.append("或");
+					} else {
+						nickNameString.append("、");
 					}
 				}
 				nickNameString.append(nickNames.get(i));
@@ -2026,73 +2026,79 @@ public class ApprovalServiceImpl implements ApprovalService {
 		final Integer namespaceId = UserContext.getCurrentNamespaceId();
 		checkPrivilege(userId, namespaceId, cmd.getOwnerType(), cmd.getOwnerId());
 
-		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
-				cmd.getTargetType(), cmd.getTargetId());
-		ApprovalRule approvalRule = ConvertHelper.convert(cmd, ApprovalRule.class);
-		if (null != map && approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId()) != null) {
-			approvalRule = this.approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
-		}
-		else{
-			approvalRule.setName(cmd.getTargetId() + "approval rule");
-			approvalRule.setNamespaceId(namespaceId);
-			this.createApprovalRule(userId, approvalRule);
-			if(null == map ){
-				map = new PunchRuleOwnerMap();
-				map.setReviewRuleId(approvalRule.getId());
-				map.setOwnerId(cmd.getOwnerId());
-				map.setOwnerType(cmd.getOwnerType());
-				map.setTargetId(cmd.getTargetId());
-				map.setTargetType(cmd.getTargetType());
-				map.setCreatorUid(UserContext.current().getUser().getId());
-				map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				this.punchProvider.createPunchRuleOwnerMap(map);
-			}
-			else{
-				map.setReviewRuleId(approvalRule.getId());
-				this.punchProvider.updatePunchRuleOwnerMap(map);
-			}
-		}
-		 
-		// 删除之前的审批流程
-		deleteApprovalRuleFlowMap(approvalRule.getId());
-		// 创建新审批流程
-		 for ( RuleFlowMap r : cmd.getRuleFlowMapList()){
-			if (ApprovalType.fromCode(r.getApprovalType()) == null) {
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-						"not exist approval type: approvalType=" + r.getApprovalType() + ", flowId=" + r.getFlowId());
-			}
-			
-			ApprovalFlow approvalFlow = ConvertHelper.convert(cmd, ApprovalFlow.class); 
-			approvalFlow.setName(cmd.getOwnerId()+" approval rule");
-			approvalFlow.setStatus(CommonStatus.ACTIVE.getCode());
-			approvalFlow.setNamespaceId(namespaceId);
-			approvalFlow.setCreatorUid(userId);
-			approvalFlow.setOperatorUid(userId);
-			approvalFlow.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			approvalFlow.setUpdateTime(approvalFlow.getCreateTime());
-			approvalFlowProvider.createApprovalFlow(approvalFlow);
-			
-			ApprovalRuleFlowMap approvalRuleFlowMap = new ApprovalRuleFlowMap();
-			approvalRuleFlowMap.setRuleId(approvalRule.getId());
-			approvalRuleFlowMap.setApprovalType(r.getApprovalType());
-			approvalRuleFlowMap.setFlowId(approvalFlow.getId());
-			approvalRuleFlowMap.setStatus(CommonStatus.ACTIVE.getCode());
-			approvalRuleFlowMapProvider.createApprovalRuleFlowMap(approvalRuleFlowMap);
-			if(null !=  r.getLevelList()){
-				for(ApprovalFlowLevelDTO fl : r.getLevelList()){
-					if (fl.getApprovalUserList() == null)
-						continue;
-					ApprovalFlowLevel ap = new ApprovalFlowLevel();
-					ap.setFlowId(approvalFlow.getId());
-					ap.setLevel(fl.getLevel());
-					for(ApprovalUser a : fl.getApprovalUserList()){
-						ap.setTargetType(a.getTargetType());
-						ap.setTargetId(a.getTargetId());
-						approvalFlowLevelProvider.createApprovalFlowLevel(ap);
+		coordinationProvider.getNamedLock(
+				CoordinationLocks.UPDATE_APPROVAL_TARGET_RULE.getCode() + cmd.getTargetId()).enter(
+				() -> {
+
+					PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
+							cmd.getTargetType(), cmd.getTargetId());
+					ApprovalRule approvalRule = ConvertHelper.convert(cmd, ApprovalRule.class);
+					if (null != map && approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId()) != null) {
+						approvalRule = this.approvalRuleProvider.findApprovalRuleById(map.getReviewRuleId());
 					}
-				}
-			}
-		}
+					else{
+						approvalRule.setName(cmd.getTargetId() + "approval rule");
+						approvalRule.setNamespaceId(namespaceId);
+						this.createApprovalRule(userId, approvalRule);
+						if(null == map ){
+							map = new PunchRuleOwnerMap();
+							map.setReviewRuleId(approvalRule.getId());
+							map.setOwnerId(cmd.getOwnerId());
+							map.setOwnerType(cmd.getOwnerType());
+							map.setTargetId(cmd.getTargetId());
+							map.setTargetType(cmd.getTargetType());
+							map.setCreatorUid(UserContext.current().getUser().getId());
+							map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+							this.punchProvider.createPunchRuleOwnerMap(map);
+						}
+						else{
+							map.setReviewRuleId(approvalRule.getId());
+							this.punchProvider.updatePunchRuleOwnerMap(map);
+						}
+					}
+					 
+					// 删除之前的审批流程
+					deleteApprovalRuleFlowMap(approvalRule.getId());
+					// 创建新审批流程
+					 for ( RuleFlowMap r : cmd.getRuleFlowMapList()){
+						if (ApprovalType.fromCode(r.getApprovalType()) == null) {
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+									"not exist approval type: approvalType=" + r.getApprovalType() + ", flowId=" + r.getFlowId());
+						}
+						
+						ApprovalFlow approvalFlow = ConvertHelper.convert(cmd, ApprovalFlow.class); 
+						approvalFlow.setName(cmd.getOwnerId()+" approval rule");
+						approvalFlow.setStatus(CommonStatus.ACTIVE.getCode());
+						approvalFlow.setNamespaceId(namespaceId);
+						approvalFlow.setCreatorUid(userId);
+						approvalFlow.setOperatorUid(userId);
+						approvalFlow.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						approvalFlow.setUpdateTime(approvalFlow.getCreateTime());
+						approvalFlowProvider.createApprovalFlow(approvalFlow);
+						
+						ApprovalRuleFlowMap approvalRuleFlowMap = new ApprovalRuleFlowMap();
+						approvalRuleFlowMap.setRuleId(approvalRule.getId());
+						approvalRuleFlowMap.setApprovalType(r.getApprovalType());
+						approvalRuleFlowMap.setFlowId(approvalFlow.getId());
+						approvalRuleFlowMap.setStatus(CommonStatus.ACTIVE.getCode());
+						approvalRuleFlowMapProvider.createApprovalRuleFlowMap(approvalRuleFlowMap);
+						if(null !=  r.getLevelList()){
+							for(ApprovalFlowLevelDTO fl : r.getLevelList()){
+								if (fl.getApprovalUserList() == null)
+									continue;
+								ApprovalFlowLevel ap = new ApprovalFlowLevel();
+								ap.setFlowId(approvalFlow.getId());
+								ap.setLevel(fl.getLevel());
+								for(ApprovalUser a : fl.getApprovalUserList()){
+									ap.setTargetType(a.getTargetType());
+									ap.setTargetId(a.getTargetId());
+									approvalFlowLevelProvider.createApprovalFlowLevel(ap);
+								}
+							}
+						}
+					}
+					 return null;
+				});
 	}
 
 	@Override
