@@ -1446,7 +1446,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		User user = UserContext.current().getUser();
-
 		List<AuthorizationServiceModule> serviceModuleAuthorizations = cmd.getServiceModuleAuthorizations();
 
 		dbProvider.execute((TransactionStatus status) -> {
