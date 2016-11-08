@@ -1,16 +1,24 @@
 import React, { PropTypes, Component} from 'react'
 import {connect} from 'react-redux'
 
+import jsonStringify from 'json-pretty'
+
 class ApiDoc extends Component {
     render() {
         let {responseSchema, javadocUrl, apiUri} = this.props;
 
         if(responseSchema) {
+            let obj = responseSchema;
+            try {
+                obj = JSON.parse(responseSchema);
+            } catch(e) {
+                console.log(`parsing ${responseSchema} got error: ${e}`);
+            }
             return (
                 <div style={{padding: '2px 8px', whiteSpace: 'normal'}}>
                     <h4 style={{margin: '0px'}}>Response JSON schema</h4>
 
-                    <p>{responseSchema}</p>
+                    <pre>{jsonStringify(obj)}</pre>
                     <h4>JavaDoc</h4>
                     <a href={javadocUrl} target="blank">{apiUri} details</a>
                 </div>

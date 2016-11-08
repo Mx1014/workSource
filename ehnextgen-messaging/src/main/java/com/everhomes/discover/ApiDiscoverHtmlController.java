@@ -73,7 +73,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
     @RequestMapping("/api-menu")
     @RequireAuthentication(false)
     public String apiIndex(HttpServletRequest request, HttpServletResponse response, Model model) {
-        model.addAttribute("restMethods", ControllerBase.getRestMethodList());
+        model.addAttribute("restMethods", ControllerBase.getRestMethodList(javadocRoot, "core"));
         return "api-menu";
     }
     
@@ -86,7 +86,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
         if(index != null)
             methodIndex = Integer.parseInt(index);
         
-        model.addAttribute("restMethod", ControllerBase.getRestMethodList().get(methodIndex));
+        model.addAttribute("restMethod", ControllerBase.getRestMethodList(javadocRoot, "core").get(methodIndex));
         model.addAttribute("javadocRoot", javadocRoot);
         
         String contextPath = request.getContextPath();
