@@ -5085,9 +5085,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public ImportDataResponse importOrganizationPersonnelData(MultipartFile mfile,
+	public ImportOrganizationPersonnelDataResponse importOrganizationPersonnelData(MultipartFile mfile,
 			Long userId, ImportOrganizationPersonnelDataCommand cmd) {
-		ImportDataResponse importDataResponse = new ImportDataResponse();
+		ImportOrganizationPersonnelDataResponse importDataResponse = new ImportOrganizationPersonnelDataResponse();
 		try {
 			//解析excel
 			List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
@@ -5099,14 +5099,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			LOGGER.debug("Start import data...,total:" + resultList.size());
 			//导入数据，返回导入错误的日志数据集
-			List<String> errorDataLogs = importOrganizationPersonnel(convertToStrList(resultList), userId, cmd);
+			List<ImportOrganizationMemberDTO> errorDataLogs = importOrganizationPersonnel(convertToStrList(resultList), userId, cmd);
 			LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
 			if(null == errorDataLogs || errorDataLogs.isEmpty()){
 				LOGGER.debug("Data import all success...");
 			}else{
 				//记录导入错误日志
-				for (String log : errorDataLogs) {
-					LOGGER.error(log);
+				for (ImportOrganizationMemberDTO log : errorDataLogs) {
+					LOGGER.error(log.getDescription());
 				}
 			}
 			
@@ -5183,8 +5183,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 	}
 	
-	private List<String> importOrganizationPersonnel(List<String> list, Long userId, ImportOrganizationPersonnelDataCommand cmd){
-		List<String> errorDataLogs = new ArrayList<String>();
+	private List<ImportOrganizationMemberDTO> importOrganizationPersonnel(List<String> list, Long userId, ImportOrganizationPersonnelDataCommand cmd){
+		List<ImportOrganizationMemberDTO> errorDataLogs = new ArrayList<ImportOrganizationMemberDTO>();
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
@@ -5202,24 +5202,30 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			if(0 == s.length){
 				LOGGER.debug("Organization member is null. data = " + str);
-				errorDataLogs.add("Organization member is null. data = " + str);
 				continue outer;
 			}
 			//手机号为空
 			if(StringUtils.isEmpty(s[4])){
 				LOGGER.debug("Organization member contactToken is null. data = " + str);
-				errorDataLogs.add("Organization member contactToken is null. data = " + str);
+				
+				ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+				d.setDescription("Organization member contactToken is null");
+				errorDataLogs.add(d);
 				continue outer;
 			}
 			if(StringUtils.isEmpty(s[2])){
 				LOGGER.debug("Organization member ContactName is null. data = " + str);
-				errorDataLogs.add("Organization member ContactName is null. data = " + str);
+				ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+				d.setDescription("Organization member ContactName is null");
+				errorDataLogs.add(d);
 				continue outer;
 			}
 			//部门为空
 			if(StringUtils.isEmpty(s[1])){
 				LOGGER.debug("Organization member depts is null. data = " + str);
-				errorDataLogs.add("Organization member depts is null. data = " + str);
+				ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+				d.setDescription("Organization member depts is null");
+				errorDataLogs.add(d);
 				continue outer;
 			}
 			
@@ -5245,7 +5251,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 					Organization dept = deptMap.get(deptName);
 					if(null == dept){
 						LOGGER.debug("Organization member depts is null. data = " + str);
-						errorDataLogs.add("Organization member depts is null. data = " + str);
+						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+						d.setDescription("Organization member depts is null");
+						errorDataLogs.add(d);
 						continue outer;
 					}
 					departmentIds.add(dept.getId());
@@ -5260,8 +5268,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				for(String jobPositionName: jobPositionStrArr) {
 					Organization jobPosition = jobPositionMap.get(jobPositionName);
 					if(null == jobPosition){
-						LOGGER.debug("Organization member depts is null. data = " + str);
-						errorDataLogs.add("Organization member depts is null. data = " + str);
+						LOGGER.debug("Organization member jobPosition is null. data = " + str);
+						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+						d.setDescription("Organization member jobPosition is null");
+						errorDataLogs.add(d);
 						continue outer;
 					}
 					jobPositionIds.add(jobPosition.getId());
@@ -5276,8 +5286,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				for(String jobLevelName: jobLevelStrArr) {
 					Organization jobLevel = jobLevelMap.get(jobLevelName);
 					if(null == jobLevel){
-						LOGGER.debug("Organization member depts is null. data = " + str);
-						errorDataLogs.add("Organization member depts is null. data = " + str);
+						LOGGER.debug("Organization member jobLevel is null. data = " + str);
+						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+						d.setDescription("Organization member jobLevel is null");
+						errorDataLogs.add(d);
 						continue outer;
 					}
 					jobLevelIds.add(jobLevel.getId());
@@ -5295,7 +5307,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 				verifyRes = this.verifyPersonnelByPhone(verifyCommand);
 			} catch (Exception e) {
 				LOGGER.debug(e.getMessage() + ". data = " + str);
-				errorDataLogs.add(e.getMessage() + ". data = " + str);
 				continue outer;
 			}
 			
@@ -5307,6 +5318,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			this.addOrganizationPersonnel(memberCommand);
 		}
 		return errorDataLogs;
+	}
+	
+	private ImportOrganizationMemberDTO convertArrToImportOrganizationMemberDTO(String[] arr) {
+		ImportOrganizationMemberDTO dto = new ImportOrganizationMemberDTO();
+		dto.setEmployeeNo(arr[0]);
+		dto.setDepartments(arr[1]);
+		dto.setContactName(arr[2]);
+		dto.setGender(arr[3]);
+		dto.setContactToken(arr[4]);
+		dto.setJobPositions(arr[5]);
+		dto.setJobLevels(arr[6]);
+		
+		return dto;
 	}
 	
 	private Map<String, Organization> convertDeptListToStrMap(List<Organization> depts){
