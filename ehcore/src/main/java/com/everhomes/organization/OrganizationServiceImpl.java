@@ -7671,13 +7671,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationJobPosition> list = organizationProvider.listOrganizationJobPositions(cmd.getOwnerType(), cmd.getOwnerId(), 
 				cmd.getKeywords(), cmd.getPageAnchor(), cmd.getPageSize());
 		
-		if(list.size() > 0){
+		int size = list.size();
+		if( size> 0){
 			response.setRequests(list.stream().map(r -> {
 				OrganizationJobPositionDTO dto = ConvertHelper.convert(r, OrganizationJobPositionDTO.class);
 				return dto;
 			}).collect(Collectors.toList()));
 			
-			if(list.size() != pageSize){
+			if(size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
         		response.setNextPageAnchor(list.get(list.size()-1).getId());
@@ -7815,14 +7816,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
 		List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, null, cmd.getPageAnchor(), pageSize);
 		
-		if(list.size() > 0){
+		int size = list.size();
+		if(size > 0){
 			response.setRequests(list.stream().map(r -> {
 				ChildrenOrganizationJobLevelDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobLevelDTO.class);
 				dto.setParentName(organization.getName());
 				return dto;
 			}).collect(Collectors.toList()));
 			
-			if(list.size() != pageSize){
+			if(size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
         		response.setNextPageAnchor(list.get(list.size()-1).getId());
@@ -7866,7 +7868,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
 		List<Organization> list = organizationProvider.listOrganizationByGroupTypes(cmd.getId(), groupTypes, cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
 		
-		if(list.size() > 0){
+		int size = list.size();
+		if(size > 0){
 			response.setRequests(list.stream().map(r -> {
 				ChildrenOrganizationJobPositionDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobPositionDTO.class);
 				dto.setParentName(organization.getName());
@@ -7881,7 +7884,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				return dto;
 			}).collect(Collectors.toList()));
 			
-			if(list.size() != pageSize){
+			if(size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
         		response.setNextPageAnchor(list.get(list.size()-1).getId());
