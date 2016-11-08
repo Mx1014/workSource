@@ -192,7 +192,14 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
 
         	EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId(), task.getOwnerType(), task.getOwnerId());
             if(null != standard) {
+            	dto.setStandardDescription(standard.getDescription());
+    			dto.setStandardName(standard.getName());
             	dto.setTaskType(standard.getStandardType());
+            	EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standard.getTemplateId(), standard.getOwnerId(), standard.getOwnerType());
+        		if(template != null) {
+        			dto.setTemplateId(template.getId());
+        			dto.setTemplateName(template.getName());
+        		}
             }
             
             EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId(), task.getOwnerType(), task.getOwnerId());

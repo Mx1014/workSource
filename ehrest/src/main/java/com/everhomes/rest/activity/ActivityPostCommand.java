@@ -13,7 +13,9 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>namespaceId:命名空间</li>
  *<li>subject:主题</li>
- *<li>description:描述</li>
+ *<li>description:描述（活动实际内容）</li>
+ *<li>contentType:内容类型，参考{@link com.everhomes.rest.forum.PostContentType}</li>
+ *<li>content:拼接的内容</li>
  *<li>location:位置</li>
  *<li>contactPerson:联系人</li>
  *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
@@ -30,12 +32,15 @@ import com.everhomes.util.StringHelper;
  *<li>guest:嘉宾</li>
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
+ * <li>maxQuantity: 限制人数</li>
  *</ul>
  */
 public class ActivityPostCommand{
     private Integer namespaceId;
     private String subject;
     private String description;
+    private String contentType;
+    private String content;
     private String location;
     private String contactPerson;
     private String contactNumber;
@@ -63,7 +68,33 @@ public class ActivityPostCommand{
     private String videoUrl;
     private Byte videoState;
     
-    public Byte getOfficialFlag() {
+    private Integer maxQuantity;
+
+	public String getContentType() {
+		return contentType;
+	}
+
+	public void setContentType(String contentType) {
+		this.contentType = contentType;
+	}
+
+	public String getContent() {
+		return content;
+	}
+
+	public void setContent(String content) {
+		this.content = content;
+	}
+
+	public Integer getMaxQuantity() {
+		return maxQuantity;
+	}
+
+	public void setMaxQuantity(Integer maxQuantity) {
+		this.maxQuantity = maxQuantity;
+	}
+
+	public Byte getOfficialFlag() {
 		return officialFlag;
 	}
 

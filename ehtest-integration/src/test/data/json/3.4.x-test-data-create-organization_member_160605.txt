@@ -40,6 +40,7 @@
       "contact_type": "0",
       "contact_name": "zhangsan",
       "contact_token": "12000000001",
+      "visible_flag": 0,
       "status": "3"
     },
     {
@@ -50,6 +51,7 @@
       "contact_type": "0",
       "contact_token": "12000000002",
       "contact_name": "lisi",
+      "visible_flag": 0,
       "status": "3"
     },
     {

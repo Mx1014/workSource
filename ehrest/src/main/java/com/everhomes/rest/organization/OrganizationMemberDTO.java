@@ -64,6 +64,8 @@ public class OrganizationMemberDTO {
 	
 	private Long   employeeNo;
 	private Byte   gender;
+
+    private Byte visibleFlag;
 	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> groups;
@@ -272,7 +274,15 @@ public class OrganizationMemberDTO {
 		this.departments = departments;
 	}
 
-	@Override
+    public Byte getVisibleFlag() {
+        return visibleFlag;
+    }
+
+    public void setVisibleFlag(Byte visibleFlag) {
+        this.visibleFlag = visibleFlag;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

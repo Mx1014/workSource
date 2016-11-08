@@ -5,8 +5,11 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
+import com.everhomes.rest.organization.VisibleFlag;
+
 import org.jooq.Condition;
 
+import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
@@ -118,7 +121,7 @@ public interface OrganizationProvider {
 	
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes);
 	
-	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, CrossShardListingLocator locator,Integer pageSize);
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 	
 	OrganizationMember findOrganizationPersonnelByPhone(Long id, String phone);
 	
@@ -216,4 +219,11 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listParentOrganizationMembersByName(String superiorPath, List<String> groupTypes, String userName);
 	
 	List<OrganizationMember> listOrganizationMemberByContactTokens(List<String> contactTokens, Long organizationId);
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds, Byte memberStatus,
+			Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize);
+	
+    GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
+    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
+
+	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
 }

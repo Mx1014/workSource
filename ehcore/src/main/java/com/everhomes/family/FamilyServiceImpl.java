@@ -2,6 +2,7 @@
 package com.everhomes.family;
 
 import ch.hsr.geohash.GeoHash;
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
 import com.everhomes.address.Address;
@@ -29,6 +30,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.organization.pm.OrganizationOwnerAddress;
 import com.everhomes.organization.pm.PropertyMgrProvider;
+import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.point.UserPointService;
 import com.everhomes.recommend.RecommendationService;
 import com.everhomes.region.Region;
@@ -44,6 +46,7 @@ import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.pm.OrganizationOwnerAddressAuthType;
+import com.everhomes.rest.organization.pm.OrganizationOwnerBehaviorType;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.region.RegionScope;
@@ -57,6 +60,7 @@ import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+
 import org.apache.lucene.spatial.DistanceUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -139,6 +143,9 @@ public class FamilyServiceImpl implements FamilyService {
 
     @Autowired
     private PropertyMgrProvider propertyMgrProvider;
+
+    @Autowired
+    private PropertyMgrService propertyMgrService;
     
     @Override
     public Family getOrCreatefamily(Address address, User u)      {
@@ -894,7 +901,7 @@ public class FamilyServiceImpl implements FamilyService {
        
         if(tuple.second()){
             // 认证organizationOwner
-            approveOrganizationOwner(cmd.getAddressId(), user.getNamespaceId(), memberUid);
+            autoApproveOrganizationOwner(cmd.getAddressId(), user.getNamespaceId(), memberUid);
 
             if(cmd.getOperatorRole().byteValue() == Role.ResourceOperator)
                 sendFamilyNotificationForApproveMember(null,group,member,userId);
@@ -923,7 +930,7 @@ public class FamilyServiceImpl implements FamilyService {
     // 认证organization owner
     // add by xq.tian   20160922
     //
-    private boolean approveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
+    private void autoApproveOrganizationOwner(Long addressId, Integer namespaceId, Long memberUid) {
         if (addressId != null) {
             User memberUser = userProvider.findUserById(memberUid);
             UserIdentifier userIdentifier = getMobileOfUserIdentifier(memberUid);
@@ -934,16 +941,28 @@ public class FamilyServiceImpl implements FamilyService {
                     for (CommunityPmOwner owner : pmOwners) {
                         OrganizationOwnerAddress ownerAddress = propertyMgrProvider.findOrganizationOwnerAddressByOwnerAndAddress(
                                 namespaceId, owner.getId(), addressId);
-                        if (ownerAddress != null && ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
-                            ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
-                            propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                        if (ownerAddress != null) {
+                            if (ownerAddress.getAuthType() != OrganizationOwnerAddressAuthType.ACTIVE.getCode()) {
+                                ownerAddress.setAuthType(OrganizationOwnerAddressAuthType.ACTIVE.getCode());
+                                propertyMgrProvider.updateOrganizationOwnerAddress(ownerAddress);
+                            }
+                        }
+                        // 不存在ownerAddress, 创建ownerAddress记录
+                        else {
+                            propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                                    memberUser.getNamespaceId(), owner.getId(), OrganizationOwnerAddressAuthType.ACTIVE);
                         }
                     }
-                    return true;
+                }
+                // 不存在organizationOwner, 根据用户资料创建organizationOwner记录
+                else {
+                    long ownerId = propertyMgrService.createOrganizationOwnerByUser(memberUser, userIdentifier.getIdentifierToken());
+                    // 创建ownerAddress
+                    propertyMgrService.createOrganizationOwnerAddress(addressId, OrganizationOwnerBehaviorType.IMMIGRATION.getLivingStatus(),
+                            memberUser.getNamespaceId(), ownerId, OrganizationOwnerAddressAuthType.ACTIVE);
                 }
             }
         }
-        return false;
     }
 
     private void sendFamilyNotificationForApproveMember(Address address, Group group, GroupMember member,long operatorId) {
@@ -1341,7 +1360,7 @@ public class FamilyServiceImpl implements FamilyService {
                         .where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
                         .fetch().map( (r) ->{
                             //排除自己家庭
-                            if(r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1) != group.getIntegralTag1())
+                            if(!r.getValue(Tables.EH_GROUPS.INTEGRAL_TAG1).equals(group.getIntegralTag1()))
                                 familyList.add(ConvertHelper.convert(r,Family.class));
                             return null;
                         });
@@ -1349,23 +1368,22 @@ public class FamilyServiceImpl implements FamilyService {
                     return true;
                 });
         List<Long> neighborUserIds = new ArrayList<Long>();
-        
+
         familyList.stream().forEach((f) ->{
             if(f == null) return;
             
             Address address = this.addressProvider.findAddressById(f.getAddressId());
             if(address != null){
                 
-                List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
+                    List<GroupMember> members = this.groupProvider.findGroupMemberByGroupId(f.getId());
                 if(members != null && !members.isEmpty()){
                     for(GroupMember m : members){
-                        
-                        if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode() 
+                        if(m.getMemberStatus() == GroupMemberStatus.ACTIVE.getCode()
                                 && m.getMemberType().equals(EntityType.USER.getCode())
                                         && m.getMemberId().longValue() != user.getId().longValue()){
                             //去重
                             if(neighborUserIds.contains(m.getMemberId())) 
-                                return;
+                                continue;
                             neighborUserIds.add(m.getMemberId());
                             NeighborUserDetailDTO n = new NeighborUserDetailDTO();
                             User u = this.userProvider.findUserById(m.getMemberId());
@@ -2118,4 +2136,26 @@ public class FamilyServiceImpl implements FamilyService {
             this.userGroupHistoryProvider.deleteUserGroupHistory(history);
         }
     }
+
+	@Override
+	public void adminBatchApproveMember(BatchApproveMemberCommand cmd) {
+		if(cmd.getMembers() == null )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "invalid parameter members is null ");
+		for(ApproveMemberCommand member : cmd.getMembers()){
+			this.adminApproveMember(member);
+		}
+	}
+
+	@Override
+	public void batchRejectMember(BatchRejectMemberCommand cmd) {
+		if(cmd.getMembers() == null )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "invalid parameter members is null ");
+		for(RejectMemberCommand member : cmd.getMembers()){
+			member.setOperatorRole(Role.SystemAdmin);
+			this.rejectMember(member);
+		}
+        
+	}
 }

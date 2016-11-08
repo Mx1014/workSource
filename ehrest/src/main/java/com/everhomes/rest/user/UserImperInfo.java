@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 public class UserImperInfo {
     private Long id;
+    private Long imperId;
     private Integer namespaceId;
     private String nickName;
     private String phone;
@@ -13,7 +14,13 @@ public class UserImperInfo {
     private String description;
     private Long ownerId;
     private Long targetId;
-    
+
+    public Long getImperId() {
+        return imperId;
+    }
+    public void setImperId(Long imperId) {
+        this.imperId = imperId;
+    }
     public Long getId() {
         return id;
     }

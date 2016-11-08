@@ -30,8 +30,12 @@ import com.everhomes.rest.user.DeleteUserImpersonationCommand;
 import com.everhomes.rest.user.GetBizSignatureCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.GetUserInfoByIdCommand;
+import com.everhomes.rest.user.InitBizInfoCommand;
+import com.everhomes.rest.user.InitBizInfoDTO;
 import com.everhomes.rest.user.ListLoginByPhoneCommand;
+import com.everhomes.rest.user.ListRegisterUsersResponse;
 import com.everhomes.rest.user.LoginToken;
+import com.everhomes.rest.user.SearchUserByNamespaceCommand;
 import com.everhomes.rest.user.SearchUserImpersonationCommand;
 import com.everhomes.rest.user.SearchUserImpersonationResponse;
 import com.everhomes.rest.user.SendMessageTestCommand;
@@ -69,7 +73,7 @@ import com.everhomes.rest.user.admin.UsersWithAddrResponse;
 public interface UserService {
     SignupToken signup(SignupCommand cmd, HttpServletRequest request);
     UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken);
-    void resendVerficationCode(Integer namespaceId, SignupToken signupToken);
+    void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
@@ -180,4 +184,13 @@ public interface UserService {
      * @param sceneType
      */
     void checkUserScene(SceneType sceneType);
+    
+    /**
+     * 查询命名空间下的用户
+     * @param cmd
+     * @return
+     */
+    ListRegisterUsersResponse searchUserByNamespace(SearchUserByNamespaceCommand cmd);
+	UserLogin reSynThridUser(InitBizInfoCommand cmd);
+	InitBizInfoDTO findInitBizInfo();
 }

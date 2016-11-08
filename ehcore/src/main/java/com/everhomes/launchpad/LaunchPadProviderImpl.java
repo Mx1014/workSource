@@ -5,10 +5,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
+import com.everhomes.rest.launchpad.ItemServiceCategryStatus;
+import com.everhomes.server.schema.tables.daos.EhItemServiceCategriesDao;
+import com.everhomes.server.schema.tables.pojos.EhItemServiceCategries;
+import com.everhomes.server.schema.tables.records.EhItemServiceCategriesRecord;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -432,5 +433,26 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		dao.update(userItem); 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUserLaunchPadItems.class, null);
 	}
-	
+
+	public List<ItemServiceCategry> listItemServiceCategries(Integer namespaceId){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		List<ItemServiceCategry> result = new ArrayList<ItemServiceCategry>();
+		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
+		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.NAMESPACE_ID.eq(namespaceId));
+		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER);
+		query.fetch().map(r -> {
+			result.add(ConvertHelper.convert(r, ItemServiceCategry.class));
+			return null;
+		});
+		return result;
+	}
+
+	@Override
+	public void createItemServiceCategry(ItemServiceCategry itemServiceCategry) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhItemServiceCategriesDao dao = new EhItemServiceCategriesDao(context.configuration());
+		dao.insert(itemServiceCategry);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhItemServiceCategries.class, null);
+	}
 }

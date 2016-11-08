@@ -905,7 +905,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 	}
 
 	private void checkNamespaceExist(Integer namespaceId) {
-		if (namespaceProvider.findNamespaceById(namespaceId) == null) {
+		if (namespaceId.intValue() != 0 && namespaceProvider.findNamespaceById(namespaceId) == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Not exist namespace: "+namespaceId);
 		}
@@ -1618,7 +1618,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		}
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		
-		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeyword(),orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(), locator, 10000);
+		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeyword(),orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(),null, locator, 10000);
 		processPinyin(organizationMembers);
 		organizationMembers.sort((o1, o2)->{
 			return o1.getFullInitial().compareTo(o2.getFullInitial());
@@ -1716,7 +1716,7 @@ public class ApprovalServiceImpl implements ApprovalService {
 		orgCommoand.setId(ownerId);
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
 		
-		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(nickName, orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(), locator, 10000);
+		List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(nickName, orgCommoand, ContactSignUpStatus.SIGNEDUP.getCode(),null, locator, 10000);
 		
 		return organizationMembers.stream().map(o->o.getTargetId()).collect(Collectors.toList());
 	}

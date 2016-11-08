@@ -10,4 +10,8 @@ public interface ParkingErrorCode {
     static final int ERROR_PLATE_NULL = 10005;  //车牌号为空
     
     static final int ERROR_PLATE_APPLIED_SERVER = 10004;  //服务器忙
+    
+    static final int ERROR_TEMP_FEE = 10010;  //费用已过期
+    
+    static final int ERROR_MAX_REQUEST_NUM = 10011;  //抱歉，你申请的月卡数量已到上限
 }

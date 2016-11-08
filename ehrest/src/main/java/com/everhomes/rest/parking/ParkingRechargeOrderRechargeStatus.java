@@ -9,12 +9,14 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingRechargeOrderRechargeStatus {
-    NONE((byte)0), UNRECHARGED((byte)1), RECHARGED((byte)2);
+    NONE((byte)0, "无效"), UNRECHARGED((byte)1, "未充值"), RECHARGED((byte)2, "已充值");
     
     private byte code;
+    private String describe;
     
-    private ParkingRechargeOrderRechargeStatus(byte code) {
+    private ParkingRechargeOrderRechargeStatus(byte code, String describe) {
         this.code = code;
+        this.describe = describe;
     }
     
     public byte getCode() {
@@ -33,4 +35,9 @@ public enum ParkingRechargeOrderRechargeStatus {
         
         return null;
     }
+
+	public String getDescribe() {
+		return describe;
+	}
+
 }

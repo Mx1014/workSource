@@ -271,6 +271,9 @@ CREATE TABLE `eh_activities` (
   `official_flag` TINYINT DEFAULT 0 COMMENT 'whether it is an official activity, 0 not, 1 yes',
   `video_url` VARCHAR(128) COMMENT 'url of video support',
   `is_video_support` TINYINT NOT NULL DEFAULT 0 COMMENT 'is video support',
+  `max_quantity` INTEGER COMMENT 'max person quantity',
+  `content_type` VARCHAR(128) COMMENT 'content type, text/rich_text',
+  `version` VARCHAR(128) COMMENT 'version',
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
@@ -1035,7 +1038,7 @@ CREATE TABLE `eh_businesses` (
   `update_time` DATETIME,
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
-  `visible_distance` DOUBLE DEFAULT 5000 COMMENT 'the distance between shop and user who can find the shop, unit: meter',
+  `visible_distance` DOUBLE DEFAULT '5000' COMMENT 'the distance between shop and user who can find the shop, unit: meter',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -2464,6 +2467,7 @@ CREATE TABLE `eh_forum_posts` (
   `end_time` DATETIME COMMENT 'publish end time',
   `official_flag` TINYINT DEFAULT 0 COMMENT 'whether it is an official activity, 0 not, 1 yes',
   `media_display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'whether display image',
+  `max_quantity` INTEGER COMMENT 'max person quantity',
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
@@ -3669,7 +3673,8 @@ CREATE TABLE `eh_organization_members` (
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
   `namespace_id` INTEGER DEFAULT 0,
-
+  `visible_flag` TINYINT DEFAULT 0 COMMENT '0 show 1 hide',
+  
   PRIMARY KEY (`id`),
   KEY `fk_eh_orgm_owner` (`organization_id`),
   KEY `i_eh_corg_group` (`member_group`),
@@ -4069,7 +4074,10 @@ CREATE TABLE `eh_parking_lots` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: waitingForApproval, 2: active',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
   `create_time` DATETIME,
-
+  `max_request_num` INTEGER NOT NULL DEFAULT 1 COMMENT 'the max num of the request card',
+  `tempfee_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'is support temp fee',
+  `rate_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'is support add or delete rate',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -4106,7 +4114,9 @@ CREATE TABLE `eh_parking_recharge_orders` (
   `new_expired_time` DATETIME,
   `paid_type` VARCHAR(32) COMMENT 'the type of payer',
   `is_delete` TINYINT NOT NULL DEFAULT 0 COMMENT 'the order is delete, 0 : is not deleted, 1: deleted',
-
+  `recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: monthly, 2: temporary',
+  `order_token` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'it may be from 3rd system',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -5119,6 +5129,19 @@ CREATE TABLE `eh_recommendations` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
+DROP TABLE IF EXISTS `eh_region_codes`;
+CREATE TABLE `eh_region_codes` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `name` VARCHAR(64) NOT NULL COMMENT 'region name',
+  `code` INTEGER NOT NULL COMMENT 'region code',
+  `pinyin` VARCHAR(256) NOT NULL COMMENT 'region name pinyin',
+  `first_letter` CHAR(2) NOT NULL COMMENT 'region name pinyin first letter',
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active', 
+  `hot_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no, 1: yes', 
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 --
 -- member of global partition
 --
@@ -6075,7 +6098,7 @@ CREATE TABLE `eh_search_types` (
   `delete_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_sequences`;
@@ -6144,6 +6167,8 @@ CREATE TABLE `eh_service_alliance_categories` (
   `delete_time` DATETIME,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `logo_url` VARCHAR(1024) COMMENT 'the logo url of the category',
+  `display_mode` TINYINT DEFAULT 1,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -6192,7 +6217,33 @@ CREATE TABLE `eh_service_alliance_requests` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_service_alliance_reservation_requests`;
+CREATE TABLE `eh_service_alliance_reservation_requests` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `template_type` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'i.e. EhServiceAllianceApplies type',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT 0,
+  `type` BIGINT NOT NULL DEFAULT 0,
+  `category_id` BIGINT NOT NULL DEFAULT 0,
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
+  `creator_name` VARCHAR(128),
+  `creator_mobile` VARCHAR(128),
+  `creator_organization_id` BIGINT NOT NULL DEFAULT 0,
+  `service_alliance_id` BIGINT NOT NULL DEFAULT 0,
+  `reserve_type` VARCHAR(128),
+  `reserve_organization` VARCHAR(128),
+  `reserve_time` VARCHAR(128),
+  `contact` VARCHAR(128),
+  `mobile` VARCHAR(128),
+  `remarks` VARCHAR(1024),
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 DROP TABLE IF EXISTS `eh_service_alliances`;
@@ -6284,8 +6335,24 @@ CREATE TABLE `eh_source_account` (
   `status` TINYINT COMMENT '0-available 1-occupied',
   `occupy_account_id` BIGINT,
   `conf_id` INTEGER,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- add by wh 20161011
+-- 用户活动率计算表
+DROP TABLE IF EXISTS `eh_stat_active_users`;
+CREATE TABLE `eh_stat_active_users` (
+  `id` BIGINT NOT NULL,
+  `stat_date` DATE COMMENT '统计日期',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `active_count` INTEGER NOT NULL DEFAULT 0 COMMENT '活动人数',
+  `total_count` INTEGER NOT NULL DEFAULT 0 COMMENT '总人数-当天的',
+  `create_time` DATETIME,
+  
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 -- 订单交易流水表
@@ -6307,6 +6374,7 @@ CREATE TABLE `eh_stat_orders` (
   `shop_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1-platform shop,2-self shop',
   `order_time` DATETIME,
   `create_time` DATETIME,
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -6375,7 +6443,15 @@ CREATE TABLE `eh_stat_service_settlement_results` (
   `total_refund_amount` DECIMAL(10,2) NOT NULL DEFAULT '0.00' COMMENT '交易总金额',
   `update_time` DATETIME,
   `create_time` DATETIME,
-
+  `alipay_paid_count` BIGINT DEFAULT 0 COMMENT '支付宝消费笔数',
+  `alipay_refund_count` BIGINT DEFAULT 0 COMMENT '支付宝退款笔数',
+  `wechat_paid_count` BIGINT DEFAULT 0 COMMENT '微信消费笔数',
+  `wechat_refund_count` BIGINT DEFAULT 0 COMMENT '微信退款笔数',
+  `payment_card_paid_count` BIGINT DEFAULT 0 COMMENT '一卡通消费笔数',
+  `payment_card_refund_count` BIGINT DEFAULT 0 COMMENT '一卡通退款笔数',
+  `total_paid_count` BIGINT DEFAULT 0 COMMENT '总消费笔数',
+  `total_refund_count` BIGINT DEFAULT 0 COMMENT '总退款消费笔数',
+  
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -6754,7 +6830,8 @@ CREATE TABLE `eh_user_identifiers` (
   `notify_time` DATETIME,
 
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-
+  `region_code` INTEGER DEFAULT '86' COMMENT 'region code 86 852',
+  
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_user_idf_owner_type_token`(`owner_uid`, `identifier_type`, `identifier_token`),
   KEY `i_eh_user_idf_owner`(`owner_uid`),
@@ -7145,6 +7222,22 @@ CREATE TABLE `eh_warning_contacts` (
 
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+DROP TABLE IF EXISTS `eh_warning_settings`;
+CREATE TABLE `eh_warning_settings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL COMMENT 'namespace id',
+  `type` varchar(64) COMMENT 'type',
+  `time` BIGINT COMMENT 'millisecond',
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
+  `update_time` DATETIME,
+  `operator_uid` BIGINT,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 --
 -- the relationship between web menus and privileges

@@ -1,9 +1,11 @@
 package com.everhomes.user;
 
+import java.util.Date;
 import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.rest.activity.ListActiveStatResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UserServiceAddressDTO;
@@ -17,6 +19,7 @@ import com.everhomes.rest.user.FeedbackCommand;
 import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
+import com.everhomes.rest.user.ListActiveStatCommand;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -88,4 +91,11 @@ public interface UserActivityService {
 	List<RequestTemplateDTO> getCustomRequestTemplateByNamespace();
 	void addCustomRequest(@Valid AddRequestCommand cmd);
 	List<RequestFieldDTO> getCustomRequestInfo(@Valid GetRequestInfoCommand cmd);
+
+	ListActiveStatResponse listActiveStat(ListActiveStatCommand cmd);
+
+	void addAnyDayActive(Date statDate, Integer namespaceId);
+
+	String getBizUrl();
+ 
 }

@@ -25,12 +25,13 @@ public class ParkingCardDTO {
 	private String plateNumber;
 	private String plateOwnerName;
 	private String plateOwnerPhone;
+	private String cardTypeId;
 	private String cardType;
 	private String cardNumber;
 	private String cardName;
 	private Long startTime;
 	private Long endTime;
-	private boolean isValid;
+	private Boolean isValid;
 	
 	public ParkingCardDTO() {
 	    
@@ -121,11 +122,11 @@ public class ParkingCardDTO {
         return StringHelper.toJsonString(this);
     }
 
-	public boolean getIsValid() {
+	public Boolean getIsValid() {
 		return isValid;
 	}
 
-	public void setIsValid(boolean isValid) {
+	public void setIsValid(Boolean isValid) {
 		this.isValid = isValid;
 	}
 
@@ -143,5 +144,13 @@ public class ParkingCardDTO {
 
 	public void setCardName(String cardName) {
 		this.cardName = cardName;
+	}
+
+	public String getCardTypeId() {
+		return cardTypeId;
+	}
+
+	public void setCardTypeId(String cardTypeId) {
+		this.cardTypeId = cardTypeId;
 	}
 }

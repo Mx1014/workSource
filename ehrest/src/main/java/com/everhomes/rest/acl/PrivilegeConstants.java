@@ -42,6 +42,7 @@ public interface PrivilegeConstants {
     public static final long ASSIGNTASK = 331L;
     public static final long COMPLETETASK = 332L; 
     public static final long CLOSETASK = 333L;
+    public static final long REVISITTASK = 920L;
     
     // privileges defined by Notice module
     public static final long NoticeManagementPost = 200L;

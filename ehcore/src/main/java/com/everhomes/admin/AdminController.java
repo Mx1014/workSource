@@ -33,6 +33,7 @@ import org.springframework.web.servlet.ModelAndView;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Privilege;
+import com.everhomes.activity.ActivityService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -140,6 +141,9 @@ public class AdminController extends ControllerBase {
     @Autowired
     private AppProvider appProvider;
     
+    @Autowired
+    private ActivityService activityService;
+    
     @Value("#{T(java.util.Arrays).asList('${source.jars}')}")
     private List<String> jars;
     
@@ -169,6 +173,9 @@ public class AdminController extends ControllerBase {
 
     @Value("${objc.response.base}")
     private String restResponseBase;    
+    
+    @Value("${javadoc.root}")
+    private String javadocRoot;
 
     @Autowired
     private UserProvider userProvider;
@@ -261,7 +268,7 @@ public class AdminController extends ControllerBase {
             });
     
             // generator controller API response objects
-            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList(javadocRoot, "core");
             for(RestMethod restMethod: apiMethods)
                 generator.generateControllerPojos(restMethod, context);
             
@@ -281,7 +288,7 @@ public class AdminController extends ControllerBase {
             JavaGenerator generator = new JavaGenerator();
 
             // generator controller API response objects
-            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList(javadocRoot, "core");
             for (RestMethod restMethod : apiMethods)
                 generator.generateControllerPojos(restMethod, context);
             
@@ -882,5 +889,12 @@ public class AdminController extends ControllerBase {
         response.setErrorDescription("OK");
         
         return response;
+    }
+    
+    @RequestMapping("warningActivity")
+    @RestReturn(String.class)
+    public RestResponse warningActivity(){
+    	activityService.activityWarningSchedule();
+    	return new RestResponse();
     }
 }

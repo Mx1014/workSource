@@ -76,5 +76,9 @@ public interface YellowPageProvider {
 	void createSettleRequests(SettleRequests request);
 	SettleRequests findSettleRequests(Long id);
 	List<SettleRequests> listSettleRequests(CrossShardListingLocator locator, int pageSize);
+	
+	void createReservationRequests(ReservationRequests request);
+	ReservationRequests findReservationRequests(Long id);
+	List<ReservationRequests> listReservationRequests(CrossShardListingLocator locator, int pageSize);
 
 }
