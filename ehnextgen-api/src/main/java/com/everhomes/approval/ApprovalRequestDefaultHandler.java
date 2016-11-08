@@ -154,7 +154,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		return null;
 	} 
 
-	private static final SimpleDateFormat minSecSF = new SimpleDateFormat("mm:ss");
+	private static final SimpleDateFormat minSecSF = new SimpleDateFormat("HH:mm");
 	 
 
 	protected String processPunchDetail(PunchDayLog pdl) {

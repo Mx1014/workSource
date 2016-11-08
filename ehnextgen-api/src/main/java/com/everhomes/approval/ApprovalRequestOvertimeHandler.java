@@ -81,12 +81,12 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 
 		List<ApprovalRequest> approvalRequests =  this.approvalRequestProvider.listApprovalRequestByEffectiveDateAndCreateUid(ownerInfo.getNamespaceId(),
 				ownerInfo.getOwnerType(), ownerInfo.getOwnerId(), cmd.getApprovalType(), new Date(cmd.getEffectiveDate()), userId, null);
-		if (approvalRequests != null && approvalRequests.size()>0) {
-			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.EFFECTIVE_DATE_HAS_REQUEST,
-					"invalid parameters, EffectiveDate already has a request !" );
-		}
 		//创建
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
+		if (approvalRequests != null && approvalRequests.size()>0) {
+			approvalRequest.setId(approvalRequests.get(0).getId());
+		}
+		
 		 	
 		return approvalRequest;
 	}
