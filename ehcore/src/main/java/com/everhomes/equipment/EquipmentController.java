@@ -382,7 +382,7 @@ public class EquipmentController extends ControllerBase {
      */
     @RequestMapping("importEquipments")
     @RestReturn(value=ImportDataResponse.class)
-    public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "_attachment") MultipartFile[] files){
+    public RestResponse importEquipments(ImportOwnerCommand cmd, @RequestParam(value = "attachment") MultipartFile[] files){
     	User manaUser = UserContext.current().getUser();
 		Long userId = manaUser.getId();
 		if(null == files || null == files[0]){

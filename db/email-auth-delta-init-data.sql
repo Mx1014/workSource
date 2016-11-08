@@ -9,3 +9,4 @@ SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'verify.mail', 'subject', 'zh_CN', '加入企业验证邮件');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '600001', 'zh_CN', '没有此邮箱域名');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '600002', 'zh_CN', '已经过了验证时间(有效期30分钟)');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('organization', '600003', 'zh_CN', '该邮箱已被占用');

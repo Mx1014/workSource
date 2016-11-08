@@ -169,4 +169,12 @@ public interface RolePrivilegeService {
 	 */
 	void exportRoleAssignmentPersonnelXls(ExcelRoleExcelRoleAssignmentPersonnelCommand cmd, HttpServletResponse response);
 	
+	/**
+     * 获取用户的权限列表
+     * @param communityId
+     * @param organizationId
+     * @param userId
+     * @return
+     */
+    List<Long> getUserCommunityPrivileges(Long communityId, Long userId);
 }

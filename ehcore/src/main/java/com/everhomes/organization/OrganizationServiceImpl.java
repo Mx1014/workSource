@@ -85,7 +85,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -148,7 +148,6 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
-import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
 import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
@@ -163,7 +162,6 @@ import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
 import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
-import com.everhomes.rest.rentalv2.AmorpmFlag;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -223,7 +221,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private DbProvider dbProvider;
 
 	@Autowired
-	private NamespacesProvider namespacesProvider;
+	private NamespaceProvider namespaceProvider;
 	
 	@Autowired
 	LocaleStringService localeStringService;
@@ -353,6 +351,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
 		}
 		
+		
 		Organization org = dbProvider.execute((TransactionStatus status) -> {
 			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				//添加子公司的时候默认给公司添加圈 sfyan 20160706
@@ -379,9 +378,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 				enterprise.setAddress(cmd.getAddress());
 				enterprise.setCreateTime(organization.getCreateTime());
 				organizationProvider.createOrganizationDetail(enterprise);
+	            
+	            // 获取父亲公司所入驻的园区，由于创建子公司时在界面上没有指定其所在园区，会导致服务市场上拿不到数据，
+	            // 故需要补充其所在园区 by lqs 20161101
+	            Long communityId = getOrganizationActiveCommunityId(cmd.getParentId());
+	            if(communityId != null) {
+	                createActiveOrganizationCommunityRequest(user.getId(), organization.getId(), communityId);
+	            } else {
+	                LOGGER.error("Community not found, organizationId={}, parentOrgId={}", organization.getId(), cmd.getParentId());
+	            }
 			}else{
 				organizationProvider.createOrganization(organization);
 			}
+			
 			return organization;
 		});
 		
@@ -645,17 +654,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setEmailDomain(cmd.getEmailDomain());
 			organizationProvider.createOrganizationDetail(enterprise);
 			
-			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
-			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
-			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
-			organizationCommunityRequest.setMemberId(enterprise.getOrganizationId());
-
-			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
-			organizationCommunityRequest.setCreatorUid(user.getId());
-			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	        
-	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
+			createActiveOrganizationCommunityRequest(user.getId(), enterprise.getOrganizationId(), cmd.getCommunityId());
+//			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+//			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
+//			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+//			organizationCommunityRequest.setMemberId(enterprise.getOrganizationId());
+//
+//			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+//			organizationCommunityRequest.setCreatorUid(user.getId());
+//			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//	        
+//	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 			
 	        // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
 	        //organization.setCommunityId(cmd.getCommunityId());
@@ -676,6 +687,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		return ConvertHelper.convert(organization, OrganizationDTO.class);
+	}
+	
+	private void createActiveOrganizationCommunityRequest(Long creatorId, Long organizationId, Long communityId) {
+	    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+        organizationCommunityRequest.setCommunityId(communityId);
+        organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+        organizationCommunityRequest.setMemberId(organizationId);
+
+        organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+        organizationCommunityRequest.setCreatorUid(creatorId);
+        organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 	}
 	
 	/**
@@ -755,6 +780,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
+				organizationDetail.setEmailDomain(cmd.getEmailDomain());
 				organizationDetail.setAddress(cmd.getAddress());
 				organizationDetail.setDescription(cmd.getDescription());
 				organizationDetail.setAvatar(cmd.getAvatar());
@@ -7426,7 +7452,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd) {
 
-		Organization org =  this.checkOrganization(cmd.getOrganizationId());
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null) {
+			return new OrganizationTreeDTO();
+		}
 		List<Organization> organizations = new ArrayList<Organization>();
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
@@ -7530,6 +7559,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd) {
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null){
+			return new OrganizationDTO();
+		}
 		Long userId = UserContext.current().getUser().getId();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 		return this.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());
@@ -7548,22 +7581,26 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd) { 
 		Long userId = UserContext.current().getUser().getId();
-		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		//通过namespace和email domain 找企业
-		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@"));
-		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,sceneToken.getNamespaceId());
-		if(null == organizations || organizations.size() == 0){
-
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_NOT_EXISTS,
-					"organization group type error");
+		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
+		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,cmd.getCommunityId());
+		//TODO: 判断邮箱是否被使用
+		OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(UserContext.getCurrentNamespaceId(),cmd.getEmail());
+		if(null != member ){
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_REPEAT,
+					"email already exists");
 		}
-		//如果只有一个公司,直接认证,返回空
+		if(null == organizations || organizations.size() == 0){
+			return null;
+		}
+		//如果只有一个公司,直接认证
 		if(organizations.size() == 1){
 			ApplyForEnterpriseContactByEmailCommand cmd2 = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
 			cmd2.setOrganizationId(organizations.get(0).getId());
 			applyForEnterpriseContactByEmail(cmd2);
-			return null;
 		}
+		
 		return organizations.stream().map(r->{
 			return ConvertHelper.convert(r, OrganizationDTO.class); 
 			}).collect(Collectors.toList());
@@ -7572,12 +7609,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
-		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+//		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
 		VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
 		dto.setUserId(userId);
 		dto.setEnterpriseId(cmd.getOrganizationId());
+		
 		// 添加联系人
 		CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
+		cmd2.setContactType(ContactType.EMAIL.getCode());
+		cmd2.setContactToken(cmd.getEmail());
 		cmd2.setOrganizationId(cmd.getOrganizationId());
 		cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
 		cmd2.setTargetId(userId);
@@ -7585,31 +7625,35 @@ public class OrganizationServiceImpl implements OrganizationService {
 		//目前写死30分钟
 		dto.setEndTime(DateHelper.currentGMTTime().getTime()+30*60*1000L);
 		String verifyToken = WebTokenGenerator.getInstance().toWebToken(dto);
-		String host =  configurationProvider.getValue(sceneToken.getNamespaceId(), "home.url", "");
+		String host =  configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 		String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken="+verifyToken;
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();
 
 		String locale = "zh_CN";
 		map.put("nickName", UserContext.current().getUser().getNickName());
-		NamespaceInfoDTO namespaceInfo = namespacesProvider.findNamespaceByid(UserContext.getCurrentNamespaceId());
+		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
 		String appName = "左邻";
-		if(null != namespaceInfo)
-			appName = namespaceInfo.getName();
+		if(null != namespace && namespace.getName() != null)
+			appName = namespace.getName();
 		map.put("appName", appName);
-		map.put("verifyUrl", verifyUrl);
-		
+		map.put("verifyUrl", verifyUrl); 
 		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
-				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件");
+				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件"); 
 		Email email = new EmailBuilder()
 	    .from(appName, "zuolin@zuolin.com")
 	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
 	    .subject(mailSubject)
 	    .text(mailText)
 	    .build();
-
-		new Mailer("smtp.mxhichina.com", 25, "zuolin@zuolin.com", "abc123!@#").sendMail(email);
+		try{
+			new Mailer("smtp.mxhichina.com", 25, "zuolin@zuolin.com", "abc123!@#").sendMail(email);
+		}catch (Exception e){
+			LOGGER.error(e.getLocalizedMessage());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
+					"send email error");
+		}
 		
 	}
 

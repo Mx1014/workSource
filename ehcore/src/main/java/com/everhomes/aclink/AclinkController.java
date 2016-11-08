@@ -423,13 +423,10 @@ public class AclinkController extends ControllerBase {
     @RequestMapping("getVisitorPhone")
     @RequireAuthentication(false)
     @RestReturn(value=GetVisitorResponse.class)
-    public RestResponse getDoorVisitorAuthPhoneByUuid(GetPhoneVisitorCommand cmd) {
+    public RestResponse getDoorVisitorAuthPhoneByUuid(GetVisitorCommand cmd) {
         RestResponse response = new RestResponse();
         
-        GetVisitorCommand cmd2 = new GetVisitorCommand();
-        cmd2.setId(cmd.getPhvid());
-        cmd2.setNamespaceId(cmd.getNamespaceId());
-        response.setResponseObject(doorAccessService.getVisitorPhone(cmd2));
+        response.setResponseObject(doorAccessService.getVisitorPhone(cmd));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -444,10 +441,13 @@ public class AclinkController extends ControllerBase {
      */
     @RequestMapping("checkVisitor")
     @RestReturn(value=GetVisitorResponse.class)
-    public RestResponse doorCheckVisitor(GetVisitorCommand cmd) {
+    public RestResponse doorCheckVisitor(GetPhoneVisitorCommand cmd) {
         RestResponse response = new RestResponse();
         
-        response.setResponseObject(doorAccessService.checkVisitor(cmd));
+        GetVisitorCommand cmd2 = new GetVisitorCommand();
+        cmd2.setId(cmd.getPhvid());
+        cmd2.setNamespaceId(cmd.getNamespaceId());
+        response.setResponseObject(doorAccessService.checkVisitor(cmd2));
         
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

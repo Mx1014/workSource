@@ -17,17 +17,17 @@ public class ApplyForEnterpriseContactByEmailCommand {
     //Use current user as userId
     //@NotNull
 
-	private String sceneToken; 
+//	private String sceneToken; 
     private String email;
     private Long organizationId;
      
-    public String getSceneToken() {
-		return sceneToken;
-	}
-
-	public void setSceneToken(String sceneToken) {
-		this.sceneToken = sceneToken;
-	}
+//    public String getSceneToken() {
+//		return sceneToken;
+//	}
+//
+//	public void setSceneToken(String sceneToken) {
+//		this.sceneToken = sceneToken;
+//	}
 
 	public String getEmail() {
 		return email;
