@@ -10,6 +10,8 @@ public interface ServiceModuleProvider {
 	
 	List<ServiceModulePrivilege> listServiceModulePrivileges(Long moduleId, ServiceModulePrivilegeType privilegeType);
 
+	List<ServiceModulePrivilege> listServiceModulePrivilegesByPrivilegeId(Long privilegeId, ServiceModulePrivilegeType privilegeType);
+
 	Long createServiceModuleAssignment(ServiceModuleAssignment serviceModuleAssignment);
 
 	List<ServiceModuleAssignment> listServiceModuleAssignments(Condition condition, Long organizationId);
