@@ -2425,37 +2425,37 @@ public class CommunityServiceImpl implements CommunityService {
 	public ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd) {
 		// TODO Auto-generated method 
 		ListCommunityAuthPersonnelsResponse response = new ListCommunityAuthPersonnelsResponse();
-		List<OrganizationCommunity> orgs = this.organizationProvider.listOrganizationByCommunityId(cmd.getCommunityId());
+		List<OrganizationCommunityRequest> orgs = this.organizationProvider.listOrganizationCommunityRequests(cmd.getCommunityId());
 		if(null == orgs || orgs.size() == 0)
 			return response;
-		
+
 		List<Long> orgIds = new ArrayList<Long>();
-		for(OrganizationCommunity org : orgs){
-			orgIds.add(org.getOrganizationId());
+		for(OrganizationCommunityRequest org : orgs){
+			orgIds.add(org.getMemberId());
 		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
+
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 		locator.setAnchor(cmd.getPageAnchor());
-		 
-		
+
+
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(
 				cmd.getKeywords(),orgIds, cmd.getStatus(), null, locator, pageSize);
-		
+
 		if(0 == organizationMembers.size()){
 			return response;
 		}
-		
+
 		response.setNextPageAnchor(locator.getAnchor());
-		
+
 		response.setMembers(organizationMembers.stream().map((c) ->{
 			ComOrganizationMemberDTO dto = ConvertHelper.convert(c, ComOrganizationMemberDTO.class);
 			Organization org = this.organizationProvider.findOrganizationById(c.getOrganizationId());
-			dto.setOrganizationName(org.getName());  
+			dto.setOrganizationName(org.getName());
 			return dto;
 		}).collect(Collectors.toList()));
-		
-		return response; 
+
+		return response;
 	}
 	
 	

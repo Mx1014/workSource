@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  *  <li>id: 任务主键id</li>
  *  <li>standardId: 标准id</li>
  *  <li>standardName: 标准名称</li>
+ *  <li>templateId: 模板id</li>
+ *  <li>templateName: 模板名称</li>
  *  <li>equipmentId: 设备id</li>
  *  <li>equipmentName: 设备名称</li>
  *  <li>equipmentLocation: 设备位置</li>
@@ -47,6 +49,10 @@ public class EquipmentTaskDTO {
 	private Long standardId;
 	
 	private String standardName;
+	
+	private Long templateId;
+	
+	private String templateName;
 	
 	private Long equipmentId;
 	
@@ -132,6 +138,22 @@ public class EquipmentTaskDTO {
 
 	public void setStandardName(String standardName) {
 		this.standardName = standardName;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public String getTemplateName() {
+		return templateName;
+	}
+
+	public void setTemplateName(String templateName) {
+		this.templateName = templateName;
 	}
 
 	public Long getEquipmentId() {

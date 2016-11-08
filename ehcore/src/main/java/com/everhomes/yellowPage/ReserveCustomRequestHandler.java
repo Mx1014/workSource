@@ -1,0 +1,273 @@
+package com.everhomes.yellowPage;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.pm.pay.GsonUtil;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.user.AddRequestCommand;
+import com.everhomes.rest.user.FieldContentType;
+import com.everhomes.rest.user.FieldType;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
+import com.everhomes.search.ReserveRequestInfoSearcher;
+import com.everhomes.user.CustomRequestConstants;
+import com.everhomes.user.CustomRequestHandler;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.mysql.jdbc.StringUtils;
+
+@Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.RESERVE_REQUEST_CUSTOM)
+public class ReserveCustomRequestHandler implements CustomRequestHandler {
+private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestHandler.class);
+	
+	@Autowired
+	private UserProvider userProvider;
+	
+	@Autowired
+	private UserActivityProvider userActivityProvider;
+	
+	@Autowired
+	private YellowPageProvider yellowPageProvider;
+	
+	@Autowired
+	private MessagingService messagingService;
+	
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
+	
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
+	
+	@Override
+	public void addCustomRequest(AddRequestCommand cmd) {
+		ReservationRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ReservationRequests.class);
+		
+		request.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+		request.setOwnerType(cmd.getOwnerType());
+		request.setOwnerId(cmd.getOwnerId());
+		request.setType(cmd.getType());
+		request.setCategoryId(cmd.getCategoryId());
+		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());
+		request.setServiceAllianceId(cmd.getServiceAllianceId());
+	  
+		User user = UserContext.current().getUser();
+		request.setCreatorUid(user.getId());
+		request.setCreatorName(user.getNickName());
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		if(identifier != null)
+			request.setCreatorMobile(identifier.getIdentifierToken());
+		
+		LOGGER.info("ReserveCustomRequestHandler addCustomRequest request:" + request);
+		yellowPageProvider.createReservationRequests(request);
+		reserveRequestInfoSearcher.feedDoc(request);
+		
+		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
+		
+		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
+		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
+		String categoryName = "";
+		if(category != null) {
+			categoryName = (category.getName() == null) ? "" : category.getName();
+		} 
+		//推送消息
+		//给服务公司留的手机号推消息
+		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
+		String locale = "zh_CN";
+		
+		Map<String, Object> notifyMap = new HashMap<String, Object>();
+		notifyMap.put("categoryName", categoryName);
+		notifyMap.put("creatorName", creatorName);
+		notifyMap.put("creatorMobile", creatorMobile);
+		notifyMap.put("note", getNote(request));
+		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
+        String creatorOrganization = "";
+		if(org != null) {
+			creatorOrganization = org.getName();
+		}
+		notifyMap.put("creatorOrganization", creatorOrganization);
+		
+		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
+		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+		
+		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
+		if(serviceOrg != null) {
+			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
+			if(orgContact != null) {
+				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
+			}
+			
+			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
+			
+		}
+		
+		//发消息给服务联盟机构管理员
+		code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ADMIN;
+		String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(), 
+				request.getType(), locator, Integer.MAX_VALUE);
+		if(targets != null && targets.size() > 0) {
+			for(ServiceAllianceNotifyTargets target : targets) {
+				if(target.getStatus().byteValue() == 1) {
+					UserIdentifier contact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), target.getContactToken());
+					if(contact != null)
+						sendMessageToUser(contact.getOwnerUid(), notifyTextForAdmin);
+				}
+				
+			}
+		}
+		
+		//发邮件给服务联盟机构管理员
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(), 
+				request.getType(), locator, Integer.MAX_VALUE);
+		if(emails != null && emails.size() > 0) {
+			for(ServiceAllianceNotifyTargets email : emails) {
+				if(email.getStatus().byteValue() == 1) {
+					sendEmail(email.getContactToken(), categoryName, notifyTextForAdmin);
+				}
+			}
+		}
+
+	}
+	
+
+	private String getNote(ReservationRequests request) {
+		
+		String reserveType = (request.getReserveType() == null) ? "" : request.getReserveType();
+		String reserveOrganization = (request.getReserveOrganization() == null) ? "" : request.getReserveOrganization();
+		String reserveTime = (request.getReserveTime() == null) ? "" : request.getReserveTime();
+		String contact = (request.getContact() == null) ? "" : request.getContact();
+		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
+		String remarks = (request.getRemarks() == null) ? "" : request.getRemarks();
+		
+		String note = "预约类型:" + reserveType + "\n" + "预约机构:" + reserveOrganization + "\n" + "预约时间:" + reserveTime
+				 + "\n" + "联系人:" + contact + "\n" + "联系电话:" + mobile + "\n" + "备注:" + remarks + "\n";
+		return note;
+	}
+	
+	private void sendMessageToUser(Long userId, String content) {
+		MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+        
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+	}
+	
+	private void sendEmail(String emailAddress, String categoryName, String content) {
+		if(!StringUtils.isNullOrEmpty(emailAddress)) {
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+	        MailHandler handler = PlatformContext.getComponent(handlerName);
+	        
+	        String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
+			String locale = "zh_CN";
+			int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_SUBJECT;
+			Map<String, Object> notifyMap = new HashMap<String, Object>();
+			notifyMap.put("categoryName", categoryName);
+			String subject = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+			
+	        handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, subject, content);
+		}
+	}
+
+	@Override
+	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
+		ReservationRequests request = yellowPageProvider.findReservationRequests(id);
+		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
+		if(request != null) {
+			fieldList = toFieldDTOList(request);
+		}
+		
+		return fieldList;
+	}
+	
+	//硬转，纯体力
+	private List<RequestFieldDTO> toFieldDTOList(ReservationRequests fields) {
+		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
+		
+		RequestFieldDTO dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
+		dto.setFieldValue(fields.getReserveType());
+		dto.setFieldName("预约类型");
+		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
+		dto.setFieldValue(fields.getReserveOrganization());
+		dto.setFieldName("预约机构");
+		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
+		dto.setFieldValue(fields.getReserveTime());
+		dto.setFieldName("预约时间");
+		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
+		dto.setFieldValue(fields.getContact());
+		dto.setFieldName("联系人");
+		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
+		dto.setFieldValue(fields.getMobile());
+		dto.setFieldName("联系电话");
+		list.add(dto);
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.STRING.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
+		dto.setFieldValue(fields.getRemarks());
+		dto.setFieldName("备注");
+		list.add(dto);
+		
+		return list;
+	}
+}

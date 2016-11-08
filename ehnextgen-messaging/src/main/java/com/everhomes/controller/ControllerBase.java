@@ -7,6 +7,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -103,10 +104,16 @@ public class ControllerBase {
         return s_restMethodMap.get(uri);
     }
     
-    public static List<RestMethod> getRestMethodList() {
+    public static List<RestMethod> getRestMethodList(String javadocRoot, String defaultSite) {
         if(s_sortRestMethodList) {
             synchronized(s_restMethodList) {
                 Collections.sort(s_restMethodList, (a, b) -> { return a.getUri().compareTo(b.getUri()); });
+
+                s_restMethodList = s_restMethodList.stream().map((m) -> {
+                    m.setJavadocUrl(javadocRoot + "/" + m.getFullJavadocUrl(defaultSite)); 
+                    return m;
+                }).collect(Collectors.toList());
+                
                 s_sortRestMethodList = false;
             }
         }

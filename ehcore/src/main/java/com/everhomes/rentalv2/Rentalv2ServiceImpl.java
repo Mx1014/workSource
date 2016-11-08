@@ -1573,33 +1573,38 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		final Job job3 = new Job(
 				SendMessageAction.class.getName(),
 				new Object[] {rentalBill.getRentalUid(),notifyTextForOther});
-		if(rentalType != null) {
-			switch(rentalType) {
-			case HOUR:
-				// 在开始时间前30分钟提醒 
-				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-						rentalBill.getStartTime().getTime() - 30*60*1000L );
-				break; 
-			default:
-				// 在开始时间前一天的下午16点提醒
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(rentalBill.getStartTime() );
-				calendar.add(Calendar.DATE, -1);
-				calendar.set(Calendar.HOUR_OF_DAY, 16);
-				calendar.set(Calendar.SECOND, 0);
-				calendar.set(Calendar.MINUTE, 0);
-				calendar.set(Calendar.MILLISECOND, 0);
-				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,calendar.getTimeInMillis() );
-				break;
-				
-			}
-		}  
-	  map = new HashMap<String, String>(); 
-      map.put("userName", user.getNickName());
-      map.put("resourceName", rentalBill.getResourceName());
-      map.put("useDetail", rentalBill.getUseDetail());
-      map.put("rentalCount", rentalBill.getRentalCount()==null?"1":""+rentalBill.getRentalCount());  
-      sendMessageCode(rs.getChargeUid(),  PunchNotificationTemplateCode.locale, map, PunchNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
+		try{
+			if(rentalType != null) {
+				switch(rentalType) {
+				case HOUR:
+					// 在开始时间前30分钟提醒 
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+							rentalBill.getStartTime().getTime() - 30*60*1000L );
+					break; 
+				default:
+					// 在开始时间前一天的下午16点提醒
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(rentalBill.getStartTime() );
+					calendar.add(Calendar.DATE, -1);
+					calendar.set(Calendar.HOUR_OF_DAY, 16);
+					calendar.set(Calendar.SECOND, 0);
+					calendar.set(Calendar.MINUTE, 0);
+					calendar.set(Calendar.MILLISECOND, 0);
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,calendar.getTimeInMillis() );
+					break;
+					
+				}
+			}  
+		
+			map = new HashMap<String, String>(); 
+			map.put("userName", user.getNickName());
+		    map.put("resourceName", rentalBill.getResourceName());
+		    map.put("useDetail", rentalBill.getUseDetail());
+		    map.put("rentalCount", rentalBill.getRentalCount()==null?"1":""+rentalBill.getRentalCount());  
+		    sendMessageCode(rs.getChargeUid(),  PunchNotificationTemplateCode.locale, map, PunchNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
+		}catch(Exception e){
+			LOGGER.error("SEND MESSAGE FAILED ,cause "+e.getLocalizedMessage());
+		}
 	}
 	
 
@@ -4054,7 +4059,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(null == defaultRule.getAutoAssign())
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter AutoAssign   is null");
-			
+			resource.setResourceCounts(defaultRule.getSiteCounts());
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
 			resource.setAutoAssign(defaultRule.getAutoAssign());
 			resource.setMultiUnit(defaultRule.getMultiUnit());
@@ -4130,29 +4135,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				addSingleRules.add(signleCmd);
 			}
 
-			
-			//建立了resource之后才有id 
-			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-				HashSet<String> siteNumberSet = new HashSet<>();
-				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
-					if( null!=defaultRule.getSiteNumbers())
-						for(String number : defaultRule.getSiteNumbers()){
-							siteNumberSet.add(number);
-							RentalResourceNumber resourceNumber = new RentalResourceNumber();
-							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-							resourceNumber.setOwnerId(resource.getId());
-							resourceNumber.setResourceNumber(number);
-							this.rentalProvider.createRentalResourceNumber(resourceNumber);
-						}
-				}
-				else
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
-				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
-					
-			} 
 			seqNum.set(0L);
 			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
@@ -4176,6 +4158,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setCellEndId(cellBeginId+seqNum.get());
 			
 			Long siteId = rentalProvider.createRentalSite(resource);
+
+			
+			//建立了resource之后才有id 
+			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				HashSet<String> siteNumberSet = new HashSet<>();
+				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
+					if( null!=defaultRule.getSiteNumbers())
+						for(String number : defaultRule.getSiteNumbers()){
+							siteNumberSet.add(number);
+							RentalResourceNumber resourceNumber = new RentalResourceNumber();
+							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+							resourceNumber.setOwnerId(siteId);
+							resourceNumber.setResourceNumber(number);
+							this.rentalProvider.createRentalResourceNumber(resourceNumber);
+						}
+				}
+				else
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
+				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
+					
+			} 
 			if(cmd.getOwners() != null){
 				for(SiteOwnerDTO dto:cmd.getOwners()){
 					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);

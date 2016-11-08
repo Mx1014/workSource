@@ -147,7 +147,7 @@ public class RepeatServiceImpl implements RepeatService {
 						repeat, repeat.getRepeatType());
 				LOGGER.info("isRepeatSettingActive: differences = " + differences + "; date = " + date);
 				for(Integer difference : differences) {
-					if(difference % repeat.getRepeatInterval() == 0 && difference > 0) {
+					if(difference % repeat.getRepeatInterval() == 0 && difference >= 0) {
 						return true;
 					}
 				}
@@ -165,7 +165,7 @@ public class RepeatServiceImpl implements RepeatService {
 									repeat, repeat.getRepeatType());
 							LOGGER.info("isRepeatSettingActive: differences = " + differences + "; startDate = " + repeat.getStartDate());
 							for(Integer difference : differences) {
-								if(difference % repeat.getRepeatInterval() == 0  && difference > 0) {
+								if(difference % repeat.getRepeatInterval() == 0  && difference >= 0) {
 									return true;
 								}
 							}
@@ -185,7 +185,7 @@ public class RepeatServiceImpl implements RepeatService {
 									repeat, repeat.getRepeatType());
 							LOGGER.info("isRepeatSettingActive: differences = " + differences + "; startDate = " + repeat.getStartDate());
 							for(Integer difference : differences) {
-								if(difference % repeat.getRepeatInterval() == 0 && difference > 0) {
+								if(difference % repeat.getRepeatInterval() == 0 && difference >= 0) {
 									return true;
 								}
 							}
