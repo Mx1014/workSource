@@ -4476,8 +4476,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization orgCommoand = new Organization();
 		orgCommoand.setId(org.getId());
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-		orgCommoand.setGroupType(org.getGroupType());
-		
+
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(),null, locator, pageSize);
 		
 		if(pinyinFlag){
@@ -5360,15 +5359,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		List<Role> roles= aclProvider.getRolesByOwner(Namespace.DEFAULT_NAMESPACE, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), null);
-		
+
 		List<Role> orgRoles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), null);
-		
+
 		if(null != roles){
 			roles.addAll(orgRoles);
 		}
-		
+
 		roles.addAll(aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), orgId));
-		
+
 	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
 		Long ownerId = orgId;
@@ -5391,6 +5390,23 @@ public class OrganizationServiceImpl implements OrganizationService {
 					departments.add(orgDTO);
 				}
 				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				departments.stream().map(r -> {
+					String[] pathStrs = r.getPath().split("|");
+					String pathName = "";
+					for (String id: pathStrs) {
+						if(id.equals(r.getDirectlyEnterpriseId())){
+							Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+							pathName = "未知";
+							if(null != o )pathName = o.getName();
+						}
+						if(!"".equals(pathName)){
+							Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+							if(null != o )pathName += "-" + o.getName();
+						}
+					}
+					r.setParentName(pathName);
+					return r;
+				});
 				dto.setDepartments(departments);
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
 				List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
@@ -7294,8 +7310,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<OrganizationDTO> jobPositions = new ArrayList<OrganizationDTO>();
 		
 		Long finalOrganizationId = organizationId;
-		String finalGroupType = groupType;
-		
+
 		dbProvider.execute((TransactionStatus status) -> {
 			
 			List<Long> departmentIds = cmd.getDepartmentIds();
