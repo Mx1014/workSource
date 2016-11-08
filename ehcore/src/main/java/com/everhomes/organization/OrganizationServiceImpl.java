@@ -4252,9 +4252,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 			member.setContactName(StringUtils.isEmpty(cmd.getContactName()) ? user.getNickName() : cmd.getContactName());
 			member.setOrganizationId(cmd.getOrganizationId());
 			member.setTargetType(OrganizationMemberTargetType.USER.getCode());
-			member.setTargetId(cmd.getTargetId());
-			// modify by wh 2016年11月8日  戴云说要用WAITING_FOR_ACCEPTANCE而不能用 WAITING_FOR_APPROVAL
-			member.setStatus(OrganizationMemberStatus.WAITING_FOR_ACCEPTANCE.getCode());
+			member.setTargetId(cmd.getTargetId()); 
+			member.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 			
 			organizationProvider.createOrganizationMember(member);
 			
