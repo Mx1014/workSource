@@ -706,3 +706,8 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('158', '790', '50652', '加班申�
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
 
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (791, '0', '加班申请', '加班申请 全部权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (792, '0', '加班申请', '加班申请 全部权限', NULL);
+INSERT INTO `eh_web_menu_privileges` VALUES ('163', '799', '50210', '通用岗位', '1', '1', '通用岗位 全部权限', '520');
+INSERT INTO `eh_web_menu_privileges` VALUES ('164', '790', '50220', '岗位管理', '1', '1', '岗位管理 全部权限', '521');
+
