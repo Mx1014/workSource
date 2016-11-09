@@ -45,7 +45,11 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 
 	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 
-	 
+
+
+	@Autowired
+	private ApprovalOpRequestProvider approvalOpRequestProvider;
+	
 	@Autowired
 	private PunchProvider punchProvider;
 	
@@ -84,9 +88,10 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		//创建
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		if (approvalRequests != null && approvalRequests.size()>0) {
+			//删掉之前的审批流程
+			approvalOpRequestProvider.deleteApprovalOpRequestByRequestId(approvalRequests.get(0).getId());
 			approvalRequest.setId(approvalRequests.get(0).getId());
 		}
-		
 		 	
 		return approvalRequest;
 	}
