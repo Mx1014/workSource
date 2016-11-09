@@ -5787,13 +5787,13 @@ System.out.println();
 		types.add(OrganizationGroupType.MANAGER.getCode());
 		List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organizationId, types);
 		if(0 < managerGroups.size()){
-			List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null,organizationId,OrganizationMemberStatus.ACTIVE, null);
-			members.stream().map(m -> {
-				OrganizationManagerDTO managerDTO = ConvertHelper.convert(m, OrganizationManagerDTO.class);
-				managerDTO.setMemberId(m.getId());
+			List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null,managerGroups.get(0).getId(),OrganizationMemberStatus.ACTIVE, null);
+
+			for (OrganizationMember member: members) {
+				OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
+				managerDTO.setMemberId(member.getId());
 				dtos.add(managerDTO);
-				return null;
-			});
+			}
 		}
 		return dtos;
 	}
