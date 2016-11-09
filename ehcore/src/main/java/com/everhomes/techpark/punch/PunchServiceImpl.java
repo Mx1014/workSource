@@ -3805,7 +3805,7 @@ public class PunchServiceImpl implements PunchService {
 			}
 		else
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
-					null,null, Integer.MAX_VALUE);
+					null,null, Integer.MAX_VALUE-1);
 		if(null == organizationMembers)
 			return null;
 		List<Long> userIds = new ArrayList<Long>();
