@@ -86,6 +86,7 @@ import com.everhomes.rest.group.ApproveAdminRoleCommand;
 import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
 import com.everhomes.rest.group.BroadcastDTO;
 import com.everhomes.rest.group.BroadcastOwnerType;
+import com.everhomes.rest.group.CancelGroupRequestCommand;
 import com.everhomes.rest.group.CategoryDTO;
 import com.everhomes.rest.group.CommandResult;
 import com.everhomes.rest.group.CreateBroadcastCommand;
@@ -4837,5 +4838,30 @@ public class GroupServiceImpl implements GroupService {
         }catch(Exception e){
         }
 		return "";
+	}
+
+	@Override
+	public void cancelGroupRequest(CancelGroupRequestCommand cmd) {
+		User user = UserContext.current().getUser();
+		Long userId = user.getId();
+		Group group = checkGroupExists(userId, cmd.getGroupId());
+		if (group.getStatus().byteValue() != GroupAdminStatus.INACTIVE.getCode() || group.getApprovalStatus() == null || group.getApprovalStatus().byteValue() != ApprovalStatus.WAITING_FOR_APPROVING.getCode()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "group status error, userId = "+userId+", groupId"+cmd.getGroupId());
+		}
+		if (userId == null || userId.longValue() != group.getCreatorUid().longValue()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, 
+	                ErrorCodes.ERROR_INVALID_PARAMETER, "error user: userId="+userId+", groupId"+cmd.getGroupId());
+		}
+		
+		dbProvider.execute((s)->{
+			group.setStatus(GroupAdminStatus.INACTIVE.getCode());
+			group.setApprovalStatus(null);
+			group.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			group.setDeleteTime(group.getUpdateTime());
+			group.setOperatorUid(userId);
+			groupProvider.updateGroup(group);
+			return null;
+		});
 	}
 }

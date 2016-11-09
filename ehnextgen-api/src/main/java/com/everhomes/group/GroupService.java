@@ -11,6 +11,7 @@ import com.everhomes.rest.group.AcceptJoinGroupInvitation;
 import com.everhomes.rest.group.ApprovalGroupRequestCommand;
 import com.everhomes.rest.group.ApproveAdminRoleCommand;
 import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
+import com.everhomes.rest.group.CancelGroupRequestCommand;
 import com.everhomes.rest.group.CommandResult;
 import com.everhomes.rest.group.CreateBroadcastCommand;
 import com.everhomes.rest.group.CreateBroadcastResponse;
@@ -227,5 +228,6 @@ public interface GroupService {
 	RestResponse createAGroup(CreateGroupCommand cmd);
 	GetRemainBroadcastCountResponse getRemainBroadcastCount(GetRemainBroadcastCountCommand cmd);
 	GetShareInfoResponse getShareInfo(GetShareInfoCommand cmd);
+	void cancelGroupRequest(CancelGroupRequestCommand cmd);
 
 }

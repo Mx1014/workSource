@@ -25,6 +25,7 @@ import com.everhomes.rest.group.AcceptJoinGroupInvitation;
 import com.everhomes.rest.group.ApprovalGroupRequestCommand;
 import com.everhomes.rest.group.ApproveAdminRoleCommand;
 import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
+import com.everhomes.rest.group.CancelGroupRequestCommand;
 import com.everhomes.rest.group.CommandResult;
 import com.everhomes.rest.group.CreateBroadcastCommand;
 import com.everhomes.rest.group.CreateBroadcastResponse;
@@ -913,5 +914,16 @@ public class GroupController extends ControllerBase {
 	@RestReturn(GetShareInfoResponse.class)
 	public RestResponse getShareInfo(GetShareInfoCommand cmd){
 		return new RestResponse(groupService.getShareInfo(cmd));
+	}
+
+	/**
+	 * <p>18.取消俱乐部申请</p>
+	 * <b>URL: /group/cancelGroupRequest</b>
+	 */
+	@RequestMapping("cancelGroupRequest")
+	@RestReturn(String.class)
+	public RestResponse cancelGroupRequest(CancelGroupRequestCommand cmd){
+		groupService.cancelGroupRequest(cmd);
+		return new RestResponse();
 	}
 }
