@@ -24,6 +24,7 @@ public class SearchEnergyMeterCommand {
     private String keyword;
     private Long billCategoryId;
     private Long serviceCategoryId;
+    @EnumType(value = EnergyMeterType.class, nullValue = true)
     private Byte meterType;
     private Long status;
     private Long pageAnchor;

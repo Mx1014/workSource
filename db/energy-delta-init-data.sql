@@ -6,6 +6,11 @@ VALUES ('2', '0', 't', '倍率', '当期倍率', '2', '1', '2016-11-01 19:06:12'
 INSERT INTO `eh_energy_meter_formula_variables` (`id`, `namespace_id`, `name`, `display_name`, `description`, `status`, `creator_uid`, `create_time`)
 VALUES ('3', '0', 'a', '读表用量差', '每日或每月读表差', '2', '1', '2016-11-01 19:06:13');
 
+--
+-- 表记默认分类(深业域空间下)
+--
+INSERT INTO `eh_energy_meter_categories` (`id`, `namespace_id`, `name`, `status`, `category_type`, `delete_flag`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('1', '999992', '应收部分', '2', '1', '0', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_categories` (`id`, `namespace_id`, `name`, `status`, `category_type`, `delete_flag`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('2', '999992', '应付部分', '2', '1', '0', NULL, NULL, NULL, NULL);
 
 --
 -- 字符串
@@ -42,9 +47,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.status', '3', 'zh_CN', '已报废');
 
-
-
--- 带单添加
+--
+-- 菜单添加
+--
 -- 新增能耗管理菜单
 --
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)

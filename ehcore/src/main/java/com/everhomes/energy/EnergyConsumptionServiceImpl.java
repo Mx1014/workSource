@@ -614,6 +614,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     .anyMatch(type -> EnergyMeterSettingType.fromCode(setting.getSettingType()) == type);
             // 抄表提示类型
             if (isPromptType) {
+                EnergyMeterSettingType settingStatus = EnergyMeterSettingType.fromCode(cmd.getSettingStatus());
+                if (settingStatus == null) {
+                    invalidParameterException("settingStatus", cmd.getSettingStatus());
+                }
                 setting.setStatus(cmd.getSettingStatus());
                 setting.setSettingValue(cmd.getSettingValue());
             } else if (cmd.getFormulaId() != null) {
@@ -643,6 +647,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         formula.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         formula.setExpression(processedExpression);
         formula.setName(cmd.getName());
+        EnergyFormulaType formulaType = EnergyFormulaType.fromCode(cmd.getFormulaType());
+        if (formulaType == null) {
+            invalidParameterException("formulaType", cmd.getFormulaType());
+        }
         formula.setFormulaType(cmd.getFormulaType());
         formula.setNamespaceId(currNamespaceId());
         formula.setDisplayExpression(cmd.getExpression());
@@ -1337,20 +1345,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         return dto;
     }
-
-    /*@Override
-    public SearchEnergyMeterReadingLogsResponse listEnergyMeterReadingLogsByMeter(ListEnergyMeterReadingLogsByMeterCommand cmd) {
-        validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-        List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getPageAnchor(), pageSize + 1);
-        SearchEnergyMeterReadingLogsResponse response = new SearchEnergyMeterReadingLogsResponse();
-        if (logs.size() > pageSize) {
-            response.setNextPageAnchor(logs.get(logs.size() - 1).getCreateTime().getTime() + 1);
-        }
-        response.setLogs(logs.stream().map(this::toEnergyMeterReadingLogDTO).collect(Collectors.toList()));
-        return response;
-    }*/
 
     private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
         EnergyMeterFormulaDTO dto = ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);

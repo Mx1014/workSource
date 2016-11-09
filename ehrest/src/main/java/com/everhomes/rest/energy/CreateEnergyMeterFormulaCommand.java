@@ -18,7 +18,8 @@ public class CreateEnergyMeterFormulaCommand {
     @NotNull private Long organizationId;
     @NotNull @Size(max = 255) private String name;
     @NotNull @Size(max = 255) private String expression;
-    @NotNull private Byte formulaType;
+    @EnumType(EnergyFormulaType.class)
+    private Byte formulaType;
 
     public Long getOrganizationId() {
         return organizationId;

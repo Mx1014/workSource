@@ -19,6 +19,7 @@ public class UpdateEnergyMeterDefaultSettingCommand {
     @NotNull private Long organizationId;
     @NotNull private Long settingId;
     private BigDecimal settingValue;
+    @EnumType(value = EnergyCommonStatus.class, nullValue = true)
     private Byte settingStatus;
     private Long formulaId;
 

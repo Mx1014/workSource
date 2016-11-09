@@ -13,6 +13,7 @@ import javax.validation.constraints.NotNull;
 public class ListEnergyMeterCategoriesCommand {
 
     @NotNull private Long organizationId;
+    @EnumType(value = EnergyCategoryType.class)
     @NotNull private Byte categoryType;
 
     public Long getOrganizationId() {
