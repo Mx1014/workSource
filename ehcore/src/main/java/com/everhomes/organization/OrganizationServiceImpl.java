@@ -7658,17 +7658,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	@Override
-	public void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) { 
+	public String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) { 
 		VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(),VerifyEnterpriseContactDTO.class );
 		if(dto == null || dto.getEndTime() ==null || dto.getEnterpriseId() == null || dto.getUserId() == null ){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"参数错误");
+			return configProvider.getValue("auth.fail", "");
 		}
 		if(DateHelper.currentGMTTime().getTime() >dto.getEndTime())
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_VERIFY_OVER_TIME,
-					"over time");
+			return configProvider.getValue("auth.overtime", "");
 		ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
 		approveForEnterpriseContact(cmd2);
+		return configProvider.getValue("auth.success", "");
 	}
 	
 }

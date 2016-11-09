@@ -353,7 +353,7 @@ public interface OrganizationService {
  
 	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
 	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd); 
-	void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
+	String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
   
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
