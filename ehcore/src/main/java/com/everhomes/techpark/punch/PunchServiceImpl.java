@@ -489,6 +489,8 @@ public class PunchServiceImpl implements PunchService {
 		newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
 		newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
+		newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId,java.sql.Date.valueOf(dateSF.format(logDay
+				.getTime())),companyId));
 		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
 				companyId, dateSF.format(logDay.getTime()));
 		if (null == punchDayLog) {
@@ -502,7 +504,18 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return newPunchDayLog;
 	}
-
+ 
+	private Byte getDeviceChangeFlag(Long userId, java.sql.Date punchDate,
+			Long companyId) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(punchDate);
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		Integer  count = this.punchProvider.countPunchLogDevice(userId,companyId,new java.sql.Date(cal.getTime().getTime()),punchDate);
+		if(count >1)
+			return NormalFlag.YES.getCode();
+		return NormalFlag.NO.getCode(); 	
+	}
 	private Time getDAOTime(Long arriveTime) {
 		if (null == arriveTime)
 			return null;

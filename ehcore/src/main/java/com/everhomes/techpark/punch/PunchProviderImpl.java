@@ -15,6 +15,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record3;
 import org.jooq.Record5;
+import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectHavingStep;
 import org.jooq.SelectJoinStep;
@@ -2367,6 +2368,22 @@ long id = sequenceProvider.getNextSequence(key);
 			return ConvertHelper.convert(record, PunchDayLog.class);
 		}
 		return null;
+	}
+
+	@Override
+	public Integer countPunchLogDevice(Long userId, Long companyId,
+			Date beginDate, Date endDate) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record1<String>> records = context.selectDistinct(Tables.EH_PUNCH_LOGS.IDENTIFICATION).from(Tables.EH_PUNCH_LOGS)
+				.where(Tables.EH_PUNCH_LOGS.USER_ID.eq(userId))
+				.and(Tables.EH_PUNCH_LOGS.ENTERPRISE_ID.eq(companyId))
+				.and(Tables.EH_PUNCH_LOGS.PUNCH_DATE.between(beginDate, endDate))
+				.fetch();
+		
+		if (records != null) {
+			return records.size();
+		}
+		return 0;
 	}
 	
 	

@@ -277,6 +277,9 @@ public interface PunchProvider {
 
 	List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(String ownerType,
 			Long ownerId, String listType);
+
+	public Integer countPunchLogDevice(Long userId, Long companyId,
+			java.sql.Date beginDate , java.sql.Date endDate);
  
  
  
