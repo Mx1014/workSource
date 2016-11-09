@@ -15,7 +15,8 @@ public class UpdateEnergyMeterStatusCommand {
 
     @NotNull private Long organizationId;
     @NotNull private Long meterId;
-    @NotNull private Byte status;
+    @EnumType(EnergyMeterStatus.class)
+    private Byte status;
 
     public Long getOrganizationId() {
         return organizationId;

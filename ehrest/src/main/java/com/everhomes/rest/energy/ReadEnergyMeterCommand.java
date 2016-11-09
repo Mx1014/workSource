@@ -1,6 +1,5 @@
 package com.everhomes.rest.energy;
 
-import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
@@ -21,7 +20,6 @@ public class ReadEnergyMeterCommand {
     @NotNull private Long organizationId;
     @NotNull private Long communityId;
     @NotNull private Long meterId;
-    @EnumType(TrueOrFalseFlag.class)
     private Byte resetMeterFlag;
     private BigDecimal lastReading;
     @NotNull private BigDecimal currReading;

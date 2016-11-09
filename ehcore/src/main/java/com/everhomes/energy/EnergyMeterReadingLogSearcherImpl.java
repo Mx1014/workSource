@@ -180,7 +180,7 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         WrapperQueryBuilder query = new WrapperQueryBuilder(filteredQuery.toString());
 
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
-                .setFrom(anchor.intValue() * pageSize)
+                .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
                 .addSort(sort)
                 .setQuery(query);

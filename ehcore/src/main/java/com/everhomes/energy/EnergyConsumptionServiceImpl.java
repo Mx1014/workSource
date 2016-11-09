@@ -477,6 +477,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         meterProvider.updateEnergyMeter(meter);
         if (EnergyMeterStatus.fromCode(cmd.getStatus()) == EnergyMeterStatus.INACTIVE) {
             meterSearcher.deleteById(meter.getId());
+        } else {
+            meterSearcher.feedDoc(meter);
         }
     }
 
@@ -501,7 +503,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         log.setNamespaceId(currNamespaceId());
         log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         log.setOperatorId(UserContext.current().getUser().getId());
-        log.setResetMeterFlag(cmd.getResetMeterFlag());
+        log.setResetMeterFlag(cmd.getResetMeterFlag() != null ? cmd.getResetMeterFlag() : TrueOrFalseFlag.FALSE.getCode());
         dbProvider.execute(r -> {
             meterReadingLogProvider.createEnergyMeterReadingLog(log);
             meter.setLastReading(log.getReading());
@@ -594,8 +596,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 lastReadingLog = meterReadingLogProvider.findLastReadingLogByMeterId(currNamespaceId(), log.getMeterId());
                 if (lastReadingLog != null) {
                     meter.setLastReading(lastReadingLog.getReading());
+                    meter.setLastReadTime(lastReadingLog.getOperateTime());
                 } else {
                     meter.setLastReading(null);
+                    meter.setLastReadTime(null);
                 }
                 meterProvider.updateEnergyMeter(meter);
             }
@@ -614,10 +618,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     .anyMatch(type -> EnergyMeterSettingType.fromCode(setting.getSettingType()) == type);
             // 抄表提示类型
             if (isPromptType) {
-                EnergyMeterSettingType settingStatus = EnergyMeterSettingType.fromCode(cmd.getSettingStatus());
-                if (settingStatus == null) {
-                    invalidParameterException("settingStatus", cmd.getSettingStatus());
-                }
                 setting.setStatus(cmd.getSettingStatus());
                 setting.setSettingValue(cmd.getSettingValue());
             } else if (cmd.getFormulaId() != null) {
@@ -1373,8 +1373,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         dto.setSettingStatus(setting.getStatus());
         if (setting.getFormulaId() != null) {
             EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), setting.getFormulaId());
-            dto.setFormulaName(formula.getName());
-            dto.setFormulaType(formula.getFormulaType());
+            if (formula != null) {
+                dto.setFormulaName(formula.getName());
+                dto.setFormulaType(formula.getFormulaType());
+            }
         }
         // 表的类型
         String meterType = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_TYPE, String.valueOf(setting.getMeterType()), currLocale(), "");
