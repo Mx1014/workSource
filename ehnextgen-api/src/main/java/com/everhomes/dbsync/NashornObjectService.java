@@ -1,6 +1,7 @@
 package com.everhomes.dbsync;
 
 import java.io.File;
+import java.util.Map;
 
 import org.jooq.Configuration;
 import org.jooq.Field;
@@ -19,6 +20,6 @@ public interface NashornObjectService {
     String getResourceAsStream(String name);
     DataTable getTableMeta(String tableName);
     DataGraph getGraph(String name);
-    Result<Record> query(DatabaseQuery query);
+    Map<String, Object> query(DatabaseQuery query);
     Field<?> getTableField(String name) throws Exception;
 }

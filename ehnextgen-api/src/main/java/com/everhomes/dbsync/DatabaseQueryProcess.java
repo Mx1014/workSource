@@ -11,69 +11,101 @@ import org.jooq.Condition;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.Row;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOnConditionStep;
 import org.jooq.SelectOnStep;
 import org.jooq.SortField;
 import org.jooq.Table;
 import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 
 public class DatabaseQueryProcess {
+    private static final Logger LOGGER = LoggerFactory.getLogger(DatabaseQueryProcess.class);
+    
     NashornObjectService service;
     DatabaseQuery query;
     SelectJoinStep<Record> joinStep;
     SelectOnConditionStep<Record> onCondStep;
-    Pattern pParam = Pattern.compile("\\$\\w+");
+    private static final Pattern pParam = Pattern.compile("\\$\\w+");
+    private Map<String, Object> result = null;
+    private List<Field<?>> fields;
+    private List<String> fieldNames;
+    private GraphRefer parentRef = null;
     
     public DatabaseQueryProcess(NashornObjectService service, DatabaseQuery query) {
-        this.service = service;
-        this.query = query;
+        this(service, query, null, null);
     }
     
-    private void processFields(Map<String, Integer> inMap, List<Field<?>> fields, DataGraph dataGraph) throws Exception {
-        if(inMap.containsKey("graph:" + dataGraph.getGraphName())) {
+    public DatabaseQueryProcess(NashornObjectService service, DatabaseQuery query, Map<String, Object> result, GraphRefer pref) {
+        this.service = service;
+        this.query = query;
+        if(result != null) {
+            this.result = result;
+            this.parentRef = pref;
+        } else {
+            this.result = new HashMap<String, Object>();
+        }
+        
+        this.fields = new ArrayList<Field<?>>();
+        this.fieldNames = new ArrayList<String>();
+    }
+    
+    private void processFields(Map<String, Integer> inMap, DataGraph dataGraph, GraphRefer ref) throws Exception {
+        DataGraph newGraph = ref.getGraph();
+        DataTable newTable = service.getTableMeta(newGraph.getTable().getTableName());
+        checkError(newTable, "newTable not found");
+        
+        if(inMap.containsKey("graph:" + newGraph.getGraphName())) {
             // dead reference reach
             return;
         }
         
-        if(inMap.containsKey("table:" + dataGraph.getTable().getTableName())) {
+        if(inMap.containsKey("table:" + newGraph.getTable().getTableName())) {
             // already process
             return;
         }
         
-        DataTable table = service.getTableMeta(dataGraph.getTable().getTableName());
-        checkError(table, "table not found");
+        inMap.put("graph:" + newGraph.getGraphName(), 1);
+        inMap.put("table:" + newGraph.getTable().getTableName(), 1);
         
-        fields.addAll(table.getFields(dataGraph.getTable().getFields()));
-        inMap.put("graph:" + dataGraph.getGraphName(), 1);
-        inMap.put("table:" + dataGraph.getTable().getTableName(), 1);
-        
-        for(GraphRefer ref : dataGraph.getRefer()) {
-            DataGraph newGraph = ref.getGraph();
-            if(!ref.getJoinType().equals(NJoinType.NO_JOIN.getCode())) {
-                processFields(inMap, fields, newGraph);    
+        //do real work
+        NJoinType nType = NJoinType.fromCode(ref.getJoinType());
+        if(!nType.equals(NJoinType.NO_JOIN)) {
+            String tableName = newGraph.getTable().getTableName();
+            List<Field<?>> newFields = newTable.getFields(newGraph.getTable().getFields());
+            for(Field<?> field : newFields) {
+                fieldNames.add(tableName + "$" + field.getName());
             }
+            this.fields.addAll(newFields);
         }
+        
+        for(GraphRefer newRef : newGraph.getRefer()) {
+            processFields(inMap, newGraph, newRef);
+        }
+        
     }
     
     private void processJoins(Map<String, Integer> inMap, DataGraph dataGraph, GraphRefer ref) {
-        if(inMap.containsKey("graph:" + dataGraph.getGraphName())) {
-            // dead reference reach
-            return;
-        }
-        
-        if(inMap.containsKey("table:" + dataGraph.getTable().getTableName())) {
-            // already process
-            return;
-        }
-        
-        inMap.put("graph:" + dataGraph.getGraphName(), 1);
-        inMap.put("table:" + dataGraph.getTable().getTableName(), 1);
-        
         DataTable table = service.getTableMeta(dataGraph.getTable().getTableName());
         DataGraph newGraph = ref.getGraph();
         DataTable newTable = service.getTableMeta(newGraph.getTable().getTableName());
         
+        if(inMap.containsKey("graph:" + newGraph.getGraphName())) {
+            // dead reference reach
+            return;
+        }
+        
+        if(inMap.containsKey("table:" + newGraph.getTable().getTableName())) {
+            // already process
+            return;
+        }
+        
+        inMap.put("graph:" + newGraph.getGraphName(), 1);
+        inMap.put("table:" + newGraph.getTable().getTableName(), 1);
+        
+        //now do real work
         SelectOnStep<Record> onStep = null;
         NJoinType nType = NJoinType.fromCode(ref.getJoinType());
         if(nType.equals(NJoinType.INNER_JOIN)) {
@@ -126,24 +158,106 @@ public class DatabaseQueryProcess {
         return DSL.condition(newSql, objs.toArray());
     }
     
+    private void processRecords(Map<String, Integer> inMap, DataGraph dataGraph, GraphRefer ref) throws Exception {
+        DataGraph newGraph = ref.getGraph();
+        DataTable newTable = service.getTableMeta(newGraph.getTable().getTableName());
+        checkError(newTable, "newTable not found");
+        
+        if(inMap.containsKey("graph:" + newGraph.getGraphName())) {
+            // dead reference reach
+            return;
+        }
+        
+        if(inMap.containsKey("table:" + newGraph.getTable().getTableName())) {
+            // already process
+            return;
+        }
+        
+        inMap.put("graph:" + newGraph.getGraphName(), 1);
+        inMap.put("table:" + newGraph.getTable().getTableName(), 1);
+        
+        //do real work
+        NJoinType nType = NJoinType.fromCode(ref.getJoinType());
+        if(nType.equals(NJoinType.NO_JOIN)) {
+            //Do a sub query here
+            DatabaseQuery subQuery = new DatabaseQuery();
+            subQuery.setPageSize(query.getPageSize());
+            subQuery.setDataGraph(newGraph);
+            //TODO support more conditions
+            subQuery.addCondition(ref.getChildField() + " = $" + ref.getChildField());
+            
+            Map<String, Object> pResults = (Map<String, Object>) this.result.get(dataGraph.getTable().getTableName());
+            checkError(pResults, "parent result not found");
+            subQuery.putInput(ref.getChildField(), pResults.get(ref.getParentField()).toString());
+            
+            DatabaseQueryProcess subProcess = new DatabaseQueryProcess(service, subQuery, pResults, ref);
+            subProcess.processQuery();
+        }
+        
+        for(GraphRefer newRef : newGraph.getRefer()) {
+            processRecords(inMap, newGraph, newRef);
+        }
+    }
+    
+    private void processRecord(DataGraph graph, DataTable table, Result<Record> records) throws Exception {
+        int size = records.size();
+        for(int i = 0; i < size; i++) {
+            Record r = records.get(i); 
+            
+            for(int j = 0; j < this.fieldNames.size(); j++) {
+                String fieldName = this.fieldNames.get(j);
+                String[] ss = fieldName.split("\\$");
+                Object val = r.getValue(j);
+                if(!this.result.containsKey(ss[0])) {
+                    this.result.put(ss[0], new HashMap<String, Object>());
+                }
+                
+                Map<String, Object> obj = (Map<String, Object>)this.result.get(ss[0]);
+                obj.put(ss[1], val);
+            }
+        }
+        
+        Map<String, Integer> inMap = new HashMap<String, Integer>();
+        inMap.put("graph:" + graph.getGraphName(), 1);
+        inMap.put("table:" + graph.getTable().getTableName(), 1);
+        for(GraphRefer newRef : graph.getRefer()) {
+            processRecords(inMap, graph, newRef);    
+        }
+    }
+    
     private void checkError(Object o, String msg) throws Exception {
         if(o == null) {
             throw new Exception(msg);
         }
     }
     
-    public Result<Record> processQuery() throws Exception {
-        DataGraph graph = service.getGraph(query.getGraphName());
+    public Map<String, Object> processQuery() throws Exception {
+        DataGraph graph = this.query.getDataGraph();
         checkError(graph, "graph not foud");
         
         GraphTable graphTable = graph.getTable();
         DataTable table = service.getTableMeta(graphTable.getTableName());
-        List<Field<?>> fields = new ArrayList<Field<?>>();
-        Map<String, Integer> inMap = new HashMap<String, Integer>();
-        processFields(inMap, fields, graph);
         
-        joinStep = DSL.using(service.configure()).select(fields).from(table.getTableName());
+        Map<String, Integer> inMap = new HashMap<String, Integer>();
+        inMap.put("graph:" + graph.getGraphName(), 1);
+        inMap.put("table:" + graph.getTable().getTableName(), 1);
+        //do real work
+        String tableName = graph.getTable().getTableName();
+        List<Field<?>> newFields = table.getFields(graph.getTable().getFields());
+        for(Field<?> field : newFields) {
+            fieldNames.add(tableName + "$" + field.getName());
+        }
+        this.fields.addAll(newFields);
+        
+        for(GraphRefer newRef : graph.getRefer()) {
+            processFields(inMap, graph, newRef);    
+        }
+        
         inMap = new HashMap<String, Integer>();
+        inMap.put("graph:" + graph.getGraphName(), 1);
+        inMap.put("table:" + graph.getTable().getTableName(), 1);
+        //do real work
+        joinStep = DSL.using(service.configure()).select(fields).from(table.getTableName());
         for(GraphRefer newRef : graph.getRefer()) {
             processJoins(inMap, graph, newRef);
         }
@@ -173,21 +287,23 @@ public class DatabaseQueryProcess {
         Result<Record> records = null;
         if(conds.size() > 0) {
             if(sorts.size() > 0) {
-                records = joinStep.where(conds).orderBy(sorts.toArray(new SortField[sorts.size()])).fetch();
+                records = joinStep.where(conds).orderBy(sorts.toArray(new SortField[sorts.size()])).limit(query.getPageSize()).fetch();
             } else {
-                records = joinStep.where(conds).fetch();
+                records = joinStep.where(conds).limit(query.getPageSize()).fetch();
             }
             
         } else {
             if(sorts.size() > 0) {
-                records = joinStep.orderBy(sorts.toArray(new SortField[sorts.size()])).fetch();
+                records = joinStep.orderBy(sorts.toArray(new SortField[sorts.size()])).limit(query.getPageSize()).fetch();
             } else {
-                records = joinStep.fetch();
+                records = joinStep.limit(query.getPageSize()).fetch();
             }
             
         }
         
-        return records;
+        processRecord(graph, table, records);
+        
+        return this.result;
     }
     
     public void setService(NashornObjectService service) {

@@ -38,12 +38,14 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.db.DbProvider;
+import com.everhomes.dbsync.DataGraph;
 import com.everhomes.dbsync.DataTable;
 import com.everhomes.dbsync.DatabaseQuery;
 import com.everhomes.dbsync.NashornHttpObject;
 import com.everhomes.dbsync.NashornObjectService;
 import com.everhomes.dbsync.NashornProcessService;
 import com.everhomes.user.base.LoginAuthTestCase;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.server.schema.Ehcore;
 import com.everhomes.server.schema.Keys;
@@ -153,14 +155,13 @@ public class NashornTest extends LoginAuthTestCase {
     @Test
     public void testQuery() {
         DatabaseQuery query = new DatabaseQuery();
-        query.setGraphName("door_user");
+        DataGraph dataGraph = nashornObjectService.getGraph("eh_door_user_permission");
+        query.setDataGraph(dataGraph);
         query.addCondition("eh_users.id = $userId");
         query.putInput("userId", "227281");
         
-        Result<Record> records = nashornObjectService.query(query);
-        if(records.size() > 0) {
-            LOGGER.info("records[0] = " + records.get(0));
-        }
+        Map<String, Object> records = nashornObjectService.query(query);
+        LOGGER.info("records=" + StringHelper.toJsonString(records));
     }
     
     @Test

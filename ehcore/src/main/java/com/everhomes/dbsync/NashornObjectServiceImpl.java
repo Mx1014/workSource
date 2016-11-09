@@ -4,6 +4,7 @@ import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 import java.util.Scanner;
 
 import org.jooq.Configuration;
@@ -24,12 +25,14 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Ehcore;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.StringHelper;
 
 @Component
@@ -47,6 +50,9 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     
     @Autowired
     private DbProvider dbProvider;
+    
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     
     private String resourceRoot = "/dbsync/";
     
@@ -190,15 +196,33 @@ public class NashornObjectServiceImpl implements NashornObjectService {
         
         graph.addRefer(belong);
         
+        DataGraph graph3 = new DataGraph();
+        GraphTable table3 = new GraphTable();
+        table3.setTableName("eh_user_identifiers");
+        table3.addField("identifier_token");
+        table3.addField("id");
+        table3.addField("claim_status");
+        table3.addField("region_code");
+        graph3.setTable(table3);
+        
+        GraphRefer hasMany = new GraphRefer();
+        hasMany.setGraph(graph3);
+        hasMany.setParentField("id");
+        hasMany.setChildField("owner_uid");
+        hasMany.setAsName("userIdentifiers");
+        hasMany.setJoinType(NJoinType.NO_JOIN.getCode());
+        graph2.addRefer(hasMany);
+        
         return graph;
     }
     
     @Override
-    public Result<Record> query(DatabaseQuery query) {
+    public Map<String, Object> query(DatabaseQuery query) {
+        query.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, query.getPageSize()));
+        
         DatabaseQueryProcess process = new DatabaseQueryProcess(this, query);
         try {
-            Result<Record> records = process.processQuery();
-            return records;
+            return process.processQuery();
         } catch (Exception e) {
             LOGGER.error("query failed", e);
         }

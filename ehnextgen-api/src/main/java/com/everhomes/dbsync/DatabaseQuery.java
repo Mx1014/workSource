@@ -10,11 +10,10 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 public class DatabaseQuery {
-    private String name;
-    private String graphName;
     private List<String> conditions;
     private Map<String, String> inputs;
     private List<String> orders;
+    private DataGraph dataGraph;
     
     private Long pageAnchor;
     private Integer pageSize;
@@ -25,20 +24,12 @@ public class DatabaseQuery {
         this.orders = new ArrayList<String>();
     }
 
-    public String getName() {
-        return name;
+    public DataGraph getDataGraph() {
+        return dataGraph;
     }
 
-    public void setName(String name) {
-        this.name = name;
-    }
-
-    public String getGraphName() {
-        return graphName;
-    }
-
-    public void setGraphName(String graphName) {
-        this.graphName = graphName;
+    public void setDataGraph(DataGraph dataGraph) {
+        this.dataGraph = dataGraph;
     }
 
     public List<String> getConditions() {
@@ -92,10 +83,5 @@ public class DatabaseQuery {
     public DatabaseQuery newCopy() {
         String json = StringHelper.toJsonString(this);
         return (DatabaseQuery)StringHelper.fromJsonString(json, DatabaseQuery.class);
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
     }
 }
