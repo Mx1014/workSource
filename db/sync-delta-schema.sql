@@ -88,16 +88,16 @@ ALTER TABLE `eh_launch_pad_items` ADD COLUMN `service_categry_id` BIGINT COMMENT
 --   `mobile` varchar(128) DEFAULT NULL,
 --   `remarks` varchar(1024) DEFAULT NULL,
 --   `create_time` datetime DEFAULT NULL,
--- 
+--
 --   PRIMARY KEY (`id`)
 -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
--- 
+--
 -- -- 添加人数限制字段, add by tt, 20161027
 -- -- ALTER TABLE `eh_forum_posts` ADD COLUMN `max_quantity` INT COMMENT 'max person quantity';
 -- -- ALTER TABLE `eh_activities` ADD COLUMN `max_quantity` INT COMMENT 'max person quantity';
 -- -- ALTER TABLE `eh_activities` ADD COLUMN `content_type` varchar(128) COMMENT 'content type, text/rich_text';
 -- -- ALTER TABLE `eh_activities` ADD COLUMN `version` varchar(128) COMMENT 'version';
--- 
+--
 -- -- 添加消息提醒设置表, add by tt, 20161027
 -- -- DROP TABLE IF EXISTS `eh_warning_settings`;
 -- -- CREATE TABLE `eh_warning_settings` (
@@ -109,12 +109,12 @@ ALTER TABLE `eh_launch_pad_items` ADD COLUMN `service_categry_id` BIGINT COMMENT
 -- --   `creator_uid` BIGINT,
 -- --   `update_time` DATETIME,
 -- --   `operator_uid` BIGINT,
--- 
+--
 -- --   PRIMARY KEY (`id`)
 -- -- ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
--- 
+--
 -- -- 以上为3.10.4合过来的脚本-------------
--- 
+--
 -- -- global table. 添加门禁特殊权限相关用户类型 add by Janson 20161028
 -- -- DROP TABLE IF EXISTS `eh_door_user_permission`;
 CREATE TABLE `eh_door_user_permission` (
@@ -168,7 +168,7 @@ CREATE TABLE `eh_equipment_inspection_equipments` (
   `geohash` VARCHAR(64) DEFAULT NULL,
   `equipment_model` VARCHAR(1024),
   `category_id` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'reference to the id of eh_categories',
-  `category_path` VARCHAR(128) DEFAULT NULL COMMENT 'reference to the path of eh_categories',  
+  `category_path` VARCHAR(128) DEFAULT NULL COMMENT 'reference to the path of eh_categories',
   `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: incomplete(不完整), 2: in use(使用中), 3: in maintenance(维修中), 4: discarded(报废), 5: disabled(停用), 6: standby(备用)',
   `installation_time` DATETIME,
   `repair_time` DATETIME,
@@ -186,8 +186,8 @@ CREATE TABLE `eh_equipment_inspection_equipments` (
   `operator_uid` BIGINT COMMENT 'operator uid of last operation',
   `update_time` DATETIME,
   `deleter_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'deleter id',
-  `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful', 
-  
+  `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
+
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -207,7 +207,7 @@ CREATE TABLE `eh_equipment_inspection_equipment_standard_map` (
     `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
     `deleter_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'deleter id',
     `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
-	
+
     PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -223,7 +223,7 @@ CREATE TABLE `eh_equipment_inspection_templates` (
     `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: inactive, 1: active',
     `delete_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record deleter user id',
     `delete_time` DATETIME,
-	
+
     PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -234,7 +234,7 @@ CREATE TABLE `eh_equipment_inspection_template_item_map` (
     `template_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to the id of eh_inspection_template',
     `item_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to the id of eh_inspection_items',
     `create_time` DATETIME,
-	
+
     PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -248,7 +248,7 @@ CREATE TABLE `eh_equipment_inspection_items` (
   `value_type` TINYINT NOT NULL DEFAULT '0' COMMENT '0-none、1-two-tuple、2-range',
   `unit` VARCHAR(32),
   `value_jason` VARCHAR(512),
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -268,6 +268,53 @@ CREATE TABLE `eh_equipment_inspection_item_results` (
   `item_unit` VARCHAR(32),
   `item_value` VARCHAR(128),
   `normal_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0: abnormal; 1: normal',
-  
+
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+-- 数据同步应用 Jannson
+-- DROP TABLE IF EXISTS `eh_sync_apps`;
+CREATE TABLE `eh_sync_apps` (
+  `id` BIGINT NOT NULL,
+  `app_key` VARCHAR(64),
+  `secret_key` VARCHAR(1024),
+  `name` VARCHAR(64),
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the item, enterprise, etc',
+  `owner_id` BIGINT NOT NULL DEFAULT '0',
+  `policy_type` TINYINT NOT NULL COMMENT 'refresh, increment',
+  `state` TINYINT NOT NULL COMMENT 'invalid, sleeping, processing, confict',
+  `description` VARCHAR(1024),
+  `last_update` DATETIME DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_sync_mapping`;
+CREATE TABLE `eh_sync_mapping` (
+  `id` BIGINT NOT NULL,
+  `sync_app_id` BIGINT NOT NULL,
+  `name` VARCHAR(64),
+  `content` TEXT,
+  `create_time` DATETIME DEFAULT NULL,
+  `status` TINYINT NOT NULL COMMENT 'invalid, valid',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_sync_trans`;
+CREATE TABLE `eh_sync_trans` (
+  `id` BIGINT NOT NULL,
+  `sync_app_id` BIGINT NOT NULL,
+  `parent_trans_id` BIGINT NOT NULL COMMENT '0 means not has a parent trans',
+  `version_id` BIGINT NOT NULL COMMENT 'version control',
+  `content` TEXT,
+  `result` TEXT,
+  `state` TINYINT NOT NULL COMMENT 'invalid, refresh, merge, confict',
+  `last_update` DATETIME DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
