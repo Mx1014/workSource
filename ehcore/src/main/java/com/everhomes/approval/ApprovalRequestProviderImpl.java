@@ -178,7 +178,7 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		}
 		
 		if (createUid != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.ge(createUid));
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(createUid));
 		}
 		if(null == approvalStatus){
 			approvalStatus= new ArrayList<Byte>();
