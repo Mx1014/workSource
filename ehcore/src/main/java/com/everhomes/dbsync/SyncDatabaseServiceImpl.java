@@ -25,6 +25,9 @@ public class SyncDatabaseServiceImpl implements SyncDatabaseService {
     @Autowired
     private SyncTranProvider syncTranProvider;
     
+    @Autowired
+    private NashornProcessService nashornProcessService;
+    
     @Override
     public SyncAppDTO createApp(SyncAppCreateCommand cmd) {
         SyncApp app = ConvertHelper.convert(cmd, SyncApp.class);
@@ -39,7 +42,14 @@ public class SyncDatabaseServiceImpl implements SyncDatabaseService {
     @Override
     public SyncMappingDTO createMapping(CreateSyncMappingCommand cmd) {
         SyncMapping map = ConvertHelper.convert(cmd, SyncMapping.class);
+        map.setStatus((byte)1);//mark as valid
         syncMappingProvider.createSyncMapping(map);
+        
+        NashornMappingObject mapObj = new NashornMappingObject();
+        mapObj.setContent(map.getContent());
+        mapObj.setName(map.getName());
+        nashornProcessService.putProcessJob(mapObj);
+        
         return ConvertHelper.convert(map, SyncMappingDTO.class);
     }
 

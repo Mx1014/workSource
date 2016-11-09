@@ -104,7 +104,12 @@ public class NashornProcessServiceImpl implements NashornProcessService {
     
     private void jsInvoke(NashornObject nobj) {
         try {
+        	
             try {
+            	if(null == nobj.getJSFunc()) {
+            		return;
+            	}
+            	
                 nashornObjectService.put(nobj);
                 Invocable jsInvoke = (Invocable) engineHolder.get();
                 jsInvoke.invokeFunction(nobj.getJSFunc(), new Object[] {nobj.getId()});
@@ -187,6 +192,9 @@ public class NashornProcessServiceImpl implements NashornProcessService {
                 this.threadJobs[i].add(obj);
             }
         }
+        
+        // run at lease once
+        queue.add(NashornNothingObject.Nothing);
     }
 
     @Override
