@@ -88,9 +88,12 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		//创建
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		if (approvalRequests != null && approvalRequests.size()>0) {
-			//删掉之前的审批流程
-			approvalOpRequestProvider.deleteApprovalOpRequestByRequestId(approvalRequests.get(0).getId());
-			approvalRequest.setId(approvalRequests.get(0).getId());
+			for (ApprovalRequest request : approvalRequests){
+				//删除之前的request
+				this.approvalRequestProvider.deleteApprovalRequest(request);
+				//删掉之前的审批流程
+				approvalOpRequestProvider.deleteApprovalOpRequestByRequestId(request.getId());
+			}
 		}
 		 	
 		return approvalRequest;

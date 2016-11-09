@@ -328,4 +328,10 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
 	}
+
+	@Override
+	public void deleteApprovalRequest(ApprovalRequest approvalRequest) {
+		getReadWriteDao().delete(approvalRequest);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhApprovalRequests.class, null);
+	}
 }

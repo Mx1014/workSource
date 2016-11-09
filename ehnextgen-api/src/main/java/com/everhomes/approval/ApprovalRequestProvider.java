@@ -32,4 +32,6 @@ public interface ApprovalRequestProvider {
 	List<ApprovalRequest> listApprovalRequestByEffectiveDateAndCreateUid(Integer namespaceId, String ownerType, Long ownerId,
 			Byte approvalType, Date effectiveDate, Long createUid, List<Byte> approvalStatus);
 
+	void deleteApprovalRequest(ApprovalRequest aprpovalRequest);
+
 }
