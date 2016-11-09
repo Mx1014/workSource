@@ -7,6 +7,14 @@ class ApiDoc extends Component {
     render() {
         let {responseSchema, javadocUrl, apiUri} = this.props;
 
+        if (process.env.NODE_ENV === 'production') {
+            let url = document.location.toString();
+            let SERVICE_ROOT = url;
+            SERVICE_ROOT = SERVICE_ROOT.substring(0, SERVICE_ROOT.lastIndexOf('/'));
+
+            javadocUrl = SERVICE_ROOT + javadocUrl;
+        }
+
         if(responseSchema) {
             let obj = responseSchema;
             try {

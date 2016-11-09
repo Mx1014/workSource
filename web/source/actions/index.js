@@ -30,7 +30,8 @@ export function fetchApiList() {
         [CALL_API]: {
             types: [ API_LIST_REQUEST, API_LIST_SUCCESS, API_LIST_FAILURE ],
             service: SERVICE_ROOT,
-            endpoint: '/discover'
+            endpoint: '/discover',
+            method: 'GET'
         }
     }
 }
