@@ -217,7 +217,7 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1087', '10037', '50400', '人员�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1088', '10038', '50500', '认证管理', '1', '1', '认证管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1089', '10039', '50600', '考勤管理', '1', '1', '考勤管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1090', '10040', '50700', '视频会议', '1', '1', '视频会议 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1090', '10041', '50800', '公司门禁', '1', '1', '公司门禁 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('1091', '10041', '50800', '公司门禁', '1', '1', '公司门禁 全部权限', '710');
 
 -- INSERT INTO `eh_web_menu_privileges` VALUES ('1091', '10042', '60000', '系统管理', '1', '1', '系统管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1092', '10043', '60000', '管理员管理', '1', '1', '管理员管理 全部权限', '710');
@@ -695,14 +695,14 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_web_menu_privileges` VALUES ('154', '795', '50630', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
 INSERT INTO `eh_web_menu_privileges` VALUES ('155', '795', '50631', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
 INSERT INTO `eh_web_menu_privileges` VALUES ('156', '796', '50632', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
-INSERT INTO `eh_web_menu_privileges` VALUES ('156', '821', '50632', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ('153', '821', '50632', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('157', '797', '50640', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('159', '798', '50650', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
 INSERT INTO `eh_web_menu_privileges` VALUES ('160', '798', '50651', '异常申请', '1', '1', '异常申请 全部权限', '510');
 INSERT INTO `eh_web_menu_privileges` VALUES ('161', '799', '50652', '请假申请', '1', '1', '请假申请 全部权限', '520');
-INSERT INTO `eh_web_menu_privileges` VALUES ('161', '790', '50652', '加班申请', '1', '1', '加班申请 全部权限', '521');
+INSERT INTO `eh_web_menu_privileges` VALUES ('158', '790', '50652', '加班申请', '1', '1', '加班申请 全部权限', '521');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
 
