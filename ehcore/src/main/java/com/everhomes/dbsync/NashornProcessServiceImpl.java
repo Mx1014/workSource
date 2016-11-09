@@ -7,6 +7,8 @@ import java.io.InputStreamReader;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URL;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.concurrent.BlockingQueue;
 import java.util.concurrent.Executors;
 import java.util.concurrent.LinkedBlockingQueue;
@@ -50,6 +52,7 @@ public class NashornProcessServiceImpl implements NashornProcessService {
     private AtomicBoolean started = new AtomicBoolean(false);
     private final ThreadFactory threadFactory;
     private Thread[] threads;
+    private List[] threadJobs;
     private volatile boolean shouldContinue;
     private ScriptEngineManager manager;
     
@@ -64,6 +67,7 @@ public class NashornProcessServiceImpl implements NashornProcessService {
             try {
                 ScriptEngine engine = manager.getEngineByName("nashorn");
                 engine.put("nashornObjs", nashornObjectService);
+                engine.put("jThreadId", String.valueOf(Thread.currentThread().getId()));
                 
                 Resource js = new ClassPathResource("/dbsync/jvm-npm.js");
                 reader = new InputStreamReader(js.getInputStream(), "UTF-8");
@@ -91,7 +95,27 @@ public class NashornProcessServiceImpl implements NashornProcessService {
         this.queue = new LinkedBlockingQueue<NashornObject>();
         this.threadFactory = Executors.defaultThreadFactory();
         threads = new Thread[N];
+        threadJobs = new List[N];
         manager = new ScriptEngineManager();
+    }
+    
+    private void jsInvoke(NashornObject nobj) {
+        try {
+            try {
+                nashornObjectService.put(nobj);
+                Invocable jsInvoke = (Invocable) engineHolder.get();
+                jsInvoke.invokeFunction(nobj.getJSFunc(), new Object[] {nobj.getId()});
+                nobj.onComplete();
+            } catch(Exception e) {
+                nobj.onError(e);
+                LOGGER.error("eval js error", e);
+                }
+                //try clear it
+                nashornObjectService.clear(nobj.getId());
+            } catch (Exception e) {
+                // weird if we reached here - something wrong is happening, but we shouldn't stop the service anyway!
+                LOGGER.warn("Unexpected message caught... Shouldn't be here", e);
+        }        
     }
     
     private void start(final int i) {
@@ -99,32 +123,32 @@ public class NashornProcessServiceImpl implements NashornProcessService {
             return;
         }
 
+        NashornProcessServiceImpl othis = this;
         shouldContinue = true;
         threads[i] = threadFactory.newThread(new Runnable() {
             public void run() {
+                List<NashornObject> jobs = new ArrayList<NashornObject>();
+                
                 while (shouldContinue) {
+                    
+                    //Do global invoke first
+                    synchronized(othis.threads[i]) {
+                        for(Object o : othis.threadJobs[i]) {
+                            jobs.add((NashornObject)o);
+                            }
+                    }
+                    
+                    for(NashornObject nobj : jobs) {
+                        jsInvoke(nobj);
+                    }
+                    
                     try {
                         NashornObject nobj = queue.take();
+                        jsInvoke(nobj);
                         
-                        try {
-                            nashornObjectService.put(nobj);
-                            Invocable jsInvoke = (Invocable) engineHolder.get();
-                            jsInvoke.invokeFunction(nobj.getJSFunc(), new Object[] {nobj.getId()});
-                            nobj.onComplete();
-                        } catch(Exception e) {
-                            nobj.onError(e);
-                            LOGGER.error("eval js error", e);
-                            }
-                        
-                        //try clear it
-                        nashornObjectService.clear(nobj.getId());
-                        
-                        } catch (InterruptedException e) {
-                            // ignore
-                        } catch (Exception e) {
-                            // weird if we reached here - something wrong is happening, but we shouldn't stop the service anyway!
-                            LOGGER.warn("Unexpected message caught... Shouldn't be here", e);
+                    } catch (InterruptedException e) {
                     }
+                    
                 }
             }
         });
@@ -147,6 +171,19 @@ public class NashornProcessServiceImpl implements NashornProcessService {
         }, obj.getTimeout(), TimeUnit.MILLISECONDS);
         
         queue.add(obj);
+    }
+    
+    @Override
+    public void putProcessJob(NashornObject obj) {
+        if (!started.get()) {
+            throw new IllegalStateException("service hasn't be started or was closed");
+        }
+        
+        for(int i = 0; i < N; i++) {
+            synchronized(this.threads[i]) {
+                this.threadJobs[i].add(obj);
+            }
+        }
     }
 
     @Override

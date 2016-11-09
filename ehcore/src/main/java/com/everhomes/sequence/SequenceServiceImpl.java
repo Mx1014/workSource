@@ -946,6 +946,16 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEquipmentInspectionItemResults.class, Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_ITEM_RESULTS).fetchOne().value1();
         });
+        syncTableSequence(null, EhSyncApps.class, Tables.EH_SYNC_APPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SYNC_APPS.ID.max()).from(Tables.EH_SYNC_APPS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhSyncMapping.class, Tables.EH_SYNC_MAPPING.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SYNC_MAPPING.ID.max()).from(Tables.EH_SYNC_MAPPING).fetchOne().value1();
+        });
+        syncTableSequence(null, EhSyncTrans.class, Tables.EH_SYNC_TRANS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SYNC_TRANS.ID.max()).from(Tables.EH_SYNC_TRANS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")
