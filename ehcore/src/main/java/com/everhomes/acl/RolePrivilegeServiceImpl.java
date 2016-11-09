@@ -1326,31 +1326,48 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<OrganizationContactDTO> listOrganizationSuperAdministrators(ListServiceModuleAdministratorsCommand cmd) {
 
-		List<Long> roles = new ArrayList<Long>();
-		roles.add(RoleConstants.PM_SUPER_ADMIN);
-		ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
-		command.setRoleIds(roles);
-		command.setOrganizationId(cmd.getOrganizationId());
-		ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(command);
-
-		return res.getMembers().stream().map(r -> {
-				return ConvertHelper.convert(r, OrganizationContactDTO.class);
+//		List<Long> roles = new ArrayList<Long>();
+//		roles.add(RoleConstants.PM_SUPER_ADMIN);
+//		ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
+//		command.setRoleIds(roles);
+//		command.setOrganizationId(cmd.getOrganizationId());
+//		ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(command);
+//
+//		return res.getMembers().stream().map(r -> {
+//				return ConvertHelper.convert(r, OrganizationContactDTO.class);
+//		}).collect(Collectors.toList());
+		List<OrganizationMember> members = this.getRoleMembers(cmd.getOrganizationId(), RoleConstants.PM_SUPER_ADMIN);
+		return members.stream().map(r -> {
+			return ConvertHelper.convert(r, OrganizationContactDTO.class);
 		}).collect(Collectors.toList());
 	}
 
 	@Override
 	public List<OrganizationContactDTO> listOrganizationAdministrators(ListServiceModuleAdministratorsCommand cmd) {
-
-		List<Long> roles = new ArrayList<Long>();
-		roles.add(RoleConstants.ENTERPRISE_SUPER_ADMIN);
-		ListOrganizationPersonnelByRoleIdsCommand command = new ListOrganizationPersonnelByRoleIdsCommand();
-		command.setRoleIds(roles);
-		command.setOrganizationId(cmd.getOrganizationId());
-		ListOrganizationMemberCommandResponse res = organizationService.listOrganizationPersonnelsByRoleIds(command);
-
-		return res.getMembers().stream().map(r -> {
+		List<OrganizationMember> members = this.getRoleMembers(cmd.getOrganizationId(), RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		return members.stream().map(r -> {
 			return ConvertHelper.convert(r, OrganizationContactDTO.class);
 		}).collect(Collectors.toList());
+	}
+
+	/**
+	 * 获取角色人员
+	 * @param organizationId
+	 * @param roleId
+     * @return
+     */
+	private List<OrganizationMember> getRoleMembers(Long organizationId, Long roleId){
+		List<OrganizationMember> members = new ArrayList<>();
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
+		if(null != roleAssignments){
+			for (RoleAssignment roleassignment: roleAssignments) {
+				if(EntityType.fromCode(roleassignment.getTargetType()) == EntityType.USER && roleassignment.getRoleId().equals(roleId)){
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
+					if(null != member)members.add(member);
+				}
+			}
+		}
+		return members;
 	}
 
 	@Override

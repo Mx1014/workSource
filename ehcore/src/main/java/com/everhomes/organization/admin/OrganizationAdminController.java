@@ -468,7 +468,7 @@ public class OrganizationAdminController extends ControllerBase {
      * <p>子机构列表</p>
      */
     @RequestMapping("listChildrenOrganizations")
-    @RestReturn(value = OrganizationDTO.class, collection = true)
+    @RestReturn(value = ListOrganizationsCommandResponse.class)
     public RestResponse listChildrenOrganizations(@Valid ListAllChildrenOrganizationsCommand cmd) {
         RestResponse response = new RestResponse(organizationService.listChildrenOrganizations(cmd.getId(), cmd.getGroupTypes()));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -559,7 +559,6 @@ public class OrganizationAdminController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse deleteOrganizationById(@Valid DeleteOrganizationIdCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         organizationService.deleteOrganization(cmd);
         RestResponse response = new RestResponse();

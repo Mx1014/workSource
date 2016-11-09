@@ -7,13 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 
-
-
-
-
-
-
-
+import com.everhomes.rest.organization.*;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
@@ -27,9 +21,6 @@ import org.junit.Test;
 
 
 import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.organization.ListAllChildrenOrganizationsCommand;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.admin.OrgListChildrenOrganizationsRestResponse;
 import com.everhomes.rest.ui.launchpad.LaunchpadGetLastLaunchPadLayoutBySceneRestResponse;
 import com.everhomes.rest.user.IdentifierClaimStatus;
@@ -49,7 +40,7 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
     }
     
     @Test
-    public void testListChildrenOrganizations1() {
+    public void testListChildrenOrganizations() {
         Integer namespaceId = 0;
         String userIdentifier = "12000000001";
         String plainTexPassword = "123456";
@@ -72,6 +63,22 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
         
         assertNotNull(response.getResponse());
         assertEquals(5, response.getResponse().size());
+
+        boolean flag = false;
+        for (OrganizationDTO dto: response.getResponse()) {
+            if(1000752L == dto.getId()){
+                assertEquals(2, dto.getManagers().size());
+                for (OrganizationManagerDTO managerDto:dto.getManagers()) {
+                    if(managerDto.getMemberId() == 8L || managerDto.getMemberId() == 9L){
+                        flag = true;
+                    }else{
+                        flag = false;
+                    }
+                }
+            }
+        }
+
+        assertEquals(true, flag);
     }
     
     
@@ -81,11 +88,14 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
     }
     
     protected void initCustomData() {
-    	
-        String userInfoFilePath = "data/json/3.8.2-test-data-organizations_160819.txt";
-        String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
-        dbProvider.loadJsonFileToDatabase(filePath, false);
-        
+        String filePath = "data/json/3.4.x-test-data-userinfo_160605.txt";
+        String file = dbProvider.getAbsolutePathFromClassPath(filePath);
+        dbProvider.loadJsonFileToDatabase(file, false);
+
+        filePath = "data/json/organizations-data-test_20161014.txt";
+        file = dbProvider.getAbsolutePathFromClassPath(filePath);
+        dbProvider.loadJsonFileToDatabase(file, false);
+
     }
 }
 
