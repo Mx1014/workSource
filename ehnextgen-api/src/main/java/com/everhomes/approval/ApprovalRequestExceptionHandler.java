@@ -311,7 +311,8 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		String scope = ApprovalLogTitleTemplateCode.SCOPE;
 		int code = ApprovalLogTitleTemplateCode.EXCEPTION_TITLE;
 		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
-		map.put("date",processRequestDate(new Date(a.getLongTag1())));
+		ApprovalExceptionContent content = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
+		map.put("date",processRequestDate(new Date(a.getLongTag1()) ,content));
 		 
 		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 		
@@ -322,19 +323,63 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 			ApprovalRequest a) { 
 		Map<String, Object> map = new HashMap<>();
 		 
-		 
 		String scope = ApprovalLogTitleTemplateCode.SCOPE;
 		int code = ApprovalLogTitleTemplateCode.EXCEPTION_MAIN_TITLE; 
-		map.put("date",processRequestDate(new Date(a.getLongTag1())));
+		ApprovalExceptionContent content = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
+		map.put("date",processRequestDate(new Date(a.getLongTag1()) ,content));
 		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(new Date(a.getLongTag1())));
-		map.put("punchLog",processPunchDetail(pdl)) ;
-		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay()))
+		map.put("punchLog",processPunchDetail(pdl,content)) ;
+		if(null == content || content.getExceptionRequestType().equals(ExceptionRequestType.ALL_DAY.getCode()))
 			map.put("punchStatus", punchService.statusToString(pdl.getStatus()));
-		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay()))
-			map.put("punchStatus", punchService.statusToString(pdl.getMorningStatus())+"/"+punchService.statusToString(pdl.getAfternoonStatus()));
+		else if(content.getExceptionRequestType().equals(ExceptionRequestType.MORNING.getCode()))
+			map.put("punchStatus", punchService.statusToString(pdl.getMorningStatus()) );
+		else if(content.getExceptionRequestType().equals(ExceptionRequestType.AFTERNOON.getCode()))
+			map.put("punchStatus", punchService.statusToString(pdl.getAfternoonStatus()));
 		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 		
 		return result;
+	}
+	 
+	public String processRequestDate(Date effectiveDate, ApprovalExceptionContent content ) {
+		return mmDDSF.format(effectiveDate)+"("+weekdaySF.format(effectiveDate)+") "+
+				(content.getExceptionRequestType().equals(ExceptionRequestType.MORNING.getCode()) ? "上午":
+					content.getExceptionRequestType().equals(ExceptionRequestType.AFTERNOON.getCode()) ?"下午":"");
+	}
+	private static final SimpleDateFormat minSecSF = new SimpleDateFormat("HH:mm");
+	  
+	protected String processPunchDetail(PunchDayLog pdl, ApprovalExceptionContent content) {
+		String punchDetail = null;
+		if(null == pdl )
+			return "无";
+		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay())){
+			if(null != pdl.getArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getArriveTime());
+				if(null != pdl.getLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+			}else{
+				punchDetail = "无";
+			}
+			
+		}
+		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay())){
+
+			if(null != content){
+				if(content.getExceptionRequestType().equals(ExceptionRequestType.MORNING.getCode()) && null != pdl.getArriveTime() ){
+					punchDetail = minSecSF.format(pdl.getArriveTime());
+					if(null != pdl.getNoonLeaveTime() )
+						punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getNoonLeaveTime());
+					}
+				else if(content.getExceptionRequestType().equals(ExceptionRequestType.AFTERNOON.getCode()) &&null != pdl.getAfternoonArriveTime() ){
+					punchDetail = minSecSF.format(pdl.getAfternoonArriveTime());
+					if(null != pdl.getLeaveTime() )
+						punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+					}
+				else
+					punchDetail = "无";
+				}
+			
+		}
+		return punchDetail;
 	}
 	@Override
 	public ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
