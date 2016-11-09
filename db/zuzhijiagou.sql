@@ -471,15 +471,6 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10052, '0', '园区简介 管理员', '园区简介 业务模块权限', NULL);
 
 
-select * from eh_acl_privileges where id >= 10001 and id <= 10052;
-SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM `eh_acl_privileges` WHERE id >= 10001 and id <= 10052;
-
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_service_module_privileges` WHERE module_id in (select id from eh_service_modules where type = 1);
-
-
 INSERT INTO `eh_web_menu_privileges` VALUES ('1', '10001', '10000', '发帖', '1', '1', '发公告和任务贴', '10');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('2', '10006', '11000', '推送消息', '1', '1', '推送消息', '20');
@@ -695,19 +686,38 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_web_menu_privileges` VALUES ('154', '795', '50630', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
 INSERT INTO `eh_web_menu_privileges` VALUES ('155', '795', '50631', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
 INSERT INTO `eh_web_menu_privileges` VALUES ('156', '796', '50632', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
-INSERT INTO `eh_web_menu_privileges` VALUES ('153', '821', '50632', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ('153', '821', '50633', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('157', '797', '50640', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('159', '798', '50650', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
 INSERT INTO `eh_web_menu_privileges` VALUES ('160', '798', '50651', '异常申请', '1', '1', '异常申请 全部权限', '510');
 INSERT INTO `eh_web_menu_privileges` VALUES ('161', '799', '50652', '请假申请', '1', '1', '请假申请 全部权限', '520');
-INSERT INTO `eh_web_menu_privileges` VALUES ('158', '790', '50652', '加班申请', '1', '1', '加班申请 全部权限', '521');
+INSERT INTO `eh_web_menu_privileges` VALUES ('158', '790', '50653', '加班申请', '1', '1', '加班申请 全部权限', '521');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (791, '0', '加班申请', '加班申请 全部权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (792, '0', '加班申请', '加班申请 全部权限', NULL);
-INSERT INTO `eh_web_menu_privileges` VALUES ('163', '799', '50210', '通用岗位', '1', '1', '通用岗位 全部权限', '520');
-INSERT INTO `eh_web_menu_privileges` VALUES ('164', '790', '50220', '岗位管理', '1', '1', '岗位管理 全部权限', '521');
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10053, '0', '通用岗位', '通用岗位 全部权限', NULL);
+INSERT INTO `eh_web_menu_privileges` VALUES ('163', '10053', '50210', '通用岗位', '1', '1', '通用岗位 全部权限', '520');
+INSERT INTO `eh_web_menu_privileges` VALUES ('164', '10035', '50220', '岗位管理', '1', '1', '岗位管理 全部权限', '521');
 
+
+select * from eh_acl_privileges where id >= 10001 and id <= 10053;
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM `eh_acl_privileges` WHERE id >= 10001 and id <= 10053;
+
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_service_module_privileges` WHERE module_id in (select id from eh_service_modules where type = 1);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1001', '0', '1', '2016-10-25 10:18:59');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10053', '1001', '0', '1', '2016-10-25 10:18:59');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1005', '0', '1', '2016-10-25 10:18:59');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10053', '1005', '0', '1', '2016-10-25 10:18:59');
+
+	
