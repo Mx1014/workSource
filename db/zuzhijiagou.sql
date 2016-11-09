@@ -229,7 +229,7 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1095', '10044', '60200', '业务�
 delete from eh_web_menus;
 INSERT INTO `eh_web_menus` VALUES ('10000', '信息发布', '0', 'fa fa-volume-up', null, '1', '2', '/10000', 'park', '100');
 INSERT INTO `eh_web_menus` VALUES ('10100', '论坛/公告', '10000', null, 'forum_notice', '0', '2', '/10000/10100', 'park', '110');
-INSERT INTO `eh_web_menus` VALUES ('10400', '广告管理', '10000', null, null, '0', '2', '/10000/10400', 'park', '140');
+INSERT INTO `eh_web_menus` VALUES ('10400', '广告管理', '10000', null, 'banner_management', '0', '2', '/10000/10400', 'park', '140');
 INSERT INTO `eh_web_menus` VALUES ('10600', '活动管理', '10000', null, 'forum_activity', '0', '2', '/10000/10600', 'park', '160');
 INSERT INTO `eh_web_menus` VALUES ('10700', '路演直播', '10000', null, 'road_show', '0', '2', '/10000/10700', 'park', '170');
 INSERT INTO `eh_web_menus` VALUES ('10800', '新闻管理', '10000', null, 'news_management', '0', '2', '/10000/10800', 'park', '180');
@@ -288,7 +288,7 @@ INSERT INTO `eh_web_menus` VALUES ('20841', '巡检项设置', '20840', null, 'e
 
 
 INSERT INTO `eh_web_menus` VALUES ('30000', '项目管理', '0', 'fa fa-building', null, '1', '2', '/30000', 'park', '300');
-INSERT INTO `eh_web_menus` VALUES ('30500', '项目信息', '30000', null, 'community_list', '0', '2', '/30000/30500', 'park', '305');
+INSERT INTO `eh_web_menus` VALUES ('30500', '项目信息', '30000', null, 'react:/project-classification/projects', '0', '2', '/30000/30500', 'park', '305');
 INSERT INTO `eh_web_menus` VALUES ('31000', '楼栋管理', '30000', null, 'building_management', '0', '2', '/30000/31000', 'park', '310');
 INSERT INTO `eh_web_menus` VALUES ('32000', '门牌管理', '30000', null, 'apartment_statistics', '0', '2', '/30000/32000', 'park', '320');
 INSERT INTO `eh_web_menus` VALUES ('33000', '企业管理', '30000', null, 'enterprise_management', '0', '2', '/30000/33000', 'park', '330');
@@ -305,14 +305,14 @@ INSERT INTO `eh_web_menus` VALUES ('40110', '招租管理', '40100', null, 'rent
 INSERT INTO `eh_web_menus` VALUES ('40120', '入住申请', '40100', null, 'enter_apply', '0', '2', '/40000/40100/40120', 'park', '414');
 
 INSERT INTO `eh_web_menus` VALUES ('40200', '工位预订', '40000', null, null, '1', '2', '/40000/40200', 'park', '420');
-INSERT INTO `eh_web_menus` VALUES ('40210', '空间管理', '40200', null, 'station_booking_rent_manage', '0', '2', '/40000/40200/40210', 'park', '424');
-INSERT INTO `eh_web_menus` VALUES ('40220', '预订详情', '40200', null, 'station_booking_enter_apply', '0', '2', '/40000/40200/40220', 'park', '426');
+INSERT INTO `eh_web_menus` VALUES ('40210', '空间管理', '40200', null, 'project_management', '0', '2', '/40000/40200/40210', 'park', '424');
+INSERT INTO `eh_web_menus` VALUES ('40220', '预订详情', '40200', null, 'project_detail', '0', '2', '/40000/40200/40220', 'park', '426');
 
 INSERT INTO `eh_web_menus` VALUES ('40300', '服务热线', '40000', null, 'service_hotline', '0', '2', '/40000/40300', 'park', '430');
 
 INSERT INTO `eh_web_menus` VALUES ('40400', '资源预订', '40000', null, null, '1', '2', '/40000/40400', 'park', '440');
-INSERT INTO `eh_web_menus` VALUES ('40410', '默认参数', '40400', null, 'rental_setting', '0', '2', '/40000/40400/40410', 'park', '441');
-INSERT INTO `eh_web_menus` VALUES ('40420', '资源发布', '40400', null, 'rental_publish', '0', '2', '/40000/40400/40420', 'park', '444');
+INSERT INTO `eh_web_menus` VALUES ('40410', '默认参数', '40400', null, 'default_parameters', '0', '2', '/40000/40400/40410', 'park', '441');
+INSERT INTO `eh_web_menus` VALUES ('40420', '资源发布', '40400', null, 'resource_publish', '0', '2', '/40000/40400/40420', 'park', '444');
 INSERT INTO `eh_web_menus` VALUES ('40430', '预订详情', '40400', null, 'rental_info', '0', '2', '/40000/40400/40430', 'park', '446');
 INSERT INTO `eh_web_menus` VALUES ('40440', '退款处理', '40400', null, 'refund_management', '0', '2', '/40000/40400/40440', 'park', '448');
 
@@ -368,48 +368,36 @@ INSERT INTO `eh_web_menus` VALUES ('41600', '园区简介', '40000', null, 'park
 INSERT INTO `eh_web_menus` VALUES ('50000', '内部管理', '0', 'fa fa-group', null, '1', '2', '/50000', 'park', '505');
 
 INSERT INTO `eh_web_menus` VALUES ('50100', '组织架构', '50000', null, null, '1', '2', '/50000/50100', 'park', '510');
-INSERT INTO `eh_web_menus` VALUES ('50110', '组织架构', '50100', null, 'architecture_management', '0', '2', '/50000/50100/50110', 'park', '511');
+INSERT INTO `eh_web_menus` VALUES ('50110', '组织架构', '50100', null, 'react:/system-architect/architect-list', '0', '2', '/50000/50100/50110', 'park', '511');
 
-INSERT INTO `eh_web_menus` VALUES ('50200', '岗位管理', '50000', null, '#', '0', '2', '/50000/50200', 'park', '521');
-INSERT INTO `eh_web_menus` VALUES ('50300', '职级管理', '50000', null, '#', '0', '2', '/50000/50300', 'park', '530');
+INSERT INTO `eh_web_menus` VALUES ('50200', '岗位管理', '50000', null, null, '0', '2', '/50000/50200', 'park', '521');
+INSERT INTO `eh_web_menus` VALUES ('50210', '通用岗位', '50200', null, 'react:/rank-management/general', '0', '2', '/50000/50200/50210', 'park', '522');
+INSERT INTO `eh_web_menus` VALUES ('50220', '岗位管理', '50200', null, 'react:/rank-management/rank-list', '0', '2', '/50000/50200/50220', 'park', '523');
 
-INSERT INTO `eh_web_menus` VALUES ('50400', '人员管理', '50000', null, 'personal_management', '0', '2', '/50000/50400', 'park', '540');
+INSERT INTO `eh_web_menus` VALUES ('50300', '职级管理', '50000', null, 'react:/system-architect/architect-list', '0', '2', '/50000/50300', 'park', '530');
+
+INSERT INTO `eh_web_menus` VALUES ('50400', '人员管理', '50000', null, 'react:/employee-management/employee-list', '0', '2', '/50000/50400', 'park', '540');
 
 INSERT INTO `eh_web_menus` VALUES ('50500', '认证管理', '50000', null, '#', '0', '2', '/50000/50500', 'park', '541');
 
 INSERT INTO `eh_web_menus` VALUES ('50600', '考勤管理', '50000', null, null, '1', '2', '/50000/50600', 'park', '543');
-INSERT INTO `eh_web_menus` VALUES ('50610', '考勤规则设置', '50600', null, null, '1', '2', '/50000/50600/50610', 'park', '544');
-INSERT INTO `eh_web_menus` VALUES ('50611', '规则管理', '50610', null, 'punch_rule', '0', '2', '/50000/50600/50610/50611', 'park', '545');
-INSERT INTO `eh_web_menus` VALUES ('50612', '时间管理', '50610', null, 'punch_time', '0', '2', '/50000/50600/50610/50612', 'park', '546');
-INSERT INTO `eh_web_menus` VALUES ('50613', '地点管理', '50610', null, 'punch_location', '0', '2', '/50000/50600/50610/50613', 'park', '547');
-INSERT INTO `eh_web_menus` VALUES ('50614', 'wifi管理', '50610', null, 'punch_wifi', '0', '2', '/50000/50600/50610/50614', 'park', '548');
-INSERT INTO `eh_web_menus` VALUES ('50615', '排班管理', '50610', null, 'punch_scheduling', '0', '2', '/50000/50600/50610/50615', 'park', '550');
-
-INSERT INTO `eh_web_menus` VALUES ('50620', '审批规则设置', '50600', null, null, '1', '2', '/50000/50600/50620', 'park', '551');
-INSERT INTO `eh_web_menus` VALUES ('50621', '审批规则', '50620', null, 'approval_rule', '0', '2', '/50000/50600/50620/50621', 'park', '552');
-INSERT INTO `eh_web_menus` VALUES ('50622', '审批人设置', '50620', null, 'approval_personal', '0', '2', '/50000/50600/50620/50622', 'park', '553');
-
-INSERT INTO `eh_web_menus` VALUES ('50630', '考勤规则配置', '50600', null, null, '1', '2', '/50000/50600/50630', 'park', '554');
-INSERT INTO `eh_web_menus` VALUES ('50631', '通用设置', '50630', null, 'punch_setting', '0', '2', '/50000/50600/50630/50631', 'park', '555');
-INSERT INTO `eh_web_menus` VALUES ('50632', '个人设置', '50630', null, 'punch_personal_setting', '0', '2', '/50000/50600/50630/50632', 'park', '556');
-
-INSERT INTO `eh_web_menus` VALUES ('50640', '打卡详情', '50600', null, null, '1', '2', '/50000/50600/50640', 'park', '557');
-INSERT INTO `eh_web_menus` VALUES ('50641', '打卡详情', '50640', null, 'punch_detail', '0', '2', '/50000/50600/50640/50641', 'park', '558');
-
-INSERT INTO `eh_web_menus` VALUES ('50650', '异常处理', '50600', null, null, '1', '2', '/50000/50600/50650', 'park', '559');
+INSERT INTO `eh_web_menus` VALUES ('50630', '考勤规则', '50600', null, null, '1', '2', '/50000/50600/50630', 'park', '554');
+INSERT INTO `eh_web_menus` VALUES ('50631', '通用规则设置', '50630', null, 'punch--generalSetting', '0', '2', '/50000/50600/50630/50631', 'park', '555');
+INSERT INTO `eh_web_menus` VALUES ('50632', '特殊个人设置', '50630', null, 'punch--personalSetting', '0', '2', '/50000/50600/50630/50632', 'park', '556');
+INSERT INTO `eh_web_menus` VALUES ('50633', '请假类型设置', '50630', null, 'leave_setting', '0', '2', '/50000/50600/50630/50633', 'park', '556');
+INSERT INTO `eh_web_menus` VALUES ('50640', '打卡详情', '50600', null, 'punch_detail', '1', '2', '/50000/50600/50640', 'park', '557');
+INSERT INTO `eh_web_menus` VALUES ('50650', '申请处理', '50600', null, null, '1', '2', '/50000/50600/50650', 'park', '559');
 INSERT INTO `eh_web_menus` VALUES ('50651', '异常申请', '50650', null, 'abnormal_apply', '0', '2', '/50000/50600/50650/50651', 'park', '560');
 INSERT INTO `eh_web_menus` VALUES ('50652', '请假申请', '50650', null, 'leave_apply', '0', '2', '/50000/50600/50650/50652', 'park', '561');
+INSERT INTO `eh_web_menus` VALUES ('50653', '加班申请', '50650', null, 'punch--overTimeApply', '0', '2', '/50000/50600/50650/50653', 'park', '561');
+INSERT INTO `eh_web_menus` VALUES ('50660', '考勤统计', '50600', null, 'punch_statistics', '1', '2', '/50000/50600/50660', 'park', '562');
 
-INSERT INTO `eh_web_menus` VALUES ('50660', '考勤统计', '50600', null, null, '1', '2', '/50000/50600/50660', 'park', '562');
-INSERT INTO `eh_web_menus` VALUES ('50661', '考勤统计', '50660', null, 'punch_statistics', '0', '2', '/50000/50600/50660/50661', 'park', '563');
 
-INSERT INTO `eh_web_menus` VALUES ('50670', '请假类型设置', '50600', null, null, '1', '2', '/50000/50600/50670', 'park', '564');
-INSERT INTO `eh_web_menus` VALUES ('50671', '类型设置', '50670', null, 'leave_setting', '0', '2', '/50000/50600/50670/50671', 'park', '565');
 
 INSERT INTO `eh_web_menus` VALUES ('50700', '视频会议', '50000', null, null, '1', '2', '/50000/50700', 'park', '570');
-INSERT INTO `eh_web_menus` VALUES ('50710', '账号管理', '50700', null, '#', '0', '2', '/50000/50700/50710', 'park', '571');
-INSERT INTO `eh_web_menus` VALUES ('50720', '我的订单', '50700', null, '#', '0', '2', '/50000/50700/50720', 'park', '572');
-INSERT INTO `eh_web_menus` VALUES ('50730', '会议官网', '50700', null, 'zlMeeting', '0', '2', '/50000/50700/50730', 'park', '573');
+INSERT INTO `eh_web_menus` VALUES ('50710', '账号管理', '50700', null, 'account_manage', '0', '2', '/50000/50700/50710', 'park', '571');
+INSERT INTO `eh_web_menus` VALUES ('50720', '我的订单', '50700', null, 'video_detail', '0', '2', '/50000/50700/50720', 'park', '572');
+INSERT INTO `eh_web_menus` VALUES ('50730', '会议官网', '50700', null, 'url:http://meeting.zuolin.com', '0', '2', '/50000/50700/50730', 'park', '573');
 
 INSERT INTO `eh_web_menus` VALUES ('50800', '公司门禁', '50000', null, null, '1', '2', '/50000/50800', 'park', '580');
 INSERT INTO `eh_web_menus` VALUES ('50810', '门禁管理', '50800', null, 'access_manage_inside', '0', '2', '/50000/50800/50810', 'park', '581');
@@ -421,8 +409,8 @@ INSERT INTO `eh_web_menus` VALUES ('50860', '门禁日志', '50800', null, 'acce
 
 INSERT INTO `eh_web_menus` VALUES ('60000', '系统管理', '0', 'fa fa-group', null, '1', '2', '/60000', 'park', '600');
 
-INSERT INTO `eh_web_menus` VALUES ('60100', '管理员管理', '60000', null, 'admin_management', '0', '2', '/60000/60100', 'park', '610');
-INSERT INTO `eh_web_menus` VALUES ('60200', '业务授权', '60000', null, '#', '0', '2', '/60000/60200', 'park', '620');
+INSERT INTO `eh_web_menus` VALUES ('60100', '管理员管理', '60000', null, 'react:/admin-management/administrator', '0', '2', '/60000/60100', 'park', '610');
+INSERT INTO `eh_web_menus` VALUES ('60200', '业务授权', '60000', null, 'react:/bussiness-authorization/department', '0', '2', '/60000/60200', 'park', '620');
 
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10001, '0', '信息发布 管理员', '信息发布 业务模块权限', NULL);
@@ -699,33 +687,22 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('143', '756', '20632', '任务审�
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('144', '757', '20640', '修改记录', '1', '1', '修改记录 全部权限', '760');
 
--- 考勤管理：
-INSERT INTO `eh_web_menu_privileges` VALUES ('145', '790', '50610', '规则管理', '1', '1', '规则管理  全部权限', '570');
-INSERT INTO `eh_web_menu_privileges` VALUES ('146', '790', '50611', '规则管理', '1', '1', '规则管理  全部权限', '100');
-INSERT INTO `eh_web_menu_privileges` VALUES ('147', '791', '50612', '时间管理', '1', '1', '时间管理 全部权限', '110');
-INSERT INTO `eh_web_menu_privileges` VALUES ('148', '792', '50613', '地点管理', '1', '1', '地点管理 全部权限', '120');
-INSERT INTO `eh_web_menu_privileges` VALUES ('149', '793', '50614', 'wifi管理', '1', '1', 'wifi管理 全部权限', '130');
-INSERT INTO `eh_web_menu_privileges` VALUES ('150', '794', '50615', '排班管理', '1', '1', '排班管理 全部权限', '140');
+-- 考勤管理：打卡 菜单改变
+delete from eh_acl_privileges where id >= 790 and id <= 794;
+delete from eh_acl_privileges where id >= 822 and id <= 823;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (790, '0', '加班申请', '加班申请 全部权限', NULL);
 
-
-INSERT INTO `eh_web_menu_privileges` VALUES ('151', '822', '50620', '审批规则设置', '1', '1', '审批规则设置 全部权限', '571'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ('152', '822', '50621', '审批规则', '1', '1', '审批规则 全部权限', '210');
-INSERT INTO `eh_web_menu_privileges` VALUES ('153', '823', '50622', '审批人设置', '1', '1', '审批人设置 全部权限', '220');
-
-INSERT INTO `eh_web_menu_privileges` VALUES ('154', '795', '50630', '考勤规则配置', '1', '1', '考勤规则配置 全部权限', '572'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ('155', '795', '50631', '通用设置', '1', '1', '通用设置 全部权限', '310');
-INSERT INTO `eh_web_menu_privileges` VALUES ('156', '796', '50632', '个人设置', '1', '1', '个人设置 全部权限', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ('154', '795', '50630', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('155', '795', '50631', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
+INSERT INTO `eh_web_menu_privileges` VALUES ('156', '796', '50632', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ('156', '821', '50632', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('157', '797', '50640', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ('158', '797', '50641', '打卡详情', '1', '1', '打卡详情 全部权限', '410');
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('159', '798', '50650', '异常处理', '1', '1', '异常处理 全部权限', '574'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ('159', '798', '50650', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
 INSERT INTO `eh_web_menu_privileges` VALUES ('160', '798', '50651', '异常申请', '1', '1', '异常申请 全部权限', '510');
 INSERT INTO `eh_web_menu_privileges` VALUES ('161', '799', '50652', '请假申请', '1', '1', '请假申请 全部权限', '520');
+INSERT INTO `eh_web_menu_privileges` VALUES ('161', '790', '50652', '加班申请', '1', '1', '加班申请 全部权限', '521');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ('163', '820', '50661', '考勤统计', '1', '1', '考勤统计  全部权限', '610');
-
-INSERT INTO `eh_web_menu_privileges` VALUES ('164', '821', '50670', '请假类型设置', '1', '1', '请假类型设置 全部权限', '576'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ('165', '821', '50671', '类型设置', '1', '1', '类型设置 全部权限', '710');
 
