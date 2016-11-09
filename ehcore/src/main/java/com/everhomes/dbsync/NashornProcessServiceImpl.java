@@ -96,6 +96,9 @@ public class NashornProcessServiceImpl implements NashornProcessService {
         this.threadFactory = Executors.defaultThreadFactory();
         threads = new Thread[N];
         threadJobs = new List[N];
+        for(int i = 0; i < N; i++) {
+            this.threadJobs[i] = new ArrayList();
+        }
         manager = new ScriptEngineManager();
     }
     

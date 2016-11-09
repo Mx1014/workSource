@@ -10,7 +10,7 @@ import javax.validation.constraints.NotNull;
 import com.everhomes.util.StringHelper;
 
 public class DatabaseQuery {
-    private List<String> conditions;
+    private Map<String, List<String>> conditions;
     private Map<String, String> inputs;
     private List<String> orders;
     private DataGraph dataGraph;
@@ -19,7 +19,7 @@ public class DatabaseQuery {
     private Integer pageSize;
     
     public DatabaseQuery() {
-        this.conditions = new ArrayList<String>();
+        this.conditions = new HashMap<String, List<String>>();
         this.inputs = new HashMap<String, String>();
         this.orders = new ArrayList<String>();
     }
@@ -32,16 +32,22 @@ public class DatabaseQuery {
         this.dataGraph = dataGraph;
     }
 
-    public List<String> getConditions() {
-        return conditions;
-    }
-
-    public void setConditions(List<String> conditions) {
-        this.conditions = conditions;
+    public List<String> getConditions(String tableName) {
+        List<String> lst = conditions.getOrDefault(tableName, new ArrayList<String>());
+        if(lst.size() == 0) {
+            //save this reference first
+            conditions.put(tableName, lst);
+        }
+        
+        return lst;
     }
     
-    public void addCondition(String condition) {
-        this.conditions.add(condition);
+    public void addCondition(String tableName, String condition) {
+        List<String> lst = conditions.getOrDefault(tableName, new ArrayList<String>());
+        if(lst.size() == 0) {
+            conditions.put(tableName, lst);
+        }
+        lst.add(condition);
     }
 
     public Map<String, String> getInputs() {

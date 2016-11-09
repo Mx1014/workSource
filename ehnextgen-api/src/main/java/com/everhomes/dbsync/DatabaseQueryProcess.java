@@ -29,7 +29,7 @@ public class DatabaseQueryProcess {
     SelectJoinStep<Record> joinStep;
     SelectOnConditionStep<Record> onCondStep;
     private static final Pattern pParam = Pattern.compile("\\$\\w+");
-    private Map<String, Object> result = null;
+    private List<Map<String, Object>> results = null;
     private List<Field<?>> fields;
     private List<String> fieldNames;
     private GraphRefer parentRef = null;
@@ -38,14 +38,14 @@ public class DatabaseQueryProcess {
         this(service, query, null, null);
     }
     
-    public DatabaseQueryProcess(NashornObjectService service, DatabaseQuery query, Map<String, Object> result, GraphRefer pref) {
+    public DatabaseQueryProcess(NashornObjectService service, DatabaseQuery query, List<Map<String, Object>> results, GraphRefer pref) {
         this.service = service;
         this.query = query;
-        if(result != null) {
-            this.result = result;
+        if(results != null) {
+            this.results = results;
             this.parentRef = pref;
         } else {
-            this.result = new HashMap<String, Object>();
+            this.results = new ArrayList<Map<String, Object>>();
         }
         
         this.fields = new ArrayList<Field<?>>();
@@ -158,7 +158,7 @@ public class DatabaseQueryProcess {
         return DSL.condition(newSql, objs.toArray());
     }
     
-    private void processRecords(Map<String, Integer> inMap, DataGraph dataGraph, GraphRefer ref) throws Exception {
+    private void processRecords(Map<String, Integer> inMap, Map<String, Object> result, DataGraph dataGraph, GraphRefer ref) throws Exception {
         DataGraph newGraph = ref.getGraph();
         DataTable newTable = service.getTableMeta(newGraph.getTable().getTableName());
         checkError(newTable, "newTable not found");
@@ -183,45 +183,53 @@ public class DatabaseQueryProcess {
             DatabaseQuery subQuery = new DatabaseQuery();
             subQuery.setPageSize(query.getPageSize());
             subQuery.setDataGraph(newGraph);
-            //TODO support more conditions
-            subQuery.addCondition(ref.getChildField() + " = $" + ref.getChildField());
+            //TODO support more conditions, and merge the parent conditions
+            subQuery.addCondition(newGraph.getTable().getTableName(), ref.getChildField() + " = $" + ref.getChildField());
             
-            Map<String, Object> pResults = (Map<String, Object>) this.result.get(dataGraph.getTable().getTableName());
-            checkError(pResults, "parent result not found");
-            subQuery.putInput(ref.getChildField(), pResults.get(ref.getParentField()).toString());
+            Map<String, Object> pResult = (Map<String, Object>) result.get(dataGraph.getTable().getTableName());
+            checkError(pResult, "parent result not found");
+            subQuery.putInput(ref.getChildField(), pResult.get(ref.getParentField()).toString());
+            List<Map<String, Object>> subResults = new ArrayList<Map<String, Object>>();
+            pResult.put(newGraph.getTable().getTableName(), subResults);
             
-            DatabaseQueryProcess subProcess = new DatabaseQueryProcess(service, subQuery, pResults, ref);
+            DatabaseQueryProcess subProcess = new DatabaseQueryProcess(service, subQuery, subResults, ref);
             subProcess.processQuery();
         }
         
         for(GraphRefer newRef : newGraph.getRefer()) {
-            processRecords(inMap, newGraph, newRef);
+            processRecords(inMap, result, newGraph, newRef);
         }
     }
     
     private void processRecord(DataGraph graph, DataTable table, Result<Record> records) throws Exception {
         int size = records.size();
+        
         for(int i = 0; i < size; i++) {
-            Record r = records.get(i); 
+            Record r = records.get(i);
+            Map<String, Object> result = new HashMap<String, Object>();
             
+            //Step1: get all objects
             for(int j = 0; j < this.fieldNames.size(); j++) {
                 String fieldName = this.fieldNames.get(j);
                 String[] ss = fieldName.split("\\$");
                 Object val = r.getValue(j);
-                if(!this.result.containsKey(ss[0])) {
-                    this.result.put(ss[0], new HashMap<String, Object>());
-                }
                 
-                Map<String, Object> obj = (Map<String, Object>)this.result.get(ss[0]);
+                Map<String, Object> obj = (Map<String, Object>)result.getOrDefault(ss[0], new HashMap<String, Object>());
+                if(obj.size() == 0) {
+                    result.put(ss[0], obj);
+                }
                 obj.put(ss[1], val);
             }
-        }
-        
-        Map<String, Integer> inMap = new HashMap<String, Integer>();
-        inMap.put("graph:" + graph.getGraphName(), 1);
-        inMap.put("table:" + graph.getTable().getTableName(), 1);
-        for(GraphRefer newRef : graph.getRefer()) {
-            processRecords(inMap, graph, newRef);    
+            
+            //Step2: make sub queries
+            Map<String, Integer> inMap = new HashMap<String, Integer>();
+            inMap.put("graph:" + graph.getGraphName(), 1);
+            inMap.put("table:" + graph.getTable().getTableName(), 1);
+            for(GraphRefer newRef : graph.getRefer()) {
+                processRecords(inMap, result, graph, newRef);    
+            }
+            
+            this.results.add(result);
         }
     }
     
@@ -231,7 +239,7 @@ public class DatabaseQueryProcess {
         }
     }
     
-    public Map<String, Object> processQuery() throws Exception {
+    public List<Map<String, Object>> processQuery() throws Exception {
         DataGraph graph = this.query.getDataGraph();
         checkError(graph, "graph not foud");
         
@@ -263,7 +271,8 @@ public class DatabaseQueryProcess {
         }
         
         List<Condition> conds = new ArrayList<Condition>();
-        for(String cond : query.getConditions()) {
+        List<String> condStrs = query.getConditions(graph.getTable().getTableName());
+        for(String cond : condStrs) {
             conds.add(parseCondition(cond, query.getInputs()));
         }
         
@@ -303,7 +312,7 @@ public class DatabaseQueryProcess {
         
         processRecord(graph, table, records);
         
-        return this.result;
+        return this.results;
     }
     
     public void setService(NashornObjectService service) {

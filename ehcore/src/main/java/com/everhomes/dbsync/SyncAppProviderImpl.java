@@ -112,5 +112,7 @@ public class SyncAppProviderImpl implements SyncAppProvider {
     private void prepareObj(SyncApp obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+        
+        obj.setLastUpdate(obj.getCreateTime());
     }
 }

@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.jooq.Configuration;
 import org.jooq.DSLContext;
@@ -54,10 +55,13 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     @Autowired
     private ConfigurationProvider configurationProvider;
     
+    private Map<String, DataGraph> graphStorage;
+    
     private String resourceRoot = "/dbsync/";
     
     public NashornObjectServiceImpl() {
         this.nobjs = new NashornObject[MAX];
+        graphStorage = new ConcurrentHashMap<String, DataGraph>();
     }
     
     @Override
@@ -168,8 +172,7 @@ public class NashornObjectServiceImpl implements NashornObjectService {
         LOGGER.info("from js: " + str);
     }
     
-    @Override
-    public DataGraph getGraph(String name) {
+    private DataGraph testGraph() {
         DataGraph graph = new DataGraph();
         GraphTable table1 = new GraphTable();
         table1.setTableName("eh_door_user_permission");
@@ -213,11 +216,25 @@ public class NashornObjectServiceImpl implements NashornObjectService {
         hasMany.setJoinType(NJoinType.NO_JOIN.getCode());
         graph2.addRefer(hasMany);
         
-        return graph;
+        return graph;        
     }
     
     @Override
-    public Map<String, Object> query(DatabaseQuery query) {
+    public DataGraph getGraph(String name) {
+        if(name.equals("testGraph")) {
+            return testGraph();
+        }
+        
+        return graphStorage.get(name);
+    }
+    
+    @Override
+    public void saveGraph(DataGraph graph) {
+        graphStorage.put(graph.getGraphName(), graph);
+    }
+    
+    @Override
+    public List<Map<String, Object>> query(DatabaseQuery query) {
         query.setPageSize(PaginationConfigHelper.getPageSize(configurationProvider, query.getPageSize()));
         
         DatabaseQueryProcess process = new DatabaseQueryProcess(this, query);

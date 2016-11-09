@@ -155,12 +155,12 @@ public class NashornTest extends LoginAuthTestCase {
     @Test
     public void testQuery() {
         DatabaseQuery query = new DatabaseQuery();
-        DataGraph dataGraph = nashornObjectService.getGraph("eh_door_user_permission");
+        DataGraph dataGraph = nashornObjectService.getGraph("testGraph");
         query.setDataGraph(dataGraph);
-        query.addCondition("eh_users.id = $userId");
+        query.addCondition(dataGraph.getTable().getTableName(), "eh_users.id = $userId");
         query.putInput("userId", "227281");
         
-        Map<String, Object> records = nashornObjectService.query(query);
+        List<Map<String, Object>> records = nashornObjectService.query(query);
         LOGGER.info("records=" + StringHelper.toJsonString(records));
     }
     
