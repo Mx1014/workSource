@@ -27,5 +27,12 @@ public interface EnergyMeterReadingLogProvider {
 
     EnergyMeterReadingLog findLastReadingLogByMeterId(Integer namespaceId, Long meterId);
 
+    /**
+     * 获取表记的所有读表记录
+     */
+    List<EnergyMeterReadingLog> listMeterReadingLogsByMeterId(Integer namespaceId, Long meterId);
+
+    void deleteMeterReadingLogsByMeterId(Integer namespaceId, Long meterId);
+
     // List<EnergyMeterReadingLog> listMeterReadingLogs(Integer namespaceId, Long meterId, Long pageAnchor, int pageSize);
 }

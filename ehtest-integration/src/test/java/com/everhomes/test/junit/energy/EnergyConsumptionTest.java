@@ -106,7 +106,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
     private CreateEnergyMeterRestResponse getMeter() {
         CreateEnergyMeterCommand cmd = new CreateEnergyMeterCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         cmd.setName("电表1");
         cmd.setMeterNumber("123456");
@@ -152,7 +152,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         logon();
         EhEnergyMetersRecord meter = context().selectFrom(EH_ENERGY_METERS).fetchAny();
         UpdateEnergyMeterCommand cmd = new UpdateEnergyMeterCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setMeterId(meter.getId());
         cmd.setName("修改电表");
         cmd.setMeterNumber("654321");
@@ -181,7 +181,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         testImportEnergyMeter();
         logon();
         SearchEnergyMeterCommand cmd = new SearchEnergyMeterCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         // cmd.setKeyword("");
         cmd.setBillCategoryId(4L);
@@ -208,7 +208,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         getMeter();
         EhEnergyMetersRecord meter = context().selectFrom(EH_ENERGY_METERS).fetchAny();
         UpdateEnergyMeterStatusCommand cmd = new UpdateEnergyMeterStatusCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setMeterId(meter.getId());
         cmd.setStatus(EnergyCommonStatus.INACTIVE.getCode());
 
@@ -228,7 +228,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testChangeEnergyMeter() {
         logon();
         ChangeEnergyMeterCommand cmd = new ChangeEnergyMeterCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         cmd.setOldReading(new BigDecimal("8888"));
         cmd.setNewReading(new BigDecimal("100"));
@@ -271,7 +271,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         assertTrue(metersList.size() > 2);
 
         BatchUpdateEnergyMeterSettingsCommand cmd = new BatchUpdateEnergyMeterSettingsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         List<Long> longList = new ArrayList<>();
         longList.add(metersList.get(0).getId());
         longList.add(metersList.get(1).getId());
@@ -308,7 +308,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         logon();
         bulkReadingLogData();
         SearchEnergyMeterReadingLogsCommand cmd = new SearchEnergyMeterReadingLogsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         // cmd.setKeyword("");
         // cmd.setMeterId(1L);
@@ -336,7 +336,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         logon();
         bulkReadingLogData();
         SearchEnergyMeterReadingLogsCommand cmd = new SearchEnergyMeterReadingLogsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         cmd.setKeyword("小黑");
         // cmd.setMeterId(1L);
@@ -364,7 +364,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         logon();
         bulkReadingLogData();
         SearchEnergyMeterReadingLogsCommand cmd = new SearchEnergyMeterReadingLogsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         cmd.setMeterId(2L);
         cmd.setPageAnchor(0L);
@@ -386,7 +386,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testDeleteEnergyMeterReadingLog() {
         logon();
         DeleteEnergyMeterReadingLogCommand cmd = new DeleteEnergyMeterReadingLogCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setLogId(1L);
 
         RestResponseBase response = httpClientService.restPost(DELETE_ENERGY_METER_READING_LOG_URL, cmd, RestResponseBase.class);
@@ -399,7 +399,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testUpdateEnergyMeterDefaultSetting() {
         logon();
         UpdateEnergyMeterDefaultSettingCommand cmd = new UpdateEnergyMeterDefaultSettingCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setSettingId(1L);
         cmd.setSettingValue(new BigDecimal("111"));
         cmd.setFormulaId(1L);
@@ -417,7 +417,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testCreateEnergyMeterFormula() {
         logon();
         CreateEnergyMeterFormulaCommand cmd = new CreateEnergyMeterFormulaCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         String name = "新建的公式1";
         cmd.setName(name);
         cmd.setExpression("[[单价]]*[[倍率]]*[[读表用量差]]+(2*[[单价]])");
@@ -439,7 +439,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testCreateEnergyMeterFormula1() {
         logon();
         CreateEnergyMeterFormulaCommand cmd = new CreateEnergyMeterFormulaCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         String name = "新建的公式1";
         cmd.setName(name);
         cmd.setExpression("[[单价]]*[[倍率]]*[[读表用量差]]+(2*[[单价]])1");// 公式结构错误,无法计算
@@ -460,7 +460,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testCreateEnergyMeterCategory() {
         logon();
         CreateEnergyMeterCategoryCommand cmd = new CreateEnergyMeterCategoryCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         String name = "自用部分";
         cmd.setName(name);
         cmd.setCategoryType(EnergyCategoryType.BILL.getCode());
@@ -485,7 +485,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         logon();
         EhEnergyMeterCategoriesRecord category = context().selectFrom(Tables.EH_ENERGY_METER_CATEGORIES).fetchAny();
         UpdateEnergyMeterCategoryCommand cmd = new UpdateEnergyMeterCategoryCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCategoryId(category.getId());
         String updateName = category.getName() + ":updated";
         cmd.setName(updateName);
@@ -508,7 +508,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         logon();
         EhEnergyMeterCategoriesRecord category = context().selectFrom(Tables.EH_ENERGY_METER_CATEGORIES).fetchAny();
         DeleteEnergyMeterCategoryCommand cmd = new DeleteEnergyMeterCategoryCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCategoryId(category.getId());
 
         RestResponseBase response = httpClientService.restPost(DELETE_ENERGY_METER_CATEGORY_URL, cmd, RestResponseBase.class);
@@ -528,7 +528,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         try {
             logon();
             ImportEnergyMeterCommand cmd = new ImportEnergyMeterCommand();
-            cmd.setOrganizationId(1L);
+            cmd.setOrganizationId(1000001L);
             cmd.setCommunityId(1L);
             String filePath;
             filePath = new File("").getCanonicalPath()+"\\src\\test\\data\\excel\\energy_meter_template.xlsx";
@@ -549,7 +549,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyMeterCategories() {
         logon();
         ListEnergyMeterCategoriesCommand cmd = new ListEnergyMeterCategoriesCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCategoryType(EnergyCategoryType.BILL.getCode());
 
         ListEnergyMeterCategoriesRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_CATEGORIES_URL, cmd, ListEnergyMeterCategoriesRestResponse.class);
@@ -563,7 +563,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyMeterCategories1() {
         logon();
         ListEnergyMeterCategoriesCommand cmd = new ListEnergyMeterCategoriesCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCategoryType(EnergyCategoryType.SERVICE.getCode());
 
         ListEnergyMeterCategoriesRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_CATEGORIES_URL, cmd, ListEnergyMeterCategoriesRestResponse.class);
@@ -588,7 +588,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         logon();
         testChangeEnergyMeter();
         ListEnergyMeterChangeLogsCommand cmd = new ListEnergyMeterChangeLogsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setMeterId(1L);
 
         ListEnergyMeterChangeLogsRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_CHANGE_LOGS_URL, cmd, ListEnergyMeterChangeLogsRestResponse.class);
@@ -604,7 +604,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyMeterFormulas() {
         logon();
         ListEnergyMeterFormulasCommand cmd = new ListEnergyMeterFormulasCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setFormulaType(EnergyFormulaType.AMOUNT.getCode());
 
         ListEnergyMeterFormulasRestResponse response = httpClientService.restPost(LIST_ENERGY_METER_FORMULAS_URL, cmd, ListEnergyMeterFormulasRestResponse.class);
@@ -618,7 +618,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyDefaultSettings() {
         logon();
         ListEnergyDefaultSettingsCommand cmd = new ListEnergyDefaultSettingsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setMeterType(EnergyMeterType.WATER.getCode());
 
         ListEnergyDefaultSettingsRestResponse response = httpClientService.restPost(GET_ENERGY_DEFAULT_SETTINGS_URL, cmd, ListEnergyDefaultSettingsRestResponse.class);
@@ -633,7 +633,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyDefaultSettings1() {
         logon();
         ListEnergyDefaultSettingsCommand cmd = new ListEnergyDefaultSettingsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         // cmd.setMeterType((byte)1);
 
         ListEnergyDefaultSettingsRestResponse response = httpClientService.restPost(GET_ENERGY_DEFAULT_SETTINGS_URL, cmd, ListEnergyDefaultSettingsRestResponse.class);
@@ -649,7 +649,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testReadEnergyMeter1() {
         logon();
         ReadEnergyMeterCommand cmd = new ReadEnergyMeterCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         cmd.setMeterId(1L);
         cmd.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
@@ -680,7 +680,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testReadEnergyMeter() {
         logon();
         ReadEnergyMeterCommand cmd = new ReadEnergyMeterCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setCommunityId(1L);
         cmd.setMeterId(1L);
         cmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
@@ -713,7 +713,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         testUpdateEnergyMeter();
         EhEnergyMetersRecord meter = context().selectFrom(EH_ENERGY_METERS).fetchAny();
         GetEnergyMeterCommand cmd = new GetEnergyMeterCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setMeterId(meter.getId());
         GetEnergyMeterRestResponse response = httpClientService.restPost(GET_ENERGY_METER_URL, cmd, GetEnergyMeterRestResponse.class);
         assertNotNull(response);
@@ -732,7 +732,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testDeleteEnergyMeterFormula() {
         logon();
         DeleteEnergyMeterFormulaCommand cmd = new DeleteEnergyMeterFormulaCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setFormulaId(1L);
 
         RestResponseBase response = httpClientService.restPost(DELETE_ENERGY_METER_FORMULA_URL, cmd, RestResponseBase.class);
@@ -750,7 +750,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testDeleteEnergyMeterFormula1() {
         logon();
         DeleteEnergyMeterFormulaCommand cmd = new DeleteEnergyMeterFormulaCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setFormulaId(2L);
 
         RestResponseBase response = httpClientService.restPost(DELETE_ENERGY_METER_FORMULA_URL, cmd, RestResponseBase.class);
@@ -766,7 +766,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     public void testListEnergyMeterSettingLogs() {
         logon();
         ListEnergyMeterSettingLogsCommand cmd = new ListEnergyMeterSettingLogsCommand();
-        cmd.setOrganizationId(1L);
+        cmd.setOrganizationId(1000001L);
         cmd.setMeterId(1L);
         cmd.setSettingType((byte)1);
 

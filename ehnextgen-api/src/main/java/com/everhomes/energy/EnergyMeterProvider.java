@@ -40,4 +40,9 @@ public interface EnergyMeterProvider {
      * 查出所有的表
      * */
 	List<EnergyMeter> listEnergyMeters();
+
+    /**
+     * 根据分类id查询表记
+     */
+    EnergyMeter findAnyByCategoryId(Integer namespaceId, Long categoryId);
 }

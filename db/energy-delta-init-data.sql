@@ -13,6 +13,20 @@ INSERT INTO `eh_energy_meter_categories` (`id`, `namespace_id`, `name`, `status`
 INSERT INTO `eh_energy_meter_categories` (`id`, `namespace_id`, `name`, `status`, `category_type`, `delete_flag`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('2', '999992', '应付部分', '2', '1', '0', NULL, NULL, NULL, NULL);
 
 --
+-- default setting
+--
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('1', '999992', '1', '1', '单价', '2', NULL, '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('2', '999992', '1', '2', '倍率', '1', NULL, '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('3', '999992', '1', '3', '用量计算公式', NULL, '1', '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('4', '999992', '1', '4', '费用计算公式', NULL, '2', '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('5', '999992', '2', '1', '单价', '2', NULL, '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('6', '999992', '2', '2', '倍率', '1', NULL, '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('7', '999992', '2', '3', '用量计算公式', NULL, '1', '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('8', '999992', '2', '4', '费用计算公式', NULL, '2', '2', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('9', '999992', '3', '5', '每日抄表提示', '20', NULL, '3', NULL, NULL, NULL, NULL);
+INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('10', '999992', '3', '6', '每月抄表提示', '30', NULL, '3', NULL, NULL, NULL, NULL);
+
+--
 -- 字符串
 --
 SET @eh_locale_strings_id = (SELECT max(id) FROM `eh_locale_strings`);
@@ -36,6 +50,8 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10010', 'zh_CN', '默认分类无法删除');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10011', 'zh_CN', '导入失败,请检查数据准确性');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10012', 'zh_CN', '分类被引用,无法删除');
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.type', '1', 'zh_CN', '水表');

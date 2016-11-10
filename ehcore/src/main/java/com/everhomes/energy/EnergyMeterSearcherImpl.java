@@ -19,6 +19,9 @@ import org.elasticsearch.index.query.FilterBuilder;
 import org.elasticsearch.index.query.FilterBuilders;
 import org.elasticsearch.index.query.QueryBuilder;
 import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.search.sort.FieldSortBuilder;
+import org.elasticsearch.search.sort.SortBuilders;
+import org.elasticsearch.search.sort.SortOrder;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -85,6 +88,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             builder.field("status", meter.getStatus());
             builder.field("name", meter.getName());
             builder.field("meterNumber", meter.getMeterNumber());
+            builder.field("createTime", meter.getCreateTime().getTime());
             builder.endObject();
             return builder;
         } catch (IOException e) {
@@ -140,10 +144,15 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             anchor = cmd.getPageAnchor();
         }
 
+        FieldSortBuilder statusSort = SortBuilders.fieldSort("status").order(SortOrder.ASC);
+        FieldSortBuilder createTimeSort = SortBuilders.fieldSort("createTime").order(SortOrder.DESC);
+
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
+                .addSort(statusSort)
+                .addSort(createTimeSort)
                 .setQuery(qb);
 
         SearchResponse rsp = builder.execute().actionGet();

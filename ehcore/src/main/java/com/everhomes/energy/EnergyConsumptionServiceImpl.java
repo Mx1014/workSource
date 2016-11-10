@@ -8,6 +8,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -23,7 +24,6 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
-
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -39,7 +39,6 @@ import javax.script.ScriptException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
@@ -49,11 +48,6 @@ import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.util.*;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -474,12 +468,22 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId());
         meter.setStatus(cmd.getStatus());
-        meterProvider.updateEnergyMeter(meter);
-        if (EnergyMeterStatus.fromCode(cmd.getStatus()) == EnergyMeterStatus.INACTIVE) {
-            meterSearcher.deleteById(meter.getId());
-        } else {
-            meterSearcher.feedDoc(meter);
-        }
+        dbProvider.execute(s -> {
+            meterProvider.updateEnergyMeter(meter);
+            if (EnergyMeterStatus.fromCode(cmd.getStatus()) == EnergyMeterStatus.INACTIVE) {
+                // 删除表记索引
+                meterSearcher.deleteById(meter.getId());
+
+                List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
+                // 1.先删除读表记录的索引
+                logs.forEach(log -> readingLogSearcher.deleteById(log.getId()));
+                // 2.再删除表记对应的读表记录
+                meterReadingLogProvider.deleteMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
+            } else {
+                meterSearcher.feedDoc(meter);
+            }
+            return true;
+        });
     }
 
     @Override
@@ -726,12 +730,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
         if (category != null) {
+            EnergyMeter meter = meterProvider.findAnyByCategoryId(currNamespaceId(), category.getId());
+            if (meter != null) {
+                LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
+                throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+            }
             if (category.getDeleteFlag() == TrueOrFalseFlag.TRUE.getCode()) {
                 category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
                 meterCategoryProvider.updateEnergyMeterCategory(category);
             } else {
-                LOGGER.info("Default energy meter can not delete, categoryId = {}", category.getId());
-                throw errorWith(SCOPE, ERR_METER_CATEGORY_CAN_NOT_DELETE, "Default energy meter can not delete");
+                LOGGER.info("Default energy meter category can not delete, categoryId = {}", category.getId());
+                throw errorWith(SCOPE, ERR_METER_CATEGORY_CAN_NOT_DELETE, "Default energy meter category can not delete");
             }
         }
     }
@@ -1435,7 +1444,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     	 }
 
     private void checkCurrentUserNotInOrg(Long orgId) {
-        /*if (orgId == null) {
+        if (orgId == null) {
             LOGGER.error("Invalid parameter organizationId [ null ]");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter organizationId [ null ]");
@@ -1446,7 +1455,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("User is not in the organization.");
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "User is not in the organization.");
-        }*/
+        }
     }
 
     // 参数校验方法

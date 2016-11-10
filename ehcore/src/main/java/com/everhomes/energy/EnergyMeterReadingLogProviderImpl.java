@@ -170,6 +170,26 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
                 .fetchAnyInto(EnergyMeterReadingLog.class);
     }
 
+    @Override
+    public List<EnergyMeterReadingLog> listMeterReadingLogsByMeterId(Integer namespaceId, Long meterId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_READING_LOGS)
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .fetchInto(EnergyMeterReadingLog.class);
+    }
+
+    @Override
+    public void deleteMeterReadingLogsByMeterId(Integer namespaceId, Long meterId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        context.update(Tables.EH_ENERGY_METER_READING_LOGS)
+                .set(Tables.EH_ENERGY_METER_READING_LOGS.STATUS, EnergyCommonStatus.INACTIVE.getCode())
+                .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId))
+                .execute();
+    }
+
     /*@Override
     public List<EnergyMeterReadingLog> listMeterReadingLogs(Integer namespaceId, Long meterId, Long pageAnchor, int pageSize) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
