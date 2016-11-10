@@ -22,13 +22,13 @@ map = {
     }
 };
 query = {
-    "getByUserId": {
+    "getByUserId": [
+        {
         "tableName": "eh_user_identifiers",
         "conditions": [" eh_users.id = $userId ", " eh_user_identifiers.claim_status = $claimStatus "],
-        "defaults": {
-            "claimStatus": 3
+        "defaults": {"claimStatus": 3}
         }
-    }
+        ]
 };
 
 var mapping = {};
@@ -49,9 +49,10 @@ mapping.mappingStart = function(apps, appName, mapName) {
         obj["appName"] = appName;
         obj["mapName"] = mapName;
         obj["mapping"] = map;
-        obj["query"] = query;
         obj["tables"] = tables;
         graph = nashornObjs.createGraph(JSON.stringify(obj));
+
+        nashornObjs.createQueryBase(appName, mapName, JSON.stringify(query));
     }
 }
 

@@ -27,7 +27,7 @@ public class SyncDatabaseAdminController extends ControllerBase {
 
     /**
      * <b>URL: /admin/dbsync/createApp</b>
-     * <p>审批加入园区的企业</p>
+     * <p>创建一个用于同步的 APP </p>
      * @return String
      */
     @RequestMapping("createApp")

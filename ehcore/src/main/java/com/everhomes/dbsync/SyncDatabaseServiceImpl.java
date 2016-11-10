@@ -1,8 +1,13 @@
 package com.everhomes.dbsync;
 
+import java.util.List;
+
+import javax.annotation.PostConstruct;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.dbsync.CreateSyncMappingCommand;
 import com.everhomes.rest.dbsync.SyncAppCreateCommand;
 import com.everhomes.rest.dbsync.SyncAppDTO;
@@ -27,6 +32,24 @@ public class SyncDatabaseServiceImpl implements SyncDatabaseService {
     
     @Autowired
     private NashornProcessService nashornProcessService;
+    
+    @PostConstruct
+    public void setup() {
+    	nashornProcessService.start();
+    	
+    	ListingLocator locator = new ListingLocator();
+    	int count = 200;
+    	do {
+    		List<SyncMapping> mappings = syncMappingProvider.getAllMappings(locator, count);
+    		for(SyncMapping map : mappings) {
+    			SyncApp app = syncAppProvider.getSyncAppById(map.getSyncAppId());
+    	        NashornMappingObject mapObj = new NashornMappingObject();
+    	        mapObj.setName(map.getName());
+    	        mapObj.setAppName(app.getName());
+    	        nashornProcessService.putProcessJob(mapObj);
+    		}
+    	} while(locator.getAnchor() != null);
+    }
     
     @Override
     public SyncAppDTO createApp(SyncAppCreateCommand cmd) {

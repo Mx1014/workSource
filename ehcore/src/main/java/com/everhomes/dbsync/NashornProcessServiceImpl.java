@@ -58,34 +58,8 @@ public class NashornProcessServiceImpl implements NashornProcessService {
     
     private ScheduledExecutorService scheduledExecutorService = ThreadUtil.newScheduledExecutorService(2, "nashorn-process-task");
     
-    @PostConstruct
-    public void setup() {
-      engineHolder = new ThreadLocal<ScriptEngine>() {
-        @Override
-        protected ScriptEngine initialValue() {
-            InputStreamReader reader;
-            try {
-                ScriptEngine engine = manager.getEngineByName("nashorn");
-                engine.put("nashornObjs", nashornObjectService);
-                engine.put("jThreadId", String.valueOf(Thread.currentThread().getId()));
-                
-                Resource js = new ClassPathResource("/dbsync/jvm-npm.js");
-                reader = new InputStreamReader(js.getInputStream(), "UTF-8");
-                engine.eval(reader);
-                
-                js = new ClassPathResource("/dbsync/init.js");
-                reader = new InputStreamReader(js.getInputStream(), "UTF-8");
-                engine.eval(reader);
-                
-                return engine;
-            } catch (ScriptException | IOException e) {
-                LOGGER.error("start js engine error", e);
-            }
-            
-          return null;
-        }
-      };
-      
+    @Override
+    public void start() {
       for(int i = 0; i < N; i++) {
           start(i);
       }
@@ -100,6 +74,32 @@ public class NashornProcessServiceImpl implements NashornProcessService {
             this.threadJobs[i] = new ArrayList();
         }
         manager = new ScriptEngineManager();
+        
+        engineHolder = new ThreadLocal<ScriptEngine>() {
+            @Override
+            protected ScriptEngine initialValue() {
+                InputStreamReader reader;
+                try {
+                    ScriptEngine engine = manager.getEngineByName("nashorn");
+                    engine.put("nashornObjs", nashornObjectService);
+                    engine.put("jThreadId", String.valueOf(Thread.currentThread().getId()));
+                    
+                    Resource js = new ClassPathResource("/dbsync/jvm-npm.js");
+                    reader = new InputStreamReader(js.getInputStream(), "UTF-8");
+                    engine.eval(reader);
+                    
+                    js = new ClassPathResource("/dbsync/init.js");
+                    reader = new InputStreamReader(js.getInputStream(), "UTF-8");
+                    engine.eval(reader);
+                    
+                    return engine;
+                } catch (ScriptException | IOException e) {
+                    LOGGER.error("start js engine error", e);
+                }
+                
+              return null;
+            }
+          };
     }
     
     private void jsInvoke(NashornObject nobj) {
@@ -136,6 +136,7 @@ public class NashornProcessServiceImpl implements NashornProcessService {
         threads[i] = threadFactory.newThread(new Runnable() {
             public void run() {
                 List<NashornObject> jobs = new ArrayList<NashornObject>();
+                engineHolder.get();
                 
                 while (shouldContinue) {
                     
@@ -150,8 +151,11 @@ public class NashornProcessServiceImpl implements NashornProcessService {
                         jsInvoke(nobj);
                     }
                     
+                    jobs = new ArrayList<NashornObject>();//remove all
+                    
                     try {
-                        NashornObject nobj = queue.take();
+//                        NashornObject nobj = queue.poll(5l, TimeUnit.SECONDS);
+                    		NashornObject nobj = queue.take();
                         jsInvoke(nobj);
                         
                     } catch (InterruptedException e) {

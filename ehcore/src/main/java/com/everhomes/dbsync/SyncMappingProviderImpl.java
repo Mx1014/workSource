@@ -119,6 +119,7 @@ public class SyncMappingProviderImpl implements SyncMappingProvider {
 			public SelectQuery<? extends Record> buildCondition(
 					ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_SYNC_MAPPING.NAME.eq(name));
+				query.addConditions(Tables.EH_SYNC_MAPPING.STATUS.eq((byte)1));
 				return query;
 			}
     		
@@ -129,6 +130,20 @@ public class SyncMappingProviderImpl implements SyncMappingProvider {
     	}
     	
     	return null;
+    }
+    
+    @Override
+    public List<SyncMapping> getAllMappings(ListingLocator locator, int count) {
+    	return this.querySyncMappings(locator, count, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_SYNC_MAPPING.STATUS.eq((byte)1));
+				return query;
+			}
+    		
+    	});
     }
 
     private void prepareObj(SyncMapping obj) {

@@ -20,4 +20,6 @@ public interface SyncMappingProvider {
 
 	SyncMapping findSyncMappingByName(String name);
 
+	List<SyncMapping> getAllMappings(ListingLocator locator, int count);
+
 }

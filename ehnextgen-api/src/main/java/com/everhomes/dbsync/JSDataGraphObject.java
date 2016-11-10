@@ -13,12 +13,10 @@ public class JSDataGraphObject {
 	
 	private List<String> tables;
 	Map<String, JSMappingObjectItem> mapping;
-	Map<String, JSQueryObjectItem> query;
 	
 	public JSDataGraphObject() {
 		tables = new ArrayList<String>();
 		mapping = new HashMap<String, JSMappingObjectItem>();
-		query = new HashMap<String, JSQueryObjectItem>(); 
 	}
 
     public String getAppName() {
@@ -43,13 +41,6 @@ public class JSDataGraphObject {
 	public void setMapping(Map<String, JSMappingObjectItem> mapping) {
 		this.mapping = mapping;
 	}
-	public Map<String, JSQueryObjectItem> getQuery() {
-		return query;
-	}
-	public void setQuery(Map<String, JSQueryObjectItem> query) {
-		this.query = query;
-	}
-
     public List<String> getTables() {
 		return tables;
 	}

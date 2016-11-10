@@ -25,13 +25,17 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.core.io.ClassPathResource;
 import org.springframework.core.io.Resource;
+import org.springframework.web.context.request.async.DeferredResult;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.dbsync.DataGraph;
 import com.everhomes.dbsync.DatabaseQuery;
 import com.everhomes.dbsync.JSDataGraphObject;
+import com.everhomes.dbsync.JSDataQueryObject;
 import com.everhomes.dbsync.JSMappingBelongObject;
 import com.everhomes.dbsync.JSMappingObjectItem;
+import com.everhomes.dbsync.JSQueryObjectItem;
+import com.everhomes.dbsync.NashornHttpObject;
 import com.everhomes.dbsync.NashornMappingObject;
 import com.everhomes.dbsync.NashornObject;
 import com.everhomes.dbsync.NashornObjectService;
@@ -41,6 +45,7 @@ import com.everhomes.dbsync.SyncAppProvider;
 import com.everhomes.dbsync.SyncDatabaseService;
 import com.everhomes.dbsync.SyncMapping;
 import com.everhomes.dbsync.SyncMappingProvider;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.dbsync.CreateSyncMappingCommand;
 import com.everhomes.rest.dbsync.SyncAppCreateCommand;
 import com.everhomes.rest.dbsync.SyncAppDTO;
@@ -166,6 +171,19 @@ public class SyncDatabaseTest extends LoginAuthTestCase {
     	
     	DataGraph dataGraph = nashornObjectService.createGraph(StringHelper.toJsonString(obj));
     	Assert.assertTrue(dataGraph != null);
+    	
+    	JSDataQueryObject queryObj = new JSDataQueryObject();
+    	List<JSQueryObjectItem> queryItems = new ArrayList<JSQueryObjectItem>();
+    	JSQueryObjectItem oItem = new JSQueryObjectItem();
+    	oItem.getConditions().add(" eh_user_identifiers.claim_status = $claimStatus ");
+    	oItem.getConditions().add(" eh_users.id = $userId ");
+    	oItem.getDefaults().put("claimStatus", "3");
+    	
+    	queryItems.add(oItem);
+    	
+    	queryObj.put("getByUserId", queryItems);
+    	
+    	nashornObjectService.createQueryBase(obj.getAppName(), obj.getMapName(), StringHelper.toJsonString(queryObj));
     }
     
     @Test
@@ -268,5 +286,82 @@ public class SyncDatabaseTest extends LoginAuthTestCase {
     	
     	SyncMapping mapping = syncMappingProvider.getSyncMappingById(map.getId());
     	syncMappingProvider.deleteSyncMapping(mapping);
+    }
+    
+    @Test
+    public void testBaseQuery() {
+    	CreateSyncMappingCommand cmd = new CreateSyncMappingCommand();
+    	cmd.setContent("mapping001.js");
+    	cmd.setName("mapping001");
+    	cmd.setSyncAppId(1l);
+    	
+    	SyncMapping map = ConvertHelper.convert(cmd, SyncMapping.class);
+      map.setStatus((byte)1);//mark as valid
+      syncMappingProvider.createSyncMapping(map);
+    	Assert.assertTrue(map.getId() > 0);
+    	
+    	ScriptEngineManager manager = new ScriptEngineManager();
+    	ScriptEngine engine = null;
+    	InputStreamReader reader;
+    	try {
+            engine = manager.getEngineByName("nashorn");
+            engine.put("nashornObjs", nashornObjectService);
+            engine.put("jThreadId", String.valueOf(Thread.currentThread().getId()));
+            
+            Resource js = new ClassPathResource("/dbsync/jvm-npm.js");
+            reader = new InputStreamReader(js.getInputStream(), "UTF-8");
+            engine.eval(reader);
+            
+            js = new ClassPathResource("/dbsync/init.js");
+            reader = new InputStreamReader(js.getInputStream(), "UTF-8");
+            engine.eval(reader);
+            
+        } catch (ScriptException | IOException e) {
+            LOGGER.error("start js engine error", e);
+        }
+    	
+    	SyncApp app = syncAppProvider.getSyncAppById(map.getSyncAppId());
+    	NashornMappingObject mapObj = new NashornMappingObject();
+    	mapObj.setName(map.getName());
+    	mapObj.setAppName(app.getName());
+    	jsInvokeTest(engine, mapObj);
+    	
+    	DataGraph dataGraph = nashornObjectService.getGraph("testCreateApp$mapping001");
+    	Assert.assertTrue(dataGraph != null);
+    	
+    	String jsonStr = nashornObjectService.makeQuery(app.getName(), map.getName(), "getByUserId", "{\"userId\": 227281}");
+    	LOGGER.info("records=" + jsonStr);
+    	Assert.assertTrue(jsonStr.indexOf("identifier_token") > 0);
+    	
+    	SyncMapping mapping = syncMappingProvider.getSyncMappingById(map.getId());
+    	syncMappingProvider.deleteSyncMapping(mapping);
+    }
+    
+    @Test
+    public void testHttpRequest() {
+    	try {
+    		//wait other threads ok
+    		Thread.sleep(15*1000l);
+    	} catch (InterruptedException e) {
+    			e.printStackTrace();
+    	}
+    	
+    	DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>();
+    	NashornHttpObject obj = new NashornHttpObject(deferredResult);
+    	obj.setUrl("/testCreateApp/mapping001/getByUserId");
+    	obj.setAppName("testCreateApp");
+    	obj.setMapName("mapping001");
+    	obj.setQuery("getByUserId");
+    	obj.setBody("{\"userId\": 227281}");
+    	jsService.push(obj);
+    	
+    	LOGGER.info("result" + deferredResult.getResult());
+    	
+    	try {
+    		Thread.sleep(15*1000l);
+    	} catch (InterruptedException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    	}
     }
 }

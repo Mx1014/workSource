@@ -60,12 +60,14 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     private SyncDatabaseService syncDatabaseService;
     
     private Map<String, DataGraph> graphStorage;
+    private Map<String, JSDataQueryObject> querybaseStorage;
     
     private String resourceRoot = "/dbsync/";
     
     public NashornObjectServiceImpl() {
         this.nobjs = new NashornObject[MAX];
         graphStorage = new ConcurrentHashMap<String, DataGraph>();
+        querybaseStorage = new ConcurrentHashMap<String, JSDataQueryObject>();
     }
     
     @Override
@@ -317,5 +319,47 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     @Override
     public Field<?> getTableField(String name) throws Exception {
         return ehcoreDatabaseService.getTableField(name);
+    }
+    
+    @Override
+    public void createQueryBase(String appName, String mapName, String jsonQuery) {
+    	try {
+    		JSDataQueryObject obj = (JSDataQueryObject)StringHelper.fromJsonString(jsonQuery, JSDataQueryObject.class);
+    		obj.setName(appName + "$" + mapName);
+    		querybaseStorage.put(obj.getName(), obj);
+    	} catch(Exception ex) {
+    		LOGGER.error("create query failed", ex);
+    	}
+    	
+    }
+    
+    @Override
+    public String makeQuery(String appName, String mapName, String queryUrl, String body) {
+    	//TODO what if the input is binary?
+    	String graphName = appName + "$" + mapName;
+    	JSDataQueryObject queryObj = querybaseStorage.get(graphName);
+    	DataGraph dataGraph = getGraph(graphName);
+    	DatabaseQuery query = new DatabaseQuery();
+    	
+    	List<JSQueryObjectItem> condObjs = queryObj.get(queryUrl);
+    	for(JSQueryObjectItem item : condObjs) {
+    		if(item.getConditions() != null) {
+    			for(String condStr : item.getConditions()) {
+        			query.addCondition(item.getTableName(), condStr);	
+        		}	
+    		}
+    		
+    		if(item.getDefaults() != null) {
+    			query.getInputs().putAll(item.getDefaults());
+    		}
+    	}
+    	
+    	//now write the real value
+    	Map<String, String> inputs = (JSDataQueryInput)StringHelper.fromJsonString(body, JSDataQueryInput.class);
+    	
+    	query.getInputs().putAll(inputs);
+    	query.setDataGraph(dataGraph);
+    	
+    	return StringHelper.toJsonString(this.query(query));
     }
 }

@@ -47,6 +47,7 @@ import com.everhomes.dbsync.NashornProcessService;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
+import com.everhomes.rest.RestResponse;
 import com.everhomes.server.schema.Ehcore;
 import com.everhomes.server.schema.Keys;
 import com.everhomes.server.schema.Tables;
@@ -188,8 +189,9 @@ public class NashornTest extends LoginAuthTestCase {
     
     @Test
     public void testHttpObjectQueue() {
+    	RestResponse rest = new RestResponse();
         String restOfTheUrl = "aaaaa";
-        DeferredResult<String> deferredResult = new DeferredResult<String>();
+        DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>();
         NashornHttpObject obj = new NashornHttpObject(deferredResult);
         obj.setUrl(restOfTheUrl);
         jsService.push(obj);  

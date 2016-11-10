@@ -25,4 +25,7 @@ public interface NashornObjectService {
     Field<?> getTableField(String name) throws Exception;
     void saveGraph(DataGraph graph);
 	DataGraph createGraph(String graphJson);
+	void createQueryBase(String appName, String mapName, String jsonQuery);
+	String makeQuery(String appName, String mapName, String queryUrl,
+			String body);
 }
