@@ -1070,6 +1070,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dateSF.format(endCalendar.getTime()));
 			if(null == cells || cells.size() == 0)
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
+				
 			else {
 				BigDecimal sum = new BigDecimal(0);
 				for(RentalCell cell : cells)
@@ -1082,7 +1083,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		} catch (ParseException e) {
 			 LOGGER.error("计算平均值-时间转换 异常");
 		}
-			 
+		rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
 				
 		return rSiteDTO;
 	}
