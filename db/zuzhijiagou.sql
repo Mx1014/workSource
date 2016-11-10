@@ -697,27 +697,60 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('158', '790', '50653', '加班申�
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
 
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10053, '0', '通用岗位', '通用岗位 全部权限', NULL);
 INSERT INTO `eh_web_menu_privileges` VALUES ('163', '10053', '50210', '通用岗位', '1', '1', '通用岗位 全部权限', '520');
-INSERT INTO `eh_web_menu_privileges` VALUES ('164', '10035', '50220', '岗位管理', '1', '1', '岗位管理 全部权限', '521');
+INSERT INTO `eh_web_menu_privileges` VALUES ('164', '10054', '50220', '岗位管理', '1', '1', '岗位管理 全部权限', '521');
+-- 新增通用岗位权限
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10053, '0', '通用岗位', '通用岗位 全部权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10054, '0', '岗位管理', '岗位管理 全部权限', NULL);
 
 
-select * from eh_acl_privileges where id >= 10001 and id <= 10053;
+select * from eh_acl_privileges where id >= 10001 and id <= 10054;
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM `eh_acl_privileges` WHERE id >= 10001 and id <= 10053;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM `eh_acl_privileges` WHERE id >= 10001 and id <= 10054;
 
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_service_module_privileges` WHERE module_id in (select id from eh_service_modules where type = 1);
 
+-- SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+-- INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+--	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1001', '0', '1', '2016-10-25 10:18:59');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+--	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10053', '1001', '0', '1', '2016-10-25 10:18:59');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+--	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1005', '0', '1', '2016-10-25 10:18:59');
+-- INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+--	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10053', '1005', '0', '1', '2016-10-25 10:18:59');
+
+-- 新增俱乐部菜单
+INSERT INTO `eh_web_menus` VALUES ('10750', '俱乐部', '10000', null, 'groups', '0', '2', '/10000/10750', 'park', '180');
+INSERT INTO `eh_web_menus` VALUES ('10751', '俱乐部管理', '10750', null, 'groups_management', '0', '2', '/10000/10750/10751', 'park', '181');
+INSERT INTO `eh_web_menus` VALUES ('10752', '审核俱乐部', '10750', null, 'audit_groups', '0', '2', '/10000/10750/10752', 'park', '182');
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10750', '俱乐部', '10000', '/10000/10750', '0', '2', '2', '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('1', '10750', '1', '10055', NULL, '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10055, '0', '俱乐部 管理员', '俱乐部 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10056, '0', '俱乐部管理', '俱乐部管理 全部权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10057, '0', '审核俱乐部', '审核俱乐部 全部权限', NULL);
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('167', '10056', '10750', '俱乐部管理', '1', '1', '俱乐部管理 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('168', '10057', '10750', '审核俱乐部', '1', '1', '审核俱乐部 全部权限', '710');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('169', '10056', '10751', '俱乐部管理', '1', '1', '俱乐部管理 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('170', '10057', '10751', '审核俱乐部', '1', '1', '审核俱乐部 全部权限', '710');
+
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1001', '0', '1', '2016-10-25 10:18:59');
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10055', '1001', '0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10053', '1001', '0', '1', '2016-10-25 10:18:59');
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10056', '1001', '0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1005', '0', '1', '2016-10-25 10:18:59');
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10057', '1001', '0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10053', '1005', '0', '1', '2016-10-25 10:18:59');
-
-	
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10055', '1005', '0', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10056', '1005', '0', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10057', '1005', '0', '1', UTC_TIMESTAMP());
