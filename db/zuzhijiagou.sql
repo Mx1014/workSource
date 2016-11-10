@@ -378,7 +378,7 @@ INSERT INTO `eh_web_menus` VALUES ('50300', '职级管理', '50000', null, 'reac
 
 INSERT INTO `eh_web_menus` VALUES ('50400', '人员管理', '50000', null, 'react:/employee-management/employee-list', '0', '2', '/50000/50400', 'park', '540');
 
-INSERT INTO `eh_web_menus` VALUES ('50500', '认证管理', '50000', null, '#', '0', '2', '/50000/50500', 'park', '541');
+INSERT INTO `eh_web_menus` VALUES ('50500', '认证管理', '50000', null, 'user_check', '0', '2', '/50000/50500', 'park', '541');
 
 INSERT INTO `eh_web_menus` VALUES ('50600', '考勤管理', '50000', null, null, '1', '2', '/50000/50600', 'park', '543');
 INSERT INTO `eh_web_menus` VALUES ('50630', '考勤规则', '50600', null, null, '1', '2', '/50000/50600/50630', 'park', '554');
