@@ -18,6 +18,7 @@ import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.GetGroupMembersCommand;
+import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
@@ -34,6 +35,7 @@ import com.everhomes.rest.quality.ListFactorsResponse;
 import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
 import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
 import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
+import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityStandardsDTO;
@@ -88,4 +90,6 @@ public interface QualityService {
 	ListQualitySpecificationsResponse listQualitySpecifications(ListQualitySpecificationsCommand cmd);
 	CountScoresResponse countScores(CountScoresCommand cmd);
 	CountTasksResponse countTasks(CountTasksCommand cmd);
+	
+	QualityInspectionSpecificationDTO getQualitySpecification(GetQualitySpecificationCommand cmd);
 }

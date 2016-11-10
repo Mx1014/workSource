@@ -1,5 +1,7 @@
 package com.everhomes.rest.quality;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -19,12 +21,13 @@ import com.everhomes.util.StringHelper;
  */
 public class UpdateQualitySpecificationCommand {
 
+	@NotNull
 	private Long id;
-	  
+	@NotNull
 	private String ownerType;
-
+	@NotNull
 	private Long ownerId;
-  
+	@NotNull
 	private Byte scopeCode;
   
 	private Long scopeId;

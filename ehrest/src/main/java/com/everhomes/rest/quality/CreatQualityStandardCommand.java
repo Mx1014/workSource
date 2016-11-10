@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>name: 标准名称</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>description: 具体内容</li>
- *  <li>specificationId: eh_quality_inspection_specifications表的id</li>
+ *  <li>specificationIds: eh_quality_inspection_specifications表的id</li>
  *  <li>repeat: 执行周期 com.everhomes.rest.quality.RepeatSettingDTO</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  * </ul>
@@ -39,8 +39,8 @@ public class CreatQualityStandardCommand {
 	private String standardNumber;
 	
 	private String description;
-	
-	private Long specificationId;
+	@ItemType(Long.class)
+	private List<Long> specificationIds;
 	
 	private RepeatSettingsDTO repeat;
 	
@@ -61,6 +61,22 @@ public class CreatQualityStandardCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
 	}
 
 	public String getName() {
@@ -87,12 +103,12 @@ public class CreatQualityStandardCommand {
 		this.description = description;
 	}
 
-	public Long getSpecificationId() {
-		return specificationId;
+	public List<Long> getSpecificationIds() {
+		return specificationIds;
 	}
 
-	public void setSpecificationId(Long specificationId) {
-		this.specificationId = specificationId;
+	public void setSpecificationIds(List<Long> specificationIds) {
+		this.specificationIds = specificationIds;
 	}
 
 	public RepeatSettingsDTO getRepeat() {

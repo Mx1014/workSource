@@ -8,7 +8,6 @@ import com.everhomes.util.StringHelper;
  *  <li>name: 类型名称</li>
  *  <li>ownerId: 类型所属的主体id</li>
  *  <li>ownerType: 类型所属的主体，如enterprise</li>
- *  <li>path: 类型路径</li>
  *  <li>score: 分数</li>
  *  <li>weight: 权重</li>
  *  <li>description: 规范内容</li>
@@ -30,8 +29,6 @@ public class CreateQualitySpecificationCommand {
 	private Long parentId;
   
 	private String name;
-  
-	private String path;
   
 	private Double score;
   
@@ -87,14 +84,6 @@ public class CreateQualitySpecificationCommand {
 
 	public void setName(String name) {
 		this.name = name;
-	}
-
-	public String getPath() {
-		return path;
-	}
-
-	public void setPath(String path) {
-		this.path = path;
 	}
 
 	public Double getScore() {

@@ -14,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *  <li>targetId: 任务所属的项目id</li>
  *  <li>targetType: 任务所属的项目，com.everhomes.rest.quality.OwnerType</li>
  *  <li>name: 任务名称</li>
- *  <li>categoryId: category表中的id</li>
+ *  <li>specificationId: specification表中的id</li>
  *  <li>executorId: 执行人uid</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>executiveExpireTime: 任务截止时间</li>
@@ -37,7 +37,7 @@ public class CreateQualityInspectionTaskCommand {
 	private String name;
 	
 	@NotNull
-	private Long categoryId;
+	private Long specificationId;
 	
 	@NotNull
 	@ItemType(StandardGroupDTO.class)
@@ -76,14 +76,14 @@ public class CreateQualityInspectionTaskCommand {
 		this.name = name;
 	}
 
-
-	public Long getCategoryId() {
-		return categoryId;
+	
+	public Long getSpecificationId() {
+		return specificationId;
 	}
 
 
-	public void setCategoryId(Long categoryId) {
-		this.categoryId = categoryId;
+	public void setSpecificationId(Long specificationId) {
+		this.specificationId = specificationId;
 	}
 
 

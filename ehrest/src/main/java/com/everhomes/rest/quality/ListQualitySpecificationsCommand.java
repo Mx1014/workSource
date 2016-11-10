@@ -8,10 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>ownerId: 类型所属组织等的id</li>
  *  <li>ownerType: 类型所属组织类型，如enterprise</li>
- *  <li>targetId: 类型所属项目的id</li>
- *  <li>targetType: 类型所属项目类型，如community</li>
- *  <li>pageAnchor: 锚点</li>
- *  <li>pageSize: 页面大小</li>
+ *  <li>scopeCode: specification可见范围类型 0: all, 1: community </li>
+ *  <li>scopeId: 看见范围具体Id，全部为0 </li>
  *  <li>parentId: 父节点id。全要则不填</li>
  *  <li>inspectionType: 规范类型 0: 类型, 1: 规范, 2: 规范事项</li>
  * </ul>
@@ -24,13 +22,9 @@ public class ListQualitySpecificationsCommand {
 	@NotNull
 	private String ownerType;
 	
-	private Long targetId;
+	private Byte scopeCode;
 	
-	private String targetType;
-	
-	private Long pageAnchor;
-	
-	private Integer pageSize;
+	private Long scopeId;
 	
 	private Long parentId;
 	
@@ -52,36 +46,20 @@ public class ListQualitySpecificationsCommand {
 		this.ownerType = ownerType;
 	}
 
-	public Long getTargetId() {
-		return targetId;
+	public Byte getScopeCode() {
+		return scopeCode;
 	}
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setScopeCode(Byte scopeCode) {
+		this.scopeCode = scopeCode;
 	}
 
-	public String getTargetType() {
-		return targetType;
+	public Long getScopeId() {
+		return scopeId;
 	}
 
-	public void setTargetType(String targetType) {
-		this.targetType = targetType;
-	}
-
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
+	public void setScopeId(Long scopeId) {
+		this.scopeId = scopeId;
 	}
 
 	public Long getParentId() {

@@ -7,14 +7,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>tasks: 参考 {@link com.everhomes.rest.quality.TaskCountDTO}</li>
- *  <li>nextPageAnchor: 下一页的锚点，没有下一页则没有</li>
+ *  <li>offset: 下一页的偏移值</li>
  * </ul>
  */
 public class CountTasksResponse {
 
 	private List<TaskCountDTO> tasks;
 	
-	private Long nextPageAnchor;
+	private Integer offset;
 
 	public List<TaskCountDTO> getTasks() {
 		return tasks;
@@ -24,14 +24,14 @@ public class CountTasksResponse {
 		this.tasks = tasks;
 	}
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getOffset() {
+		return offset;
 	}
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setOffset(Integer offset) {
+		this.offset = offset;
 	}
-	
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

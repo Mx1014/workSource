@@ -80,7 +80,7 @@ public class QualityStandardsDTO {
 	private Long reviewerUid;
 	
 	private Timestamp reviewTime;
-	
+	@ItemType(QualityInspectionSpecificationDTO.class)
 	private List<QualityInspectionSpecificationDTO> specifications;
 	
 	public Long getId() {

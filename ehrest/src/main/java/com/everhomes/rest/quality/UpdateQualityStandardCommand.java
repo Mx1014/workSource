@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>name: 标准名称</li>
  *  <li>standardNumber: 标准编号</li>
  *  <li>description: 具体内容</li>
- *  <li>specificationId: eh_quality_inspection_specifications表的id</li>
+ *  <li>specificationIds: eh_quality_inspection_specifications表的id</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  * </ul>
  */
@@ -40,8 +40,8 @@ public class UpdateQualityStandardCommand {
 	
 	@ItemType(StandardGroupDTO.class)
 	private List<StandardGroupDTO> group;
-	
-	private Long specificationId;
+	@ItemType(Long.class)
+	private List<Long> specificationIds;
 	
 	private Long targetId;
 	
@@ -103,12 +103,12 @@ public class UpdateQualityStandardCommand {
 		this.group = group;
 	}
 
-	public Long getSpecificationId() {
-		return specificationId;
+	public List<Long> getSpecificationIds() {
+		return specificationIds;
 	}
 
-	public void setSpecificationId(Long specificationId) {
-		this.specificationId = specificationId;
+	public void setSpecificationIds(List<Long> specificationIds) {
+		this.specificationIds = specificationIds;
 	}
 
 	public Long getTargetId() {

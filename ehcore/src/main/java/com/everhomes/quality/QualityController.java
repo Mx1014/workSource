@@ -28,6 +28,7 @@ import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.GetGroupMembersCommand;
+import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
@@ -44,6 +45,7 @@ import com.everhomes.rest.quality.ListFactorsResponse;
 import com.everhomes.rest.quality.ListRecordsByTaskIdCommand;
 import com.everhomes.rest.quality.ListQualityInspectionLogsCommand;
 import com.everhomes.rest.quality.ListQualityInspectionLogsResponse;
+import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityStandardsDTO;
@@ -489,16 +491,32 @@ public class QualityController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /quality/listQualityCategories</b>
+	 * <b>URL: /quality/listQualitySpecifications</b>
 	 * <p>查看品质核查类型/规范</p>
 	 */
-	@RequestMapping("listQualityCategories")
+	@RequestMapping("listQualitySpecifications")
 	@RestReturn(value = ListQualitySpecificationsResponse.class)
 	public RestResponse listQualitySpecifications(ListQualitySpecificationsCommand cmd) {
 		
 		ListQualitySpecificationsResponse specifications = qualityService.listQualitySpecifications(cmd);
 		
 		RestResponse response = new RestResponse(specifications);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/getQualitySpecification</b>
+	 * <p>查看特定规范及其事项</p>
+	 */
+	@RequestMapping("getQualitySpecification")
+	@RestReturn(value = QualityInspectionSpecificationDTO.class)
+	public RestResponse getQualitySpecification(GetQualitySpecificationCommand cmd) {
+		
+		QualityInspectionSpecificationDTO specification = qualityService.getQualitySpecification(cmd);
+		
+		RestResponse response = new RestResponse(specification);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

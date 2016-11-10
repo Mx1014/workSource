@@ -48,17 +48,80 @@ import java.util.Map;
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 
 
 
@@ -111,11 +174,14 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.quality.QualityProvider;
 import com.everhomes.rest.equipment.ReviewResult;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
 import com.everhomes.rest.quality.QualityInspectionLogDTO;
@@ -125,40 +191,54 @@ import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityStandardStatus;
+import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhForumPostsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionLogsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSpecificationItemResultsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionSpecificationsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardGroupMapDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardSpecificationMapDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskRecordsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
+import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionLogs;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecificationItemResults;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionSpecifications;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardSpecificationMap;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionLogsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSpecificationItemResultsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionSpecificationsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardSpecificationMapRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -235,7 +315,7 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, 
+	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Long groupId, 
     		Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag) {
 		assert(locator.getEntityId() != 0);
@@ -252,6 +332,13 @@ public class QualityProviderImpl implements QualityProvider {
 		if(!StringUtils.isNullOrEmpty(ownerType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));    	
 		}
+		if(targetId != null && targetId != 0) {
+        	query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+        }
+		if(!StringUtils.isNullOrEmpty(targetType)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));    	
+		}
+		
 		if(taskType != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(taskType));
 		}
@@ -285,7 +372,7 @@ public class QualityProviderImpl implements QualityProvider {
 		if(timeCompared) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))
 					.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.isNull()));
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.ne(QualityInspectionTaskStatus.CLOSED.getCode()));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 		}
 		
 		if(standardIds != null) {
@@ -350,7 +437,7 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType) {
+	public List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandards.class, locator.getEntityId()));
 		List<QualityInspectionStandards> standards = new ArrayList<QualityInspectionStandards>();
@@ -364,6 +451,13 @@ public class QualityProviderImpl implements QualityProvider {
         }
 		if(!StringUtils.isNullOrEmpty(ownerType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.OWNER_TYPE.eq(ownerType));    	
+		}
+		
+		if(targetId != null && targetId != 0) {
+        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_ID.eq(targetId));
+        }
+		if(!StringUtils.isNullOrEmpty(targetType)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_TYPE.eq(targetType));    	
 		}
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.ne(QualityStandardStatus.INACTIVE.getCode()));
@@ -864,7 +958,7 @@ public class QualityProviderImpl implements QualityProvider {
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
         SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
         
-        query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.CLOSED.getCode()));
+        query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.in(QualityInspectionTaskStatus.EXECUTED.getCode(), QualityInspectionTaskStatus.DELAY.getCode()));
 
         if(startDate != null && !"".equals(startDate)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_TIME.ge(startDate));
@@ -1066,7 +1160,7 @@ public class QualityProviderImpl implements QualityProvider {
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.gt(locator.getAnchor()));
 			
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current));
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.ne(QualityInspectionTaskStatus.CLOSED.getCode()));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 			
 			query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.asc());
 			
@@ -1135,15 +1229,12 @@ public class QualityProviderImpl implements QualityProvider {
 	public void closeTask(QualityInspectionTasks task) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		
-		if(task.getStatus().equals(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()))
+		if(task.getResult().equals(QualityInspectionTaskResult.NONE.getCode()))
 			task.setResult(QualityInspectionTaskResult.INSPECT_DELAY.getCode());
-		if(task.getStatus().equals(QualityInspectionTaskStatus.RECTIFING.getCode()))
+		if(task.getResult().equals(QualityInspectionTaskResult.CORRECT.getCode()))
 			task.setResult(QualityInspectionTaskResult.CORRECT_DELAY.getCode());
-		if(task.getStatus().equals(QualityInspectionTaskStatus.RECTIFIED_AND_WAITING_APPROVAL.getCode())
-				|| task.getStatus().equals(QualityInspectionTaskStatus.RECTIFY_CLOSED_AND_WAITING_APPROVAL.getCode()))
-			task.setResult(QualityInspectionTaskResult.RECTIFY_DELAY.getCode());
 		
-		task.setStatus(QualityInspectionTaskStatus.CLOSED.getCode());
+		task.setStatus(QualityInspectionTaskStatus.DELAY.getCode());
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhQualityInspectionTasks t = ConvertHelper.convert(task, EhQualityInspectionTasks.class);
 		EhQualityInspectionTasksDao dao = new EhQualityInspectionTasksDao(context.configuration());
@@ -1257,6 +1348,372 @@ public class QualityProviderImpl implements QualityProvider {
 			return null;
 		
 		return result.get(0);
+	}
+
+	@Override
+	public void deleteQualityInspectionStandardSpecificationMapByStandardId(
+			Long standardId) {
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionStandardSpecificationMap.class), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhQualityInspectionStandardSpecificationMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP);
+					query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STANDARD_ID.eq(standardId));
+					query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+					query.fetch().map((EhQualityInspectionStandardSpecificationMapRecord record) -> {
+						deleteQualityInspectionStandardSpecificationMap(record.getId());
+		            	return null;
+					});
+
+					return true;
+				});
+		
+	}
+	
+	@Override
+	public void deleteQualityInspectionStandardSpecificationMap(Long standardSpecificationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionStandardSpecificationMap.class));
+		EhQualityInspectionStandardSpecificationMapDao dao = new EhQualityInspectionStandardSpecificationMapDao(context.configuration());
+        dao.deleteById(standardSpecificationId);
+		
+	}
+
+	@Override
+	public QualityInspectionStandardSpecificationMap createQualityInspectionStandardSpecificationMap(
+			QualityInspectionStandardSpecificationMap map) {
+
+		assert(map.getStandardId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionStandardSpecificationMap.class, map.getStandardId()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionStandardSpecificationMap.class));
+        map.setId(id);
+        map.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        map.setStatus((byte) 2);
+        
+        EhQualityInspectionStandardSpecificationMapDao dao = new EhQualityInspectionStandardSpecificationMapDao(context.configuration());
+        dao.insert(map);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionStandardSpecificationMap.class, null);
+        
+        return map;
+	}
+
+	@Override
+	public QualityInspectionSpecifications findSpecificationById(Long id,
+			String ownerType, Long ownerId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.eq(id));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+		 
+		List<QualityInspectionSpecifications> result = new ArrayList<QualityInspectionSpecifications>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		
+		return result.get(0);
+	}
+
+	@Override
+	public void populateStandardsSpecifications(
+			List<QualityInspectionStandards> standards) {
+		if(standards == null || standards.size() == 0) {
+            return;
+        }
+            
+        final List<Long> standardIds = new ArrayList<Long>();
+        final Map<Long, QualityInspectionStandards> mapStandards = new HashMap<Long, QualityInspectionStandards>();
+        
+        for(QualityInspectionStandards standard: standards) {
+        	standardIds.add(standard.getId());
+        	mapStandards.put(standard.getId(), standard);
+        }
+        
+        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionStandards.class, standardIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionStandards.class), null, (DSLContext context, Object reducingContext) -> {
+            
+        	SelectQuery<EhQualityInspectionStandardSpecificationMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP);
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STANDARD_ID.in(standardIds));
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+            query.fetch().map((EhQualityInspectionStandardSpecificationMapRecord record) -> {
+            	QualityInspectionStandards standard = mapStandards.get(record.getStandardId());
+                assert(standard != null);
+                QualityInspectionSpecifications specification = findSpecificationById(record.getSpecificationId(), standard.getOwnerType(), standard.getOwnerId());
+            
+                standard.getSpecifications().add(specification);
+                return null;
+            });
+            return true;
+        });
+	}
+
+	@Override
+	public void populateStandardSpecifications(
+			QualityInspectionStandards standard) {
+		if(standard == null) {
+            return;
+        } else {
+            List<QualityInspectionStandards> standards = new ArrayList<QualityInspectionStandards>();
+            standards.add(standard);
+            
+            populateStandardsSpecifications(standards);
+        }
+	}
+
+	@Override
+	public void createQualitySpecification(
+			QualityInspectionSpecifications specification) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionSpecifications.class));
+		
+		specification.setId(id);
+		specification.setNamespaceId(UserContext.getCurrentNamespaceId());
+		specification.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		specification.setPath(specification.getPath() + specification.getId());
+		specification.setStatus(QualityStandardStatus.ACTIVE.getCode());
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSpecifications.class, id));
+        EhQualityInspectionSpecificationsDao dao = new EhQualityInspectionSpecificationsDao(context.configuration());
+        dao.insert(specification);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionSpecifications.class, null);
+		
+	}
+
+	@Override
+	public void updateQualitySpecification(
+			QualityInspectionSpecifications specification) {
+
+		assert(specification.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSpecifications.class, specification.getId()));
+        EhQualityInspectionSpecificationsDao dao = new EhQualityInspectionSpecificationsDao(context.configuration());
+        dao.update(specification);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionSpecifications.class, specification.getId());	
+		
+	}
+
+	@Override
+	public void inactiveQualityInspectionStandardSpecificationMapBySpecificationId(
+			Long specificationId) {
+		Long userId = UserContext.current().getUser().getId();
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhQualityInspectionStandardSpecificationMap.class), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhQualityInspectionStandardSpecificationMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP);
+					query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.SPECIFICATION_ID.eq(specificationId));
+					query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+					query.fetch().map((EhQualityInspectionStandardSpecificationMapRecord record) -> {
+						QualityInspectionStandardSpecificationMap map = ConvertHelper.convert(record, QualityInspectionStandardSpecificationMap.class);
+						map.setStatus(QualityStandardStatus.INACTIVE.getCode());
+						map.setDeleterUid(userId);
+						map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						updateQualityInspectionStandardSpecificationMap(map);
+		            	return null;
+					});
+
+					return true;
+				});
+		
+	}
+
+	@Override
+	public void updateQualityInspectionStandardSpecificationMap(
+			QualityInspectionStandardSpecificationMap map) {
+		assert(map.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionStandardSpecificationMap.class, map.getId()));
+        EhQualityInspectionStandardSpecificationMapDao dao = new EhQualityInspectionStandardSpecificationMapDao(context.configuration());
+        dao.update(map);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionStandardSpecificationMap.class, map.getId());	
+	}
+
+	@Override
+	public List<QualityInspectionSpecifications> listAllChildrenSpecifications(
+			String superiorPath, String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Byte inspectionType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<QualityInspectionSpecifications> result  = new ArrayList<QualityInspectionSpecifications>();
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PATH.like(superiorPath));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		
+		if(scopeCode != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
+		if(scopeId != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(scopeId));
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+		
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+		
+		return result;
+	}
+
+	@Override
+	public List<QualityInspectionSpecifications> listChildrenSpecifications(
+			String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Long parentId, Byte inspectionType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<QualityInspectionSpecifications> result  = new ArrayList<QualityInspectionSpecifications>();
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.PARENT_ID.eq(parentId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		
+		if(scopeCode != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
+		if(scopeId != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(scopeId));
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+		
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+		
+		return result;
+		
+	}
+
+	@Override
+	public List<TaskCountDTO> countTasks(String ownerType, Long ownerId,
+			String targetType, Long targetId, Long startTime, Long endTime,
+			int offset, int count) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<TaskCountDTO> dtos = new ArrayList<TaskCountDTO>();
+		
+		final Field<Byte> none = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode()), QualityInspectionTaskResult.NONE.getCode());
+		final Field<Byte> correct = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()), QualityInspectionTaskResult.CORRECT.getCode());
+		final Field<Byte> inspectComplete = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode()), QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
+		final Field<Byte> correctComplete = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT_COMPLETE.getCode()), QualityInspectionTaskResult.CORRECT_COMPLETE.getCode());
+		final Field<Byte> inspectDelay = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.INSPECT_DELAY.getCode()), QualityInspectionTaskResult.INSPECT_DELAY.getCode());
+		final Field<Byte> correctDelay = DSL.decode().when(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT_DELAY.getCode()), QualityInspectionTaskResult.CORRECT_DELAY.getCode());
+		final Field<?>[] fields = {Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID, DSL.count().as("taskCount"), 
+				DSL.count(none).as("toExecuted"), DSL.count(correct).as("inCorrection"), DSL.count(inspectComplete).as("completeInspection"), 
+				DSL.count(correctComplete).as("completeCorrection"),DSL.count(inspectDelay).as("delayInspection"),DSL.count(correctDelay).as("delayCorrection")};
+		final SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(fields);
+		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASKS);
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+		
+		if(!StringUtils.isNullOrEmpty(targetType)) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
+		}
+		
+		if(targetId != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+		}
+		
+		if(startTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(startTime)));
+		}
+		
+		if(endTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(new Timestamp(endTime)));
+		}
+		
+		query.addGroupBy(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID);
+		query.addLimit(offset, count);
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("countTasks, sql=" + query.getSQL());
+            LOGGER.debug("countTasks, bindValues=" + query.getBindValues());
+        }
+		
+		query.fetch().map((r) -> {
+			dtos.add(ConvertHelper.convert(r, TaskCountDTO.class));
+			return null;
+		});
+		
+		return dtos;
+	}
+
+	@Override
+	public void populateRecordItemResults(
+			List<QualityInspectionTaskRecords> records) {
+		if(records == null || records.size() == 0) {
+            return;
+        }
+            
+        final List<Long> recordIds = new ArrayList<Long>();
+        final Map<Long, QualityInspectionTaskRecords> mapRecords = new HashMap<Long, QualityInspectionTaskRecords>();
+        
+        for(QualityInspectionTaskRecords record: records) {
+        	recordIds.add(record.getId());
+        	mapRecords.put(record.getId(), record);
+        }
+        
+        List<Integer> shards = this.shardingProvider.getContentShards(EhQualityInspectionTaskRecords.class, recordIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhQualityInspectionTaskRecords.class), null, (DSLContext context, Object reducingContext) -> {
+            
+        	SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TASK_RECORD_ID.in(recordIds));
+            query.fetch().map((EhQualityInspectionSpecificationItemResultsRecord record) -> {
+            	QualityInspectionTaskRecords r = mapRecords.get(record.getTaskRecordId());
+                assert(r != null);
+                QualityInspectionSpecificationItemResults result = findItemResultById(record.getId());
+            
+                r.getItemResults().add(result);
+                return null;
+            });
+            return true;
+        });
+        
+        LOGGER.info("populateRecordItemResults: " + records);
+		
+	}
+	
+	private QualityInspectionSpecificationItemResults findItemResultById(Long resultId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionSpecificationItemResults.class, resultId));
+		EhQualityInspectionSpecificationItemResultsDao dao = new EhQualityInspectionSpecificationItemResultsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(resultId), QualityInspectionSpecificationItemResults.class);
+	}
+
+	@Override
+	public void populateRecordItemResult(QualityInspectionTaskRecords record) {
+		if(record == null) {
+            return;
+        } else {
+            List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+            records.add(record);
+            
+            populateRecordItemResults(records);
+        }
+		
+	}
+
+	@Override
+	public void createSpecificationItemResults(
+			QualityInspectionSpecificationItemResults result) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionSpecificationItemResults.class));
+		
+		result.setId(id);
+		result.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+		LOGGER.info("createSpecificationItemResults: " + result);
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionSpecificationItemResults.class, id));
+        EhQualityInspectionSpecificationItemResultsDao dao = new EhQualityInspectionSpecificationItemResultsDao(context.configuration());
+        dao.insert(result);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionTasks.class, null);
 	}
 
 }
