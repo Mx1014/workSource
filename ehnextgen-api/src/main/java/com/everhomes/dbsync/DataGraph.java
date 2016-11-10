@@ -47,7 +47,7 @@ public class DataGraph {
     }
 
 	public static DataGraph fromJSDataGraph(String graphJson) {
-		JSDataGraphObject obj = ConvertHelper.convert(graphJson, JSDataGraphObject.class);
+		JSDataGraphObject obj = (JSDataGraphObject)StringHelper.fromJsonString(graphJson, JSDataGraphObject.class);
 		String graphName = obj.getAppName() + "$" + obj.getMapName();
 		
 		Map<String, DataGraph> tree = new HashMap<String, DataGraph>();
@@ -73,8 +73,8 @@ public class DataGraph {
 		for(String t : obj.getTables()) {
 			DataGraph dataGraph = tree.get(t);
 			JSMappingObjectItem mItem = obj.getMapping().get(t);
+			
 			if(mItem.getBelong() != null) {
-				
 				for(JSMappingBelongObject item : mItem.getBelong()) {
 					GraphRefer ref = new GraphRefer();
 					NJoinType join = NJoinType.fromCode(item.getJoin());
@@ -85,8 +85,10 @@ public class DataGraph {
 					DataGraph subGraph = tree.get(item.getTable());
 					ref.setGraph(subGraph);
 					dataGraph.addRefer(ref);
-				}				
-				
+				}		
+			}
+			
+			if(mItem.getHasMany() != null) {
 				for(JSMappingHasObject item: mItem.getHasMany()) {
 					GraphRefer ref = new GraphRefer();
 					NJoinType join = NJoinType.fromCode(item.getJoin());
@@ -99,7 +101,9 @@ public class DataGraph {
 					dataGraph.addRefer(ref);
 					dataGraph.addRefer(ref);
 				}
-				
+			}
+			
+			if(mItem.getHasOne() != null) {
 				for(JSMappingHasObject item: mItem.getHasOne()) {
 					GraphRefer ref = new GraphRefer();
 					NJoinType join = NJoinType.fromCode(item.getJoin());
@@ -113,7 +117,8 @@ public class DataGraph {
 					dataGraph.addRefer(ref);
 				}
 				
-			}			
+			}		
+			
 		}
 		
 		topGraph.setGraphName(graphName);

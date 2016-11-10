@@ -1,5 +1,7 @@
 package com.everhomes.dbsync;
 
+import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -12,6 +14,12 @@ public class JSDataGraphObject {
 	private List<String> tables;
 	Map<String, JSMappingObjectItem> mapping;
 	Map<String, JSQueryObjectItem> query;
+	
+	public JSDataGraphObject() {
+		tables = new ArrayList<String>();
+		mapping = new HashMap<String, JSMappingObjectItem>();
+		query = new HashMap<String, JSQueryObjectItem>(); 
+	}
 
     public String getAppName() {
 		return appName;

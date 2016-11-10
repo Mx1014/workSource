@@ -75,7 +75,7 @@ module = (typeof module === 'undefined') ? {} : module;
     var core;
     var native_;
     var file = Require.resolve(id, parent);
-    nashornObjs.log("filecore=" + file.core);
+    //nashornObjs.log("filecore=" + file.core);
 
     if (!file) {
       if (typeof NativeRequire.require === 'function') {
@@ -92,7 +92,7 @@ module = (typeof module === 'undefined') ? {} : module;
     if (file.core) {
       file = file.path;
       core = true;
-        nashornObjs.log(file);
+      //nashornObjs.log(file);
     }
     try {
       if (Require.cache[file]) {

@@ -1,9 +1,9 @@
 var App = require("db");
 
+tables = ["eh_user_identifiers", "eh_users"];
 map = {
-    "tables": ["eh_user_identifiers", "eh_users"],
     "eh_user_identifiers": {
-        "fields": ["id", "owner_uid", "identifier_type", "name", "claim_status"],
+        "fields": ["id", "owner_uid", "identifier_type", "identifier_token", "claim_status"],
         "primary": "id",
         "belong": [
             {
@@ -21,7 +21,6 @@ map = {
         "primary": "id"
     }
 };
-
 query = {
     "getByUserId": {
         "tableName": "eh_user_identifiers",
@@ -51,6 +50,7 @@ mapping.mappingStart = function(apps, appName, mapName) {
         obj["mapName"] = mapName;
         obj["mapping"] = map;
         obj["query"] = query;
+        obj["tables"] = tables;
         graph = nashornObjs.createGraph(JSON.stringify(obj));
     }
 }

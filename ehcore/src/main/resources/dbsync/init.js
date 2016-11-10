@@ -10,7 +10,7 @@ function httpProcess(id) {
 function mappingInit(id) {
     jmap = nashornObjs.get(id);
     print(jmap.getName());
-    var mapName = jmap.getAppName() + "$" + jmap.getName();
+    var mapName = "app$" + jmap.getAppName() + "$" + jmap.getName();
     var imp = require(mapName);
     imp.mappingStart(Apps, jmap.getAppName(), jmap.getName());
 }

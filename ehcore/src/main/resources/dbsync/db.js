@@ -3,7 +3,7 @@
 function App(name) {
     this.name = name;
     this.maps = {};
-    this.quries = {};
+    this.queries = {};
 }
 
 module.exports = App;

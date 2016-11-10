@@ -285,14 +285,20 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     
     @Override
     public DataGraph createGraph(String graphJson) {
-    	DataGraph graph = DataGraph.fromJSDataGraph(graphJson);
-    	if(graph == null) {
-    		return null;
+    	try {
+    		DataGraph graph = DataGraph.fromJSDataGraph(graphJson);
+        	if(graph == null) {
+        		return null;
+        	}
+        	
+        	saveGraph(graph);	
+        	
+        	return getGraph(graph.getGraphName());	
+    	} catch(Exception ex) {
+    		LOGGER.error("graph create failed", ex);
     	}
     	
-    	saveGraph(graph);	
-    	
-    	return getGraph(graph.getGraphName());
+    	return null;
     }
     
     @Override

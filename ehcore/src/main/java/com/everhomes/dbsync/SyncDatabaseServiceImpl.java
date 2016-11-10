@@ -42,11 +42,16 @@ public class SyncDatabaseServiceImpl implements SyncDatabaseService {
     @Override
     public SyncMappingDTO createMapping(CreateSyncMappingCommand cmd) {
         SyncMapping map = ConvertHelper.convert(cmd, SyncMapping.class);
-        map.setStatus((byte)1);//mark as valid
-        syncMappingProvider.createSyncMapping(map);
         
         NashornMappingObject mapObj = new NashornMappingObject();
         mapObj.setName(map.getName());
+        
+        SyncApp app = syncAppProvider.getSyncAppById(map.getSyncAppId());
+        mapObj.setAppName(app.getName());
+        
+        map.setStatus((byte)1);//mark as valid
+        syncMappingProvider.createSyncMapping(map);
+        
         nashornProcessService.putProcessJob(mapObj);
         
         return ConvertHelper.convert(map, SyncMappingDTO.class);
@@ -57,6 +62,10 @@ public class SyncDatabaseServiceImpl implements SyncDatabaseService {
     	SyncApp app = syncAppProvider.findSyncAppByName(appName);
     	if(app == null) {
     		return null;
+    	}
+    	
+    	if(mappingName.endsWith(".js")) {
+    		mappingName = mappingName.substring(0, mappingName.length() - 3);
     	}
     	
     	SyncMapping mapping = this.syncMappingProvider.findSyncMappingByName(mappingName);
