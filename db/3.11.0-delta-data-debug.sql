@@ -285,3 +285,16 @@ DELETE FROM eh_organization_owner_attachments WHERE namespace_id = '999992';
 DELETE FROM eh_organization_owner_cars WHERE namespace_id = '999992';
 DELETE FROM eh_organization_owner_car_attachments WHERE namespace_id = '999992';
 DELETE FROM eh_organization_owner_owner_car WHERE namespace_id = '999992';
+
+--
+-- 删除深业的家庭及家庭里的成员信息		add by xq.tian	2016/11/010
+--
+DELETE FROM eh_user_groups WHERE group_id IN (
+  SELECT id FROM eh_groups WHERE discriminator = 'family' AND integral_tag2 IN (240111044331051300, 240111044331051301, 240111044331051302, 240111044331051303, 240111044331051304)
+);
+
+DELETE FROM eh_group_members WHERE group_id IN (
+  SELECT id FROM eh_groups WHERE discriminator = 'family' AND integral_tag2 IN (240111044331051300, 240111044331051301, 240111044331051302, 240111044331051303, 240111044331051304)
+);
+
+DELETE FROM eh_groups WHERE discriminator = 'family' AND integral_tag2 IN (240111044331051300, 240111044331051301, 240111044331051302, 240111044331051303, 240111044331051304);
