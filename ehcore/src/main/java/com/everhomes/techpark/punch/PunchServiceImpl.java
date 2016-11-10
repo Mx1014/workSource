@@ -64,6 +64,7 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.techpark.punch.AbsenceTimeDTO;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
@@ -3801,7 +3802,9 @@ public class PunchServiceImpl implements PunchService {
 			for (Organization o : orgs){
 				orgIds.add(o.getId());
 			}
-//			organizationMembers = this.organizationProvider.listOrganizationPersonnel
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
+					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
 			}
 		else
 			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),

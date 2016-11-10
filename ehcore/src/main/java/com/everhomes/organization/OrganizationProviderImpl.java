@@ -1525,7 +1525,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
 		});
-		locator.setAnchor(null);
+		if(null!= locator)
+			locator.setAnchor(null);
 
 		if(result.size() >= pageSize){
 			result.remove(result.size() - 1);
