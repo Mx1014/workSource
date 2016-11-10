@@ -1547,6 +1547,8 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 	VALUES(240111044331051439, 240111044331055036, '', 114.117284, 22.547342, 'ws10kb9ev3nq');
 INSERT INTO `eh_organization_communities`(organization_id, community_id) 
 	VALUES(1007144, 240111044331055036);
+INSERT INTO `eh_namespace_resources`(`id`, `namespace_id`, `resource_type`, `resource_id`, `create_time`) 
+	VALUES(1673, 999985, 'COMMUNITY', 240111044331055036, UTC_TIMESTAMP());
 	
 INSERT INTO `eh_buildings` (`id`, `community_id`, `name`, `alias_name`, `manager_uid`, `contact`, `address`, `area_size`, `longitude`, `latitude`, `geohash`, `description`, `poster_uri`, `status`, `operator_uid`, `operate_time`, `creator_uid`, `create_time`, `delete_time`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `string_tag1`, `string_tag2`, `string_tag3`, `string_tag4`, `string_tag5`, `namespace_id`)
 	VALUES(181515, 240111044331055036, '华润大厦', '华润大厦', 0, NULL, '广东省深圳市罗湖区深南东路5001号', NULl, NULL, NULL, NULL, NULL, NULL, 2, 1, UTC_TIMESTAMP(), 1, UTC_TIMESTAMP(), NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 999985);
