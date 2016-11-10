@@ -7659,15 +7659,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) { 
-		VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(),VerifyEnterpriseContactDTO.class );
-		if(dto == null || dto.getEndTime() ==null || dto.getEnterpriseId() == null || dto.getUserId() == null ){
+		try{
+			VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(),VerifyEnterpriseContactDTO.class );
+			if(dto == null || dto.getEndTime() ==null || dto.getEnterpriseId() == null || dto.getUserId() == null ){
+				return configProvider.getValue("auth.fail", "");
+			}
+			if(DateHelper.currentGMTTime().getTime() >dto.getEndTime())
+				return configProvider.getValue("auth.overtime", "");
+			ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
+			approveForEnterpriseContact(cmd2);
+			return configProvider.getValue("auth.success", "");
+		}catch(Exception e ){
 			return configProvider.getValue("auth.fail", "");
 		}
-		if(DateHelper.currentGMTTime().getTime() >dto.getEndTime())
-			return configProvider.getValue("auth.overtime", "");
-		ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
-		approveForEnterpriseContact(cmd2);
-		return configProvider.getValue("auth.success", "");
 	}
 	
 }
