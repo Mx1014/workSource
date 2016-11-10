@@ -1412,7 +1412,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			this.batchAddAddresses(community, datas);
 			
 		} catch (Exception e) {
-			throw new RuntimeErrorException("File parsing error");
+			throw new RuntimeErrorException("File parsing error", e);
 		}
 		
 	}
