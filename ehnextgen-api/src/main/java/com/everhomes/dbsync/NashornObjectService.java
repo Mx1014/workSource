@@ -28,4 +28,5 @@ public interface NashornObjectService {
 	void createQueryBase(String appName, String mapName, String jsonQuery);
 	String makeQuery(String appName, String mapName, String queryUrl,
 			String body);
+	String makeRawQuery(String sql, String queryUrl, String body);
 }

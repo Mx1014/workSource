@@ -362,4 +362,9 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     	
     	return StringHelper.toJsonString(this.query(query));
     }
+    
+    @Override
+    public String makeRawQuery(String sql, String queryUrl, String body) {
+    	return "";
+    }
 }

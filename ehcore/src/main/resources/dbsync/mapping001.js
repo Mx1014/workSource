@@ -29,6 +29,12 @@ query = {
         "defaults": {"claimStatus": 3}
         }
         ]
+    "getByPhone": [
+        {
+            "tableName": "eh_users",
+            "rawSql": "select * from eh_users join eh_user_identifiers on eh_users.id=eh_user_identifiers.owner_uid where eh_user_identifiers.identifier_token like '$phone%'"
+        }
+    ]
 };
 
 var mapping = {};

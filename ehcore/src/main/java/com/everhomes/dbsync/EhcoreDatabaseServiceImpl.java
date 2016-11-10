@@ -84,7 +84,7 @@ public class EhcoreDatabaseServiceImpl implements EhcoreDatabaseService {
     public Field<?> getTableField(String name) throws Exception {
         String tableName = null;
         String fieldName = null;
-        String[] ns = name.split(".");
+        String[] ns = name.split("\\.");
         if(ns.length == 3) {
             tableName = ns[1].trim();
             fieldName = ns[2].trim();
