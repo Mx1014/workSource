@@ -219,7 +219,22 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 	public BriefApprovalRequestDTO processApprovalRequestByScene(ApprovalRequest approvalRequest) {
 		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
 		  
-		briefApprovalRequestDTO.setTitle(ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest));
+		briefApprovalRequestDTO.setTitle(ApprovalRequestTitle(approvalRequest));
 		return briefApprovalRequestDTO;
+	}
+
+	private String ApprovalRequestTitle(ApprovalRequest a) {
+		Map<String, Object> map = new HashMap<>(); 
+		 
+		// 初次提交
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.OVERTIME_TITLE;
+		map.put("nickName","");
+		map.put("date",processRequestDate(a.getEffectiveDate()));
+		map.put("hour",a.getHourLength());
+		 
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
 	}
 }
