@@ -1,5 +1,7 @@
 package com.everhomes.dbsync;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.concurrent.atomic.AtomicBoolean;
 
@@ -121,7 +123,7 @@ public class NashornHttpObject implements NashornObject {
         	  this.result.setErrorResult(res);
         } else {
         	try {
-        		Map responseObject = (Map)StringHelper.fromJsonString(this.respStr, Map.class);
+        		List responseObject = (List)StringHelper.fromJsonString(this.respStr, ArrayList.class);
         		res.setResponseObject(responseObject);
         		res.setErrorCode(ErrorCodes.SUCCESS);
         		res.setErrorDescription("OK");
