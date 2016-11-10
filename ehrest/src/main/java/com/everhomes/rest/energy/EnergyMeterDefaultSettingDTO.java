@@ -11,6 +11,7 @@ import java.math.BigDecimal;
  *     <li>settingValue: 属性值</li>
  *     <li>formulaName: 公式名称</li>
  *     <li>formulaType: 公式类型 {@link com.everhomes.rest.energy.EnergyFormulaType}</li>
+ *     <li>settingStatus: 状态 {@link com.everhomes.rest.energy.EnergyCommonStatus}</li>
  * </ul>
  */
 public class EnergyMeterDefaultSettingDTO {
@@ -21,6 +22,7 @@ public class EnergyMeterDefaultSettingDTO {
     private String formulaName;
     private String meterType;
     private Byte formulaType;
+    private Byte settingStatus;
 
     public Long getId() {
         return id;
@@ -36,6 +38,14 @@ public class EnergyMeterDefaultSettingDTO {
 
     public BigDecimal getSettingValue() {
         return settingValue;
+    }
+
+    public Byte getSettingStatus() {
+        return settingStatus;
+    }
+
+    public void setSettingStatus(Byte settingStatus) {
+        this.settingStatus = settingStatus;
     }
 
     public void setSettingValue(BigDecimal settingValue) {

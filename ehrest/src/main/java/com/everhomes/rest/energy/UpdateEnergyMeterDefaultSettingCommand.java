@@ -11,6 +11,7 @@ import java.math.BigDecimal;
  *     <li>settingId: 设置id</li>
  *     <li>settingValue: 属性值</li>
  *     <li>formulaId: 如果修改的是公式,则为公式id</li>
+ *     <li>settingStatus: 状态 {@link com.everhomes.rest.energy.EnergyCommonStatus}</li>
  * </ul>
  */
 public class UpdateEnergyMeterDefaultSettingCommand {
@@ -18,6 +19,7 @@ public class UpdateEnergyMeterDefaultSettingCommand {
     @NotNull private Long organizationId;
     @NotNull private Long settingId;
     private BigDecimal settingValue;
+    private Byte settingStatus;
     private Long formulaId;
 
     public Long getOrganizationId() {
@@ -38,6 +40,14 @@ public class UpdateEnergyMeterDefaultSettingCommand {
 
     public BigDecimal getSettingValue() {
         return settingValue;
+    }
+
+    public Byte getSettingStatus() {
+        return settingStatus;
+    }
+
+    public void setSettingStatus(Byte settingStatus) {
+        this.settingStatus = settingStatus;
     }
 
     public void setSettingValue(BigDecimal settingValue) {

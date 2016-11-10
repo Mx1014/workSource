@@ -1,21 +1,5 @@
 package com.everhomes.energy;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record7;
-import org.jooq.Record8;
-import org.jooq.SelectHavingStep;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
@@ -29,6 +13,13 @@ import com.everhomes.server.schema.tables.pojos.EhEnergyMonthStatistics;
 import com.everhomes.server.schema.tables.records.EhEnergyMonthStatisticsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EnergyMonthStatisticProviderImpl implements EnergyMonthStatisticProvider {
@@ -197,4 +188,14 @@ public class EnergyMonthStatisticProviderImpl implements EnergyMonthStatisticPro
 			return result;
 		return null;
 	}
+
+    @Override
+    public EnergyMonthStatistic findByMeterAndDate(Integer namespaceId, Long meterId, String dateStr) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_MONTH_STATISTICS)
+                // .where(Tables.EH_ENERGY_DATE_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .where(Tables.EH_ENERGY_MONTH_STATISTICS.METER_ID.eq(meterId))
+                .and(Tables.EH_ENERGY_MONTH_STATISTICS.DATE_STR.eq(dateStr))
+                .fetchAnyInto(EnergyMonthStatistic.class);
+    }
 }

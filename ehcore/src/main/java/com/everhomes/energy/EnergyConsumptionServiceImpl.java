@@ -48,6 +48,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
+import java.util.*;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashSet;
@@ -209,11 +210,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
         // 账单项目
         EnergyMeterCategory billCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getBillCategoryId());
-        dto.setBillCategory(billCategory.getName());
+        dto.setBillCategory(billCategory != null ? billCategory.getName() : null);
 
         // 分类
         EnergyMeterCategory serviceCategory = meterCategoryProvider.findById(currNamespaceId(), meter.getServiceCategoryId());
-        dto.setServiceCategory(serviceCategory.getName());
+        dto.setServiceCategory(serviceCategory != null ? serviceCategory.getName() : null);
 
         // 当前价格
         EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE);
@@ -236,7 +237,122 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeterFormula amountFormula = meterFormulaProvider.findById(currNamespaceId(), amountLog.getFormulaId());
             dto.setAmountFormula(toEnergyMeterFormulaDTO(amountFormula));
         }
+
+        // 抄表提示, 判断今天是否读表
+        Timestamp lastReadTime = meter.getLastReadTime();
+        if (lastReadTime != null && (lastReadTime.getTime() - Date.valueOf(LocalDate.now()).getTime() >= 0)) {
+            dto.setTodayReadStatus(TrueOrFalseFlag.TRUE.getCode());
+        }
+
+        // 日读表差
+        this.processDayPrompt(meter, dto);
+        // 月读表差
+        this.processMonthPrompt(meter, dto);
         return dto;
+    }
+
+    private void processDayPrompt(EnergyMeter meter, EnergyMeterDTO dto) {
+        Timestamp lastReadTime = meter.getLastReadTime();
+        EnergyMeterDefaultSetting dayPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.DAY_PROMPT);
+        if (lastReadTime != null && dayPromptSetting != null && Objects.equals(dayPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
+            LocalDateTime lastReadDateTime = lastReadTime.toLocalDateTime();
+            // lastReadingTime 前一天的开始
+            Date lastReadingTimeLastDayBegin = Date.valueOf(LocalDate.of(lastReadDateTime.getYear(), lastReadDateTime.getMonthValue(), lastReadDateTime.getDayOfMonth()).minusDays(1));
+
+            EnergyDateStatistic statistic = energyDateStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), Date.valueOf(lastReadDateTime.toLocalDate()));
+            if (statistic != null) {
+                // 上次读表前一天的最后一条读表记录
+                EnergyMeterReadingLog lastLastReadingLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(), null, new Timestamp(lastReadingTimeLastDayBegin.getTime()));
+                // 上次读表记录
+                EnergyMeterReadingLog lastReadingLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(), null, meter.getLastReadTime());
+
+                // 读表用量差
+                BigDecimal amount = new BigDecimal(0);
+
+                // 默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
+                BigDecimal readingAnchor = meter.getStartReading();
+                BigDecimal dayCurrReading = meter.getStartReading();
+                if(null != lastLastReadingLog){
+                    readingAnchor = lastLastReadingLog.getReading();
+                }
+                if(null != lastReadingLog){
+                    dayCurrReading = lastReadingLog.getReading();
+                }
+
+                // 拿出单个表前一天所有的读表记录
+                List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(), new Timestamp(lastReadingTimeLastDayBegin.getTime()), meter.getLastReadTime());
+
+                // 查看是否有换表,是否有归零
+                if(meterReadingLogs != null){
+                    for(EnergyMeterReadingLog log : meterReadingLogs){
+
+                        //有归零 量程设置为最大值-锚点,锚点设置为0
+                        if(log.getResetMeterFlag()!=null && TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag()){
+                            amount = amount.add(meter.getMaxReading().subtract(readingAnchor));
+                            readingAnchor = new BigDecimal(0);
+                        }
+                        //有换表 量程加上旧表读数-锚点,锚点重置为新读数
+                        if(log.getChangeMeterFlag() != null && TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag()){
+                            EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+                            amount = amount.add(changeLog.getOldReading().subtract(readingAnchor));
+                            readingAnchor = changeLog.getNewReading();
+                        }
+                    }
+                }
+                //计算当天走了多少字 量程+昨天最后一次读数 - 锚点
+                amount = amount.add(dayCurrReading.subtract(readingAnchor));
+
+                //获取公式,计算当天的费用
+                EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE, meter.getLastReadTime());
+                EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE , meter.getLastReadTime());
+                EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA , meter.getLastReadTime());
+
+                String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+
+                ScriptEngineManager manager = new ScriptEngineManager();
+                ScriptEngine engine = manager.getEngineByName("js");
+
+                engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+
+                BigDecimal realAmount;
+                try {
+                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
+                } catch (ScriptException e) {
+                    e.printStackTrace();
+                    LOGGER.error("The energy meter error");
+                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
+                }
+                if (realAmount.doubleValue() > 0) {
+                    BigDecimal percent = realAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
+                    if (percent.doubleValue() >= dayPromptSetting.getSettingValue().doubleValue()) {
+                        dto.setDayPrompt(dayPromptSetting.getSettingValue());
+                    }
+                }
+            }
+        }
+    }
+
+    private void processMonthPrompt(EnergyMeter meter, EnergyMeterDTO dto) {
+        Timestamp lastReadTime = meter.getLastReadTime();
+        EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
+        if (lastReadTime != null && monthPromptSetting != null && Objects.equals(monthPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
+            LocalDateTime lastReadDateTime = lastReadTime.toLocalDateTime();
+            // lastReadingTime 前一月的开始
+            Date lastReadingTimeLastMonthBegin = Date.valueOf(LocalDate.of(lastReadDateTime.getYear(), lastReadDateTime.getMonth().minus(1), 1));
+
+            EnergyMonthStatistic statistic = energyMonthStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), "" + lastReadDateTime.toLocalDate().getYear() + lastReadDateTime.toLocalDate().getMonthValue());
+            if (statistic != null) {
+                BigDecimal thisMonthAmount = energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(), lastReadingTimeLastMonthBegin, Date.valueOf(LocalDate.now()));
+                if (thisMonthAmount.doubleValue() > 0) {
+                    BigDecimal percent = thisMonthAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
+                    if (percent.doubleValue() >= monthPromptSetting.getSettingValue().doubleValue()) {
+                        dto.setMonthPrompt(monthPromptSetting.getSettingValue());
+                    }
+                }
+            }
+        }
     }
 
     @Override
@@ -274,8 +390,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setStartTime(new Timestamp(cmd.getStartTime()));
-        Timestamp endTime = cmd.getEndTime() == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): new Timestamp(cmd.getEndTime());
-        log.setEndTime(endTime);
+        // Timestamp endTime = cmd.getEndTime() == null ? Timestamp.valueOf(LocalDateTime.now().plusYears(100)): new Timestamp(cmd.getEndTime());
+        if (cmd.getEndTime() != null) {
+            log.setEndTime(new Timestamp(cmd.getEndTime()));
+        }
         log.setMeterId(cmd.getMeterId());
         log.setSettingType(settingType.getCode());
         log.setNamespaceId(currNamespaceId());
@@ -368,13 +486,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId());
 
-        // 第一次读表的时候判断读数与起始读数的大小
+        /*// 第一次读表的时候判断读数与起始读数的大小
         if (meter.getLastReading() == null) {
             if (cmd.getCurrReading().doubleValue() < meter.getStartReading().doubleValue()) {
                 LOGGER.error("Current reading less then meter start reading, meterId = ", meter.getId());
                 throw errorWith(SCOPE, ERR_CURR_READING_LESS_THEN_START_READING, "Current reading less then meter start reading, meterId = %s", meter.getId());
             }
-        }
+        }*/
         EnergyMeterReadingLog log = new EnergyMeterReadingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setReading(cmd.getCurrReading());
@@ -465,7 +583,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             LOGGER.error("The energy meter reading log operate time is before today, id = {}", cmd.getLogId());
             throw errorWith(SCOPE, ERR_METER_READING_LOG_BEFORE_TODAY, "The energy meter reading log operate time is before today, id = %s", cmd.getLogId());
         }
-        meterReadingLogProvider.deleteEnergyMeterReadingLog(log);
+
+        dbProvider.execute(r -> {
+            EnergyMeterReadingLog lastReadingLog = meterReadingLogProvider.findLastReadingLogByMeterId(currNamespaceId(), log.getMeterId());
+            meterReadingLogProvider.deleteEnergyMeterReadingLog(log);
+
+            // 删除的记录是最后一条, 把表记的lastReading修改成新的最后一次读数
+            if (Objects.equals(lastReadingLog.getId(), log.getId())) {
+                EnergyMeter meter = meterProvider.findById(currNamespaceId(), log.getMeterId());
+                lastReadingLog = meterReadingLogProvider.findLastReadingLogByMeterId(currNamespaceId(), log.getMeterId());
+                if (lastReadingLog != null) {
+                    meter.setLastReading(lastReadingLog.getReading());
+                } else {
+                    meter.setLastReading(null);
+                }
+                meterProvider.updateEnergyMeter(meter);
+            }
+            return true;
+        });
         readingLogSearcher.deleteById(log.getId());
     }
 
@@ -475,10 +610,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeterDefaultSetting setting = defaultSettingProvider.findById(currNamespaceId(), cmd.getSettingId());
         if (setting != null) {
-            if (cmd.getFormulaId() != null) {
+            boolean isPromptType = Stream.of(EnergyMeterSettingType.MONTH_PROMPT, EnergyMeterSettingType.DAY_PROMPT)
+                    .anyMatch(type -> EnergyMeterSettingType.fromCode(setting.getSettingType()) == type);
+            // 抄表提示类型
+            if (isPromptType) {
+                setting.setStatus(cmd.getSettingStatus());
+                setting.setSettingValue(cmd.getSettingValue());
+            } else if (cmd.getFormulaId() != null) {
+                // 公式类型
                 setting.setFormulaId(cmd.getFormulaId());
-            }
-            if (cmd.getSettingValue() != null) {
+            } else if (cmd.getSettingValue() != null) {
+                // 价格及倍率类型
                 setting.setSettingValue(cmd.getSettingValue());
             }
             defaultSettingProvider.updateEnergyMeterDefaultSetting(setting);
@@ -502,7 +644,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         formula.setExpression(processedExpression);
         formula.setName(cmd.getName());
         formula.setFormulaType(cmd.getFormulaType());
-        formula.setNamespaceId(UserContext.getCurrentNamespaceId());
+        formula.setNamespaceId(currNamespaceId());
+        formula.setDisplayExpression(cmd.getExpression());
         meterFormulaProvider.createEnergyMeterFormula(formula);
         return toEnergyMeterFormulaDTO(formula);
     }
@@ -548,7 +691,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeterCategory category = new EnergyMeterCategory();
-        category.setNamespaceId(UserContext.getCurrentNamespaceId());
+        category.setNamespaceId(currNamespaceId());
         category.setName(cmd.getName());
         category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
         category.setCategoryType(cmd.getCategoryType());
@@ -1210,19 +1353,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }*/
 
     private EnergyMeterFormulaDTO toEnergyMeterFormulaDTO(EnergyMeterFormula formula) {
-        return ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
+        EnergyMeterFormulaDTO dto = ConvertHelper.convert(formula, EnergyMeterFormulaDTO.class);
+        dto.setExpression(formula.getDisplayExpression());
+        return dto;
     }
 
     @Override
     public List<EnergyMeterDefaultSettingDTO> listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterDefaultSetting> settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
+        List<EnergyMeterDefaultSetting> settings = new ArrayList<>();
+        if (cmd.getMeterType() != null) {
+            settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
+        } else {
+            List<EnergyMeterDefaultSetting> waterSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.WATER.getCode());
+            List<EnergyMeterDefaultSetting> elecSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.ELECTRIC.getCode());
+            settings.addAll(waterSettings);
+            settings.addAll(elecSettings);
+        }
         return settings.stream().map(this::toEnergyMeterDefaultSettingDTO).collect(Collectors.toList());
     }
 
     private EnergyMeterDefaultSettingDTO toEnergyMeterDefaultSettingDTO(EnergyMeterDefaultSetting setting) {
         EnergyMeterDefaultSettingDTO dto = ConvertHelper.convert(setting, EnergyMeterDefaultSettingDTO.class);
+        dto.setSettingStatus(setting.getStatus());
         if (setting.getFormulaId() != null) {
             EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), setting.getFormulaId());
             dto.setFormulaName(formula.getName());
@@ -1567,6 +1721,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			
 		}
 		 
-	} 
-	
+	}
+
+    @Override
+    public void syncEnergyMeterReadingLogIndex() {
+        readingLogSearcher.syncFromDb();
+    }
+
+    @Override
+    public void syncEnergyMeterIndex() {
+        meterSearcher.syncFromDb();
+    }
+
 }

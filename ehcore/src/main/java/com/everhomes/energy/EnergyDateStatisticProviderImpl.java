@@ -1,24 +1,10 @@
 package com.everhomes.energy;
 
-import java.math.BigDecimal;
-import java.sql.Date;
-import java.util.List;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.officecubicle.OfficeCubicleSpace;
-import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEnergyDateStatisticsDao;
@@ -26,6 +12,13 @@ import com.everhomes.server.schema.tables.pojos.EhEnergyDateStatistics;
 import com.everhomes.server.schema.tables.records.EhEnergyDateStatisticsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.util.List;
 
 @Component
 public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvider {
@@ -182,4 +175,14 @@ public class EnergyDateStatisticProviderImpl implements EnergyDateStatisticProvi
 			return result;
 		return null;
 	}
+
+    @Override
+    public EnergyDateStatistic findByMeterAndDate(Integer namespaceId, Long meterId, Date date) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_DATE_STATISTICS)
+                // .where(Tables.EH_ENERGY_DATE_STATISTICS.NAMESPACE_ID.eq(namespaceId))
+                .where(Tables.EH_ENERGY_DATE_STATISTICS.METER_ID.eq(meterId))
+                .and(Tables.EH_ENERGY_DATE_STATISTICS.STAT_DATE.eq(date))
+                .fetchAnyInto(EnergyDateStatistic.class);
+    }
 }

@@ -25,5 +25,7 @@ public interface EnergyMeterReadingLogProvider {
 
     List<EnergyMeterReadingLog> listMeterReadingLogs(long pageAnchor, int pageSize);
 
+    EnergyMeterReadingLog findLastReadingLogByMeterId(Integer namespaceId, Long meterId);
+
     // List<EnergyMeterReadingLog> listMeterReadingLogs(Integer namespaceId, Long meterId, Long pageAnchor, int pageSize);
 }

@@ -1,11 +1,11 @@
 package com.everhomes.energy;
 
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.List;
-
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
 
 public interface EnergyDateStatisticProvider {
 
@@ -31,6 +31,7 @@ public interface EnergyDateStatisticProvider {
 	List<EnergyDateStatistic> listEnergyDateStatistics(Byte meterType, Long communityId, List<Long> billCategoryIds,
 			List<Long> serviceCategoryIds, Date startDate, Date endDate);
 
-	EnergyDateStatistic getEnergyDateStatisticByStatDate(Long meterId, Date statDate);
+    EnergyDateStatistic findByMeterAndDate(Integer namespaceId, Long meterId, Date date);
 
+	EnergyDateStatistic getEnergyDateStatisticByStatDate(Long meterId, Date statDate);
 }

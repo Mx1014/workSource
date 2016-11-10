@@ -22,6 +22,9 @@ import java.sql.Timestamp;
  *     <li>amountFormula: 用量公式 {@link com.everhomes.rest.energy.EnergyMeterFormulaDTO}</li>
  *     <li>lastReadTime: 最后一次读表时间</li>
  *     <li>lastReading: 最后一次读数值</li>
+ *     <li>todayReadStatus: 今日读表状态{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>dayPrompt: 每日读表提示</li>
+ *     <li>monthPrompt: 每月读表提示</li>
  * </ul>
  */
 public class EnergyMeterDTO {
@@ -41,6 +44,10 @@ public class EnergyMeterDTO {
     private String status;
     private Timestamp lastReadTime;
     private BigDecimal lastReading;
+
+    private Byte todayReadStatus;
+    private BigDecimal dayPrompt;
+    private BigDecimal monthPrompt;
 
     public Long getId() {
         return id;
@@ -68,6 +75,30 @@ public class EnergyMeterDTO {
 
     public String getMeterNumber() {
         return meterNumber;
+    }
+
+    public Byte getTodayReadStatus() {
+        return todayReadStatus;
+    }
+
+    public void setTodayReadStatus(Byte todayReadStatus) {
+        this.todayReadStatus = todayReadStatus;
+    }
+
+    public BigDecimal getDayPrompt() {
+        return dayPrompt;
+    }
+
+    public void setDayPrompt(BigDecimal dayPrompt) {
+        this.dayPrompt = dayPrompt;
+    }
+
+    public BigDecimal getMonthPrompt() {
+        return monthPrompt;
+    }
+
+    public void setMonthPrompt(BigDecimal monthPrompt) {
+        this.monthPrompt = monthPrompt;
     }
 
     public void setMeterNumber(String meterNumber) {
