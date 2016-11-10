@@ -15,16 +15,24 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.parking.*;
+import com.everhomes.rest.order.CommonOrderCommand;
+import com.everhomes.rest.order.CommonOrderDTO;
+import com.everhomes.rest.order.OrderType;
+import com.everhomes.rest.parking.*;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -35,7 +43,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
-// @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
+@Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "BOSIGAO2")
 public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Bosigao2ParkingVendorHandler.class);
 	

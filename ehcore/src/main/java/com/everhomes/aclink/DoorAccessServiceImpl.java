@@ -94,7 +94,9 @@ import com.everhomes.rest.aclink.CreateDoorAuthByUser;
 import com.everhomes.rest.aclink.CreateDoorAuthCommand;
 import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
 import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
+import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DataUtil;
+import com.everhomes.rest.aclink.DeleteQRUserPermissionCommand;
 import com.everhomes.rest.aclink.DoorAccessActivedCommand;
 import com.everhomes.rest.aclink.DoorAccessActivingCommand;
 import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
@@ -112,6 +114,7 @@ import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.DoorLinglingExtraKeyDTO;
 import com.everhomes.rest.aclink.DoorMessage;
 import com.everhomes.rest.aclink.DoorMessageType;
+import com.everhomes.rest.aclink.DoorUserPermissionDTO;
 import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
 import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
 import com.everhomes.rest.aclink.GetShortMessageCommand;
@@ -126,6 +129,8 @@ import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
 import com.everhomes.rest.aclink.ListDoorAccessResponse;
 import com.everhomes.rest.aclink.ListDoorAuthCommand;
 import com.everhomes.rest.aclink.ListDoorAuthResponse;
+import com.everhomes.rest.aclink.ListQRUserPermissionCommand;
+import com.everhomes.rest.aclink.ListQRUserPermissionResponse;
 import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageCommand;
 import com.everhomes.rest.aclink.QueryDoorMessageResponse;
@@ -249,6 +254,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private AclinkLogProvider aclinkLogProvider;
+    
+    @Autowired
+    private DoorUserPermissionProvider doorUserPermissionProvider;
     
     final Pattern npattern = Pattern.compile("\\d+");
     
@@ -1541,6 +1549,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         dto.setIsSupportSmart((byte)1);
         
         dto.setQrDriver(this.configProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode()));
+        dto.setQrDriverExt(this.configProvider.getValue(cmd.getNamespaceId(), AclinkConstant.ACLINK_QR_DRIVER_EXT, DoorAccessDriverType.ZUOLIN.getCode()));
         dto.setSmartDriver(DoorAccessDriverType.ZUOLIN.getCode());
         
         return dto;
@@ -1548,6 +1557,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     private DoorAccessDriverType getQrDriverType(Integer namespaceId) {
         String t = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_DRIVER_TYPE, DoorAccessDriverType.ZUOLIN.getCode());
+        return DoorAccessDriverType.fromCode(t);
+    }
+    
+    private DoorAccessDriverType getQrDriverExt(Integer namespaceId) {
+        String t = this.configProvider.getValue(namespaceId, AclinkConstant.ACLINK_QR_DRIVER_EXT, DoorAccessDriverType.ZUOLIN.getCode());
         return DoorAccessDriverType.fromCode(t);
     }
     
@@ -1943,88 +1957,175 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return ConvertHelper.convert(doorAccess, DoorAccessDTO.class);
     }
     
+    //zuolin device qr. normal visitor auth
+    private DoorAuthDTO createZuolinDeviceQr(CreateDoorVisitorCommand cmd) {
+        User user = UserContext.current().getUser();
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
+        
+        //TODO check for permission
+//        DoorAuth authChecked = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
+//        if(authChecked == null || (!authChecked.getRightVisitor().equals((byte)1))) {
+//            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "User not auth");   
+//        }
+        
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.replace("-", "");
+        uuid = uuid.substring(0, 5);
+        
+        DoorAuth auth = new DoorAuth();
+        auth.setApplyUserName(cmd.getUserName());
+        auth.setApproveUserId(user.getId());
+        auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
+        auth.setDescription(cmd.getDescription());
+        auth.setDoorId(cmd.getDoorId());
+        auth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
+        auth.setOrganization(cmd.getOrganization());
+        auth.setPhone(cmd.getPhone());
+        auth.setNickname(cmd.getUserName());
+        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setValidFromMs(System.currentTimeMillis());
+        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setUserId(0l);
+        auth.setOwnerType(doorAccess.getOwnerType());
+        auth.setOwnerId(doorAccess.getOwnerId());
+        auth.setStatus(DoorAuthStatus.VALID.getCode());
+        auth.setAuthMethod(cmd.getAuthMethod());
+        doorAuthProvider.createDoorAuth(auth);
+        
+        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+        if(aesUserKey == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
+        }
+        
+        auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+        
+        //convert to qr, move it to CmdUtil ?
+        byte[] type = new byte[]{0, 1};
+        byte[] cmdArr = new byte[]{8, 0};
+        byte[] qrArr = Base64.decodeBase64(aesUserKey.getSecret());
+        byte[] lengthArr = DataUtil.shortToByteArray((short) (qrArr.length + cmdArr.length));
+        long curTimeMill = System.currentTimeMillis();
+        byte[] timeArr = DataUtil.longToByteArray(curTimeMill);
+        byte[] resultArr = new byte[cmdArr.length + type.length + lengthArr.length + qrArr.length + timeArr.length];
+        System.arraycopy(type, 0, resultArr, 0, type.length);
+        System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
+        System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
+        System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
+        System.arraycopy(timeArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, timeArr.length);
+        String resultStr = Base64.encodeBase64String(resultArr);
+        
+        auth.setQrKey(resultStr);
+        doorAuthProvider.updateDoorAuth(auth);
+        
+        String nickName = user.getNickName();
+        if(nickName == null || nickName.isEmpty()) {
+            nickName = user.getAccountName();
+        }
+        
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
+        String templateLocale = user.getLocale();
+        smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
+        
+        return ConvertHelper.convert(auth, DoorAuthDTO.class);        
+    }
+    
+    //TODO better for implements
+    private DoorAuthDTO createZuolinPhoneQr(CreateDoorVisitorCommand cmd) {
+        User user = UserContext.current().getUser();
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+        }
+        
+        String uuid = UUID.randomUUID().toString();
+        uuid = uuid.replace("-", "");
+        uuid = uuid.substring(0, 5);
+        
+        DoorAuth auth = new DoorAuth();
+        auth.setApplyUserName(user.getNickName());
+        auth.setApproveUserId(user.getId());
+        auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
+        auth.setDescription(cmd.getDescription());
+        auth.setDoorId(cmd.getDoorId());
+        auth.setDriver(DoorAccessDriverType.PHONE_VISIT.getCode()); //for phone visit implements
+        auth.setOrganization(cmd.getOrganization());
+        auth.setPhone(cmd.getPhone());
+        auth.setNickname(cmd.getUserName());
+        auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setValidFromMs(System.currentTimeMillis());
+        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setUserId(0l);
+        auth.setOwnerType(doorAccess.getOwnerType());
+        auth.setOwnerId(doorAccess.getOwnerId());
+        auth.setStatus(DoorAuthStatus.VALID.getCode());
+        auth.setAuthMethod(cmd.getAuthMethod());
+        
+        //TODO valid count
+        doorAuthProvider.createDoorAuth(auth);
+        
+        AesUserKey aesUserKey = generateAesUserKey(user, auth);
+        if(aesUserKey == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
+        }
+        
+        auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
+        
+        //convert to qr, move it to CmdUtil ?
+        byte[] type = new byte[]{0, 1};
+        byte[] cmdArr = new byte[]{8, 0};
+        byte[] qrArr = Base64.decodeBase64(aesUserKey.getSecret());
+        byte[] lengthArr = DataUtil.shortToByteArray((short) (qrArr.length + cmdArr.length));
+        long curTimeMill = System.currentTimeMillis();
+        byte[] timeArr = DataUtil.longToByteArray(curTimeMill);
+        byte[] resultArr = new byte[cmdArr.length + type.length + lengthArr.length + qrArr.length + timeArr.length];
+        System.arraycopy(type, 0, resultArr, 0, type.length);
+        System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
+        System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
+        System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
+        System.arraycopy(timeArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, timeArr.length);
+        String resultStr = Base64.encodeBase64String(resultArr);
+        
+        auth.setQrKey(resultStr);
+        doorAuthProvider.updateDoorAuth(auth);
+        
+        String nickName = user.getNickName();
+        if(nickName == null || nickName.isEmpty()) {
+            nickName = user.getAccountName();
+        }
+        
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
+        smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
+        String templateLocale = user.getLocale();
+        smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
+        
+        return ConvertHelper.convert(auth, DoorAuthDTO.class);   
+    }
+    
     @Override
     public DoorAuthDTO createDoorVisitorAuth(CreateDoorVisitorCommand cmd) {
         DoorAccessDriverType qrDriver = getQrDriverType(cmd.getNamespaceId());
+        DoorAccessDriverType qrDriverExt = getQrDriverExt(cmd.getNamespaceId());
         if(qrDriver.equals(DoorAccessDriverType.LINGLING)) {
             return createLinglingVisitorAuth(cmd);
         } else {
-            User user = UserContext.current().getUser();
-            
-            DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-            if(doorAccess == null) {
-                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "DoorAccess not found");
+            if(qrDriverExt.equals(DoorAccessDriverType.ZUOLIN)) {
+                return createZuolinDeviceQr(cmd);
+            } else {
+                //phone visitor
+                return createZuolinPhoneQr(cmd);
             }
-            
-            //TODO check for permission
-//            DoorAuth authChecked = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), user.getId());
-//            if(authChecked == null || (!authChecked.getRightVisitor().equals((byte)1))) {
-//                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "User not auth");   
-//            }
-            
-            String uuid = UUID.randomUUID().toString();
-            uuid = uuid.replace("-", "");
-            uuid = uuid.substring(0, 5);
-            
-            DoorAuth auth = new DoorAuth();
-            auth.setApplyUserName(cmd.getUserName());
-            auth.setApproveUserId(user.getId());
-            auth.setAuthType(DoorAuthType.ZUOLIN_VISITOR.getCode());
-            auth.setDescription(cmd.getDescription());
-            auth.setDoorId(cmd.getDoorId());
-            auth.setDriver(DoorAccessDriverType.ZUOLIN.getCode());
-            auth.setOrganization(cmd.getOrganization());
-            auth.setPhone(cmd.getPhone());
-            auth.setNickname(cmd.getUserName());
-            auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-            auth.setValidFromMs(System.currentTimeMillis());
-            auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
-            auth.setUserId(0l);
-            auth.setOwnerType(doorAccess.getOwnerType());
-            auth.setOwnerId(doorAccess.getOwnerId());
-            auth.setStatus(DoorAuthStatus.VALID.getCode());
-            auth.setAuthMethod(cmd.getAuthMethod());
-            doorAuthProvider.createDoorAuth(auth);
-            
-            AesUserKey aesUserKey = generateAesUserKey(user, auth);
-            if(aesUserKey == null) {
-                throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_STATE_ERROR, "DoorAccess user key error");
-            }
-            
-            auth.setLinglingUuid(uuid + "-" + auth.getId().toString());
-            
-            //convert to qr, move it to CmdUtil ?
-            byte[] type = new byte[]{0, 1};
-            byte[] cmdArr = new byte[]{8, 0};
-            byte[] qrArr = Base64.decodeBase64(aesUserKey.getSecret());
-            byte[] lengthArr = DataUtil.shortToByteArray((short) (qrArr.length + cmdArr.length));
-            long curTimeMill = System.currentTimeMillis();
-            byte[] timeArr = DataUtil.longToByteArray(curTimeMill);
-            byte[] resultArr = new byte[cmdArr.length + type.length + lengthArr.length + qrArr.length + timeArr.length];
-            System.arraycopy(type, 0, resultArr, 0, type.length);
-            System.arraycopy(lengthArr, 0, resultArr, type.length, lengthArr.length);
-            System.arraycopy(cmdArr, 0, resultArr, type.length + lengthArr.length, cmdArr.length);
-            System.arraycopy(qrArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length, qrArr.length);
-            System.arraycopy(timeArr, 0, resultArr, cmdArr.length + type.length + lengthArr.length + qrArr.length, timeArr.length);
-            String resultStr = Base64.encodeBase64String(resultArr);
-            
-            auth.setQrKey(resultStr);
-            doorAuthProvider.updateDoorAuth(auth);
-            
-            String nickName = user.getNickName();
-            if(nickName == null || nickName.isEmpty()) {
-                nickName = user.getAccountName();
-            }
-            
-            String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
-            List<Tuple<String, Object>> variables = smsProvider.toTupleList(AclinkConstant.SMS_VISITOR_USER, nickName);
-            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_DOOR, doorAccess.getName());
-            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_LINK, homeUrl+"/evh");
-            smsProvider.addToTupleList(variables, AclinkConstant.SMS_VISITOR_ID, auth.getLinglingUuid());
-            String templateLocale = user.getLocale();
-            smsProvider.sendSms(cmd.getNamespaceId(), cmd.getPhone(), SmsTemplateCode.SCOPE, SmsTemplateCode.ACLINK_VISITOR_MSG_CODE, templateLocale, variables);
-            
-            return ConvertHelper.convert(auth, DoorAuthDTO.class);
         }
     }
     
@@ -2144,13 +2245,110 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             resp.setDoorName(doorAccess.getName());
         }
         
+        resp.setPhone(auth.getPhone());
+        if(auth.getValidEndMs() > System.currentTimeMillis()) {
+            resp.setIsValid((byte)1);    
+        } else {
+            resp.setIsValid((byte)0);
+        }
+        resp.setDescription(auth.getDescription());
+        resp.setValidDay(1l);
+        resp.setOrganization(auth.getOrganization());
+        resp.setUserName(auth.getNickname());
+        
         User user = userProvider.findUserById(auth.getApproveUserId());
         if(user != null) {
-            resp.setUserName(user.getNickName());
+            resp.setApproveName(user.getNickName());
         }
         
         resp.setCreateTime(auth.getCreateTime().getTime());
         resp.setQr(auth.getQrKey());
+      
+        return resp;
+    }
+    
+    @Override
+    public GetVisitorResponse getVisitorPhone(GetVisitorCommand cmd) {
+        GetVisitorResponse resp = new GetVisitorResponse();
+        DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
+        if(auth == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth not found");
+        }
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+        if(doorAccess != null) {
+            resp.setDoorName(doorAccess.getName());
+        }
+        
+        resp.setPhone(auth.getPhone());
+        if(auth.getValidEndMs() > System.currentTimeMillis()) {
+            resp.setIsValid((byte)1);    
+        } else {
+            resp.setIsValid((byte)0);
+        }
+        resp.setDescription(auth.getDescription());
+        resp.setValidDay(1l);
+        resp.setOrganization(auth.getOrganization());
+        resp.setUserName(auth.getNickname());
+        
+        User user = userProvider.findUserById(auth.getApproveUserId());
+        if(user != null) {
+            resp.setApproveName(user.getNickName());
+        }
+        
+        //https://core.zuolin.com/evh/aclink/phv?id=10ae5-15016
+        String homeUrl = configProvider.getValue(AclinkConstant.HOME_URL, "");
+        String url = homeUrl + "/evh/aclink/phv?phvid=" + cmd.getId() + "#sign_suffix";
+        
+        resp.setCreateTime(auth.getCreateTime().getTime());
+        //resp.setQr(Base64.encodeBase64String(url.getBytes()));
+        resp.setQr(url);
+      
+        return resp;
+    }
+    
+    @Override
+    public GetVisitorResponse checkVisitor(GetVisitorCommand cmd) {
+        GetVisitorResponse resp = new GetVisitorResponse();
+        DoorAuth auth = doorAuthProvider.getLinglingDoorAuthByUuid(cmd.getId());
+        if(auth == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "auth not found");
+        }
+        
+        Integer namespaceId = cmd.getNamespaceId();
+        if(namespaceId == null) {
+            namespaceId = UserContext.getCurrentNamespaceId();
+        }
+        DoorUserPermission dp = doorUserPermissionProvider.checkPermission(namespaceId, UserContext.current().getUser().getId()
+                , auth.getOwnerId(), auth.getOwnerType());
+        if(dp == null) {
+            resp.setPermissionDeny((byte)1);
+        } else {
+            resp.setPermissionDeny((byte)0);
+        }
+        
+        DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
+        if(doorAccess != null) {
+            resp.setDoorName(doorAccess.getName());
+        }
+        
+        resp.setPhone(auth.getPhone());
+        if(auth.getValidEndMs() > System.currentTimeMillis()) {
+            resp.setIsValid((byte)1);    
+        } else {
+            resp.setIsValid((byte)0);
+        }
+        resp.setDescription(auth.getDescription());
+        resp.setValidDay(1l);
+        resp.setOrganization(auth.getOrganization());
+        resp.setUserName(auth.getNickname());
+        
+        User user = userProvider.findUserById(auth.getApproveUserId());
+        if(user != null) {
+            resp.setApproveName(user.getNickName());
+        }
+        
+        resp.setCreateTime(auth.getCreateTime().getTime());
       
         return resp;
     }
@@ -2450,6 +2648,59 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             AclinkLogDTO dto = ConvertHelper.convert(obj, AclinkLogDTO.class);
             resp.getDtos().add(dto);
         }
+        return resp;
+    }
+    
+    @Override
+    public DoorAuth getLinglingDoorAuthByUuid(String uuid) {
+        return doorAuthProvider.getLinglingDoorAuthByUuid(uuid);
+    }
+    
+    @Override
+    public DoorUserPermissionDTO createQRUserPermission(CreateQRUserPermissionCommand cmd) {
+        if(cmd.getNamespaceId() == null) {
+            cmd.setNamespaceId(0);
+        }
+        
+        User u = UserContext.current().getUser();
+        DoorUserPermission dp = new DoorUserPermission();
+        dp.setApproveUserId(u.getId());
+        dp.setAuthType((byte)0);
+        dp.setDescription(cmd.getDescription());
+        dp.setUserId(cmd.getUserId());
+        dp.setOwnerId(cmd.getOwnerId());
+        dp.setOwnerType(cmd.getOwnerType());
+        dp.setNamespaceId(cmd.getNamespaceId());
+        dp.setStatus((byte)1);
+        doorUserPermissionProvider.createDoorUserPermission(dp);
+        
+        return ConvertHelper.convert(dp, DoorUserPermissionDTO.class);
+    }
+    
+    @Override
+    public DoorUserPermissionDTO deleteQRUserPermission(DeleteQRUserPermissionCommand cmd) {
+        DoorUserPermission obj = doorUserPermissionProvider.getDoorUserPermissionById(cmd.getId());
+        if(obj != null) {
+            doorUserPermissionProvider.deleteDoorUserPermission(obj);
+            return ConvertHelper.convert(obj, DoorUserPermissionDTO.class);
+        }
+        
+        return null;
+        
+    }
+    
+    @Override
+    public ListQRUserPermissionResponse listQRUserPermissions(ListQRUserPermissionCommand cmd) {
+        ListQRUserPermissionResponse resp = new ListQRUserPermissionResponse();
+        ListingLocator locator = new ListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        List<DoorUserPermissionDTO> dtos = doorUserPermissionProvider.listDoorUserPermissions(cmd.getNamespaceId()
+                , cmd.getOwnerId()
+                , cmd.getOwnerType()
+                , locator, count);
+        resp.setDtos(dtos);
+        resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
     

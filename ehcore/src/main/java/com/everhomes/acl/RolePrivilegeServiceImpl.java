@@ -739,6 +739,46 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	return privileges;
     }
     
+    /**
+     * 获取用户的权限列表
+     * @param communityId
+     * @param organizationId
+     * @param userId
+     * @return
+     */
+    public List<Long> getUserCommunityPrivileges(Long communityId, Long userId){
+    	
+    	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(), communityId, EntityType.USER.getCode(), userId);
+
+    	List<Long> privileges = new ArrayList<Long>();
+    	
+    	List<Long> roleIds = new ArrayList<Long>();
+    	for (RoleAssignment role : userRoles) {
+    		roleIds.add(role.getRoleId());
+		}
+    	
+    	List<Long> privilegeIds = new ArrayList<Long>();
+		for (Long roleId : roleIds) {
+			List<Acl> acls = null;
+			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
+				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
+			}else{
+				Role role = aclProvider.getRoleById(roleId);
+				if(null != role){
+					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+				}
+				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
+			}
+			for (Acl acl : acls) {
+				privilegeIds.add(acl.getPrivilegeId());
+			}
+			
+		}
+		privileges = privilegeIds;	
+    	
+    	return privileges;
+    }
+    
     
     @Override
     public boolean checkAdministrators(Long organizationId) {

@@ -12,7 +12,14 @@ import com.everhomes.util.StringHelper;
  * <li>categoryId: 子类型ID</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
- * <li>attachments: 图片列表</li>
+ * <li>organizationId: 公司id</li>
+ * <li>taskCategoryId: 服务类型id</li>
+ * <li>addressId: 门牌id</li>
+ * <li>priority: 客户反映</li>
+ * <li>reserveTime: 预约时间</li>
+ * <li>sourceType: 报事来源</li>
+ * <li>requestorName: 联系人名称</li>
+ * <li>requestorPhone: 联系方式</li>
  * </ul>
  */
 public class CreateTaskCommand {
@@ -21,9 +28,17 @@ public class CreateTaskCommand {
 	private Long categoryId;
 	private String address;
 	private String content;
-	private String nickName;
-	private String mobile;
+//	private String nickName;
+//	private String mobile;
 	private Long organizationId;
+	
+	private Long taskCategoryId;
+	private Long addressId;
+	private Byte priority;
+	private String sourceType;
+	private Long reserveTime;
+	private String requestorName;
+	private String requestorPhone;
 	
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
@@ -64,22 +79,55 @@ public class CreateTaskCommand {
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
+	
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
+	}
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
+	}
+	public Long getAddressId() {
+		return addressId;
+	}
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+	
+	public Long getReserveTime() {
+		return reserveTime;
+	}
+	public void setReserveTime(Long reserveTime) {
+		this.reserveTime = reserveTime;
+	}
+	public Byte getPriority() {
+		return priority;
+	}
+	public void setPriority(Byte priority) {
+		this.priority = priority;
+	}
+	public String getSourceType() {
+		return sourceType;
+	}
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+	public String getRequestorName() {
+		return requestorName;
+	}
+	public void setRequestorName(String requestorName) {
+		this.requestorName = requestorName;
+	}
+	public String getRequestorPhone() {
+		return requestorPhone;
+	}
+	public void setRequestorPhone(String requestorPhone) {
+		this.requestorPhone = requestorPhone;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
-	public String getNickName() {
-		return nickName;
-	}
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
-	public String getMobile() {
-		return mobile;
-	}
-	public void setMobile(String mobile) {
-		this.mobile = mobile;
-	}
+
 	public Long getOrganizationId() {
 		return organizationId;
 	}

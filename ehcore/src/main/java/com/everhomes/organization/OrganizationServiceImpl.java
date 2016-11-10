@@ -253,6 +253,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setDirectlyEnterpriseId(parOrg.getDirectlyEnterpriseId());
 		}
 		
+		
 		Organization org = dbProvider.execute((TransactionStatus status) -> {
 			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				//添加子公司的时候默认给公司添加圈 sfyan 20160706
@@ -279,9 +280,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 				enterprise.setAddress(cmd.getAddress());
 				enterprise.setCreateTime(organization.getCreateTime());
 				organizationProvider.createOrganizationDetail(enterprise);
+	            
+	            // 获取父亲公司所入驻的园区，由于创建子公司时在界面上没有指定其所在园区，会导致服务市场上拿不到数据，
+	            // 故需要补充其所在园区 by lqs 20161101
+	            Long communityId = getOrganizationActiveCommunityId(cmd.getParentId());
+	            if(communityId != null) {
+	                createActiveOrganizationCommunityRequest(user.getId(), organization.getId(), communityId);
+	            } else {
+	                LOGGER.error("Community not found, organizationId={}, parentOrgId={}", organization.getId(), cmd.getParentId());
+	            }
 			}else{
 				organizationProvider.createOrganization(organization);
 			}
+			
 			return organization;
 		});
 		
@@ -542,17 +553,19 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setMemberCount(cmd.getMemberCount());
 			organizationProvider.createOrganizationDetail(enterprise);
 			
-			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
-			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
-			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
-			organizationCommunityRequest.setMemberId(enterprise.getOrganizationId());
-
-			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
-			organizationCommunityRequest.setCreatorUid(user.getId());
-			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	        
-	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
+			createActiveOrganizationCommunityRequest(user.getId(), enterprise.getOrganizationId(), cmd.getCommunityId());
+//			OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+//			organizationCommunityRequest.setCommunityId(cmd.getCommunityId());
+//			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+//			organizationCommunityRequest.setMemberId(enterprise.getOrganizationId());
+//
+//			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+//			organizationCommunityRequest.setCreatorUid(user.getId());
+//			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//	        
+//	        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 			
 	        // 把企业所在的小区信息放到eh_organization_community_requests表，从eh_organizations表删除掉，以免重复 by lqs 20160512
 	        //organization.setCommunityId(cmd.getCommunityId());
@@ -573,6 +586,20 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		return ConvertHelper.convert(organization, OrganizationDTO.class);
+	}
+	
+	private void createActiveOrganizationCommunityRequest(Long creatorId, Long organizationId, Long communityId) {
+	    OrganizationCommunityRequest organizationCommunityRequest = new OrganizationCommunityRequest();
+        organizationCommunityRequest.setCommunityId(communityId);
+        organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+        organizationCommunityRequest.setMemberId(organizationId);
+
+        organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+        organizationCommunityRequest.setCreatorUid(creatorId);
+        organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        organizationCommunityRequest.setApproveTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        this.organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
 	}
 	
 	/**
@@ -4346,6 +4373,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
+	public List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org) {
+		return this.convertDTO(organizationMembers, org);
+	}
+	
+	@Override
 	public ListOrganizationMemberCommandResponse listOrganizationPersonnelsByRoleIds(ListOrganizationPersonnelByRoleIdsCommand cmd){
 		ListOrganizationContactCommand command = new ListOrganizationContactCommand();
 		command.setOrganizationId(cmd.getOrganizationId());
@@ -4660,6 +4692,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
 		orgs.add(organization);
+		if(LOGGER.isDebugEnabled())
+        	LOGGER.info("orgs:" + orgs);
 		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
 		
 		for (Organization org : orgs) {
@@ -4669,6 +4703,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 				if(null == community){
 					continue;
 				}
+				
+				if(LOGGER.isDebugEnabled())
+		        	LOGGER.info("community:" + community);
+				
 				if(community.getNamespaceId().equals(namespaceId)){
 					dtos.add(ConvertHelper.convert(community, CommunityDTO.class));
 				}
@@ -5209,6 +5247,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
 		Long ownerId = orgId;
+
+		OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
 	    
 		return organizationMembers.stream().map((c) ->{
 			Long organizationId = ownerId;
@@ -5217,12 +5257,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
-			
+
+
 			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
-				dto.setDepartments(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
+				if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
+					departments.add(orgDTO);
+				}
+				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				dto.setDepartments(departments);
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
-				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
+				List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
+				groups.add(orgDTO);
+				groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
+				dto.setGroups(groups);
 			}
 			
 			if(OrganizationMemberTargetType.USER.getCode().equals(dto.getTargetType())){
@@ -5236,7 +5285,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(c.getIntegralTag4() != null && c.getIntegralTag4() == 1){
 				dto.setContactToken(null);
 			}
-			
+
+			if(null == VisibleFlag.fromCode(c.getVisibleFlag())){
+				dto.setVisibleFlag(VisibleFlag.SHOW.getCode());
+			}
+
 			/**
 			 * 补充用户角色
 			 */
@@ -7239,6 +7292,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 		Organization organization = this.checkOrganization(cmd.getOrganizationId());
 
+		if(OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			organization = this.checkOrganization(organization.getDirectlyEnterpriseId());
+		}
+
 		VisibleFlag visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
 
 		if(null == visibleFlag){
@@ -7248,16 +7305,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.GROUP.getCode());
 		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
 
 		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypeList);
 
 		List<Long> organizationIds = new ArrayList<Long>();
 		organizationIds.add(organization.getId());
 		for (Organization org : organizations) {
-			if(org.getDirectlyEnterpriseId().equals(organization.getId())){
-				organizationIds.add(organization.getId());
-			}
-
+			organizationIds.add(org.getId());
 		}
 
 		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(cmd.getContactToken(), organizationIds);
@@ -7293,7 +7348,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public OrganizationTreeDTO listAllTreeOrganizations(ListAllTreeOrganizationsCommand cmd) {
 
-		Organization org =  this.checkOrganization(cmd.getOrganizationId());
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null) {
+			return new OrganizationTreeDTO();
+		}
 		List<Organization> organizations = new ArrayList<Organization>();
 		List<String> groupTypeList = new ArrayList<String>();
 		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
@@ -7386,6 +7444,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(!StringUtils.isEmpty(r.getInitial())){
 				dto.setInitial(r.getInitial().replace("~", "#"));
 			}
+
 			return dto;
 		}).collect(Collectors.toList());
 
@@ -7396,6 +7455,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd) {
+		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
+		if(org == null){
+			return new OrganizationDTO();
+		}
 		Long userId = UserContext.current().getUser().getId();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 		return this.getMemberTopDepartment(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), cmd.getOrganizationId());

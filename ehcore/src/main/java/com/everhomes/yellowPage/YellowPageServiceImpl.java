@@ -20,6 +20,7 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.math.RandomUtils;
+import org.apache.commons.lang.math.RandomUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -34,6 +35,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
+
+import static org.bouncycastle.asn1.x500.style.RFC4519Style.c;
 
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
@@ -578,9 +581,9 @@ public class YellowPageServiceImpl implements YellowPageService {
     private void processDetailUrl(ServiceAllianceDTO dto) {
         try {
             String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
-            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(dto.getName(), "UTF-8"), RandomUtils.nextInt());
+            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(dto.getName(), "UTF-8"), RandomUtils.nextInt(2));
             dto.setDetailUrl(url);
-        } catch (UnsupportedEncodingException e) {
+        } catch (Exception e) {
             e.printStackTrace();
         }
     }
@@ -930,4 +933,20 @@ public class YellowPageServiceImpl implements YellowPageService {
             return dto;
         }).collect(Collectors.toList());
     }
+
+    @Override
+    public List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId,
+                cmd.getParentId(), CategoryAdminStatus.ACTIVE);
+        return entityResultList.stream().map(r -> {
+            List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(namespaceId,
+                    r.getId(), CategoryAdminStatus.ACTIVE);
+            if (childCategories != null && childCategories.size() > 0) {
+                r.setDisplayMode(childCategories.get(0).getDisplayMode());
+            }
+            return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
+        }).collect(Collectors.toList());
+    }
+
 }

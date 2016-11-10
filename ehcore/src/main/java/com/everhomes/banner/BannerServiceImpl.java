@@ -127,6 +127,11 @@ public class BannerServiceImpl implements BannerService {
         }
         
         List<Banner> allBanners = new ArrayList<Banner>();
+
+        // 看是否有自定义banner        add by xq.tian  2016/11/01
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, ScopeType.COMMUNITY.getCode(), communityId, sceneType);
+
         List<Banner> communityBanners = bannerProvider.findBannersByTagAndScope(namespaceId, sceneType, cmd.getBannerLocation(), cmd.getBannerGroup(), ScopeType.COMMUNITY.getCode(), communityId);
         List<Banner> customizedBanners = new ArrayList<Banner>();
         
@@ -135,8 +140,8 @@ public class BannerServiceImpl implements BannerService {
 				customizedBanners.add(banner);
 			}
 		}
-        
-        if(customizedBanners.size() > 0){
+
+        if(customizedBanner != null || customizedBanners.size() > 0){
         	allBanners = customizedBanners;
         }else{
         	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
@@ -224,8 +229,11 @@ public class BannerServiceImpl implements BannerService {
 				customizedBanners.add(banner);
 			}
 		}
-        
-        if(customizedBanners.size() > 0){
+        // 看是否有自定义banner        add by xq.tian  2016/11/01
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, ScopeType.COMMUNITY.getCode(), communityId, sceneTypeStr);
+
+        if(customizedBanner != null || customizedBanners.size() > 0){
         	allBanners = customizedBanners;
         }else{
         	//String token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
@@ -757,27 +765,33 @@ public class BannerServiceImpl implements BannerService {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid scope parameter.");
 		}
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		
-		Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize() 
+
+        Integer pageSize = cmd.getPageSize() != null ? cmd.getPageSize()
 				: this.configurationProvider.getIntValue("pagination.page.size", AppConfig.DEFAULT_PAGINATION_PAGE_SIZE);
-		List<BannerDTO> result = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
-				pageSize + 1, ApplyPolicy.CUSTOMIZED);
-        if(result == null || result.isEmpty()) {
-        	result = bannerProvider.listBannersByOwner(namespaceId, null, cmd.getSceneType(), cmd.getPageAnchor(), pageSize + 1,
+
+        // 看是否有自定义banner
+        // 如果有, 则说明该场景下只需要自定义的banner了, 不需要默认的banner了
+        Banner customizedBanner = bannerProvider.findAnyCustomizedBanner(namespaceId, cmd.getScope().getScopeCode(), cmd.getScope().getScopeId(), cmd.getSceneType());
+        List<BannerDTO> bannerList;
+        if (customizedBanner != null) {
+            bannerList = bannerProvider.listBannersByOwner(namespaceId, cmd.getScope(), cmd.getSceneType(), cmd.getPageAnchor(),
+                    pageSize + 1, ApplyPolicy.CUSTOMIZED);
+        } else {
+            bannerList = bannerProvider.listBannersByOwner(namespaceId, null, cmd.getSceneType(), cmd.getPageAnchor(), pageSize + 1,
                     ApplyPolicy.DEFAULT);
         }
-        
-        for(BannerDTO dto : result) {
+
+        for(BannerDTO dto : bannerList) {
         	dto.setPosterUrl(parserUri(dto.getPosterPath(), cmd.getOwnerType(), cmd.getOwnerId()));
         }
         
-		bannerDTOSort(result);
+		bannerDTOSort(bannerList);
 		
 		ListBannersByOwnerCommandResponse resp = new ListBannersByOwnerCommandResponse();
-		resp.setBanners(result);
-		if(result.size() > pageSize) {
-			resp.setNextPageAnchor(result.get(result.size() - 1).getId());
-			result.remove(result.size() - 1);
+		resp.setBanners(bannerList);
+		if(bannerList.size() > pageSize) {
+			resp.setNextPageAnchor(bannerList.get(bannerList.size() - 1).getId());
+			bannerList.remove(bannerList.size() - 1);
 		}
 		return resp;
 	}

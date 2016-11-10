@@ -648,6 +648,20 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/searchOrganizationOwnersBycondition</b>
+	 * <p>搜索业主列表 用于物业报修 任务</p>
+	 */
+	@RequestMapping("searchOrganizationOwnersBycondition")
+	@RestReturn(value=OrganizationOwnerDTO.class, collection=true)
+	public RestResponse searchOrganizationOwnersBycondition(@Valid SearchOrganizationOwnersByconditionCommand cmd) {
+		List<OrganizationOwnerDTO> results = propertyMgrService.searchOrganizationOwnersBycondition(cmd);
+		RestResponse response = new RestResponse(results);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /pm/listOrganizationOwnersByAddress</b>
@@ -1484,6 +1498,20 @@ public class PropertyMgrController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /pm/updateOrganizationOwnerAddressAuthType</b>
+	 * <p>解除业主与地址之间的认证关系</p>
+	 */
+	@RequestMapping("updateOrganizationOwnerAddressAuthType")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse updateOrganizationOwnerAddressAuthType(@Valid UpdateOrganizationOwnerAddressAuthTypeCommand cmd) {
+		propertyMgrService.deleteOrganizationOwnerAddressAuthStatus(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
 	 * <b>URL: /pm/listOrganizationOwnerBehaviors</b>
 	 * <p>查询业主的活动记录</p>
 	 */
@@ -1533,6 +1561,20 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(value=OrganizationOwnerTypeDTO.class, collection = true)
 	public RestResponse listOrganizationOwnerTypes(@Valid ListOrganizationOwnerTypesCommand cmd) {
         List<OrganizationOwnerTypeDTO> dtos = propertyMgrService.listOrganizationOwnerTypes(cmd);
+        RestResponse response = new RestResponse(dtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/listParkingCardCategories</b>
+	 * <p>列出停车类型列表</p>
+	 */
+	@RequestMapping("listParkingCardCategories")
+	@RestReturn(value=ParkingCardCategoryDTO.class, collection = true)
+	public RestResponse listParkingCardCategories(@Valid ListParkingCardCategoriesCommand cmd) {
+        List<ParkingCardCategoryDTO> dtos = propertyMgrService.listParkingCardCategories(cmd);
         RestResponse response = new RestResponse(dtos);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

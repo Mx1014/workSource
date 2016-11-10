@@ -38,13 +38,13 @@ public class PmTaskAdminController extends ControllerBase {
 	private PmTaskSearch pmTaskSearch;
       
       /**
-       * <b>URL: /admin/pmtask/createTask</b>
+       * <b>URL: /admin/pmtask/createTaskByOrg</b>
        * <p>创建新任务</p>
        */
-      @RequestMapping("createTask")
+      @RequestMapping("createTaskByOrg")
       @RestReturn(value=PmTaskDTO.class)
-      public RestResponse createTask(CreateTaskCommand cmd) {
-    	  PmTaskDTO dto = pmTaskService.createTaskByAdmin(cmd);
+      public RestResponse createTaskByOrg(CreateTaskCommand cmd) {
+    	  PmTaskDTO dto = pmTaskService.createTaskByOrg(cmd);
           RestResponse response = new RestResponse(dto);
           response.setErrorCode(ErrorCodes.SUCCESS);
           response.setErrorDescription("OK");

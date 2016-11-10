@@ -349,4 +349,6 @@ public interface OrganizationService {
 	 * @return
      */
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
+	
+	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
 }

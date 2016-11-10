@@ -10,6 +10,9 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 关键字</li>
  * <li>pageAnchor: 下一页开始的锚点</li>
  * <li>pageSize: 每页大小</li>
+ * <li>buildingName: 楼栋名称</li>
+ * <li>addressId: 地址id</li>
+ * <li>apartmentName: 门牌名称</li>
  * </ul>
  */
 public class SearchOrganizationOwnersCommand {
@@ -20,6 +23,9 @@ public class SearchOrganizationOwnersCommand {
     private String keyword;
     private Long pageAnchor;
     private Integer pageSize;
+    private String buildingName;
+    private Long addressId;
+    private String apartmentName;
 
     public Long getCommunityId() {
         return communityId;
@@ -61,6 +67,22 @@ public class SearchOrganizationOwnersCommand {
         this.keyword = keyword;
     }
 
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public Long getAddressId() {
+        return addressId;
+    }
+
+    public void setAddressId(Long addressId) {
+        this.addressId = addressId;
+    }
+
     public Long getOrganizationId() {
         return organizationId;
     }
@@ -69,8 +91,17 @@ public class SearchOrganizationOwnersCommand {
         this.organizationId = organizationId;
     }
 
-    @Override
+    public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }
