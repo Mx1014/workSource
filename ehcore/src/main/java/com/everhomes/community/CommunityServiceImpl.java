@@ -1458,7 +1458,8 @@ public class CommunityServiceImpl implements CommunityService {
 			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
 			for (OrganizationOwner organizationOwner : owners) {
 				Address address = addressProvider.findAddressById(organizationOwner.getAddressId());
-				addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+				if(null != address)
+					addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
 			}
 			return dto;
 		}
@@ -1470,9 +1471,10 @@ public class CommunityServiceImpl implements CommunityService {
 				Group group = groupProvider.findGroupById(userGroup.getGroupId());
 				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
 					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
-					if(null != address)
+					if(null != address){
 						address.setMemberStatus(userGroup.getMemberStatus());
 						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+					}
 				}
 			}
 		}
