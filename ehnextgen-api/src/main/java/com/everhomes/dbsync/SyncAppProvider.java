@@ -17,4 +17,6 @@ public interface SyncAppProvider {
 
     List<SyncApp> querySyncApps(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+	SyncApp findSyncAppByName(String name);
+
 }

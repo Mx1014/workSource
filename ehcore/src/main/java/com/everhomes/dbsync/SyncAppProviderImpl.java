@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -114,5 +115,26 @@ public class SyncAppProviderImpl implements SyncAppProvider {
         obj.setCreateTime(new Timestamp(l2));
         
         obj.setLastUpdate(obj.getCreateTime());
+    }
+    
+    @Override
+    public SyncApp findSyncAppByName(String name) {
+    	ListingLocator locator = new ListingLocator();
+    	List<SyncApp> apps = this.querySyncApps(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_SYNC_APPS.NAME.eq(name));
+				return query;
+			}
+    		
+    	});
+    	
+    	if(apps != null && apps.size() > 0) {
+    		return apps.get(0);
+    	}
+    	
+    	return null;
     }
 }

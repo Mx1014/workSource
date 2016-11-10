@@ -24,4 +24,5 @@ public interface NashornObjectService {
     List<Map<String, Object>> query(DatabaseQuery query);
     Field<?> getTableField(String name) throws Exception;
     void saveGraph(DataGraph graph);
+	DataGraph createGraph(String graphJson);
 }

@@ -1,13 +1,17 @@
 //load('./jvm-npm.js')
-var h = require("db");
-h.hello();
+//var db = require("db");
+
+var Apps = {};
 
 function httpProcess(id) {
     print(id);
 }
 
 function mappingInit(id) {
-    mapItem = nashornObjs.get(id);
-    print(mapItem.getName());
+    jmap = nashornObjs.get(id);
+    print(jmap.getName());
+    var mapName = jmap.getAppName() + "$" + jmap.getName();
+    var imp = require(mapName);
+    imp.mappingStart(Apps, jmap.getAppName(), jmap.getName());
 }
 

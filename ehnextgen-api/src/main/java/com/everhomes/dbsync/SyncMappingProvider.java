@@ -18,4 +18,6 @@ public interface SyncMappingProvider {
     List<SyncMapping> querySyncMappings(ListingLocator locator, int count,
             ListingQueryBuilderCallback queryBuilderCallback);
 
+	SyncMapping findSyncMappingByName(String name);
+
 }

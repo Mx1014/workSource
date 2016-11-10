@@ -11,4 +11,6 @@ public interface SyncDatabaseService {
 
     SyncMappingDTO createMapping(CreateSyncMappingCommand cmd);
 
+	String loadMapping(String appName, String mappingName);
+
 }

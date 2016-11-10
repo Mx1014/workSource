@@ -34,6 +34,7 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Ehcore;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 @Component
@@ -54,6 +55,9 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     
     @Autowired
     private ConfigurationProvider configurationProvider;
+    
+    @Autowired
+    private SyncDatabaseService syncDatabaseService;
     
     private Map<String, DataGraph> graphStorage;
     
@@ -137,6 +141,28 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     public File getResource(String name) {
         Resource js = null;
         try {
+        		if(name.indexOf('$') > 0) {
+        			String[] ns = name.split("\\$");
+        			if(ns.length != 3) {
+        				return null;
+        			}
+        			
+        			String mapping = null;
+        			if(ns[0].equals("app")) {
+        				mapping = syncDatabaseService.loadMapping(ns[1], ns[2]);
+        			}
+        			
+        			if(mapping != null) {
+        				if(mapping.endsWith(".js")) {
+        					js = new ClassPathResource(resourceRoot + mapping);
+        				} else {
+        					js = new ClassPathResource(resourceRoot + "nothing.js");
+        				}
+        				
+        				return js.getFile();
+        			}
+        		}
+        		
             js = new ClassPathResource(resourceRoot + name);
             return js.getFile();
         } catch(Exception ex) {
@@ -150,6 +176,30 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     public String getResourceAsStream(String name) {
         Resource js = null;
         try {
+        	
+    		if(name.indexOf('$') > 0) {
+    			String[] ns = name.split("\\$");
+    			if(ns.length != 3) {
+    				return null;
+    			}
+    			
+    			String mapping = null;
+    			if(ns[0].equals("app")) {
+    				mapping = syncDatabaseService.loadMapping(ns[1], ns[2]);
+    			}
+    			
+    			if(mapping != null) {
+    				if(mapping.endsWith(".js")) {
+    		         js = new ClassPathResource(resourceRoot + mapping);
+    		         try(Scanner scanner = new Scanner(js.getInputStream())) {
+    		                return scanner.useDelimiter("\\A").next();
+    		            }
+    				} else {
+    					return mapping;
+    				}
+    			}
+    		}
+    		
             js = new ClassPathResource(resourceRoot + name);
             try(Scanner scanner = new Scanner(js.getInputStream())) {
                 return scanner.useDelimiter("\\A").next();
@@ -231,6 +281,18 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     @Override
     public void saveGraph(DataGraph graph) {
         graphStorage.put(graph.getGraphName(), graph);
+    }
+    
+    @Override
+    public DataGraph createGraph(String graphJson) {
+    	DataGraph graph = DataGraph.fromJSDataGraph(graphJson);
+    	if(graph == null) {
+    		return null;
+    	}
+    	
+    	saveGraph(graph);	
+    	
+    	return getGraph(graph.getGraphName());
     }
     
     @Override

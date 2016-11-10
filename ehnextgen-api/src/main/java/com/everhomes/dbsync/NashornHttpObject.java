@@ -11,6 +11,8 @@ public class NashornHttpObject implements NashornObject {
     private long createTime;
     private String url;
     private String respStr;
+    private String appName;
+    private String mapName;
     DeferredResult<String> result;
     private AtomicBoolean finished;
 
@@ -52,7 +54,23 @@ public class NashornHttpObject implements NashornObject {
         return createTime;
     }
 
-    @Override
+    public String getAppName() {
+		return appName;
+	}
+
+	public void setAppName(String appName) {
+		this.appName = appName;
+	}
+
+	public String getMapName() {
+		return mapName;
+	}
+
+	public void setMapName(String mapName) {
+		this.mapName = mapName;
+	}
+
+	@Override
     public long getTimeout() {
         return (10*1000l); //TODO hard code here
     }

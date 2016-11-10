@@ -46,11 +46,25 @@ public class SyncDatabaseServiceImpl implements SyncDatabaseService {
         syncMappingProvider.createSyncMapping(map);
         
         NashornMappingObject mapObj = new NashornMappingObject();
-        mapObj.setContent(map.getContent());
         mapObj.setName(map.getName());
         nashornProcessService.putProcessJob(mapObj);
         
         return ConvertHelper.convert(map, SyncMappingDTO.class);
+    }
+    
+    @Override
+    public String loadMapping(String appName, String mappingName) {
+    	SyncApp app = syncAppProvider.findSyncAppByName(appName);
+    	if(app == null) {
+    		return null;
+    	}
+    	
+    	SyncMapping mapping = this.syncMappingProvider.findSyncMappingByName(mappingName);
+    	if(mapping != null) {
+    		return mapping.getContent();
+    	}
+    	
+    	return null;
     }
 
 }

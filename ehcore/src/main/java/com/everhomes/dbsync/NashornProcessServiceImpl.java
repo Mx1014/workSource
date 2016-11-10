@@ -48,7 +48,7 @@ public class NashornProcessServiceImpl implements NashornProcessService {
     private TaskScheduler taskScheduler;
     
     private ThreadLocal<ScriptEngine> engineHolder;
-    private BlockingQueue<NashornObject> queue;
+    private BlockingQueue<NashornObject> queue;//TODO use multiple queue ?
     private AtomicBoolean started = new AtomicBoolean(false);
     private final ThreadFactory threadFactory;
     private Thread[] threads;

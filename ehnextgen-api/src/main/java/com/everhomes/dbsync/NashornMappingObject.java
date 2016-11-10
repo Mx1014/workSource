@@ -3,8 +3,8 @@ package com.everhomes.dbsync;
 public class NashornMappingObject implements NashornObject {
 	private long id;
 	private long createTime;
-	private String content;
 	private String name;
+	private String appName;
 	
 	public long getId() {
 		return id;
@@ -34,21 +34,21 @@ public class NashornMappingObject implements NashornObject {
 	@Override
 	public void onComplete() {
 	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
+	
 	public String getName() {
 		return name;
 	}
 
 	public void setName(String name) {
 		this.name = name;
+	}
+
+	public String getAppName() {
+		return appName;
+	}
+
+	public void setAppName(String appName) {
+		this.appName = appName;
 	}
 
 	@Override

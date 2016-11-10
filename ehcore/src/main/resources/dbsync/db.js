@@ -1,8 +1,9 @@
 //http://gywbd.github.io/posts/2014/11/using-exports-nodejs-interface-design-pattern.html
-var f = {
-    hello : function(){
-        print("hello");
-    }
+
+function App(name) {
+    this.name = name;
+    this.maps = {};
+    this.quries = {};
 }
 
-module.exports = f;
+module.exports = App;

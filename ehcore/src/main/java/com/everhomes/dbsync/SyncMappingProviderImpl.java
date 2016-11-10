@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -107,6 +108,27 @@ public class SyncMappingProviderImpl implements SyncMappingProvider {
         }
 
         return objs;
+    }
+    
+    @Override
+    public SyncMapping findSyncMappingByName(String name) {
+    	ListingLocator locator = new ListingLocator();
+    	List<SyncMapping> mappings = this.querySyncMappings(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_SYNC_MAPPING.NAME.eq(name));
+				return query;
+			}
+    		
+    	});
+    	
+    	if(mappings != null && mappings.size() > 0) {
+    		return mappings.get(0);
+    	}
+    	
+    	return null;
     }
 
     private void prepareObj(SyncMapping obj) {
