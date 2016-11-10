@@ -1470,8 +1470,8 @@ public class CommunityServiceImpl implements CommunityService {
 				Group group = groupProvider.findGroupById(userGroup.getGroupId());
 				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
 					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
-					address.setMemberStatus(userGroup.getMemberStatus());
 					if(null != address)
+						address.setMemberStatus(userGroup.getMemberStatus());
 						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
 				}
 			}
