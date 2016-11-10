@@ -1588,7 +1588,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			dayStat.setResetMeterFlag(resetFlag);
 			dayStat.setChangeMeterFlag(changeFlag);
 			dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-			dayStat.setCreatorUid(UserContext.current().getUser().getId());
+//			dayStat.setCreatorUid(UserContext.current().getUser().getId());
 			dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
 			energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
@@ -1647,7 +1647,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			for(EnergyCountStatistic cs : countStats){
 
 				cs.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-				cs.setCreatorUid(UserContext.current().getUser().getId());
+//				cs.setCreatorUid(UserContext.current().getUser().getId());
 				cs.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 						.getTime()));
 				energyCountStatisticProvider.createEnergyCountStatistic(cs);
@@ -1712,7 +1712,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 				
 
 				yoy.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-				yoy.setCreatorUid(UserContext.current().getUser().getId());
+//				yoy.setCreatorUid(UserContext.current().getUser().getId());
 				yoy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 						.getTime()));
 				
