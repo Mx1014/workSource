@@ -4513,9 +4513,13 @@ public class GroupServiceImpl implements GroupService {
 		groupSetting.setCreatorUid(UserContext.current().getUser().getId());
 		groupSetting.setUpdateTime(groupSetting.getCreateTime());
 		groupSetting.setOperatorUid(groupSetting.getCreatorUid());
-		if (getGroupSetting(cmd.getNamespaceId()) == null) {
+		GroupSetting old = null;
+		if ((old = getGroupSetting(cmd.getNamespaceId())) == null) {
 			groupSettingProvider.createGroupSetting(groupSetting);
 		}else {
+			groupSetting.setCreateTime(old.getCreateTime());
+			groupSetting.setCreatorUid(old.getCreatorUid());
+			groupSetting.setId(old.getId());
 			groupSettingProvider.updateGroupSetting(groupSetting);
 		}
 		
