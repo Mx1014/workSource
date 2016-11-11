@@ -38,6 +38,7 @@ function httpProcess(id) {
         print("dsl Query...");
         queryItem = queryItem[0];
         rlt = queryItem.queryFunc(jreq.getBody());
+        print("rlt=" + rlt);
         jreq.resp(rlt);
     } else {
         print("makeQuery...");

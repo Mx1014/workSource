@@ -3,7 +3,6 @@ var dsl = require("dsl");
 var DSL = dsl.DSL;
 var Tables = dsl.TABLES;
 
-tables = ["eh_user_identifiers", "eh_users"];
 map = {
     "eh_user_identifiers": {
         "fields": ["id", "owner_uid", "identifier_type", "identifier_token", "claim_status"],
@@ -44,6 +43,7 @@ query = {
             if(input && input.length > 0) {
                 o = JSON.parse(input);
             }
+            print("accountName:" + o.accountName);
             records = DSL.using(dsl.readOnly(Tables.EhUsers)).select(dsl.fields("eh_users.id", "eh_users.uuid", "eh_users.account_name"))
                 .where("eh_users.account_name like ?", o.accountName + "%").from(Tables.EH_USERS).limit(10).fetch();
             return dsl.parseRecords(records);
@@ -69,7 +69,7 @@ mapping.mappingStart = function(apps, appName, mapName) {
         obj["appName"] = appName;
         obj["mapName"] = mapName;
         obj["mapping"] = map;
-        obj["tables"] = tables;
+        obj["tables"] = ["eh_user_identifiers", "eh_users"];
         graph = nashornObjs.createGraph(JSON.stringify(obj));
 
         nashornObjs.createQueryBase(appName, mapName, JSON.stringify(query));
