@@ -11,6 +11,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 import com.everhomes.http.HttpUtils;
+import com.everhomes.rest.common.BizDetailActionData;
 import com.everhomes.rest.launchpad.*;
 import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
 import com.everhomes.rest.statistics.transaction.StatWareDTO;
@@ -950,8 +951,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 						if(businesses.size() > 0){
 							BusinessDTO business = businesses.get(0);
 							itemDTO.setIconUrl(business.getLogoUrl());
+							BizDetailActionData actionData = (BizDetailActionData)StringHelper.fromJsonString(r.getActionData(), BizDetailActionData.class);
 							JSONObject jsonObject = new JSONObject();
-							jsonObject.put(LaunchPadConstants.URL,business.getUrl());
+							if(null != actionData){
+								jsonObject.put(LaunchPadConstants.URL, actionData.getUrl());
+							}else{
+								LOGGER.error("item action data error. itemId = {}, actionData= {}", r.getId(), r.getActionData());
+							}
 							jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
 							itemDTO.setActionData(jsonObject.toJSONString());
 							itemDTO.setItemLabel(business.getDisplayName());
