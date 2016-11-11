@@ -1488,9 +1488,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
 	/**
-	 * 每天早上0点10分刷前一天的读表
+	 * 每天早上1点10分刷前一天的读表
 	 * */
-	@Scheduled(cron = "0 10 0 * * ?")
+	@Scheduled(cron = "0 10 1 * * ?")
     public void caculateEnergyDayStat(){
 		//刷今天的
 		caculateEnergyDayStatByDate(DateHelper.currentGMTTime());
