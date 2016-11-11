@@ -8,6 +8,7 @@ import org.jooq.Configuration;
 import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.Result;
+import org.jooq.Table;
 
 public interface NashornObjectService {
     void put(NashornObject nobj) throws Exception;
@@ -29,4 +30,11 @@ public interface NashornObjectService {
 	String makeQuery(String appName, String mapName, String queryUrl,
 			String body);
 	String makeRawQuery(String sql, String queryUrl, String body);
+	Configuration readOnly(Class<?> accessPojo);
+	Configuration readWrite(Class<?> accessPojo);
+	long getNextSequence(Class<?> accessPojo);
+	List<Table<?>> getTables();
+	String parseRecords(Result<Record> records);
+	List<Field<?>> fields(List<String> strs);
+	Table<?> getTable(String tableName);
 }

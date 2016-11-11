@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 import org.jooq.DataType;
 import org.jooq.Field;
 import org.jooq.Table;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.stereotype.Component;
@@ -90,7 +91,9 @@ public class EhcoreDatabaseServiceImpl implements EhcoreDatabaseService {
             fieldName = ns[2].trim();
         } else if(ns.length == 2) {
             tableName = ns[0].trim();
-            fieldName = ns[1].trim();            
+            fieldName = ns[1].trim();
+        } else if(ns.length == 1) {
+        	return DSL.field(name);
         } else {
             throw new Exception("field=" + name + " not found!");
         }

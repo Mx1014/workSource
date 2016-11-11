@@ -11,6 +11,9 @@ import javax.script.ScriptEngine;
 import javax.script.ScriptEngineManager;
 import javax.script.ScriptException;
 
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.impl.DSL;
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -50,6 +53,7 @@ import com.everhomes.rest.dbsync.CreateSyncMappingCommand;
 import com.everhomes.rest.dbsync.SyncAppCreateCommand;
 import com.everhomes.rest.dbsync.SyncAppDTO;
 import com.everhomes.rest.dbsync.SyncMappingDTO;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -356,6 +360,114 @@ public class SyncDatabaseTest extends LoginAuthTestCase {
     	jsService.push(obj);
     	
     	LOGGER.info("result" + deferredResult.getResult());
+    	
+    	try {
+    		Thread.sleep(15*1000l);
+    	} catch (InterruptedException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    	}
+    }
+    
+    @Test
+    public void testRawQuery() {
+    	//TODO named bindings: http://www.jooq.org/doc/2.5/manual/sql-building/bind-values/named-parameters/
+    	
+    	String sql1 = "select * from eh_users join eh_user_identifiers on eh_users.id=eh_user_identifiers.owner_uid where eh_user_identifiers.identifier_token = ?";
+    	Result<Record> records = DSL.using(nashornObjectService.configure()).fetch(sql1, "13564546106");
+    	LOGGER.info("records=" + records);
+    	
+    	List<String> strs = new ArrayList<String>();
+    	strs.add("eh_users.id");
+    	strs.add("eh_users.uuid");
+    	strs.add("eh_users.account_name");
+    	LOGGER.info("" + DSL.using(nashornObjectService.configure()).select(nashornObjectService.fields(strs))
+    			.from(nashornObjectService.getTableMeta("eh_users").getTableJOOQ())
+    			.where("eh_users.account_name like ?", "1%").limit(10).fetch());
+    	
+    	String sql2 = "select * from eh_users join eh_user_identifiers on eh_users.id=eh_user_identifiers.owner_uid where eh_user_identifiers.identifier_token = $phone";
+    	String jsonResult = nashornObjectService.makeRawQuery(sql2, "{\"regCityId\": 10002}", "{\"phone\": \"13564546106\"}");
+    	LOGGER.info("result=" + jsonResult);
+    }
+    
+    @Test
+    public void testRawQueryObj() {
+    	try {
+    		//wait other threads ok
+    		Thread.sleep(15*1000l);
+    	} catch (InterruptedException e) {
+    			e.printStackTrace();
+    	}
+    	
+    	DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>();
+    	NashornHttpObject obj = new NashornHttpObject(deferredResult);
+    	obj.setUrl("/testCreateApp/mapping001/getByPhone");
+    	obj.setAppName("testCreateApp");
+    	obj.setMapName("mapping001");
+    	obj.setQuery("getByPhone");
+    	obj.setBody("{\"phone\": \"13564546106\"}");//What about like ???
+    	jsService.push(obj);
+    	
+    	LOGGER.info("result" + deferredResult.getResult());
+    	
+    	try {
+    		Thread.sleep(15*1000l);
+    	} catch (InterruptedException e) {
+    			// TODO Auto-generated catch block
+    			e.printStackTrace();
+    	}
+    }
+    
+    @Test
+    public void testDSLJS() {
+    	ScriptEngineManager manager = new ScriptEngineManager();
+    	ScriptEngine engine = null;
+    	InputStreamReader reader;
+    	try {
+            engine = manager.getEngineByName("nashorn");
+            engine.put("nashornObjs", nashornObjectService);
+            engine.put("jThreadId", String.valueOf(Thread.currentThread().getId()));
+            
+            Resource js = new ClassPathResource("/dbsync/jvm-npm.js");
+            reader = new InputStreamReader(js.getInputStream(), "UTF-8");
+            engine.eval(reader);
+            
+            js = new ClassPathResource("/dbsync/init.js");
+            reader = new InputStreamReader(js.getInputStream(), "UTF-8");
+            engine.eval(reader);
+            
+        } catch (ScriptException | IOException e) {
+            LOGGER.error("start js engine error", e);
+        }
+    	
+        Invocable jsInvoke = (Invocable) engine;
+        try {
+			jsInvoke.invokeFunction("testDSL");
+		} catch (NoSuchMethodException | ScriptException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    @Test
+    public void testDSLQueryObj() {
+    	try {
+    		//wait other threads ok
+    		Thread.sleep(15*1000l);
+    	} catch (InterruptedException e) {
+    			e.printStackTrace();
+    	}
+    	
+    	DeferredResult<RestResponse> deferredResult = new DeferredResult<RestResponse>();
+    	NashornHttpObject obj = new NashornHttpObject(deferredResult);
+    	obj.setUrl("/testCreateApp/mapping001/findByAccountName");
+    	obj.setAppName("testCreateApp");
+    	obj.setMapName("mapping001");
+    	obj.setQuery("findByAccountName");
+    	obj.setBody("{\"accountName\": \"1\"}");//What about like ???
+    	jsService.push(obj);
+    	
+    	LOGGER.info("result:" + deferredResult.getResult());
     	
     	try {
     		Thread.sleep(15*1000l);

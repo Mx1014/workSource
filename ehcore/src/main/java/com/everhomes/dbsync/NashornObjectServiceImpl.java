@@ -3,6 +3,7 @@ package com.everhomes.dbsync;
 import java.io.File;
 import java.io.InputStream;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Scanner;
@@ -33,6 +34,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Ehcore;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhSyncApps;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -114,6 +116,20 @@ public class NashornObjectServiceImpl implements NashornObjectService {
             return obj;
         }
     }
+    
+    @Override
+    public List<Field<?>> fields(List<String> strs) {
+    	List<Field<?>> fields = new ArrayList<Field<?>>();
+    	for(String s : strs) {
+    		try {
+				fields.add(ehcoreDatabaseService.getTableField(s));
+			} catch (Exception e) {
+				LOGGER.error("get field error", e);
+			}
+    	}
+    	
+    	return fields;
+    }
 
     @Override
     public Configuration configure() {
@@ -128,6 +144,21 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     }
     
     @Override
+    public Configuration readOnly(Class<?> accessPojo) {
+    	return this.dbProvider.getDslContext(AccessSpec.readOnlyWith(accessPojo)).configuration();
+    }
+    
+    @Override
+    public Configuration readWrite(Class<?> accessPojo) {
+    	return this.dbProvider.getDslContext(AccessSpec.readWriteWith(accessPojo)).configuration();
+    }
+    
+    @Override
+    public long getNextSequence(Class<?> accessPojo) {
+        return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(accessPojo));
+    }
+    
+    @Override
     public String tableMeta(String tableName) {
         Table<?> table = Ehcore.EHCORE.getTable(tableName);
         String origin = "";
@@ -137,6 +168,12 @@ public class NashornObjectServiceImpl implements NashornObjectService {
         }
         
         return origin;
+    }
+    
+    @Override
+    public List<Table<?>> getTables() {
+    	List<Table<?>> tables = Ehcore.EHCORE.getTables();
+    	return tables;
     }
     
     @Override
@@ -217,6 +254,16 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     @Override
     public DataTable getTableMeta(String tableName) {
         return ehcoreDatabaseService.getTableMeta(tableName);
+    }
+    
+    @Override
+    public Table<?> getTable(String tableName) {
+        DataTable dt = ehcoreDatabaseService.getTableMeta(tableName);
+        if(dt == null) {
+        	return null;
+        }
+        
+        return dt.getTableJOOQ();
     }
     
     @Override
@@ -364,7 +411,41 @@ public class NashornObjectServiceImpl implements NashornObjectService {
     }
     
     @Override
-    public String makeRawQuery(String sql, String queryUrl, String body) {
-    	return "";
+    public String makeRawQuery(String sql, String def, String body) {
+    	Map<String, String> map1 = null;
+    	if(def != null && !def.isEmpty()) {
+    		map1 = (JSDataQueryInput)StringHelper.fromJsonString(def, JSDataQueryInput.class);	
+    	}
+    	
+    	Map<String, String> map2 = null;
+    	if(body != null && !body.isEmpty()) {
+    		map2 = (JSDataQueryInput)StringHelper.fromJsonString(body, JSDataQueryInput.class);	
+    	}
+    	
+    	if(map1 == null) {
+    		map1 = map2;
+    	} else {
+    		if(map2 != null) {
+    			map1.putAll(map2);
+    		}
+    	}
+    	
+    	DatabaseRawQueryProcess process = new DatabaseRawQueryProcess(this, sql, map1);
+    	List<Map<String, Object>> rlt;
+		try {
+			rlt = process.processQuery();
+	    	if(rlt != null) {
+	    		return StringHelper.toJsonString(rlt);
+	    	}
+		} catch (Exception e) {
+			LOGGER.error("raw query failed", e);
+		}
+		
+		return null;
+    }
+    
+    @Override
+    public String parseRecords(Result<Record> records) {
+        return StringHelper.toJsonString(DatabaseRawQueryProcess.processRecord(records));
     }
 }
