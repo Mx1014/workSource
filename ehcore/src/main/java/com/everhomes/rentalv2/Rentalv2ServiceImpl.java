@@ -2075,6 +2075,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setUnit(cmd.getUnit());
 			rs.setBeginDate(new Date(cmd.getBeginDate()));
 			rs.setEndDate(new Date(cmd.getEndDate()));
+			//modify by wh 2016-11-11 修改时间点和修改操作人的记录
+			rs.setOperatorUid(UserContext.current().getUser().getId());
+			rs.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			String openWorkday = "0000000";
 			if(null!=cmd.getOpenWeekday()) {
 				int openWorkdayInt=0;
