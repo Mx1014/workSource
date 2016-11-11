@@ -160,7 +160,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         SearchEnergyMeterResponse response = new SearchEnergyMeterResponse();
         if (ids.size() > pageSize) {
             ids.remove(ids.size() - 1);
-            response.setNextPageAnchor(ids.size());
+            response.setNextPageAnchor(anchor + ids.size());
         }
         List<EnergyMeter> meters = meterProvider.listByIds(UserContext.getCurrentNamespaceId(), ids);
         response.setMeters(meters.stream().map(energyConsumptionService::toEnergyMeterDTO).collect(Collectors.toList()));
