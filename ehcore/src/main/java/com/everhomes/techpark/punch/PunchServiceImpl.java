@@ -19,10 +19,8 @@ import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.TimeZone;
 import java.util.stream.Collectors;
 
@@ -66,6 +64,7 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.techpark.punch.AbsenceTimeDTO;
 import com.everhomes.rest.techpark.punch.AddPunchExceptionRequestCommand;
@@ -118,6 +117,8 @@ import com.everhomes.rest.techpark.punch.ViewFlags;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
+import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
@@ -135,8 +136,10 @@ import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
+import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
@@ -147,7 +150,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.WebTokenGenerator;
-import com.mysql.fabric.xmlrpc.base.Array;
 
 @Service
 public class PunchServiceImpl implements PunchService {
@@ -223,7 +225,7 @@ public class PunchServiceImpl implements PunchService {
 	 * <li>NORMAL(0): 正常</li>
 	 * </ul>
 	 */
-
+	@Override
 	public String statusToString (Byte status){
 		if(null == status){
 			return "";
@@ -488,6 +490,8 @@ public class PunchServiceImpl implements PunchService {
 		newPunchDayLog.setAfternoonStatus(pdl.getAfternoonPunchStatus());
 		newPunchDayLog.setViewFlag(ViewFlags.NOTVIEW.getCode());
 		newPunchDayLog.setExceptionStatus(pdl.getExceptionStatus());
+		newPunchDayLog.setDeviceChangeFlag(getDeviceChangeFlag(userId,java.sql.Date.valueOf(dateSF.format(logDay
+				.getTime())),companyId));
 		PunchDayLog punchDayLog = punchProvider.getDayPunchLogByDate(userId,
 				companyId, dateSF.format(logDay.getTime()));
 		if (null == punchDayLog) {
@@ -501,7 +505,18 @@ public class PunchServiceImpl implements PunchService {
 		}
 		return newPunchDayLog;
 	}
-
+ 
+	private Byte getDeviceChangeFlag(Long userId, java.sql.Date punchDate,
+			Long companyId) {
+		// TODO Auto-generated method stub
+		Calendar cal = Calendar.getInstance();
+		cal.setTime(punchDate);
+		cal.add(Calendar.DAY_OF_MONTH, -1);
+		Integer  count = this.punchProvider.countPunchLogDevice(userId,companyId,new java.sql.Date(cal.getTime().getTime()),punchDate);
+		if(count >1)
+			return NormalFlag.YES.getCode();
+		return NormalFlag.NO.getCode(); 	
+	}
 	private Time getDAOTime(Long arriveTime) {
 		if (null == arriveTime)
 			return null;
@@ -2715,6 +2730,18 @@ public class PunchServiceImpl implements PunchService {
 			 
 		}
 	}
+	PunchTimeRule convertPunchTimeRule(PunchTimeRuleDTO dto ){
+		PunchTimeRule punchTimeRule = ConvertHelper.convert(dto, PunchTimeRule.class);
+		punchTimeRule.setAfternoonArriveTime(convertTime(dto.getAfternoonArriveTime()));
+		punchTimeRule.setPunchTimesPerDay(dto.getPunchTimesPerDay());
+		punchTimeRule.setNoonLeaveTime(convertTime(dto.getNoonLeaveTime())); 
+		punchTimeRule.setDaySplitTime(convertTime(dto.getDaySplitTime()));
+		convertTime(punchTimeRule, dto.getStartEarlyTime(), dto.getStartLateTime(), dto.getEndEarlyTime());
+		punchTimeRule.setCreatorUid( UserContext.current().getUser().getId());
+		punchTimeRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
+		return punchTimeRule;
+	}
 	@Override
 	public void updatePunchTimeRule(UpdatePunchTimeRuleCommand cmd) {
 		Long userId = UserContext.current().getUser().getId();
@@ -2798,16 +2825,20 @@ public class PunchServiceImpl implements PunchService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setTimeRules(new ArrayList<PunchTimeRuleDTO>());
 		results.forEach((other) -> {
-			PunchTimeRuleDTO dto = ConvertHelper.convert(other, PunchTimeRuleDTO.class); 
-			dto.setAfternoonArriveTime(convertTimeToGMTMillisecond(other.getAfternoonArriveTime()));
-			dto.setNoonLeaveTime(convertTimeToGMTMillisecond(other.getNoonLeaveTime()));
-			dto.setStartEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()));
-			dto.setStartLateTime(convertTimeToGMTMillisecond(other.getStartLateTime()));
-			dto.setEndEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()) + convertTimeToGMTMillisecond(other.getWorkTime()));
-			dto.setDaySplitTime(convertTimeToGMTMillisecond(other.getDaySplitTime()));
+			PunchTimeRuleDTO dto = this.processTimeRuleDTO(other);
 			response.getTimeRules().add(dto);
 		});
 		return response;
+	}
+	PunchTimeRuleDTO processTimeRuleDTO(PunchTimeRule other){
+		PunchTimeRuleDTO dto = ConvertHelper.convert(other, PunchTimeRuleDTO.class); 
+		dto.setAfternoonArriveTime(convertTimeToGMTMillisecond(other.getAfternoonArriveTime()));
+		dto.setNoonLeaveTime(convertTimeToGMTMillisecond(other.getNoonLeaveTime()));
+		dto.setStartEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()));
+		dto.setStartLateTime(convertTimeToGMTMillisecond(other.getStartLateTime()));
+		dto.setEndEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()) + convertTimeToGMTMillisecond(other.getWorkTime()));
+		dto.setDaySplitTime(convertTimeToGMTMillisecond(other.getDaySplitTime()));
+		return dto;
 	}
 	@Override
 	public void addPunchLocationRule(PunchLocationRuleDTO cmd) {
@@ -2954,18 +2985,22 @@ public class PunchServiceImpl implements PunchService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setLocationRules(new ArrayList<PunchLocationRuleDTO>());
 		results.forEach((other) -> {
-			PunchLocationRuleDTO dto = ConvertHelper.convert(other, PunchLocationRuleDTO.class); 
+			PunchLocationRuleDTO dto = this.processLocationRuleDTO(other);
 			response.getLocationRules().add(dto);
-			List<PunchGeopoint> geos = this.punchProvider.listPunchGeopointsByRuleId(other.getOwnerType(), other.getOwnerId(), other.getId()) ;
-			if(null != geos){
-				dto.setPunchGeoPoints(new ArrayList<PunchGeoPointDTO>());
-				for(PunchGeopoint geo : geos){
-					PunchGeoPointDTO geoDTO = ConvertHelper.convert(geo, PunchGeoPointDTO.class);
-					dto.getPunchGeoPoints().add(geoDTO);
-				} 
-			}
 		});
 		return response;
+	}
+	PunchLocationRuleDTO processLocationRuleDTO(PunchLocationRule other){
+		PunchLocationRuleDTO dto = ConvertHelper.convert(other, PunchLocationRuleDTO.class); 
+		List<PunchGeopoint> geos = this.punchProvider.listPunchGeopointsByRuleId(other.getOwnerType(), other.getOwnerId(), other.getId()) ;
+		if(null != geos){
+			dto.setPunchGeoPoints(new ArrayList<PunchGeoPointDTO>());
+			for(PunchGeopoint geo : geos){
+				PunchGeoPointDTO geoDTO = ConvertHelper.convert(geo, PunchGeoPointDTO.class);
+				dto.getPunchGeoPoints().add(geoDTO);
+			} 
+		}
+		return dto;
 	}
 	@Override
 	public void addPunchWiFiRule(PunchWiFiRuleDTO cmd) {
@@ -3010,6 +3045,7 @@ public class PunchServiceImpl implements PunchService {
 			});
 		}
 	}
+	 
 	@Override
 	public void updatePunchWiFiRule(PunchWiFiRuleDTO cmd) {
 		Long userId = UserContext.current().getUser().getId();
@@ -3108,18 +3144,23 @@ public class PunchServiceImpl implements PunchService {
 		response.setNextPageAnchor(nextPageAnchor);
 		response.setWifiRules(new ArrayList<PunchWiFiRuleDTO>()); 
 		results.forEach((other) -> {
-			PunchWiFiRuleDTO dto = ConvertHelper.convert(other, PunchWiFiRuleDTO.class); 
+			PunchWiFiRuleDTO dto = processWifiRuleDTO(other);
 			response.getWifiRules().add(dto);
-			List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(other.getOwnerType(), other.getOwnerId(), other.getId()) ;
-			if(null != wifis){
-				dto.setWifis(new ArrayList<PunchWiFiDTO>()); 
-				for(PunchWifi geo : wifis){
-					PunchWiFiDTO wifiDTO = ConvertHelper.convert(geo, PunchWiFiDTO.class);
-					dto.getWifis().add(wifiDTO);
-				} 
-			}
 		});
 		return response;
+	}
+	PunchWiFiRuleDTO processWifiRuleDTO(PunchWifiRule other){
+		PunchWiFiRuleDTO dto = ConvertHelper.convert(other, PunchWiFiRuleDTO.class); 
+		
+		List<PunchWifi> wifis = this.punchProvider.listPunchWifisByRuleId(other.getOwnerType(), other.getOwnerId(), other.getId()) ;
+		if(null != wifis){
+			dto.setWifis(new ArrayList<PunchWiFiDTO>()); 
+			for(PunchWifi geo : wifis){
+				PunchWiFiDTO wifiDTO = ConvertHelper.convert(geo, PunchWiFiDTO.class);
+				dto.getWifis().add(wifiDTO);
+			} 
+		}
+		return dto;
 	}
 	@Override
 	public void addPunchWorkdayRule(PunchWorkdayRuleDTO cmd) {
@@ -3629,7 +3670,7 @@ public class PunchServiceImpl implements PunchService {
 	public PunchRule getPunchRule(String ownerType, Long ownerId,Long userId){
 		//如果有个人规则就返回个人规则
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
-		if (null == map){
+		if (null == map || map.getPunchRuleId() == null){
 			//没有个人规则,向上递归找部门规则
 			if(!ownerType.equals(PunchOwnerType.ORGANIZATION.getCode()))
 				return null;
@@ -3648,7 +3689,7 @@ public class PunchServiceImpl implements PunchService {
 	public ApprovalRule getApprovalRule(String ownerType, Long ownerId,Long userId){
 		//如果有个人规则就返回个人规则
 		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId, PunchOwnerType.User.getCode(), userId);
-		if (null == map){
+		if (null == map || map.getReviewRuleId() == null ){
 			//没有个人规则,向上递归找部门规则
 			if(!ownerType.equals(PunchOwnerType.ORGANIZATION.getCode()))
 				return null;
@@ -3686,20 +3727,11 @@ public class PunchServiceImpl implements PunchService {
 		ListPunchCountCommandResponse response = new ListPunchCountCommandResponse();
 		List<PunchCountDTO> punchCountDTOList = new ArrayList<PunchCountDTO>();
 
-		//找到所有子部门 下面的用户
 		Organization org = this.checkOrganization(cmd.getOwnerId());
-		List<String> groupTypeList = new ArrayList<String>();
-		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-		List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
-				(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
-		if(null == organizationMembers)
+		
+		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+		if (null == userIds)
 			return response;
-		List<Long> userIds = new ArrayList<Long>();
-		for(OrganizationMemberDTO member : organizationMembers){
-			if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
-				userIds.add(member.getTargetId());
-		}
 		//分页查询
 		if (cmd.getPageAnchor() == null)
 			cmd.setPageAnchor(0L);
@@ -3756,6 +3788,36 @@ public class PunchServiceImpl implements PunchService {
 		return response;
 	}
 
+	private List<Long> listDptUserIds(Organization org , Long ownerId,String userName, Byte includeSubDpt) {
+		//找到所有子部门 下面的用户
+		 
+		List<String> groupTypeList = new ArrayList<String>();
+//		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<OrganizationMember> organizationMembers = null;
+		if(null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())){ 
+			
+			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypeList);
+			List<Long> orgIds = new ArrayList<Long>();
+			for (Organization o : orgs){
+				orgIds.add(o.getId());
+			}
+			CrossShardListingLocator locator = new CrossShardListingLocator();
+			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, orgIds,
+					OrganizationMemberStatus.ACTIVE.getCode(), ContactSignUpStatus.SIGNEDUP.getCode(), locator, Integer.MAX_VALUE-1);
+			}
+		else
+			organizationMembers = this.organizationProvider.listOrganizationPersonnels(userName, org, ContactSignUpStatus.SIGNEDUP.getCode(),
+					null,null, Integer.MAX_VALUE-1);
+		if(null == organizationMembers)
+			return null;
+		List<Long> userIds = new ArrayList<Long>();
+		for(OrganizationMember member : organizationMembers){
+			if (member.getTargetType() != null && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+				userIds.add(member.getTargetId());
+		}
+		return userIds;
+}
 	private Map<Long, List<AbsenceTimeDTO>> getUserAbsenceTimes(String month, String ownerType, Long ownerId, List<Long> absenceUserIdList) {
 		Long userId = UserContext.current().getUser().getId();
 		Long organizationId = organizationService.getTopOrganizationId(ownerId);
@@ -3872,17 +3934,10 @@ public class PunchServiceImpl implements PunchService {
 		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
 			//找到所有子部门 下面的用户
 			Organization org = this.checkOrganization(cmd.getOwnerId());
-			List<String> groupTypeList = new ArrayList<String>();
-			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
-					(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
-			if(null == organizationMembers)
-				return null;
-			List<Long> userIds = new ArrayList<Long>();
-			for(OrganizationMemberDTO member : organizationMembers){
-				userIds.add(member.getTargetId());
-			}
+
+			List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+			if (null == userIds)
+				return response;
 			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
 			 
 			String startDay=null;
@@ -4120,17 +4175,10 @@ public class PunchServiceImpl implements PunchService {
 		if(PunchOwnerType.ORGANIZATION.equals(ownerType)){
 			//找到所有子部门 下面的用户
 			Organization org = this.checkOrganization(cmd.getOwnerId());
-			List<String> groupTypeList = new ArrayList<String>();
-			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-			List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
-					(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
-			if(null == organizationMembers)
+
+			List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+			if (null == userIds)
 				return response;
-			List<Long> userIds = new ArrayList<Long>();
-			for(OrganizationMemberDTO member : organizationMembers){
-				userIds.add(member.getTargetId());
-			}
 			//分页查询 由于用到多条件排序,所以使用pageOffset方式分页
 			Integer pageOffset = 0; 
 			if (cmd.getPageAnchor() != null)
@@ -4240,18 +4288,11 @@ public class PunchServiceImpl implements PunchService {
 
 		//找到所有子部门 下面的用户
 		Organization org = this.checkOrganization(cmd.getOwnerId());
-		List<String> groupTypeList = new ArrayList<String>();
-		groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-		groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-		List<OrganizationMemberDTO> organizationMembers = this.organizationService.listAllChildOrganizationPersonnel
-				(cmd.getOwnerId(), groupTypeList, cmd.getUserName()) ;
-		if(null == organizationMembers)
+		 
+
+		List<Long> userIds = listDptUserIds(org,cmd.getOwnerId(), cmd.getUserName(),cmd.getIncludeSubDpt());
+		if (null == userIds)
 			return response;
-		List<Long> userIds = new ArrayList<Long>();
-		for(OrganizationMemberDTO member : organizationMembers){
-			if (null != member.getTargetType() && member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
-				userIds.add(member.getTargetId());
-		}
 
 		Long organizationId = org.getDirectlyEnterpriseId();
 		if(organizationId.equals(0L))
@@ -4409,6 +4450,254 @@ public class PunchServiceImpl implements PunchService {
 		}
 	
 
+	}
+	/**
+	 * 把一个target的所有规则取出来组装到resp里返回 
+	 * */
+	@Override
+	public GetTargetPunchAllRuleResponse getTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd) { 
+
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getTargetId() ||null == cmd.getTargetType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid target type or  Id parameter in the command");
+		}
+		GetTargetPunchAllRuleResponse resp = new GetTargetPunchAllRuleResponse();
+		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getTargetType(), cmd.getTargetId());
+		if(null == map || map.getPunchRuleId() == null ){
+			return null;
+		}
+		PunchRule pr = this.punchProvider.getPunchRuleById(map.getPunchRuleId());
+		if(null == pr)
+			return null;
+		PunchTimeRule ptr = this.getPunchTimeRule(pr);
+		if(null != ptr)
+			resp.setTimeRule(processTimeRuleDTO(ptr));
+		if(null != pr.getLocationRuleId()){
+			PunchLocationRule plr = this.punchProvider.getPunchLocationRuleById(pr.getLocationRuleId());
+			if(null != plr)
+				resp.setLocationRule(this.processLocationRuleDTO(plr));
+		}
+
+		if(null != pr.getWifiRuleId()){
+			PunchWifiRule pwr = this.punchProvider.getPunchWifiRuleById(pr.getWifiRuleId());
+			if(null != pwr)
+				resp.setWifiRule(this.processWifiRuleDTO(pwr));
+		}
+
+		if(null != pr.getWorkdayRuleId()){
+			PunchWorkdayRule pwkr = this.punchProvider.getPunchWorkdayRuleById(pr.getWorkdayRuleId());
+			if(null != pwkr)
+				resp.setWorkdayRule(this.ConvertPunchWiFiRule2DTO(pwkr));
+		}
+		return resp;
+	}
+	/**
+	 * 给一个target设置规则
+	 * */
+	@Override
+	public void updateTargetPunchAllRule(UpdateTargetPunchAllRuleCommand cmd) {
+
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getTargetId() ||null == cmd.getTargetType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid target type or  Id parameter in the command");
+		}
+		// TODO 删除之前的规则
+		coordinationProvider.getNamedLock(
+				CoordinationLocks.UPDATE_APPROVAL_TARGET_RULE.getCode() + cmd.getTargetId()).enter(
+				() -> {
+			//建立所有规则
+			PunchRule pr = new PunchRule();
+			pr.setOwnerId(cmd.getOwnerId());
+			pr.setOwnerType(cmd.getOwnerType());
+			pr.setName(cmd.getTargetId()+"rule");
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			//time rule
+			if(null != cmd.getTimeRule()){
+				PunchTimeRule ptr = convertPunchTimeRule(cmd.getTimeRule());
+				ptr.setOwnerId(cmd.getOwnerId());
+				ptr.setOwnerType(cmd.getOwnerType());
+				this.punchProvider.createPunchTimeRule(ptr);
+				pr.setTimeRuleId(ptr.getId());
+			}
+			//location rule 
+			if(null != cmd.getLocationRule()){
+				PunchLocationRule obj = ConvertHelper.convert( cmd.getLocationRule(), PunchLocationRule.class);
+				obj.setOwnerId(cmd.getOwnerId());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setName(cmd.getTargetId()+"rule");
+				obj.setCreatorUid(UserContext.current().getUser().getId());
+				obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				this.punchProvider.createPunchLocationRule(obj); 
+				if(null !=  cmd.getLocationRule().getPunchGeoPoints()){ 
+					for (PunchGeoPointDTO punchGeopointDTO :  cmd.getLocationRule().getPunchGeoPoints()) {
+						PunchGeopoint punchGeopoint = ConvertHelper.convert(punchGeopointDTO, PunchGeopoint.class);
+						punchGeopoint.setOwnerType(cmd.getOwnerType());
+						punchGeopoint.setOwnerId(cmd.getOwnerId()); 
+						punchGeopoint.setLocationRuleId(obj.getId());
+						punchGeopoint.setCreatorUid(UserContext.current().getUser().getId());
+						punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						punchGeopoint.setGeohash(GeoHashUtils.encode(
+								punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+						punchProvider.createPunchGeopoint(punchGeopoint);
+					}
+				}
+				pr.setLocationRuleId(obj.getId());
+			}
+			//wifi rule 
+			if(null != cmd.getWifiRule()){
+				PunchWifiRule obj = ConvertHelper.convert(cmd, PunchWifiRule.class);
+				obj.setOwnerId(cmd.getOwnerId());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setName(cmd.getTargetId()+"rule");
+				obj.setCreatorUid(UserContext.current().getUser().getId());
+				obj.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				this.punchProvider.createPunchWifiRule(obj); 
+				if(null != cmd.getWifiRule().getWifis()) {
+					for (PunchWiFiDTO dto : cmd.getWifiRule().getWifis()) {
+						PunchWifi punchWifi = ConvertHelper.convert(dto, PunchWifi.class);
+						punchWifi.setOwnerType(cmd.getOwnerType());
+						punchWifi.setOwnerId(cmd.getOwnerId());  
+						punchWifi.setCreatorUid(UserContext.current().getUser().getId());
+						punchWifi.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						punchWifi.setWifiRuleId(obj.getId());
+						punchProvider.createPunchWifi(punchWifi);
+					}
+				}
+				pr.setWifiRuleId(obj.getId());
+			}
+			//workday rule 
+			if(null != cmd.getWorkdayRule()){
+				PunchWorkdayRule obj = converDTO2WorkdayRule( cmd.getWorkdayRule());
+				obj.setOwnerId(cmd.getOwnerId());
+				obj.setOwnerType(cmd.getOwnerType());
+				obj.setName(cmd.getTargetId()+"rule");
+				this.punchProvider.createPunchWorkdayRule(obj); 
+				if(null !=  cmd.getWorkdayRule().getWorkdays()) {
+					for (Long date :  cmd.getWorkdayRule().getWorkdays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(UserContext.current().getUser().getId());
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.WORKDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+								
+					}
+				}
+				if(null !=  cmd.getWorkdayRule().getHolidays()) {
+					for (Long date :  cmd.getWorkdayRule().getHolidays()) {
+						PunchHoliday holiday = new PunchHoliday();
+						holiday.setOwnerType(cmd.getOwnerType());
+						holiday.setOwnerId(cmd.getOwnerId());  
+						holiday.setCreatorUid(UserContext.current().getUser().getId());
+						holiday.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+						holiday.setWorkdayRuleId(obj.getId());
+						holiday.setRuleDate(new java.sql.Date(date));
+						holiday.setStatus(DateStatus.HOLIDAY.getCode());
+						this.punchProvider.createPunchHoliday(holiday);
+					}
+				}
+				pr.setWorkdayRuleId(obj.getId());
+			}
+			
+	
+			PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
+					cmd.getTargetType(), cmd.getTargetId());
+	
+			if(null == map ){
+				map = ConvertHelper.convert(cmd, PunchRuleOwnerMap.class);
+				map.setCreatorUid(UserContext.current().getUser().getId());
+				map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				this.punchProvider.createPunchRule(pr);
+				map.setPunchRuleId(pr.getId());
+				this.punchProvider.createPunchRuleOwnerMap(map);
+			}else{
+				if(null == map.getPunchRuleId())
+					this.punchProvider.createPunchRule(pr);
+				else{
+					PunchRule oldPr = this.punchProvider.getPunchRuleById(map.getPunchRuleId());
+					if(null == oldPr)
+						this.punchProvider.createPunchRule(pr);
+					else{
+						pr.setId(oldPr.getId());
+						this.punchProvider.updatePunchRule(pr);
+					}
+				}
+				map.setCreatorUid(UserContext.current().getUser().getId());
+				map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+						.getTime()));
+				map.setPunchRuleId(pr.getId());
+				this.punchProvider.updatePunchRuleOwnerMap(map);
+			}
+			 return null;
+		});
+		 
+	}
+	@Override
+	public void deleteTargetPunchAllRule(GetTargetPunchAllRuleCommand cmd) { 
+		if (null == cmd.getOwnerId() ||null == cmd.getOwnerType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == cmd.getTargetId() ||null == cmd.getTargetType()) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid target type or  Id parameter in the command");
+		}
+
+		if(cmd.getTargetType().equals(cmd.getOwnerType())&&cmd.getTargetId().equals(cmd.getOwnerId())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"不能删除公司规则");
+		}
+		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getTargetType(), cmd.getTargetId());
+
+		if(null != map){
+			// 删除规则
+			deletePunchRules(cmd.getOwnerType(), cmd.getOwnerId(),map.getPunchRuleId());
+			map.setPunchRuleId(null);
+			map.setCreatorUid(UserContext.current().getUser().getId());
+			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime())); 
+			this.punchProvider.updatePunchRuleOwnerMap(map);
+		}
+	}
+	private void deletePunchRules(String ownerType, Long ownerId, Long punchRuleId) {
+		 
+		if(null == punchRuleId)
+			return;
+		PunchRule pr = this.punchProvider.getPunchRuleById(punchRuleId);
+		if(null == pr)
+			return;
+		this.punchProvider.deletePunchTimeRuleByOwnerAndId(ownerType , ownerId, pr.getTimeRuleId()); 
+		this.punchProvider.deletePunchLocationRuleByOwnerAndId(ownerType, ownerId, pr.getLocationRuleId());  
+		this.punchProvider.deletePunchGeopointsByRuleId( pr.getLocationRuleId());
+		this.punchProvider.deletePunchWifiRuleByOwnerAndId(ownerType, ownerId, pr.getWifiRuleId());  
+		this.punchProvider.deletePunchWifisByRuleId(pr.getWifiRuleId()); 
+		this.punchProvider.deletePunchWorkdayRuleByOwnerAndId(ownerType, ownerId, pr.getWorkdayRuleId());  
+		this.punchProvider.deletePunchHolidayByRuleId(pr.getWorkdayRuleId()); 
+		this.punchProvider.deletePunchRule(pr);
 	}
 	
 }

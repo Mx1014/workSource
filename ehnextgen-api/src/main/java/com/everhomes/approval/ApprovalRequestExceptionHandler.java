@@ -20,16 +20,23 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
+import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.BasicDescriptionDTO;
+import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
 import com.everhomes.rest.approval.ExceptionRequestBasicDescription;
 import com.everhomes.rest.approval.ExceptionRequestDTO;
 import com.everhomes.rest.approval.ExceptionRequestType;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.RequestDTO;
+import com.everhomes.rest.approval.TimeRange;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.techpark.punch.ExceptionStatus;
 import com.everhomes.rest.techpark.punch.PunchRquestType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
@@ -40,6 +47,7 @@ import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.techpark.punch.PunchExceptionApproval;
 import com.everhomes.techpark.punch.PunchExceptionRequest;
 import com.everhomes.techpark.punch.PunchProvider;
+import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -56,7 +64,11 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	@Autowired
+	private PunchService punchService;
+
+	@Autowired
 	private PunchProvider punchProvider;
+	
 	
 	@Autowired
 	private AttachmentProvider attachmentProvider;
@@ -70,14 +82,14 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(approvalRequest);
-		ExceptionRequestBasicDescription description = new ExceptionRequestBasicDescription();
+		BasicDescriptionDTO description = new BasicDescriptionDTO();
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		description.setPunchDate(new Timestamp(content.getPunchDate()));
 		description.setExceptionRequestType(content.getExceptionRequestType());
 		description.setPunchDetail(content.getPunchDetail());
 		description.setPunchStatusName(content.getPunchStatusName());
 		
-		approvalBasicInfo.setDescriptionJson(JSON.toJSONString(description));
+		approvalBasicInfo.setDescriptionJson(description);
 		return approvalBasicInfo;
 	}
 
@@ -102,8 +114,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		
 		ApprovalRequest approvalRequest = super.preProcessCreateApprovalRequest(userId, ownerInfo, cmd);
 		approvalRequest.setContentJson(JSON.toJSONString(approvalExceptionContent));
-		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate());
-		
+		approvalRequest.setLongTag1(approvalExceptionContent.getPunchDate()); 
 		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
 		if (punchExceptionRequest != null) {
 			approvalRequest.setId(punchExceptionRequest.getRequestId());
@@ -113,12 +124,13 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		
 		return approvalRequest;
 	}
-
+	
 	@Override
 	public void postProcessCreateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, ApprovalRequest approvalRequest,
 			CreateApprovalRequestBySceneCommand cmd) {
 		ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(cmd.getContentJson(), ApprovalExceptionContent.class);
 		//处理考勤
+		//插入一条记录.让用户查看考勤的时候 看到的是查看异常申请而不是添加异常申请
 		PunchExceptionRequest punchExceptionRequest = getPunchExceptionRequest(userId, ownerInfo.getOwnerId(), approvalExceptionContent.getPunchDate(), approvalExceptionContent.getExceptionRequestType()); 
 		if (punchExceptionRequest != null) {
 			punchExceptionRequest.setDescription(approvalRequest.getReason());
@@ -222,9 +234,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 	}
 
 	@Override
-	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
-		List<ExceptionRequestDTO> resultList = approvalRequestList.stream().map(a->{
-			ExceptionRequestDTO exceptionRequest = new ExceptionRequestDTO();
+	public List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+		List<RequestDTO> resultList = approvalRequestList.stream().map(a->{
+			RequestDTO exceptionRequest = new RequestDTO();
 			ApprovalExceptionContent approvalExceptionContent = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
 			exceptionRequest.setRequestId(a.getId());
 			exceptionRequest.setPunchDate(new Timestamp(approvalExceptionContent.getPunchDate()));
@@ -236,7 +248,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}).collect(Collectors.toList());
 		
 		
-		return JSON.toJSONString(resultList);
+		return resultList;
 	}
 
 	@Override
@@ -284,5 +296,108 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
 	}
-	
+
+	@Override
+	public BriefApprovalRequestDTO processBriefApprovalRequest(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		  
+		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest  ));
+		return briefApprovalRequestDTO;
+	}
+	private String processBriefRequestTitle(ApprovalRequest a  ) { 
+		Map<String, Object> map = new HashMap<>();
+		 
+		 
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.EXCEPTION_TITLE;
+		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
+		ApprovalExceptionContent content = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
+		map.put("date",processRequestDate(new Date(a.getLongTag1()) ,content));
+		 
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
+	@Override
+	public String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest a) { 
+		Map<String, Object> map = new HashMap<>();
+		 
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.EXCEPTION_MAIN_TITLE; 
+		ApprovalExceptionContent content = JSONObject.parseObject(a.getContentJson(), ApprovalExceptionContent.class);
+		map.put("date",processRequestDate(new Date(a.getLongTag1()) ,content));
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(a.getCreatorUid(), a.getOwnerId(), dateSF.format(new Date(a.getLongTag1())));
+		map.put("punchLog",processPunchDetail(pdl,content)) ;
+		if(null == content || content.getExceptionRequestType().equals(ExceptionRequestType.ALL_DAY.getCode()))
+			map.put("punchStatus", punchService.statusToString(pdl.getStatus()));
+		else if(content.getExceptionRequestType().equals(ExceptionRequestType.MORNING.getCode()))
+			map.put("punchStatus", punchService.statusToString(pdl.getMorningStatus()) );
+		else if(content.getExceptionRequestType().equals(ExceptionRequestType.AFTERNOON.getCode()))
+			map.put("punchStatus", punchService.statusToString(pdl.getAfternoonStatus()));
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
+	 
+	public String processRequestDate(Date effectiveDate, ApprovalExceptionContent content ) {
+		return mmDDSF.format(effectiveDate)+"("+weekdaySF.format(effectiveDate)+") "+
+				(content.getExceptionRequestType().equals(ExceptionRequestType.MORNING.getCode()) ? "上午":
+					content.getExceptionRequestType().equals(ExceptionRequestType.AFTERNOON.getCode()) ?"下午":"");
+	}
+	private static final SimpleDateFormat minSecSF = new SimpleDateFormat("HH:mm");
+	  
+	protected String processPunchDetail(PunchDayLog pdl, ApprovalExceptionContent content) {
+		String punchDetail = null;
+		if(null == pdl )
+			return "无";
+		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay())){
+			if(null != pdl.getArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getArriveTime());
+				if(null != pdl.getLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+			}else{
+				punchDetail = "无";
+			}
+			
+		}
+		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay())){
+
+			if(null != content){
+				if(content.getExceptionRequestType().equals(ExceptionRequestType.MORNING.getCode()) && null != pdl.getArriveTime() ){
+					punchDetail = minSecSF.format(pdl.getArriveTime());
+					if(null != pdl.getNoonLeaveTime() )
+						punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getNoonLeaveTime());
+					}
+				else if(content.getExceptionRequestType().equals(ExceptionRequestType.AFTERNOON.getCode()) &&null != pdl.getAfternoonArriveTime() ){
+					punchDetail = minSecSF.format(pdl.getAfternoonArriveTime());
+					if(null != pdl.getLeaveTime() )
+						punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+					}
+				else
+					punchDetail = "无";
+				}
+			
+		}
+		return punchDetail;
+	}
+	@Override
+	public ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
+			ListApprovalLogAndFlowOfRequestBySceneResponse result,
+			ApprovalRequest approvalRequest) { 
+		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
+		result.setPunchDate( content.getPunchDate() );
+		result.setExceptionRequestType(content.getExceptionRequestType()); 
+		result.setPunchDetail(content.getPunchDetail());
+		result.setPunchStatusName(content.getPunchStatusName());
+		return null;
+	}
+
+	@Override
+	public BriefApprovalRequestDTO processApprovalRequestByScene(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		  
+		briefApprovalRequestDTO.setTitle(ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest  ));
+		return briefApprovalRequestDTO;
+	}
 }
