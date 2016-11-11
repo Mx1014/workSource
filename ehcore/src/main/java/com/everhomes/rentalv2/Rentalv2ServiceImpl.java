@@ -192,6 +192,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sequence.SequenceProvider;
@@ -200,6 +201,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -271,6 +273,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	private String queueName = "rentalService";
 
+	@Autowired
+	private SmsProvider smsProvider;
 	@Autowired
 	private MessagingService messagingService;
 	@Autowired
@@ -3084,6 +3088,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else if(bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 				if(bill.getPayTotalMoney().equals(bill.getPaidMoney())){
 					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+					UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
+					if(null == userIdentifier){
+						LOGGER.error("userIdentifier is null...userId = " + bill.getCreatorUid());
+					}else{
+						sendRentalSuccessSms(bill.getNamespaceId(),userIdentifier.getIdentifierToken(), bill); 
+					}
 				}
 				else{
 					LOGGER.error("待付款订单:id ["+bill.getId()+"]付款金额有问题： 应该付款金额："+bill.getPayTotalMoney()+"实际付款金额："+bill.getPaidMoney());
@@ -4732,7 +4742,38 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalProvider.deleteResource(cmd.getId());
 		
 	}
-
+	
+	/**
+	 * 发短信给付费成功的用户
+	 * */
+	private void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,RentalOrder order){
+		String templateScope = SmsTemplateCode.SCOPE;
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("resourceName", order.getResourceName());
+		smsProvider.addToTupleList(variables, "useDetail", order.getUseDetail()); 
+		//根据条件找模板id
+		RentalResource rs = this.rentalProvider.getRentalSiteById(order.getRentalResourceId());
+		if(rs == null){
+			LOGGER.error("send message to user failed rental resource can not found [resource id = "+order.getRentalResourceId()+"]");
+			return ;
+		} 
+		int templateId = SmsTemplateCode.RENTAL_SUCCESS_EXCLUSIVE_CODE;
+		//如果不是独占资源
+		if(rs.getExclusiveFlag().equals(NormalFlag.NONEED.getCode())){
+			if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				//带场所编号的
+				templateId = SmsTemplateCode.RENTAL_SUCCESS_SITENUMBER_CODE;
+			}
+			else{
+				//不带场所编号的
+				templateId = SmsTemplateCode.RENTAL_SUCCESS_NOSITENUMBER_CODE;
+				smsProvider.addToTupleList(variables, "count", order.getRentalCount()); 
+			}
+		}
+			
+		String templateLocale = UserContext.current().getUser().getLocale();
+		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+ 
+	}
 	
  
 }
