@@ -2543,9 +2543,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(standard != null) {
 			response.setTaskType(standard.getStandardType());
 		} 
+		
+		EquipmentTaskDTO taskDto = convertEquipmentTaskToDTO(task);
+		
+		
         List<EquipmentTaskLogsDTO> dtos = logs.stream().map((r) -> {
         	
         	EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+        	dto.setTemplateId(taskDto.getTemplateId());
+        	dto.setTemplateName(taskDto.getTemplateName());
         	
         	List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
         	
