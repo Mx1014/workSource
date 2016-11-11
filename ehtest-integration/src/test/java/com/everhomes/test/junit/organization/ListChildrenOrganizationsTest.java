@@ -53,8 +53,9 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
         List<String> groupTypes = new ArrayList<String>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
         cmd.setGroupTypes(groupTypes);
-        
+
         OrgListChildrenOrganizationsRestResponse response = httpClientService.restGet(commandRelativeUri, cmd, OrgListChildrenOrganizationsRestResponse.class, context);
         
         assertNotNull("The reponse of getting user info may not be null", response);
@@ -62,10 +63,11 @@ public class ListChildrenOrganizationsTest extends BaseLoginAuthTestCase {
             StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
         
         assertNotNull(response.getResponse());
-        assertEquals(5, response.getResponse().size());
+        assertNotNull(response.getResponse().getDtos());
+        assertEquals(6, response.getResponse().getDtos().size());
 
         boolean flag = false;
-        for (OrganizationDTO dto: response.getResponse()) {
+        for (OrganizationDTO dto: response.getResponse().getDtos()) {
             if(1000752L == dto.getId()){
                 assertEquals(2, dto.getManagers().size());
                 for (OrganizationManagerDTO managerDto:dto.getManagers()) {
