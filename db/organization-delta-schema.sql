@@ -301,5 +301,5 @@ ALTER TABLE `eh_acl_role_assignments` ADD INDEX `i_eh_acl_role_asgn_namespace_id
 
 
 
-
+ALTER TABLE `eh_launch_pad_items` CHANGE `target_id` `target_id` VARCHAR(64);
 
