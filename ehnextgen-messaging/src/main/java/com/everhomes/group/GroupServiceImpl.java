@@ -4513,7 +4513,11 @@ public class GroupServiceImpl implements GroupService {
 		groupSetting.setCreatorUid(UserContext.current().getUser().getId());
 		groupSetting.setUpdateTime(groupSetting.getCreateTime());
 		groupSetting.setOperatorUid(groupSetting.getCreatorUid());
-		groupSettingProvider.createGroupSetting(groupSetting);
+		if (getGroupSetting(cmd.getNamespaceId()) == null) {
+			groupSettingProvider.createGroupSetting(groupSetting);
+		}else {
+			groupSettingProvider.updateGroupSetting(groupSetting);
+		}
 		
 		return ConvertHelper.convert(groupSetting, GroupParametersResponse.class);
 	}
@@ -4527,8 +4531,12 @@ public class GroupServiceImpl implements GroupService {
 		return getGroupParameters(cmd.getNamespaceId());
 	}
 
+	private GroupSetting getGroupSetting(Integer namespaceId){
+		return groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
+	}
+	
 	private GroupParametersResponse getGroupParameters(Integer namespaceId) {
-		GroupSetting groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
+		GroupSetting groupSetting = getGroupSetting(namespaceId);
 		if (groupSetting == null) {
 			return new GroupParametersResponse(namespaceId, TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), TrueOrFalseFlag.TRUE.getCode(), 1);
 		}
