@@ -58,6 +58,7 @@ CREATE TABLE `eh_quality_inspection_specification_item_results` (
   `task_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_quality_inspection_tasks',
   `specification_parent_id` BIGINT NOT NULL DEFAULT '0',
   `specification_id` BIGINT NOT NULL DEFAULT '0',
+  `specification_path` VARCHAR(128),
   `item_description` VARCHAR(512),
   `item_score` DOUBLE NOT NULL DEFAULT '0',
   `quantity` INTEGER NOT NULL DEFAULT '0',

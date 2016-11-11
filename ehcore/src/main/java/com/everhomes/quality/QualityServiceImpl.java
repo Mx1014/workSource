@@ -128,6 +128,7 @@ import com.everhomes.rest.quality.ReportSpecificationItemResultsDTO;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
 import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
+import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
 import com.everhomes.rest.quality.SpecificationApplyPolicy;
 import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.StandardGroupDTO;
@@ -2343,8 +2344,23 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		CountScoresResponse response = new CountScoresResponse();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+		List<ScoreGroupByTargetDTO> scores = new ArrayList<ScoreGroupByTargetDTO>();
+		if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
+			String superiorPath = "/%";
+			scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime(), locator, pageSize + 1);
+		} else {
+			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
+			String superiorPath = parent.getPath() + "/%";
+			scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime(), locator, pageSize + 1);
+		}
+		
+		
+		return response;
 	}
 
 	@Override
@@ -2353,12 +2369,13 @@ public class QualityServiceImpl implements QualityService {
 		CountTasksResponse response = new CountTasksResponse();
 		
 		int offset = cmd.getOffset() == null ? 0 : cmd.getOffset();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		
 		List<TaskCountDTO> tasks = qualityProvider.countTasks(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getTargetType(), cmd.getTargetId(), cmd.getStartTime(), cmd.getEndTime(),
-				offset, cmd.getPageSize()+1);
+				offset, pageSize+1);
 		
-		if(tasks != null && tasks.size() > cmd.getPageSize()) {
+		if(tasks != null && tasks.size() > pageSize) {
 			tasks.remove(tasks.size() - 1);
 			response.setOffset(offset + 1);
 		}

@@ -78,6 +78,8 @@ import java.util.Map;
 
 
 
+
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -92,6 +94,8 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
 
 
 
@@ -191,6 +195,7 @@ import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityStandardStatus;
+import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -1714,6 +1719,30 @@ public class QualityProviderImpl implements QualityProvider {
         dao.insert(result);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionTasks.class, null);
+	}
+
+	@Override
+	public List<ScoreGroupByTargetDTO> countScores(String ownerType,
+			Long ownerId, String targetType, List<Long> targetIds,
+			String superiorPath, Long startTime, Long endTime,
+			ListingLocator locator, int count) {
+		// TODO Auto-generated method stub
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE.eq(targetType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_ID.eq(ownerId));
+//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS..like(superiorPath));
+		if(startTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.ge(new Timestamp(startTime)));
+		}
+		
+		if(endTime != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.le(new Timestamp(endTime)));
+		}
+		query.addGroupBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID);
+		query.addLimit(count);
+		return null;
 	}
 
 }

@@ -2,6 +2,7 @@ package com.everhomes.rest.quality;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -12,6 +13,7 @@ import com.everhomes.util.StringHelper;
  */
 public class CountTasksResponse {
 
+	@ItemType(TaskCountDTO.class)
 	private List<TaskCountDTO> tasks;
 	
 	private Integer offset;

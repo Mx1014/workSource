@@ -1,14 +1,17 @@
 package com.everhomes.rest.quality;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
  *  <li>ownerId: 任务所属组织等的id</li>
  *  <li>ownerType: 任务所属组织类型，如enterprise</li>
- *  <li>targetId: 任务所属项目等的id</li>
+ *  <li>targetIds: 任务所属项目等的id列表</li>
  *  <li>targetType: 任务所属项目类型，如community</li>
  *  <li>specificationId: 父类型id  </li>
  *  <li>startTime: 起始月份  </li>
@@ -24,8 +27,8 @@ public class CountScoresCommand {
 	
 	@NotNull
 	private String ownerType;
-	
-	private Long targetId;
+	@ItemType(Long.class)
+	private List<Long> targetIds;
 	
 	private String targetType;
 	
@@ -55,12 +58,12 @@ public class CountScoresCommand {
 		this.ownerType = ownerType;
 	}
 
-	public Long getTargetId() {
-		return targetId;
+	public List<Long> getTargetIds() {
+		return targetIds;
 	}
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setTargetIds(List<Long> targetIds) {
+		this.targetIds = targetIds;
 	}
 
 	public String getTargetType() {

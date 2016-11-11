@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *  <li>specificationParentId: 规范事项所属规范id</li>
  *  <li>specificationId: 规范事项id</li>
+ *  <li>specificationPath: 规范事项path</li>
  *  <li>itemDescription: 规范事项描述</li>
  *  <li>itemScore: 事项分数</li>
  *  <li>quantity: 数量</li>
@@ -13,6 +14,8 @@ import com.everhomes.util.StringHelper;
 public class ReportSpecificationItemResultsDTO {
 	
 	private Long specificationParentId;
+	
+	private String specificationPath;
 
 	private Long specificationId;
 	  
@@ -28,6 +31,14 @@ public class ReportSpecificationItemResultsDTO {
 
 	public void setSpecificationId(Long specificationId) {
 		this.specificationId = specificationId;
+	}
+
+	public String getSpecificationPath() {
+		return specificationPath;
+	}
+
+	public void setSpecificationPath(String specificationPath) {
+		this.specificationPath = specificationPath;
 	}
 
 	public String getItemDescription() {

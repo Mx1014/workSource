@@ -7,6 +7,8 @@ import com.everhomes.util.StringHelper;
  *  <li>id: 参考主键id</li>
  *  <li>specificationId: 类型id</li>
  *  <li>specificationName: 类型名</li>
+ *  <li>specificationWeight: 类型权重</li>
+ *  <li>specificationScore: 类型分数</li>
  *  <li>targetName: 项目名</li>
  *  <li>targetId: 项目id</li>
  *  <li>specificationWeight: 类型权重</li>
@@ -22,6 +24,8 @@ public class ScoreDTO {
 	private String specificationName;
 	
 	private Double specificationWeight;
+	
+	private Double specificationScore;
 	
 	private Long targetId;
 	
@@ -59,6 +63,14 @@ public class ScoreDTO {
 
 	public void setSpecificationWeight(Double specificationWeight) {
 		this.specificationWeight = specificationWeight;
+	}
+
+	public Double getSpecificationScore() {
+		return specificationScore;
+	}
+
+	public void setSpecificationScore(Double specificationScore) {
+		this.specificationScore = specificationScore;
 	}
 
 	public Long getTargetId() {
