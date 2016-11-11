@@ -387,6 +387,9 @@ public class VersionServiceImpl implements VersionService {
 	}
 
 	private String processUrl(String url){
+		if (StringUtils.isBlank(url)) {
+			return "";
+		}
 		if (url.startsWith("http:") || url.startsWith("${")) {
 			return url;
 		}

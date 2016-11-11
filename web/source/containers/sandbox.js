@@ -2,17 +2,17 @@ import React, { PropTypes, Component} from 'react'
 import {connect} from 'react-redux'
 
 import {SplitPane, Pane} from 'widget-splitter'
-import {dispatch} from 'widget-redux-util/redux-enhancer'
 
-import {ApiList} from '../components/apilist'
-import {fetchApiList, loadNavigationData, initConsole, setSandboxCurrentApi, setApiFilter} from '../actions'
+import ApiList from '../components/apilist'
 import ApiPanel from './api-panel'
 
 import layoutStyles from '../shared/style/layout.css'
 
+import {fetchApiList, appendToConsole, setSandboxCurrentApi, setApiFilter} from '../actions'
+
 class Sandbox extends Component {
     render() {
-        let {apis} = this.props;
+        let {apis, onInputChange, onItemClick} = this.props;
 
         return (
             <SplitPane>
@@ -22,16 +22,16 @@ class Sandbox extends Component {
                         <div style={{padding: '4px 32px 4px 16px'}}>
                             <input type="text"
                                    ref={(domInput) => this.domInput = domInput}
-                                   onChange={(e) => this.onInputChange(e)}
+                                   onChange={(e) => onInputChange(this.domInput.value)}
                                    style={{width: '100%'}}
-                                   placeholder={"Type API prefix to narrow down the list below"}
+                                   placeholder={"Type prefix to narrow down the list below"}
                                 >
                             </input>
                         </div>
                     </td></tr>
 
                     <tr><td>
-                        <ApiList items={apis} onItemClick={(item) => this.onItemClick(item)} />
+                        <ApiList items={apis} onItemClick={(item) => onItemClick(item)} />
                     </td></tr>
                     </tbody></table>
                 </Pane>
@@ -43,16 +43,9 @@ class Sandbox extends Component {
     }
 
     componentDidMount() {
-        this.props.loadNavigationData();
-        this.props.initConsole();
-    }
+        let {onSandboxInit} = this.props;
 
-    onInputChange(e) {
-        dispatch(setApiFilter(this.domInput.value))
-    }
-
-    onItemClick(item) {
-        dispatch(setSandboxCurrentApi(item.uri));
+        onSandboxInit();
     }
 }
 
@@ -65,12 +58,24 @@ function filterApiList(state, prefix) {
 
 const mapStateToProps = (state, ownProps) => ({
     apis: filterApiList(state, state.apiNavigation.apiFilter)
-})
+});
 
-export default Sandbox = connect(
-    mapStateToProps,
-    {
-        loadNavigationData,
-        initConsole
+const mapDispatchToProps = (dispatch) => ({
+    onSandboxInit: ()=> {
+        dispatch(fetchApiList());
+        dispatch(appendToConsole('Core-Server API portal started at ' + new Date().toLocaleString()));
+    },
+
+    onItemClick: (item) => {
+        dispatch(setSandboxCurrentApi(item.uri));
+    },
+
+    onInputChange: (val)=> {
+        dispatch(setApiFilter(val))
     }
+});
+
+export default connect(
+    mapStateToProps,
+    mapDispatchToProps
 )(Sandbox);

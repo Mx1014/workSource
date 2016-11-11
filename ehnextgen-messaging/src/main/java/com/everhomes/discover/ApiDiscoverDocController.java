@@ -48,6 +48,9 @@ public class ApiDiscoverDocController extends ControllerBase {
 	@Value("${src.path:E:/workspace/ehnextgen}")
 	private String srcPath;
 
+	@Value("${javadoc.root}")
+    private String javadocRoot;
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(ApiDiscoverDocController.class);
 
 	/**
@@ -68,7 +71,7 @@ public class ApiDiscoverDocController extends ControllerBase {
 		if (LIST_MY_METHOD != null && (reload == null || reload == false)) {
 			return ;
 		}
-		List<RestMethod> restMethodList = getRestMethodList();
+		List<RestMethod> restMethodList = getRestMethodList(javadocRoot, "core");
 		Map<String, MyMethod> myMethodMap = scanController();
 		Map<String, Map<String, String>> restMap = scanRest();
 		

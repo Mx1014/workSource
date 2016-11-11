@@ -37,6 +37,7 @@ import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
+import com.everhomes.search.EquipmentTasksSearcher;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionAccessoriesDao;
@@ -107,6 +108,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	
 	@Autowired
     private ConfigurationProvider configurationProvider;
+	
+	@Autowired
+	private EquipmentTasksSearcher equipmentTasksSearcher;
 	
 	@PostConstruct
 	public void init() {
@@ -740,15 +744,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasks(
 			String ownerType, Long ownerId, List<String> targetType, List<Long> targetId,
-			CrossShardListingLocator locator, Integer pageSize) {
+			Integer offset, Integer pageSize) {
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-		if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
-        }
-		
+//		if(locator.getAnchor() != null) {
+//            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+//        }
+//		
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
@@ -762,6 +766,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
 		
 		Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
+		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+		con2 = con2.and(con3);
 //		con2 = con2.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
 //		
 //		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
@@ -772,8 +779,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		query.addConditions(con);
 		
-		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
-        query.addLimit(pageSize);
+		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+//        query.addLimit(pageSize);
+        query.addLimit(offset, pageSize);
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
@@ -1357,6 +1365,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			query.fetch().map((r) -> {
 				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
 				closeTask(task);
+				equipmentTasksSearcher.feedDoc(task);
 				return null;
 			});
 			return AfterAction.next;
@@ -1387,6 +1396,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			query.fetch().map((r) -> {
 				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
 				closeReviewTasks(task);
+				equipmentTasksSearcher.feedDoc(task);
 				return null;
 			});
 			return AfterAction.next;
@@ -1403,7 +1413,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
 			task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 		
-		task.setStatus(EquipmentTaskStatus.CLOSE.getCode());
+		task.setStatus(EquipmentTaskStatus.NONE.getCode());
 		task.setResult(EquipmentTaskResult.NONE.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
@@ -1423,6 +1433,23 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTasks.class, t.getId());
+	}
+
+	@Override
+	public EquipmentInspectionEquipments findEquipmentByQrCodeToken(
+			String qrCodeToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionEquipmentsRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENTS.QR_CODE_TOKEN.eq(qrCodeToken));
+		 
+		List<EquipmentInspectionEquipments> result = new ArrayList<EquipmentInspectionEquipments>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionEquipments.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
 	}
 
 }
