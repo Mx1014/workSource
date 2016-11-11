@@ -1073,7 +1073,7 @@ public class QualityProviderImpl implements QualityProvider {
 			Long categoryId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhQualityInspectionStandardsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARDS);
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.CATEGORY_ID.eq(categoryId));
+		//query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.CATEGORY_ID.eq(categoryId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.ne(QualityStandardStatus.INACTIVE.getCode()));
 		
 		List<QualityInspectionStandards> result = new ArrayList<QualityInspectionStandards>();
