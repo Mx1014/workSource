@@ -1917,7 +1917,7 @@ public class PunchServiceImpl implements PunchService {
 		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "%", groupTypes);
 		Map<Long, Organization> deptMap = this.convertDeptListToMap(departments);
 		List<PunchDayLog> result = punchProvider.listPunchDayLogs(userIds,
 				cmd.getEnterpriseId(), cmd.getStartDay(), cmd.getEndDay(),
@@ -2610,7 +2610,7 @@ public class PunchServiceImpl implements PunchService {
 //		Organization organization = organizationProvider.findOrganizationById(cmd.getEnterpriseId());
 //		List<String> groupTypes = new ArrayList<String>();
 //		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-//		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
+//		List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "%", groupTypes);
 //		Map<Long, Organization> deptMap = this.convertDeptListToMap(departments);
 //		
 //		List<PunchStatisticsDTO> dtos = result
@@ -3797,7 +3797,7 @@ public class PunchServiceImpl implements PunchService {
 		List<OrganizationMember> organizationMembers = null;
 		if(null == includeSubDpt || includeSubDpt.equals(NormalFlag.YES.getCode())){ 
 			
-			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", groupTypeList);
+			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypeList);
 			List<Long> orgIds = new ArrayList<Long>();
 			for (Organization o : orgs){
 				orgIds.add(o.getId());
