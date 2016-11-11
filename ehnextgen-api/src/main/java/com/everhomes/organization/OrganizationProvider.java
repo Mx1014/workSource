@@ -223,8 +223,15 @@ public interface OrganizationProvider {
 			Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize);
 	
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
-    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
-
-	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId); 
+ 
+    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize); 
+	List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long  communityId);
+  
+  
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
+ 
+	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+	
+	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
+ 
 }

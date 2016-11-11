@@ -14,5 +14,13 @@ public class Organization extends EhOrganizations {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+    public String getEmailDomain() {
+        return OrganizationCustomField.EMAIL_DOMAIN.getStringValue(this);
+    }
+    
+    public void setEmailDomain(String emailDomain) {
+    	OrganizationCustomField.EMAIL_DOMAIN.setStringValue(this, emailDomain);
+    }
     
 }

@@ -209,25 +209,28 @@ public class ParkingServiceImpl implements ParkingService {
     	List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(),
         		cmd.getPlateNumber());
         User user = UserContext.current().getUser();
-		if(cardList.size()>0){
+        int cardListSize = cardList.size();
+		if(cardListSize > 0){
 			LOGGER.error("PlateNumber card is existed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_EXIST,
 					"PlateNumber card is existed");
 		}
 
-        if(cardList.size() == 0){
-        	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+        if(cardListSize == 0){
+        	List<ParkingCardRequest> requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), null, null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
-        	if(list.size() > parkingLot.getMaxRequestNum()){
+        	int requestlistSize = requestlist.size();
+        	if(requestlistSize >= parkingLot.getMaxRequestNum()){
         		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
     					"The card request is rather than max request num.");
         	}
-        	list = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
+        	requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
-        	if(list.size()>0){
+        	requestlistSize = requestlist.size();
+        	if(requestlistSize > 0){
         		LOGGER.error("PlateNumber is already applied, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
     					"plateNumber is already applied.");
@@ -547,22 +550,33 @@ public class ParkingServiceImpl implements ParkingService {
         }
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
         
-    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, null, 
-    			null, null, null, ParkingCardRequestStatus.QUEUEING.getCode(),
+		StringBuilder strBuilder = new StringBuilder();
+		// 补上ownerType、ownerId、parkingLotId参数，以区分清楚是哪个小区哪个停车场的车牌，否则会发放其它园区的车牌 by lqs 20161103
+    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
+    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
     			null, null, cmd.getCount())
     			.stream().map(r -> {
     				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
+    				if(strBuilder.length() > 0) {
+    				    strBuilder.append(", ");
+    				}
+    				strBuilder.append(r.getId());
 					return r;
     			}).collect(Collectors.toList());
     	
     	parkingProvider.updateParkingCardRequest(list);
+    	// 添加日志，方便定位哪个车牌被修改状态了（即发放了） by lqs 20161103
+    	if(LOGGER.isDebugEnabled()) {
+    	    LOGGER.debug("Issue parking cards, requestIds=[{}]", strBuilder.toString());
+    	}
+    	Integer namespaceId = UserContext.getCurrentNamespaceId();
     	Map<String, Object> map = new HashMap<String, Object>();
 		String deadline = deadline(parkingLot.getCardReserveDays());
 	    map.put("deadline", deadline);
 		String scope = ParkingNotificationTemplateCode.SCOPE;
 		int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
 		String locale = "zh_CN";
-		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId, scope, code, locale, map, "");
 		list.forEach(applier -> {
 			sendMessageToUser(applier.getRequestorUid(), notifyTextForApplicant);
 		});

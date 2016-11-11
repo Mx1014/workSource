@@ -406,6 +406,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(siteRuleId);
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.REFUNDED.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.REFUNDING.getCode()));
 		step.where(condition);
 		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
