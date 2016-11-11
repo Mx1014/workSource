@@ -27,6 +27,13 @@ INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_typ
 INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_type`, `setting_type`, `name`, `setting_value`, `formula_id`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`) VALUES ('10', '999992', '3', '6', '每月抄表提示', '30', NULL, '3', NULL, NULL, NULL, NULL);
 
 --
+-- 能耗管理在服务广场的入口
+--
+SET @launch_pad_item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
+VALUES(@launch_pad_item_id := @launch_pad_item_id + 1, 999992, 0, 0, 0, '/home', 'Bizs', 'Energy', '能耗管理', 'cs://1/image/aW1hZ2UvTVRwaVl6ZGtPVFE0TURZd1pUZzRZekppTTJNMVl6QmlPVFprTWpWbFpHRXlNUQ', 1, 1, 13, '{"url":"http://m.kuaidi100.com"}', 0, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'pm_admin');
+
+--
 -- 字符串
 --
 SET @eh_locale_strings_id = (SELECT max(id) FROM `eh_locale_strings`);
@@ -43,7 +50,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10006', 'zh_CN', '只允许删除今天的读表记录');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
-  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10008', 'zh_CN', '公式被引用,无法删除');
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10008', 'zh_CN', '删除失败,该公式已被引用');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10009', 'zh_CN', '起始读数大于最大量程');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
@@ -51,7 +58,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10011', 'zh_CN', '导入失败,请检查数据准确性');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
-  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10012', 'zh_CN', '分类被引用,无法删除');
+  VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10012', 'zh_CN', '删除失败,该选项已被引用');
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.type', '1', 'zh_CN', '水表');
@@ -88,14 +95,14 @@ VALUES ((@menu_scope_id := @menu_scope_id + 1), 49100, '', 'EhNamespaces', 99999
 
 -- 表记管理菜单
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (49110, '表记管理', 49100, NULL, 'energy_table_management', 0, 2, '/40000/49100/49110', 'park', 391);
+VALUES (49110, '表计管理', 49100, NULL, 'energy_table_management', 0, 2, '/40000/49100/49110', 'park', 391);
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (423, 0, '表记管理', '能耗管理 表记管理 全部权限', NULL);
+VALUES (423, 0, '表计管理', '能耗管理 表计管理 全部权限', NULL);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 423, 49110, '表记管理', 1, 1, '能耗管理 表记管理 全部权限', 203);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 423, 49110, '表计管理', 1, 1, '能耗管理 表计管理 全部权限', 203);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)

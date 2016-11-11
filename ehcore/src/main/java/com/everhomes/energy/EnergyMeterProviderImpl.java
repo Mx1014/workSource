@@ -59,6 +59,7 @@ public class EnergyMeterProviderImpl implements EnergyMeterProvider {
         return context().selectFrom(EH_ENERGY_METERS)
                 .where(EH_ENERGY_METERS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METERS.ID.in(ids))
+                .orderBy(EH_ENERGY_METERS.STATUS.asc(), EH_ENERGY_METERS.CREATE_TIME.desc())
                 .fetchInto(EnergyMeter.class);
     }
 
