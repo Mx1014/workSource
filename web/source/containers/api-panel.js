@@ -1,5 +1,4 @@
 import React, { PropTypes, Component} from 'react'
-import {connect} from 'react-redux'
 
 import {SplitPane, Pane} from 'widget-splitter'
 import {Tab} from 'widget-tab'
@@ -8,11 +7,30 @@ import ApiResult from './api-console'
 import ApiDoc from './api-doc'
 import InputForm from '../components/input'
 
+import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
 import {apiAction, appendToConsole} from '../actions'
 
-class ApiPanel extends Component {
+import Sandbox from './sandbox'
+
+class ApiPanel extends WidgetComponent {
+
+    static mapStateToProps(state, ownProps) {
+        let navigationState = getComponentState(state, Sandbox, null, false);
+
+        let currentApi = null;
+        if(!!navigationState)
+            currentApi = navigationState.currentApi;
+
+        return ({
+            responseSchema: !!currentApi ? currentApi.returnTemplate : null,
+            javadocUrl: !!currentApi ? currentApi.javadocUrl : null,
+            apiUri: !!currentApi ? currentApi.uri : null,
+            currentApi
+        });
+    }
+
     render() {
-        let {currentApi, onFormSubmit} = this.props;
+        let {currentApi} = this.props;
 
         let items = [
             {description: 'API Console', component: <ApiResult/>},
@@ -24,7 +42,9 @@ class ApiPanel extends Component {
                 <div style={{height: "100%", width: "100%"}}>
                     <SplitPane splitDirection="vertical">
                         <Pane style={{height: '300px', overflow: 'scroll'}}>
-                            <InputForm title={currentApi.uri} items={currentApi.params} onFormSubmit={onFormSubmit}/>
+                            <InputForm title={currentApi.uri}
+                                       items={currentApi.params}
+                                       onFormSubmit={(uri, data)=>this.onFormSubmit(uri, data)} />
                         </Pane>
                         <Pane>
                             <Tab items={items}/>
@@ -47,20 +67,11 @@ class ApiPanel extends Component {
             );
         }
     }
+
+    onFormSubmit(uri, data) {
+        this.dispatch(appendToConsole('=> ' + uri + ' ' + JSON.stringify(data)))
+        this.dispatch(apiAction(uri, data))
+    }
 }
 
-const mapStateToProps = (state, ownProps) => ({
-    currentApi: state.apiNavigation.currentApi
-});
-
-const mapDispatchToProps = (dispatch, ownProps) => ({
-    onFormSubmit: (uri, data) => {
-        dispatch(appendToConsole('=> ' + uri + ' ' + JSON.stringify(data)))
-        dispatch(apiAction(uri, data))
-    }
-});
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ApiPanel);
+export default registerComponent(ApiPanel, true);

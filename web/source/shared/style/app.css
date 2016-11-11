@@ -100,3 +100,14 @@
     background-color: #555;
     color: white;
 }
+
+.serverConsoleBox {
+}
+
+.serverConsoleBox textarea {
+    padding: 4px;
+}
+
+.serverConsoleBox textarea:focus {
+    outline: none !important;
+}

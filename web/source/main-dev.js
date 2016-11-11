@@ -14,11 +14,12 @@ import {render} from 'react-dom'
 import {applyMiddleware, combineReducers, compose} from 'redux'
 import thunk from 'redux-thunk'
 
+import {routerReducer} from 'react-router-redux'
 import {browserHistory} from 'react-router'
 import {syncHistoryWithStore, routerMiddleware} from 'react-router-redux'
 
 import {bindLocaleLoader} from 'widget-common-util/locale'
-import {createStore, apiDispatcherMiddleware} from 'widget-redux-util/redux-enhancer'
+import {createStore, getInitState, getReducers, registerComponentReducer, apiDispatcherMiddleware} from 'widget-redux-util/redux-enhancer'
 import {actionInterceptor} from 'widget-redux-util/action-interceptor'
 
 import {loadLocaleResource} from './locale/resource-loader'
@@ -27,16 +28,16 @@ import createLogger from 'redux-logger'
 import DevTools from './dev-tools'
 
 import Root from './root'
-import reducers from './reducers'
 
 //
 // Create store and launch (Standard)
 //
 bindLocaleLoader(loadLocaleResource)
+registerComponentReducer('routing', routerReducer);
 
 export const store = createStore(
-    reducers,
-    {},
+    getReducers(),
+    getInitState(),
     compose(
         applyMiddleware(
             thunk,

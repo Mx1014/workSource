@@ -18,22 +18,22 @@ import {browserHistory} from 'react-router'
 import {syncHistoryWithStore, routerMiddleware, routerReducer} from 'react-router-redux'
 
 import {bindLocaleLoader} from 'widget-common-util/locale'
-import {createStore, apiDispatcherMiddleware} from 'widget-redux-util/redux-enhancer'
+import {createStore, getInitState, getReducers, registerComponentReducer, apiDispatcherMiddleware} from 'widget-redux-util/redux-enhancer'
 import {actionInterceptor} from 'widget-redux-util/action-interceptor'
 
 import {loadLocaleResource} from './locale/resource-loader'
 
 import Root from './root'
-import reducers from './reducers'
 
 //
 // Create store and launch (Standard)
 //
 bindLocaleLoader(loadLocaleResource);
+registerComponentReducer('routing', routerReducer);
 
 export const store = createStore(
-    reducers,
-    {},
+    getReducers(),
+    getInitState(),
     applyMiddleware(
         thunk,
         actionInterceptor.getMiddleware(),

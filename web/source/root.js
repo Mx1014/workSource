@@ -13,6 +13,9 @@ import Home from './containers/home'
 import Sandbox from './containers/sandbox'
 import ApiPanel from './containers/api-panel'
 
+import HelpDesk from './containers/help-desk'
+import ServerConsole from './containers/server-console'
+
 export default class Root extends Component {
     render() {
         return (
@@ -21,10 +24,16 @@ export default class Root extends Component {
                     <Route path="/" component={Home}>
                         <IndexRedirect to="/sandbox" />
                         <Route path="/sandbox" component={Sandbox} />
+                        <Route path="/helpdesk" component={HelpDesk}>
+                            <IndexRedirect to="/helpdesk/console" />
+                            <Route path="/helpdesk/console" component={ServerConsole} />
+                        </Route>
                     </Route>
                     <Route path="*/api" component={Home}>
                         <IndexRedirect to="sandbox" />
                         <Route path="sandbox" component={Sandbox} />
+                        <Route path="/helpdesk" component={HelpDesk}>
+                        </Route>
                     </Route>
                 </Router>
             </Provider>

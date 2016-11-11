@@ -23,6 +23,10 @@ if (process.env.NODE_ENV === 'production') {
     SERVICE_ROOT = "http://localhost:5000/evh"
 }
 
+export function getServiceRoot() {
+    return SERVICE_ROOT;
+}
+
 export function fetchApiList() {
     console.log('page url: ' + document.location);
 
@@ -30,8 +34,7 @@ export function fetchApiList() {
         [CALL_API]: {
             types: [ API_LIST_REQUEST, API_LIST_SUCCESS, API_LIST_FAILURE ],
             service: SERVICE_ROOT,
-            endpoint: '/discover',
-            method: 'GET'
+            endpoint: '/discover'
         }
     }
 }
