@@ -1,4 +1,4 @@
--- ALL
+-- ALL 全部菜单的范围-----start 不要执行
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '10000', '', 'EhNamespaces', '999987', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '10100', '', 'EhNamespaces', '999987', '2');
@@ -150,7 +150,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '60000', '', 'EhNamespaces', '999987', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '60100', '', 'EhNamespaces', '999987', '2');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '60200', '', 'EhNamespaces', '999987', '2');
-
+--  全部菜单的范围-----end 不要执行
 
 	
 -- 科技园
@@ -1234,7 +1234,7 @@ INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner
 	
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '30000', '', 'EhNamespaces', '999993', '2');
-	INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '30500', '', 'EhNamespaces', '999993', '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '31000', '', 'EhNamespaces', '999993', '2');
@@ -1307,7 +1307,7 @@ INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner
 	
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '30000', '', 'EhNamespaces', '999992', '2');
-	INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '30500', '', 'EhNamespaces', '999992', '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '31000', '', 'EhNamespaces', '999992', '2');
