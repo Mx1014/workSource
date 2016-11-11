@@ -1728,11 +1728,15 @@ public class QualityProviderImpl implements QualityProvider {
 			ListingLocator locator, int count) {
 		// TODO Auto-generated method stub
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<ScoreGroupByTargetDTO> dtoList = new ArrayList<ScoreGroupByTargetDTO>();
 		SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
+		if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.lt(locator.getAnchor()));
+        }
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE.eq(targetType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_ID.eq(ownerId));
-//		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS..like(superiorPath));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PATH.like(superiorPath));
 		if(startTime != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.ge(new Timestamp(startTime)));
 		}
@@ -1740,9 +1744,21 @@ public class QualityProviderImpl implements QualityProvider {
 		if(endTime != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.le(new Timestamp(endTime)));
 		}
+		
 		query.addGroupBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID);
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.desc());
 		query.addLimit(count);
-		return null;
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query logs by count, sql=" + query.getSQL());
+            LOGGER.debug("Query logs by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhQualityInspectionSpecificationItemResultsRecord record) -> {
+        	return null;
+        });
+        
+		return dtoList;
 	}
 
 }
