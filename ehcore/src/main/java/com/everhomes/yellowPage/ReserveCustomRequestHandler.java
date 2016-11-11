@@ -169,7 +169,11 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		String contact = (request.getContact() == null) ? "" : request.getContact();
 		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
 		String remarks = (request.getRemarks() == null) ? "" : request.getRemarks();
-		
+		if(StringUtils.isNullOrEmpty(request.getReserveType())) {
+			String note = "预约机构:" + reserveOrganization + "\n" + "预约时间:" + reserveTime
+					 + "\n" + "联系人:" + contact + "\n" + "联系电话:" + mobile + "\n" + "备注:" + remarks + "\n";
+			return note;
+		}
 		String note = "预约类型:" + reserveType + "\n" + "预约机构:" + reserveOrganization + "\n" + "预约时间:" + reserveTime
 				 + "\n" + "联系人:" + contact + "\n" + "联系电话:" + mobile + "\n" + "备注:" + remarks + "\n";
 		return note;
@@ -220,13 +224,16 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 	private List<RequestFieldDTO> toFieldDTOList(ReservationRequests fields) {
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
 		
-		RequestFieldDTO dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		RequestFieldDTO dto = null;
 		
-		dto.setFieldValue(fields.getReserveType());
-		dto.setFieldName("预约类型");
-		list.add(dto);
+		if(!StringUtils.isNullOrEmpty(fields.getReserveType())) {
+			dto = new RequestFieldDTO();
+			dto.setFieldType(FieldType.STRING.getCode());
+			dto.setFieldContentType(FieldContentType.TEXT.getCode());
+			dto.setFieldValue(fields.getReserveType());
+			dto.setFieldName("预约类型");
+			list.add(dto);
+		}
 		
 		dto = new RequestFieldDTO();
 		dto.setFieldType(FieldType.STRING.getCode());
