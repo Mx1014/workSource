@@ -308,6 +308,11 @@ public class GroupServiceImpl implements GroupService {
                 
         		return new RestResponse(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, errorDescription);
     		}
+        	//判断简介
+        	if (cmd.getDescription() == null || cmd.getDescription().length() < 10) {
+        		throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_DESCRIPTION_LENGTH,
+    					"title length cannot be less than 10!");
+			}
 		}
     	return new RestResponse(createGroup(cmd, groupSetting));
     }
@@ -4442,6 +4447,14 @@ public class GroupServiceImpl implements GroupService {
 			LOGGER.error("Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters");
+		}
+		if (cmd.getTitle().length() > 10) {
+			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_BROADCAST_TITLE_LENGTH,
+					"title length cannot be greater than 10!");
+		}
+		if (cmd.getContent().length() > 200) {
+			throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_BROADCAST_CONTENT_LENGTH,
+					"content length cannot be greater than 200");
 		}
 	}
 

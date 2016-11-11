@@ -38,4 +38,7 @@ public interface GroupServiceErrorCode {
     
     static final int ERROR_GROUP_CATEGORY_NAME_EXIST = 10031; // 分类已存在
     static final int ERROR_GROUP_BEYOND_BROADCAST_COUNT = 10032; // 今天广播发送次数已用完
+    static final int ERROR_BROADCAST_TITLE_LENGTH = 10033; // 标题不能超过10个字
+    static final int ERROR_BROADCAST_CONTENT_LENGTH = 10034; // 内容不能超过200个字
+    static final int ERROR_GROUP_DESCRIPTION_LENGTH = 10035; // 不可小于10个字
 }
