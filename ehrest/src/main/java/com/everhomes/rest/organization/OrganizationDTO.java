@@ -41,6 +41,7 @@ import com.everhomes.util.StringHelper;
  *  <li>enterpriseContactor: 企业联系人</li>
  *  <li>mobile: 手机号</li>
  * <li>doorplateAddress：门牌地址</li>
+ *  <li>emailDomain: 邮箱域名 </li>
  * <li>
  * </ul>
  */
@@ -88,6 +89,7 @@ public class OrganizationDTO {
 	private String enterpriseContactor;
 	
 	private String mobile;
+    private String emailDomain;
 	
 	public String getEnterpriseContactor() {
 		return enterpriseContactor;
@@ -344,4 +346,12 @@ public class OrganizationDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
+	}
 }
