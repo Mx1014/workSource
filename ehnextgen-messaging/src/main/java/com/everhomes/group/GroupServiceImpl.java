@@ -738,7 +738,7 @@ public class GroupServiceImpl implements GroupService {
         	    }
         		tmpGroup = groupProvider.findGroupById(userGroup.getGroupId());
         	    //加上域空间限制，否则跨域的也会查出来, add by tt, 20161101
-        	    if (tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
+        	    if (tmpGroup != null && tmpGroup.getNamespaceId().intValue() != namespaceId.intValue()) {
 					continue;
 				}
         		if(tmpGroup != null && !tmpGroup.getStatus().equals(GroupAdminStatus.INACTIVE.getCode())) {
@@ -779,12 +779,17 @@ public class GroupServiceImpl implements GroupService {
                 if(tmpGroup != null && tmpGroup.getOwningForumId() != null && tmpGroup.getOwningForumId().longValue() == ForumConstants.FEEDBACK_FORUM) {
                     continue;
                 }
-                if(tmpGroup != null && Byte.valueOf(GroupPrivacy.PUBLIC.getCode()).equals(tmpGroup.getPrivateFlag()) && Byte.valueOf(GroupAdminStatus.ACTIVE.getCode()).equals(tmpGroup.getStatus())) {
-                    groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
+                // 且这个成员在这个已经审批通过了, add by tt, 20161112
+                if(tmpGroup != null && Byte.valueOf(GroupPrivacy.PUBLIC.getCode()).equals(tmpGroup.getPrivateFlag()) 
+                		&& Byte.valueOf(GroupAdminStatus.ACTIVE.getCode()).equals(tmpGroup.getStatus())
+                		&& GroupMemberStatus.fromCode(userGroup.getMemberStatus()) == GroupMemberStatus.ACTIVE) {
+                	groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
                 } 
                 // 审核中的俱乐部也要显示，add by tt, 20161103
                 else if (tmpGroup != null && GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(tmpGroup.getPrivateFlag()) 
-                		&& GroupAdminStatus.INACTIVE == GroupAdminStatus.fromCode(tmpGroup.getStatus()) && ApprovalStatus.WAITING_FOR_APPROVING == ApprovalStatus.fromCode(tmpGroup.getApprovalStatus())) {
+                		&& GroupAdminStatus.INACTIVE == GroupAdminStatus.fromCode(tmpGroup.getStatus()) 
+                		&& ApprovalStatus.WAITING_FOR_APPROVING == ApprovalStatus.fromCode(tmpGroup.getApprovalStatus())
+                		&& operatorId == tmpGroup.getCreatorUid().longValue()) {
                 	groupDtoList.add(toGroupDTO(operatorId, tmpGroup));
 				}
                 else {
