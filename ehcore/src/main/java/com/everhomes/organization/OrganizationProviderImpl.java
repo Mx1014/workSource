@@ -2648,7 +2648,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(null != pageSize)
 			query.addLimit(pageSize);
 		query.addOrderBy(Tables.EH_ORGANIZATION_JOB_POSITIONS.ID.asc());
-		return query.fetch().stream().map(r -> ConvertHelper.convert(query.fetchOne(), OrganizationJobPosition.class))
+		return query.fetch().stream().map(r -> ConvertHelper.convert(r, OrganizationJobPosition.class))
 				.collect(Collectors.toList());
 	}
 	

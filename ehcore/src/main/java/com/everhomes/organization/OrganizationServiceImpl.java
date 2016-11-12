@@ -7991,6 +7991,16 @@ System.out.println();
 		if(size > 0){
 			response.setRequests(list.stream().map(r -> {
 				ChildrenOrganizationJobLevelDTO dto = ConvertHelper.convert(r, ChildrenOrganizationJobLevelDTO.class);
+				Organization orgCommoand = new Organization();
+				orgCommoand.setId(r.getId());
+				orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+				
+				CrossShardListingLocator locator = new CrossShardListingLocator();
+				locator.setAnchor(cmd.getPageAnchor());
+				List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),
+						orgCommoand, null, VisibleFlag.ALL, locator, 10000);
+				dto.setMembers(organizationMembers.stream().map(m -> ConvertHelper.convert(r, OrganizationMemberDTO.class))
+						.collect(Collectors.toList()));
 				dto.setParentName(organization.getName());
 				return dto;
 			}).collect(Collectors.toList()));
@@ -8052,6 +8062,18 @@ System.out.println();
 					return null;
 				}).collect(Collectors.toList());
 				dto.setJobPositions(organizationJobPositionDTOs);
+				
+				Organization orgCommoand = new Organization();
+				orgCommoand.setId(r.getId());
+				orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+				
+				CrossShardListingLocator locator = new CrossShardListingLocator();
+				locator.setAnchor(cmd.getPageAnchor());
+				List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),
+						orgCommoand, null, VisibleFlag.ALL, locator, 10000);
+				dto.setMembers(organizationMembers.stream().map(m -> ConvertHelper.convert(r, OrganizationMemberDTO.class))
+						.collect(Collectors.toList()));
+				
 				return dto;
 			}).collect(Collectors.toList()));
 			

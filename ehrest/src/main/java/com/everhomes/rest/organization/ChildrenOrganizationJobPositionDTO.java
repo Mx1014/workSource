@@ -22,7 +22,8 @@ public class ChildrenOrganizationJobPositionDTO {
 	private String parentName;
 	private String  name;
 	private String  path;
-
+	@ItemType(OrganizationMemberDTO.class)
+	private List<OrganizationMemberDTO> members;
 	@ItemType(OrganizationJobPositionDTO.class)
 	private List<OrganizationJobPositionDTO> jobPositions;
 
@@ -72,6 +73,14 @@ public class ChildrenOrganizationJobPositionDTO {
 
 	public void setJobPositions(List<OrganizationJobPositionDTO> jobPositions) {
 		this.jobPositions = jobPositions;
+	}
+
+	public List<OrganizationMemberDTO> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<OrganizationMemberDTO> members) {
+		this.members = members;
 	}
 
 	@Override

@@ -2,6 +2,7 @@ package com.everhomes.rest.organization.pm;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.organization.OrganizationJobPositionDTO;
+import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -26,6 +27,9 @@ public class ChildrenOrganizationJobLevelDTO {
 
 	private Integer size;
 
+	@ItemType(OrganizationMemberDTO.class)
+	private List<OrganizationMemberDTO> members;
+	
 	public Long getId() {
 		return id;
 	}
@@ -72,6 +76,14 @@ public class ChildrenOrganizationJobLevelDTO {
 
 	public void setSize(Integer size) {
 		this.size = size;
+	}
+
+	public List<OrganizationMemberDTO> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<OrganizationMemberDTO> members) {
+		this.members = members;
 	}
 
 	@Override

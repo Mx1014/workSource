@@ -1,5 +1,8 @@
 package com.everhomes.rest.organization;
 
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -18,7 +21,8 @@ public class OrganizationJobPositionDTO {
 	private Long ownerId;
 	private String name;
 	private String discription;
-
+	@ItemType(OrganizationMemberDTO.class)
+	private List<OrganizationMemberDTO> members;
 	public Long getId() {
 		return id;
 	}
@@ -57,6 +61,14 @@ public class OrganizationJobPositionDTO {
 
 	public void setDiscription(String discription) {
 		this.discription = discription;
+	}
+
+	public List<OrganizationMemberDTO> getMembers() {
+		return members;
+	}
+
+	public void setMembers(List<OrganizationMemberDTO> members) {
+		this.members = members;
 	}
 
 	@Override
