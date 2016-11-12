@@ -156,7 +156,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
                 .setQuery(qb);
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug(builder.toString());
+            LOGGER.debug("Query energy meters, builder={}", builder);
         }
         
         SearchResponse rsp = builder.execute().actionGet();
