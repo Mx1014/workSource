@@ -155,6 +155,10 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
                 .addSort(createTimeSort)
                 .setQuery(qb);
 
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug(builder.toString());
+        }
+        
         SearchResponse rsp = builder.execute().actionGet();
         List<Long> ids = getIds(rsp);
         SearchEnergyMeterResponse response = new SearchEnergyMeterResponse();
