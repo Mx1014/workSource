@@ -776,7 +776,7 @@ public class GroupServiceImpl implements GroupService {
             for(UserGroup userGroup : userGroupList) {
                 tmpGroup = groupProvider.findGroupById(userGroup.getGroupId());
                 // 过滤掉意见反馈圈 by lqs 20160416
-                if(tmpGroup.getOwningForumId() != null && tmpGroup.getOwningForumId().longValue() == ForumConstants.FEEDBACK_FORUM) {
+                if(tmpGroup != null && tmpGroup.getOwningForumId() != null && tmpGroup.getOwningForumId().longValue() == ForumConstants.FEEDBACK_FORUM) {
                     continue;
                 }
                 if(tmpGroup != null && Byte.valueOf(GroupPrivacy.PUBLIC.getCode()).equals(tmpGroup.getPrivateFlag()) && Byte.valueOf(GroupAdminStatus.ACTIVE.getCode()).equals(tmpGroup.getStatus())) {
@@ -2241,9 +2241,13 @@ public class GroupServiceImpl implements GroupService {
         }
         
         Group group = this.groupProvider.findGroupById(groupId);
-        if(group == null) {
+        if(group == null || group.getStatus().byteValue() == GroupAdminStatus.INACTIVE.getCode()) {
+        	int code = GroupServiceErrorCode.ERROR_GROUP_NOT_FOUND;
+        	if (GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+				code = GroupServiceErrorCode.ERROR_GROUP_CLUB_NOT_FOUND;
+			}
             LOGGER.error("Group not found, operatorUid=" + operatorUid + ", groupId=" + groupId + ", tag=" + tag);
-            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_NOT_FOUND, 
+            throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, code, 
                     "Unable to find the group");
         }
         
