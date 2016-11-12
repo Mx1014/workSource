@@ -1,21 +1,26 @@
 // @formatter:off
 package com.everhomes.launchpad;
 
+import java.net.URLEncoder;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.Comparator;
-import java.util.List;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.persistence.Convert;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
+import com.everhomes.http.HttpUtils;
+import com.everhomes.rest.common.BizDetailActionData;
 import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.statistics.transaction.SettlementErrorCode;
+import com.everhomes.rest.statistics.transaction.StatWareDTO;
 import com.everhomes.rest.ui.launchpad.*;
 import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.statistics.transaction.*;
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
+import org.apache.http.protocol.HTTP;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -80,12 +85,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
 
 @Component
 public class LaunchPadServiceImpl implements LaunchPadService {
@@ -897,8 +896,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	
 	private List<LaunchPadItemDTO> processLaunchPadItems(String token, Long userId, Long communityId, List<LaunchPadItem> allItems, HttpServletRequest request,ItemDisplayFlag itemDisplayFlag) {
         List<LaunchPadItemDTO> result = new ArrayList<LaunchPadItemDTO>();
-        
-	    try{ 
+	    try{
             List<LaunchPadItemDTO> distinctDto = new ArrayList<LaunchPadItemDTO>();
             final String businessDetailUrl = configurationProvider.getValue(BUSINESS_DETAIL_URL, "");
             final String prefixUrl = configurationProvider.getValue(PREFIX_URL, "");
@@ -913,7 +911,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         	}
             LOGGER.debug("need business item size = {} id = {},", businessIds.size(), businessIds);
             List<Long> bizIds = businessIds;
-            
+
             allItems.forEach(r ->{
                 LaunchPadItemDTO itemDTO = ConvertHelper.convert(r, LaunchPadItemDTO.class);
                 if(null != request){
@@ -922,38 +920,65 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 if(null == itemDTO.getScaleType()){
                 	itemDTO.setScaleType(ScaleType.TAILOR.getCode());
                 }
-                
-                if(r.getTargetType() != null && r.getTargetType().equalsIgnoreCase(ItemTargetType.BIZ.getCode())){
-                	
-                	Business b = this.businessProvider.findBusinessById(r.getTargetId());
-                	if(b != null){
-                		if( ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY
-                				|| BusinessTargetType.fromCode(b.getTargetType()) != BusinessTargetType.ZUOLIN 
-                				|| (bizIds.contains(r.getTargetId()) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
-                            itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
-                            JSONObject jsonObject = new JSONObject();
-                            jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
-                            jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
-                            itemDTO.setActionData(jsonObject.toJSONString());
-                            if(b.getCreatorUid().longValue() == userId)
-                                itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
-                            else
-                                itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
-                            
-                            itemDTO.setEditFlag(r.getDeleteFlag());
-                            distinctDto.add(itemDTO);
-                        }
-                	}
-                }else{
-                    String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
-                    itemDTO.setIconUrl(url);
+
+
+				if(null != ItemTargetType.fromCode(r.getTargetType())){
+					if(ItemTargetType.BIZ == ItemTargetType.fromCode(r.getTargetType())){
+						Long businessId = Long.valueOf(r.getTargetId());
+						Business b = this.businessProvider.findBusinessById(businessId);
+						if(b != null){
+							if( ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.DISPLAY
+									|| BusinessTargetType.fromCode(b.getTargetType()) != BusinessTargetType.ZUOLIN
+									|| (bizIds.contains(businessId) && ItemDisplayFlag.fromCode(r.getDisplayFlag()) == ItemDisplayFlag.HIDE)){
+								itemDTO.setIconUrl(processLogoUrl(b,userId,imageUrl));
+								JSONObject jsonObject = new JSONObject();
+								jsonObject.put(LaunchPadConstants.URL, processUrl(b, prefixUrl,businessDetailUrl));
+								jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
+								itemDTO.setActionData(jsonObject.toJSONString());
+								if(b.getCreatorUid().longValue() == userId)
+									itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName()+"(店铺)");
+								else
+									itemDTO.setItemLabel(b.getName() == null ? itemDTO.getItemLabel() : b.getName());
+
+								itemDTO.setEditFlag(r.getDeleteFlag());
+								distinctDto.add(itemDTO);
+							}
+						}
+					}else if(ItemTargetType.ZUOLIN_SHOP == ItemTargetType.fromCode(r.getTargetType())){
+						List<String> businessNos = new ArrayList<>();
+						businessNos.add(r.getTargetId());
+						List<BusinessDTO> businesses = this.getBusinessesInfo(businessNos);
+						if(businesses.size() > 0){
+							BusinessDTO business = businesses.get(0);
+							itemDTO.setIconUrl(business.getLogoUrl());
+							BizDetailActionData actionData = (BizDetailActionData)StringHelper.fromJsonString(r.getActionData(), BizDetailActionData.class);
+							JSONObject jsonObject = new JSONObject();
+							if(null != actionData){
+								jsonObject.put(LaunchPadConstants.URL, actionData.getUrl());
+							}else{
+								LOGGER.error("item action data error. itemId = {}, actionData= {}", r.getId(), r.getActionData());
+							}
+							jsonObject.put(LaunchPadConstants.COMMUNITY_ID, communityId);
+							itemDTO.setActionData(jsonObject.toJSONString());
+							itemDTO.setItemLabel(business.getDisplayName());
+							itemDTO.setEditFlag(r.getDeleteFlag());
+							distinctDto.add(itemDTO);
+						}
+					}else{
+						String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
+						itemDTO.setIconUrl(url);
+						itemDTO.setEditFlag(r.getDeleteFlag());
+						distinctDto.add(itemDTO);
+					}
+				}else{
+					String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
+					itemDTO.setIconUrl(url);
 //                    if(LOGGER.isDebugEnabled()) {
 //                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
 //                    }
-                    itemDTO.setEditFlag(r.getDeleteFlag());
-                    distinctDto.add(itemDTO);
-                }
-                
+					itemDTO.setEditFlag(r.getDeleteFlag());
+					distinctDto.add(itemDTO);
+				}
             });
             if(distinctDto != null && !distinctDto.isEmpty()){
                 distinctDto.forEach(r ->{
@@ -976,6 +1001,75 @@ public class LaunchPadServiceImpl implements LaunchPadService {
         }
         return result;
 	}
+
+	private List<BusinessDTO> getBusinessesInfo(List<String> businessIds){
+		List<BusinessDTO> businesses = new ArrayList<>();
+		String serverURL = configurationProvider.getValue(StatTransactionConstant.BIZ_SERVER_URL, "");
+		if(org.springframework.util.StringUtils.isEmpty(serverURL)){
+			LOGGER.error("biz serverURL not configured, param = {}", StatTransactionConstant.BIZ_SERVER_URL);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz serverURL not configured.");
+		}
+
+		String paidOrderApi = configurationProvider.getValue(StatTransactionConstant.BIZ_BUSINESSES_INFO_API, "");
+
+		if(org.springframework.util.StringUtils.isEmpty(paidOrderApi)){
+			LOGGER.error("biz paid ware info api not configured, param = {}", StatTransactionConstant.BIZ_WARE_INFO_API);
+			throw RuntimeErrorException.errorWith(SettlementErrorCode.SCOPE, SettlementErrorCode.ERROR_PARAMETER_ISNULL,
+					"biz paid  ware info api not configured.");
+		}
+
+		try {
+			String appKey = configurationProvider.getValue(StatTransactionConstant.BIZ_APPKEY, "");
+			String secretKey = configurationProvider.getValue(StatTransactionConstant.BIZ_SECRET_KEY, "");
+			Integer nonce = (int)(Math.random()*1000);
+			Long timestamp = System.currentTimeMillis();
+			Map<String,Object> params = new HashMap<String, Object>();
+			params.put("nonce", nonce);
+			params.put("timestamp", timestamp);
+			params.put("appKey", appKey);
+			params.put("shopNos", businessIds);
+			Map<String, String> mapForSignature = new HashMap<String, String>();
+			for(Map.Entry<String, Object> entry : params.entrySet()) {
+				if(!entry.getKey().equals("shopNos")) {
+					mapForSignature.put(entry.getKey(), entry.getValue().toString());
+				}
+			}
+			mapForSignature.put("modelIds", org.apache.commons.lang.StringUtils.join(businessIds, ","));
+			String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+			params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+			String url = serverURL + paidOrderApi;
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("request url = {}, params = {}", url, params);
+			}
+
+			String result = HttpUtils.postJson(url, StringHelper.toJsonString(params), 30, HTTP.UTF_8);
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("response result = {}", result);
+			}
+			ListBusinessInfoResponse response= (ListBusinessInfoResponse)StringHelper.fromJsonString(result, ListModelInfoResponse.class);
+
+			if(null != response){
+				List<BizBusinessInfo> bizBusinessInfos = response.getResponse();
+				if(null != bizBusinessInfos){
+					for (BizBusinessInfo bizBusinessInfo: bizBusinessInfos) {
+						BusinessDTO business = new BusinessDTO();
+						business.setName(bizBusinessInfo.getShopName());
+						business.setAddress(bizBusinessInfo.getShopAddress());
+						business.setPhone(bizBusinessInfo.getPhone());
+						business.setLogoUrl(bizBusinessInfo.getShopLogo());
+						business.setDisplayName(bizBusinessInfo.getShopName());
+						businesses.add(business);
+					}
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("Get business info error e = {}");
+		}
+
+		return businesses;
+	}
+
 
 	@SuppressWarnings("unchecked")
 	private String parserJson(String userToken,long userId, Long communityId,LaunchPadItem launchPadItem, HttpServletRequest request) {
