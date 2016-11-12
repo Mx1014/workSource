@@ -256,7 +256,7 @@ INSERT INTO `eh_web_menus` VALUES ('20190', '统计', '20100', null, 'task_stati
 
 INSERT INTO `eh_web_menus` VALUES ('20400', '物业缴费', '20000', null, null, '1', '2', '/20000/20400', 'park', '250');
 INSERT INTO `eh_web_menus` VALUES ('20410', '缴费记录', '20400', null, 'property_fee_record', '0', '2', '/20000/20400/20410', 'park', '252');
-INSERT INTO `eh_web_menus` VALUES ('20420', '设置', '43500', null, 'property_fee_config', '0', '2', '/20000/20400/20420', 'park', '255');
+INSERT INTO `eh_web_menus` VALUES ('20420', '设置', '20400', null, 'property_fee_config', '0', '2', '/20000/20400/20420', 'park', '255');
 
 
 INSERT INTO `eh_web_menus` VALUES ('20600', '品质核查', '20000', null, null, '1', '2', '/20000/20600', 'park', '260');
