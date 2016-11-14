@@ -33,5 +33,6 @@ public interface ApprovalServiceErrorCode {
 	
 	int EFFECTIVE_DATE_HAS_REQUEST = 10022;  //所选日期已提交过加班申请，请重新选择
 	
+	int APPROVAL_LEVEL_APPROVED = 10023;  //申请单已经被审批
 	
 }
