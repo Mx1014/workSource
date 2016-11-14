@@ -144,14 +144,14 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
             anchor = cmd.getPageAnchor();
         }
 
-        FieldSortBuilder statusSort = SortBuilders.fieldSort("status").order(SortOrder.ASC);
+        // FieldSortBuilder statusSort = SortBuilders.fieldSort("status").order(SortOrder.ASC);
         FieldSortBuilder createTimeSort = SortBuilders.fieldSort("createTime").order(SortOrder.DESC);
 
         qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
-                // .addSort(statusSort)
+                // .addSort(statusSort) // this sort will conflict, elasticsearch bug: https://github.com/elastic/elasticsearch/issues/8688
                 .addSort(createTimeSort)
                 .setQuery(qb);
 
