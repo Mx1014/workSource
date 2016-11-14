@@ -19,5 +19,7 @@ public interface EnergyConsumptionServiceErrorCode {
     int ERR_METER_CATEGORY_CAN_NOT_DELETE = 10010;// 默认分类无法删除
     int ERR_METER_IMPORT = 10011;// 导入失败,请检查数据准确性
     int ERR_METER_CATEGORY_HAS_BEEN_REFERENCE = 10012;// 分类被引用,无法删除
+    int ERR_METER_SETTING_START_TIME_ERROR = 10013;// 开始时间不能小于现在
+    int ERR_METER_SETTING_END_TIME_ERROR = 10014;// 结束时间不能小于开始时间
 
 }

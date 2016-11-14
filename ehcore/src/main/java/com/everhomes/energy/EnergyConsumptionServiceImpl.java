@@ -382,6 +382,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd) {
+        // 开始时间不能小于现在
+        if (cmd.getStartTime() != null && cmd.getStartTime() < Date.valueOf(LocalDate.now()).getTime()) {
+            LOGGER.error("Energy meter setting start time less then now.");
+            throw errorWith(SCOPE, ERR_METER_SETTING_START_TIME_ERROR, "Energy meter setting start time less them now.");
+        }
+        // 结束时间不能小于开始时间
+        if (cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getEndTime() - cmd.getStartTime() < 0) {
+            LOGGER.error("Energy meter setting end time less then start time.");
+            throw errorWith(SCOPE, ERR_METER_SETTING_END_TIME_ERROR, "Energy meter setting end time less them start time.");
+        }
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setStartTime(new Timestamp(cmd.getStartTime()));
@@ -533,40 +543,42 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void batchUpdateEnergyMeterSettings(BatchUpdateEnergyMeterSettingsCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeter> meters = meterProvider.listByIds(currNamespaceId(), cmd.getMeterIds());
-        if (meters != null && meters.size() > 0) {
-            meters.forEach(r -> {
-                UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
-                updateCmd.setMeterId(r.getId());
-                // 价格
-                if (cmd.getPrice() != null) {
-                    updateCmd.setPrice(cmd.getPrice());
-                    updateCmd.setStartTime(cmd.getPriceStart());
-                    updateCmd.setEndTime(cmd.getPriceEnd());
-                    this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
-                }
-                // 倍率
-                if (cmd.getRate() != null) {
-                    updateCmd.setRate(cmd.getRate());
-                    updateCmd.setStartTime(cmd.getRateStart());
-                    updateCmd.setEndTime(cmd.getRateEnd());
-                    this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
-                }
-                // 费用
-                if (cmd.getCostFormulaId() != null) {
-                    updateCmd.setCostFormulaId(cmd.getCostFormulaId());
-                    updateCmd.setStartTime(cmd.getCostFormulaStart());
-                    updateCmd.setEndTime(cmd.getCostFormulaEnd());
-                    this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
-                }
-                // 用量
-                if (cmd.getAmountFormulaId() != null) {
-                    updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
-                    updateCmd.setStartTime(cmd.getAmountFormulaStart());
-                    updateCmd.setEndTime(cmd.getAmountFormulaEnd());
-                    this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
-                }
-            });
+        if (cmd.getMeterIds() != null) {
+            List<EnergyMeter> meters = meterProvider.listByIds(currNamespaceId(), cmd.getMeterIds());
+            if (meters != null && meters.size() > 0) {
+                meters.forEach(r -> {
+                    UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
+                    updateCmd.setMeterId(r.getId());
+                    // 价格
+                    if (cmd.getPrice() != null) {
+                        updateCmd.setPrice(cmd.getPrice());
+                        updateCmd.setStartTime(cmd.getPriceStart());
+                        updateCmd.setEndTime(cmd.getPriceEnd());
+                        this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
+                    }
+                    // 倍率
+                    if (cmd.getRate() != null) {
+                        updateCmd.setRate(cmd.getRate());
+                        updateCmd.setStartTime(cmd.getRateStart());
+                        updateCmd.setEndTime(cmd.getRateEnd());
+                        this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
+                    }
+                    // 费用
+                    if (cmd.getCostFormulaId() != null) {
+                        updateCmd.setCostFormulaId(cmd.getCostFormulaId());
+                        updateCmd.setStartTime(cmd.getCostFormulaStart());
+                        updateCmd.setEndTime(cmd.getCostFormulaEnd());
+                        this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+                    }
+                    // 用量
+                    if (cmd.getAmountFormulaId() != null) {
+                        updateCmd.setAmountFormulaId(cmd.getAmountFormulaId());
+                        updateCmd.setStartTime(cmd.getAmountFormulaStart());
+                        updateCmd.setEndTime(cmd.getAmountFormulaEnd());
+                        this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
+                    }
+                });
+            }
         }
     }
 

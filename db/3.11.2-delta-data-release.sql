@@ -140,6 +140,10 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10011', 'zh_CN', '导入失败,请检查数据准确性');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10012', 'zh_CN', '删除失败,该选项已被引用');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10013', 'zh_CN', '开始不能时间小于现在');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10014', 'zh_CN', '结束时间不能小于开始时间');
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy.meter.type', '1', 'zh_CN', '水表');
