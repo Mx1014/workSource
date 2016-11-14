@@ -151,7 +151,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
-                .addSort(statusSort)
+                // .addSort(statusSort)
                 .addSort(createTimeSort)
                 .setQuery(qb);
 
