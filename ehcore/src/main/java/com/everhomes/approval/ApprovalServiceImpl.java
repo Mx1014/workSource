@@ -1643,8 +1643,8 @@ public class ApprovalServiceImpl implements ApprovalService {
 		ApprovalFlowLevel approvalFlowLevel = approvalFlowLevelProvider.findApprovalFlowLevel(ApprovalTargetType.USER.getCode(),
 				userId, flowId, level);
 		if (approvalFlowLevel == null) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"you have no privilege");
+			throw RuntimeErrorException.errorWith(ApprovalServiceErrorCode.SCOPE, ApprovalServiceErrorCode.APPROVAL_LEVEL_APPROVED,
+					"already approved");
 		}
 	}
 
