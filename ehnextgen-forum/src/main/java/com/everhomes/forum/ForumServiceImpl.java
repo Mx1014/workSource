@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Calendar;
+import java.util.Comparator;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
@@ -35,6 +36,8 @@ import com.everhomes.acl.Role;
 import com.everhomes.activity.Activity;
 import com.everhomes.activity.ActivityProivider;
 import com.everhomes.activity.ActivityRoster;
+import com.everhomes.activity.ActivityService;
+import com.everhomes.activity.WarnActivityBeginningAction;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -71,6 +74,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.OrganizationTaskTarget;
 import com.everhomes.point.UserPointService;
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
@@ -78,8 +82,10 @@ import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
 import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
@@ -136,6 +142,7 @@ import com.everhomes.rest.group.GroupDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.group.ListPublicGroupCommand;
+import com.everhomes.rest.group.ListUserGroupPostResponse;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -199,10 +206,13 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateUtils;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+
+import net.greghaines.jesque.Job;
 
 @Component
 public class ForumServiceImpl implements ForumService {
@@ -213,6 +223,12 @@ public class ForumServiceImpl implements ForumService {
     
     @Autowired
     private ActivityProivider activityProivider;
+
+	@Autowired
+	JesqueClientFactory jesqueClientFactory;
+    
+    @Autowired
+    private ActivityService activityService;
     
     @Autowired
     private DbProvider dbProvider;
@@ -370,6 +386,11 @@ public class ForumServiceImpl implements ForumService {
         	
         }
         
+        // 发活动的时候判断要不要设置定时任务
+        if (null != cmd.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == cmd.getEmbeddedAppId().longValue()) {
+			setActivitySchedule(post.getEmbeddedId());
+		}
+        
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
         
         long endTime = System.currentTimeMillis();
@@ -381,7 +402,25 @@ public class ForumServiceImpl implements ForumService {
         return postDto;
     }
     
-    private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
+    private void setActivitySchedule(Long activityId) {
+    	Activity activity = activityProivider.findActivityById(activityId);
+    	if (activity == null) {
+			return;
+		}
+    	ActivityWarningResponse queryActivityWarningResponse = activityService.queryActivityWarning(new GetActivityWarningCommand(activity.getNamespaceId()));
+    	//判断如果提醒时间大于当前时间并且要落在使用轮循+定时的方式无法找到区间内才设置提醒
+    	if (activity.getStartTime().getTime() - queryActivityWarningResponse.getTime() > new Date().getTime() 
+    			&& DateUtils.getCurrentHour().getTime() == DateUtils.formatHour(new Date(activity.getStartTime().getTime() - queryActivityWarningResponse.getTime())).getTime()) {
+    		final Job job1 = new Job(
+					WarnActivityBeginningAction.class.getName(),
+					new Object[] { String.valueOf(activity.getId()) });
+			jesqueClientFactory.getClientPool().delayedEnqueue(WarnActivityBeginningAction.QUEUE_NAME, job1,
+					activity.getStartTime().getTime() - queryActivityWarningResponse.getTime());
+			LOGGER.debug("设置了一个活动提醒："+activity.getId());
+		}
+	}
+
+	private OrganizationTaskType getOrganizationTaskType(Long contentCategoryId) {
 		if(contentCategoryId != null) {
 			if(contentCategoryId == CategoryConstants.CATEGORY_ID_NOTICE) {
 				return OrganizationTaskType.NOTICE;
@@ -5232,6 +5271,61 @@ public class ForumServiceImpl implements ForumService {
 		}
 		
 		return null;
+	}
+
+	//查询用户关注的俱乐部的帖子
+	@Override
+	public ListUserGroupPostResponse listUserGroupPost(VisibilityScope scope, Long communityId, List<Long> forumIdList, Long userId, Long pageAnchor, Integer pageSize) {
+        
+		final int thisPageSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+        
+        Condition condition = this.notEqPostCategoryCondition(null, null);
+        
+        
+        
+        //由于论坛有可能是分库分表的，所以这里只能一个论坛一个论坛来查询，分页查询的时候需要每个论坛都查前20条，然后合并到一起再取前20条，最后再返回
+        //如果是第2页，那就要每个论坛取前40条，合并到一起再取第21到第40条，依次类推
+        //如果按照锚点来查的话，按照给定的锚点每个论坛取前20条，再合并到一起取前20条
+        List<Post> totalPostList = new ArrayList<>();
+        forumIdList.forEach(forumId->{
+        	CrossShardListingLocator locator = new CrossShardListingLocator();
+            locator.setAnchor(pageAnchor);
+        	locator.setEntityId(forumId);
+            List<Post> posts = this.forumProvider.queryPosts(locator, thisPageSize + 1, (loc, query) -> {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forumId));
+                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+                query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+                if(null != condition){
+                	query.addConditions(condition);
+                }
+                return query;
+            });
+            if (posts != null && posts.size() > 0) {
+                totalPostList.addAll(posts);
+			}
+        });
+        
+        //此处按id排序而不是创建时间，因为有可能创建时间是一样的，那样在分界点的数据就会有问题
+        totalPostList.sort((post1, post2)->post1.getId().longValue() > post2.getId().longValue()?-1:1);
+        
+        //取前21条，多一条是为了后面判断是否有下一页
+        List<Post> resultPostList = totalPostList.subList(0, totalPostList.size()>thisPageSize+1?thisPageSize+1:totalPostList.size());
+        
+        this.forumProvider.populatePostAttachments(resultPostList);
+        
+        Long nextPageAnchor = null;
+        if(resultPostList.size() > thisPageSize) {
+        	resultPostList.remove(resultPostList.size() - 1);
+            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getId();
+        }
+        
+        populatePosts(userId, resultPostList, communityId, false);
+        
+        List<PostDTO> postDtoList = resultPostList.stream().map((r) -> {
+          return ConvertHelper.convert(r, PostDTO.class);  
+        }).collect(Collectors.toList());
+        
+        return new ListUserGroupPostResponse(nextPageAnchor, postDtoList);
 	}
     
 }

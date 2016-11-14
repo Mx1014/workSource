@@ -15,17 +15,28 @@ public class ActivityWarningResponse {
 	private Integer namespaceId;
 	private Integer days;
 	private Integer hours;
+	private Long time;
 	
 	public ActivityWarningResponse() {
 		super();
 	}
 	
-	public ActivityWarningResponse(Integer namespaceId, Integer days, Integer hours) {
+	public ActivityWarningResponse(Integer namespaceId, Integer days, Integer hours, Long time) {
 		super();
 		this.namespaceId = namespaceId;
 		this.days = days;
 		this.hours = hours;
+		this.time = time;
 	}
+
+	public Long getTime() {
+		return time;
+	}
+
+	public void setTime(Long time) {
+		this.time = time;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

@@ -15,22 +15,20 @@ import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSON;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.rest.approval.AbsenceBasicDescription;
-import com.everhomes.rest.approval.AbsenceRequestDTO;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
+import com.everhomes.rest.approval.ApprovalLogTitleTemplateCode;
 import com.everhomes.rest.approval.ApprovalNotificationTemplateCode;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
+import com.everhomes.rest.approval.BasicDescriptionDTO;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TimeRange;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.server.schema.tables.pojos.EhApprovalDayActualTime;
 import com.everhomes.techpark.punch.PunchRule;
 import com.everhomes.techpark.punch.PunchService;
 import com.everhomes.techpark.punch.PunchTimeRule;
@@ -68,9 +66,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	@Autowired
 	private PunchService punchService;
 	
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	
+
 	@Autowired
 	private ApprovalDayActualTimeProvider approvalDayActualTimeProvider;
 	
@@ -79,7 +75,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		ApprovalBasicInfoOfRequestDTO approvalBasicInfo = super.processApprovalBasicInfoOfRequest(approvalRequest);
 		
-		AbsenceBasicDescription description = new AbsenceBasicDescription();
+		BasicDescriptionDTO description = new BasicDescriptionDTO();
 		
 		//1. 获取类别名称
 		ApprovalCategory approvalCategory = approvalCategoryProvider.findApprovalCategoryById(approvalRequest.getCategoryId());
@@ -96,7 +92,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			description.setTimeRangeList(timeRangeList);
 		}
 		
-		approvalBasicInfo.setDescriptionJson(JSON.toJSONString(description));
+		approvalBasicInfo.setDescriptionJson(description);
 		return approvalBasicInfo;
 	}
 
@@ -105,16 +101,24 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 	public BriefApprovalRequestDTO processBriefApprovalRequest(ApprovalRequest approvalRequest) {
 		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
 		String timeTotal = null;
+
+		Long fromTime = null;
+		Long endTime =null ;
 		if (approvalRequest.getTimeFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
 			List<TimeRange> timeRangeList = briefApprovalRequestDTO.getTimeRangeList();
 			for (TimeRange timeRange : timeRangeList) {
 				timeTotal = calculateTimeTotal(timeTotal, timeRange.getActualResult());
+				if(null == fromTime || fromTime > timeRange.getFromTime())
+					fromTime = timeRange.getFromTime();
+				if(null == endTime || endTime < timeRange.getEndTime())
+					endTime = timeRange.getEndTime();
 			}
 		}
 		briefApprovalRequestDTO.setDescription(timeTotal);
-		
+		briefApprovalRequestDTO.setTitle(processBriefRequestTitle(approvalRequest ,timeTotal,fromTime,endTime));
 		return briefApprovalRequestDTO;
 	}
+	
 
 	private String calculateTimeTotal(String timeTotal, String actualResult) {
 		//表中按1.25.33这样存储，每一位分别代表天、小时、分钟，统计时需要每个位分别相加，且小时满24不用进一，分钟满60需要进一，如果某一位是0也必须存储，也就是说结果中必须包含两个小数点
@@ -616,9 +620,9 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 
 
 	@Override
-	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
-		List<AbsenceRequestDTO> resultList = approvalRequestList.stream().map(a->{
-			AbsenceRequestDTO absenceRequest = new AbsenceRequestDTO();
+	public List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+		List<RequestDTO> resultList = approvalRequestList.stream().map(a->{
+			RequestDTO absenceRequest = new RequestDTO();
 			absenceRequest.setRequestId(a.getId());
 			absenceRequest.setReason(a.getReason());
 			absenceRequest.setNickName(approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()));
@@ -640,7 +644,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			return absenceRequest;
 		}).collect(Collectors.toList());
 		
-		return JSON.toJSONString(resultList);
+		return resultList;
 	}
 
 
@@ -691,6 +695,96 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			map.put("approver", approvalService.getUserName(approvalRequest.getOperatorUid(), approvalRequest.getOwnerId()));
 		}
 		return localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+	}
+	private String processBriefRequestTitle(ApprovalRequest a , String timeTotal ,Long fromTime ,Long endTime) {
+		// TODO Auto-generated method stub
+		Map<String, Object> map = new HashMap<>();
+		 
+		// 初次提交
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.ABSENCE_TITLE;
+		map.put("nickName",approvalService.getUserName(a.getCreatorUid(), a.getOwnerId()) );
+		map.put("category",
+				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
+		String[] times = timeTotal.split("\\.");
+		map.put("day", times[0].equals("0")?"":times[0]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale()).getText());
+		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale()).getText());
+		map.put("min", times[2].equals("0")?"":times[2]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale()).getText());
+		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
+		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
+		map.put("endDate", mmDDSF.format(new Date(endTime)));
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
+
+ 
+	@Override
+	public String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest a) { 
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(a);
+		String timeTotal = null;
+
+		Long fromTime = null;
+		Long endTime =null ;
+		if (a.getTimeFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+			List<TimeRange> timeRangeList = briefApprovalRequestDTO.getTimeRangeList();
+			for (TimeRange timeRange : timeRangeList) {
+				timeTotal = calculateTimeTotal(timeTotal, timeRange.getActualResult());
+				if(null == fromTime || fromTime > timeRange.getFromTime())
+					fromTime = timeRange.getFromTime();
+				if(null == endTime || endTime < timeRange.getEndTime())
+					endTime = timeRange.getEndTime();
+			}
+		}
+		Map<String, Object> map = new HashMap<>();
+		 
+		 
+		String scope = ApprovalLogTitleTemplateCode.SCOPE;
+		int code = ApprovalLogTitleTemplateCode.ABSENCE_MAIN_TITLE;
+		map.put("category",
+				approvalService.findApprovalCategoryById(a.getCategoryId()).getCategoryName());
+		String[] times = timeTotal.split("\\.");
+		map.put("day", times[0].equals("0")?"":times[0]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.DAY,UserContext.current().getUser().getLocale()).getText());
+		map.put("hour", times[1].equals("0")?"":times[1]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.HOUR,UserContext.current().getUser().getLocale()).getText());
+		map.put("min", times[2].equals("0")?"":times[2]+ localeStringProvider.find(ApprovalTypeTemplateCode.TIME_SCOPE,
+				ApprovalTypeTemplateCode.MIN,UserContext.current().getUser().getLocale()).getText());
+		SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd HH:mm");
+		map.put("beginDate", mmDDSF.format(new Date(fromTime)));
+		map.put("endDate", mmDDSF.format(new Date(endTime)));
+		
+		String result = localeTemplateService.getLocaleTemplateString(scope, code, UserContext.current().getUser().getLocale(), map, "");
+		
+		return result;
+	}
+	
+
+	
+	@Override
+	public BriefApprovalRequestDTO processApprovalRequestByScene(ApprovalRequest approvalRequest) {
+		BriefApprovalRequestDTO briefApprovalRequestDTO = super.processBriefApprovalRequest(approvalRequest);
+		String timeTotal = null;
+
+		Long fromTime = null;
+		Long endTime =null ;
+		if (approvalRequest.getTimeFlag().byteValue() == TrueOrFalseFlag.TRUE.getCode()) {
+			List<TimeRange> timeRangeList = briefApprovalRequestDTO.getTimeRangeList();
+			for (TimeRange timeRange : timeRangeList) {
+				timeTotal = calculateTimeTotal(timeTotal, timeRange.getActualResult());
+				if(null == fromTime || fromTime > timeRange.getFromTime())
+					fromTime = timeRange.getFromTime();
+				if(null == endTime || endTime < timeRange.getEndTime())
+					endTime = timeRange.getEndTime();
+			}
+		}
+		briefApprovalRequestDTO.setDescription(timeTotal);
+		briefApprovalRequestDTO.setTitle(ApprovalLogAndFlowOfRequestResponseTitle(approvalRequest));
+		return briefApprovalRequestDTO;
 	}
 	
 }

@@ -222,8 +222,13 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Long organizationId, OrganizationMemberStatus memberStatus,OrganizationMemberTargetType targetType);
 	
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
-    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
-
+ 
+    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize); 
+	List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long  communityId);
+  
+  
+	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
+ 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
 
 	List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId);
@@ -246,4 +251,6 @@ public interface OrganizationProvider {
 			Long pageAnchor, Integer pageSize);
 	
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
+
+	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
 }

@@ -242,4 +242,12 @@ public interface RolePrivilegeService {
      * @return
      */
 	List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId);
+
+	/**
+     * 获取用户的权限列表
+     * @param communityId
+     * @param userId
+     * @return
+     */
+    List<Long> getUserCommunityPrivileges(Long communityId, Long userId);
 }

@@ -19,6 +19,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserService;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="Synch Info Controller", site="synchInfo")
 @RestController
@@ -37,6 +38,7 @@ public class TechparkOpenController extends ControllerBase {
 	/**
 	 * <b>URL: /openapi/techpark/syncData</b>
 	 */
+	@RequireAuthentication(false)
 	@RequestMapping("syncData")
 	@RestReturn(String.class)
 	public RestResponse initBizInfo(@Valid SyncDataCommand cmd,HttpServletRequest request, HttpServletResponse response) {

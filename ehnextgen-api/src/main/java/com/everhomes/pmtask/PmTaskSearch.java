@@ -10,6 +10,6 @@ public interface PmTaskSearch {
 	void feedDoc(PmTask task);
 	void syncFromDb();
 	
-	List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, Long endDate,
-    		Long pageAnchor, Integer pageSize);
+	List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
+			Long endDate, Long addressId, Long pageAnchor, Integer pageSize);
 }

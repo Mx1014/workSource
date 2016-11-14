@@ -73,4 +73,4 @@ java.source.version=1.8
 java.target.version=1.8
 java.version=1.8
 
-
+simple-java-mail.version = 4.1.1

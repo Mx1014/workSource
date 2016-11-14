@@ -173,6 +173,9 @@ public class AdminController extends ControllerBase {
 
     @Value("${objc.response.base}")
     private String restResponseBase;    
+    
+    @Value("${javadoc.root}")
+    private String javadocRoot;
 
     @Autowired
     private UserProvider userProvider;
@@ -265,7 +268,7 @@ public class AdminController extends ControllerBase {
             });
     
             // generator controller API response objects
-            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList(javadocRoot, "core");
             for(RestMethod restMethod: apiMethods)
                 generator.generateControllerPojos(restMethod, context);
             
@@ -285,7 +288,7 @@ public class AdminController extends ControllerBase {
             JavaGenerator generator = new JavaGenerator();
 
             // generator controller API response objects
-            List<RestMethod> apiMethods = ControllerBase.getRestMethodList();
+            List<RestMethod> apiMethods = ControllerBase.getRestMethodList(javadocRoot, "core");
             for (RestMethod restMethod : apiMethods)
                 generator.generateControllerPojos(restMethod, context);
             

@@ -1530,6 +1530,8 @@ public class PropertyMgrProviderImpl implements PropertyMgrProvider {
 				.where(Tables.EH_ORGANIZATION_OWNER_ADDRESS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ORGANIZATION_OWNERS.STATUS.eq(OrganizationOwnerStatus.NORMAL.getCode()))
 				.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.ADDRESS_ID.eq(addressId))
+                // 供在门牌管理中显示已在App中注册的用户(在organizationOwner里表现为已认证状态)
+				.and(Tables.EH_ORGANIZATION_OWNER_ADDRESS.AUTH_TYPE.eq(OrganizationOwnerAddressAuthType.ACTIVE.getCode()))
 				.fetch().map(mapper);
 		return dtoList;
     }

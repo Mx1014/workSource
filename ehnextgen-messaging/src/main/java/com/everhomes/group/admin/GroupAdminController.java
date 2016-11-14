@@ -86,8 +86,8 @@ public class GroupAdminController extends ControllerBase {
     @RequestMapping("deleteGroup")
     @RestReturn(value=String.class)
     public RestResponse deleteGroup(GetGroupCommand cmd){
-    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+//    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.groupService.deleteGroup(cmd.getGroupId());
         
