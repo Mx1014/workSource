@@ -33,6 +33,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1695,12 +1696,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			query.addLimit(pageSize);
 		
 		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.asc());
-		
-		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, Organization.class));
-			return null;
-		});
-		
+		if(!StringUtils.isEmpty(keyword)) {
+			return query.fetch().map(new DefaultRecordMapper(Tables.EH_ORGANIZATIONS.recordType(), Organization.class));
+			
+		}else {
+			query.fetch().map((r) -> {
+				result.add(ConvertHelper.convert(r, Organization.class));
+				return null;
+			});
+		}
 		return result;
 	}
 	
