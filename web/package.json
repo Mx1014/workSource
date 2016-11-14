@@ -1,7 +1,7 @@
 {
-  "name": "skynet-admin",
+  "name": "api-portal",
   "version": "1.0.0",
-  "description": "Skynet admin portal",
+  "description": "API portal",
   "main": "index.js",
   "scripts": {
     "test": "jest",
@@ -34,14 +34,10 @@
     "babel-preset-react": "^6.11.1",
     "babel-preset-stage-0": "^6.5.0",
     "babelify": "^7.3.0",
-    "browserify": "^13.1.0",
     "cpy-cli": "^1.0.1",
     "css-loader": "^0.15.1",
     "extract-text-webpack-plugin": "^1.0.1",
     "file-loader": "^0.9.0",
-    "gulp": "^3.9.1",
-    "gulp-streamify": "^1.0.2",
-    "gulp-uglify": "^2.0.0",
     "html-loader": "^0.4.3",
     "html-webpack-plugin": "^2.22.0",
     "html-webpack-template": "^5.1.1",
@@ -60,13 +56,11 @@
     "redux-logger": "^2.6.1",
     "style-loader": "^0.12.3",
     "url-loader": "^0.5.6",
-    "vinyl-source-stream": "^1.1.0",
     "webpack": "^1.13.2",
     "webpack-dev-server": "^1.15.1"
   },
   "dependencies": {
     "babel-runtime": "^6.11.6",
-    "flux": "^2.1.1",
     "form-data": "^2.1.1",
     "isomorphic-fetch": "^2.2.1",
     "json-pretty": "0.0.1",
@@ -78,8 +72,7 @@
     "react-router-redux": "^4.0.5",
     "react-server-sent-event-container": "^1.0.4",
     "redux": "^3.5.2",
-    "redux-thunk": "^2.1.0",
-    "reselect": "^2.5.3"
+    "redux-thunk": "^2.1.0"
   },
   "eslintConfig": {
     "extends": "./node_modules/react-scripts/config/eslint.js"

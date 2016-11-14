@@ -8,19 +8,42 @@ import ApiPanel from './api-panel'
 
 import layoutStyles from '../shared/style/layout.css'
 
-import {fetchApiList, appendToConsole, setSandboxCurrentApi, setApiFilter} from '../actions'
-import {API_LIST_SUCCESS, SANDBOX_SET_CURRENT, SANDBOX_SET_APIFILTER} from '../actions'
+import {fetchApiList, appendToConsole, setSandboxCurrentApi, setSandboxInitialized, setApiFilter} from '../actions'
+import {API_LIST_SUCCESS, SANDBOX_SET_CURRENT, SANDBOX_SET_INITIALIZED, SANDBOX_SET_APIFILTER} from '../actions'
 
 class Sandbox extends WidgetComponent {
 
+    //
+    // Component state structure design and state -> props mapping
+    //
+    static statePath = "Sandbox";
     static getInstanceInitState() {
         return ({
             currentApi: null,
             apiFilter: null,
-            apis: []
+            apis: [],
+            initialized: false
         });
     }
 
+    static mapStateToProps(state, ownProps) {
+        let instanceState = getComponentState(state, Sandbox, undefined, false);
+        let prefix = instanceState.apiFilter;
+
+        let apis = instanceState.apis;
+        if(!!prefix)
+            apis = apis.filter((item) => item.uri.startsWith(prefix));
+
+        return ({
+            apis: apis,
+            initialized: instanceState.initialized,
+            apiFilter: instanceState.apiFilter
+        });
+    }
+
+    //
+    // Component state reducing
+    //
     static componentReducer(state, action) {
         switch(action.type) {
             case API_LIST_SUCCESS:
@@ -32,6 +55,10 @@ class Sandbox extends WidgetComponent {
                 return {...state, currentApi: item};
             }
 
+            case SANDBOX_SET_INITIALIZED: {
+                return {...state, initialized: true};
+            }
+
             case SANDBOX_SET_APIFILTER: {
                 return {...state, apiFilter: action.filter}
             }
@@ -39,19 +66,11 @@ class Sandbox extends WidgetComponent {
         return state;
     }
 
-    static mapStateToProps(state, ownProps) {
-        let instanceState = getComponentState(state, Sandbox, undefined, false);
-        let prefix = instanceState.apiFilter;
-
-        let apis = instanceState.apis;
-        if(!!prefix)
-            apis = apis.filter((item) => item.uri.startsWith(prefix));
-
-        return ({apis});
-    }
-
+    //
+    // Component rendering and behaviour
+    //
     render() {
-        let {apis} = this.props;
+        let {apis = [], apiFilter} = this.props;
 
         return (
             <SplitPane>
@@ -85,7 +104,14 @@ class Sandbox extends WidgetComponent {
         super.componentDidMount();
 
         this.dispatch(fetchApiList());
-        this.dispatch(appendToConsole('Core-Server API portal started at ' + new Date().toLocaleString()));
+        if(!this.props.initialized) {
+            this.dispatch(appendToConsole('Core-Server API portal started at ' + new Date().toLocaleString()));
+            this.dispatch(setSandboxInitialized());
+        }
+
+        let {apiFilter} = this.props;
+        if(!!apiFilter)
+            this.domInput.value = apiFilter;
     }
 
     onInputChange(val) {

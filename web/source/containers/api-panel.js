@@ -14,8 +14,12 @@ import Sandbox from './sandbox'
 
 class ApiPanel extends WidgetComponent {
 
+    //
+    // Component state structure design and state -> props mapping
+    //
+    static statePath = "ApiPanel";
     static mapStateToProps(state, ownProps) {
-        let navigationState = getComponentState(state, Sandbox, null, false);
+        let navigationState = getComponentState(state, "Sandbox", null, false);
 
         let currentApi = null;
         if(!!navigationState)
@@ -29,6 +33,9 @@ class ApiPanel extends WidgetComponent {
         });
     }
 
+    //
+    // Component rendering and behaviour
+    //
     render() {
         let {currentApi} = this.props;
 

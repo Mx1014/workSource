@@ -1,13 +1,14 @@
 import React, {Component} from 'react'
 import {serverSentEventConnect} from 'react-server-sent-event-container'
 
-import {dispatch, WidgetComponent} from 'widget-redux-util/redux-enhancer'
+import {dispatch, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
 import {actionInterceptor} from 'widget-redux-util/action-interceptor'
 import {utf8ArrayToStr} from 'widget-common-util/misc'
 
 import Base64 from 'base64-js'
 
-import {getServiceRoot} from '../actions'
+import {getServiceRoot, connectServerConsole, disconnectServerConsole, SERVER_CONSOLE_CLEAR} from '../actions'
+import ServerConsolePanel from './server-console-panel'
 
 import styles from '../shared/style/app.css'
 
@@ -31,12 +32,16 @@ class ServerConsole extends WidgetComponent {
     componentWillUnmount() {
         super.componentWillUnmount();
 
-        if(!!eventSource)
-            eventSource.close();
+        if(!!this.props.eventSource)
+            this.props.eventSource.close();
     }
 
     onEventAction(action) {
         if(action.type == 'SSE.data') {
+            let panelState = getComponentState(null, ServerConsolePanel, undefined, false);
+            if(panelState.paused)
+                return;
+
             let message = utf8ArrayToStr(Base64.toByteArray(action.data));
 
             if(!!this.domResultPanel) {
@@ -51,6 +56,9 @@ class ServerConsole extends WidgetComponent {
 
                 this.domResultPanel.scrollTop = this.domResultPanel.scrollHeight - this.domResultPanel.clientHeight;
             }
+        } else if(action.type == SERVER_CONSOLE_CLEAR) {
+            if(!!this.domResultPanel)
+                this.domResultPanel.value = '';
         }
     }
 
@@ -63,20 +71,17 @@ class ServerConsole extends WidgetComponent {
 }
 
 const onOpen = (props, source) => {
-    console.log('open');
+    dispatch(connectServerConsole());
 };
 
 const onMessage = (event, props, source) => {
-    console.log('onMessage');
-
     if(!!event && !!event.data)
         dispatch({type: 'SSE.data', data: event.data});
 };
 
 const onError = (event, props, source) => {
-    console.log('error');
-    console.log(event);
     source.close();
+    dispatch(disconnectServerConsole());
 }
 
 const eventObj = {

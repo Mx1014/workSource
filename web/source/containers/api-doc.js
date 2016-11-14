@@ -9,6 +9,10 @@ import {getServiceRoot} from '../actions'
 
 class ApiDoc extends WidgetComponent {
 
+    //
+    // Component state structure design and state -> props mapping
+    //
+    static statePath = "ApiDoc";
     static mapStateToProps(state, ownProps) {
         let navigationState = getComponentState(state, Sandbox, null, false);
         let currentApi = null;
@@ -22,6 +26,9 @@ class ApiDoc extends WidgetComponent {
         });
     }
 
+    //
+    // Component rendering and behaviour
+    //
     render() {
         let {responseSchema, javadocUrl, apiUri} = this.props;
 

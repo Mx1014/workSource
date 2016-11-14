@@ -6,43 +6,33 @@
  *
  */
 
-// React
-import React, {Component} from 'react'
-import {render} from 'react-dom'
-
-// Redux
-import {applyMiddleware, combineReducers} from 'redux'
-import thunk from 'redux-thunk'
-
-import {browserHistory} from 'react-router'
-import {syncHistoryWithStore, routerMiddleware, routerReducer} from 'react-router-redux'
-
+import {startRoot} from 'widget-redux-util/redux-enhancer'
 import {bindLocaleLoader} from 'widget-common-util/locale'
-import {createStore, getInitState, getReducers, registerComponentReducer, apiDispatcherMiddleware} from 'widget-redux-util/redux-enhancer'
-import {actionInterceptor} from 'widget-redux-util/action-interceptor'
-
 import {loadLocaleResource} from './locale/resource-loader'
 
 import Root from './root'
 
+bindLocaleLoader(loadLocaleResource)
+
+let base = "/";
+if (process.env.NODE_ENV === 'production') {
+    let url = document.location.toString();
+
+    let startPos = url.indexOf("/api");
+    if(startPos > 0) {
+        let endPos = startPos;
+        startPos = url.lastIndexOf("/", startPos - 1);
+
+        if(endPos >= startPos)
+            base = url.substring(startPos, endPos + 4);
+        else
+            base = "/";
+
+        console.log(`Base ${base}`);
+    }
+}
+
 //
-// Create store and launch (Standard)
+// Application main - startRoot
 //
-bindLocaleLoader(loadLocaleResource);
-registerComponentReducer('routing', routerReducer);
-
-export const store = createStore(
-    getReducers(),
-    getInitState(),
-    applyMiddleware(
-        thunk,
-        actionInterceptor.getMiddleware(),
-        apiDispatcherMiddleware,
-        routerMiddleware(browserHistory)        // allow navigation through React action
-    )
-);
-
-export const history = syncHistoryWithStore(browserHistory, store);
-history.listen(location=> { console.log('go to location ' + location.pathname); });
-
-render(<Root store={store} history={history} />, document.getElementById('root'));
+startRoot(Root, "root", [], [], base);

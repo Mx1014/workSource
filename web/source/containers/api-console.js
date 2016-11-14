@@ -11,12 +11,27 @@ import {CONSOLE_APPEND, CONSOLE_CLEAR, API_SUCCESS, API_FAILURE} from '../action
 
 class ApiConsole extends WidgetComponent {
 
+    //
+    // Component state structure design and state -> props mapping
+    //
+    static statePath = "ApiConsole";
     static getInstanceInitState() {
         return {
             consoleItems: []
         }
     }
 
+    static mapStateToProps(state, ownProps) {
+        let instanceState = getComponentState(state, ApiConsole, ownProps.instanceKey, false);
+
+        return ({
+            items: instanceState.consoleItems
+        })
+    }
+
+    //
+    // Component state reducing
+    //
     static componentReducer(state, action) {
         switch(action.type) {
             case CONSOLE_APPEND:
@@ -34,16 +49,11 @@ class ApiConsole extends WidgetComponent {
         return state;
     }
 
-    static mapStateToProps(state, ownProps) {
-        let instanceState = getComponentState(state, ApiConsole, ownProps.instanceKey, false);
-
-        return ({
-            items: instanceState.consoleItems
-        })
-    }
-
+    //
+    // Component rendering and behaviour
+    //
     render() {
-        let {items} = this.props;
+        let {items = []} = this.props;
 
         return (
             <table className={layoutStyles.layoutTable}><tbody>
