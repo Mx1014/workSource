@@ -37,6 +37,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -128,7 +130,8 @@ import com.everhomes.rest.quality.ReportSpecificationItemResultsDTO;
 import com.everhomes.rest.quality.ReportVerificationResultCommand;
 import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
-import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
+import com.everhomes.rest.quality.ScoreDTO;
+import com.everhomes.rest.quality.ScoreGroupBySpecificationDTO;
 import com.everhomes.rest.quality.SpecificationApplyPolicy;
 import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.StandardGroupDTO;
@@ -193,6 +196,9 @@ public class QualityServiceImpl implements QualityService {
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 	
 	@Override
 	public QualityStandardsDTO creatQualityStandard(CreatQualityStandardCommand cmd) {
@@ -2249,12 +2255,11 @@ public class QualityServiceImpl implements QualityService {
 	public ListQualitySpecificationsResponse listQualitySpecifications(
 			ListQualitySpecificationsCommand cmd) {
 		ListQualitySpecificationsResponse response = new ListQualitySpecificationsResponse();
-		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<QualityInspectionSpecificationDTO>();
+		
 		
 		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
 		List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<QualityInspectionSpecifications>();
-		List<Long> scopeDeleteSpecifications = new ArrayList<Long>();
-		Map<Long, QualityInspectionSpecificationDTO> scopeModifySpecifications = new HashMap<Long, QualityInspectionSpecificationDTO>();
+		
 
 		//先查全公司的该节点下的所有子节点,再查该项目下的所有子节点
 		QualityInspectionSpecifications parent = new QualityInspectionSpecifications();
@@ -2274,6 +2279,23 @@ public class QualityServiceImpl implements QualityService {
 			}
 		}
 		
+		List<QualityInspectionSpecificationDTO> dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+		
+		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);
+		parentDto = processQualitySpecificationTree(dtos, parentDto);
+		dtos = parentDto.getChildrens();
+		
+		response.setSpecifications(dtos);
+		return response;
+	}
+	
+	private List<QualityInspectionSpecificationDTO> dealWithScopeSpecifications(List<QualityInspectionSpecifications> specifications, List<QualityInspectionSpecifications> scopeSpecifications) {
+		
+		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<QualityInspectionSpecificationDTO>();
+		
+		List<Long> scopeDeleteSpecifications = new ArrayList<Long>();
+		Map<Long, QualityInspectionSpecificationDTO> scopeModifySpecifications = new HashMap<Long, QualityInspectionSpecificationDTO>();
+		
 		if(scopeSpecifications != null && scopeSpecifications.size() > 0) {
 			for(QualityInspectionSpecifications scopeSpecification : scopeSpecifications) {
 				if(SpecificationApplyPolicy.DELETE.equals(SpecificationApplyPolicy.fromCode(scopeSpecification.getApplyPolicy()))) {
@@ -2291,7 +2313,6 @@ public class QualityServiceImpl implements QualityService {
 			}
 		}
 		
-		
 		if(specifications != null && specifications.size() > 0) {
 			for(QualityInspectionSpecifications specification : specifications) {
 				QualityInspectionSpecificationDTO dto = ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class);
@@ -2307,14 +2328,9 @@ public class QualityServiceImpl implements QualityService {
 				
 				dtos.add(dto);
 			}
-		} 
+		}
 		
-		QualityInspectionSpecificationDTO parentDto = ConvertHelper.convert(parent, QualityInspectionSpecificationDTO.class);
-		parentDto = processQualitySpecificationTree(dtos, parentDto);
-		dtos = parentDto.getChildrens();
-		
-		response.setSpecifications(dtos);
-		return response;
+		return dtos;
 	}
 	
 	/**
@@ -2346,20 +2362,68 @@ public class QualityServiceImpl implements QualityService {
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
 		CountScoresResponse response = new CountScoresResponse();
 		
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		CrossShardListingLocator locator = new CrossShardListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-		List<ScoreGroupByTargetDTO> scores = new ArrayList<ScoreGroupByTargetDTO>();
+		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
+		
+		//查第一级的子结点
 		if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
-			String superiorPath = "/%";
-			scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime(), locator, pageSize + 1);
+			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, null);
 		} else {
 			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
 			String superiorPath = parent.getPath() + "/%";
-			scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime(), locator, pageSize + 1);
+			specifications = qualityProvider.listAllChildrenSpecifications(superiorPath, cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, null);
 		}
-		
-		
+
+		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<QualityInspectionSpecificationDTO>();
+		if(cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
+			for(Long target : cmd.getTargetIds()) {
+				List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<QualityInspectionSpecifications>();
+				
+				if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
+					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, target, 0L, null);
+				} else {
+					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, target, cmd.getSpecificationId(), null);
+				}
+				
+				dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
+			}
+		}
+				
+		if(dtos != null && dtos.size() > 0) {
+			for(QualityInspectionSpecificationDTO dto : dtos) {
+				List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+				if(dto.getId() == null || dto.getId() == 0L) {
+					String superiorPath = "/%";
+					scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime());
+				} else {
+					QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
+					String superiorPath = parent.getPath() + "/%";
+					scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime());
+				}
+				
+				if(scores != null && scores.size() > 0) {
+					Map<Long, ScoreDTO> targetScores = new HashMap<Long, ScoreDTO>();
+					ScoreGroupBySpecificationDTO scoreBySpecification = new ScoreGroupBySpecificationDTO();
+					scoreBySpecification.setSpecificationId(dto.getId());
+					scoreBySpecification.setSpecificationName(dto.getName());
+					scoreBySpecification.setSpecificationInspectionType(dto.getInspectionType());
+					scoreBySpecification.setSpecificationScore(dto.getScore());
+					scoreBySpecification.setSpecificationWeight(dto.getWeight());
+					for(ScoreDTO scoreDto : scores) {
+						
+						Community community = communityProvider.findCommunityById(scoreDto.getTargetId());
+						if(community != null) {
+							scoreDto.setTargetName(community.getName());
+						}
+						
+						
+						targetScores.put(scoreDto.getTargetId(), scoreDto);
+					}
+				}
+				
+				
+			}
+		}
+			
 		return response;
 	}
 
@@ -2379,7 +2443,21 @@ public class QualityServiceImpl implements QualityService {
 			tasks.remove(tasks.size() - 1);
 			response.setOffset(offset + 1);
 		}
-		
+
+		if(tasks != null) {
+			for(TaskCountDTO task : tasks) {
+				Community community = communityProvider.findCommunityById(task.getTargetId());
+				if(community != null) {
+					task.setTargetName(community.getName());
+				}
+				
+				Double correctionRate =  ((double)(task.getInCorrection() + task.getDelayCorrection() + task.getCompleteCorrection()))/task.getTaskCount();
+				task.setCorrectionRate(correctionRate);
+				
+				Double delayRate =  ((double)(task.getDelayCorrection() + task.getDelayInspection()))/task.getTaskCount();
+				task.setDelayRate(delayRate);
+			}
+		}
 		response.setTasks(tasks);
 		return response;
 	}

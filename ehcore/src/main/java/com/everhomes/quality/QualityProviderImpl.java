@@ -80,6 +80,11 @@ import java.util.Map;
 
 
 
+
+
+
+
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -94,6 +99,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
+
 
 
 
@@ -190,12 +200,14 @@ import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
 import com.everhomes.rest.quality.QualityInspectionLogDTO;
 import com.everhomes.rest.quality.QualityInspectionLogType;
+import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityStandardStatus;
-import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
+import com.everhomes.rest.quality.ScoreDTO;
+import com.everhomes.rest.quality.ScoreGroupBySpecificationDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
@@ -1553,8 +1565,9 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
 		if(scopeId != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(scopeId));
+		if(inspectionType != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
 		
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
 		
 		query.fetch().map((r) -> {
@@ -1581,8 +1594,9 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_CODE.eq(scopeCode));
 		if(scopeId != null)
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.SCOPE_ID.eq(scopeId));
+		if(inspectionType != null)
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
 		
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.INSPECTION_TYPE.eq(inspectionType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
 		
 		query.fetch().map((r) -> {
@@ -1640,9 +1654,17 @@ public class QualityProviderImpl implements QualityProvider {
             LOGGER.debug("countTasks, sql=" + query.getSQL());
             LOGGER.debug("countTasks, bindValues=" + query.getBindValues());
         }
-		
 		query.fetch().map((r) -> {
-			dtos.add(ConvertHelper.convert(r, TaskCountDTO.class));
+			TaskCountDTO dto = new TaskCountDTO();
+			dto.setTargetId(r.getValue(Tables.EH_QUALITY_INSPECTION_TASKS.TARGET_ID));
+			dto.setTaskCount(r.getValue("taskCount", Long.class));
+			dto.setToExecuted(r.getValue("toExecuted", Long.class));
+			dto.setInCorrection(r.getValue("inCorrection", Long.class));
+			dto.setCompleteInspection(r.getValue("completeInspection", Long.class));
+			dto.setCompleteCorrection(r.getValue("completeCorrection", Long.class));
+			dto.setDelayInspection(r.getValue("delayInspection", Long.class));
+			dto.setDelayCorrection(r.getValue("delayCorrection", Long.class));
+			dtos.add(dto);
 			return null;
 		});
 		
@@ -1722,17 +1744,20 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<ScoreGroupByTargetDTO> countScores(String ownerType,
-			Long ownerId, String targetType, List<Long> targetIds,
-			String superiorPath, Long startTime, Long endTime,
-			ListingLocator locator, int count) {
-		// TODO Auto-generated method stub
+	public List<ScoreDTO> countScores(String ownerType, Long ownerId, String targetType, List<Long> targetIds,
+			String superiorPath, Long startTime, Long endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		List<ScoreGroupByTargetDTO> dtoList = new ArrayList<ScoreGroupByTargetDTO>();
-		SelectQuery<EhQualityInspectionSpecificationItemResultsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
-		if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.lt(locator.getAnchor()));
-        }
+		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		
+		
+		final Field<?>[] fields = {Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID, 
+				Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID, DSL.sum(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TOTAL_SCORE).as("totalScore")};
+		final SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(fields);
+		query.addFrom(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
+		
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.in(targetIds));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE.eq(targetType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_ID.eq(ownerId));
@@ -1745,20 +1770,32 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.le(new Timestamp(endTime)));
 		}
 		
-		query.addGroupBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID);
+		query.addGroupBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID);
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.desc());
-		query.addLimit(count);
 		
 		if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Query logs by count, sql=" + query.getSQL());
-            LOGGER.debug("Query logs by count, bindValues=" + query.getBindValues());
+            LOGGER.debug("countScores, sql=" + query.getSQL());
+            LOGGER.debug("countScores, bindValues=" + query.getBindValues());
         }
+		
+		query.fetch().map((r) -> {
+			ScoreDTO score = new ScoreDTO();
+			Double totalScore = r.getValue("totalScore", Double.class);
+			QualityInspectionSpecifications parentSpecification = findSpecificationById(r.getValue(
+					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID), ownerType, ownerId);
+			if(parentSpecification.getScore() < totalScore) {
+				score.setScore(parentSpecification.getScore());
+			} else {
+				score.setScore(totalScore);
+			}
+			
+			score.setTargetId(r.getValue(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID));
+			
+			scores.add(score);
+			return null;
+		});
         
-        query.fetch().map((EhQualityInspectionSpecificationItemResultsRecord record) -> {
-        	return null;
-        });
-        
-		return dtoList;
+		return scores;
 	}
-
+	
 }
