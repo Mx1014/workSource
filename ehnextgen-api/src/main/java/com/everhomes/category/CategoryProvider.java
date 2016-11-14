@@ -28,4 +28,5 @@ public interface CategoryProvider {
     
     List<Category> listTaskCategories(Integer namespaceId, Long parentId, String keyword, Long pageAnchor, Integer pageSize);
     Category findCategoryByPath(Integer namespaceId, String path);
+	Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId, String categoryName);
 }

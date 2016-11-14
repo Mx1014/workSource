@@ -1,18 +1,39 @@
 import React, { PropTypes, Component} from 'react'
-import {connect} from 'react-redux'
 
 import jsonStringify from 'json-pretty'
 
-class ApiDoc extends Component {
+import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
+import Sandbox from './sandbox'
+
+import {getServiceRoot} from '../actions'
+
+class ApiDoc extends WidgetComponent {
+
+    //
+    // Component state structure design and state -> props mapping
+    //
+    static statePath = "ApiDoc";
+    static mapStateToProps(state, ownProps) {
+        let navigationState = getComponentState(state, Sandbox, null, false);
+        let currentApi = null;
+        if(!!navigationState)
+            currentApi = navigationState.currentApi;
+
+        return ({
+            responseSchema: !!currentApi ? currentApi.returnTemplate : null,
+            javadocUrl: !!currentApi ? currentApi.javadocUrl : null,
+            apiUri: !!currentApi ? currentApi.uri : null
+        });
+    }
+
+    //
+    // Component rendering and behaviour
+    //
     render() {
         let {responseSchema, javadocUrl, apiUri} = this.props;
 
         if (process.env.NODE_ENV === 'production') {
-            let url = document.location.toString();
-            let SERVICE_ROOT = url;
-            SERVICE_ROOT = SERVICE_ROOT.substring(0, SERVICE_ROOT.lastIndexOf('/'));
-
-            javadocUrl = SERVICE_ROOT + javadocUrl;
+            javadocUrl = getServiceRoot() + javadocUrl;
         }
 
         if(responseSchema) {
@@ -41,39 +62,4 @@ class ApiDoc extends Component {
     }
 }
 
-function getResponseSchema(state) {
-    let navigationState = state.apiNavigation;
-
-    if(!!navigationState.currentApi)
-        return navigationState.currentApi.returnTemplate;
-
-    return null;
-}
-
-function getDocUrl(state) {
-    let navigationState = state.apiNavigation;
-
-    if(!!navigationState.currentApi)
-        return navigationState.currentApi.javadocUrl;
-
-    return null;
-}
-
-function getUri(state) {
-    let navigationState = state.apiNavigation;
-
-    if(!!navigationState.currentApi)
-        return navigationState.currentApi.uri;
-
-    return null;
-}
-
-const mapStateToProps = (state, ownProps) => {
-    return ({
-        responseSchema: getResponseSchema(state),
-        javadocUrl: getDocUrl(state),
-        apiUri: getUri(state)
-    });
-}
-
-export default connect(mapStateToProps)(ApiDoc);
+export default registerComponent(ApiDoc, true);
