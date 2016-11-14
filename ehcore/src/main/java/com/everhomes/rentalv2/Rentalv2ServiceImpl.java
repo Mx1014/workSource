@@ -1083,12 +1083,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				//四舍五入保留三位
 				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
+					
+				
 			}
 		} catch (ParseException e) {
 			 LOGGER.error("计算平均值-时间转换 异常");
 		}
-		rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
-				
+
+		if(rentalSite.getAvgPriceStr() == null){
+			rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
+			rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
+			rentalProvider.updateRentalSite(rentalSite);	
+		}
 		return rSiteDTO;
 	}
 	private List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId, String beginTime, String endTime) throws ParseException {
