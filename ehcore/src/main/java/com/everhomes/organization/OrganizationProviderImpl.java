@@ -1697,6 +1697,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.asc());
 		if(!StringUtils.isEmpty(keyword)) {
+			query.addGroupBy(Tables.EH_ORGANIZATIONS.ID);
 			return query.fetch().map(new DefaultRecordMapper(Tables.EH_ORGANIZATIONS.recordType(), Organization.class));
 			
 		}else {
