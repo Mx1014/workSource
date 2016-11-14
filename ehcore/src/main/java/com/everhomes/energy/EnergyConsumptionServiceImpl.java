@@ -382,16 +382,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd) {
-        // 开始时间不能小于现在
-        if (cmd.getStartTime() != null && cmd.getStartTime() < Date.valueOf(LocalDate.now()).getTime()) {
-            LOGGER.error("Energy meter setting start time less then now.");
-            throw errorWith(SCOPE, ERR_METER_SETTING_START_TIME_ERROR, "Energy meter setting start time less them now.");
-        }
-        // 结束时间不能小于开始时间
-        if (cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getEndTime() - cmd.getStartTime() < 0) {
-            LOGGER.error("Energy meter setting end time less then start time.");
-            throw errorWith(SCOPE, ERR_METER_SETTING_END_TIME_ERROR, "Energy meter setting end time less them start time.");
-        }
+        checkUpdateCommand(cmd);
         EnergyMeterSettingLog log = new EnergyMeterSettingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setStartTime(new Timestamp(cmd.getStartTime()));
@@ -417,6 +408,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 break;
         }
         meterSettingLogProvider.createSettingLog(log);
+    }
+
+    private void checkUpdateCommand(UpdateEnergyMeterCommand cmd) {
+        // 开始时间不能小于现在
+        if (cmd.getStartTime() != null && cmd.getStartTime() < Date.valueOf(LocalDate.now()).getTime()) {
+            LOGGER.error("Energy meter setting start time less then now.");
+            throw errorWith(SCOPE, ERR_METER_SETTING_START_TIME_ERROR, "Energy meter setting start time less them now.");
+        }
+        // 结束时间不能小于开始时间
+        if (cmd.getStartTime() != null && cmd.getEndTime() != null && cmd.getEndTime() - cmd.getStartTime() < 0) {
+            LOGGER.error("Energy meter setting end time less then start time.");
+            throw errorWith(SCOPE, ERR_METER_SETTING_END_TIME_ERROR, "Energy meter setting end time less them start time.");
+        }
     }
 
     @Override
