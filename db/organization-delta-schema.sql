@@ -255,6 +255,7 @@ CREATE TABLE `eh_service_module_privileges` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+
 -- 业务模块分配 by sfyan 20161029
 -- 超级管理员 定义一个超管权限
 -- 公司管理员 定义一个公司管理员的权限 
@@ -296,12 +297,12 @@ ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_ctag1`(`comment_tag1`);
 ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_ctag2`(`comment_tag2`);
 
 ALTER TABLE `eh_acl_role_assignments` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries';
-ALTER TABLE `eh_acl_role_assignments` ADD INDEX `i_eh_acl_role_asgn_namespace_id`(`namesp
+ALTER TABLE `eh_acl_role_assignments` ADD INDEX `i_eh_acl_role_asgn_namespace_id`(`namespace_id`);
 
 ALTER TABLE `eh_launch_pad_items` CHANGE `target_id` `target_id` VARCHAR(64);
 
 
--- merge 3.11.2
+-- merge 3.11.2 sfyan
 
 -- added by wh  2016-10-19  申请表添加时长和生效日期  
 
