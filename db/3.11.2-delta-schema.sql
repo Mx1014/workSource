@@ -1,4 +1,8 @@
 
+-- added by wh  2016-11-14  增加平均价格字段
+
+ALTER TABLE `eh_rentalv2_resources` ADD COLUMN `avg_price` VARCHAR(1024) COMMENT '平均价格计算好的字符串';
+
 -- added by wh  2016-10-19  申请表添加时长和生效日期  
 
 ALTER TABLE `eh_approval_requests` ADD COLUMN `effective_date` DATE COMMENT 'when the request approval effective';
