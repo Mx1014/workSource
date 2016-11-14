@@ -184,7 +184,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -525,6 +527,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -606,6 +609,7 @@ import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListTasksByTokenCommand;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -3384,6 +3388,41 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		return dtos;
+	}
+
+	@Override
+	public ListEquipmentTasksResponse listTasksByToken(
+			ListTasksByTokenCommand cmd) {
+
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentByQrCodeToken(cmd.getQrCodeToken());
+		
+		if(equipment == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST,
+ 				"设备不存在");
+		}
+		
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1);
+		
+		if(tasks.size() > pageSize) {
+        	tasks.remove(tasks.size() - 1);
+        	response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
+        }
+        
+    	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+        	return dto;
+        }).filter(r->r!=null).collect(Collectors.toList());
+        
+		response.setTasks(dtos);
+				
+		return response;
 	}
 
 }
