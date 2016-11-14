@@ -542,6 +542,7 @@ public class FamilyProviderImpl implements FamilyProvider {
 					Integer c = context.selectCount().from(Tables.EH_GROUPS)
 							.where(Tables.EH_GROUPS.INTEGRAL_TAG2.eq(communityId))
 							.and(Tables.EH_GROUPS.DISCRIMINATOR.eq(GroupDiscriminator.FAMILY.getCode()))
+							.and(Tables.EH_GROUPS.MEMBER_COUNT.gt(0L))
 							.and(Tables.EH_GROUPS.STATUS.eq(GroupAdminStatus.ACTIVE.getCode()))
 							.fetchOne(0,Integer.class);
 					count[0] = c;
