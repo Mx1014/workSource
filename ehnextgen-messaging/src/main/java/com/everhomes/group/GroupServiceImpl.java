@@ -294,7 +294,7 @@ public class GroupServiceImpl implements GroupService {
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
-    	Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+    	Integer namespaceId = (cmd.getNamespaceId() == null) ? UserContext.getCurrentNamespaceId(): cmd.getNamespaceId();
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
@@ -325,7 +325,7 @@ public class GroupServiceImpl implements GroupService {
     }
     
     private GroupDTO createGroup(CreateGroupCommand cmd, GroupSetting groupSetting) {
-    	Integer namespaceId = (cmd.getNamespaceId() == null) ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId();
+    	Integer namespaceId = (cmd.getNamespaceId() == null) ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
     	
         long startTime = System.currentTimeMillis();
         User user = UserContext.current().getUser();
