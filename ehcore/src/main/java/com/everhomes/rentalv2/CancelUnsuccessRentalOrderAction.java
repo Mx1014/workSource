@@ -74,7 +74,8 @@ public class CancelUnsuccessRentalOrderAction implements Runnable {
 			return ;
 		if (!rentalBill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()) ) {
 			rentalBill.setStatus(SiteBillStatus.FAIL.getCode());
-			rentalProvider.deleteRentalBillById(rentalBill.getId());
+//			rentalProvider.deleteRentalBillById(rentalBill.getId());
+			rentalProvider.updateRentalBill(rentalBill);
 //			RentalResource site = this.rentalProvider.getRentalSiteById(rentalBill.getRentalResourceId());
 //			RentalRule rule = this.rentalProvider.getRentalRule(site.getOwnerId(), site.getOwnerType(), site.getSiteType());
 //			StringBuffer sb = new StringBuffer();

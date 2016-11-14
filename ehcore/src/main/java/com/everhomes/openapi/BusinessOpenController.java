@@ -48,7 +48,10 @@ import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.openapi.BizMessageType;
 import com.everhomes.rest.openapi.BusinessMessageCommand;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
 import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
@@ -269,6 +272,9 @@ public class BusinessOpenController extends ControllerBase {
 	@RequestMapping("sendMessageToUser")
 	@RestReturn(value=String.class)
 	public RestResponse sendMessageToUser(BusinessMessageCommand cmd) {
+		if(BizMessageType.fromCode(cmd.getBizMessageType()) == BizMessageType.VOICE) {
+			cmd.getMeta().put(MessageMetaConstant.VOICE_REMIND, MetaObjectType.BIZ_NEW_ORDER.getCode());
+		}
 		sendMessageToUser(cmd.getUserId(), cmd.getContent(), cmd.getMeta());
 
 		RestResponse response =  new RestResponse();

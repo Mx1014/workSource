@@ -27,6 +27,7 @@ import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListTasksByTokenCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -103,5 +104,5 @@ public interface EquipmentService {
 	void deleteInspectionTemplate(DeleteInspectionTemplateCommand cmd);
 	InspectionTemplateDTO findInspectionTemplate(DeleteInspectionTemplateCommand cmd);
 	List<InspectionTemplateDTO> listInspectionTemplates(ListInspectionTemplatesCommand cmd);
-	
+	ListEquipmentTasksResponse listTasksByToken(ListTasksByTokenCommand cmd);
 }
