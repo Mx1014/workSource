@@ -13,18 +13,21 @@ import Home from './containers/home'
 import Sandbox from './containers/sandbox'
 import ApiPanel from './containers/api-panel'
 
+import HelpDesk from './containers/help-desk'
+import ServerConsolePanel from './containers/server-console-panel'
+
 export default class Root extends Component {
     render() {
         return (
             <Provider store={this.props.store}>
                 <Router history={this.props.history}>
                     <Route path="/" component={Home}>
-                        <IndexRedirect to="/sandbox" />
-                        <Route path="/sandbox" component={Sandbox} />
-                    </Route>
-                    <Route path="*/api" component={Home}>
-                        <IndexRedirect to="sandbox" />
-                        <Route path="sandbox" component={Sandbox} />
+                        <IndexRedirect to="/sandbox"/>
+                        <Route path="/sandbox" component={Sandbox}/>
+                        <Route path="/helpdesk" component={HelpDesk}>
+                            <IndexRedirect to="/helpdesk/console"/>
+                            <Route path="/helpdesk/console" component={ServerConsolePanel}/>
+                        </Route>
                     </Route>
                 </Router>
             </Provider>

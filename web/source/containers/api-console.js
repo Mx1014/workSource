@@ -1,20 +1,65 @@
 import React, { PropTypes, Component} from 'react'
 
-import {connect} from 'react-redux'
 import {clearConsole} from '../actions'
+
+import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
 
 import styles from '../shared/style/app.css'
 import layoutStyles from '../shared/style/layout.css'
 
-class ApiConsole extends Component {
+import {CONSOLE_APPEND, CONSOLE_CLEAR, API_SUCCESS, API_FAILURE} from '../actions'
+
+class ApiConsole extends WidgetComponent {
+
+    //
+    // Component state structure design and state -> props mapping
+    //
+    static statePath = "ApiConsole";
+    static getInstanceInitState() {
+        return {
+            consoleItems: []
+        }
+    }
+
+    static mapStateToProps(state, ownProps) {
+        let instanceState = getComponentState(state, ApiConsole, ownProps.instanceKey, false);
+
+        return ({
+            items: instanceState.consoleItems
+        })
+    }
+
+    //
+    // Component state reducing
+    //
+    static componentReducer(state, action) {
+        switch(action.type) {
+            case CONSOLE_APPEND:
+                return {consoleItems: [...state.consoleItems, action.text]};
+
+            case CONSOLE_CLEAR:
+                return {consoleItems: []};
+
+            case API_SUCCESS:
+                return {consoleItems: [...state.consoleItems, '<= ' + JSON.stringify(action.response)]};
+
+            case API_FAILURE:
+                return {consoleItems: [...state.consoleItems, '<= ' + JSON.stringify(action.error)]};
+        }
+        return state;
+    }
+
+    //
+    // Component rendering and behaviour
+    //
     render() {
-        let {items, onClearClick} = this.props;
+        let {items = []} = this.props;
 
         return (
             <table className={layoutStyles.layoutTable}><tbody>
             <tr style={{height: '20px'}}><td>
                 <div>
-                    <button onClick={onClearClick}>Clear</button>
+                    <button onClick={(e)=>this.onClearConsoleClick()}>Clear</button>
                 </div>
             </td></tr>
             <tr style={{height: '*%'}}><td>
@@ -29,19 +74,10 @@ class ApiConsole extends Component {
     renderItem(item, index) {
         return <p key={index}>{item}</p>;
     }
+
+    onClearConsoleClick() {
+        this.dispatch(clearConsole());
+    }
 }
 
-const mapStateToProps = (state, ownProps) => ({
-    items: state.apiConsole.consoleItems
-});
-
-const mapDispatchToProps = (dispatch) => ({
-    onClearClick: (e)=> {
-        dispatch(clearConsole());
-    }
-});
-
-export default connect(
-    mapStateToProps,
-    mapDispatchToProps
-)(ApiConsole);
+export default registerComponent(ApiConsole, true);
