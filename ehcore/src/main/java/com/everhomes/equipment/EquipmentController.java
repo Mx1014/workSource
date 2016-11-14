@@ -38,6 +38,7 @@ import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListTasksByTokenCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -940,5 +941,21 @@ public class EquipmentController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+	 * <b>URL: /equipment/listTasksByToken</b>
+	 * <p>扫码查看设备任务</p>
+	 */
+	@RequestMapping("listTasksByToken")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse listTasksByToken(ListTasksByTokenCommand cmd) {
+		
+		ListEquipmentTasksResponse tasks = equipmentService.listTasksByToken(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
     
 }
