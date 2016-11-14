@@ -13,7 +13,7 @@ CREATE TABLE `eh_flows` (
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running, pending, stop',
   `stop_time` DATETIME NOT NULL COMMENT 'last stop time',
-  `run_time` DATETIME NOT NULL COMMENT 'last create time',
+  `run_time` DATETIME NOT NULL COMMENT 'last run time',
   `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
   `start_node` BIGINT NOT NULL DEFAULT 0,
@@ -61,6 +61,8 @@ CREATE TABLE `eh_flow_nodes` (
     `owner_id` BIGINT NOT NULL,
     `owner_type` VARCHAR(64) NOT NULL,
 
+    `node_name` VARCHAR(64) NOT NULL,
+    `description` VARCHAR(1024) NOT NULL,
     `priority` INTEGER NOT NULL,
     `dealing_id` BIGINT NOT NULL,
     `dealing_button_id` BIGINT NOT NULL,
@@ -68,8 +70,8 @@ CREATE TABLE `eh_flow_nodes` (
     `enter_action_id` BIGINT NOT NULL DEFAULT 0,
     `run_action_id` BIGINT NOT NULL DEFAULT 0,
     `leave_action_id` BIGINT NOT NULL DEFAULT 0,
-    `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -81,9 +83,10 @@ CREATE TABLE `eh_flow_buttons` (
     `flow_id` BIGINT NOT NULL,
     `flow_version_id` INTEGER NOT NULL,
     `button_name` VARCHAR(64),
-    `flow_button_type` VARCHAR(64),
+    `flow_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, TransferStep, CommentStep, EndStep, EndNotifyStep',
     `goto_level` INTEGER NOT NULL DEFAULT 0,
     `flow_action_id` BIGINT NOT NULL COMMENT 'actions attach to this buttons',
+    `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
 
     PRIMARY KEY (`id`)
@@ -92,19 +95,23 @@ CREATE TABLE `eh_flow_buttons` (
 -- DROP TABLE IF EXISTS `eh_flow_actions`;
 CREATE TABLE `eh_flow_actions` (
     `id` BIGINT NOT NULL,
+    `parent_id` BIGINT NOT NULL DEFAULT 0,
     `flow_id` BIGINT NOT NULL,
     `flow_version_id` INTEGER NOT NULL,
     `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick, scripts',
     `belong_to` BIGINT NOT NULL,
     `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node_change, flow_button_click',
-    `action_target_id` BIGINT NOT NULL DEFAULT 0,
+    `selection_target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'target users',
     `from_node_id` BIGINT NOT NULL DEFAULT 0,
     `target_node_id` BIGINT NOT NULL DEFAULT 0,
+    `status` TINYINT NOT NULL COMMENT 'invalid, valid',
+    `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `module_id` INTEGER NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
-    `status` TINYINT NOT NULL COMMENT 'invalid, valid',
+    `owner_id` BIGINT NOT NULL,
+    `owner_type` VARCHAR(64) NOT NULL,
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -132,6 +139,7 @@ CREATE TABLE `eh_user_selections` (
     `flow_id` BIGINT NOT NULL,
     `flow_version_id` INTEGER NOT NULL,
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
+    `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `module_id` INTEGER NOT NULL COMMENT 'the module id',
