@@ -319,7 +319,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     LOGGER.error("The energy meter error");
                     throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
                 }
-                if (realAmount.doubleValue() > 0) {
+                if (realAmount.doubleValue() > 0 && statistic.getCurrentAmount().doubleValue() != 0) {
                     BigDecimal percent = realAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
                     if (percent.doubleValue() >= dayPromptSetting.getSettingValue().doubleValue()) {
                         dto.setDayPrompt(dayPromptSetting.getSettingValue());
@@ -340,7 +340,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMonthStatistic statistic = energyMonthStatisticProvider.findByMeterAndDate(currNamespaceId(), meter.getId(), "" + lastReadDateTime.toLocalDate().getYear() + lastReadDateTime.toLocalDate().getMonthValue());
             if (statistic != null) {
                 BigDecimal thisMonthAmount = energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(), lastReadingTimeLastMonthBegin, Date.valueOf(lastReadDateTime.toLocalDate().plusDays(1)));
-                if (thisMonthAmount.doubleValue() > 0) {
+                if (thisMonthAmount.doubleValue() > 0 && statistic.getCurrentAmount().doubleValue() != 0) {
                     BigDecimal percent = thisMonthAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
                     if (percent.doubleValue() >= monthPromptSetting.getSettingValue().doubleValue()) {
                         dto.setMonthPrompt(monthPromptSetting.getSettingValue());
@@ -625,18 +625,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     case MONTH_PROMPT:
                     case DAY_PROMPT:
                         // 抄表提示类型
-                        setting.setStatus(cmd.getSettingStatus());
-                        setting.setSettingValue(cmd.getSettingValue());
+                        setting.setStatus(cmd.getSettingStatus() != null ? cmd.getSettingStatus() : setting.getStatus());
+                        setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
                         break;
                     case PRICE:
                     case RATE:
                         // 价格及倍率类型
-                        setting.setSettingValue(cmd.getSettingValue());
+                        setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
                         break;
                     case AMOUNT_FORMULA:
                     case COST_FORMULA:
                         // 公式类型
-                        setting.setFormulaId(cmd.getFormulaId());
+                        setting.setFormulaId(cmd.getFormulaId() != null ? cmd.getFormulaId() : setting.getFormulaId());
                         break;
                     default:
                         break;
