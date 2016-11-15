@@ -972,6 +972,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 		calendar.set(Calendar.MINUTE, 0);
 		return calendar ;
 	}
+	public List<DayStatDTO> deepCopyStatDays(List<DayStatDTO> days){
+		List<DayStatDTO> result = new ArrayList<DayStatDTO>();
+		if(days == null )
+			return null;
+		for(DayStatDTO day : days ){
+			result.add(ConvertHelper.convert(day, DayStatDTO.class));
+		}
+		return result;
+	}
     @Override
     public EnergyStatDTO getEnergyStatByDay(EnergyStatCommand cmd) {
     	//TODO: check cmd
@@ -1026,7 +1035,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     			EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(dayStat.getBillCategoryId());
     			billDTO.setBillCategoryId(billCategory.getId());
     			billDTO.setBillCategoryName(billCategory.getName());
-    			billDTO.setDayBillStats(new ArrayList<DayStatDTO>());
+    			billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
     			billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
     			result.getBillDayStats().add(billDTO);
     		}
@@ -1041,7 +1050,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     			EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(dayStat.getServiceCategoryId());
     			serviceDTO.setServiceCategoryId(serviceCategory.getId());
     			serviceDTO.setServiceCategoryName(serviceCategory.getName());
-    			serviceDTO.setDayServiceStats(new ArrayList<DayStatDTO>());
+    			serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
     			serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
     			billDTO.getServiceDayStats().add(serviceDTO);
     		}
@@ -1053,12 +1062,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     		MeterStatDTO meterDTO = findMeterStatDTO(serviceDTO, dayStat.getMeterId());
     		if(meterDTO == null){
     			meterDTO = ConvertHelper.convert(dayStat, MeterStatDTO.class);
-    			meterDTO.setDayStats(new ArrayList<DayStatDTO>());
+    			meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
     			serviceDTO.getMeterDayStats().add(meterDTO);
     		}
-    		meterDTO.getDayStats().add(dayDTO);
+    		DayStatDTO meterDayStat = findDayStat(meterDTO.getDayStats(), dayDTO.getStatDate());
+    		meterDayStat.setCurrentAmount(dayDTO.getCurrentAmount());
+    		meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
+    		meterDayStat.setCurrentReading(dayDTO.getCurrentReading());
+    		meterDayStat.setLastReading(dayDTO.getLastReading());
+
     	}
-    	 
+    	
     	//最终计算实际负担 
     	result.setDayBurdenStats(new ArrayList<DayStatDTO>());
     	BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
@@ -1233,7 +1247,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    			EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(monthStat.getBillCategoryId());
 	    			billDTO.setBillCategoryId(billCategory.getId());
 	    			billDTO.setBillCategoryName(billCategory.getName());
-	    			billDTO.setDayBillStats(new ArrayList<DayStatDTO>());
+	    			billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
 	    			billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
 	    			result.getBillDayStats().add(billDTO);
 	    		}
@@ -1248,7 +1262,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    			EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(monthStat.getServiceCategoryId());
 	    			serviceDTO.setServiceCategoryId(serviceCategory.getId());
 	    			serviceDTO.setServiceCategoryName(serviceCategory.getName());
-	    			serviceDTO.setDayServiceStats(new ArrayList<DayStatDTO>());
+	    			serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
 	    			serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
 	    			billDTO.getServiceDayStats().add(serviceDTO);
 	    		}
@@ -1260,10 +1274,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    		MeterStatDTO meterDTO = findMeterStatDTO(serviceDTO, monthStat.getMeterId());
 	    		if(meterDTO == null){
 	    			meterDTO = ConvertHelper.convert(monthStat, MeterStatDTO.class);
-	    			meterDTO.setDayStats(new ArrayList<DayStatDTO>());
+	    			meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
 	    			serviceDTO.getMeterDayStats().add(meterDTO);
 	    		}
-	    		meterDTO.getDayStats().add(dayDTO);
+
+	    		DayStatDTO meterDayStat = findDayStat(meterDTO.getDayStats(), dayDTO.getStatDate());
+	    		meterDayStat.setCurrentAmount(dayDTO.getCurrentAmount());
+	    		meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
+	    		meterDayStat.setCurrentReading(dayDTO.getCurrentReading());
+	    		meterDayStat.setLastReading(dayDTO.getLastReading());
 	    	}
 	    	 
 	    	//最终计算实际负担  和同比  
