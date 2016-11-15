@@ -131,7 +131,7 @@ public class ApprovalRequestOvertimeHandler extends ApprovalRequestDefaultHandle
 		dto.setPunchDate(new Timestamp(a.getEffectiveDate().getTime()));
 		dto.setHourLength(a.getHourLength());
 		dto.setPunchDetail(processPunchDetail(pdl));
-		approvalBasicInfo.setDescriptionJson(dto);
+		approvalBasicInfo.setDescriptionJson(dto.toString());
 		return approvalBasicInfo;
 	}
 

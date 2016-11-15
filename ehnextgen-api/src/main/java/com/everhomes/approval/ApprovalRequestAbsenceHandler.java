@@ -92,7 +92,7 @@ public class ApprovalRequestAbsenceHandler extends ApprovalRequestDefaultHandler
 			description.setTimeRangeList(timeRangeList);
 		}
 		
-		approvalBasicInfo.setDescriptionJson(description);
+		approvalBasicInfo.setDescriptionJson(description.toString());
 		return approvalBasicInfo;
 	}
 

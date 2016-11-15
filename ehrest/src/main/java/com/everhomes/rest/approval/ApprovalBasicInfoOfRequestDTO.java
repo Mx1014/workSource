@@ -16,7 +16,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ApprovalBasicInfoOfRequestDTO {
 	private Byte approveType;
-	private BasicDescriptionDTO descriptionJson;
+	private String descriptionJson;
 	private Byte approvalStatus;
 
 
@@ -47,12 +47,15 @@ public class ApprovalBasicInfoOfRequestDTO {
 	public String toString() {
 		return StringHelper.toJsonString(this);
 	}
- 
-	public BasicDescriptionDTO getDescriptionJson() {
+
+
+	public String getDescriptionJson() {
 		return descriptionJson;
 	}
 
-	public void setDescriptionJson(BasicDescriptionDTO descriptionJson) {
+
+	public void setDescriptionJson(String descriptionJson) {
 		this.descriptionJson = descriptionJson;
 	}
+ 
 }

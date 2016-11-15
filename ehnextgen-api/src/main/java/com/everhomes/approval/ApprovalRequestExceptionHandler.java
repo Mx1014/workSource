@@ -89,7 +89,7 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		description.setPunchDetail(content.getPunchDetail());
 		description.setPunchStatusName(content.getPunchStatusName());
 		
-		approvalBasicInfo.setDescriptionJson(description);
+		approvalBasicInfo.setDescriptionJson(approvalRequest.getContentJson());
 		return approvalBasicInfo;
 	}
 
