@@ -10,7 +10,7 @@ CREATE TABLE `eh_flows` (
   `module_type` VARCHAR(64) NOT NULL,
 
   `flow_main_id` NOT NULL DEFAULT 0 COMMENT 'the real flow id for all copy, the first flow_main_id=0',
-  `version` INTEGER NOT NULL COMMENT 'current flow version',
+  `flow_version` INTEGER NOT NULL COMMENT 'current flow version',
   `flow_name` VARCHAR(64) NOT NULL COMMENT 'the name of flow',
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running, pending, stop',
@@ -130,6 +130,7 @@ CREATE TABLE `eh_flow_user_selections` (
     `source_type` VARCHAR(64) COMMENT 'community, organization, user, variable',
     `belong_to` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other flow object id',
     `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_superviser, flow_node_processor, flow_node_applier, flow_button_clicker, flow_action_processor',
+    `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow, flow_node, flow_button, flow_action',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
