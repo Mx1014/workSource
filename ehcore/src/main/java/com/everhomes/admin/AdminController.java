@@ -94,8 +94,8 @@ import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import com.everhomes.util.ConsoleOutputFilter;
-import com.everhomes.util.ConsoleOutputListener;
+//import com.everhomes.util.ConsoleOutputFilter;
+//import com.everhomes.util.ConsoleOutputListener;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.FileHelper;
 import com.everhomes.util.ReflectionHelper;
@@ -902,31 +902,31 @@ public class AdminController extends ControllerBase {
     	return new RestResponse();
     }
     
-    @RequestMapping(value="sseConsole")
-    public ResponseBodyEmitter sseConsole() {
-        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
-                UserContext.current().getUser().getId(), Privilege.Visible, null)) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
-        }
-        
-        SseEmitter emitter = new ConsoleOutputSseEmitter(Long.MAX_VALUE);
-        return emitter;
-    }
+//    @RequestMapping(value="sseConsole")
+//    public ResponseBodyEmitter sseConsole() {
+//        if(!this.aclProvider.checkAccess("system", null, EhUsers.class.getSimpleName(),
+//                UserContext.current().getUser().getId(), Privilege.Visible, null)) {
+//            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED, "Access denied");
+//        }
+//        
+//        SseEmitter emitter = new ConsoleOutputSseEmitter(Long.MAX_VALUE);
+//        return emitter;
+//    }
     
-    private static class ConsoleOutputSseEmitter extends SseEmitter implements ConsoleOutputListener {
-        public ConsoleOutputSseEmitter(Long timeout) {
-            super(timeout);
-            ConsoleOutputFilter.subscribe(this);
-        }
-        
-        @Override
-        public void onConsoleOutput(String output) {
-            try {
-                send(SseEmitter.event().name("SSE.Console").data(output));
-            } catch (Throwable e) {
-                ConsoleOutputFilter.unsubscribe(this);
-                complete();
-            }
-        }
-    }
+//    private static class ConsoleOutputSseEmitter extends SseEmitter implements ConsoleOutputListener {
+//        public ConsoleOutputSseEmitter(Long timeout) {
+//            super(timeout);
+//            ConsoleOutputFilter.subscribe(this);
+//        }
+//        
+//        @Override
+//        public void onConsoleOutput(String output) {
+//            try {
+//                send(SseEmitter.event().name("SSE.Console").data(output));
+//            } catch (Throwable e) {
+//                ConsoleOutputFilter.unsubscribe(this);
+//                complete();
+//            }
+//        }
+//    }
 }
