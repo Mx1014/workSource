@@ -5675,18 +5675,19 @@ System.out.println();
 				departments = departments.stream().map(r -> {
 					String[] pathStrs = r.getPath().split("|");
 					String pathName = "";
-					for (String id: pathStrs) {
+					for (String idStr: pathStrs) {
+						Long id = Long.valueOf(idStr);
 						if(id.equals(r.getDirectlyEnterpriseId())){
 							Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
 							pathName = "未知";
 							if(null != o )pathName = o.getName();
 						}
 						if(!"".equals(pathName)){
-							Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+							Organization o = organizationProvider.findOrganizationById(id);
 							if(null != o )pathName += "-" + o.getName();
 						}
 					}
-					r.setParentName(pathName);
+					r.setPathName(pathName);
 					return r;
 				}).collect(Collectors.toList());
 				dto.setDepartments(departments);
