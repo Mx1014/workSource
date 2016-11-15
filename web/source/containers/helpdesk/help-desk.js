@@ -1,8 +1,7 @@
 import React, { PropTypes, Component} from 'react'
 
-import {WidgetComponent} from 'widget-redux-util/redux-enhancer'
-
 import {SplitPane, Pane} from 'widget-splitter'
+import {WidgetComponent} from 'widget-redux-util/redux-enhancer'
 
 import styles from '../../shared/style/app.css'
 

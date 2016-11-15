@@ -1,10 +1,10 @@
 import React, {Component} from 'react'
 
 import {dispatch, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
-import {utf8ArrayToStr} from 'widget-common-util/misc'
 
-import Base64 from 'base64-js'
+import {utf8ArrayToStr} from 'widget-common-util/misc'
 import {serverSentEventConnect} from 'react-server-sent-event-container'
+import Base64 from 'base64-js'
 
 import {getServiceRoot, connectServerConsole, disconnectServerConsole, SERVER_CONSOLE_CLEAR} from '../../actions'
 import ServerConsolePanel from './server-console-panel'

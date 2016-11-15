@@ -1,6 +1,7 @@
 import React, { PropTypes, Component} from 'react'
 
 import {registerComponent, getComponentState, WidgetComponent} from '../../../local/node_modules/widget-redux-util/redux-enhancer'
+
 import {replace} from 'react-router-redux'
 
 import styles from '../../shared/style/app.css'
