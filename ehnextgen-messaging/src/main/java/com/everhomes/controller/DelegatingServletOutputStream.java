@@ -19,6 +19,7 @@ package com.everhomes.controller;
 import java.io.IOException;
 import java.io.OutputStream;
 import javax.servlet.ServletOutputStream;
+import javax.servlet.WriteListener;
 
 import org.springframework.util.Assert;
 
@@ -33,6 +34,17 @@ import org.springframework.util.Assert;
  * @see MockHttpServletResponse
  */
 public class DelegatingServletOutputStream extends ServletOutputStream {
+
+    @Override
+    public boolean isReady() {
+        // TODO Auto-generated method stub
+        return false;
+    }
+
+    @Override
+    public void setWriteListener(WriteListener arg0) {
+        // TODO Auto-generated method stub
+    }
 
     private final OutputStream targetStream;
 
