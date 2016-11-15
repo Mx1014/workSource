@@ -9,7 +9,11 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.tools.ant.taskdefs.condition.And;
+import org.hibernate.annotations.Where;
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -866,4 +870,35 @@ public class GroupProviderImpl implements GroupProvider {
     @Override
     public void evictGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize) {
     }
+
+	@Override
+	public List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize,
+			boolean includeCreator, Long creatorId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
+		SelectConditionStep<Record> step = context
+				.select()
+				.from(EH_GROUP_MEMBERS)
+				.where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId));
+				
+		
+		if (status != null) {
+			step = step.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(status));
+		}
+		
+		if (!includeCreator) {
+			step = step.and(EH_GROUP_MEMBERS.MEMBER_ID.ne(creatorId));
+		}
+		
+		Result<Record> result =step.orderBy(EH_GROUP_MEMBERS.MEMBER_ROLE.asc(), EH_GROUP_MEMBERS.ID.desc())
+			.limit(from.intValue(), pageSize)
+			.fetch();
+		
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, GroupMember.class));
+		}
+		
+		return new ArrayList<GroupMember>();
+	}
+    
+    
 }
