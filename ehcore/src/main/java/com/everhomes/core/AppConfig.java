@@ -61,12 +61,12 @@ public class AppConfig {
         return filter;
     }
     
-    @Bean
-    public SchedulerFactoryBean quartz() {
-        SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
-        factoryBean.setAutoStartup(true);
-        factoryBean.setApplicationContextSchedulerContextKey("applicationContext");
-        return factoryBean;
-    }
+//    @Bean
+//    public SchedulerFactoryBean quartz() {
+//        SchedulerFactoryBean factoryBean = new SchedulerFactoryBean();
+//        factoryBean.setAutoStartup(true);
+//        factoryBean.setApplicationContextSchedulerContextKey("applicationContext");
+//        return factoryBean;
+//    }
     
 }
