@@ -237,14 +237,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         if (lastReadTime != null && (lastReadTime.getTime() - Date.valueOf(LocalDate.now()).getTime() >= 0)) {
             dto.setTodayReadStatus(TrueOrFalseFlag.TRUE.getCode());
             // 日读表差
-            this.processDayPrompt(meter, dto);
+            dto.setDayPrompt(this.processDayPrompt(meter));
             // 月读表差
-            this.processMonthPrompt(meter, dto);
+            dto.setMonthPrompt(this.processMonthPrompt(meter));
         }
         return dto;
     }
 
-    private void processDayPrompt(EnergyMeter meter, EnergyMeterDTO dto) {
+    private BigDecimal processDayPrompt(EnergyMeter meter) {
         Timestamp lastReadTime = meter.getLastReadTime();
         EnergyMeterDefaultSetting dayPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.DAY_PROMPT);
         if (lastReadTime != null && dayPromptSetting != null && Objects.equals(dayPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
@@ -301,9 +301,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE, meter.getLastReadTime());
                 EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE , meter.getLastReadTime());
                 EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(), meter.getId(), EnergyMeterSettingType.AMOUNT_FORMULA , meter.getLastReadTime());
-
-                String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-
+                if (Stream.of(priceSetting, rateSetting, amountSetting).anyMatch(Objects::isNull)) {
+                    return null;
+                }
+                EnergyMeterFormula amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId());
+                if (amountFormula == null) {
+                    return null;
+                }
                 ScriptEngineManager manager = new ScriptEngineManager();
                 ScriptEngine engine = manager.getEngineByName("js");
 
@@ -313,8 +317,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
                 BigDecimal realAmount;
                 try {
-                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
-                } catch (ScriptException e) {
+                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula.getExpression()));
+                } catch (Exception e) {
                     e.printStackTrace();
                     LOGGER.error("The energy meter error");
                     throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
@@ -322,14 +326,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if (realAmount.doubleValue() > 0 && statistic.getCurrentAmount().doubleValue() != 0) {
                     BigDecimal percent = realAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
                     if (percent.doubleValue() >= dayPromptSetting.getSettingValue().doubleValue()) {
-                        dto.setDayPrompt(dayPromptSetting.getSettingValue());
+                        return dayPromptSetting.getSettingValue();
                     }
                 }
             }
         }
+        return null;
     }
 
-    private void processMonthPrompt(EnergyMeter meter, EnergyMeterDTO dto) {
+    private BigDecimal processMonthPrompt(EnergyMeter meter) {
         Timestamp lastReadTime = meter.getLastReadTime();
         EnergyMeterDefaultSetting monthPromptSetting = defaultSettingProvider.findBySettingType(currNamespaceId(), EnergyMeterSettingType.MONTH_PROMPT);
         if (lastReadTime != null && monthPromptSetting != null && Objects.equals(monthPromptSetting.getStatus(), EnergyCommonStatus.ACTIVE.getCode())) {
@@ -343,11 +348,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if (thisMonthAmount.doubleValue() > 0 && statistic.getCurrentAmount().doubleValue() != 0) {
                     BigDecimal percent = thisMonthAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
                     if (percent.doubleValue() >= monthPromptSetting.getSettingValue().doubleValue()) {
-                        dto.setMonthPrompt(monthPromptSetting.getSettingValue());
+                        return monthPromptSetting.getSettingValue();
                     }
                 }
             }
         }
+        return null;
     }
 
     @Override
@@ -540,6 +546,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         dto.setOperatorName(user.getNickName());
         EnergyMeter meter = this.findMeterById(log.getMeterId());
         dto.setMeterName(meter.getName());
+        // 处理抄表提示
+        dto.setDayPrompt(this.processDayPrompt(meter));
+        dto.setMonthPrompt(this.processMonthPrompt(meter));
         return dto;
     }
 
