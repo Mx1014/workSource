@@ -508,8 +508,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 			for (Long memberId: addMemberIds) {
 				OrganizationMember member = organizationProvider.findOrganizationMemberById(memberId);
 				if(null != member){
-					member.setOrganizationId(organization.getId());
-					organizationProvider.createOrganizationMember(member);
+					OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndToken(member.getContactToken(), organization.getId());
+					if(null == organizationMember){
+						member.setOrganizationId(organization.getId());
+						organizationProvider.createOrganizationMember(member);
+					}else{
+						LOGGER.debug("organization member already existing. organizationId = {}, contactToken = {}", organizationMember.getOrganizationId(), organizationMember.getContactToken());
+					}
 				}
 			}
 		}else{
@@ -7931,9 +7936,7 @@ System.out.println();
 		VisibleFlag visibleFlag = VisibleFlag.SHOW;
 		if(VisibleFlag.ALL == VisibleFlag.fromCode(cmd.getVisibleFlag())){
 			visibleFlag = null;
-		}
-
-		if(null != VisibleFlag.fromCode(cmd.getVisibleFlag())){
+		}else if(null != VisibleFlag.fromCode(cmd.getVisibleFlag())){
 			visibleFlag = VisibleFlag.fromCode(cmd.getVisibleFlag());
 		}
 
