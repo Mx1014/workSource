@@ -5672,7 +5672,7 @@ System.out.println();
 					departments.add(orgDTO);
 				}
 				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
-				departments.stream().map(r -> {
+				departments = departments.stream().map(r -> {
 					String[] pathStrs = r.getPath().split("|");
 					String pathName = "";
 					for (String id: pathStrs) {
@@ -5688,7 +5688,7 @@ System.out.println();
 					}
 					r.setParentName(pathName);
 					return r;
-				});
+				}).collect(Collectors.toList());
 				dto.setDepartments(departments);
 			}else if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.GROUP){
 				List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
