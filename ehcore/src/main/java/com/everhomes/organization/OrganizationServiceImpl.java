@@ -8257,7 +8257,7 @@ System.out.println();
 				CrossShardListingLocator locator = new CrossShardListingLocator();
 				locator.setAnchor(cmd.getPageAnchor());
 				List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),
-						orgCommoand, null, VisibleFlag.SHOW, locator, 10000);
+						orgCommoand, null, VisibleFlag.ALL, locator, 10000);
 				dto.setMembers(organizationMembers.stream().map(m -> ConvertHelper.convert(m, OrganizationMemberDTO.class))
 						.collect(Collectors.toList()));
 				dto.setParentName(organization.getName());
@@ -8329,7 +8329,7 @@ System.out.println();
 				CrossShardListingLocator locator = new CrossShardListingLocator();
 				locator.setAnchor(cmd.getPageAnchor());
 				List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationPersonnels(null,
-						orgCommoand, null, VisibleFlag.SHOW, locator, 10000);
+						orgCommoand, null, VisibleFlag.ALL, locator, 10000);
 				dto.setMembers(organizationMembers.stream().map(m -> ConvertHelper.convert(m, OrganizationMemberDTO.class))
 						.collect(Collectors.toList()));
 				
