@@ -5344,10 +5344,13 @@ public class OrganizationServiceImpl implements OrganizationService {
 		List<ImportOrganizationMemberDTO> errorDataLogs = new ArrayList<ImportOrganizationMemberDTO>();
 		Organization org = checkOrganization(cmd.getOrganizationId());
 		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		List<Organization> depts = organizationProvider.listDepartments(org.getPath()+"/%", 1, 1000);
-		List<Organization> jobPositions = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", 
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypes);
+		List<Organization> jobPositions = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", 
 				Collections.singletonList(OrganizationGroupType.JOB_POSITION.getCode()));
-		List<Organization> jobLevels = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"/%", 
+		List<Organization> jobLevels = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", 
 				Collections.singletonList(OrganizationGroupType.JOB_LEVEL.getCode()));
 		
 		Map<String, Organization> jobPositionMap = this.convertOrgListToStrMap(jobPositions);
@@ -5405,7 +5408,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				String[] deptStrArr = deptStr.split(",");
 				List<Long> departmentIds = new ArrayList<Long>();
 				for(String deptName: deptStrArr) {
-					Organization dept = deptMap.get(deptName);
+					Organization dept = deptMap.get(deptName.trim());
 					if(null == dept){
 						LOGGER.debug("Organization member depts is null. data = " + str);
 						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
@@ -5423,7 +5426,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				String[] jobPositionStrArr = jobPositionStr.split(",");
 				List<Long> jobPositionIds = new ArrayList<Long>();
 				for(String jobPositionName: jobPositionStrArr) {
-					Organization jobPosition = jobPositionMap.get(jobPositionName);
+					Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
 					if(null == jobPosition){
 						LOGGER.debug("Organization member jobPosition is null. data = " + str);
 						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
@@ -5505,7 +5508,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			String[] pathArr = path.split("/");
 			StringBuilder sb = new StringBuilder(); 
 			for(int i=0,length=pathArr.length; i<length; i++) {
-				if(pathArr[i].length() != 0) {
+				if(pathArr[i].length() != 0 && i < length-1) {
 					sb.append(temp.get(Long.valueOf(pathArr[i]))).append("-");
 				}
 				if(i == length-1) {
