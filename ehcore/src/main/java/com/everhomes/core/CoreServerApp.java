@@ -30,7 +30,7 @@ public class CoreServerApp {
         AtomikosHelper.fixup();
         
         SpringApplication app = new SpringApplication(CoreServerApp.class);
-        app.setShowBanner(false);
+        // app.setShowBanner(false);
         app.setWebEnvironment(true);
         app.run(args);
     }
