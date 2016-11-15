@@ -11,7 +11,8 @@ import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.time.StopWatch;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
-import org.apache.http.annotation.NotThreadSafe;
+import org.apache.http.annotation.Contract;
+import org.apache.http.annotation.ThreadingBehavior;
 import org.apache.http.client.ClientProtocolException;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.ResponseHandler;
@@ -483,7 +484,7 @@ public class HttpUtils {
 		/**
 		 * 没有现成的delete可以带json的，自己实现一个，参考HttpPost的实现
 		 */
-		@NotThreadSafe
+		@Contract(threading = ThreadingBehavior.UNSAFE)
 		class HttpDeleteWithBody extends HttpEntityEnclosingRequestBase {
 			public static final String METHOD_NAME = "DELETE";
 

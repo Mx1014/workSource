@@ -2577,31 +2577,32 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         for(int i = 0; i < cmds.getItems().size(); i++) {
             AclinkLogItem cmd = cmds.getItems().get(i);
             AclinkLog aclinkLog = ConvertHelper.convert(cmd, AclinkLog.class);
-            DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
-            if(cmd.getUserId() == null) {
-                cmd.setUserId(doorAuth.getUserId());
-            }
-            UserInfo user = userService.getUserInfo(cmd.getUserId());
-            DoorAccess door = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
-            
-            aclinkLog.setDoorName(door.getName());
-            aclinkLog.setUserName(user.getNickName());
-            aclinkLog.setHardwareId(door.getHardwareId());
-            aclinkLog.setOwnerId(door.getOwnerId());
-            aclinkLog.setOwnerType(door.getOwnerType());
-            aclinkLog.setDoorType(door.getDoorType());
-            if(user.getPhones() != null && user.getPhones().size() > 0) {
-                aclinkLog.setUserIdentifier(user.getPhones().get(0));    
-            }
             
             try {
+                DoorAuth doorAuth = doorAuthProvider.getDoorAuthById(cmd.getAuthId());
+                if(cmd.getUserId() == null) {
+                    cmd.setUserId(doorAuth.getUserId());
+                }
+                UserInfo user = userService.getUserInfo(cmd.getUserId());
+                DoorAccess door = doorAccessProvider.getDoorAccessById(doorAuth.getDoorId());
+                
+                aclinkLog.setDoorName(door.getName());
+                aclinkLog.setUserName(user.getNickName());
+                aclinkLog.setHardwareId(door.getHardwareId());
+                aclinkLog.setOwnerId(door.getOwnerId());
+                aclinkLog.setOwnerType(door.getOwnerType());
+                aclinkLog.setDoorType(door.getDoorType());
+                if(user.getPhones() != null && user.getPhones().size() > 0) {
+                    aclinkLog.setUserIdentifier(user.getPhones().get(0));    
+                }
+                
                 aclinkLogProvider.createAclinkLog(aclinkLog);
                 AclinkLogDTO dto = ConvertHelper.convert(aclinkLog, AclinkLogDTO.class);
                 if(dto != null) {
                     resp.getDtos().add(dto);
                 }
             } catch(Exception ex) {
-                LOGGER.error("aclinklog error", ex);
+                LOGGER.error("aclinklog error i=" + i, ex);
             }
         }
         
