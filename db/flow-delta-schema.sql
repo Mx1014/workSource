@@ -2,14 +2,16 @@
 -- DROP TABLE IF EXISTS `eh_flows`;
 CREATE TABLE `eh_flows` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `version_id` INTEGER NOT NULL COMMENT 'current flow version',
-  `flow_name` VARCHAR(64) NOT NULL COMMENT 'the name of flow',
-
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `module_id` INTEGER NOT NULL COMMENT 'the module id',
-  `module_type` VARCHAR(64) NOT NULL,
+
   `owner_id` BIGINT NOT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
+  `module_id` INTEGER NOT NULL COMMENT 'the module id',
+  `module_type` VARCHAR(64) NOT NULL,
+
+  `flow_main_id` NOT NULL DEFAULT 0 COMMENT 'the real flow id for all copy, the first flow_main_id=0',
+  `version` INTEGER NOT NULL COMMENT 'current flow version',
+  `flow_name` VARCHAR(64) NOT NULL COMMENT 'the name of flow',
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running, pending, stop',
   `stop_time` DATETIME NOT NULL COMMENT 'last stop time',
@@ -38,10 +40,12 @@ CREATE TABLE `eh_flows` (
 -- DROP TABLE IF EXISTS `eh_flow_stats`;
 CREATE TABLE `eh_flow_stats` (
   `id` BIGINT NOT NULL,
-  `flow_id` BIGINT NOT NULL,
-  `flow_version_id` INTEGER NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
-  `state_level` INTEGER NOT NULL,
+  `flow_main_id` BIGINT NOT NULL,
+  `flow_version` INTEGER NOT NULL,
+
+  `node_level` INTEGER NOT NULL,
   `running_count` INTEGER NOT NULL,
   `enter_count` INTEGER NOT NULL,
   `leave_count` INTEGER NOT NULL,
@@ -52,24 +56,14 @@ CREATE TABLE `eh_flow_stats` (
 -- DROP TABLE IF EXISTS `eh_flow_nodes`;
 CREATE TABLE `eh_flow_nodes` (
     `id` BIGINT NOT NULL,
-    `flow_id` BIGINT NOT NULL,
-    `flow_version_id` INTEGER NOT NULL,
-
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
-    `module_type` VARCHAR(64) NOT NULL,
-    `owner_id` BIGINT NOT NULL,
-    `owner_type` VARCHAR(64) NOT NULL,
 
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
     `node_name` VARCHAR(64) NOT NULL,
     `description` VARCHAR(1024) NOT NULL,
-    `priority` INTEGER NOT NULL,
-    `dealing_id` BIGINT NOT NULL,
-    `dealing_button_id` BIGINT NOT NULL,
-    `apply_button_id` BIGINT NOT NULL,
-    `enter_action_id` BIGINT NOT NULL DEFAULT 0,
-    `run_action_id` BIGINT NOT NULL DEFAULT 0,
-    `leave_action_id` BIGINT NOT NULL DEFAULT 0,
+    `node_level` INTEGER NOT NULL,
+    `auto_step_hour` INTEGER NOT NULL DEFAULT 0 COMMENT 'after hour, step next',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
 
@@ -77,15 +71,17 @@ CREATE TABLE `eh_flow_nodes` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_buttons`;
+-- TODO form values
 CREATE TABLE `eh_flow_buttons` (
     `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
     `flow_node_id` BIGINT NOT NULL,
-    `flow_id` BIGINT NOT NULL,
-    `flow_version_id` INTEGER NOT NULL,
     `button_name` VARCHAR(64),
     `flow_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, TransferStep, CommentStep, EndStep, EndNotifyStep',
     `goto_level` INTEGER NOT NULL DEFAULT 0,
-    `flow_action_id` BIGINT NOT NULL COMMENT 'actions attach to this buttons',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
 
@@ -95,23 +91,16 @@ CREATE TABLE `eh_flow_buttons` (
 -- DROP TABLE IF EXISTS `eh_flow_actions`;
 CREATE TABLE `eh_flow_actions` (
     `id` BIGINT NOT NULL,
-    `parent_id` BIGINT NOT NULL DEFAULT 0,
-    `flow_id` BIGINT NOT NULL,
-    `flow_version_id` INTEGER NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
     `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick, scripts',
     `belong_to` BIGINT NOT NULL,
-    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node_change, flow_button_click',
-    `selection_target_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'target users',
-    `from_node_id` BIGINT NOT NULL DEFAULT 0,
-    `target_node_id` BIGINT NOT NULL DEFAULT 0,
+    `belong_type` VARCHAR(64) NOT NULL COMMENT 'node_normal_enter, node_reject_enter, node_after_transfer, flow_button_click',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
-
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
-    `module_type` VARCHAR(64) NOT NULL,
-    `owner_id` BIGINT NOT NULL,
-    `owner_type` VARCHAR(64) NOT NULL,
+    `render_text` VARCHAR(256),
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -127,25 +116,21 @@ CREATE TABLE `eh_flow_actions` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_user_selections`;
-CREATE TABLE `eh_user_selections` (
+-- DROP TABLE IF EXISTS `eh_flow_user_selections`;
+CREATE TABLE `eh_flow_user_selections` (
     `id` BIGINT NOT NULL,
-    `parent_id` BIGINT NOT NULL,
-    `path` VARCHAR(64),
-    `name` VARCHAR(64),
-    `source_id` BIGINT NOT NULL DEFAULT 0,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
+
+    `select_type` VARCHAR(64) NOT NULL COMMENT 'group_selection, position_selection, manager_selection, variable_selection',
+    `source_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other user object id',
     `source_type` VARCHAR(64) COMMENT 'community, organization, user, variable',
-    `variable_type` VARCHAR(64),
-    `flow_id` BIGINT NOT NULL,
-    `flow_version_id` INTEGER NOT NULL,
+    `belong_to` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other flow object id',
+    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_superviser, flow_node_processor, flow_node_applier, flow_button_clicker, flow_action_processor',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
-
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
-    `module_type` VARCHAR(64) NOT NULL,
-    `owner_id` BIGINT NOT NULL,
-    `owner_type` VARCHAR(64) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
