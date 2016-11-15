@@ -126,12 +126,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationRoleMapProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.organization.OrganizationServiceImpl;
+import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.user.IdentifierType;
@@ -740,6 +735,46 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return privilegeIds;
 	}
 
+    /**
+     * 获取用户的权限列表
+     * @param communityId
+     * @param userId
+     * @return
+     */
+    public List<Long> getUserCommunityPrivileges(Long communityId, Long userId){
+    	
+    	List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(), communityId, EntityType.USER.getCode(), userId);
+
+    	List<Long> privileges = new ArrayList<Long>();
+    	
+    	List<Long> roleIds = new ArrayList<Long>();
+    	for (RoleAssignment role : userRoles) {
+    		roleIds.add(role.getRoleId());
+		}
+    	
+    	List<Long> privilegeIds = new ArrayList<Long>();
+		for (Long roleId : roleIds) {
+			List<Acl> acls = null;
+			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
+				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
+			}else{
+				Role role = aclProvider.getRoleById(roleId);
+				if(null != role){
+					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+				}
+				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
+			}
+			for (Acl acl : acls) {
+				privilegeIds.add(acl.getPrivilegeId());
+			}
+			
+		}
+		privileges = privilegeIds;	
+    	
+    	return privileges;
+    }
+    
+    
     @Override
     public boolean checkAdministrators(Long organizationId) {
     	User user = UserContext.current().getUser();
@@ -1202,6 +1237,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				menus.add(webMenu);
 			}
 		}
+		menus.sort((o1, o2) -> o1.getSortNum() - o2.getSortNum());
     	return menus;
 	}
 

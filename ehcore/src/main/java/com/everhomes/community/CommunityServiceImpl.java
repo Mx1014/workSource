@@ -706,7 +706,9 @@ public class CommunityServiceImpl implements CommunityService {
         		OrganizationMember member = organizationProvider.findOrganizationMemberById(dto.getManagerUid());
         		if(null != member){
         			dto.setManagerNickName(member.getContactName());
-        			dto.setContact(member.getContactToken());
+        			//modify by wh 2016-11-8 加了管理员电话新字段
+        			//dto.setContact(member.getContactToken());
+        			dto.setManagerContact(member.getContactToken());
         		}
         	}
         	

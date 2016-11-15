@@ -839,7 +839,7 @@ public class GroupProviderImpl implements GroupProvider {
 	    			.where(EH_GROUP_MEMBERS.GROUP_ID.eq(groupId))
 		    		.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(GroupMemberStatus.ACTIVE.getCode()))
 		    		.and(EH_GROUP_MEMBERS.MEMBER_TYPE.eq(EntityType.USER.getCode()))
-		    		.orderBy(EH_GROUP_MEMBERS.ID.asc())
+		    		.orderBy(EH_GROUP_MEMBERS.MEMBER_ROLE.asc(), EH_GROUP_MEMBERS.ID.asc())  //按角色、id排序，角色：创建者4、管理员5、普通成员7，这样可取出第一个管理员
 		    		.limit(1)
 		    		.fetchOne()
 		    		.map(r->ConvertHelper.convert(r, GroupMember.class));
