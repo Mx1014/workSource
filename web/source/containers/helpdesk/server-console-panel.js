@@ -5,8 +5,8 @@ import {registerComponent, getComponentState, WidgetComponent} from 'widget-redu
 
 import ServerConsole from './server-console'
 
-import {clearServerConsole, pauseServerConsole, resumeServerConsole, connectServerConsole, disconnectServerConsole} from '../actions'
-import {SERVER_CONSOLE_PAUSE, SERVER_CONSOLE_RESUME, SERVER_CONSOLE_CONNECT, SERVER_CONSOLE_DISCONNECT} from '../actions'
+import {clearServerConsole, pauseServerConsole, resumeServerConsole, connectServerConsole, disconnectServerConsole} from '../../actions'
+import {SERVER_CONSOLE_PAUSE, SERVER_CONSOLE_RESUME, SERVER_CONSOLE_CONNECT, SERVER_CONSOLE_DISCONNECT} from '../../actions'
 
 class ServerConsolePanel extends WidgetComponent {
 

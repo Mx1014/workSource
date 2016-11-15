@@ -2,8 +2,8 @@ import React, { PropTypes, Component} from 'react'
 
 import Header from './header'
 
-import layoutStyles from '../shared/style/layout.css'
-import styles from '../shared/style/app.css'
+import layoutStyles from '../../shared/style/layout.css'
+import styles from '../../shared/style/app.css'
 
 export default class Home extends Component {
     render() {

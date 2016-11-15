@@ -1,15 +1,16 @@
 import React, { PropTypes, Component} from 'react'
 
-import {SplitPane, Pane} from 'widget-splitter'
 import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
 
-import ApiList from '../components/apilist'
+import {SplitPane, Pane} from 'widget-splitter'
+
+import ApiList from '../../components/apilist'
 import ApiPanel from './api-panel'
 
-import layoutStyles from '../shared/style/layout.css'
+import layoutStyles from '../../shared/style/layout.css'
 
-import {fetchApiList, appendToConsole, setSandboxCurrentApi, setSandboxInitialized, setApiFilter} from '../actions'
-import {API_LIST_SUCCESS, SANDBOX_SET_CURRENT, SANDBOX_SET_INITIALIZED, SANDBOX_SET_APIFILTER} from '../actions'
+import {fetchApiList, appendToConsole, setSandboxCurrentApi, setSandboxInitialized, setApiFilter} from '../../actions'
+import {API_LIST_SUCCESS, SANDBOX_SET_CURRENT, SANDBOX_SET_INITIALIZED, SANDBOX_SET_APIFILTER} from '../../actions'
 
 class Sandbox extends WidgetComponent {
 
