@@ -97,7 +97,8 @@ CREATE TABLE `eh_flow_actions` (
     `flow_version` INTEGER NOT NULL,
     `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick, scripts',
     `belong_to` BIGINT NOT NULL,
-    `belong_type` VARCHAR(64) NOT NULL COMMENT 'node_normal_enter, node_reject_enter, node_after_transfer, flow_button_click',
+    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
+    `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `render_text` VARCHAR(256),
@@ -138,25 +139,27 @@ CREATE TABLE `eh_flow_user_selections` (
 -- DROP TABLE IF EXISTS `eh_flow_cases`;
 CREATE TABLE `eh_flow_cases` (
     `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `owner_id` BIGINT NOT NULL,
+    `owner_type` VARCHAR(64) NOT NULL,
+    `module_id` INTEGER NOT NULL COMMENT 'the module id',
+    `module_type` VARCHAR(64) NOT NULL,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
+
     `apply_user_id` BIGINT NOT NULL,
-    `dealing_user_id` BIGINT NOT NULL,
-    `dealing_selection_id` BIGINT NOT NULL,
+    `process_user_id` BIGINT NOT NULL,
     `refer_id` BIGINT NOT NULL DEFAULT 0,
     `refer_type` VARCHAR(64) NOT NULL,
     `current_node_id` BIGINT NOT NULL DEFAULT 0,
-    `state` TINYINT NOT NULL DEFAULT 0,
-    `reject_id` INTEGER NOT NULL DEFAULT 0,
-    `change_time` DATETIME NOT NULL COMMENT 'state change time',
+    `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, initial, process, end',
+    `reject_count` INTEGER NOT NULL DEFAULT 0,
+    `reject_node_id` BIGINT NOT NULL DEFAULT 0,
+    `last_step_time` DATETIME NOT NULL COMMENT 'state change time',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `content` TEXT,
-
-    `flow_id` BIGINT NOT NULL,
-    `flow_version_id` INTEGER NOT NULL,
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
-    `module_type` VARCHAR(64) NOT NULL,
-    `owner_id` BIGINT NOT NULL,
-    `owner_type` VARCHAR(64) NOT NULL,
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -175,7 +178,11 @@ CREATE TABLE `eh_flow_cases` (
 -- DROP TABLE IF EXISTS `eh_flow_event_logs`;
 CREATE TABLE `eh_flow_event_logs` (
     `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
     `parent_id` BIGINT NOT NULL,
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
     `flow_node_id` BIGINT NOT NULL DEFAULT 0,
     `flow_case_id` BIGINT NOT NULL DEFAULT 0,
     `flow_button_id` BIGINT NOT NULL DEFAULT 0,
@@ -183,17 +190,9 @@ CREATE TABLE `eh_flow_event_logs` (
     `flow_user_id` BIGINT NOT NULL DEFAULT 0,
     `flow_selection_id` BIGINT NOT NULL DEFAULT 0,
     `subject_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the post id for this event',
-    `log_type` VARCHAR(64) NOT NULL,
-    `log_name` VARCHAR(64) COMMENT 'the title of this log',
-    `content` TEXT,
-
-    `flow_id` BIGINT NOT NULL,
-    `flow_version_id` INTEGER NOT NULL,
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
-    `module_type` VARCHAR(64) NOT NULL,
-    `owner_id` BIGINT NOT NULL,
-    `owner_type` VARCHAR(64) NOT NULL,
+    `log_type` VARCHAR(64) NOT NULL COMMENT 'flow_step, button_click, action_result',
+    `log_title` VARCHAR(64) COMMENT 'the title of this log',
+    `log_content` TEXT,
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -212,7 +211,13 @@ CREATE TABLE `eh_flow_event_logs` (
 -- DROP TABLE IF EXISTS `eh_flow_variables`;
 CREATE TABLE `eh_flow_variables` (
     `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
     `name` VARCHAR(64),
+
+    `owner_id` BIGINT NOT NULL,
+    `owner_type` VARCHAR(64) NOT NULL,
+    `module_id` INTEGER NOT NULL COMMENT 'the module id',
+    `module_type` VARCHAR(64) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -220,17 +225,18 @@ CREATE TABLE `eh_flow_variables` (
 -- DROP TABLE IF EXISTS `eh_flow_evaluates`;
 CREATE TABLE `eh_flow_evaluates` (
     `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `owner_id` BIGINT NOT NULL,
+    `owner_type` VARCHAR(64) NOT NULL,
+    `module_id` INTEGER NOT NULL COMMENT 'the module id',
+    `module_type` VARCHAR(64) NOT NULL,
+
     `star` TINYINT NOT NULL,
     `user_id` BIGINT NOT NULL,
     `flow_case_id` BIGINT NOT NULL,
-
-    `flow_id` BIGINT NOT NULL,
-    `flow_version_id` INTEGER NOT NULL,
-    `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
-    `module_type` VARCHAR(64) NOT NULL,
-    `owner_id` BIGINT NOT NULL,
-    `owner_type` VARCHAR(64) NOT NULL,
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
