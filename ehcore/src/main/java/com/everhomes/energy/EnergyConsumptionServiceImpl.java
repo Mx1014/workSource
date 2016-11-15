@@ -995,7 +995,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     		DayStatDTO date = new DayStatDTO();
     		date.setStatDate(new Date(beginCalendar.getTime().getTime()).getTime());
     		date.setDateStr(dateStrSF.format(beginCalendar.getTime()));
-    		
+    		result.getDates().add(date);
     		//日期增加每一天,循环不能超过33天
     		beginCalendar.add(Calendar.DAY_OF_MONTH, 1);
     		if(looptimes ++ > 33)
@@ -1203,6 +1203,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    		DayStatDTO date = new DayStatDTO();
 	    		date.setStatDate(monthSF.get().parse(monthSF.get().format(beginCalendar.getTime())).getTime());
 	    		date.setDateStr(dateStrSF.format(beginCalendar.getTime()));
+	    		result.getDates().add(date);
 	    		
 	    		//日期增加每一天,循环不能超过13个月
 	    		beginCalendar.add(Calendar.MONTH, 1);
