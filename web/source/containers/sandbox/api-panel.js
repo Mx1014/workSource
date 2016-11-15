@@ -1,16 +1,16 @@
 import React, { PropTypes, Component} from 'react'
 
+import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
+
 import {SplitPane, Pane} from 'widget-splitter'
 import {Tab} from 'widget-tab'
 
+import Sandbox from './sandbox'
 import ApiResult from './api-console'
 import ApiDoc from './api-doc'
-import InputForm from '../components/input'
+import InputForm from '../../components/input'
 
-import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
-import {apiAction, appendToConsole} from '../actions'
-
-import Sandbox from './sandbox'
+import {apiAction, appendToConsole} from '../../actions'
 
 class ApiPanel extends WidgetComponent {
 

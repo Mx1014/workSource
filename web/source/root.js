@@ -9,12 +9,12 @@ import {Provider} from 'react-redux'
 import {Router, Route, IndexRedirect} from 'react-router'
 import {routerReducer} from 'react-router-redux'
 
-import Home from './containers/home'
-import Sandbox from './containers/sandbox'
-import ApiPanel from './containers/api-panel'
+import Home from './containers/home/home'
+import Sandbox from './containers/sandbox/sandbox'
+import ApiPanel from './containers/sandbox/api-panel'
 
-import HelpDesk from './containers/help-desk'
-import ServerConsolePanel from './containers/server-console-panel'
+import HelpDesk from './containers/helpdesk/help-desk'
+import ServerConsolePanel from './containers/helpdesk/server-console-panel'
 
 export default class Root extends Component {
     render() {
