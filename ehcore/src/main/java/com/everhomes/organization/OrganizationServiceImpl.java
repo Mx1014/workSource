@@ -5676,20 +5676,22 @@ System.out.println();
 				}
 				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
 				departments = departments.stream().map(r -> {
-					String[] pathStrs = r.getPath().split("|");
+					String[] pathStrs = r.getPath().split("/");
 					String pathName = "";
-					for (String id: pathStrs) {
-						if(id.equals(r.getDirectlyEnterpriseId())){
-							Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
-							pathName = "未知";
-							if(null != o )pathName = o.getName();
-						}
-						if(!"".equals(pathName)){
-							Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
-							if(null != o )pathName += "-" + o.getName();
+					for (String idStr: pathStrs) {
+						if(!"".equals(idStr)){
+							Long id = Long.valueOf(idStr);
+							if(id.equals(r.getDirectlyEnterpriseId())){
+								Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+								pathName = "未知";
+								if(null != o )pathName = o.getName();
+							}else if(!"".equals(pathName)){
+								Organization o = organizationProvider.findOrganizationById(id);
+								if(null != o )pathName += "-" + o.getName();
+							}
 						}
 					}
-					r.setParentName(pathName);
+					r.setPathName(pathName);
 					return r;
 				}).collect(Collectors.toList());
 				dto.setDepartments(departments);
