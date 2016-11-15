@@ -311,7 +311,7 @@ public class GroupServiceImpl implements GroupService {
         	//判断简介
         	if (cmd.getDescription() == null || cmd.getDescription().length() < 10) {
         		throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_DESCRIPTION_LENGTH,
-    					"title length cannot be less than 10!");
+    					"description length cannot be less than 10!");
 			}
 		}
     	return new RestResponse(createGroup(cmd, groupSetting));
@@ -1666,31 +1666,42 @@ public class GroupServiceImpl implements GroupService {
         //organization的member不在group里面 所以先去掉校验by xiongying 20160524
 //        checkGroupPrivilege(operator.getId(), cmd.getGroupId(), PrivilegeConstants.GroupListMember);
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
-        locator.setAnchor(cmd.getPageAnchor());
-        
-        List<GroupMember> members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
-            (loc,query) -> {
-                if(cmd.getStatus() != null) {
-                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
-                }
-                
-                // 俱乐部的成员需要按创建者、管理员、成员的顺序按加入时间倒序排列，add by tt, 20161103
-                if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
-                	if (TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.FALSE) {
-						query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
-					}
-					query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
-				}
-                
-                return query;
-            });
-        
+        Long pageAnchor = cmd.getPageAnchor() == null?0L:cmd.getPageAnchor();
+        List<GroupMember> members = null;
         Long nextPageAnchor = null;
-        if(members.size() > pageSize) {
-            members.remove(members.size() - 1);
-            nextPageAnchor = members.get(members.size() -1).getId();
-        }
+        
+        //如果是按创建者、管理员、成员顺序排序再按加入时间排序，不能按锚点分页，add by tt, 20161115
+
+        // 俱乐部的成员需要按创建者、管理员、成员的顺序按加入时间倒序排列，add by tt, 20161103
+        if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+//        	if (TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.FALSE) {
+//				query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
+//			}
+//			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
+			Long from = pageAnchor * pageSize;
+			members = groupProvider.listPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getStatus(), from, pageSize+1, TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE, group.getCreatorUid());
+			if(members.size() > pageSize) {
+	            members.remove(members.size() - 1);
+	            nextPageAnchor = pageAnchor + 1;
+	        }
+		}else {
+			CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
+	        locator.setAnchor(cmd.getPageAnchor());
+	        
+	        members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
+	            (loc,query) -> {
+	                if(cmd.getStatus() != null) {
+	                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
+	                }
+	                
+	                return query;
+	            });
+	        
+	        if(members.size() > pageSize) {
+	            members.remove(members.size() - 1);
+	            nextPageAnchor = members.get(members.size() -1).getId();
+	        }
+		}
 
         List<GroupMemberDTO> memberDtos = members.stream()
                 .map((r) -> { return ConvertHelper.convert(r, GroupMemberDTO.class);})
