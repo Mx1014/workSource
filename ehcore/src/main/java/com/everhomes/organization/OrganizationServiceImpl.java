@@ -7266,7 +7266,7 @@ System.out.println();
             String departmentStr = "";
             if(null != departments){
             	 for (OrganizationDTO department : departments) {
-                 	departmentStr += "," + department.getName();
+                 	departmentStr += "," + department.getPathName();
      			}
             }
            
