@@ -1456,7 +1456,10 @@ public class GroupServiceImpl implements GroupService {
                 deleteActiveGroupMember(userId, member, "leave group");
             }
             
-            sendGroupNotificationForMemberLeaveGroup(group, member);
+            // 俱乐部退出不发消息，add by tt, 20161115
+            if (GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+            	sendGroupNotificationForMemberLeaveGroup(group, member);
+			}
             break;
         default:
             LOGGER.error("Target user is not an active group member, operatorUid=" + userId + ", groupId=" + groupId 
