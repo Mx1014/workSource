@@ -1,5 +1,7 @@
 package com.everhomes.rest.quality;
 
+import java.util.List;
+
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
@@ -11,13 +13,13 @@ import com.everhomes.util.StringHelper;
 public class CountScoresResponse {
 
 	@ItemType(ScoreGroupBySpecificationDTO.class)
-	private ScoreGroupBySpecificationDTO scores;
+	private List<ScoreGroupBySpecificationDTO> scores;
 
-	public ScoreGroupBySpecificationDTO getScores() {
+	public List<ScoreGroupBySpecificationDTO> getScores() {
 		return scores;
 	}
 
-	public void setScores(ScoreGroupBySpecificationDTO scores) {
+	public void setScores(List<ScoreGroupBySpecificationDTO> scores) {
 		this.scores = scores;
 	}
 

@@ -893,7 +893,7 @@ public class QualityServiceImpl implements QualityService {
 			//QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
 		    QualityInspectionSpecifications category = qualityProvider.findSpecificationById(r.getCategoryId(), r.getOwnerType(), r.getOwnerId());
 		    if(category != null) {
-		        r.setCategoryName(getQualityCategoryNamePath(category.getPath()));
+		        r.setCategoryName(getSpecificationNamePath(category.getPath(), category.getOwnerType(), category.getOwnerId()));
 		    }
 			
         	if(executeUid != null) {
@@ -2361,16 +2361,16 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
 		CountScoresResponse response = new CountScoresResponse();
+		List<ScoreGroupBySpecificationDTO> scoresBySpecification = new ArrayList<ScoreGroupBySpecificationDTO>();
 		
 		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
 		
 		//查第一级的子结点
 		if(cmd.getSpecificationId() == null || cmd.getSpecificationId() == 0L) {
-			specifications = qualityProvider.listAllChildrenSpecifications("/%", cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, null);
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, 0L, null);
 		} else {
 			QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
-			String superiorPath = parent.getPath() + "/%";
-			specifications = qualityProvider.listAllChildrenSpecifications(superiorPath, cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, null);
+			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, parent.getId(), null);
 		}
 
 		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<QualityInspectionSpecificationDTO>();
@@ -2392,11 +2392,11 @@ public class QualityServiceImpl implements QualityService {
 			for(QualityInspectionSpecificationDTO dto : dtos) {
 				List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
 				if(dto.getId() == null || dto.getId() == 0L) {
-					String superiorPath = "/%";
+					String superiorPath = "%";
 					scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime());
 				} else {
-					QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getSpecificationId(), cmd.getOwnerType(), cmd.getOwnerId());
-					String superiorPath = parent.getPath() + "/%";
+					QualityInspectionSpecifications parent = verifiedSpecificationById(dto.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+					String superiorPath = parent.getPath() + "%";
 					scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime());
 				}
 				
@@ -2409,21 +2409,35 @@ public class QualityServiceImpl implements QualityService {
 					scoreBySpecification.setSpecificationScore(dto.getScore());
 					scoreBySpecification.setSpecificationWeight(dto.getWeight());
 					for(ScoreDTO scoreDto : scores) {
-						
-						Community community = communityProvider.findCommunityById(scoreDto.getTargetId());
-						if(community != null) {
-							scoreDto.setTargetName(community.getName());
+						if(targetScores.get(scoreDto.getTargetId()) == null) {
+							Community community = communityProvider.findCommunityById(scoreDto.getTargetId());
+							if(community != null) {
+								scoreDto.setTargetName(community.getName());
+							}
+							
+							targetScores.put(scoreDto.getTargetId(), scoreDto);
+						} else {
+							ScoreDTO targetScore = targetScores.get(scoreDto.getTargetId());
+							targetScore.setScore(targetScore.getScore()+scoreDto.getScore());
+							targetScores.put(scoreDto.getTargetId(), targetScore);
 						}
-						
-						
-						targetScores.put(scoreDto.getTargetId(), scoreDto);
 					}
+					
+					List<ScoreDTO> scoreList = new ArrayList<ScoreDTO>();
+					for(ScoreDTO scoreDTO : targetScores.values()) {
+						Double score = (scoreBySpecification.getSpecificationScore() - scoreDTO.getScore()) * scoreBySpecification.getSpecificationWeight();
+						scoreDTO.setScore(score);
+						scoreList.add(scoreDTO);
+					}
+					scoreBySpecification.setScores(scoreList);
+					scoresBySpecification.add(scoreBySpecification);
+					
 				}
-				
 				
 			}
 		}
-			
+
+		response.setScores(scoresBySpecification);
 		return response;
 	}
 
