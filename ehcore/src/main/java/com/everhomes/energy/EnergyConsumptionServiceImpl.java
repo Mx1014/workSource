@@ -938,11 +938,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 		calendar.setTime(date);
 		calendar.add(Calendar.YEAR, -1);
 		calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
-		calendar.set(Calendar.DAY_OF_MONTH, 0);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+		calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+		calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+		calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
 		return calendar ;
 	}
 
@@ -965,11 +965,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
 		}
 
-		calendar.set(Calendar.DAY_OF_MONTH, 0);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+		calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+		calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+		calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
 		return calendar ;
 	}
 	public List<DayStatDTO> deepCopyStatDays(List<DayStatDTO> days){
