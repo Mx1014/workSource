@@ -1880,7 +1880,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //				yoy.setCreatorUid(UserContext.current().getUser().getId());
 				yoy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 						.getTime()));
-				
+				energyYoyStatisticProvider.deleteEnergyYoyStatistic(yoy.getCommunityId(), yoy.getDateStr());
 				energyYoyStatisticProvider.createEnergyYoyStatistic(yoy);
 			}
 			
