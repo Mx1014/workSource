@@ -155,8 +155,10 @@ CREATE TABLE `eh_flow_user_selections` (
     `flow_version` INTEGER NOT NULL,
 
     `select_type` VARCHAR(64) NOT NULL COMMENT 'group_selection, position_selection, manager_selection, variable_selection',
-    `source_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other user object id',
-    `source_type` VARCHAR(64) COMMENT 'community, organization, user, variable',
+    `source_id_a` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other user object id',
+    `source_type_a` VARCHAR(64) COMMENT 'community, organization, user, variable',
+    `source_id_b` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other user object id',
+    `source_type_b` VARCHAR(64) COMMENT 'community, organization, user, variable',
     `belong_to` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other flow object id',
     `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_superviser, flow_node_processor, flow_node_applier, flow_button_clicker, flow_action_processor',
     `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow, flow_node, flow_button, flow_action',
