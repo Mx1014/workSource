@@ -530,7 +530,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterReadingLog log = new EnergyMeterReadingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setReading(cmd.getCurrReading());
-        log.setCommunityId(cmd.getCommunityId());
+        log.setCommunityId(meter.getCommunityId());
         log.setMeterId(meter.getId());
         log.setNamespaceId(currNamespaceId());
         log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));

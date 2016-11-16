@@ -18,8 +18,8 @@ import java.math.BigDecimal;
 public class ReadEnergyMeterCommand {
 
     @NotNull private Long organizationId;
-    @NotNull private Long communityId;
     @NotNull private Long meterId;
+    private Long communityId;
     private Byte resetMeterFlag;
     private BigDecimal lastReading;
     @NotNull private BigDecimal currReading;
