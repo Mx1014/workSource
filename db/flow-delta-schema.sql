@@ -16,6 +16,7 @@ CREATE TABLE `eh_flows` (
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running, pending, stop',
   `stop_time` DATETIME NOT NULL COMMENT 'last stop time',
   `run_time` DATETIME NOT NULL COMMENT 'last run time',
+  `update_time` DATETIME NOT NULL COMMENT 'last run time',
   `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
   `start_node` BIGINT NOT NULL DEFAULT 0,
@@ -96,7 +97,7 @@ CREATE TABLE `eh_flow_forms` (
     `flow_version` INTEGER NOT NULL,
 
     `form_name` VARCHAR(64),
-    `form_type` VARCHAR(64) COMMENT 'text, datetime, checkbox, radiobox',
+    `form_type` VARCHAR(64) COMMENT 'text, datetime, checkbox, radiobox, selection',
     `form_default` TEXT,
     `form_render` TEXT,
     `belong_to` BIGINT NOT NULL,
@@ -188,6 +189,7 @@ CREATE TABLE `eh_flow_cases` (
     `reject_node_id` BIGINT NOT NULL DEFAULT 0,
     `last_step_time` DATETIME NOT NULL COMMENT 'state change time',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
+    `case_type` VARCHAR(64),
     `content` TEXT,
 
     `string_tag1` VARCHAR(128),
