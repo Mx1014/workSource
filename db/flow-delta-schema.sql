@@ -6,11 +6,11 @@ CREATE TABLE `eh_flows` (
 
   `owner_id` BIGINT NOT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
-  `module_id` INTEGER NOT NULL COMMENT 'the module id',
+  `module_id` BIGINT NOT NULL COMMENT 'the module id',
   `module_type` VARCHAR(64) NOT NULL,
 
   `flow_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the real flow id for all copy, the first flow_main_id=0',
-  `flow_version` INTEGER NOT NULL COMMENT 'current flow version',
+  `flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'current flow version',
   `flow_name` VARCHAR(64) NOT NULL COMMENT 'the name of flow',
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running, pending, stop',
@@ -175,7 +175,7 @@ CREATE TABLE `eh_flow_cases` (
 
     `owner_id` BIGINT NOT NULL,
     `owner_type` VARCHAR(64) NOT NULL,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
+    `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
 
     `flow_main_id` BIGINT NOT NULL,
@@ -249,7 +249,7 @@ CREATE TABLE `eh_flow_variables` (
 
     `owner_id` BIGINT NOT NULL,
     `owner_type` VARCHAR(64) NOT NULL,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
+    `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
 
     PRIMARY KEY (`id`)
@@ -262,7 +262,7 @@ CREATE TABLE `eh_flow_evaluates` (
 
     `owner_id` BIGINT NOT NULL,
     `owner_type` VARCHAR(64) NOT NULL,
-    `module_id` INTEGER NOT NULL COMMENT 'the module id',
+    `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
 
     `star` TINYINT NOT NULL,

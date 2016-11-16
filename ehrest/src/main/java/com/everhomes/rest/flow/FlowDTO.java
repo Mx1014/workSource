@@ -14,12 +14,7 @@ public class FlowDTO {
     private String     moduleType;
     private Long     id;
     private Integer     namespaceId;
-    private String     stringTag5;
-    private String     stringTag4;
     private Timestamp     stopTime;
-    private String     stringTag1;
-    private String     stringTag3;
-    private String     stringTag2;
     private Byte     status;
     private Long     lastNode;
     private Integer     flowVersion;
@@ -27,16 +22,146 @@ public class FlowDTO {
     private Timestamp     createTime;
     private Integer     moduleId;
     private Long     startNode;
-    private Long     integralTag1;
-    private Long     integralTag2;
-    private Long     integralTag3;
-    private Long     integralTag4;
-    private Long     integralTag5;
     private Long     ownerId;
     private Long     superviserId;
 
+    public String getFlowName() {
+		return flowName;
+	}
 
-    @Override
+	public void setFlowName(String flowName) {
+		this.flowName = flowName;
+	}
+
+	public Long getFlowMainId() {
+		return flowMainId;
+	}
+
+	public void setFlowMainId(Long flowMainId) {
+		this.flowMainId = flowMainId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+
+	public Long getEndNode() {
+		return endNode;
+	}
+
+	public void setEndNode(Long endNode) {
+		this.endNode = endNode;
+	}
+
+	public String getModuleType() {
+		return moduleType;
+	}
+
+	public void setModuleType(String moduleType) {
+		this.moduleType = moduleType;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Timestamp getStopTime() {
+		return stopTime;
+	}
+
+	public void setStopTime(Timestamp stopTime) {
+		this.stopTime = stopTime;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public Long getLastNode() {
+		return lastNode;
+	}
+
+	public void setLastNode(Long lastNode) {
+		this.lastNode = lastNode;
+	}
+
+	public Integer getFlowVersion() {
+		return flowVersion;
+	}
+
+	public void setFlowVersion(Integer flowVersion) {
+		this.flowVersion = flowVersion;
+	}
+
+	public Timestamp getRunTime() {
+		return runTime;
+	}
+
+	public void setRunTime(Timestamp runTime) {
+		this.runTime = runTime;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public Integer getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Integer moduleId) {
+		this.moduleId = moduleId;
+	}
+
+	public Long getStartNode() {
+		return startNode;
+	}
+
+	public void setStartNode(Long startNode) {
+		this.startNode = startNode;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public Long getSuperviserId() {
+		return superviserId;
+	}
+
+	public void setSuperviserId(Long superviserId) {
+		this.superviserId = superviserId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

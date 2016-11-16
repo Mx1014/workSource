@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.records.EhFlowsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +110,11 @@ public class FlowProviderImpl implements FlowProvider {
     }
 
     private void prepareObj(Flow obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+        obj.setStopTime(obj.getCreateTime());
+        obj.setStopTime(obj.getCreateTime());
+        obj.setRunTime(obj.getCreateTime());
+        obj.setUpdateTime(obj.getCreateTime());
     }
 }
