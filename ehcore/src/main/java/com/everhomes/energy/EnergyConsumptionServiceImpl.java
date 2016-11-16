@@ -962,7 +962,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 		}
 		else {
 			calendar.setTime(date); 
-			calendar.set(Calendar.MONTH, 11);
+			calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
 		}
 
 		calendar.set(Calendar.DAY_OF_MONTH, 0);
