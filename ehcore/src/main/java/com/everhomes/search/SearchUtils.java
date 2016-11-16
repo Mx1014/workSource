@@ -47,6 +47,8 @@ public class SearchUtils {
 
     public static final String EQUIPMENTSTANDARDMAP = "equipmentStandardMap";
     
+    public static final String APARTMENTREQUEST = "apartmentRequest";
+    
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

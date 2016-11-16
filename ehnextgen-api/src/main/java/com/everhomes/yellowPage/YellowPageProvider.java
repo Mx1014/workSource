@@ -80,5 +80,9 @@ public interface YellowPageProvider {
 	void createReservationRequests(ReservationRequests request);
 	ReservationRequests findReservationRequests(Long id);
 	List<ReservationRequests> listReservationRequests(CrossShardListingLocator locator, int pageSize);
+	
+	void createApartmentRequests(ServiceAllianceApartmentRequests request);
+	ServiceAllianceApartmentRequests findApartmentRequests(Long id);
+	List<ServiceAllianceApartmentRequests> listApartmentRequests(CrossShardListingLocator locator, int pageSize);
 
 }

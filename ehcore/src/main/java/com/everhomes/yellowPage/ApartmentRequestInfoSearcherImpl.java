@@ -1,7 +1,6 @@
 package com.everhomes.yellowPage;
 
 import java.io.IOException;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -31,30 +30,20 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.search.AbstractElasticSearch;
+import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.SearchUtils;
-import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.DateHelper;
-import com.everhomes.videoconf.ConfAccounts;
 
 @Component
-public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearch
-	implements ServiceAllianceRequestInfoSearcher {
+public class ApartmentRequestInfoSearcherImpl  extends AbstractElasticSearch implements ApartmentRequestInfoSearcher {
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(ServiceAllianceRequestInfoSearcherImpl.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApartmentRequestInfoSearcherImpl.class);
 	
 	@Autowired
 	private YellowPageProvider yellowPageProvider;
@@ -69,7 +58,29 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Override
 	public void deleteById(Long id) {
 		deleteById(id.toString());
-		
+	}
+
+	@Override
+	public void bulkUpdate(List<ServiceAllianceApartmentRequests> requests) {
+		BulkRequestBuilder brb = getClient().prepareBulk();
+        for (ServiceAllianceApartmentRequests request : requests) {
+	            XContentBuilder source = createDoc(request);
+	            if(null != source) {
+	                LOGGER.info("service alliance apartment request id:" + request.getId());
+	                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
+	                        .id(request.getId().toString()).source(source)); 
+	                }
+            
+        }
+        if (brb.numberOfActions() > 0) {
+            brb.execute().actionGet();
+        }
+	}
+
+	@Override
+	public void feedDoc(ServiceAllianceApartmentRequests request) {
+		XContentBuilder source = createDoc(request);
+        feedDoc(request.getId().toString(), source);
 	}
 
 	@Override
@@ -79,7 +90,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-            List<ServiceAllianceRequests> requests = yellowPageProvider.listServiceAllianceRequests(locator, pageSize);
+            List<ServiceAllianceApartmentRequests> requests = yellowPageProvider.listApartmentRequests(locator, pageSize);
             
             if(requests.size() > 0) {
                 this.bulkUpdate(requests);
@@ -90,37 +101,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             }
         }
         
-        LOGGER.info("sync for service alliance request ok");
-		
-	}
+        LOGGER.info("sync for service alliance apartment request ok");
 
-	@Override
-	public String getIndexType() {
-		return SearchUtils.SAREQUEST;
-	}
-
-	@Override
-	public void bulkUpdate(List<ServiceAllianceRequests> requests) {
-		BulkRequestBuilder brb = getClient().prepareBulk();
-        for (ServiceAllianceRequests request : requests) {
-	            XContentBuilder source = createDoc(request);
-	            if(null != source) {
-	                LOGGER.info("service alliance request id:" + request.getId());
-	                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
-	                        .id(request.getId().toString()).source(source)); 
-	                }
-            
-        }
-        if (brb.numberOfActions() > 0) {
-            brb.execute().actionGet();
-        }
-		
-	}
-
-	@Override
-	public void feedDoc(ServiceAllianceRequests request) {
-		XContentBuilder source = createDoc(request);
-        feedDoc(request.getId().toString(), source);
 	}
 
 	@Override
@@ -172,7 +154,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         }
         
         if(LOGGER.isDebugEnabled())
-			LOGGER.info("ServiceAllianceRequestInfoSearcherImpl query builder ："+builder);
+			LOGGER.info("ApartmentRequestInfoSearcherImpl query builder ："+builder);
         
         SearchResponse rsp = builder.execute().actionGet();
         SearchRequestInfoResponse response = new SearchRequestInfoResponse();
@@ -188,7 +170,12 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		return response;
 	}
 
-	private XContentBuilder createDoc(ServiceAllianceRequests request){
+	@Override
+	public String getIndexType() {
+		return SearchUtils.APARTMENTREQUEST;
+	}
+	
+	private XContentBuilder createDoc(ServiceAllianceApartmentRequests request){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("type", request.getType());
@@ -223,7 +210,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.endObject();
             return b;
         } catch (IOException ex) {
-            LOGGER.error("Create ServiceAllianceRequests " + request.getId() + " error");
+            LOGGER.error("Create ServiceAllianceApartmentRequests " + request.getId() + " error");
             return null;
         }
     }
