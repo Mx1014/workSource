@@ -1835,7 +1835,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setWaterBurdenAmount(yoy.getWaterPayableAmount().subtract(yoy.getWaterReceivableAmount()));
-				yoy.setWaterAverageAmount(com.getAreaSize() == null ? null:yoy.getWaterBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setWaterAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 				
 
@@ -1847,7 +1847,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setElectricBurdenAmount(yoy.getElectricPayableAmount().subtract(yoy.getElectricReceivableAmount()));
-				yoy.setElectricAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setElectricAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 				
 
@@ -1860,7 +1860,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setWaterLastBurdenAmount(yoy.getWaterLastPayableAmount().subtract(yoy.getWaterLastReceivableAmount()));
-				yoy.setWaterLastAverageAmount(com.getAreaSize() == null ? null:yoy.getWaterLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setWaterLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 
 				
@@ -1872,7 +1872,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setElectricLastBurdenAmount(yoy.getElectricLastPayableAmount().subtract(yoy.getElectricLastReceivableAmount()));
-				yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 				
 
