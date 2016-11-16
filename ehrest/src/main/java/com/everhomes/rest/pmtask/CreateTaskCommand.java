@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>sourceType: 报事来源</li>
  * <li>requestorName: 联系人名称</li>
  * <li>requestorPhone: 联系方式</li>
+ * <li>addressType: 地址类型   1:小区家庭门牌地址 2: 园区公司地址 {@link com.everhomes.rest.pmtask.PmTaskAddressType }</li>
  * </ul>
  */
 public class CreateTaskCommand {
@@ -38,6 +39,8 @@ public class CreateTaskCommand {
 	private String requestorName;
 	private String requestorPhone;
 	
+	private Byte addressType; 
+	
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
 	
@@ -53,7 +56,6 @@ public class CreateTaskCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-	
 	public Long getCategoryId() {
 		return categoryId;
 	}
@@ -78,7 +80,6 @@ public class CreateTaskCommand {
 	public void setAttachments(List<AttachmentDescriptor> attachments) {
 		this.attachments = attachments;
 	}
-	
 	public Long getTaskCategoryId() {
 		return taskCategoryId;
 	}
@@ -91,7 +92,6 @@ public class CreateTaskCommand {
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
 	}
-	
 	public Long getReserveTime() {
 		return reserveTime;
 	}
@@ -122,12 +122,17 @@ public class CreateTaskCommand {
 	public void setRequestorPhone(String requestorPhone) {
 		this.requestorPhone = requestorPhone;
 	}
-
 	public Long getOrganizationId() {
 		return organizationId;
 	}
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+	public Byte getAddressType() {
+		return addressType;
+	}
+	public void setAddressType(Byte addressType) {
+		this.addressType = addressType;
 	}
 	
 	@Override

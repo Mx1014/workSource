@@ -174,6 +174,7 @@ public class PmTaskController extends ControllerBase {
       @RequestMapping("createTaskByUser")
       @RestReturn(value=PmTaskDTO.class)
       public RestResponse createTaskByUser(CreateTaskCommand cmd) {
+    	  //TODO: 添加服务地点类型
     	  PmTaskDTO dto = pmTaskService.createTask(cmd);
           RestResponse response = new RestResponse(dto);
           response.setErrorCode(ErrorCodes.SUCCESS);

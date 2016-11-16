@@ -35,6 +35,7 @@ import com.everhomes.util.StringHelper;
  * <li>addressId: 门牌id</li>
  * <li>revisitContent: 回访内容</li>
  * <li>revisitTime: 回访时间</li>
+ * <li>operatorStar: 操作人员评价分数</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -66,6 +67,8 @@ public class PmTaskDTO {
 	private Long addressId;
 	private String revisitContent;
 	private Timestamp revisitTime;
+	
+	private Byte operatorStar;
 	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
@@ -245,14 +248,21 @@ public class PmTaskDTO {
 	public void setRevisitContent(String revisitContent) {
 		this.revisitContent = revisitContent;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 	public Timestamp getRevisitTime() {
 		return revisitTime;
 	}
 	public void setRevisitTime(Timestamp revisitTime) {
 		this.revisitTime = revisitTime;
+	}
+	public Byte getOperatorStar() {
+		return operatorStar;
+	}
+	public void setOperatorStar(Byte operatorStar) {
+		this.operatorStar = operatorStar;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
 	}
 }

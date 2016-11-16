@@ -1,5 +1,7 @@
 package com.everhomes.rest.pmtask;
 
+import com.everhomes.util.StringHelper;
+
 /**
  * <ul>
  * <li>ownerType: 归属的类型</li>
@@ -19,4 +21,51 @@ public class UpdateTaskCommand {
 	private Byte priority;
 	private String sourceType;
 	private Long reserveTime;
+	public String getOwnerType() {
+		return ownerType;
+	}
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
+	public Long getOwnerId() {
+		return ownerId;
+	}
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+	public Long getTaskId() {
+		return taskId;
+	}
+	public void setTaskId(Long taskId) {
+		this.taskId = taskId;
+	}
+	public Long getCategoryId() {
+		return categoryId;
+	}
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+	public Byte getPriority() {
+		return priority;
+	}
+	public void setPriority(Byte priority) {
+		this.priority = priority;
+	}
+	public String getSourceType() {
+		return sourceType;
+	}
+	public void setSourceType(String sourceType) {
+		this.sourceType = sourceType;
+	}
+	public Long getReserveTime() {
+		return reserveTime;
+	}
+	public void setReserveTime(Long reserveTime) {
+		this.reserveTime = reserveTime;
+	}
+	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }
