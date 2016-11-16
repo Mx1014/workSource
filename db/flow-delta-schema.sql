@@ -1,5 +1,5 @@
 -- eh_flows
--- DROP TABLE IF EXISTS `eh_flows`;
+DROP TABLE IF EXISTS `eh_flows`;
 CREATE TABLE `eh_flows` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -37,7 +37,7 @@ CREATE TABLE `eh_flows` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_stats`;
+DROP TABLE IF EXISTS `eh_flow_stats`;
 CREATE TABLE `eh_flow_stats` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -53,7 +53,7 @@ CREATE TABLE `eh_flow_stats` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_nodes`;
+DROP TABLE IF EXISTS `eh_flow_nodes`;
 CREATE TABLE `eh_flow_nodes` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -70,8 +70,7 @@ CREATE TABLE `eh_flow_nodes` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_buttons`;
--- TODO form values
+DROP TABLE IF EXISTS `eh_flow_buttons`;
 CREATE TABLE `eh_flow_buttons` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -88,7 +87,36 @@ CREATE TABLE `eh_flow_buttons` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_actions`;
+DROP TABLE IF EXISTS `eh_flow_forms`;
+CREATE TABLE `eh_flow_forms` (
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
+
+    `form_name` VARCHAR(64),
+    `form_type` VARCHAR(64) COMMENT 'text, datetime, checkbox, radiobox',
+    `form_default` TEXT,
+    `form_render` TEXT,
+    `belong_to` BIGINT NOT NULL,
+    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
+
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    `integral_tag1` BIGINT DEFAULT 0,
+    `integral_tag2` BIGINT DEFAULT 0,
+    `integral_tag3` BIGINT DEFAULT 0,
+    `integral_tag4` BIGINT DEFAULT 0,
+    `integral_tag5` BIGINT DEFAULT 0,
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_flow_actions`;
 CREATE TABLE `eh_flow_actions` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -117,7 +145,7 @@ CREATE TABLE `eh_flow_actions` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_user_selections`;
+DROP TABLE IF EXISTS `eh_flow_user_selections`;
 CREATE TABLE `eh_flow_user_selections` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -137,7 +165,7 @@ CREATE TABLE `eh_flow_user_selections` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_cases`;
+DROP TABLE IF EXISTS `eh_flow_cases`;
 CREATE TABLE `eh_flow_cases` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -176,7 +204,7 @@ CREATE TABLE `eh_flow_cases` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_event_logs`;
+DROP TABLE IF EXISTS `eh_flow_event_logs`;
 CREATE TABLE `eh_flow_event_logs` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -209,7 +237,7 @@ CREATE TABLE `eh_flow_event_logs` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_variables`;
+DROP TABLE IF EXISTS `eh_flow_variables`;
 CREATE TABLE `eh_flow_variables` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -223,7 +251,7 @@ CREATE TABLE `eh_flow_variables` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_flow_evaluates`;
+DROP TABLE IF EXISTS `eh_flow_evaluates`;
 CREATE TABLE `eh_flow_evaluates` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
