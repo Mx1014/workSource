@@ -226,6 +226,8 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
             dto.setMeterName((String) source.get("meterName"));
             Object resetFlag = source.get("resetFlag");
             dto.setResetMeterFlag(resetFlag != null ? Byte.valueOf(resetFlag.toString()) : null);
+            Object changeFlag = source.get("changeFlag");
+            dto.setChangeMeterFlag(changeFlag != null ? Byte.valueOf(changeFlag.toString()) : null);
             Object operateTime = source.get("operateTime");
             dto.setOperateTime(operateTime != null ? new Timestamp(Long.valueOf(operateTime.toString())) : null);
             dto.setOperatorName((String)source.get("operatorName"));
