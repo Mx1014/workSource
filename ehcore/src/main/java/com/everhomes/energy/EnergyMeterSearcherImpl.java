@@ -15,10 +15,7 @@ import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
-import org.elasticsearch.index.query.FilterBuilder;
-import org.elasticsearch.index.query.FilterBuilders;
-import org.elasticsearch.index.query.QueryBuilder;
-import org.elasticsearch.index.query.QueryBuilders;
+import org.elasticsearch.index.query.*;
 import org.elasticsearch.search.sort.FieldSortBuilder;
 import org.elasticsearch.search.sort.SortBuilders;
 import org.elasticsearch.search.sort.SortOrder;
@@ -124,8 +121,10 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
                     .field("meterNumber", 5.0f)
                     .field("name", 2.0f);
         }
-
-        FilterBuilder fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+        FilterBuilder fb = new AndFilterBuilder();
+        if (cmd.getCommunityId() != null) {
+            fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+        }
         if (cmd.getMeterType() != null) {
             fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("meterType", cmd.getMeterType()));
         }
