@@ -9,7 +9,7 @@ CREATE TABLE `eh_flows` (
   `module_id` INTEGER NOT NULL COMMENT 'the module id',
   `module_type` VARCHAR(64) NOT NULL,
 
-  `flow_main_id` NOT NULL DEFAULT 0 COMMENT 'the real flow id for all copy, the first flow_main_id=0',
+  `flow_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the real flow id for all copy, the first flow_main_id=0',
   `flow_version` INTEGER NOT NULL COMMENT 'current flow version',
   `flow_name` VARCHAR(64) NOT NULL COMMENT 'the name of flow',
 
