@@ -311,6 +311,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private UserProvider userProvider;
 	@Autowired
 	private AppProvider appProvider;
+	private Integer namespaceId;
+	private Integer namespaceId2;
+	private String phoneNumber;
 	
 	 
 
@@ -4755,7 +4758,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	/**
 	 * 发短信给付费成功的用户
 	 * */
-	private void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,RentalOrder order){
+	@Override
+	public void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,RentalOrder order){  
 		String templateScope = SmsTemplateCode.SCOPE;
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("resourceName", order.getResourceName());
 		smsProvider.addToTupleList(variables, "useDetail", order.getUseDetail()); 
@@ -4764,7 +4768,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(rs == null){
 			LOGGER.error("send message to user failed rental resource can not found [resource id = "+order.getRentalResourceId()+"]");
 			return ;
-		} 
+		} 	
 		int templateId = SmsTemplateCode.RENTAL_SUCCESS_EXCLUSIVE_CODE;
 		//如果不是独占资源
 		if(rs.getExclusiveFlag().equals(NormalFlag.NONEED.getCode())){
@@ -4779,7 +4783,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 			
-		String templateLocale = UserContext.current().getUser().getLocale();
+		String templateLocale = PunchNotificationTemplateCode.locale;
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
  
 	}

@@ -265,6 +265,7 @@ delete from eh_acl_privileges where id >= 790 and id <= 794;
 delete from eh_acl_privileges where id >= 822 and id <= 823;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (790, '0', '加班申请', '加班申请 全部权限', NULL);
 
+delete from eh_web_menu_privileges where menu_id in (select id from eh_web_menus where path like '%56100%');
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '795', '56110', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '795', '56111', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
@@ -286,4 +287,336 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1002', '0', '1', UTC_TIMESTAMP());
 
+delete from eh_web_menu_scopes where menu_id in (select id from eh_web_menus where path like '%56100%');	
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+-- 科技园
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 1000000,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 1000000,2);
+-- 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999988,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999988,2);
 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999989,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999989,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999990,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999990,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999991,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999991,2);
+	
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999992,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999992,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999993,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999993,2);
+	
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999999,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999999,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999986,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999986,2);
+	
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999987,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999987,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999985,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999985,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhNamespaces', 999984,2);
+	
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhOrganizations', 1002756,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhOrganizations', 1002756,2);
+
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56100,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56110,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56111,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56112,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56113,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56120,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56130,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56131,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56132,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56133,'', 'EhOrganizations', 1004005,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES((@menu_scope_id := @menu_scope_id + 1),56140,'', 'EhOrganizations', 1004005,2);
+	
+	
+	
+	
+	
+	
+	
+	
+	
