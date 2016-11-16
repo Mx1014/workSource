@@ -1313,7 +1313,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    		//应收减应付
 	    		burdenDay.setStatDate(receivableDay.getStatDate());
 	    		burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
-	    		burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
+	    		burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost())); 
 	    		result.getDayBurdenStats().add(burdenDay);
 	    		result.getLastYearPayableStats().add(lastYearDTO);
 	    		lastYearDTO.setStatDate(receivableDay.getStatDate());

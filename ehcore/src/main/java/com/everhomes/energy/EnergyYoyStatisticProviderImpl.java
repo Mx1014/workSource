@@ -130,4 +130,12 @@ public class EnergyYoyStatisticProviderImpl implements EnergyYoyStatisticProvide
 			return result.get(0);
 		return null;
 	}
+
+	@Override
+	public void deleteEnergyYoyStatistic(Long communityId, String dateStr) {
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+        context.delete(Tables.EH_ENERGY_YOY_STATISTICS)
+		.where(Tables.EH_ENERGY_YOY_STATISTICS.COMMUNITY_ID.eq(communityId))
+		.and(Tables.EH_ENERGY_YOY_STATISTICS.DATE_STR.eq(dateStr)).execute();
+	}
 }
