@@ -28,8 +28,6 @@ public class CreateTaskCommand {
 	private Long categoryId;
 	private String address;
 	private String content;
-//	private String nickName;
-//	private String mobile;
 	private Long organizationId;
 	
 	private Long taskCategoryId;
@@ -42,6 +40,7 @@ public class CreateTaskCommand {
 	
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
+	
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -123,10 +122,6 @@ public class CreateTaskCommand {
 	public void setRequestorPhone(String requestorPhone) {
 		this.requestorPhone = requestorPhone;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -135,4 +130,8 @@ public class CreateTaskCommand {
 		this.organizationId = organizationId;
 	}
 	
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }
