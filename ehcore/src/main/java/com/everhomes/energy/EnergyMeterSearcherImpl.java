@@ -25,6 +25,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -121,7 +122,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
                     .field("meterNumber", 5.0f)
                     .field("name", 2.0f);
         }
-        FilterBuilder fb = new AndFilterBuilder();
+        /*FilterBuilder fb = new AndFilterBuilder();
         if (cmd.getCommunityId() != null) {
             fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
         }
@@ -141,7 +142,36 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
         Long anchor = 0L;
         if(cmd.getPageAnchor() != null) {
             anchor = cmd.getPageAnchor();
+        }*/
+
+        List<FilterBuilder> filterBuilders = new ArrayList<>();
+        if (cmd.getCommunityId() != null) {
+            TermFilterBuilder communityIdTermFilter = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+            filterBuilders.add(communityIdTermFilter);
         }
+        if (cmd.getMeterType() != null) {
+            TermFilterBuilder meterTypeTermFilter = FilterBuilders.termFilter("meterType", cmd.getMeterType());
+            filterBuilders.add(meterTypeTermFilter);
+        }
+        if (cmd.getBillCategoryId() != null) {
+            TermFilterBuilder billCategoryIdFilter = FilterBuilders.termFilter("billCategoryId", cmd.getBillCategoryId());
+            filterBuilders.add(billCategoryIdFilter);
+        }
+        if (cmd.getServiceCategoryId() != null) {
+            TermFilterBuilder serviceCategoryIdFilter = FilterBuilders.termFilter("serviceCategoryId", cmd.getServiceCategoryId());
+            filterBuilders.add(serviceCategoryIdFilter);
+        }
+        if (cmd.getStatus() != null) {
+            TermFilterBuilder statusFilter = FilterBuilders.termFilter("status", cmd.getStatus());
+            filterBuilders.add(statusFilter);
+        }
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0L;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        AndFilterBuilder fb = FilterBuilders.andFilter(filterBuilders.toArray(new FilterBuilder[filterBuilders.size()]));
 
         // FieldSortBuilder statusSort = SortBuilders.fieldSort("status").order(SortOrder.ASC);
         FieldSortBuilder createTimeSort = SortBuilders.fieldSort("createTime").order(SortOrder.DESC);

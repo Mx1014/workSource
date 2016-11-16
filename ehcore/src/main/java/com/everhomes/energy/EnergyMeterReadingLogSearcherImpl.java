@@ -11,6 +11,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -55,8 +56,8 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
     @Autowired
     private UserProvider userProvider;
 
-    @Autowired
-    private EnergyMeterChangeLogProvider changeLogProvider;
+    // @Autowired
+    // private EnergyMeterChangeLogProvider changeLogProvider;
 
     @Override
     public void deleteById(Long id) {
@@ -140,32 +141,44 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
         } else {
             qb = QueryBuilders.multiMatchQuery(cmd.getKeyword())
                     .field("meterNumber", 5.0f)
-                    .field("operatorName", 5.0f)
                     .field("meterName", 2.0f);
         }
 
-        FilterBuilder fb = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+        if (StringUtils.isNotEmpty(cmd.getOperatorName())) {
+            MultiMatchQueryBuilder operatorNameQuery = QueryBuilders.multiMatchQuery(cmd.getOperatorName(), "operatorName");
+            qb = QueryBuilders.boolQuery().must(qb).must(operatorNameQuery);
+        }
+
+        List<FilterBuilder> filterBuilders = new ArrayList<>();
+        if (cmd.getCommunityId() != null) {
+            FilterBuilder communityIdTerm = FilterBuilders.termFilter("communityId", cmd.getCommunityId());
+            filterBuilders.add(communityIdTerm);
+        }
         if (cmd.getMeterType() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("meterType", cmd.getMeterType()));
+            TermFilterBuilder meterTypeTerm = FilterBuilders.termFilter("meterType", cmd.getMeterType());
+            filterBuilders.add(meterTypeTerm);
         }
         if (cmd.getBillCategoryId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("billCategoryId", cmd.getBillCategoryId()));
+            TermFilterBuilder billCategoryIdTerm = FilterBuilders.termFilter("billCategoryId", cmd.getBillCategoryId());
+            filterBuilders.add(billCategoryIdTerm);
         }
         if (cmd.getServiceCategoryId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("serviceCategoryId", cmd.getServiceCategoryId()));
+            TermFilterBuilder serviceCategoryIdTerm = FilterBuilders.termFilter("serviceCategoryId", cmd.getServiceCategoryId());
+            filterBuilders.add(serviceCategoryIdTerm);
         }
         if (cmd.getMeterId() != null) {
-            fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("meterId", cmd.getMeterId()));
+            TermFilterBuilder meterIdTerm = FilterBuilders.termFilter("meterId", cmd.getMeterId());
+            filterBuilders.add(meterIdTerm);
         }
-        RangeFilterBuilder rangeTime = new RangeFilterBuilder("operateTime");
+        RangeFilterBuilder rangeTimeTerm = new RangeFilterBuilder("operateTime");
         if (cmd.getStartTime() != null) {
-            rangeTime.gte(cmd.getStartTime());
+            rangeTimeTerm.gte(cmd.getStartTime());
         }
         if (cmd.getEndTime() != null) {
-            rangeTime.lte(cmd.getEndTime());
+            rangeTimeTerm.lte(cmd.getEndTime());
         }
         if (cmd.getEndTime() != null || cmd.getEndTime() != null) {
-            fb = FilterBuilders.andFilter(fb, rangeTime);
+            filterBuilders.add(rangeTimeTerm);
         }
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -176,14 +189,16 @@ public class EnergyMeterReadingLogSearcherImpl extends AbstractElasticSearch imp
 
         FieldSortBuilder sort = SortBuilders.fieldSort("operateTime").order(SortOrder.DESC);
 
-        FilteredQueryBuilder filteredQuery = QueryBuilders.filteredQuery(qb, fb);
-        WrapperQueryBuilder query = new WrapperQueryBuilder(filteredQuery.toString());
+        AndFilterBuilder fb = FilterBuilders.andFilter(filterBuilders.toArray(new FilterBuilder[filterBuilders.size()]));
 
+        qb = QueryBuilders.filteredQuery(qb, fb);
         builder.setSearchType(SearchType.QUERY_THEN_FETCH)
                 .setFrom(anchor.intValue())
                 .setSize(pageSize + 1)
                 .addSort(sort)
-                .setQuery(query);
+                .setQuery(qb);
+
+        LOGGER.debug("energy meter reading log query = {}", builder.toString());
 
         SearchResponse rsp = builder.execute().actionGet();
         List<EnergyMeterReadingLogDTO> logs = toMeterReadingLogDTOList(rsp);
