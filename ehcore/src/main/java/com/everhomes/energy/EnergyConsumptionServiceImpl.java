@@ -937,7 +937,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTime(date);
 		calendar.add(Calendar.YEAR, -1);
-		calendar.set(Calendar.MONTH, 11);
+		calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
 		calendar.set(Calendar.DAY_OF_MONTH, 0);
 		calendar.set(Calendar.HOUR_OF_DAY, 0);
 		calendar.set(Calendar.SECOND, 0);
@@ -962,7 +962,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 		}
 		else {
 			calendar.setTime(date); 
-			calendar.set(Calendar.MONTH, 11);
+			calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
 		}
 
 		calendar.set(Calendar.DAY_OF_MONTH, 0);
