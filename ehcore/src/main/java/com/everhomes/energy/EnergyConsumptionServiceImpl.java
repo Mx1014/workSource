@@ -522,17 +522,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         EnergyMeter meter = this.findMeterById(cmd.getMeterId());
 
-        /*// 第一次读表的时候判断读数与起始读数的大小
-        if (meter.getLastReading() == null) {
-            if (cmd.getCurrReading().doubleValue() < meter.getStartReading().doubleValue()) {
-                LOGGER.error("Current reading less then meter start reading, meterId = ", meter.getId());
-                throw errorWith(SCOPE, ERR_CURR_READING_LESS_THEN_START_READING, "Current reading less then meter start reading, meterId = %s", meter.getId());
-            }
-        }*/
+        // 读数大于最大量程
+        if (cmd.getCurrReading().doubleValue() > meter.getMaxReading().doubleValue()) {
+            LOGGER.error("Current reading greater then meter max reading, meterId = ", meter.getId());
+            throw errorWith(SCOPE, ERR_CURR_READING_GREATER_THEN_MAX_READING, "Current reading greater then meter max reading, meterId = %s", meter.getId());
+        }
         EnergyMeterReadingLog log = new EnergyMeterReadingLog();
         log.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         log.setReading(cmd.getCurrReading());
-        log.setCommunityId(cmd.getCommunityId());
+        log.setCommunityId(meter.getCommunityId());
         log.setMeterId(meter.getId());
         log.setNamespaceId(currNamespaceId());
         log.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -938,11 +936,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 		calendar.setTime(date);
 		calendar.add(Calendar.YEAR, -1);
 		calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
-		calendar.set(Calendar.DAY_OF_MONTH, 0);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+		calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+		calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+		calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
 		return calendar ;
 	}
 
@@ -965,11 +963,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 			calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
 		}
 
-		calendar.set(Calendar.DAY_OF_MONTH, 0);
-		calendar.set(Calendar.HOUR_OF_DAY, 0);
-		calendar.set(Calendar.SECOND, 0);
-		calendar.set(Calendar.MILLISECOND, 0);
-		calendar.set(Calendar.MINUTE, 0);
+		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+		calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+		calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+		calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
 		return calendar ;
 	}
 	public List<DayStatDTO> deepCopyStatDays(List<DayStatDTO> days){
@@ -1313,7 +1311,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	    		//应收减应付
 	    		burdenDay.setStatDate(receivableDay.getStatDate());
 	    		burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
-	    		burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
+	    		burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost())); 
 	    		result.getDayBurdenStats().add(burdenDay);
 	    		result.getLastYearPayableStats().add(lastYearDTO);
 	    		lastYearDTO.setStatDate(receivableDay.getStatDate());
@@ -1837,7 +1835,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setWaterBurdenAmount(yoy.getWaterPayableAmount().subtract(yoy.getWaterReceivableAmount()));
-				yoy.setWaterAverageAmount(com.getAreaSize() == null ? null:yoy.getWaterBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setWaterAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 				
 
@@ -1849,7 +1847,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setElectricBurdenAmount(yoy.getElectricPayableAmount().subtract(yoy.getElectricReceivableAmount()));
-				yoy.setElectricAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setElectricAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 				
 
@@ -1862,7 +1860,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setWaterLastBurdenAmount(yoy.getWaterLastPayableAmount().subtract(yoy.getWaterLastReceivableAmount()));
-				yoy.setWaterLastAverageAmount(com.getAreaSize() == null ? null:yoy.getWaterLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setWaterLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 
 				
@@ -1874,7 +1872,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 				
 				yoy.setElectricLastBurdenAmount(yoy.getElectricLastPayableAmount().subtract(yoy.getElectricLastReceivableAmount()));
-				yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? null:yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+				yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
 				, 3, RoundingMode.HALF_UP));
 				
 
@@ -1882,7 +1880,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 //				yoy.setCreatorUid(UserContext.current().getUser().getId());
 				yoy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 						.getTime()));
-				
+				energyYoyStatisticProvider.deleteEnergyYoyStatistic(yoy.getCommunityId(), yoy.getDateStr());
 				energyYoyStatisticProvider.createEnergyYoyStatistic(yoy);
 			}
 			

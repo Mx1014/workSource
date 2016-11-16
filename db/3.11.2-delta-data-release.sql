@@ -131,6 +131,8 @@ VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10005',
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10006', 'zh_CN', '只允许删除今天的读表记录');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10007', 'zh_CN', '读数超过最大量程');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10008', 'zh_CN', '删除失败,该公式已被引用');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ((@eh_locale_strings_id := @eh_locale_strings_id + 1), 'energy', '10009', 'zh_CN', '起始读数大于最大量程');

@@ -41,7 +41,7 @@ CREATE TABLE `eh_energy_meters` (
   `update_uid`          BIGINT,
   `update_time`         DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 抄表记录
@@ -63,7 +63,7 @@ CREATE TABLE `eh_energy_meter_reading_logs` (
   `update_uid`        BIGINT,
   `update_time`       DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 换表记录
@@ -85,7 +85,7 @@ CREATE TABLE `eh_energy_meter_change_logs` (
   `update_uid`     BIGINT,
   `update_time`    DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 表记分类属性
@@ -103,7 +103,7 @@ CREATE TABLE `eh_energy_meter_categories` (
   `update_uid`    BIGINT,
   `update_time`   DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 表记属性
@@ -124,7 +124,7 @@ CREATE TABLE `eh_energy_meter_setting_logs` (
   `update_uid`    BIGINT,
   `update_time`   DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 默认显示的属性值
@@ -144,7 +144,7 @@ CREATE TABLE `eh_energy_meter_default_settings` (
   `update_uid`    BIGINT,
   `update_time`   DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 表记计算公式
@@ -163,7 +163,7 @@ CREATE TABLE `eh_energy_meter_formulas` (
   `update_uid`   BIGINT,
   `update_time`  DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 公式变量
@@ -181,7 +181,7 @@ CREATE TABLE `eh_energy_meter_formula_variables` (
   `update_uid`   BIGINT,
   `update_time`  DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 每日水电报表
@@ -215,7 +215,7 @@ CREATE TABLE `eh_energy_date_statistics` (
   `update_uid`          BIGINT,
   `update_time`         DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 --  每月水电报表
@@ -249,7 +249,7 @@ CREATE TABLE `eh_energy_month_statistics` (
   `update_uid`          BIGINT,
   `update_time`         DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 --
 -- 总量记录表
 --
@@ -273,7 +273,7 @@ CREATE TABLE `eh_energy_count_statistics` (
   `update_uid`            BIGINT,
   `update_time`           DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 --
 -- 各项目月水电能耗情况-同比
@@ -307,7 +307,7 @@ CREATE TABLE `eh_energy_yoy_statistics` (
   `update_uid`        BIGINT,
   `update_time`       DATETIME,
   PRIMARY KEY (`id`)
-);
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 圈添加审核状态，add by tt, 20161028
 ALTER TABLE `eh_groups` ADD COLUMN `approval_status` TINYINT COMMENT 'approval status';

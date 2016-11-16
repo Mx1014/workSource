@@ -4783,7 +4783,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 			
-		String templateLocale = UserContext.current().getUser().getLocale();
+		String templateLocale = PunchNotificationTemplateCode.locale;
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
  
 	}

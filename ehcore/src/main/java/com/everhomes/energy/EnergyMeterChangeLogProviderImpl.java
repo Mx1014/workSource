@@ -103,7 +103,10 @@ public class EnergyMeterChangeLogProviderImpl implements EnergyMeterChangeLogPro
 
     @Override
     public EnergyMeterChangeLog getEnergyMeterChangeLogByLogId(Long id) {
-        return null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.selectFrom(Tables.EH_ENERGY_METER_CHANGE_LOGS)
+                .where(Tables.EH_ENERGY_METER_CHANGE_LOGS.READING_LOG_ID.eq(id))
+                .fetchOneInto(EnergyMeterChangeLog.class);
     }
 
     @Override

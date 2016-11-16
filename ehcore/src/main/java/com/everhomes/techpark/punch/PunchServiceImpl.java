@@ -230,6 +230,8 @@ public class PunchServiceImpl implements PunchService {
 		if(null == status){
 			return "";
 		}
+		if(status.equals(ApprovalStatus.FORGOT.getCode()))
+			return "忘打卡";
 		if(status.equals(ApprovalStatus.HALFABSENCE.getCode()))
 			return "半天事假";
 		if(status.equals(ApprovalStatus.HALFEXCHANGE.getCode()))
