@@ -264,19 +264,19 @@ delete from eh_acl_privileges where id >= 822 and id <= 823;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (790, '0', '加班申请', '加班申请 全部权限', NULL);
 
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '795', '56110', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '795', '56111', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '796', '56112', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '821', '56113', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '795', '56110', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '795', '56111', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '796', '56112', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '821', '56113', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
 
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '797', '56120', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '797', '56120', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
 
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '798', '56130', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '798', '56131', '异常申请', '1', '1', '异常申请 全部权限', '510');
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '799', '56132', '请假申请', '1', '1', '请假申请 全部权限', '520');
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '790', '56133', '加班申请', '1', '1', '加班申请 全部权限', '521');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '798', '56130', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '798', '56131', '异常申请', '1', '1', '异常申请 全部权限', '510');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '799', '56132', '请假申请', '1', '1', '请假申请 全部权限', '520');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '790', '56133', '加班申请', '1', '1', '加班申请 全部权限', '521');
 
-INSERT INTO `eh_web_menu_privileges` VALUES ((@acl_id := @acl_id + 1), '820', '56140', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '820', '56140', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
