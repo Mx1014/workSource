@@ -189,7 +189,7 @@ CREATE TABLE `eh_flow_cases` (
     `reject_node_id` BIGINT NOT NULL DEFAULT 0,
     `last_step_time` DATETIME NOT NULL COMMENT 'state change time',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
-    `case_type` VARCHAR(64),
+    `case_type` VARCHAR(64) COMMENT 'inner, outer etc',
     `content` TEXT,
 
     `string_tag1` VARCHAR(128),
