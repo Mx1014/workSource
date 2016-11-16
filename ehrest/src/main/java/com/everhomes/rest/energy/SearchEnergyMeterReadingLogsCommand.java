@@ -23,7 +23,7 @@ import javax.validation.constraints.NotNull;
 public class SearchEnergyMeterReadingLogsCommand {
 
     @NotNull private Long organizationId;
-    @NotNull private Long communityId;
+    private Long communityId;
     private String keyword;
     private String operatorName;
     private Long meterId;
