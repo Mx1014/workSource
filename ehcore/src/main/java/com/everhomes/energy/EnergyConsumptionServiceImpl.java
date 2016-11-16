@@ -1145,15 +1145,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 	* @return   
 	*/
     private DayStatDTO findDayStat(List<DayStatDTO> list , Long statDate){
-    	if(null != list && list.size()>0)
-    		for(DayStatDTO dto : list )
-    			if(dto.getStatDate().equals(statDate))
-    				return dto;
-    	DayStatDTO dto =new DayStatDTO();
-    	dto.setStatDate(statDate);
-    	list.add(dto);
-    	return dto;
+    	DayStatDTO dayStatDTO = new DayStatDTO();
+        dayStatDTO.setStatDate(statDate);
+        if(null != list && list.size()>0) {
+            for (DayStatDTO dto : list) {
+                if (dto.getStatDate().equals(statDate)) {
+                    return dto;
+                }
+            }
+            list.add(dayStatDTO);
+        }
+    	return dayStatDTO;
     }
+
 	/**
 	* 通过id查DTO是否有该项目
 	* @param  

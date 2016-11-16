@@ -112,7 +112,7 @@ INSERT INTO `eh_energy_meter_default_settings` (`id`, `namespace_id`, `meter_typ
 --
 SET @launch_pad_item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`)
-VALUES(@launch_pad_item_id := @launch_pad_item_id + 1, 999992, 0, 0, 0, '/home', 'Bizs', 'Energy', '能耗管理', 'cs://1/image/aW1hZ2UvTVRwaVl6ZGtPVFE0TURZd1pUZzRZekppTTJNMVl6QmlPVFprTWpWbFpHRXlNUQ', 1, 1, 13, '{"url":"http://core.zuolin.com/energy-management/index.html?hideNavigationBar=1#/energy_management#sign_suffix"}', 0, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'pm_admin');
+VALUES(@launch_pad_item_id := @launch_pad_item_id + 1, 999992, 0, 0, 0, '/home', 'Bizs', 'Energy', '能耗管理', 'cs://1/image/aW1hZ2UvTVRvM1pHVTNPVE16Wm1NMVlURTFabUpsTXpoaE9ERmpOamhqTmpneVpHVXlZZw', 1, 1, 13, '{"url":"http://core.zuolin.com/energy-management/index.html?hideNavigationBar=1#/energy_management#sign_suffix"}', 0, 0, 1, 1, NULL, 0, NULL, NULL, NULL, 0, 'pm_admin');
 
 --
 -- 字符串
@@ -244,3 +244,44 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (402, 'club.placeholder.name', '俱乐部', 'club placeholder name', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (403, 'club.share.url', '/mobile/static/group_share/index.html', 'club share url', 0, NULL);
+
+-- 打卡考勤菜单 update by sunwen 20161116
+delete from eh_web_menus where path like '%56100%';
+INSERT INTO `eh_web_menus` VALUES ('56100', '考勤管理', '56000', null, null, '1', '2', '/50000/56000/56100', 'park', '543');
+INSERT INTO `eh_web_menus` VALUES ('56110', '考勤规则', '56100', null, null, '1', '2', '/50000/56000/56100/56110', 'park', '554');
+INSERT INTO `eh_web_menus` VALUES ('56111', '通用规则设置', '56110', null, 'punch--generalSetting', '0', '2', '/50000/56000/56100/56110/56111', 'park', '555');
+INSERT INTO `eh_web_menus` VALUES ('56112', '特殊个人设置', '56110', null, 'punch--personalSetting', '0', '2', '/50000/56000/56100/56110/56112', 'park', '556');
+INSERT INTO `eh_web_menus` VALUES ('56113', '请假类型设置', '56110', null, 'leave_setting', '0', '2', '/50000/56000/56100/56110/56113', 'park', '556');
+INSERT INTO `eh_web_menus` VALUES ('56120', '打卡详情', '56100', null, 'punch_detail', '1', '2', '/50000/56000/56100/56120', 'park', '557');
+INSERT INTO `eh_web_menus` VALUES ('56130', '申请处理', '56100', null, null, '1', '2', '/50000/56000/56100/56130', 'park', '559');
+INSERT INTO `eh_web_menus` VALUES ('56131', '异常申请', '56130', null, 'abnormal_apply', '0', '2', '/50000/56000/56100/56130/56131', 'park', '560');
+INSERT INTO `eh_web_menus` VALUES ('56132', '请假申请', '56130', null, 'leave_apply', '0', '2', '/50000/56000/56100/56130/56132', 'park', '561');
+INSERT INTO `eh_web_menus` VALUES ('56133', '加班申请', '56130', null, 'punch--overTimeApply', '0', '2', '/50000/56000/56100/56130/56133', 'park', '561');
+INSERT INTO `eh_web_menus` VALUES ('56140', '考勤统计', '56100', null, 'punch_statistics', '1', '2', '/50000/56000/56100/56140', 'park', '562');
+
+delete from eh_acl_privileges where id >= 790 and id <= 794;
+delete from eh_acl_privileges where id >= 822 and id <= 823;
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (790, '0', '加班申请', '加班申请 全部权限', NULL);
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '795', '56110', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '795', '56111', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '796', '56112', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '821', '56113', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '797', '56120', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
+
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '798', '56130', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '798', '56131', '异常申请', '1', '1', '异常申请 全部权限', '510');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '799', '56132', '请假申请', '1', '1', '请假申请 全部权限', '520');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '790', '56133', '加班申请', '1', '1', '加班申请 全部权限', '521');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '820', '56140', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1001', '0', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '790', '1002', '0', '1', UTC_TIMESTAMP());
+
+

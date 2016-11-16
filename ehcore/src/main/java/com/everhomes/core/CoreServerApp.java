@@ -7,7 +7,7 @@ import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.EnableAutoConfiguration;
 import org.springframework.boot.autoconfigure.freemarker.FreeMarkerAutoConfiguration;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
-import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
+//import org.springframework.boot.autoconfigure.jdbc.XADataSourceAutoConfiguration;
 import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration;
 import org.springframework.context.annotation.ComponentScan;
 
@@ -24,7 +24,7 @@ import com.everhomes.atomikos.AtomikosHelper;
  */
 @ComponentScan(value={"com.everhomes"})
 @EnableAutoConfiguration(exclude={
-    XADataSourceAutoConfiguration.class,
+//    XADataSourceAutoConfiguration.class,
     DataSourceAutoConfiguration.class, 
     HibernateJpaAutoConfiguration.class,
     FreeMarkerAutoConfiguration.class

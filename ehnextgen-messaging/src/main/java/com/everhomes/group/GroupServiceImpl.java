@@ -25,6 +25,7 @@ import com.everhomes.acl.AclAccessor;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -67,6 +68,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.ForumConstants;
@@ -200,6 +203,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhForumPosts;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
@@ -224,6 +228,9 @@ public class GroupServiceImpl implements GroupService {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
+    
+    @Autowired
+    private AppUrlService appUrlService;
     
     @Autowired
     private GroupProvider groupProvider;
@@ -1456,7 +1463,10 @@ public class GroupServiceImpl implements GroupService {
                 deleteActiveGroupMember(userId, member, "leave group");
             }
             
-            sendGroupNotificationForMemberLeaveGroup(group, member);
+            // 俱乐部退出不发消息，add by tt, 20161115
+            if (GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+            	sendGroupNotificationForMemberLeaveGroup(group, member);
+			}
             break;
         default:
             LOGGER.error("Target user is not an active group member, operatorUid=" + userId + ", groupId=" + groupId 
@@ -4846,10 +4856,16 @@ public class GroupServiceImpl implements GroupService {
 	                ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters, cmd"+cmd);
 		}
 		GetShareInfoResponse response = new GetShareInfoResponse();
-		VersionInfoDTO versionInfoDTO = versionService.getVersionInfo(cmd.getRealm());
-		response.setAppName(versionInfoDTO.getAppName());
-		response.setAppIconUrl(versionInfoDTO.getIconUrl());
-		response.setDownloadUrl(versionInfoDTO.getDownloadUrl());
+//		VersionInfoDTO versionInfoDTO = versionService.getVersionInfo(cmd.getRealm());
+//		response.setAppName(versionInfoDTO.getAppName());
+//		response.setAppIconUrl(versionInfoDTO.getIconUrl());
+//		response.setDownloadUrl(versionInfoDTO.getDownloadUrl());
+		// 熊颖之前有个接口可以获取app名称和图标, update by tt, 20161115
+		AppUrlDTO appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(cmd.getNamespaceId(),OSType.Android.getCode()));
+		response.setAppName(appUrlDTO.getName());
+		response.setAppIconUrl(appUrlDTO.getLogoUrl());
+		response.setDownloadUrl(appUrlDTO.getDownloadUrl());
+		response.setAppDescription(appUrlDTO.getDescription());
 		
 		Group group = groupProvider.findGroupById(cmd.getGroupId());
 		response.setGroupName(group.getName());
