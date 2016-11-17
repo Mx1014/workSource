@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.greghaines.jesque.Job;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -4784,6 +4785,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 			
 		String templateLocale = PunchNotificationTemplateCode.locale;
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
  
 	}
