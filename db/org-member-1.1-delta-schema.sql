@@ -18,3 +18,5 @@ CREATE TABLE `eh_organization_user_logs` (
 
 -- 增加字段  
 ALTER TABLE `eh_organization_members` ADD COLUMN `executive_flag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管';
+ALTER TABLE `eh_organization_members` ADD COLUMN `position` VARCHAR(128) DEFAULT NULL COMMENT '职位';
+ALTER TABLE `eh_organization_members` ADD COLUMN `id_number` VARCHAR(20) DEFAULT NULL COMMENT 'ID CARD NUMBER';

@@ -867,6 +867,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 				departmentMember.setContactType(IdentifierType.MOBILE.getCode());
 				departmentMember.setTargetId(identifier.getOwnerUid());
 				organizationProvider.createOrganizationMember(departmentMember);
+
+		    	//记录添加log 
+		    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+		    	orgLog.setUserId(departmentMember.getTargetId());
+		    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		    	orgLog.setOperationType(OperationType.JOIN.getCode());
+		    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+		    	this.organizationProvider.createOrganizationUserLog(orgLog);
 			}
 		}
 		else{//添加未注册用户为管理员。
@@ -876,7 +884,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 			departmentMember.setTargetId(0l);
 			departmentMember.setGroupPath(org.getPath());
 			organizationProvider.createOrganizationMember(departmentMember);
+
+	    	//记录添加log 
+	    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+	    	orgLog.setUserId(departmentMember.getTargetId());
+	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    	orgLog.setOperationType(OperationType.JOIN.getCode());
+	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+	    	this.organizationProvider.createOrganizationUserLog(orgLog);
 		}
+		
 	}
 	
 	
@@ -2093,6 +2110,16 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 				}
 			}
+
+
+	    	//记录新增 log 
+	    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+	    	orgLog.setUserId(communityPmMember.getTargetId());
+	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    	orgLog.setOperationType(OperationType.JOIN.getCode());
+	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+	    	this.organizationProvider.createOrganizationUserLog(orgLog);
+	    	
 			return status;
 		});
 	}
@@ -4243,6 +4270,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         } else {
             LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
         }
+
+    	//记录添加log 
+    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	orgLog.setUserId(member.getTargetId());
+    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	orgLog.setOperationType(OperationType.JOIN.getCode());
+    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+    	this.organizationProvider.createOrganizationUserLog(orgLog);
 	}
 
 	/**
@@ -4323,6 +4358,14 @@ public class OrganizationServiceImpl implements OrganizationService {
         member.setStatus(OrganizationMemberStatus.INACTIVE.getCode());
         updateEnterpriseContactStatus(userId, member);
 
+
+    	//记录退出log 
+    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	orgLog.setUserId(member.getTargetId());
+    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	orgLog.setOperationType(OperationType.QUIT.getCode());
+    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+    	this.organizationProvider.createOrganizationUserLog(orgLog);
 		//退出机构，要把在机构相关的角色权限删除掉 by sfyan 20161018
 		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
 			List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), EntityType.USER.getCode(), member.getTargetId());
@@ -4595,7 +4638,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 			
 			return null;
 		});
-		
+
+    	//记录新增 log 
+    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	orgLog.setUserId(organizationMember.getTargetId());
+    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	orgLog.setOperationType(OperationType.JOIN.getCode());
+    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+    	this.organizationProvider.createOrganizationUserLog(orgLog);
+    	
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			userSearcher.feedDoc(organizationMember);
 		}
@@ -7091,10 +7142,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    	}
 	    	}
 	    	//记录删除log 
-	    	OrganizationUserLog orgLog = new OrganizationUserLog();
-	    	orgLog.setNamespaceId(member.getNamespaceId());
+	    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+	    	orgLog.setUserId(member.getTargetId());
 	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-	    	orgLog.setOperationType();
+	    	orgLog.setOperationType(OperationType.QUIT.getCode());
+	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+	    	this.organizationProvider.createOrganizationUserLog(orgLog);
 			return null;
 		});
 	}
@@ -7115,6 +7168,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationMember.setContactType(IdentifierType.MOBILE.getCode());
 		organizationMember.setCreatorUid(user.getId());
 		organizationMember.setNamespaceId(namespaceId);
+
 		organizationMember.setGroupId(0l);
 		if(StringUtils.isEmpty(organizationMember.getTargetId())){
 			organizationMember.setTargetType(OrganizationMemberTargetType.UNTRACK.getCode());
@@ -7217,7 +7271,15 @@ public class OrganizationServiceImpl implements OrganizationService {
 				sendMessageForContactApproved(organizationMember);
 			}
 		}
-		
+
+    	//记录新增 log 
+    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	orgLog.setUserId(organizationMember.getTargetId());
+    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+    	orgLog.setOperationType(OperationType.JOIN.getCode());
+    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
+    	this.organizationProvider.createOrganizationUserLog(orgLog);
+    	
 		return dto;
 	}
 	

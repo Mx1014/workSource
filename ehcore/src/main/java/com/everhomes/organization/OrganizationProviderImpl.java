@@ -2492,4 +2492,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return results;
 	}
+
+	@Override
+	public void createOrganizationUserLog(OrganizationUserLog orgLog) {
+ 
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationUserLogs.class));
+		orgLog.setId(id);  
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationUserLogsDao dao = new EhOrganizationUserLogsDao(context.configuration());
+		dao.insert(orgLog);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationUserLogs.class, null); 
+	}
 }
