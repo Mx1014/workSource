@@ -11,8 +11,7 @@ CREATE TABLE `eh_organization_user_logs` (
   `operator_uid` BIGINT(20) NOT NULL,
   `namespace_id` INT(11) DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB AUTO_INCREMENT=2119064 DEFAULT CHARSET=utf8mb4
-
+) ENGINE=INNODB AUTO_INCREMENT=2119064 DEFAULT CHARSET=utf8mb4;
 
 -- 增加字段  
-ALTER TABLE `eh_organization_members` ADD COLUMN `executive_flag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管',
+ALTER TABLE `eh_organization_members` ADD COLUMN `executive_flag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管';
