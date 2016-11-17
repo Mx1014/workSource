@@ -32,6 +32,8 @@ CREATE TABLE `eh_contracts` (
 -- DROP TABLE IF EXISTS `eh_contract_building_mappings`;
 CREATE TABLE `eh_contract_building_mappings` (
   `id` BIGINT NOT NULL,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
   `contract_id` INTEGER NOT NULL,
   `contract_number` VARCHAR(128) NOT NULL,
   `building_name` VARCHAR(128),

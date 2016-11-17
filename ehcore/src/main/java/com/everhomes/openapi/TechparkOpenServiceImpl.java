@@ -34,6 +34,10 @@ import com.everhomes.rest.openapi.techpark.CustomerContractBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerLivingStatus;
 import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
+import com.everhomes.rest.organization.NamespaceOrganizationType;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -301,9 +305,22 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			Organization organization = organizationProvider.findOrganizationByNameAndNamespaceId(customerRental.getName(), namespaceId);
 			if (organization == null) {
 				organization = new Organization();
-				
-				
-				
+				organization.setParentId(0L);
+				organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+				organization.setName(customerRental.getName());
+				organization.setAddressId(0L);
+				organization.setDescription(customerRental.getNumber());
+				organization.setPath("");
+				organization.setLevel(1);
+				organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+				organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+				organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				organization.setUpdateTime(organization.getCreateTime());
+				organization.setDirectlyEnterpriseId(0L);
+				organization.setNamespaceId(namespaceId);
+				organization.setShowFlag((byte)1);
+				organization.setNamespaceOrganizationType(NamespaceOrganizationType.JINDIE.getCode());
+				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.createOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
@@ -326,10 +343,15 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			Contract contract = contractProvider.findContractByNumber(organization.getNamespaceId(), organization.getId(), customerContract.getContractNumber());
 			if (contract == null) {
 				contract = new Contract();
-				
-				
-				
+				contract.setNamespaceId(organization.getNamespaceId());
+				contract.setOrganizationId(organization.getId());
+				contract.setOrganizationName(organization.getName());
+				contract.setContractNumber(customerContract.getContractNumber());
+				contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
+				contract.setStatus(CommonStatus.ACTIVE.getCode());
+				contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				contractProvider.createContract(contract);
+				insertOrUpdateContractBuildingMappings(contract, customerContract.getBuildings());
 			}else {
 				contract.setContractNumber(customerContract.getContractNumber());
 				contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
@@ -388,6 +410,19 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void deleteRentings(AppNamespaceMapping appNamespaceMapping, String delDataList) {
+		if (StringUtils.isBlank(delDataList)) {
+			return;
+		}
+		Integer namespaceId = appNamespaceMapping.getNamespaceId();
+		Long communityId = appNamespaceMapping.getCommunityId();
+		
+		List<CustomerRental> list = JSONObject.parseArray(delDataList, CustomerRental.class);
+		for (CustomerRental customerRental : list) {
+			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerApartment.getBuildingName(), customerApartment.getApartmentName());
+			if (address != null) {
+				addressProvider.deleteAddress(address);
+			}
+		}
 	}
 	
 }
