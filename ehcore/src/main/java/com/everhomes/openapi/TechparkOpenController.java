@@ -33,6 +33,8 @@ public class TechparkOpenController extends ControllerBase {
 	private AppProvider appProvider;
 	@Autowired
 	private UserActivityService userActivityService;
+	@Autowired
+	private TechparkOpenService techparkOpenService;
 
 
 	/**
