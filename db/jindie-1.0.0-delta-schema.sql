@@ -19,6 +19,8 @@ ALTER TABLE `eh_addresses` ADD COLUMN `rent_area` DOUBLE,
 CREATE TABLE `eh_contracts` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
   `contract_number` VARCHAR(128) NOT NULL,
   `contract_end_date` DATETIME NOT NULL,
   `status` TINYINT,
@@ -31,6 +33,7 @@ CREATE TABLE `eh_contracts` (
 CREATE TABLE `eh_contract_building_mappings` (
   `id` BIGINT NOT NULL,
   `contract_id` INTEGER NOT NULL,
+  `contract_number` VARCHAR(128) NOT NULL,
   `building_name` VARCHAR(128),
   `apartment_name` DATETIME,
   `area_size` DOUBLE,

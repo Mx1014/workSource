@@ -45,7 +45,8 @@ public class TechparkOpenController extends ControllerBase {
 	@RestReturn(String.class)
 	public RestResponse initBizInfo(@Valid SyncDataCommand cmd,HttpServletRequest request, HttpServletResponse response) {
 		LOGGER.debug("Sync techpark data, cmd={}", cmd);
-
+		
+		techparkOpenService.syncData(cmd);
 		RestResponse result =  new RestResponse();
 		result.setErrorCode(ErrorCodes.SUCCESS);
 		result.setErrorDescription("OK");

@@ -339,4 +339,20 @@ public class AddressProviderImpl implements AddressProvider {
                 .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(DSL.concat("%", buildingName, "%")).or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(DSL.concat("%", buildingName, "%"))))
                 .fetchInto(AddressDTO.class);
     }
+
+	@Override
+	public Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_ADDRESSES)
+	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+	        .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
+	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+	        .fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, Address.class);
+		}
+		return null;
+	}
+    
 }
