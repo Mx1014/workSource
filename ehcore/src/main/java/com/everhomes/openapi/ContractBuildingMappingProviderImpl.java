@@ -64,6 +64,9 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
 				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.eq(apartmentName))
 				.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, ContractBuildingMapping.class);
+		}
 		return null;
 	}
 

@@ -346,7 +346,22 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		for (CustomerContractBuilding customerContractBuilding : buildings) {
 			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
-			
+			if (contractBuildingMapping == null) {
+				contractBuildingMapping = new ContractBuildingMapping();
+				contractBuildingMapping.setContractId(contract.getId());
+				contractBuildingMapping.setContractNumber(contract.getContractNumber());
+				contractBuildingMapping.setBuildingName(customerContractBuilding.getBuildingName());
+				contractBuildingMapping.setApartmentName(customerContractBuilding.getApartmentName());
+				contractBuildingMapping.setAreaSize(customerContractBuilding.getAreaSize());
+				contractBuildingMapping.setStatus(CommonStatus.ACTIVE.getCode());
+				contractBuildingMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				contractBuildingMappingProvider.createContractBuildingMapping(contractBuildingMapping);
+			}else {
+				contractBuildingMapping.setBuildingName(customerContractBuilding.getBuildingName());
+				contractBuildingMapping.setApartmentName(customerContractBuilding.getApartmentName());
+				contractBuildingMapping.setAreaSize(customerContractBuilding.getAreaSize());
+				contractBuildingMappingProvider.updateContractBuildingMapping(contractBuildingMapping);
+			}
 		}
 	}
 
