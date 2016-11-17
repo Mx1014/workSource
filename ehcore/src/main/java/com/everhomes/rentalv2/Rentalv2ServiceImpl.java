@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.greghaines.jesque.Job;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -1229,6 +1230,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else
 				rentalBill.setCancelTime(new Timestamp(rs.getCancelTime()));
 			rentalBill.setResourceName(rs.getResourceName());
+			rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId()==null?0:
+			UserContext.getCurrentNamespaceId());
 			rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 			rentalBill.setRentalUid(userId);
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
@@ -4784,8 +4787,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 			
 		String templateLocale = PunchNotificationTemplateCode.locale;
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("begin Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
- 
+
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("end Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
 	}
 	
  
