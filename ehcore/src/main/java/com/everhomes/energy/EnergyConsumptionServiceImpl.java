@@ -181,6 +181,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         meter.setNamespaceId(currNamespaceId());
         dbProvider.execute(r -> {
             meterProvider.createEnergyMeter(meter);
+
             // 创建setting log 记录
             UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
             updateCmd.setPrice(cmd.getPrice());
@@ -193,6 +194,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
             this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+
+            // 创建一条初始读表记录
+            ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
+            readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
+            readEnergyMeterCmd.setCurrReading(meter.getStartReading());
+            readEnergyMeterCmd.setMeterId(meter.getId());
+            readEnergyMeterCmd.setOrganizationId(cmd.getOrganizationId());
+            readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+            this.readEnergyMeter(readEnergyMeterCmd);
             return true;
         });
         meterSearcher.feedDoc(meter);
