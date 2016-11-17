@@ -15,4 +15,6 @@ public interface ContractProvider {
 
 	Contract findContractByNumber(Integer namespaceId, Long id, String contractNumber);
 
+	void deleteContractByOrganizationName(Integer namespaceId, String name);
+
 }

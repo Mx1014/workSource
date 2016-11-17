@@ -12,6 +12,7 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.address.AddressAdminStatus;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAddressesDao;
@@ -348,6 +349,7 @@ public class AddressProviderImpl implements AddressProvider {
 	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
 	        .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
 	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
+	        .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 	        .fetchOne();
 		if (record != null) {
 			return ConvertHelper.convert(record, Address.class);

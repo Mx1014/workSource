@@ -16,4 +16,6 @@ public interface ContractBuildingMappingProvider {
 	ContractBuildingMapping findContractBuildingMappingByName(String contractNumber, String buildingName,
 			String apartmentName);
 
+	void deleteContractBuildingMappingByOrganizatinName(Integer namespaceId, String name);
+
 }

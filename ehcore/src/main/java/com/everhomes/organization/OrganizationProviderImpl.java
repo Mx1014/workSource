@@ -2446,6 +2446,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, Organization.class);
 		return null;
 	}
+
+	@Override
+	public Organization findOrganizationByName(String name, Integer namespaceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+				.fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
+	}
 	
 	   // by Janson
     @Cacheable(value="listGroupMessageMembers", key="{#namespaceId, #groupId, #pageSize}", unless="#result.getSize() == 0")

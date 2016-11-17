@@ -127,6 +127,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				building.setStatus(CommonStatus.ACTIVE.getCode());
 				building.setCreatorUid(1L);
 				building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				building.setOperatorUid(1L);
+				building.setOperateTime(building.getCreateTime());
 				building.setNamespaceId(namespaceId);
 				building.setProductType(customerBuilding.getProductType());
 				building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
@@ -141,6 +143,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
 				building.setJoininDate(getTimestampDate(customerBuilding.getJoininDate()));
 				building.setFloorCount(customerBuilding.getFloorCount());
+				building.setOperatorUid(1L);
+				building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				buildingProvider.updateBuilding(building);
 			}
 		}
@@ -172,7 +176,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		for (CustomerBuilding customerBuilding : list) {
 			Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerBuilding.getBuildingName());
 			if (building != null) {
-				buildingProvider.deleteBuilding(building);
+				building.setStatus(CommonStatus.INACTIVE.getCode());
+				building.setOperatorUid(1L);
+				building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				building.setDeleteTime(building.getOperateTime());
+				buildingProvider.updateBuilding(building);
 			}
 		}
 	}
@@ -214,6 +222,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				address.setStatus(CommonStatus.ACTIVE.getCode());
 				address.setCreatorUid(1L);
 				address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				address.setOperatorUid(1L);
+				address.setOperateTime(address.getCreateTime());
 				address.setAreaSize(customerApartment.getAreaSize());
 				address.setNamespaceId(namespaceId);
 				address.setRentArea(customerApartment.getRentArea());
@@ -234,6 +244,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				address.setInnerArea(customerApartment.getInnerArea());
 				address.setLayout(customerApartment.getLayout());
 				address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+				address.setOperatorUid(1L);
+				address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				addressProvider.updateAddress(address);
 			}
 		}
@@ -279,7 +291,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		for (CustomerApartment customerApartment : list) {
 			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerApartment.getBuildingName(), customerApartment.getApartmentName());
 			if (address != null) {
-				addressProvider.deleteAddress(address);
+				address.setStatus(CommonStatus.INACTIVE.getCode());
+				address.setOperatorUid(1L);
+				address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				address.setDeleteTime(address.getOperateTime());
+				addressProvider.updateAddress(address);
 			}
 		}
 	}
@@ -302,7 +318,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		
 		List<CustomerRental> list = JSONObject.parseArray(varDataList, CustomerRental.class);
 		for (CustomerRental customerRental : list) {
-			Organization organization = organizationProvider.findOrganizationByNameAndNamespaceId(customerRental.getName(), namespaceId);
+			Organization organization = organizationProvider.findOrganizationByName(customerRental.getName(), namespaceId);
+			contractProvider.deleteContractByOrganizationName(namespaceId, customerRental.getName());
+			contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, customerRental.getName());
 			if (organization == null) {
 				organization = new Organization();
 				organization.setParentId(0L);
@@ -327,6 +345,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			}else {
 				organization.setName(customerRental.getName());
 				organization.setDescription(customerRental.getNumber());
+				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				organizationProvider.updateOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
@@ -414,14 +433,17 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
-		Long communityId = appNamespaceMapping.getCommunityId();
 		
 		List<CustomerRental> list = JSONObject.parseArray(delDataList, CustomerRental.class);
 		for (CustomerRental customerRental : list) {
-			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerApartment.getBuildingName(), customerApartment.getApartmentName());
-			if (address != null) {
-				addressProvider.deleteAddress(address);
+			Organization organization = organizationProvider.findOrganizationByName(customerRental.getName(), namespaceId);
+			if (organization != null) {
+				organization.setStatus(OrganizationStatus.DELETED.getCode());
+				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				organizationProvider.updateOrganization(organization);
 			}
+			contractProvider.deleteContractByOrganizationName(namespaceId, organization.getName());
+			contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, organization.getName());
 		}
 	}
 	

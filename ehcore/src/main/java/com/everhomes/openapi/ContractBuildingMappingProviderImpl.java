@@ -13,6 +13,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
@@ -63,11 +64,21 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
 				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
 				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.eq(apartmentName))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.fetchOne();
 		if (record != null) {
 			return ConvertHelper.convert(record, ContractBuildingMapping.class);
 		}
 		return null;
+	}
+
+	@Override
+	public void deleteContractBuildingMappingByOrganizatinName(Integer namespaceId, String organizationName) {
+		getReadWriteContext().update(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+		.set(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS, CommonStatus.INACTIVE.getCode())
+		.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ORGANIZATION_NAME.eq(organizationName))
+		.execute();
 	}
 
 	private EhContractBuildingMappingsDao getReadWriteDao() {

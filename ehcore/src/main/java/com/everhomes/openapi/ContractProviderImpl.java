@@ -13,6 +13,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractsDao;
@@ -62,11 +63,21 @@ public class ContractProviderImpl implements ContractProvider {
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
 				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
+				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.fetchOne();
 		if (record != null) {
 			return ConvertHelper.convert(record, Contract.class);
 		}
 		return null;
+	}
+
+	@Override
+	public void deleteContractByOrganizationName(Integer namespaceId, String organizationName) {
+		getReadWriteContext().update(Tables.EH_CONTRACTS)
+			.set(Tables.EH_CONTRACTS.STATUS, CommonStatus.INACTIVE.getCode())
+			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_CONTRACTS.ORGANIZATION_NAME.eq(organizationName))
+			.execute();
 	}
 
 	private EhContractsDao getReadWriteDao() {
