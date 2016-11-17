@@ -35,7 +35,7 @@ CREATE TABLE `eh_contract_building_mappings` (
   `contract_id` INTEGER NOT NULL,
   `contract_number` VARCHAR(128) NOT NULL,
   `building_name` VARCHAR(128),
-  `apartment_name` DATETIME,
+  `apartment_name` VARCHAR(128),
   `area_size` DOUBLE,
   `status` TINYINT,
   `create_time` DATETIME,

@@ -13,4 +13,7 @@ public interface ContractBuildingMappingProvider {
 
 	List<ContractBuildingMapping> listContractBuildingMapping();
 
+	ContractBuildingMapping findContractBuildingMappingByName(String contractNumber, String buildingName,
+			String apartmentName);
+
 }

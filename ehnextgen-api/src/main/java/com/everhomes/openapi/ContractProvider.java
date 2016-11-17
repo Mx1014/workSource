@@ -13,4 +13,6 @@ public interface ContractProvider {
 
 	List<Contract> listContract();
 
+	Contract findContractByNumber(Integer namespaceId, Long id, String contractNumber);
+
 }

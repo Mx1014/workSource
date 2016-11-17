@@ -30,6 +30,7 @@ import com.everhomes.rest.openapi.TechparkDataType;
 import com.everhomes.rest.openapi.techpark.CustomerApartment;
 import com.everhomes.rest.openapi.techpark.CustomerBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerContract;
+import com.everhomes.rest.openapi.techpark.CustomerContractBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerLivingStatus;
 import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
@@ -54,6 +55,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private ContractProvider contractProvider;
+	
+	@Autowired
+	private ContractBuildingMappingProvider contractBuildingMappingProvider;
 	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
@@ -315,7 +322,32 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		
+		for (CustomerContract customerContract : contracts) {
+			Contract contract = contractProvider.findContractByNumber(organization.getNamespaceId(), organization.getId(), customerContract.getContractNumber());
+			if (contract == null) {
+				contract = new Contract();
+				
+				
+				
+				contractProvider.createContract(contract);
+			}else {
+				contract.setContractNumber(customerContract.getContractNumber());
+				contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
+				contractProvider.updateContract(contract);
+				insertOrUpdateContractBuildingMappings(contract, customerContract.getBuildings());
+			}
+		}
 		
+	}
+
+	private void insertOrUpdateContractBuildingMappings(Contract contract, List<CustomerContractBuilding> buildings) {
+		if (buildings == null || buildings.size() == 0) {
+			return;
+		}
+		for (CustomerContractBuilding customerContractBuilding : buildings) {
+			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+			
+		}
 	}
 
 	private void insertOrUpdateOrganizationDetail(Organization organization, String contact, String contactPhone) {

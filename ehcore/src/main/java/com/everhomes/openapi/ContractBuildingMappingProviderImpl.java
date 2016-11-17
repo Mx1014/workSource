@@ -4,6 +4,7 @@ package com.everhomes.openapi;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +56,17 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 				.fetch().map(r -> ConvertHelper.convert(r, ContractBuildingMapping.class));
 	}
 	
+	@Override
+	public ContractBuildingMapping findContractBuildingMappingByName(String contractNumber, String buildingName,
+			String apartmentName) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.eq(apartmentName))
+				.fetchOne();
+		return null;
+	}
+
 	private EhContractBuildingMappingsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

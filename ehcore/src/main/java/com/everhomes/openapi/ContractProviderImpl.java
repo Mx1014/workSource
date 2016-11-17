@@ -4,6 +4,7 @@ package com.everhomes.openapi;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -55,6 +56,19 @@ public class ContractProviderImpl implements ContractProvider {
 				.fetch().map(r -> ConvertHelper.convert(r, Contract.class));
 	}
 	
+	@Override
+	public Contract findContractByNumber(Integer namespaceId, Long organizationId, String contractNumber) {
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
+				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
+				.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, Contract.class);
+		}
+		return null;
+	}
+
 	private EhContractsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
