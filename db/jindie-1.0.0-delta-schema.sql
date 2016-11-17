@@ -37,3 +37,13 @@ CREATE TABLE `eh_contract_building_mappings` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_app_namespace_mappings`;
+CREATE TABLE `eh_app_namespace_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INT(11),
+  `app_key` VARCHAR(64),
+  `community_id` BIGINT,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
