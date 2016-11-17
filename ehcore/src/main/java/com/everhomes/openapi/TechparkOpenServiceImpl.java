@@ -19,7 +19,7 @@ import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.discover.ItemType;
+import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
@@ -66,6 +66,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	@Autowired
 	private ContractBuildingMappingProvider contractBuildingMappingProvider;
 	
+	@Autowired
+	private DbProvider dbProvider;
+	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
 		if (StringUtils.isBlank(cmd.getAppKey()) || cmd.getDataType() == null) {
@@ -104,8 +107,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void syncBuildings(AppNamespaceMapping appNamespaceMapping, String varDataList, String delDataList) {
-		insertOrUpdateBuildings(appNamespaceMapping, varDataList);
-		deleteBuildings(appNamespaceMapping, delDataList);
+		dbProvider.execute(s->{
+			insertOrUpdateBuildings(appNamespaceMapping, varDataList);
+			deleteBuildings(appNamespaceMapping, delDataList);
+			return true;
+		});
 	}
 
 	private void insertOrUpdateBuildings(AppNamespaceMapping appNamespaceMapping, String varDataList) {
@@ -186,8 +192,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void syncApartments(AppNamespaceMapping appNamespaceMapping, String varDataList, String delDataList) {
-		insertOrUpdateApartments(appNamespaceMapping, varDataList);
-		deleteApartments(appNamespaceMapping, delDataList);
+		dbProvider.execute(s->{
+			insertOrUpdateApartments(appNamespaceMapping, varDataList);
+			deleteApartments(appNamespaceMapping, delDataList);
+			return true;
+		});
 	}
 
 	private void insertOrUpdateApartments(AppNamespaceMapping appNamespaceMapping, String varDataList) {
@@ -301,8 +310,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void syncRentings(AppNamespaceMapping appNamespaceMapping, String varDataList, String delDataList) {
-		insertOrUpdateRentings(appNamespaceMapping, varDataList);
-		deleteRentings(appNamespaceMapping, delDataList);
+		dbProvider.execute(s->{
+			insertOrUpdateRentings(appNamespaceMapping, varDataList);
+			deleteRentings(appNamespaceMapping, delDataList);
+			return true;
+		});
 	}
 
 	private void insertOrUpdateRentings(AppNamespaceMapping appNamespaceMapping, String varDataList) {
