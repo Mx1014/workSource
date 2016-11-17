@@ -114,6 +114,7 @@
 		eh_pm_task_targets | eh_parking_card_categories |
 		eh_warning_settings | eh_service_alliance_reservation_requests | eh_door_user_permission |
         eh_equipment_inspection_equipment_standard_map | eh_equipment_inspection_templates | eh_equipment_inspection_template_item_map | eh_equipment_inspection_items | eh_equipment_inspection_item_results | 
+        eh_organization_user_logs |
         </includes>
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
