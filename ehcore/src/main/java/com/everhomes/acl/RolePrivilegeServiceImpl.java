@@ -679,11 +679,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		for (Long roleId : roleIds) {
     			List<Acl> acls = null;
     			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
-    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
+					AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
+					acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, descriptor);
     			}else{
     				Role role = aclProvider.getRoleById(roleId);
     				if(null != role){
-    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+						AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
+    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), descriptor);
     				}
     				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
     			}
@@ -704,11 +706,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		for (Long roleId : roleIds) {
     			List<Acl> acls = null;
     			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
-    				acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, roleId);
+					AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
+					acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, descriptor);
     			}else{
     				Role role = aclProvider.getRoleById(roleId);
     				if(null != role){
-    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+						AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
+    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), descriptor);
     				}
     				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
     			}
