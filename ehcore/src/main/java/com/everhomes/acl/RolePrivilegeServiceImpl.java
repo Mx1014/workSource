@@ -713,6 +713,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					privileges.add(privilege.getId());
 				}
 			}
+		}else{
+			privileges.addAll(privilegeIds);
 		}
 
     	return privileges;
