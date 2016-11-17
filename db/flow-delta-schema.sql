@@ -82,8 +82,10 @@ CREATE TABLE `eh_flow_buttons` (
     `button_name` VARCHAR(64),
     `flow_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, TransferStep, CommentStep, EndStep, EndNotifyStep',
     `goto_level` INTEGER NOT NULL DEFAULT 0,
+    `goto_node_id` INTEGER NOT NULL DEFAULT 0,
+    `need_subject` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need subject for this step, 1: need subject for this step',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
-    `status` TINYINT NOT NULL COMMENT 'invalid, valid',
+    `status` TINYINT NOT NULL COMMENT '0: invalid, 1: disabled, 2: hidden, 3: visible',
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -102,6 +104,7 @@ CREATE TABLE `eh_flow_forms` (
     `form_render` TEXT,
     `belong_to` BIGINT NOT NULL,
     `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
+    `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -124,13 +127,13 @@ CREATE TABLE `eh_flow_actions` (
 
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
-    `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick, scripts',
+    `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick_sms, tick_message, scripts',
     `belong_to` BIGINT NOT NULL,
     `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
     `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
-    `render_text` VARCHAR(256),
+    `render_text` VARCHAR(256) COMMENT 'the content for this message that have variables',
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -273,4 +276,6 @@ CREATE TABLE `eh_flow_evaluates` (
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- TODO scripts for this module
 

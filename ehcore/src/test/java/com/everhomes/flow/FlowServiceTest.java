@@ -51,7 +51,7 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Flow obj = new Flow();
     	obj.setOwnerId(0l);
     	obj.setOwnerType(OwnerType.ENTERPRISE.getCode());
-    	obj.setModuleId(0);
+    	obj.setModuleId(0l);
     	obj.setModuleType(FlowModuleType.NO_MODULE.getCode());
     	obj.setFlowName("test-flow");
     	obj.setFlowVersion(0);

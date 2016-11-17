@@ -1,18 +1,18 @@
 package com.everhomes.rest.flow;
 
-public enum FlowStatusType {
-	INVALID((byte)0), VALID((byte)1), CONFIG((byte)2), RUNNING((byte)3), STOP((byte)4);
+public enum FlowNodeStatus {
+	INVALID((byte)0), HIDDEN((byte)1), VISIBLE((byte)2);
 	private byte code;
     
     public byte getCode() {
         return this.code;
     }
     
-    private FlowStatusType(byte code) {
+    private FlowNodeStatus(byte code) {
         this.code = code;
     }
     
-    public static FlowStatusType fromCode(Byte code) {
+    public static FlowNodeStatus fromCode(Byte code) {
         if(code == null)
             return null;
         
@@ -20,13 +20,9 @@ public enum FlowStatusType {
         case 0 :
             return INVALID;
         case 1 :
-        		return VALID;
+        		return HIDDEN;
         case 2 :
-            return CONFIG;
-        case 3:
-            return RUNNING;
-        case 4:
-        	   return STOP;
+            return VISIBLE;
         }
         
         return null;
