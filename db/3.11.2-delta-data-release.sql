@@ -246,7 +246,7 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (402, 'club.placeholder.name', '俱乐部', 'club placeholder name', 0, NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (403, 'club.share.url', '/mobile/static/group_share/index.html', 'club share url', 0, NULL);
-
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (402, 'club.placeholder.name', '白领社团', 'club placeholder name', 999985, NULL);
 
 -- 俱乐部菜单 by tt, 20161117
 set @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
@@ -276,14 +276,29 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1002,0,1,now() FROM `eh_web_menu_privileges` WHERE `menu_id` in (SELECT id FROM `eh_web_menus` WHERE `path` LIKE '%49100/%');
 
 set @scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+-- 科技园
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-SELECT @scope_id := @scope_id+1, 49100,'', 'EhNamespaces', id , 2 FROM `eh_namespaces`;
+VALUES (@scope_id := @scope_id+1, 49100,'俱乐部', 'EhNamespaces', 1000000 , 1);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES (@scope_id := @scope_id+1, 49110,'俱乐部管理', 'EhNamespaces', 1000000 , 1);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES (@scope_id := @scope_id+1, 49120,'审核俱乐部', 'EhNamespaces', 1000000 , 1);
 
+-- 华润
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-SELECT @scope_id := @scope_id+1, 49110,'', 'EhNamespaces', id , 2 FROM `eh_namespaces`;
+VALUES (@scope_id := @scope_id+1, 49100,'社团', 'EhNamespaces', 999985 , 1);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES (@scope_id := @scope_id+1, 49110,'社团管理', 'EhNamespaces', 999985 , 1);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES (@scope_id := @scope_id+1, 49120,'审核社团', 'EhNamespaces', 999985 , 1);
 
+-- 清华信息港
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-SELECT @scope_id := @scope_id+1, 49120,'', 'EhNamespaces', id , 2 FROM `eh_namespaces`;
+VALUES (@scope_id := @scope_id+1, 49100,'俱乐部', 'EhNamespaces', 999984 , 1);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES (@scope_id := @scope_id+1, 49110,'俱乐部管理', 'EhNamespaces', 999984 , 1);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES (@scope_id := @scope_id+1, 49120,'审核俱乐部', 'EhNamespaces', 999984 , 1);
 
 
 -- 打卡考勤菜单 update by sunwen 20161116
