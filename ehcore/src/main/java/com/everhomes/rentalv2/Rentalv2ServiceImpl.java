@@ -4786,11 +4786,15 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			
 		String templateLocale = PunchNotificationTemplateCode.locale;
 		if(LOGGER.isDebugEnabled()) {
-            LOGGER.info("Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+            LOGGER.info("begin Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
                 + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
         }
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
- 
+
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("end Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
 	}
 	
  
