@@ -7090,7 +7090,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 		    	}
 	    	}
-	    	
+	    	//记录删除log 
+	    	OrganizationUserLog orgLog = new OrganizationUserLog();
+	    	orgLog.setNamespaceId(member.getNamespaceId());
+	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	    	orgLog.setOperationType();
 			return null;
 		});
 	}
