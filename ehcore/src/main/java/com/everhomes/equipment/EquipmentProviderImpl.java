@@ -756,6 +756,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.DELAY.getCode()));
 		if(targetType != null && targetType.size() > 0)
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_TYPE.in(targetType));
 		
@@ -1413,8 +1414,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
 			task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 		
-		task.setStatus(EquipmentTaskStatus.NONE.getCode());
-		task.setResult(EquipmentTaskResult.NONE.getCode());
+		task.setStatus(EquipmentTaskStatus.DELAY.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);

@@ -55,6 +55,8 @@ import com.everhomes.util.StringHelper;
  * <li>mediaDisplayFlag: 是否显示图片，0否1是</li>
  * <li>maxQuantity: 限制人数</li>
  * <li>contentUrl: 内容链接</li>
+ * <li>groupId: 俱乐部id</li>
+ * <li>groupName: 俱乐部名称</li>
  * </ul>
  */
 public class PostDTO {
@@ -151,6 +153,26 @@ public class PostDTO {
     private Integer maxQuantity;
     
     private String contentUrl;
+    
+    private Long groupId;
+    
+    private String groupName;
+
+	public Long getGroupId() {
+		return groupId;
+	}
+
+	public void setGroupId(Long groupId) {
+		this.groupId = groupId;
+	}
+
+	public String getGroupName() {
+		return groupName;
+	}
+
+	public void setGroupName(String groupName) {
+		this.groupName = groupName;
+	}
 
 	public String getContentUrl() {
 		return contentUrl;

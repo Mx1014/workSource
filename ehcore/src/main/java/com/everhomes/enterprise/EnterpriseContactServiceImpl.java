@@ -1661,7 +1661,7 @@ public class EnterpriseContactServiceImpl implements EnterpriseContactService {
 		contact.setRole(cmd.getRole());
 		contact.setSex(cmd.getSex());
 		contact.setEmployeeNo(cmd.getEmployeeNo());
-		//phone num change
+		//phone num changeEnergyMeter
 		EnterpriseContactGroupMember enterpriseContactGroupMember = this.enterpriseContactProvider.getContactGroupMemberByContactId(contact.getEnterpriseId(), cmd.getContactId());
 		if(null!=cmd.getContactGroupId()){
 			if(null == enterpriseContactGroupMember){
