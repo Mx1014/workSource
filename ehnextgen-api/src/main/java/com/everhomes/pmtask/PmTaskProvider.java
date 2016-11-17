@@ -46,4 +46,6 @@ public interface PmTaskProvider {
 	List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize);
 	
 	PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId);
+	
+	Integer countUserProccsingPmTask(String ownerType, Long ownerId, Long userId);
 }

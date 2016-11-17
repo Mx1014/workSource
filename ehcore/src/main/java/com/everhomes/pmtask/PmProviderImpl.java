@@ -259,6 +259,25 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
+	public Integer countUserProccsingPmTask(String ownerType, Long ownerId, Long userId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASKS.fields()).from(Tables.EH_PM_TASKS);
+        Condition condition = Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType);
+        condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
+        
+        query.join(context.select(Tables.EH_PM_TASK_LOGS.TARGET_ID,Tables.EH_PM_TASK_LOGS.TASK_ID)
+				.from(Tables.EH_PM_TASK_LOGS).where(Tables.EH_PM_TASK_LOGS.STATUS.eq(PmTaskStatus.PROCESSING.getCode()))
+				.and(Tables.EH_PM_TASK_LOGS.ID.in(context.select(Tables.EH_PM_TASK_LOGS.ID.max())
+	    				.from(Tables.EH_PM_TASK_LOGS).groupBy(Tables.EH_PM_TASK_LOGS.TASK_ID)))
+				.asTable(Tables.EH_PM_TASK_LOGS.getName()))
+		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+    	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
+    					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));	
+        	
+        return query.where(condition).fetchCount();
+	}
+	
+	@Override
 	public List<PmTaskLog> listPmTaskLogs(Long taskId, Byte status){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskLogs.class));
         

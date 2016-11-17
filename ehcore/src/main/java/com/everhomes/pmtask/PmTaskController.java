@@ -27,6 +27,7 @@ import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
 import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
@@ -204,6 +205,7 @@ public class PmTaskController extends ControllerBase {
       @RestReturn(value=String.class)
       public RestResponse updateTaskByOrg(UpdateTaskCommand cmd) {
     	  //TODO:
+    	  pmTaskService.updateTaskByOrg(cmd);
           RestResponse response = new RestResponse();
           response.setErrorCode(ErrorCodes.SUCCESS);
           response.setErrorDescription("OK");
@@ -314,11 +316,11 @@ public class PmTaskController extends ControllerBase {
 	 * <p>授权人员 管理小区列表</p>
 	 */
 	@RequestMapping("listAuthorizationCommunityByUser")
-	@RestReturn(value=String.class)
+	@RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
 	public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
 		//TODO:
-//		pmTaskService.evaluateTask(cmd);
-		RestResponse response = new RestResponse();
+		ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -375,8 +377,8 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("getUserRelatedAddressesByCommunity")
     @RestReturn(value=GetUserRelatedAddressResponse.class)
     public RestResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
-    	//TODO:
-        RestResponse response = new RestResponse();
+    	GetUserRelatedAddressResponse resp = pmTaskService.getUserRelatedAddressesByCommunity(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -440,8 +442,8 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("searchTaskOperatorStatistics")
     @RestReturn(value=SearchTaskOperatorStatisticsResponse.class)
     public RestResponse searchTaskOperatorStatistics(SearchTaskStatisticsCommand cmd) {
-    	//TODO:
-        RestResponse response = new RestResponse();
+    	SearchTaskOperatorStatisticsResponse resp = pmTaskService.searchTaskOperatorStatistics(cmd);
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -453,8 +455,7 @@ public class PmTaskController extends ControllerBase {
      */
     @RequestMapping("exportTaskOperatorStatistics")
     public void exportTaskOperatorStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
-    	//TODO:
-       
+    	pmTaskService.exportTaskOperatorStatistics(cmd, resp);
     }
     
     /**

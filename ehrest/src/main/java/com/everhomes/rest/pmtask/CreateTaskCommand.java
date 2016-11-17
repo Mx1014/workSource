@@ -39,7 +39,8 @@ public class CreateTaskCommand {
 	private String requestorName;
 	private String requestorPhone;
 	
-	private Byte addressType; 
+	private Byte addressType;
+	private Long addressOrgId;
 	
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
@@ -133,6 +134,12 @@ public class CreateTaskCommand {
 	}
 	public void setAddressType(Byte addressType) {
 		this.addressType = addressType;
+	}
+	public Long getAddressOrgId() {
+		return addressOrgId;
+	}
+	public void setAddressOrgId(Long addressOrgId) {
+		this.addressOrgId = addressOrgId;
 	}
 	
 	@Override

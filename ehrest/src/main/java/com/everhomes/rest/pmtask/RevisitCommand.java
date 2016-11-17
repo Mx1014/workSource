@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>id: 任务ID</li>
  * <li>content: 回访内容</li>
+ * <li>operatorStar: 处理人员评价分数</li>
  * </ul>
  */
 public class RevisitCommand {
@@ -15,6 +16,8 @@ public class RevisitCommand {
     private Long ownerId;
     private Long id;
     private String content;
+    private Byte operatorStar;
+    
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -33,15 +36,20 @@ public class RevisitCommand {
 	public void setId(Long id) {
 		this.id = id;
 	}
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
-	}
 	public String getContent() {
 		return content;
 	}
 	public void setContent(String content) {
 		this.content = content;
 	}
-    
+	public Byte getOperatorStar() {
+		return operatorStar;
+	}
+	public void setOperatorStar(Byte operatorStar) {
+		this.operatorStar = operatorStar;
+	}
+	@Override
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }
