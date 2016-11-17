@@ -263,7 +263,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		return response;
 	}
-
+	
 	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {
 		if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
 			Address address = addressProvider.findAddressById(task.getAddressId());
@@ -741,12 +741,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		    
 			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
 			    
-				if(null == task.getOrganizationId()){
+				if(null == task.getOrganizationId() || task.getOrganizationId() == 0){
 					setParam(map, task.getCreatorUid(), pmTaskLogDTO);
-//					User user = userProvider.findUserById(task.getCreatorUid());
-//	    			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-//	    			map.put("operatorName", user.getNickName());
-//				    map.put("operatorPhone", userIdentifier.getIdentifierToken());
 				}else{
 					map.put("operatorName", task.getRequestorName());
 				    map.put("operatorPhone", task.getRequestorPhone());
@@ -928,34 +924,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    	if(LOGGER.isDebugEnabled())
 	    		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
 	    	if(size > 0){
-	    		List<String> phones = new ArrayList<String>();
-	        	
-	        	//消息推送
-	        	String scope = PmTaskNotificationTemplateCode.SCOPE;
-	    	    String locale = PmTaskNotificationTemplateCode.LOCALE;
-	        	for(PmTaskTarget p: targets) {
-	            	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(p.getTargetId(), IdentifierType.MOBILE.getCode());
-	            	phones.add(sender.getIdentifierToken());
-	            	//消息推送
-	            	Map<String, Object> map = new HashMap<String, Object>();
-	        	    map.put("creatorName", requestorName);
-	        	    map.put("creatorPhone", requestorPhone);
-	        	    map.put("categoryName", taskCategory.getName());
-	        		int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
-	        		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-	        		sendMessageToUser(p.getTargetId(), text);
-	        	}
-	        	int num = phones.size();
-	        	if(num > 0) {
-	        		String[] s = new String[num];
-	            	phones.toArray(s);
-	        		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", requestorName);
-	        		smsProvider.addToTupleList(variables, "operatorPhone", requestorPhone);
-	        		smsProvider.addToTupleList(variables, "categoryName", taskCategory.getName());
-	        		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
-	        				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
-	        	}
-	        	
+	    		sendMessage4CreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
 	    	}
 			return null;
 		});
@@ -963,6 +932,36 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
+	private void sendMessage4CreateTask(List<PmTaskTarget> targets, String requestorName, String requestorPhone, 
+			String taskCategoryName, User user) {
+		List<String> phones = new ArrayList<String>();
+    	
+    	//消息推送
+    	String scope = PmTaskNotificationTemplateCode.SCOPE;
+	    String locale = PmTaskNotificationTemplateCode.LOCALE;
+    	for(PmTaskTarget p: targets) {
+        	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(p.getTargetId(), IdentifierType.MOBILE.getCode());
+        	phones.add(sender.getIdentifierToken());
+        	//消息推送
+        	Map<String, Object> map = new HashMap<String, Object>();
+    	    map.put("creatorName", requestorName);
+    	    map.put("creatorPhone", requestorPhone);
+    	    map.put("categoryName", taskCategoryName);
+    		int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
+    		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+    		sendMessageToUser(p.getTargetId(), text);
+    	}
+    	int num = phones.size();
+    	if(num > 0) {
+    		String[] s = new String[num];
+        	phones.toArray(s);
+    		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", requestorName);
+    		smsProvider.addToTupleList(variables, "operatorPhone", requestorPhone);
+    		smsProvider.addToTupleList(variables, "categoryName", taskCategoryName);
+    		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
+    				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
+    	}
+	}
 	
 	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
 		if(!CollectionUtils.isEmpty(list)){
@@ -1463,6 +1462,42 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 	}
 
+//	private void createTaskStatistics(Long communityId, Long taskCategoryId) {
+//		PmTaskStatistics statistics = new PmTaskStatistics();
+//		Integer totalCount = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), null, startDate, endDate);
+//		Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+//		Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+//		Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+//		Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.CLOSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
+//		
+//		Integer star1 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)1, startDate, endDate);
+//		Integer star2 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)2, startDate, endDate);
+//		Integer star3 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)3, startDate, endDate);
+//		Integer star4 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)4, startDate, endDate);
+//		Integer star5 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)5, startDate, endDate);
+//		
+//		statistics.setTaskCategoryId(taskCategory.getId());
+//		statistics.setCategoryId(category.getId());
+//		statistics.setCreateTime(new Timestamp(now));
+//		statistics.setDateStr(startDate);
+//		statistics.setNamespaceId(n.getId());
+//		statistics.setOwnerId(community.getId());
+//		statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
+//		
+//		statistics.setTotalCount(totalCount);
+//		statistics.setUnprocessCount(unprocessCount);
+//		statistics.setProcessedCount(processedCount);
+//		statistics.setProcessingCount(processingCount);
+//		statistics.setCloseCount(closeCount);
+//		
+//		statistics.setStar1(star1);
+//		statistics.setStar2(star2);
+//		statistics.setStar3(star3);
+//		statistics.setStar4(star4);
+//		statistics.setStar5(star5);
+//		pmTaskProvider.createTaskStatistics(statistics);
+//	}
+	
 	private Timestamp getBeginOfMonth(Long time){
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(time);
