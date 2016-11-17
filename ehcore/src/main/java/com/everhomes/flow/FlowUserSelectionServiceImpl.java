@@ -14,7 +14,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 
 	@Autowired
 	private FlowUserSelectionProvider flowUserSelectionProvider;
-	
+
 	@Override
 	public List<UserInfo> findUsersBySelection(FlowUserSelection userSelection) {
 		// TODO Auto-generated method stub
@@ -54,4 +54,25 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 		// TODO Auto-generated method stub
 		
 	}
+
+	@Override
+	public Long selectFlowSuperviser(Long flowId, FlowUserSelection selection) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long selectFlowNodeProcessor(Long flowNodeId,
+			FlowUserSelection selection) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Long selectActionUser(Long actionId, FlowUserSelection selection) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	
+
 }

@@ -229,6 +229,7 @@ CREATE TABLE `eh_flow_event_logs` (
     `log_type` VARCHAR(64) NOT NULL COMMENT 'flow_step, button_click, action_result',
     `log_title` VARCHAR(64) COMMENT 'the title of this log',
     `log_content` TEXT,
+    `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -248,12 +249,15 @@ DROP TABLE IF EXISTS `eh_flow_variables`;
 CREATE TABLE `eh_flow_variables` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
-    `name` VARCHAR(64),
 
     `owner_id` BIGINT NOT NULL,
     `owner_type` VARCHAR(64) NOT NULL,
     `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
+
+    `name` VARCHAR(64),
+    `script_type` VARCHAR(64) NOT NULL COMMENT 'flow_inner, java_prototype',
+    `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -277,5 +281,23 @@ CREATE TABLE `eh_flow_evaluates` (
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- TODO scripts for this module
+-- scripts for this module
+DROP TABLE IF EXISTS `eh_flow_scripts`;
+CREATE TABLE `eh_flow_scripts` (
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `owner_id` BIGINT NOT NULL,
+    `owner_type` VARCHAR(64) NOT NULL,
+    `module_id` BIGINT NOT NULL COMMENT 'the module id',
+    `module_type` VARCHAR(64) NOT NULL,
+
+    `name` VARCHAR(64) NOT NULL,
+    `script_type` VARCHAR(64) NOT NULL COMMENT 'java_prototype',
+    `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
+    `flow_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, TransferStep, CommentStep, EndStep, EndNotifyStep',
+    `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
