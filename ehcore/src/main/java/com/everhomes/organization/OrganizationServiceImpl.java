@@ -2272,7 +2272,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 						continue;
 					}
 					
-					if(!org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
+					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
 						//物业或业委增加小区Id和小区name信息
 						if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){

@@ -72,6 +72,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModule.*;
@@ -180,7 +181,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		ListWebMenuResponse res = new ListWebMenuResponse();
 		
 		//获取用户在机构范围内的所有权限
-		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		List<Long> privilegeIds = new ArrayList<>();
+
+		List<Long> ids = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+		if(null != ids){
+			privilegeIds.addAll(ids);
+		}
+
+		ids = this.getAllResourcePrivilegeIds(cmd.getOrganizationId(), user.getId());
+		if(null != ids){
+			privilegeIds.addAll(ids);
+		}
 
 		if(null == privilegeIds){
 			res.setMenus(new ArrayList<WebMenuDTO>());
@@ -669,68 +680,82 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		roleIds.add(role.getRoleId());
 		}
 
-    	if(!StringUtils.isEmpty(module)){
-    		List<Privilege> s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
+		List<Privilege> s = null;
+		if(!StringUtils.isEmpty(module)){
+    		s = aclProvider.getPrivilegesByTag(module); //aclProvider 调平台根据角色list+模块 获取权限list接口
     		if(null == s){
     			return privileges;
     		}
-    		
-    		List<Long> privilegeIds = new ArrayList<Long>();
-    		for (Long roleId : roleIds) {
-    			List<Acl> acls = null;
-    			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
-					AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
-					acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, descriptor);
-    			}else{
-    				Role role = aclProvider.getRoleById(roleId);
-    				if(null != role){
-						AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
-    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), descriptor);
-    				}
-    				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
-    			}
-    			for (Acl acl : acls) {
-    				privilegeIds.add(acl.getPrivilegeId());
+    	}
+
+		List<Long> privilegeIds = new ArrayList<>();
+		for (Long roleId : roleIds) {
+			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
+				List<Long> ids = this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), null, EntityType.ROLE.getCode(), roleId);
+				if(null != ids){
+					privilegeIds.addAll(ids);
 				}
-    			
+
+			}else{
+				Role role = aclProvider.getRoleById(roleId);
+				if(null != role){
+					List<Long> ids = this.getResourceAclPrivilegeIds(role.getOwnerType(), role.getOwnerId(), EntityType.ROLE.getCode(), roleId);
+					if(null != ids){
+						privilegeIds.addAll(ids);
+					}
+				}
+				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
 			}
-    		
-    		for (Privilege privilege : s) {
+		}
+		if(!StringUtils.isEmpty(module)){
+			for (Privilege privilege : s) {
 				if(privilegeIds.contains(privilege.getId())){
 					privileges.add(privilege.getId());
 				}
 			}
-    		
-    	}else{
-    		List<Long> privilegeIds = new ArrayList<Long>();
-    		for (Long roleId : roleIds) {
-    			List<Acl> acls = null;
-    			if(RoleConstants.PLATFORM_PM_ROLES.contains(roleId) || RoleConstants.PLATFORM_ENTERPRISE_ROLES.contains(roleId)){
-					AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
-					acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(), null, descriptor);
-    			}else{
-    				Role role = aclProvider.getRoleById(roleId);
-    				if(null != role){
-						AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId);
-    					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), descriptor);
-    				}
-    				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
-    			}
-    			for (Acl acl : acls) {
-    				privilegeIds.add(acl.getPrivilegeId());
-				}
-    			
-			}
-    		privileges = privilegeIds;
-    	}
-		privileges.addAll(getResourceAclPrivilegeIdsByRole(organizationId, userId));
+		}
+
     	return privileges;
     }
 
-    private List<Long> getResourceAclPrivilegeIdsByRole(Long organizationId, Long userId){
+	private List<Long> getAllResourcePrivilegeIds(Long organizationId, Long userId){
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		List<CommunityDTO> communityDTOs = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
+		List<OrganizationDTO> organizationDTOs = new ArrayList<>();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 		List<Long> privilegeIds = new ArrayList<>();
-		AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
-		List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.ORGANIZATIONS.getCode(),organizationId, descriptor);
+		if(null != userIdentifier){
+			List<OrganizationDTO> departments = organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), organization.getPath());
+			if(null != departments){
+				organizationDTOs.addAll(departments);
+			}
+			List<OrganizationDTO> enterprises = organizationService.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, userIdentifier.getIdentifierToken(), organization.getPath());
+			if(null != enterprises){
+				organizationDTOs.addAll(enterprises);
+			}
+		}
+
+		for (CommunityDTO communityDTO:communityDTOs) {
+			List<Long> ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.USER.getCode(), userId);
+			if(null != ids){
+				privilegeIds.addAll(ids);
+			}
+			if(privilegeIds.size() == 0){
+				for (OrganizationDTO dto: organizationDTOs) {
+					ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), dto.getId());
+					if(null != ids){
+						privilegeIds.addAll(ids);
+					}
+				}
+			}
+		}
+		return privilegeIds;
+	}
+
+    private List<Long> getResourceAclPrivilegeIds(String ownerType, Long ownerId, String targetType, Long targetId){
+		List<Long> privilegeIds = new ArrayList<>();
+		AclRoleDescriptor descriptor = new AclRoleDescriptor(targetType, targetId);
+		List<Acl> acls = aclProvider.getResourceAclByRole(ownerType,ownerId, descriptor);
 		if(null != acls){
 			for (Acl acl :acls) {
 				privilegeIds.add(acl.getPrivilegeId());
@@ -738,6 +763,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		return privilegeIds;
 	}
+
 
     /**
      * 获取用户的权限列表
@@ -1037,13 +1063,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     		if(StringUtils.isEmpty(orgId)){
     			continue;
     		}
-    		if(null == userRoles){
-    			userRoles = this.getUserRoles(Long.parseLong(orgId), userId);
-    		}else{
-    			userRoles.addAll(this.getUserRoles(Long.parseLong(orgId), userId));
-    		}
+			Organization organization = organizationProvider.findOrganizationById(Long.parseLong(orgId));
+			if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE || OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.GROUP ){
+				if(null == userRoles){
+					userRoles = this.getUserRoles(Long.parseLong(orgId), userId);
+				}else{
+					userRoles.addAll(this.getUserRoles(Long.parseLong(orgId), userId));
+				}
+			}
 		}
-    	
     	return userRoles;
     }
     
@@ -1749,5 +1777,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
     public static void main(String[] args) {
+		List<Long> privilegeIds = new ArrayList<>();
+		privilegeIds.addAll(null);
 	}
 }
