@@ -1245,7 +1245,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd){
 
-		User user = UserContext.current().getUser();
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		Long roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 

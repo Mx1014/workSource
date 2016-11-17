@@ -12,5 +12,5 @@ public interface UserPrivilegeMgr {
      * @param organizationId
      * @param privilegeId
      */
-    void checkUserAuthority(String ownerType, Long ownerId, Long organizationId, Long privilegeId);
+    void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId);
 }

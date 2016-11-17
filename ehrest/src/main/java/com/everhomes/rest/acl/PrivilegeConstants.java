@@ -66,4 +66,11 @@ public interface PrivilegeConstants {
 
     //公司管理员权限
     public static final long ORGANIZATION_ADMIN = 15L;
+
+    //管理员管理
+    public static final long ADMIN_MANAGE = 10043L;
+
+    //业务授权
+    public static final long SERVICE_AUTHORIZATION = 10044L;
+
 }

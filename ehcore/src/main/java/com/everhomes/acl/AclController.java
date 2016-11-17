@@ -3,6 +3,7 @@ package com.everhomes.acl;
 
 import java.util.List;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -16,6 +17,8 @@ import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.serviceModule.ServiceModuleService;
 
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -41,6 +44,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("createOrganizationAdmin")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
         rolePrivilegeService.createOrganizationAdmin(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -55,6 +60,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("createOrganizationSuperAdmin")
     @RestReturn(value=String.class)
     public RestResponse createOrganizationSuperAdmin(@Valid CreateOrganizationAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
         rolePrivilegeService.createOrganizationSuperAdmin(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -69,6 +76,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("createServiceModuleAdmin")
     @RestReturn(value=String.class)
     public RestResponse createServiceModuleAdmin(@Valid CreateServiceModuleAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
         rolePrivilegeService.createServiceModuleAdmin(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -83,6 +92,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("authorizationServiceModule")
     @RestReturn(value=String.class)
     public RestResponse authorizationServiceModule(@Valid AuthorizationServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.SERVICE_AUTHORIZATION);
         rolePrivilegeService.authorizationServiceModule(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -97,6 +108,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("listServiceModuleAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listServiceModuleAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
         RestResponse response = new RestResponse(rolePrivilegeService.listServiceModuleAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -110,6 +123,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteServiceModuleAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse deleteServiceModuleAdministrators(@Valid DeleteServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
         rolePrivilegeService.deleteServiceModuleAdministrators(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -124,6 +139,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("listAuthorizationServiceModules")
     @RestReturn(value=AuthorizationServiceModuleDTO.class, collection = true)
     public RestResponse listAuthorizationServiceModules(@Valid ListAuthorizationServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.SERVICE_AUTHORIZATION);
         RestResponse response = new RestResponse(rolePrivilegeService.listAuthorizationServiceModules(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -167,6 +184,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("listAuthorizationServiceModuleMembers")
     @RestReturn(value=AuthorizationServiceModuleMembersDTO.class, collection = true)
     public RestResponse listAuthorizationServiceModuleMembers(@Valid ListAuthorizationServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.SERVICE_AUTHORIZATION);
         RestResponse response = new RestResponse(rolePrivilegeService.listAuthorizationServiceModuleMembers(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -180,6 +199,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteOrganizationAdministrators")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
         rolePrivilegeService.deleteOrganizationAdministrators(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -194,6 +215,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteOrganizationSuperAdministrators")
     @RestReturn(value=String.class)
     public RestResponse deleteOrganizationSuperAdministrators(@Valid DeleteOrganizationAdminCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
         rolePrivilegeService.deleteOrganizationSuperAdministrators(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -208,6 +231,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("deleteAuthorizationServiceModule")
     @RestReturn(value=String.class)
     public RestResponse deleteAuthorizationServiceModule(@Valid DeleteAuthorizationServiceModuleCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.SERVICE_AUTHORIZATION);
         rolePrivilegeService.deleteAuthorizationServiceModule(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -222,6 +247,8 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationSuperAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationSuperAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationSuperAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -235,11 +262,12 @@ public class AclController extends ControllerBase {
     @RequestMapping("listOrganizationAdministrators")
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
-
 
 }

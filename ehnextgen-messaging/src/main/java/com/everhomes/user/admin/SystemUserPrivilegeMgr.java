@@ -68,9 +68,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @param privilegeId
      * @return
      */
-    private boolean checkOrganizationRoleAccess(Long organizationId, Long privilegeId){
-        User user = UserContext.current().getUser();
-        List<RoleAssignment> roleAssignments = rolePrivilegeService.getUserAllOrgRoles(organizationId, user.getId());
+    private boolean checkOrganizationRoleAccess(Long userId, Long organizationId, Long privilegeId){
+        List<RoleAssignment> roleAssignments = rolePrivilegeService.getUserAllOrgRoles(organizationId, userId);
 
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         for (RoleAssignment roleAssignment: roleAssignments) {
@@ -88,7 +87,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @param privilegeId
      * @return
      */
-    private boolean checkModuleAdmin(String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+    private boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         List<ServiceModulePrivilege> moduleAdmins = new ArrayList<>();
         for (ServiceModulePrivilege serviceModule:serviceModules) {
@@ -96,7 +95,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         }
 
         for (ServiceModulePrivilege moduleAdmin:moduleAdmins) {
-            if(checkAccess(ownerType, ownerId, organizationId, moduleAdmin.getPrivilegeId())){
+            if(checkAccess(userId, ownerType, ownerId, organizationId, moduleAdmin.getPrivilegeId())){
                 return true;
             }
         }
@@ -108,10 +107,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @param organizationId
      * @return
      */
-    private boolean checkSuperAdmin(Long organizationId){
-        User user = UserContext.current().getUser();
+    private boolean checkSuperAdmin(Long userId, Long organizationId){
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
-        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), user.getId());
+        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
         return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, descriptors);
     }
@@ -121,10 +119,9 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @param organizationId
      * @return
      */
-    private boolean checkOrganizationAdmin(Long organizationId){
-        User user = UserContext.current().getUser();
+    private boolean checkOrganizationAdmin(Long userId, Long organizationId){
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
-        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), user.getId());
+        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
         return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.ORGANIZATION_ADMIN, descriptors);
     }
@@ -138,8 +135,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @param privilegeId
      * @return
      */
-    private boolean checkAccess(String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-        User user = UserContext.current().getUser();
+    private boolean checkAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
 
         Organization organization = organizationProvider.findOrganizationById(organizationId);
 
@@ -148,7 +144,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             return false;
         }
 
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
 
         if(null == userIdentifier){
             LOGGER.debug("user identifierToken is null..");
@@ -162,7 +158,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             descriptors.add(descriptor);
         }
 
-        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), user.getId());
+        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
 
 
@@ -174,31 +170,31 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     @Override
-    public void checkUserAuthority(String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+    public void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
 
-        if(checkSuperAdmin(organizationId)){
+        if(checkSuperAdmin(userId, organizationId)){
             LOGGER.debug("check super admin privilege success...");
             return;
         }
 
-        if(checkModuleAdmin(ownerType, ownerId, organizationId, privilegeId)){
+        if(checkModuleAdmin(userId, ownerType, ownerId, organizationId, privilegeId)){
             LOGGER.debug("check module admin privilege success...");
             return;
         }
 
-        if(checkAccess(ownerType, ownerId, organizationId, privilegeId)){
+        if(checkAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
             LOGGER.debug("check privilege success...");
             return;
         }
 
-        if(checkOrganizationRoleAccess(organizationId, privilegeId)){
+        if(checkOrganizationRoleAccess(userId, organizationId, privilegeId)){
             LOGGER.debug("check role privilege success...");
             return;
         }
 
-        LOGGER.error("non-privileged, privilegeId={}, organizationId = {}", privilegeId, organizationId);
-        throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
-                "non-privileged.");
+        LOGGER.error("Insufficient privilege, privilegeId={}, organizationId = {}", privilegeId, organizationId);
+        throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                "Insufficient privilege");
     }
     
 }
