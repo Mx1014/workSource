@@ -35,7 +35,7 @@ CREATE TABLE `eh_contract_building_mappings` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `organization_id` BIGINT,
   `organization_name` VARCHAR(64),
-  `contract_id` INTEGER,
+  `contract_id` BIGINT,
   `contract_number` VARCHAR(128),
   `building_name` VARCHAR(128),
   `apartment_name` VARCHAR(128),
