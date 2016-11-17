@@ -922,7 +922,7 @@ public class YellowPageServiceImpl implements YellowPageService {
     @Override
     public List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId,
+        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(cmd.getOwnerType(), cmd.getOwnerId(),namespaceId,
                 cmd.getParentId(), CategoryAdminStatus.ACTIVE);
         return entityResultList.stream().map(r -> {
             ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
@@ -937,10 +937,10 @@ public class YellowPageServiceImpl implements YellowPageService {
     @Override
     public List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(namespaceId,
+        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(cmd.getOwnerType(), cmd.getOwnerId(), namespaceId,
                 cmd.getParentId(), CategoryAdminStatus.ACTIVE);
         return entityResultList.stream().map(r -> {
-            List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(namespaceId,
+            List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(cmd.getOwnerType(), cmd.getOwnerId(), namespaceId,
                     r.getId(), CategoryAdminStatus.ACTIVE);
             if (childCategories != null && childCategories.size() > 0) {
                 r.setDisplayMode(childCategories.get(0).getDisplayMode());
