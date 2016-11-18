@@ -23,7 +23,6 @@ public class FlowDTO {
     private Integer     moduleId;
     private Long     startNode;
     private Long     ownerId;
-    private Long     superviserId;
 
     public String getFlowName() {
 		return flowName;
@@ -151,14 +150,6 @@ public class FlowDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
-	}
-
-	public Long getSuperviserId() {
-		return superviserId;
-	}
-
-	public void setSuperviserId(Long superviserId) {
-		this.superviserId = superviserId;
 	}
 
 	@Override

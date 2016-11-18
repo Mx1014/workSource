@@ -22,7 +22,6 @@ CREATE TABLE `eh_flows` (
   `start_node` BIGINT NOT NULL DEFAULT 0,
   `end_node` BIGINT NOT NULL DEFAULT 0,
   `last_node` BIGINT NOT NULL DEFAULT 0,
-  `superviser_id` BIGINT NOT NULL DEFAULT 0,
 
   `string_tag1` VARCHAR(128),
   `string_tag2` VARCHAR(128),

@@ -4,9 +4,14 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.flow.ActionStepType;
+import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.rest.flow.UpdateFlowNameCommand;
 
 public interface FlowService {
 	/**
@@ -169,6 +174,32 @@ public interface FlowService {
 	 * @return
 	 */
 	List<FlowEventLog> findFlowEventDetail(FlowCase flowCase, FlowNode flowNode);
+
+	/**
+	 * 来自管理后台的创建 Flow 的请求
+	 * @param cmd
+	 * @return
+	 */
+	FlowDTO createFlow(CreateFlowCommand cmd);
+
+	/**
+	 * 列出 Flow 的简要列表
+	 * @param cmd
+	 * @return
+	 */
+	ListFlowBriefResponse listBriefFlows(ListFlowCommand cmd);
+
+	/**
+	 * 删除某一个工作流
+	 * @param flowId
+	 */
+	void deleteFlow(Long flowId);
+
+	/**
+	 * 修改工作流的名字
+	 * @param cmd
+	 */
+	FlowDTO updateFlowName(UpdateFlowNameCommand cmd);
 	
 	//TODO 日志信息分类：
 	
