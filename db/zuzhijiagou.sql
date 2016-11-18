@@ -115,17 +115,6 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 
 
 
-
--- INSERT INTO `eh_web_menu_privileges` VALUES ('999', '10001', '10000', '信息发布', '1', '1', '信息发布 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1000', '10002', '10000', '论坛/公告', '1', '1', '论坛/公告 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1001', '10003', '10000', '广告管理', '1', '1', '广告管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1002', '10004', '10000', '活动管理', '1', '1', '活动管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1003', '10005', '10000', '新闻管理', '1', '1', '新闻管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1004', '10006', '10000', '一键推送', '1', '1', '一键推送 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1005', '10045', '10000', '路演直播', '1', '1', '路演直播 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1006', '10046', '10000', '行业动态', '1', '1', '行业动态 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1007', '10049', '10000', '园区报', '1', '1', '园区报 全部权限', '710');
-
 INSERT INTO `eh_web_menu_privileges` VALUES ('1008', '10002', '10100', '论坛/公告', '1', '1', '论坛/公告 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1009', '10003', '10400', '广告管理', '1', '1', '广告管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1010', '10004', '10600', '活动管理', '1', '1', '活动管理 全部权限', '710');
@@ -135,29 +124,10 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1013', '10045', '10700', '路演�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1014', '10046', '10900', '行业动态', '1', '1', '行业动态 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1015', '10049', '10850', '园区报', '1', '1', '园区报 全部权限', '710');
 
--- INSERT INTO `eh_web_menu_privileges` VALUES ('1016', '10007', '20000', '物业服务', '1', '1', '物业服务 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1017', '10008', '20000', '物业报修', '1', '1', '物业报修 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1018', '10009', '20000', '物业缴费', '1', '1', '物业缴费 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1019', '10010', '20000', '品质核查', '1', '1', '品质核查 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1020', '10011', '20000', '设备巡检', '1', '1', '设备巡检 全部权限', '710');
-
 INSERT INTO `eh_web_menu_privileges` VALUES ('1021', '10008', '20100', '物业报修', '1', '1', '物业报修 全部权限', '710');
-SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-SELECT ((@web_menu_privilegel_id := @web_menu_privilegel_id + 1), '10008', `id` , '物业报修', '1', '1', '物业报修 全部权限', '710') FROM `eh_web_menus` WHERE `path` like '20100/%';
 INSERT INTO `eh_web_menu_privileges` VALUES ('1022', '10009', '20400', '物业缴费', '1', '1', '物业缴费 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1023', '10010', '20600', '品质核查', '1', '1', '品质核查 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1024', '10011', '20800', '设备巡检', '1', '1', '设备巡检 全部权限', '710');
-
--- INSERT INTO `eh_web_menu_privileges` VALUES ('1025', '10012', '30000', '项目管理', '1', '1', '项目管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1026', '10013', '30000', '项目信息', '1', '1', '项目信息 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1027', '10014', '30000', '楼栋管理', '1', '1', '楼栋管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1028', '10015', '30000', '门牌管理', '1', '1', '门牌管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1029', '10016', '30000', '用户管理', '1', '1', '用户管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1030', '10017', '30000', '用户认证', '1', '1', '用户认证 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1031', '10018', '30000', '客户资料', '1', '1', '客户资料 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1032', '10047', '30000', '企业管理', '1', '1', '企业管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1033', '10048', '30000', '业主管理', '1', '1', '业主管理 全部权限', '710');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1034', '10013', '30500', '项目信息', '1', '1', '项目信息 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1035', '10014', '31000', '楼栋管理', '1', '1', '楼栋管理 全部权限', '710');
@@ -167,24 +137,6 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1038', '10017', '35000', '用户�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1039', '10018', '37000', '客户资料', '1', '1', '客户资料 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1040', '10047', '33000', '企业管理', '1', '1', '企业管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1041', '10048', '38000', '业主管理', '1', '1', '业主管理 全部权限', '710');
-
--- INSERT INTO `eh_web_menu_privileges` VALUES ('1042', '10019', '40000', '运营服务', '1', '1', '运营服务 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1043', '10020', '40000', '招租管理', '1', '1', '招租管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1044', '10021', '40000', '工位预订', '1', '1', '工位预订 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1045', '10022', '40000', '服务热线', '1', '1', '服务热线 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1046', '10023', '40000', '资源预订', '1', '1', '资源预订 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1047', '10024', '40000', '服务联盟', '1', '1', '服务联盟 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1048', '10025', '40000', '创客空间', '1', '1', '创客空间 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1049', '10026', '40000', '结算管理', '1', '1', '结算管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1050', '10027', '40000', '运营统计', '1', '1', '运营统计 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1051', '10028', '40000', '停车缴费', '1', '1', '停车缴费 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1052', '10029', '40000', '车辆管理', '1', '1', '车辆管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1053', '10030', '40000', '大堂门禁', '1', '1', '大堂门禁 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1054', '10031', '40000', 'Wifi热点', '1', '1', 'Wifi热点 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1055', '10032', '40000', '一卡通', '1', '1', '一卡通 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1056', '10050', '40000', '场所预订', '1', '1', '场所预订 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1057', '10051', '40000', '服务预约', '1', '1', '服务预约 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1058', '10052', '40000', '园区简介', '1', '1', '园区简介 全部权限', '710');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1059', '10020', '40100', '招租管理', '1', '1', '招租管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1060', '10021', '40200', '工位预订', '1', '1', '工位预订 全部权限', '710');
@@ -203,16 +155,6 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1072', '10050', '41300', '场所�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1073', '10051', '41400', '服务预约', '1', '1', '服务预约 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1074', '10052', '10200', '园区简介', '1', '1', '园区简介 全部权限', '710');
 
--- INSERT INTO `eh_web_menu_privileges` VALUES ('1075', '10033', '50000', '内部管理', '1', '1', '内部管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1076', '10034', '50000', '组织架构', '1', '1', '组织架构 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1077', '10035', '50000', '岗位管理', '1', '1', '岗位管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1078', '10036', '50000', '职级管理', '1', '1', '职级管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1079', '10037', '50000', '人员管理', '1', '1', '人员管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1080', '10038', '50000', '认证管理', '1', '1', '认证管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1081', '10039', '50000', '考勤管理', '1', '1', '考勤管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1082', '10040', '50000', '视频会议', '1', '1', '视频会议 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1083', '10041', '50000', '公司门禁', '1', '1', '公司门禁 全部权限', '710');
-
 INSERT INTO `eh_web_menu_privileges` VALUES ('1084', '10034', '50100', '组织架构', '1', '1', '组织架构 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1085', '10035', '50200', '岗位管理', '1', '1', '岗位管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1086', '10036', '50300', '职级管理', '1', '1', '职级管理 全部权限', '710');
@@ -221,10 +163,6 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1088', '10038', '50500', '认证�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1089', '10039', '50600', '考勤管理', '1', '1', '考勤管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1090', '10040', '50700', '视频会议', '1', '1', '视频会议 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1091', '10041', '50800', '公司门禁', '1', '1', '公司门禁 全部权限', '710');
-
--- INSERT INTO `eh_web_menu_privileges` VALUES ('1091', '10042', '60000', '系统管理', '1', '1', '系统管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1092', '10043', '60000', '管理员管理', '1', '1', '管理员管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1093', '10044', '60000', '业务授权', '1', '1', '业务授权 全部权限', '710');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1094', '10043', '60100', '管理员管理', '1', '1', '管理员管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1095', '10044', '60200', '业务授权', '1', '1', '业务授权 全部权限', '710');
@@ -323,8 +261,8 @@ INSERT INTO `eh_web_menus` VALUES ('40440', '退款处理', '40400', null, 'refu
 INSERT INTO `eh_web_menus` VALUES ('40500', '服务联盟', '40000', null, null, '1', '2', '/40000/40500', 'park', '450');
 INSERT INTO `eh_web_menus` VALUES ('40510', '类型管理', '40500', null, 'service_type_management', '0', '2', '/40000/40500/40510', 'park', '451');
 INSERT INTO `eh_web_menus` VALUES ('40520', '机构管理', '40500', null, 'service_alliance', '0', '2', '/40000/40500/40520', 'park', '453');
-INSERT INTO `eh_web_menus` VALUES ('40530', '消息推送设置', '40500', null, 'message_push_setting', '0', '2', '/40500/40530', 'park', '455');
-INSERT INTO `eh_web_menus` VALUES ('40540', '申请记录', '40500', null, 'apply_record', '0', '2', '/40500/40540', 'park', '457');
+INSERT INTO `eh_web_menus` VALUES ('40530', '消息推送设置', '40500', null, 'message_push_setting', '0', '2', '/40000/40500/40530', 'park', '455');
+INSERT INTO `eh_web_menus` VALUES ('40540', '申请记录', '40500', null, 'apply_record', '0', '2', '/40000/40500/40540', 'park', '457');
 
 INSERT INTO `eh_web_menus` VALUES ('40600', '创客空间', '40000', null, 'market_zone', '0', '2', '/40000/40600', 'park', '460');
 
@@ -753,3 +691,16 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10056', '1005', '0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10057', '1005', '0', '1', UTC_TIMESTAMP());
+
+
+-- 添加 业务权限下面的子菜单
+SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+-- INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+-- SELECT ((@web_menu_privilegel_id := @web_menu_privilegel_id + 1), '10008', `id` , '物业报修', '1', '1', '物业报修 全部权限', '710') FROM `eh_web_menus` WHERE `path` like '20100/%';
+	
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
+(select t.* FROM eh_web_menus m
+JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
+ON m.id = t.menu_id
+) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges)
