@@ -2266,7 +2266,8 @@ public class QualityServiceImpl implements QualityService {
 			
 			qualityProvider.inactiveQualityInspectionStandardSpecificationMapBySpecificationId(specification.getId());
 		} else {
-			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))) {
+			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
+					&& !specification.getScopeId().equals(cmd.getScopeId())) {
 				QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.DELETE.getCode());
 				newSpecification.setReferId(specification.getId());
