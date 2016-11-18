@@ -2227,8 +2227,7 @@ public class QualityServiceImpl implements QualityService {
 	public void updateQualitySpecification(UpdateQualitySpecificationCommand cmd) {
 		QualityInspectionSpecifications specification = verifiedSpecificationById(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
-		if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
-				&& specification.getScopeId().equals(cmd.getScopeId())) {
+		if(specification.getScopeId().equals(cmd.getScopeId())) {
 			
 			specification.setName(cmd.getName());
 			specification.setDescription(cmd.getDescription());
@@ -2238,7 +2237,7 @@ public class QualityServiceImpl implements QualityService {
 			qualityProvider.updateQualitySpecification(specification);
 		} else {
 			if(SpecificationScopeCode.COMMUNITY.equals(SpecificationScopeCode.fromCode(cmd.getScopeCode()))
-					&& specification.getScopeId().equals(cmd.getScopeId())) {
+					&& !specification.getScopeId().equals(cmd.getScopeId())) {
 				QualityInspectionSpecifications newSpecification = ConvertHelper.convert(cmd, QualityInspectionSpecifications.class);
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.MODIFY.getCode());
 				newSpecification.setReferId(specification.getId());
