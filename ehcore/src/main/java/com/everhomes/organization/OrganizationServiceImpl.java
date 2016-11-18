@@ -7599,15 +7599,16 @@ System.out.println();
 		
 		if(OrganizationGroupType.fromCode(org.getGroupType()) != OrganizationGroupType.ENTERPRISE){
 			organizationId = org.getDirectlyEnterpriseId();
-			groupType = org.getGroupType();
 			org = checkOrganization(organizationId);
 		}
-		
+
 		List<String> groupTypes = new ArrayList<String>();
-		groupTypes.add(groupType);
-		
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
+		groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+
 		List<Organization> childOrganizations = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
-		
+
 		OrganizationMemberDTO dto = ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);;
 		
 		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();

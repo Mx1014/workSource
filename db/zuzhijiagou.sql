@@ -142,6 +142,9 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1019', '10010', '20000', '品质�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1020', '10011', '20000', '设备巡检', '1', '1', '设备巡检 全部权限', '710');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1021', '10008', '20100', '物业报修', '1', '1', '物业报修 全部权限', '710');
+SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+SELECT ((@web_menu_privilegel_id := @web_menu_privilegel_id + 1), '10008', `id` , '物业报修', '1', '1', '物业报修 全部权限', '710') FROM `eh_web_menus` WHERE `path` like '20100/%';
 INSERT INTO `eh_web_menu_privileges` VALUES ('1022', '10009', '20400', '物业缴费', '1', '1', '物业缴费 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1023', '10010', '20600', '品质核查', '1', '1', '品质核查 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1024', '10011', '20800', '设备巡检', '1', '1', '设备巡检 全部权限', '710');
