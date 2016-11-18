@@ -2734,6 +2734,8 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Override
 	public List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd) {
+		if(null == cmd.getParentId())
+			cmd.setParentId(0L);
 		List<ResourceCategoryDTO> list = listResourceCategories(cmd);
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 
@@ -2743,17 +2745,20 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 	
 	private void setresourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
-		for(ResourceCategoryDTO r: list) {
-			List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(r.getId(), namespaceId);
-			List<ResourceCategoryAssignmentDTO> resourceDTOs = resourceCategoryAssignments.stream().map(ra -> {
-				ResourceCategoryAssignmentDTO dto = ConvertHelper.convert(ra, ResourceCategoryAssignmentDTO.class);
-				Community community = communityProvider.findCommunityById(ra.getResourceId());
-				dto.setResourceName(community.getName());
-				return dto;
-			}).collect(Collectors.toList());
-			setresourceDTOs(r.getCategoryDTOs(), namespaceId);
-			r.setResourceDTOs(resourceDTOs);
+		if(null != list) {
+			for(ResourceCategoryDTO r: list) {
+				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(r.getId(), namespaceId);
+				List<ResourceCategoryAssignmentDTO> resourceDTOs = resourceCategoryAssignments.stream().map(ra -> {
+					ResourceCategoryAssignmentDTO dto = ConvertHelper.convert(ra, ResourceCategoryAssignmentDTO.class);
+					Community community = communityProvider.findCommunityById(ra.getResourceId());
+					dto.setResourceName(community.getName());
+					return dto;
+				}).collect(Collectors.toList());
+				setresourceDTOs(r.getCategoryDTOs(), namespaceId);
+				r.setResourceDTOs(resourceDTOs);
+			}
 		}
+		
 	}
 	
 	private ResourceCategoryDTO getChildCategories(List<ResourceCategoryDTO> list, ResourceCategoryDTO dto){
