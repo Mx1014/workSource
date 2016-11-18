@@ -17,35 +17,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import javax.servlet.http.HttpServletResponse;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -64,20 +36,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
