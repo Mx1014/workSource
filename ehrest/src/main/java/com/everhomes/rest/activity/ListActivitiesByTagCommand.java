@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>officialFlag:是否是官方活动</li>
  * <li>range:范围,周边活动传入6；同城活动传入4</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>categoryId: 活动类型id</li>
  *</ul>
  */
 public class ListActivitiesByTagCommand {
@@ -25,7 +26,17 @@ public class ListActivitiesByTagCommand {
     
     private Integer pageSize;
     
-    public Long getCommunity_id() {
+    private Long categoryId;
+    
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Long getCommunity_id() {
 		return community_id;
 	}
 

@@ -33,6 +33,7 @@ import com.everhomes.util.StringHelper;
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>maxQuantity: 限制人数</li>
+ * <li>categoryId: 活动类型id</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -69,6 +70,9 @@ public class ActivityPostCommand{
     private Byte videoState;
     
     private Integer maxQuantity;
+    
+    //added by xiongying
+    private Long categoryId;
 
 	public String getContentType() {
 		return contentType;
@@ -297,7 +301,15 @@ public class ActivityPostCommand{
         this.videoState = videoState;
     }
 
-    @Override
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

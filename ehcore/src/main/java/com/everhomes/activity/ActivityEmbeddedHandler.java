@@ -209,6 +209,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
+            if(cmd.getCategoryId() == null) {
+            	cmd.setCategoryId(0L);
+            }
+            
             if(activityService.isPostIdExist(post.getId())){
             	activityService.updatePost(cmd, post.getId());
             }

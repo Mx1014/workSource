@@ -328,6 +328,9 @@ public class ActivityServiceImpl implements ActivityService {
         //add by tt, 添加版本号，20161018
         activity.setVersion(UserContext.current().getVersion());
         
+        //add by xiongying, 添加类型id， 20161117
+        activity.setCategoryId(cmd.getCategoryId());
+        
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);
         
@@ -1488,6 +1491,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setPageSize(cmd.getPageSize());
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         execCmd.setOfficialFlag(cmd.getOfficialFlag());
+        execCmd.setCategoryId(cmd.getCategoryId());
         return listActivitiesByLocation(execCmd);
 		
         // 把公用的代码转移到listActivitiesByLocation()中，公司场景和小区场景获取经纬度的方式不一样 by lqs 20160419
@@ -1616,6 +1620,11 @@ public class ActivityServiceImpl implements ActivityService {
             condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
         }
 
+        //增加活动类型判断add by xiongying 20161117
+        if(null != cmd.getCategoryId()) {
+        	condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+        }
+        
         CrossShardListingLocator locator=new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         int ipageSize = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
@@ -2060,6 +2069,7 @@ public class ActivityServiceImpl implements ActivityService {
             execCmd.setPageSize(cmd.getPageSize());
             execCmd.setTag(cmd.getTag());
             execCmd.setRange(geoCharCount);
+            execCmd.setCategoryId(cmd.getCategoryId());
             if(999987L == namespaceId){
             	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
             }
@@ -2115,6 +2125,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setTag(cmd.getTag());
         execCmd.setPageSize(cmd.getPageSize());
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+        execCmd.setCategoryId(cmd.getCategoryId());
         if(999987L == namespaceId){
         	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
         }
