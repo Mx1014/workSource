@@ -8,6 +8,8 @@ import java.util.List;
 import java.util.UUID;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -44,6 +46,8 @@ import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class TechparkOpenServiceImpl implements TechparkOpenService{
+	
+	private final static Logger LOGGER = LoggerFactory.getLogger(TechparkOpenServiceImpl.class);
 
 	@Autowired
 	private AppNamespaceMappingProvider appNamespaceMappingProvider;
@@ -115,7 +119,13 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void insertOrUpdateBuildings(AppNamespaceMapping appNamespaceMapping, String varDataList) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync insert or update buildings~~~~");
+		}
 		if (StringUtils.isBlank(varDataList)) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync insert or update buildings, no data and return directly");
+			}
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
@@ -154,25 +164,40 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				buildingProvider.updateBuilding(building);
 			}
 		}
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync insert or update buildings, total="+list.size());
+		}
 	}
 
 	private Timestamp getTimestampDate(String dateString) {
-		SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-		try {
-			Date date = datetimeSF.parse(dateString);
-			return new Timestamp(date.getTime());
-		} catch (ParseException e) {
+		if (StringUtils.isNotBlank(dateString)) {
+			SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 			try {
-				Long time = Long.parseLong(dateString);
-				return new Timestamp(time);
-			} catch (Exception e2) {
+				Date date = datetimeSF.parse(dateString);
+				return new Timestamp(date.getTime());
+			} catch (ParseException e) {
+				try {
+					Long time = Long.parseLong(dateString);
+					return new Timestamp(time);
+				} catch (Exception e2) {
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("parse date error, date="+dateString);
+					}
+				}
 			}
 		}
 		return null;
 	}
 
 	private void deleteBuildings(AppNamespaceMapping appNamespaceMapping, String delDataList) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync delete buildings");
+		}
 		if (StringUtils.isBlank(delDataList)) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync delete buildings, no data and return directly");
+			}
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
@@ -189,6 +214,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				buildingProvider.updateBuilding(building);
 			}
 		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync delete buildings, total="+list.size());
+		}
 	}
 
 	private void syncApartments(AppNamespaceMapping appNamespaceMapping, String varDataList, String delDataList) {
@@ -200,7 +228,13 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void insertOrUpdateApartments(AppNamespaceMapping appNamespaceMapping, String varDataList) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync insert or update apartments");
+		}
 		if (StringUtils.isBlank(varDataList)) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync insert or update apartments, no data and return directly");
+			}
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
@@ -258,6 +292,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				addressProvider.updateAddress(address);
 			}
 		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync insert or update apartments, total="+list.size());
+		}
 	}
 
 	private Byte getLivingStatus(Byte livingStatus) {
@@ -290,7 +327,13 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void deleteApartments(AppNamespaceMapping appNamespaceMapping, String delDataList) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync delete apartments");
+		}
 		if (StringUtils.isBlank(delDataList)) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync end apartments, no data and return directly");
+			}
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
@@ -307,6 +350,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				addressProvider.updateAddress(address);
 			}
 		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync delete apartments, total="+list.size());
+		}
 	}
 
 	private void syncRentings(AppNamespaceMapping appNamespaceMapping, String varDataList, String delDataList) {
@@ -318,7 +364,13 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void insertOrUpdateRentings(AppNamespaceMapping appNamespaceMapping, String varDataList) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync insert or update rentings");
+		}
 		if (StringUtils.isBlank(varDataList)) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync insert or update rentings, no data and return directly");
+			}
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
@@ -363,10 +415,19 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				insertOrUpdateContracts(organization, customerRental.getContracts());
 			}
 		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync insert or update rentings, total="+list.size());
+		}
 	}
 
 	private void insertOrUpdateContracts(Organization organization, List<CustomerContract> contracts) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync insert or update contracts");
+		}
 		if (contracts == null || contracts.size() == 0) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync insert or update contracts, no data and return directly");
+			}
 			return;
 		}
 		
@@ -390,11 +451,19 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				insertOrUpdateContractBuildingMappings(contract, customerContract.getBuildings());
 			}
 		}
-		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync insert or update contracts, total="+contracts.size());
+		}
 	}
 
 	private void insertOrUpdateContractBuildingMappings(Contract contract, List<CustomerContractBuilding> buildings) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync insert or update contract building mappings");
+		}
 		if (buildings == null || buildings.size() == 0) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync insert or update contract building mappings, no data and return directly");
+			}
 			return;
 		}
 		for (CustomerContractBuilding customerContractBuilding : buildings) {
@@ -415,6 +484,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				contractBuildingMapping.setAreaSize(customerContractBuilding.getAreaSize());
 				contractBuildingMappingProvider.updateContractBuildingMapping(contractBuildingMapping);
 			}
+		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync insert or update contract building mappings, total="+buildings.size());
 		}
 	}
 
@@ -441,7 +513,13 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void deleteRentings(AppNamespaceMapping appNamespaceMapping, String delDataList) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync delete rentings");
+		}
 		if (StringUtils.isBlank(delDataList)) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync delete rentings, no data and return directly");
+			}
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
@@ -456,6 +534,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			}
 			contractProvider.deleteContractByOrganizationName(namespaceId, organization.getName());
 			contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, organization.getName());
+		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync delete rentings, total="+list.size());
 		}
 	}
 	
