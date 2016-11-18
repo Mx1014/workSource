@@ -7609,7 +7609,7 @@ System.out.println();
 
 		List<Organization> childOrganizations = organizationProvider.listOrganizationByGroupTypes(org.getPath() + "/%", groupTypes);
 
-		OrganizationMemberDTO dto = ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);;
+		OrganizationMemberDTO dto = ConvertHelper.convert(organizationMember, OrganizationMemberDTO.class);
 		
 		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
 		List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
