@@ -196,6 +196,42 @@ public class PmProviderImpl implements PmTaskProvider{
         List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
         return result;
 	}
+	
+	@Override
+	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long taskCategoryId, Byte status){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType));
+        if(null != ownerId)
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
+        if(null != taskCategoryId)
+        	query.addConditions(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId));
+        if(null != status)
+        	query.addConditions(Tables.EH_PM_TASKS.STATUS.eq(status));
+        
+        List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+        return result;
+	}
+	
+	@Override
+	public List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType));
+        if(null != ownerId)
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
+        if(null != taskCategoryId)
+        	query.addConditions(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId));
+        query.addConditions(Tables.EH_PM_TASKS.OPERATOR_STAR.ne((byte)0));
+        
+        List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+        return result;
+	}
+	
 	//查询管理员已办任务，未办任务， 用户发的任务
 //	@Cacheable(value="listPmTask",key="{#ownerType, #ownerId, #userId, #status}", unless="#result.size() == 0")
 	@SuppressWarnings({ "unchecked", "rawtypes" })

@@ -48,4 +48,8 @@ public interface PmTaskProvider {
 	PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId);
 	
 	Integer countUserProccsingPmTask(String ownerType, Long ownerId, Long userId);
+	
+	List<PmTask> listPmTask(String ownerType, Long ownerId, Long taskCategoryId, Byte status);
+	
+	List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId);
 }

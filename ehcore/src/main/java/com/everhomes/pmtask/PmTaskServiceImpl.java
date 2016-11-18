@@ -1391,6 +1391,52 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 	}
 
+//	@Scheduled(cron="0 5 0 1 * ? ")
+//	public void createTaskTargetStatistics(){
+//		
+//		this.coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_TARGET_STATISTICS.getCode()).enter(()-> {
+//			List<Namespace> namepaces = pmTaskProvider.listNamespace();
+//			long now = System.currentTimeMillis();
+//			Timestamp startDate = getBeginOfMonth(now);     
+//			Timestamp endDate = getEndOfMonth(now);
+//			boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
+//			if(isOperateByAdmin){
+//				startDate = getEndOfMonth(now);
+//				endDate = null;
+//			}
+//			for(Namespace n: namepaces){
+//				Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+//				Category ancestor = categoryProvider.findCategoryById(defaultId);
+//				
+//				if(ancestor != null){
+//					//防止定时任务重复执行
+//					List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(n.getId(), null, null, null, startDate,
+//							null, 10);
+//					if(list.size() != 0)
+//						break;
+//					
+//					List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
+//					if(null != categories && !categories.isEmpty()){
+//						List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
+//						for(Community community:communities){
+//							for(Category taskCategory: categories) {
+//								List<PmTask> tasks = pmTaskProvider.listPmTask4Stat(PmTaskOwnerType.COMMUNITY.getCode(), community.getId(), taskCategory.getId());
+//								PmTaskTargetStatistic statistic = new PmTaskTargetStatistic();
+//								statistic.setOwnerId(community.getId());
+//								statistic.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
+//								statistic.set
+//							}
+//						}
+//						
+//					}
+//					
+//				}
+//			}
+//		return null;
+//        });
+//		
+//	}
+	
 	private void createTaskStatistics(Long communityId, Long taskCategoryId, Long categoryId, Timestamp startDate,
 			Timestamp endDate, Long now, Integer namespaceId) {
 		PmTaskStatistics statistics = new PmTaskStatistics();
