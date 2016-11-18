@@ -60,6 +60,7 @@ import com.everhomes.rentalv2.RentalItem;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.forum.PostContentType;
@@ -227,25 +228,52 @@ public class QualityServiceImpl implements QualityService {
 		standard.setCreatorUid(user.getId());
 		standard.setOperatorUid(user.getId());
 		standard.setNamespaceId(user.getNamespaceId());
-		standard.setTargetId(cmd.getTargetId());
-		standard.setTargetType(cmd.getTargetType());
 		if(repeat == null) {
 			standard.setRepeatSettingId(0L);
 		} else {
 			standard.setRepeatSettingId(repeat.getId());
 		}
+		
+		if(cmd.getTargetId() != null && cmd.getTargetType() != null) {
+			standard.setTargetId(cmd.getTargetId());
+			standard.setTargetType(cmd.getTargetType());
 			
-		qualityProvider.createQualityInspectionStandards(standard);
+			qualityProvider.createQualityInspectionStandards(standard);
+			createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(), user.getId());
+			
+			List<StandardGroupDTO> groupList = cmd.getGroup();
+			processStandardGroups(groupList, standard);
+			processRepeatSetting(standard);
+			processStandardSpecification(standard, cmd.getSpecificationIds());
+			
+			QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
+			convertSpecificationToDTO(standard, dto);
+			return dto;
+		} else {
+			List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+			QualityStandardsDTO dto = new QualityStandardsDTO();
+			if(communities != null && communities.size() > 0) {
+				for(CommunityDTO community : communities) {
+					standard.setTargetId(community.getId());
+					standard.setTargetType(OwnerType.COMMUNITY.getCode());
+					
+					qualityProvider.createQualityInspectionStandards(standard);
+					createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(), user.getId());
+					
+					List<StandardGroupDTO> groupList = cmd.getGroup();
+					processStandardGroups(groupList, standard);
+					processRepeatSetting(standard);
+					processStandardSpecification(standard, cmd.getSpecificationIds());
+					
+					dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
+					convertSpecificationToDTO(standard, dto);
+					
+				}
+			}
+			return dto;
+		}
 		
-		createQualityInspectionStandardLogs(standard, QualityInspectionLogProcessType.INSERT.getCode(), user.getId());
 		
-		List<StandardGroupDTO> groupList = cmd.getGroup();
-		processStandardGroups(groupList, standard);
-		processRepeatSetting(standard);
-		processStandardSpecification(standard, cmd.getSpecificationIds());
-		QualityStandardsDTO dto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
-		convertSpecificationToDTO(standard, dto);
-		return dto;
 		
 	}
 	
