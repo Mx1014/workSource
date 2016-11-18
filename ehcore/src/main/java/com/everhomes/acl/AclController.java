@@ -270,4 +270,18 @@ public class AclController extends ControllerBase {
         return response;
     }
 
+
+    /**
+     * <b>URL: /acl/listUserRelatedProjectByMenuId</b>
+     * <p>用户的在这个菜单下的项目列表</p>
+     */
+    @RequestMapping("listUserRelatedProjectByMenuId")
+    @RestReturn(value=ProjectDTO.class, collection = true)
+    public RestResponse listUserRelatedProjectByMenuId(@Valid ListUserRelatedProjectByMenuIdCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.listUserRelatedProjectByMenuId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

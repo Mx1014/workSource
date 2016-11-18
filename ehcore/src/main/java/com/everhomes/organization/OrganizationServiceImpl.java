@@ -5769,7 +5769,18 @@ System.out.println();
 		
 		return groups;
 	}
-	
+
+	@Override
+	public List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId){
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if(null != userIdentifier && null != organization){
+			return this.getOrganizationMemberGroups(organizationGroupType, userIdentifier.getIdentifierToken(), organization.getPath());
+		}
+		return new ArrayList<>();
+	}
+
+
 	@Override
 	public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
 			List<String> groupTypes,Byte naviFlag) {
