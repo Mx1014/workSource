@@ -17,6 +17,7 @@ import javax.annotation.PostConstruct;
 
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
+import org.jooq.JoinType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -114,13 +115,16 @@ import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.AttachmentDTO;
+import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.GetTopicCommand;
 import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
 import com.everhomes.rest.forum.ListPostCommandResponse;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.PostFavoriteFlag;
+import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.forum.TopicPublishStatus;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -129,6 +133,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
+import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -148,6 +153,7 @@ import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -264,6 +270,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private WorkerPoolFactory workerPoolFactory;
+    
+    @Autowired
+    private ConfigurationProvider configProvider;
     
     @PostConstruct
     public void setup() {
@@ -2185,6 +2194,37 @@ public class ActivityServiceImpl implements ActivityService {
 		return response;
 	}
 
+//	@Override
+//	public ListActivitiesReponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand command) {
+//		Long userId = UserContext.current().getUser().getId();
+//		QueryOrganizationTopicCommand cmd = new QueryOrganizationTopicCommand();
+//		SceneTokenDTO sceneTokenDTO = WebTokenGenerator.getInstance().fromWebToken(command.getSceneToken(), SceneTokenDTO.class);
+//		processOfficalActivitySceneToken(userId, sceneTokenDTO, cmd);
+//		cmd.setContentCategory(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY);
+//		cmd.setEmbeddedAppId(AppConstants.APPID_ACTIVITY);
+//		cmd.setOfficialFlag(OfficialFlag.YES.getCode());
+//		cmd.setPageAnchor(command.getPageAnchor());
+//		cmd.setPageSize(command.getPageSize());
+//		
+//		// 由于listOrgTopics查询官方活动时，当一个机构下面没有管理小区或者以普通公司的身份查询的时候，会查不到东西，使用新的方法来解决 by lqs 20160730
+//		// ListPostCommandResponse postResponse = forumService.listOrgTopics(cmd);
+//		ListPostCommandResponse postResponse = forumService.listOfficialActivityTopics(cmd);
+//		List<PostDTO> posts = postResponse.getPosts();		
+//		final List<ActivityDTO> activities = new ArrayList<>();
+//		if (posts != null && posts.size() > 0) {
+//			posts.forEach(p->{
+//				//吐槽：这里ActivityPostCommand和ActivityDTO中相同的字段，名字竟然不一样，如postUri和postUrl
+//				ActivityDTO activity = (ActivityDTO) StringHelper.fromJsonString(p.getEmbeddedJson().replace("posterUri", "posterUrl"), ActivityDTO.class);
+//				activity.setFavoriteFlag(p.getFavoriteFlag());
+//				fixupVideoInfo(activity);//added by janson
+//				activities.add(activity);
+//			});
+//		}
+//		
+//		ListActivitiesReponse reponse = new ListActivitiesReponse(postResponse.getNextPageAnchor(), activities);
+//		return reponse;
+//	}
+	
 	@Override
 	public ListActivitiesReponse listOfficialActivitiesByScene(ListNearbyActivitiesBySceneCommand command) {
 		Long userId = UserContext.current().getUser().getId();
@@ -2196,25 +2236,154 @@ public class ActivityServiceImpl implements ActivityService {
 		cmd.setOfficialFlag(OfficialFlag.YES.getCode());
 		cmd.setPageAnchor(command.getPageAnchor());
 		cmd.setPageSize(command.getPageSize());
+		cmd.setCategoryId(command.getCategoryId());
 		
-		// 由于listOrgTopics查询官方活动时，当一个机构下面没有管理小区或者以普通公司的身份查询的时候，会查不到东西，使用新的方法来解决 by lqs 20160730
-		// ListPostCommandResponse postResponse = forumService.listOrgTopics(cmd);
-		ListPostCommandResponse postResponse = forumService.listOfficialActivityTopics(cmd);
-		List<PostDTO> posts = postResponse.getPosts();		
-		final List<ActivityDTO> activities = new ArrayList<>();
-		if (posts != null && posts.size() > 0) {
-			posts.forEach(p->{
-				//吐槽：这里ActivityPostCommand和ActivityDTO中相同的字段，名字竟然不一样，如postUri和postUrl
-				ActivityDTO activity = (ActivityDTO) StringHelper.fromJsonString(p.getEmbeddedJson().replace("posterUri", "posterUrl"), ActivityDTO.class);
-				activity.setFavoriteFlag(p.getFavoriteFlag());
-				fixupVideoInfo(activity);//added by janson
-				activities.add(activity);
-			});
-		}
+		ListActivitiesReponse activities = listOfficialActivities(cmd);
 		
-		ListActivitiesReponse reponse = new ListActivitiesReponse(postResponse.getNextPageAnchor(), activities);
-		return reponse;
+		return activities;
 	}
+	
+	private ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd) {
+		long startTime = System.currentTimeMillis();
+        User operator = UserContext.current().getUser();
+        Long operatorId = operator.getId();
+        Long organizationId = cmd.getOrganizationId();
+        Long communityId = cmd.getCommunityId();
+        List<Long> forumIds = new ArrayList<Long>();
+        
+        List<Long> communityIdList = new ArrayList<Long>();
+        // 获取所管理的所有小区对应的社区论坛
+        if(organizationId != null) {
+            ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+            command.setOrganizationId(organizationId);
+            List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+            if(communities != null){
+                for (CommunityDTO communityDTO : communities) {
+                    communityIdList.add(communityDTO.getId());
+                    forumIds.add(communityDTO.getDefaultForumId());
+                }
+            }
+        }
+        // 办公地点所在园区对应的社区论坛
+        if(communityId != null) {
+            Community community = communityProvider.findCommunityById(communityId);
+            communityIdList.add(community.getId());
+            forumIds.add(community.getDefaultForumId());
+        }
+        
+        // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
+        if(forumIds.size() == 0) {
+            LOGGER.error("Forum not found for offical activities, cmd={}", cmd);
+            return null;
+        }
+        
+        Condition activityCondition = Tables.EH_ACTIVITIES.FORUM_ID.in(forumIds);
+        
+        //增加categoryId add by xiongying 20161118
+        if(null != cmd.getCategoryId()) {
+        	activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+        }
+        
+        
+        // 可见性条件：如果有当前小区/园区，则加上小区条件；如果有对应的管理机构，则加上机构条件；这两个条件为或的关系；
+        Condition communityCondition = null;
+        if(communityId != null) {
+            communityCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+            communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(communityId));
+        }
+        Condition orgCondition = null;
+        if(organizationId != null) {
+            orgCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+            orgCondition = orgCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(organizationId));
+        }
+        Condition visibleCondition = communityCondition;
+        if(visibleCondition == null) {
+            visibleCondition = orgCondition;
+        } else {
+        	if (orgCondition != null) {
+        		visibleCondition = visibleCondition.or(orgCondition);
+			}
+        }
+        
+        Condition condition = activityCondition;
+        if(visibleCondition != null) {
+            condition = condition.and(visibleCondition);
+        }
+        condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
+        CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<ActivityDTO> dtos = this.getOrgActivities(locator, pageSize, condition, cmd.getPublishStatus());
+        if(LOGGER.isInfoEnabled()) {
+            long endTime = System.currentTimeMillis();
+            LOGGER.info("Query offical activities, userId=" + operatorId + ", size=" + dtos.size() 
+                + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+        }   
+        
+        ListActivitiesReponse response = new ListActivitiesReponse(locator.getAnchor(), dtos);
+        return response;
+	}
+	
+	private List<ActivityDTO> getOrgActivities(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
+    	User user = UserContext.current().getUser();
+    	
+    	Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
+    	
+    	
+    	condition = condition.and(Tables.EH_ACTIVITIES.STATUS.eq(PostStatus.ACTIVE.getCode()));
+        
+        if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.UNPUBLISHED){
+        	condition = condition.and(Tables.EH_ACTIVITIES.START_TIME.gt(timestemp));
+        }
+        
+        if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.PUBLISHED){
+        	condition = condition.and(Tables.EH_ACTIVITIES.START_TIME.lt(timestemp));
+        	condition = condition.and(Tables.EH_ACTIVITIES.END_TIME.gt(timestemp));
+        }
+        
+        if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.EXPIRED){
+        	condition = condition.and(Tables.EH_ACTIVITIES.END_TIME.lt(timestemp));
+        }
+        
+        List<Activity> activities = this.activityProvider.listActivities(locator, pageSize + 1, condition);
+
+        List<ActivityDTO> activityDtos = activities.stream().map(activity->{
+            Post post = forumProvider.findPostById(activity.getPostId());
+            if(post==null){
+                return null;
+            }
+            if(activity.getPosterUri()==null){
+            	this.forumProvider.populatePostAttachments(post);
+            	List<Attachment> attachmentList = post.getAttachments();
+            	if(attachmentList != null && attachmentList.size() != 0){
+            		for(Attachment attachment : attachmentList){
+            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+            				activity.setPosterUri(attachment.getContentUri());
+            			break;
+            		}
+            	}
+            }
+            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+            dto.setActivityId(activity.getId());
+            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+            dto.setProcessStatus(getStatus(activity).getCode());
+            dto.setFamilyId(activity.getCreatorFamilyId());
+            dto.setStartTime(activity.getStartTime().toString());
+            dto.setStopTime(activity.getEndTime().toString());
+            dto.setGroupId(activity.getGroupId());
+            dto.setPosterUrl(getActivityPosterUrl(activity));
+            fixupVideoInfo(dto);
+            return dto;
+        }).filter(r->r!=null).collect(Collectors.toList());
+        
+        return activityDtos;
+    }
 
 	private void processOfficalActivitySceneToken(Long userId, SceneTokenDTO sceneTokenDTO, QueryOrganizationTopicCommand cmd) {
 		Long organizationId = null;
