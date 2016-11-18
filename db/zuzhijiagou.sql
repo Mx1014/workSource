@@ -618,33 +618,33 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('144', '757', '20640', '修改记�
 -- 考勤管理：打卡 菜单改变
 delete from eh_acl_privileges where id >= 790 and id <= 794;
 delete from eh_acl_privileges where id >= 822 and id <= 823;
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (790, '0', '加班申请', '加班申请 全部权限', NULL);
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (790, '0', '加班申请', '加班申请 全部权限', NULL);
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('154', '795', '50630', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ('155', '795', '50631', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
-INSERT INTO `eh_web_menu_privileges` VALUES ('156', '796', '50632', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
-INSERT INTO `eh_web_menu_privileges` VALUES ('153', '821', '50633', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('154', '795', '50630', '考勤规则', '1', '1', '考勤规则 全部权限', '572'); 
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('155', '795', '50631', '通用规则设置', '1', '1', '通用规则设置 全部权限', '310');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('156', '796', '50632', '特殊个人设置', '1', '1', '特殊个人设置 全部权限', '320');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('153', '821', '50633', '请假类型设置', '1', '1', '请假类型设置 全部权限', '320');
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('157', '797', '50640', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('157', '797', '50640', '打卡详情', '1', '1', '打卡详情 全部权限', '573'); 
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('159', '798', '50650', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
-INSERT INTO `eh_web_menu_privileges` VALUES ('160', '798', '50651', '异常申请', '1', '1', '异常申请 全部权限', '510');
-INSERT INTO `eh_web_menu_privileges` VALUES ('161', '799', '50652', '请假申请', '1', '1', '请假申请 全部权限', '520');
-INSERT INTO `eh_web_menu_privileges` VALUES ('158', '790', '50653', '加班申请', '1', '1', '加班申请 全部权限', '521');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('159', '798', '50650', '申请处理', '1', '1', '申请处理 全部权限', '574'); 
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('160', '798', '50651', '异常申请', '1', '1', '异常申请 全部权限', '510');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('161', '799', '50652', '请假申请', '1', '1', '请假申请 全部权限', '520');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('158', '790', '50653', '加班申请', '1', '1', '加班申请 全部权限', '521');
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('162', '820', '50660', '考勤统计', '1', '1', '考勤统计 全部权限', '575'); 
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('163', '10053', '50210', '通用岗位', '1', '1', '通用岗位 全部权限', '520');
-INSERT INTO `eh_web_menu_privileges` VALUES ('164', '10054', '50220', '岗位管理', '1', '1', '岗位管理 全部权限', '521');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('163', '10053', '50210', '通用岗位', '1', '1', '通用岗位 全部权限', '520');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ('164', '10054', '50220', '岗位管理', '1', '1', '岗位管理 全部权限', '521');
 -- 新增通用岗位权限
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10053, '0', '通用岗位', '通用岗位 全部权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10054, '0', '岗位管理', '岗位管理 全部权限', NULL);
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10053, '0', '通用岗位', '通用岗位 全部权限', NULL);
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10054, '0', '岗位管理', '岗位管理 全部权限', NULL);
 
 
-select * from eh_acl_privileges where id >= 10001 and id <= 10054;
+select * from eh_acl_privileges where id >= 10001 and id <= 10052;
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM `eh_acl_privileges` WHERE id >= 10001 and id <= 10054;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM `eh_acl_privileges` WHERE id >= 10001 and id <= 10052;
 
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_service_module_privileges` WHERE module_id in (select id from eh_service_modules where type = 1);
@@ -659,6 +659,21 @@ SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,
 -- INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
 --	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10053', '1005', '0', '1', '2016-10-25 10:18:59');
 
+
+-- 添加 业务权限下面的子菜单
+SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+-- INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+-- SELECT ((@web_menu_privilegel_id := @web_menu_privilegel_id + 1), '10008', `id` , '物业报修', '1', '1', '物业报修 全部权限', '710') FROM `eh_web_menus` WHERE `path` like '20100/%';
+	
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+
+SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
+(select t.* FROM eh_web_menus m
+JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
+ON m.id = t.menu_id
+) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges where privilege_id>=10000)
+
+
 -- 新增俱乐部菜单
 INSERT INTO `eh_web_menus` VALUES ('10750', '俱乐部', '10000', null, 'groups', '0', '2', '/10000/10750', 'park', '180');
 INSERT INTO `eh_web_menus` VALUES ('10751', '俱乐部管理', '10750', null, 'groups_management', '0', '2', '/10000/10750/10751', 'park', '181');
@@ -669,38 +684,16 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('53', '10750', '1', '10055', NULL, '0', UTC_TIMESTAMP());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10055, '0', '俱乐部 管理员', '俱乐部 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10056, '0', '俱乐部管理', '俱乐部管理 全部权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10057, '0', '审核俱乐部', '审核俱乐部 全部权限', NULL);
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10056, '0', '俱乐部管理', '俱乐部管理 全部权限', NULL);
+-- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10057, '0', '审核俱乐部', '审核俱乐部 全部权限', NULL);
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('167', '10056', '10750', '俱乐部管理', '1', '1', '俱乐部管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('168', '10057', '10750', '审核俱乐部', '1', '1', '审核俱乐部 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('166', '10055', '10750', '俱乐部管理', '1', '1', '俱乐部管理 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('167', '10055', '10751', '俱乐部管理', '1', '1', '俱乐部管理 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('168', '10055', '10752', '审核俱乐部', '1', '1', '审核俱乐部 全部权限', '710');
 
-INSERT INTO `eh_web_menu_privileges` VALUES ('169', '10056', '10751', '俱乐部管理', '1', '1', '俱乐部管理 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('170', '10057', '10751', '审核俱乐部', '1', '1', '审核俱乐部 全部权限', '710');
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10055', '1001', '0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10056', '1001', '0', '1', UTC_TIMESTAMP());
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10057', '1001', '0', '1', UTC_TIMESTAMP());
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10055', '1005', '0', '1', UTC_TIMESTAMP());
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10056', '1005', '0', '1', UTC_TIMESTAMP());
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10057', '1005', '0', '1', UTC_TIMESTAMP());
-
-
--- 添加 业务权限下面的子菜单
-SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
--- INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
--- SELECT ((@web_menu_privilegel_id := @web_menu_privilegel_id + 1), '10008', `id` , '物业报修', '1', '1', '物业报修 全部权限', '710') FROM `eh_web_menus` WHERE `path` like '20100/%';
-	
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
-(select t.* FROM eh_web_menus m
-JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
-ON m.id = t.menu_id
-) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges)
