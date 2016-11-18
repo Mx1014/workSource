@@ -3,8 +3,10 @@ package com.everhomes.openapi;
 
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -60,12 +62,14 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 	@Override
 	public ContractBuildingMapping findContractBuildingMappingByName(String contractNumber, String buildingName,
 			String apartmentName) {
-		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+		SelectConditionStep<Record> step =getReadOnlyContext().select().from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
-				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
 				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.eq(apartmentName))
-				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-				.fetchOne();
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		if (StringUtils.isNotBlank(buildingName)) {
+			step = step.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName));
+		}
+		Record record = step.fetchOne();
 		if (record != null) {
 			return ConvertHelper.convert(record, ContractBuildingMapping.class);
 		}

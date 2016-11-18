@@ -24,8 +24,11 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+
+import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.SelectConditionStep;
 import org.jooq.SelectQuery;
 import org.jooq.impl.DSL;
 import org.slf4j.Logger;
@@ -344,13 +347,16 @@ public class AddressProviderImpl implements AddressProvider {
 	@Override
 	public Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		Record record = context.select().from(Tables.EH_ADDRESSES)
+		SelectConditionStep<Record> step = context.select().from(Tables.EH_ADDRESSES)
 	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
 	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
-	        .and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName))
 	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
-	        .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
-	        .fetchOne();
+	        .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		if (StringUtils.isNotBlank(buildingName)) {
+			step = step.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName));
+		}
+	    Record record = step.fetchOne();
+	    
 		if (record != null) {
 			return ConvertHelper.convert(record, Address.class);
 		}

@@ -470,6 +470,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
 			if (contractBuildingMapping == null) {
 				contractBuildingMapping = new ContractBuildingMapping();
+				contractBuildingMapping.setNamespaceId(contract.getNamespaceId());
+				contractBuildingMapping.setOrganizationId(contract.getOrganizationId());
+				contractBuildingMapping.setOrganizationName(contract.getOrganizationName());
 				contractBuildingMapping.setContractId(contract.getId());
 				contractBuildingMapping.setContractNumber(contract.getContractNumber());
 				contractBuildingMapping.setBuildingName(customerContractBuilding.getBuildingName());
