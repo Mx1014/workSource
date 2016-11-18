@@ -1215,7 +1215,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 	
 	private List<PmTaskStatistics> mergeTaskCategoryList(List<PmTaskStatistics> list) {
-		List<PmTaskStatistics> result = new ArrayList<PmTaskStatistics>();
+		
 		Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 		for(PmTaskStatistics p: list){
 			Long id = p.getTaskCategoryId();
@@ -1237,6 +1237,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			tempMap.put(id, p);
 		}
 	
+		List<PmTaskStatistics> result = new ArrayList<PmTaskStatistics>();
 		for(PmTaskStatistics p1:tempMap.values()){
 			result.add(p1);
 		}
@@ -1370,42 +1371,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 					List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
 					for(Community community:communities){
 						for(Category taskCategory: categories) {
-							
+							createTaskStatistics(community.getId(), taskCategory.getId(), 0L, startDate, endDate, now, n.getId());
+
 							List<Category> tempCategories = categoryProvider.listTaskCategories(n.getId(), taskCategory.getId(), null, null, null);
 							for(Category category: tempCategories) {
-								PmTaskStatistics statistics = new PmTaskStatistics();
-								Integer totalCount = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), null, startDate, endDate);
-								Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
-								Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
-								Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
-								Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.CLOSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
 								
-								Integer star1 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)1, startDate, endDate);
-								Integer star2 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)2, startDate, endDate);
-								Integer star3 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)3, startDate, endDate);
-								Integer star4 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)4, startDate, endDate);
-								Integer star5 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)5, startDate, endDate);
-								
-								statistics.setTaskCategoryId(taskCategory.getId());
-								statistics.setCategoryId(category.getId());
-								statistics.setCreateTime(new Timestamp(now));
-								statistics.setDateStr(startDate);
-								statistics.setNamespaceId(n.getId());
-								statistics.setOwnerId(community.getId());
-								statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-								
-								statistics.setTotalCount(totalCount);
-								statistics.setUnprocessCount(unprocessCount);
-								statistics.setProcessedCount(processedCount);
-								statistics.setProcessingCount(processingCount);
-								statistics.setCloseCount(closeCount);
-								
-								statistics.setStar1(star1);
-								statistics.setStar2(star2);
-								statistics.setStar3(star3);
-								statistics.setStar4(star4);
-								statistics.setStar5(star5);
-								pmTaskProvider.createTaskStatistics(statistics);
+								createTaskStatistics(community.getId(), taskCategory.getId(), category.getId(), startDate, endDate, now, n.getId());
 							}
 							
 						}
@@ -1420,41 +1391,42 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 	}
 
-//	private void createTaskStatistics(Long communityId, Long taskCategoryId) {
-//		PmTaskStatistics statistics = new PmTaskStatistics();
-//		Integer totalCount = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), null, startDate, endDate);
-//		Integer unprocessCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.UNPROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
-//		Integer processingCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSING.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
-//		Integer processedCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.PROCESSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
-//		Integer closeCount = pmTaskProvider.countTask(community.getId(), PmTaskStatus.CLOSED.getCode(), taskCategory.getId(), category.getId(), null, startDate, endDate);
-//		
-//		Integer star1 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)1, startDate, endDate);
-//		Integer star2 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)2, startDate, endDate);
-//		Integer star3 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)3, startDate, endDate);
-//		Integer star4 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)4, startDate, endDate);
-//		Integer star5 = pmTaskProvider.countTask(community.getId(), null, taskCategory.getId(), category.getId(), (byte)5, startDate, endDate);
-//		
-//		statistics.setTaskCategoryId(taskCategory.getId());
-//		statistics.setCategoryId(category.getId());
-//		statistics.setCreateTime(new Timestamp(now));
-//		statistics.setDateStr(startDate);
-//		statistics.setNamespaceId(n.getId());
-//		statistics.setOwnerId(community.getId());
-//		statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-//		
-//		statistics.setTotalCount(totalCount);
-//		statistics.setUnprocessCount(unprocessCount);
-//		statistics.setProcessedCount(processedCount);
-//		statistics.setProcessingCount(processingCount);
-//		statistics.setCloseCount(closeCount);
-//		
-//		statistics.setStar1(star1);
-//		statistics.setStar2(star2);
-//		statistics.setStar3(star3);
-//		statistics.setStar4(star4);
-//		statistics.setStar5(star5);
-//		pmTaskProvider.createTaskStatistics(statistics);
-//	}
+	private void createTaskStatistics(Long communityId, Long taskCategoryId, Long categoryId, Timestamp startDate,
+			Timestamp endDate, Long now, Integer namespaceId) {
+		PmTaskStatistics statistics = new PmTaskStatistics();
+		Integer totalCount = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, null, startDate, endDate);
+		Integer unprocessCount = pmTaskProvider.countTask(communityId, PmTaskStatus.UNPROCESSED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		Integer processingCount = pmTaskProvider.countTask(communityId, PmTaskStatus.PROCESSING.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		Integer processedCount = pmTaskProvider.countTask(communityId, PmTaskStatus.PROCESSED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		Integer closeCount = pmTaskProvider.countTask(communityId, PmTaskStatus.CLOSED.getCode(), taskCategoryId, categoryId, null, startDate, endDate);
+		
+		Integer star1 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)1, startDate, endDate);
+		Integer star2 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)2, startDate, endDate);
+		Integer star3 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)3, startDate, endDate);
+		Integer star4 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)4, startDate, endDate);
+		Integer star5 = pmTaskProvider.countTask(communityId, null, taskCategoryId, categoryId, (byte)5, startDate, endDate);
+		
+		statistics.setTaskCategoryId(taskCategoryId);
+		statistics.setCategoryId(categoryId);
+		statistics.setCreateTime(new Timestamp(now));
+		statistics.setDateStr(startDate);
+		statistics.setNamespaceId(namespaceId);
+		statistics.setOwnerId(communityId);
+		statistics.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
+		
+		statistics.setTotalCount(totalCount);
+		statistics.setUnprocessCount(unprocessCount);
+		statistics.setProcessedCount(processedCount);
+		statistics.setProcessingCount(processingCount);
+		statistics.setCloseCount(closeCount);
+		
+		statistics.setStar1(star1);
+		statistics.setStar2(star2);
+		statistics.setStar3(star3);
+		statistics.setStar4(star4);
+		statistics.setStar5(star5);
+		pmTaskProvider.createTaskStatistics(statistics);
+	}
 	
 	private Timestamp getBeginOfMonth(Long time){
 		Calendar calendar = Calendar.getInstance();
@@ -1983,41 +1955,43 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<TaskCategoryStatisticsDTO> list = new ArrayList<TaskCategoryStatisticsDTO>();
 		outer:
 		for(PmTaskStatistics pts: temp) {
-			Community community = communityProvider.findCommunityById(pts.getOwnerId());
-			for(TaskCategoryStatisticsDTO d: list) {
-				if(pts.getOwnerId().equals(d.getOwnerId())) {
-					CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
-					categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
-					Category category = categoryProvider.findCategoryById(pts.getCategoryId());
-					categoryStatisticsDTO.setCategoryName(category.getName());
-					categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
-					categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
-					categoryStatisticsDTO.setOwnerName(community.getName());
-					d.getRequests().add(categoryStatisticsDTO);
-					continue outer;
+			if(null != pts.getCategoryId() && pts.getCategoryId() != 0) {
+				Community community = communityProvider.findCommunityById(pts.getOwnerId());
+				for(TaskCategoryStatisticsDTO d: list) {
+					if(pts.getOwnerId().equals(d.getOwnerId())) {
+						CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
+						categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
+						Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+						categoryStatisticsDTO.setCategoryName(category.getName());
+						categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+						categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
+						categoryStatisticsDTO.setOwnerName(community.getName());
+						d.getRequests().add(categoryStatisticsDTO);
+						continue outer;
+					}
 				}
-			}
-			TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
-			
-			Category taskCategory = categoryProvider.findCategoryById(pts.getTaskCategoryId());
-			Category category = categoryProvider.findCategoryById(pts.getCategoryId());
+				TaskCategoryStatisticsDTO dto = new TaskCategoryStatisticsDTO();
+				
+				Category taskCategory = categoryProvider.findCategoryById(pts.getTaskCategoryId());
+				Category category = categoryProvider.findCategoryById(pts.getCategoryId());
 
-			dto.setTaskCategoryId(pts.getTaskCategoryId());
-			dto.setTaskCategoryName(taskCategory.getName());
-			dto.setOwnerId(pts.getOwnerId());
-//			dto.setOwnerName(community.getName());
-			CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
-			categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
-			categoryStatisticsDTO.setCategoryName(category.getName());
-			categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
-			categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
-			categoryStatisticsDTO.setOwnerName(community.getName());
-			
-			List<CategoryStatisticsDTO> list2 = new ArrayList<CategoryStatisticsDTO>();
-			list2.add(categoryStatisticsDTO);
-			dto.setRequests(list2);
-			
-			list.add(dto);
+				dto.setTaskCategoryId(pts.getTaskCategoryId());
+				dto.setTaskCategoryName(taskCategory.getName());
+				dto.setOwnerId(pts.getOwnerId());
+//				dto.setOwnerName(community.getName());
+				CategoryStatisticsDTO categoryStatisticsDTO = new CategoryStatisticsDTO();
+				categoryStatisticsDTO.setCategoryId(pts.getCategoryId());
+				categoryStatisticsDTO.setCategoryName(category.getName());
+				categoryStatisticsDTO.setTotalCount(pts.getTotalCount());
+				categoryStatisticsDTO.setOwnerId(pts.getOwnerId());
+				categoryStatisticsDTO.setOwnerName(community.getName());
+				
+				List<CategoryStatisticsDTO> list2 = new ArrayList<CategoryStatisticsDTO>();
+				list2.add(categoryStatisticsDTO);
+				dto.setRequests(list2);
+				
+				list.add(dto);
+			}
 		}
 		
 		return list;
@@ -2098,23 +2072,25 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Map<Long, PmTaskStatistics> tempMap = new HashMap<>();
 		for(PmTaskStatistics p: list){
 			Long id = p.getCategoryId();
-			PmTaskStatistics pts = null;
-			if(null != id) {
-				if(tempMap.containsKey(id)){
-					pts = tempMap.get(id);
-					pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
-					pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
-					pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
-					pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
-					pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
-					pts.setStar1(pts.getStar1() + p.getStar1());
-					pts.setStar2(pts.getStar2() + p.getStar2());
-					pts.setStar3(pts.getStar3() + p.getStar3());
-					pts.setStar4(pts.getStar4() + p.getStar4());
-					pts.setStar5(pts.getStar5() + p.getStar5());
-					continue;
+			if(null != id && id != 0) {
+				PmTaskStatistics pts = null;
+				if(null != id) {
+					if(tempMap.containsKey(id)){
+						pts = tempMap.get(id);
+						pts.setTotalCount(pts.getTotalCount() + p.getTotalCount());
+						pts.setUnprocessCount(pts.getUnprocessCount() + p.getUnprocessCount());
+						pts.setProcessingCount(pts.getProcessingCount() + p.getProcessingCount());
+						pts.setProcessedCount(pts.getProcessedCount() + p.getProcessedCount());
+						pts.setCloseCount(pts.getCloseCount() + p.getCloseCount());
+						pts.setStar1(pts.getStar1() + p.getStar1());
+						pts.setStar2(pts.getStar2() + p.getStar2());
+						pts.setStar3(pts.getStar3() + p.getStar3());
+						pts.setStar4(pts.getStar4() + p.getStar4());
+						pts.setStar5(pts.getStar5() + p.getStar5());
+						continue;
+					}
+					tempMap.put(id, p);
 				}
-				tempMap.put(id, p);
 			}
 		}
 		list.clear();
