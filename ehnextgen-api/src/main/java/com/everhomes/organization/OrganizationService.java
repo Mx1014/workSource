@@ -383,4 +383,6 @@ public interface OrganizationService {
 	ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd);
 	List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,
 			List<Long> memberUids);
+
+	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId);
 }

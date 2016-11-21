@@ -250,4 +250,11 @@ public interface RolePrivilegeService {
      * @return
      */
     List<Long> getUserCommunityPrivileges(Long communityId, Long userId);
+
+	/**
+	 * 获取项目
+	 * @param cmd
+	 * @return
+     */
+	List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd);
 }

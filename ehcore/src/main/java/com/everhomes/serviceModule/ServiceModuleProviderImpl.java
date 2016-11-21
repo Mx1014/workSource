@@ -146,13 +146,37 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
-	public List<ServiceModuleAssignment> listResourceAssignments(String targetType, Long targetId, Long organizationId) {
+	public List<ServiceModuleAssignment> listResourceAssignments(String targetType, Long targetId, Long organizationId, List<Long> moduleIds) {
 		List<ServiceModuleAssignment> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
 		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
+		if(null != moduleIds && moduleIds.size() >0){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.in(moduleIds));
+		}
+		query.addConditions(cond);
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE);
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));
+			return null;
+		});
+		return results;
+	}
+
+	@Override
+	public List<ServiceModuleAssignment> listResourceAssignments(String targetType, List<Long> targetIds, Long organizationId, List<Long> moduleIds) {
+		List<ServiceModuleAssignment> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.in(targetIds));
+		if(null != moduleIds && moduleIds.size() >0){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.MODULE_ID.in(moduleIds));
+		}
 		query.addConditions(cond);
 		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE);
 		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID);
