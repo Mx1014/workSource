@@ -534,9 +534,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setStatus(OrganizationStatus.DELETED.getCode());
 				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				organizationProvider.updateOrganization(organization);
+				contractProvider.deleteContractByOrganizationName(namespaceId, organization.getName());
+				contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, organization.getName());
 			}
-			contractProvider.deleteContractByOrganizationName(namespaceId, organization.getName());
-			contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, organization.getName());
 		}
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~end sync delete rentings, total="+list.size());
