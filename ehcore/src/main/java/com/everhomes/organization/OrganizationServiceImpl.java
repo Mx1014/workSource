@@ -5029,6 +5029,17 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId){
+
+		if(null == cmd.getAccountPhone()){
+			LOGGER.error("contactToken can not be empty.");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactToken can not be empty.");
+		}
+
+		if(null == cmd.getAccountName()){
+			LOGGER.error("contactName can not be empty.");
+			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactName can not be empty.");
+		}
+
 		int namespaceId = UserContext.getCurrentNamespaceId(null);
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 		

@@ -3,11 +3,7 @@ package com.everhomes.acl;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -68,11 +64,15 @@ import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategory;
+import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.community.ResourceCategoryAssignmentDTO;
+import com.everhomes.rest.community.ResourceCategoryDTO;
 import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModule.*;
@@ -1739,6 +1739,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd) {
 		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuPrivilegeByMenuId(cmd.getMenuId());
 
 		// 用户的角色以及用户所在部门角色的所有权限
@@ -1747,56 +1748,146 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		// 用户在当前机构自身权限
 		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), user.getId()));
 
+		List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+
+		List<ProjectDTO> projectDTOs = new ArrayList<>();
 		for (WebMenuPrivilege webMenuPrivilege:webMenuPrivileges) {
 			// 用户有此菜单的权限，则获取全部的园区项目
 			if(privilegeIds.contains(webMenuPrivilege.getPrivilegeId())){
-				List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
-				return communitydtos.stream().map(r -> {
+				communitydtos.stream().map(r -> {
 					ProjectDTO dto = new ProjectDTO();
 					dto.setProjectId(r.getId());
+					dto.setProjectName(r.getName());
 					dto.setProjectType(EntityType.COMMUNITY.getCode());
+					projectDTOs.add(dto);
+					return null;
+				});
+				break;
+			}
+		}
+
+		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
+			List<Long> moduleIds = new ArrayList<>();
+			for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
+				List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(webMenuPrivilege.getPrivilegeId(), null);
+				for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
+					moduleIds.add(modulePrivilege.getModuleId());
+				}
+			}
+
+			// 获取个人的业务模块下的项目
+			List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.USER.getCode(), user.getId(), cmd.getOrganizationId(), moduleIds);
+
+			List<OrganizationDTO> orgDTOs = new ArrayList<>();
+
+			// 没有，则获取个人所在公司节点的业务模块下的项目
+			if(serviceModuleAssignments.size() == 0){
+				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, user.getId(), cmd.getOrganizationId()));
+				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, user.getId(), cmd.getOrganizationId()));
+				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.GROUP, user.getId(), cmd.getOrganizationId()));
+				List<Long> targetIds = new ArrayList<>();
+				for (OrganizationDTO orgDTO: orgDTOs) {
+					targetIds.add(orgDTO.getId());
+				}
+				if(targetIds.size() > 0){
+					serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+				}
+			}
+
+			for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
+				if(EntityType.fromCode(serviceModuleAssignment.getOwnerType()) == EntityType.COMMUNITY){
+					ProjectDTO dto = new ProjectDTO();
+					dto.setProjectId(serviceModuleAssignment.getOwnerId());
+					dto.setProjectType(EntityType.COMMUNITY.getCode());
+					Community community = communityProvider.findCommunityById(serviceModuleAssignment.getOwnerId());
+					if(null != community){
+						dto.setProjectName(community.getName());
+					}
+					projectDTOs.add(dto);
+				}
+			}
+		}
+
+		List<ProjectDTO> entityts = new ArrayList<>();
+		List<Long> categoryIds = new ArrayList<>();
+		if(0 != projectDTOs.size()){
+			for (ProjectDTO project: projectDTOs) {
+				ResourceCategoryAssignment categoryAssignment = communityProvider.findResourceCategoryAssignment(project.getProjectId(), project.getProjectType(),namespaceId);
+
+				if(null != categoryAssignment){
+					ResourceCategory category = communityProvider.findResourceCategoryById(categoryAssignment.getResourceCategryId());
+					if(null != category && !StringUtils.isEmpty(category.getPath())){
+						String[] idStrs = category.getPath().split("/");
+						for (String idStr:idStrs) {
+							categoryIds.add(Long.valueOf(idStr));
+						}
+					}
+				}else{
+					entityts.add(project);
+				}
+			}
+		}
+
+		List<ProjectDTO> projects = new ArrayList<>();
+		List<ProjectDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), categoryIds)
+				.stream().map(r -> {
+					ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
+					dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+					dto.setProjectName(r.getName());
+					dto.setProjectId(r.getId());
 					return dto;
 				}).collect(Collectors.toList());
+
+		for(ProjectDTO project: temp) {
+			getChildCategories(temp, project);
+			if(project.getParentId() == 0L) {
+				projects.add(project);
 			}
 		}
 
-		List<Long> moduleIds = new ArrayList<>();
-		for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
-			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(webMenuPrivilege.getPrivilegeId(), null);
-			for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
-				moduleIds.add(modulePrivilege.getModuleId());
-			}
-		}
+		setResourceDTOs(projects, namespaceId);
+		projects.addAll(entityts);
 
-		List<ProjectDTO> projectDTOs = new ArrayList<>();
-		// 获取个人的业务模块下的项目
-		List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.USER.getCode(), user.getId(), cmd.getOrganizationId(), moduleIds);
-
-		List<OrganizationDTO> orgDTOs = new ArrayList<>();
-
-		// 没有，则获取个人所在公司节点的业务模块下的项目
-		if(serviceModuleAssignments.size() == 0){
-			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, user.getId(), cmd.getOrganizationId()));
-			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, user.getId(), cmd.getOrganizationId()));
-			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.GROUP, user.getId(), cmd.getOrganizationId()));
-			List<Long> targetIds = new ArrayList<>();
-			for (OrganizationDTO orgDTO: orgDTOs) {
-				targetIds.add(orgDTO.getId());
-			}
-			if(targetIds.size() > 0){
-				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
-			}
-		}
-
-		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
-			if(EntityType.fromCode(serviceModuleAssignment.getOwnerType()) == EntityType.COMMUNITY){
-				ProjectDTO dto = new ProjectDTO();
-				dto.setProjectId(serviceModuleAssignment.getOwnerId());
-				dto.setProjectType(EntityType.COMMUNITY.getCode());
-				projectDTOs.add(dto);
-			}
-		}
 		return projectDTOs;
+	}
+
+
+	private ProjectDTO getChildCategories(List<ProjectDTO> list, ProjectDTO dto){
+
+		List<ProjectDTO> childrens = new ArrayList<>();
+
+		for (ProjectDTO rrojectDTO : list) {
+			if(dto.getProjectId().equals(rrojectDTO.getParentId())){
+				childrens.add(getChildCategories(list, rrojectDTO));
+			}
+		}
+		dto.setProjects(childrens);
+
+		return dto;
+	}
+
+	private void setResourceDTOs(List<ProjectDTO> list, Integer namespaceId){
+		if(null != list) {
+			for(ProjectDTO project: list) {
+				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(project.getProjectId(), namespaceId);
+				List<ProjectDTO> projects = resourceCategoryAssignments.stream().map(r -> {
+					ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
+					dto.setProjectId(r.getResourceId());
+					if(EntityType.COMMUNITY == EntityType.fromCode(r.getResourceType())){
+						Community community = communityProvider.findCommunityById(r.getResourceId());
+						if(community != null){
+							dto.setProjectName(community.getName());
+						}
+					}
+					dto.setProjectType(r.getResourceType());
+					dto.setParentId(r.getResourceCategryId());
+					return dto;
+				}).collect(Collectors.toList());
+				setResourceDTOs(project.getProjects(), namespaceId);
+				project.setProjects(projects);
+			}
+		}
+
 	}
 
 	/**

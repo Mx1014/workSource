@@ -100,4 +100,5 @@ public interface CommunityProvider {
     List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path);
     
     List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId);
+    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids);
 }

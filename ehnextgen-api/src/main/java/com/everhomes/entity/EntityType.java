@@ -3,21 +3,7 @@ package com.everhomes.entity;
 
 import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhAppUrls;
-import com.everhomes.server.schema.tables.pojos.EhBuildings;
-import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
-import com.everhomes.server.schema.tables.pojos.EhForums;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhNews;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhRegions;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
-import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.*;
 
 /**
  * <p>实体类型:</p>
@@ -59,7 +45,8 @@ public enum EntityType {
     NEWS(EhNews.class.getSimpleName()),
     IMPERSONATION(EhUserImpersonations.class.getSimpleName()),
     SACATEGORY(EhServiceAllianceCategories.class.getSimpleName()),
-    ROLE(EhAclRoles.class.getSimpleName());
+    ROLE(EhAclRoles.class.getSimpleName()),
+    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName());
     private String code;
     
     private EntityType(String code) {
