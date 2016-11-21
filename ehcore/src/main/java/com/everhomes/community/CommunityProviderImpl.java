@@ -18,6 +18,7 @@ import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOffsetStep;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1308,7 +1309,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 		
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhCommunities.class));
 
-        SelectJoinStep<Record> query = context.select().from(Tables.EH_COMMUNITIES);
+        SelectJoinStep<Record> query = context.select(Tables.EH_COMMUNITIES.fields()).from(Tables.EH_COMMUNITIES);
 		Condition cond = Tables.EH_COMMUNITIES.NAMESPACE_ID.eq(namespaceId);
 		cond = cond.and(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
 		if(null != pageAnchor && pageAnchor != 0){
@@ -1332,8 +1333,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		if(null != pageSize)
 			query.limit(pageSize);
 		
-		List<Community> communities = query.where(cond).fetch().stream().map(r -> ConvertHelper.convert(r, Community.class))
-				.collect(Collectors.toList());
+		List<Community> communities = query.where(cond).fetch().
+				map(new DefaultRecordMapper(Tables.EH_COMMUNITIES.recordType(), Community.class));
 		
 		return communities;
 	}
