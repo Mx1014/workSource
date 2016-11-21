@@ -11,7 +11,7 @@ CREATE TABLE `eh_pm_task_target_statistics` (
   `owner_id` BIGINT NOT NULL DEFAULT 0,
 
   `target_id` BIGINT NOT NULL DEFAULT 0,
-  `avg_star` INTEGER NOT NULL DEFAULT 0,
+  `avg_star` DECIMAL(10,2) NOT NULL DEFAULT 0,
   `task_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'task category id',
 
   `date_str` DATETIME,
