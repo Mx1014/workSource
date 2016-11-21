@@ -875,7 +875,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    	orgLog.setOperationType(OperationType.JOIN.getCode());
 		    	orgLog.setRequestType(RequestType.ADMIN.getCode());
 		    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-		    	this.organizationProvider.createOrganizationUserLog(orgLog);
+		    	this.organizationProvider.createOrganizationMemberLog(orgLog);
 			}
 		}
 		else{//添加未注册用户为管理员。
@@ -893,7 +893,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    	orgLog.setOperationType(OperationType.JOIN.getCode());
 	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-	    	this.organizationProvider.createOrganizationUserLog(orgLog);
+	    	this.organizationProvider.createOrganizationMemberLog(orgLog);
 		}
 		
 	}
@@ -2121,7 +2121,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	orgLog.setOperationType(OperationType.JOIN.getCode());
 	    	orgLog.setRequestType(RequestType.USER.getCode());
 	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-	    	this.organizationProvider.createOrganizationUserLog(orgLog);
+	    	this.organizationProvider.createOrganizationMemberLog(orgLog);
 	    	
 			return status;
 		});
@@ -4281,7 +4281,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	orgLog.setOperationType(OperationType.JOIN.getCode());
     	orgLog.setRequestType(RequestType.USER.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-    	this.organizationProvider.createOrganizationUserLog(orgLog);
+    	this.organizationProvider.createOrganizationMemberLog(orgLog);
 	}
 
 	/**
@@ -4370,7 +4370,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	orgLog.setOperationType(OperationType.QUIT.getCode());
     	orgLog.setRequestType(RequestType.USER.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-    	this.organizationProvider.createOrganizationUserLog(orgLog);
+    	this.organizationProvider.createOrganizationMemberLog(orgLog);
 		//退出机构，要把在机构相关的角色权限删除掉 by sfyan 20161018
 		if(OrganizationMemberTargetType.fromCode(member.getTargetType()) == OrganizationMemberTargetType.USER){
 			List<RoleAssignment> userRoles = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), member.getOrganizationId(), EntityType.USER.getCode(), member.getTargetId());
@@ -4651,7 +4651,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	orgLog.setOperationType(OperationType.JOIN.getCode());
     	orgLog.setRequestType(RequestType.USER.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-    	this.organizationProvider.createOrganizationUserLog(orgLog);
+    	this.organizationProvider.createOrganizationMemberLog(orgLog);
     	
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			userSearcher.feedDoc(organizationMember);
@@ -7154,7 +7154,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    	orgLog.setOperationType(OperationType.QUIT.getCode());
 	    	orgLog.setRequestType(RequestType.ADMIN.getCode());
 	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-	    	this.organizationProvider.createOrganizationUserLog(orgLog);
+	    	this.organizationProvider.createOrganizationMemberLog(orgLog);
 			return null;
 		});
 	}
@@ -7286,7 +7286,7 @@ public class OrganizationServiceImpl implements OrganizationService {
     	orgLog.setOperationType(OperationType.JOIN.getCode());
     	orgLog.setRequestType(RequestType.ADMIN.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-    	this.organizationProvider.createOrganizationUserLog(orgLog);
+    	this.organizationProvider.createOrganizationMemberLog(orgLog);
     	
 		return dto;
 	}

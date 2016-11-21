@@ -226,5 +226,5 @@ public interface OrganizationProvider {
     void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
-	void createOrganizationUserLog(OrganizationMemberLog orgLog);
+	void createOrganizationMemberLog(OrganizationMemberLog orgLog);
 }

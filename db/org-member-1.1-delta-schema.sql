@@ -15,7 +15,7 @@ CREATE TABLE `eh_organization_member_logs` (
   `operate_time` DATETIME , 
   `operator_uid` BIGINT(20) NOT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB AUTO_INCREMENT=2119064 DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 增加字段  `eh_users`
 ALTER TABLE `eh_users` ADD COLUMN `executive_tag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管';
