@@ -410,6 +410,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setName(customerRental.getName());
 				organization.setDescription(customerRental.getNumber());
 				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				organization.setNamespaceOrganizationType(NamespaceOrganizationType.JINDIE.getCode());
+				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.updateOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
