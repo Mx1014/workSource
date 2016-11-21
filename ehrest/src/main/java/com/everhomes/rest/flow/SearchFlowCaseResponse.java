@@ -5,7 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-public class ListFlowCaseByUserIdResponse {
+public class SearchFlowCaseResponse {
 	@ItemType(FlowCaseDTO.class)
 	private List<FlowCaseDTO> flowCases;
 	private Long nextPageAnchor;

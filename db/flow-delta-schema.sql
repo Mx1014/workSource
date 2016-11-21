@@ -196,6 +196,8 @@ CREATE TABLE `eh_flow_cases` (
     `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
     `module_name` VARCHAR(64),
+    `applier_name` VARCHAR(64),
+    `applier_phone` VARCHAR(64),
 
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
@@ -212,6 +214,7 @@ CREATE TABLE `eh_flow_cases` (
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `case_type` VARCHAR(64) COMMENT 'inner, outer etc',
     `content` TEXT,
+    `evaluate_score` INTEGER NOT NULL DEFAULT 0,
 
     `string_tag1` VARCHAR(128),
     `string_tag2` VARCHAR(128),
@@ -240,6 +243,7 @@ CREATE TABLE `eh_flow_event_logs` (
     `flow_button_id` BIGINT NOT NULL DEFAULT 0,
     `flow_action_id` BIGINT NOT NULL DEFAULT 0,
     `flow_user_id` BIGINT NOT NULL DEFAULT 0,
+    `flow_user_name` VARCHAR(64),
     `flow_selection_id` BIGINT NOT NULL DEFAULT 0,
     `subject_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the post id for this event',
     `log_type` VARCHAR(64) NOT NULL COMMENT 'flow_step, button_click, action_result',

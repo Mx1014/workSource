@@ -12,13 +12,13 @@ public class FlowUserSelectionDTO {
     private String     selectType;
     private Long     sourceId;
     private Long     flowMainId;
+    private Long     belongTo;
+    private String     belongType;
     private String     belongEntity;
     private Timestamp     createTime;
     private Integer     namespaceId;
     private Integer     flowVersion;
     private Long     id;
-    private Long     belongTo;
-    private String     belongType;
 
 
     public Byte getStatus() {

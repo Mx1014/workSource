@@ -10,18 +10,22 @@ import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowPostSubjectCommand;
+import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowCaseByUserIdCommand;
-import com.everhomes.rest.flow.ListFlowCaseByUserIdResponse;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
@@ -293,14 +297,33 @@ public interface FlowService {
 	 */
 	FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd);
 
-	ListFlowCaseByUserIdResponse listFlowCasesByUserId(ListFlowCaseByUserIdCommand cmd);
-
 	/**
-	 * TODO 每个 FlowCase 过程中的节点信息
+	 * 搜索 FlowCase 的信息
 	 * @param cmd
 	 * @return
 	 */
-	Object listFlowCaseLogsCommand(ListFlowCaseLogsCommand cmd);
+	SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd);
+
+	/**
+	 * 获取 FlowCase 的详细日志信息
+	 * @param flowCaseId
+	 * @return
+	 */
+	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId);
+
+	/**
+	 * 创建工作流相关的帖子信息
+	 * @param cmd
+	 * @return
+	 */
+	FlowPostSubjectDTO postSubject(FlowPostSubjectCommand cmd);
+
+	/**
+	 * 触发工作流按钮事件的响应
+	 * @param cmd
+	 * @return
+	 */
+	FlowButtonDTO fireButton(FlowFireButtonCommand cmd);
 	
 	//TODO 日志信息分类：
 	
