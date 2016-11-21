@@ -195,6 +195,7 @@ CREATE TABLE `eh_flow_cases` (
     `owner_type` VARCHAR(64) NOT NULL,
     `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
+    `module_name` VARCHAR(64),
 
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,

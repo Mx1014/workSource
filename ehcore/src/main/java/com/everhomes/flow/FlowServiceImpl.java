@@ -22,6 +22,9 @@ import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowCaseByUserIdCommand;
+import com.everhomes.rest.flow.ListFlowCaseByUserIdResponse;
+import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
@@ -270,6 +273,19 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ListFlowCaseByUserIdResponse listFlowCasesByUserId(
+			ListFlowCaseByUserIdCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public Object listFlowCaseLogsCommand(ListFlowCaseLogsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

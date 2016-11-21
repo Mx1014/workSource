@@ -20,6 +20,9 @@ import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowCaseByUserIdCommand;
+import com.everhomes.rest.flow.ListFlowCaseByUserIdResponse;
+import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
@@ -289,6 +292,15 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd);
+
+	ListFlowCaseByUserIdResponse listFlowCasesByUserId(ListFlowCaseByUserIdCommand cmd);
+
+	/**
+	 * TODO 每个 FlowCase 过程中的节点信息
+	 * @param cmd
+	 * @return
+	 */
+	Object listFlowCaseLogsCommand(ListFlowCaseLogsCommand cmd);
 	
 	//TODO 日志信息分类：
 	
