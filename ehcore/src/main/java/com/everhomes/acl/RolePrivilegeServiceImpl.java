@@ -848,6 +848,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
     	List<Long> privileges = this.getUserPrivileges(null, ownerId, user.getId());
 
+		List<Long> ids = this.getAllResourcePrivilegeIds(ownerId, user.getId());
+		if(null != ids){
+			privileges.addAll(ids);
+		}
     	if(!privileges.contains(privilegeId)){
     		this.returnNoPrivileged(privileges, user);
     	}
