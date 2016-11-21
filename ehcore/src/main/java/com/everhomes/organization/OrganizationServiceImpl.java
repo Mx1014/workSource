@@ -869,10 +869,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationProvider.createOrganizationMember(departmentMember);
 
 		    	//记录添加log 
-		    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+		    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
 		    	orgLog.setUserId(departmentMember.getTargetId());
 		    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		    	orgLog.setOperationType(OperationType.JOIN.getCode());
+		    	orgLog.setRequestType(RequestType.ADMIN.getCode());
 		    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
 		    	this.organizationProvider.createOrganizationUserLog(orgLog);
 			}
@@ -886,8 +887,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organizationProvider.createOrganizationMember(departmentMember);
 
 	    	//记录添加log 
-	    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+	    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
 	    	orgLog.setUserId(departmentMember.getTargetId());
+	    	orgLog.setRequestType(RequestType.ADMIN.getCode());
 	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    	orgLog.setOperationType(OperationType.JOIN.getCode());
 	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
@@ -2113,10 +2115,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
 	    	//记录新增 log 
-	    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+	    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
 	    	orgLog.setUserId(communityPmMember.getTargetId());
 	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    	orgLog.setOperationType(OperationType.JOIN.getCode());
+	    	orgLog.setRequestType(RequestType.USER.getCode());
 	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
 	    	this.organizationProvider.createOrganizationUserLog(orgLog);
 	    	
@@ -4272,10 +4275,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
 
     	//记录添加log 
-    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
     	orgLog.setUserId(member.getTargetId());
     	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     	orgLog.setOperationType(OperationType.JOIN.getCode());
+    	orgLog.setRequestType(RequestType.USER.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
     	this.organizationProvider.createOrganizationUserLog(orgLog);
 	}
@@ -4360,10 +4364,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 
     	//记录退出log 
-    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
     	orgLog.setUserId(member.getTargetId());
     	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     	orgLog.setOperationType(OperationType.QUIT.getCode());
+    	orgLog.setRequestType(RequestType.USER.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
     	this.organizationProvider.createOrganizationUserLog(orgLog);
 		//退出机构，要把在机构相关的角色权限删除掉 by sfyan 20161018
@@ -4640,10 +4645,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		});
 
     	//记录新增 log 
-    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
     	orgLog.setUserId(organizationMember.getTargetId());
     	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     	orgLog.setOperationType(OperationType.JOIN.getCode());
+    	orgLog.setRequestType(RequestType.USER.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
     	this.organizationProvider.createOrganizationUserLog(orgLog);
     	
@@ -7142,10 +7148,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		    	}
 	    	}
 	    	//记录删除log 
-	    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+	    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
 	    	orgLog.setUserId(member.getTargetId());
 	    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 	    	orgLog.setOperationType(OperationType.QUIT.getCode());
+	    	orgLog.setRequestType(RequestType.ADMIN.getCode());
 	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
 	    	this.organizationProvider.createOrganizationUserLog(orgLog);
 			return null;
@@ -7273,10 +7280,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 
     	//记录新增 log 
-    	OrganizationUserLog orgLog = ConvertHelper.convert(cmd, OrganizationUserLog.class);
+    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
     	orgLog.setUserId(organizationMember.getTargetId());
     	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     	orgLog.setOperationType(OperationType.JOIN.getCode());
+    	orgLog.setRequestType(RequestType.ADMIN.getCode());
     	orgLog.setOperatorUid(UserContext.current().getUser().getId());
     	this.organizationProvider.createOrganizationUserLog(orgLog);
     	

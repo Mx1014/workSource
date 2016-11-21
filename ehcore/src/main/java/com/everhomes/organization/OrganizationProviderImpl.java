@@ -2494,7 +2494,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
-	public void createOrganizationUserLog(OrganizationUserLog orgLog) {
+	public void createOrganizationUserLog(OrganizationMemberLog orgLog) {
  
 		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationUserLogs.class));
 		orgLog.setId(id);  

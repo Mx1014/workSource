@@ -1,9 +1,9 @@
 package com.everhomes.organization;
 
-import com.everhomes.server.schema.tables.pojos.EhOrganizationUserLogs;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
 import com.everhomes.util.StringHelper;
 
-public class OrganizationUserLog extends EhOrganizationUserLogs {
+public class OrganizationMemberLog extends EhOrganizationMemberLogs {
 
 	/**
 	 * 

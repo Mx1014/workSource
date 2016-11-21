@@ -17,7 +17,7 @@ CREATE TABLE `eh_organization_member_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB AUTO_INCREMENT=2119064 DEFAULT CHARSET=utf8mb4;
 
--- 增加字段  
-ALTER TABLE `eh_organization_members` ADD COLUMN `executive_flag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管';
-ALTER TABLE `eh_organization_members` ADD COLUMN `position` VARCHAR(128) DEFAULT NULL COMMENT '职位';
-ALTER TABLE `eh_organization_members` ADD COLUMN `identity_number` VARCHAR(20) DEFAULT NULL COMMENT 'ID CARD NUMBER';
+-- 增加字段  `eh_users`
+ALTER TABLE `eh_users` ADD COLUMN `executive_tag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管';
+ALTER TABLE `eh_users` ADD COLUMN `position_tag` VARCHAR(128) DEFAULT NULL COMMENT '职位';
+ALTER TABLE `eh_users` ADD COLUMN `identity_number_tag` VARCHAR(20) DEFAULT NULL COMMENT '身份证号';
