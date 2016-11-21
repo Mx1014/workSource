@@ -63,7 +63,9 @@ CREATE TABLE `eh_flow_nodes` (
     `node_name` VARCHAR(64) NOT NULL,
     `description` VARCHAR(1024) NOT NULL,
     `node_level` INTEGER NOT NULL,
-    `auto_step_hour` INTEGER NOT NULL DEFAULT 0 COMMENT 'after hour, step next',
+    `auto_step_minute` INTEGER NOT NULL DEFAULT 0 COMMENT 'after hour, step next',
+    `auto_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, EndStep',
+    `allow_applier_update` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow applier update content',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
 
@@ -79,12 +81,25 @@ CREATE TABLE `eh_flow_buttons` (
     `flow_version` INTEGER NOT NULL,
     `flow_node_id` BIGINT NOT NULL,
     `button_name` VARCHAR(64),
-    `flow_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, TransferStep, CommentStep, EndStep, EndNotifyStep',
+    `description` VARCHAR(1024),
+    `flow_step_type` VARCHAR(64) COMMENT 'no_step, start_step, approve_step, reject_step, transfer_step, comment_step, end_step, notify_step',
     `goto_level` INTEGER NOT NULL DEFAULT 0,
     `goto_node_id` INTEGER NOT NULL DEFAULT 0,
     `need_subject` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need subject for this step, 1: need subject for this step',
+    `need_processor` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need processor, 1: need only one processor',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: disabled, 2: hidden, 3: visible',
+
+    `string_tag1` VARCHAR(128),
+    `string_tag2` VARCHAR(128),
+    `string_tag3` VARCHAR(128),
+    `string_tag4` VARCHAR(128),
+    `string_tag5` VARCHAR(128),
+    `integral_tag1` BIGINT DEFAULT 0,
+    `integral_tag2` BIGINT DEFAULT 0,
+    `integral_tag3` BIGINT DEFAULT 0,
+    `integral_tag4` BIGINT DEFAULT 0,
+    `integral_tag5` BIGINT DEFAULT 0,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -126,10 +141,11 @@ CREATE TABLE `eh_flow_actions` (
 
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
-    `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick_sms, tick_message, scripts',
+    `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick_sms, tick_message, tracker, scripts',
     `belong_to` BIGINT NOT NULL,
     `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
-    `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
+    `flow_step_type` VARCHAR(64) COMMENT 'no_step, start_step, approve_step, reject_step, transfer_step, comment_step, end_step, notify_step',
+    `action_step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `render_text` VARCHAR(256) COMMENT 'the content for this message that have variables',
@@ -156,14 +172,14 @@ CREATE TABLE `eh_flow_user_selections` (
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
 
-    `select_type` VARCHAR(64) NOT NULL COMMENT 'group_selection, position_selection, manager_selection, variable_selection',
+    `select_type` VARCHAR(64) NOT NULL COMMENT 'department, position, manager, variable',
     `source_id_a` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other user object id',
     `source_type_a` VARCHAR(64) COMMENT 'community, organization, user, variable',
     `source_id_b` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other user object id',
     `source_type_b` VARCHAR(64) COMMENT 'community, organization, user, variable',
     `belong_to` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other flow object id',
-    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_superviser, flow_node_processor, flow_node_applier, flow_button_clicker, flow_action_processor',
     `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow, flow_node, flow_button, flow_action',
+    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_superviser, flow_node_processor, flow_node_applier, flow_button_clicker, flow_action_processor',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
@@ -273,6 +289,7 @@ CREATE TABLE `eh_flow_evaluates` (
 
     `star` TINYINT NOT NULL,
     `user_id` BIGINT NOT NULL,
+    `flow_node_id` BIGINT NOT NULL,
     `flow_case_id` BIGINT NOT NULL,
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
@@ -294,7 +311,7 @@ CREATE TABLE `eh_flow_scripts` (
     `name` VARCHAR(64) NOT NULL,
     `script_type` VARCHAR(64) NOT NULL COMMENT 'java_prototype',
     `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
-    `flow_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, TransferStep, CommentStep, EndStep, EndNotifyStep',
+    `flow_step_type` VARCHAR(64) COMMENT 'no_step, start_step, approve_step, reject_step, transfer_step, comment_step, end_step, notify_step',
     `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
 
     PRIMARY KEY (`id`)

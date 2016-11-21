@@ -1,0 +1,87 @@
+package com.everhomes.rest.flow;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+public class UpdateFlowButtonCommand {
+	private Long flowNodeId;
+	private String buttonName;
+	private String description;
+	private String flowStepType;
+	private Long gotoNodeId;
+	private Byte needSubject;
+	private Byte needProcessor;
+	
+	private FlowActionInfo messageAction;
+	private FlowActionInfo smsAction;
+	
+	@ItemType(String.class)
+	private List<String> flowScripts;
+	
+	public Long getFlowNodeId() {
+		return flowNodeId;
+	}
+	public void setFlowNodeId(Long flowNodeId) {
+		this.flowNodeId = flowNodeId;
+	}
+	public String getButtonName() {
+		return buttonName;
+	}
+	public void setButtonName(String buttonName) {
+		this.buttonName = buttonName;
+	}
+	public String getDescription() {
+		return description;
+	}
+	public void setDescription(String description) {
+		this.description = description;
+	}
+	public String getFlowStepType() {
+		return flowStepType;
+	}
+	public void setFlowStepType(String flowStepType) {
+		this.flowStepType = flowStepType;
+	}
+	public Long getGotoNodeId() {
+		return gotoNodeId;
+	}
+	public void setGotoNodeId(Long gotoNodeId) {
+		this.gotoNodeId = gotoNodeId;
+	}
+	public Byte getNeedSubject() {
+		return needSubject;
+	}
+	public void setNeedSubject(Byte needSubject) {
+		this.needSubject = needSubject;
+	}
+	public Byte getNeedProcessor() {
+		return needProcessor;
+	}
+	public void setNeedProcessor(Byte needProcessor) {
+		this.needProcessor = needProcessor;
+	}
+	public FlowActionInfo getMessageAction() {
+		return messageAction;
+	}
+	public void setMessageAction(FlowActionInfo messageAction) {
+		this.messageAction = messageAction;
+	}
+	public FlowActionInfo getSmsAction() {
+		return smsAction;
+	}
+	public void setSmsAction(FlowActionInfo smsAction) {
+		this.smsAction = smsAction;
+	}
+	public List<String> getFlowScripts() {
+		return flowScripts;
+	}
+	public void setFlowScripts(List<String> flowScripts) {
+		this.flowScripts = flowScripts;
+	}
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

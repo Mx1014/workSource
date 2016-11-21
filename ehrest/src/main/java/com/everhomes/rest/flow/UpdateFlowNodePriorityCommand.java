@@ -1,0 +1,42 @@
+package com.everhomes.rest.flow;
+
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+public class UpdateFlowNodePriorityCommand {
+	private Long flowMainId;
+	private Long lastUpdateTime;
+	
+	@ItemType(FlowNodeDTO.class)
+	List<FlowNodeDTO> flowNodes;
+
+	public Long getFlowMainId() {
+		return flowMainId;
+	}
+
+	public void setFlowMainId(Long flowMainId) {
+		this.flowMainId = flowMainId;
+	}
+
+	public Long getLastUpdateTime() {
+		return lastUpdateTime;
+	}
+
+	public void setLastUpdateTime(Long lastUpdateTime) {
+		this.lastUpdateTime = lastUpdateTime;
+	}
+
+	public List<FlowNodeDTO> getFlowNodes() {
+		return flowNodes;
+	}
+
+	public void setFlowNodes(List<FlowNodeDTO> flowNodes) {
+		this.flowNodes = flowNodes;
+	}
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }	
+}

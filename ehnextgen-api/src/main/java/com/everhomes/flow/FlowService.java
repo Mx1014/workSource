@@ -5,13 +5,31 @@ import java.util.Map;
 
 import com.everhomes.rest.flow.ActionStepType;
 import com.everhomes.rest.flow.CreateFlowCommand;
+import com.everhomes.rest.flow.CreateFlowNodeCommand;
+import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowNodeDTO;
+import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowUserSelectionDTO;
+import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
+import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
+import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeCommand;
+import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeReminder;
+import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 
 public interface FlowService {
 	/**
@@ -200,6 +218,77 @@ public interface FlowService {
 	 * @param cmd
 	 */
 	FlowDTO updateFlowName(UpdateFlowNameCommand cmd);
+
+	FlowNodeDTO createFlowNode(CreateFlowNodeCommand cmd);
+
+	FlowNode deleteFlowNode(Long flowNodeId);
+
+	ListBriefFlowNodeResponse listBriefFlowNodes(Long flowId);
+
+	/**
+	 * 更新所有节点的顺序
+	 * @param cmd
+	 * @return
+	 */
+	ListBriefFlowNodeResponse updateNodePriority(UpdateFlowNodePriorityCommand cmd);
+
+	FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd);
+
+	/**
+	 * 创建用户选择项
+	 * @param cmd
+	 * @return
+	 */
+	FlowUserSelectionDTO createFlowUserSelection(CreateFlowUserSelectionCommand cmd);
+
+	/**
+	 * 获取某一个项目下的所有用户选择实体
+	 * @param cmd
+	 * @return
+	 */
+	ListFlowUserSelectionResponse listFlowUserSelection(ListFlowUserSelectionCommand cmd);
+
+	/**
+	 * 删除用户选择项
+	 * @param cmd
+	 * @return
+	 */
+	FlowUserSelectionDTO deleteUserSelection(DeleteFlowUserSelectionCommand cmd);
+	
+	/**
+	 * 修改节点按钮信息
+	 * @param cmd
+	 * @return
+	 */
+	FlowButtonDTO updateFlowButton(UpdateFlowButtonCommand cmd);
+
+	/**
+	 * 禁用按钮
+	 * @param cmd
+	 * @return
+	 */
+	FlowButtonDTO disableFlowButton(DisableFlowButtonCommand cmd);
+
+	/**
+	 * 修改任务节点的消息提醒
+	 * @param cmd
+	 * @return
+	 */
+	FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminder cmd);
+
+	/**
+	 * 任务跟踪
+	 * @param cmd
+	 * @return
+	 */
+	FlowNodeDetailDTO updateFlowNodeTracker(UpdateFlowNodeTrackerCommand cmd);
+
+	/**
+	 * 显示所有的变量列表
+	 * @param cmd
+	 * @return
+	 */
+	FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd);
 	
 	//TODO 日志信息分类：
 	
