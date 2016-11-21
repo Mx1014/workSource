@@ -455,7 +455,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		group.setDescription(organization.getName());
 		group.setStatus(OrganizationStatus.ACTIVE.getCode());
 
-		group.setCreatorUid(organization.getId());
+		group.setCreatorUid(UserContext.current().getUser().getId());
 
 		group.setNamespaceId(namespaceId);
 
