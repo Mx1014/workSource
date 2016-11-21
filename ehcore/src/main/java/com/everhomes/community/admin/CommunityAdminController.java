@@ -431,6 +431,20 @@ public class CommunityAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/community/updateCommunityUser</b>
+     * <p>园区管理员更新用户信息</p>
+     */
+    @RequestMapping("updateCommunityUser")
+    @RestReturn(value=CommunityUserAddressDTO.class)
+    public RestResponse updateCommunityUser(@Valid CommunityUserAddressDTO cmd) {
+    	communityService.updateCommunityUser(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/community/qryCommunityUserEnterpriseByUserId</b>
      * <p>查询用户所在的地址</p>
      */

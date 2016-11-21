@@ -68,6 +68,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationMemberLogsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
@@ -83,6 +84,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
@@ -95,6 +97,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsR
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationMemberLogsRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
@@ -2553,11 +2556,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	@Override
 	public void createOrganizationMemberLog(OrganizationMemberLog orgLog) {
  
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMmeberLogs.class));
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberLogs.class));
 		orgLog.setId(id);  
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		EhOrganizationMmeberLogsDao dao = new EhOrganizationMmeberLogsDao(context.configuration());
+		EhOrganizationMemberLogsDao dao = new EhOrganizationMemberLogsDao(context.configuration());
 		dao.insert(orgLog);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMmeberLogs.class, null); 
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberLogs.class, null); 
+	}
+
+	@Override
+	public List<OrganizationMemberLog> listOrganizationMemberLogs(Long id) {
+		List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(id)); 
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationMemberLog.class));
+			return null;
+		});
+		if(results.size() == 0)
+			return null;
+		return results;
 	}
 }

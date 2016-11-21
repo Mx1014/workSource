@@ -227,4 +227,5 @@ public interface OrganizationProvider {
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
 	void createOrganizationMemberLog(OrganizationMemberLog orgLog);
+	List<OrganizationMemberLog> listOrganizationMemberLogs(Long id);
 }

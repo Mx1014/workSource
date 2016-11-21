@@ -127,4 +127,6 @@ public interface CommunityService {
 	void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd);
 
 	ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd);
+
+	void updateCommunityUser(CommunityUserAddressDTO cmd);
 }
