@@ -1209,6 +1209,26 @@ public class CommunityProviderImpl implements CommunityProvider {
         return query.where(condition).fetch().stream().map(r -> ConvertHelper.convert(r, ResourceCategory.class)).
         		collect(Collectors.toList());
 	}
+
+    @Override
+    public List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategories.class));
+        SelectJoinStep<Record> query = context.select().from(Tables.EH_RESOURCE_CATEGORIES);
+
+        Condition condition =  Tables.EH_RESOURCE_CATEGORIES.STATUS.eq(ResourceCategoryStatus.ACTIVE.getCode());
+        if(!StringUtils.isEmpty(ownerType)){
+            condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        }
+        if(null != ownerId){
+            condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.OWNER_ID.eq(ownerId));
+        }
+        if(null != ids && 0 != ids.size())
+            condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.ID.in(ids));
+
+        return query.where(condition).fetch().stream().map(r -> ConvertHelper.convert(r, ResourceCategory.class)).
+                collect(Collectors.toList());
+    }
 	
 	@Override
 	public void updateResourceCategory(ResourceCategory resourceCategory) {
