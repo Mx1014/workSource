@@ -34,6 +34,11 @@ import com.everhomes.util.StringHelper;
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>maxQuantity: 限制人数</li>
  * <li>categoryId: 活动类型id</li>
+ * <li>forumId: 论坛ID</li>
+ * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
+ * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
+ * <li>visibleRegionType: 区域范围类型，{@link com.everhomes.rest.visibility.VisibleRegionType}</li>
+ * <li>visibleRegionId: 区域范围类型对应的ID</li>
  *</ul>
  */
 public class ActivityPostCommand{
@@ -73,6 +78,16 @@ public class ActivityPostCommand{
     
     //added by xiongying
     private Long categoryId;
+
+    private Long forumId;
+    
+    private String creatorTag;
+    
+    private String targetTag;
+    
+    private Byte visibleRegionType;
+    
+    private Long visibleRegionId;
 
 	public String getContentType() {
 		return contentType;
@@ -307,6 +322,46 @@ public class ActivityPostCommand{
 
 	public void setCategoryId(Long categoryId) {
 		this.categoryId = categoryId;
+	}
+
+	public Long getForumId() {
+		return forumId;
+	}
+
+	public void setForumId(Long forumId) {
+		this.forumId = forumId;
+	}
+
+	public String getCreatorTag() {
+		return creatorTag;
+	}
+
+	public void setCreatorTag(String creatorTag) {
+		this.creatorTag = creatorTag;
+	}
+
+	public String getTargetTag() {
+		return targetTag;
+	}
+
+	public void setTargetTag(String targetTag) {
+		this.targetTag = targetTag;
+	}
+
+	public Byte getVisibleRegionType() {
+		return visibleRegionType;
+	}
+
+	public void setVisibleRegionType(Byte visibleRegionType) {
+		this.visibleRegionType = visibleRegionType;
+	}
+
+	public Long getVisibleRegionId() {
+		return visibleRegionId;
+	}
+
+	public void setVisibleRegionId(Long visibleRegionId) {
+		this.visibleRegionId = visibleRegionId;
 	}
 
 	@Override
