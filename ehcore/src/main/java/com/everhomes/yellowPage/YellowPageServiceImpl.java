@@ -577,7 +577,8 @@ public class YellowPageServiceImpl implements YellowPageService {
     private void processDetailUrl(ServiceAllianceDTO dto) {
         try {
             String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
-            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(dto.getName(), "UTF-8"), RandomUtils.nextInt(2));
+            String name = org.apache.commons.lang.StringUtils.trimToEmpty(dto.getName());
+            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
             dto.setDetailUrl(url);
         } catch (Exception e) {
             e.printStackTrace();
