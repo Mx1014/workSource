@@ -7719,17 +7719,19 @@ System.out.println();
 				}
 			}
 			//重新把成员添加到公司多个职级
-			for (Long jobLevelId : jobLevelIds) {
-				Organization group = checkOrganization(jobLevelId);
+			if(null != jobLevelIds){
+				for (Long jobLevelId : jobLevelIds) {
+					Organization group = checkOrganization(jobLevelId);
 
-				organizationMember.setGroupPath(group.getPath());
+					organizationMember.setGroupPath(group.getPath());
 
-				organizationMember.setOrganizationId(jobLevelId);
+					organizationMember.setOrganizationId(jobLevelId);
 
-				organizationProvider.createOrganizationMember(organizationMember);
+					organizationProvider.createOrganizationMember(organizationMember);
 
-				jobLevels.add(ConvertHelper.convert(group, OrganizationDTO.class));
-			}			
+					jobLevels.add(ConvertHelper.convert(group, OrganizationDTO.class));
+				}
+			}
 
 			dto.setGroups(groups);
 			
