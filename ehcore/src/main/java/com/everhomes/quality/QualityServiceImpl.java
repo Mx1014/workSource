@@ -2242,6 +2242,7 @@ public class QualityServiceImpl implements QualityService {
 				newSpecification.setApplyPolicy(SpecificationApplyPolicy.MODIFY.getCode());
 				newSpecification.setReferId(specification.getId());
 				newSpecification.setCreatorUid(UserContext.current().getUser().getId());
+				newSpecification.setInspectionType(specification.getInspectionType());
 				
 				if(cmd.getParentId() != null) {
 					QualityInspectionSpecifications parent = verifiedSpecificationById(cmd.getParentId(), cmd.getOwnerType(), cmd.getOwnerId());
