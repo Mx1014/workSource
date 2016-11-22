@@ -2495,14 +2495,13 @@ public class CommunityServiceImpl implements CommunityService {
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name);
 			checkResourceCategoryExsit(category);
 			category = new ResourceCategory();
-			category.setPath("/" + name);
 		}else{
 			parentCategory = communityProvider.findResourceCategoryById(parentId);
 			checkResourceCategoryIsNull(parentCategory);
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, parentId, name);
 			checkResourceCategoryExsit(category);
 			category = new ResourceCategory();
-			category.setPath(parentCategory.getPath() + "/" + name);
+			category.setPath(parentCategory.getPath());
 		}
 		
 		category.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -2528,10 +2527,10 @@ public class CommunityServiceImpl implements CommunityService {
 		checkResourceCategoryIsNull(category);
 		
 		category.setName(cmd.getName());
-		String path = category.getPath();
-		path = path.substring(0, path.lastIndexOf("/"));
-
-		category.setPath(path + "/" + cmd.getName());
+//		String path = category.getPath();
+//		path = path.substring(0, path.lastIndexOf("/"));
+//
+//		category.setPath(path + "/" + cmd.getName());
 		category.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 		communityProvider.updateResourceCategory(category);
 	}

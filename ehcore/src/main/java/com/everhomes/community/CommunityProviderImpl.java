@@ -1160,6 +1160,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhResourceCategories.class));
         
 		resourceCategory.setId(id);
+		if(null != resourceCategory.getPath())
+			resourceCategory.setPath(resourceCategory.getPath() + "/" + id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhResourceCategoriesDao dao = new EhResourceCategoriesDao(context.configuration());
         dao.insert(resourceCategory);
