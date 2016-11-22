@@ -1,13 +1,12 @@
 import React, { PropTypes, Component} from 'react'
 
-import {clearConsole} from '../actions'
-
 import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
 
-import styles from '../shared/style/app.css'
-import layoutStyles from '../shared/style/layout.css'
+import styles from '../../shared/style/app.css'
+import layoutStyles from '../../shared/style/layout.css'
 
-import {CONSOLE_APPEND, CONSOLE_CLEAR, API_SUCCESS, API_FAILURE} from '../actions'
+import {CONSOLE_APPEND, CONSOLE_CLEAR, API_SUCCESS, API_FAILURE} from '../../actions'
+import {clearConsole} from '../../actions'
 
 class ApiConsole extends WidgetComponent {
 

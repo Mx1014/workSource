@@ -23,4 +23,6 @@ public interface EnergyYoyStatisticProvider {
  
 	EnergyYoyStatistic getEnergyYoyStatisticByCommuniytyAndDate(Long communityId, String date);
 
+	void deleteEnergyYoyStatistic(Long communityId, String dateStr);
+
 }

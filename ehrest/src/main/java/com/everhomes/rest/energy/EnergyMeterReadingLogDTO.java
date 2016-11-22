@@ -17,6 +17,8 @@ import java.sql.Timestamp;
  *     <li>operateTime: 读表时间</li>
  *     <li>resetMeterFlag: 是否为复始计量 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  *     <li>changeMeterFlag: 是否为换表 {@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ *     <li>dayPrompt: 日抄表提示</li>
+ *     <li>monthPrompt: 月抄表提示</li>
  * </ul>
  */
 public class EnergyMeterReadingLogDTO {
@@ -32,6 +34,9 @@ public class EnergyMeterReadingLogDTO {
     private Byte resetMeterFlag;
     private Byte changeMeterFlag;
 
+    private BigDecimal dayPrompt;
+    private BigDecimal monthPrompt;
+
     public Long getId() {
         return id;
     }
@@ -42,6 +47,22 @@ public class EnergyMeterReadingLogDTO {
 
     public Long getMeterId() {
         return meterId;
+    }
+
+    public BigDecimal getDayPrompt() {
+        return dayPrompt;
+    }
+
+    public void setDayPrompt(BigDecimal dayPrompt) {
+        this.dayPrompt = dayPrompt;
+    }
+
+    public BigDecimal getMonthPrompt() {
+        return monthPrompt;
+    }
+
+    public void setMonthPrompt(BigDecimal monthPrompt) {
+        this.monthPrompt = monthPrompt;
     }
 
     public void setMeterId(Long meterId) {

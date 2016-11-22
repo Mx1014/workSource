@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.greghaines.jesque.Job;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -311,6 +312,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private UserProvider userProvider;
 	@Autowired
 	private AppProvider appProvider;
+	private Integer namespaceId;
+	private Integer namespaceId2;
+	private String phoneNumber;
 	
 	 
 
@@ -1083,12 +1087,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				//四舍五入保留三位
 				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
+					
+				
 			}
 		} catch (ParseException e) {
 			 LOGGER.error("计算平均值-时间转换 异常");
 		}
-		rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
-				
+
+		if(rentalSite.getAvgPriceStr() == null){
+			rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
+			rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
+			rentalProvider.updateRentalSite(rentalSite);	
+		}
 		return rSiteDTO;
 	}
 	private List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId, String beginTime, String endTime) throws ParseException {
@@ -1220,6 +1230,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else
 				rentalBill.setCancelTime(new Timestamp(rs.getCancelTime()));
 			rentalBill.setResourceName(rs.getResourceName());
+			rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId()==null?0:
+			UserContext.getCurrentNamespaceId());
 			rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 			rentalBill.setRentalUid(userId);
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
@@ -4749,7 +4761,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	/**
 	 * 发短信给付费成功的用户
 	 * */
-	private void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,RentalOrder order){
+	@Override
+	public void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,RentalOrder order){  
 		String templateScope = SmsTemplateCode.SCOPE;
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("resourceName", order.getResourceName());
 		smsProvider.addToTupleList(variables, "useDetail", order.getUseDetail()); 
@@ -4758,7 +4771,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(rs == null){
 			LOGGER.error("send message to user failed rental resource can not found [resource id = "+order.getRentalResourceId()+"]");
 			return ;
-		} 
+		} 	
 		int templateId = SmsTemplateCode.RENTAL_SUCCESS_EXCLUSIVE_CODE;
 		//如果不是独占资源
 		if(rs.getExclusiveFlag().equals(NormalFlag.NONEED.getCode())){
@@ -4773,9 +4786,17 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 		}
 			
-		String templateLocale = UserContext.current().getUser().getLocale();
+		String templateLocale = PunchNotificationTemplateCode.locale;
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("begin Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
- 
+
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("end Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
 	}
 	
  

@@ -23,6 +23,7 @@ public class GetShareInfoResponse {
 	private String appName;
 	private String appIconUrl;
 	private String downloadUrl;
+	private String appDescription;
 	private String groupName;
 	private String groupAvatarUrl;
 	private String groupDescription;
@@ -30,6 +31,12 @@ public class GetShareInfoResponse {
 	private List<String> groupMemberAvatarList;
 	private String clubPlaceholderName;
 	
+	public String getAppDescription() {
+		return appDescription;
+	}
+	public void setAppDescription(String appDescription) {
+		this.appDescription = appDescription;
+	}
 	public String getClubPlaceholderName() {
 		return clubPlaceholderName;
 	}

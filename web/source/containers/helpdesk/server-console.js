@@ -1,16 +1,15 @@
 import React, {Component} from 'react'
-import {serverSentEventConnect} from 'react-server-sent-event-container'
 
 import {dispatch, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
-import {actionInterceptor} from 'widget-redux-util/action-interceptor'
-import {utf8ArrayToStr} from 'widget-common-util/misc'
 
+import {utf8ArrayToStr} from 'widget-common-util/misc'
+import {serverSentEventConnect} from 'react-server-sent-event-container'
 import Base64 from 'base64-js'
 
-import {getServiceRoot, connectServerConsole, disconnectServerConsole, SERVER_CONSOLE_CLEAR} from '../actions'
+import {getServiceRoot, connectServerConsole, disconnectServerConsole, SERVER_CONSOLE_CLEAR} from '../../actions'
 import ServerConsolePanel from './server-console-panel'
 
-import styles from '../shared/style/app.css'
+import styles from '../../shared/style/app.css'
 
 class ServerConsole extends WidgetComponent {
     render() {

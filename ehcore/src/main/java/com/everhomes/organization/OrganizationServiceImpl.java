@@ -2043,7 +2043,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
 //	    String rootPath = null;
 	    Set<Long> organizationIds = new HashSet<>();
-	    for(Organization org : orgDbist) {
+	    if (orgDbist != null && !orgDbist.isEmpty()) {
+	    	for(Organization org : orgDbist) {
 //	        orgResultist.add(org);
 //	        rootPath = getOrganizationRootPath(org.getPath());
 //	        if(rootPath != null && rootPath.length() > 0) {
@@ -2052,13 +2053,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 //	                orgResultist.addAll(tempDbist);
 //	            }
 //	        }
-
-			if(org != null && org.getPath() != null){
-				organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
-												.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
-												.filter(f->f!=null).collect(Collectors.toSet()));
-			}
-	    }
+	    		
+	    		if(org != null && org.getPath() != null){
+	    			organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
+	    					.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
+	    					.filter(f->f!=null).collect(Collectors.toSet()));
+	    		}
+	    	}
+		}
 	    return new ArrayList<>(organizationIds);
 	}
 	
@@ -8141,8 +8143,9 @@ System.out.println();
 		
 		// 添加联系人
 		CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
-		cmd2.setContactType(ContactType.EMAIL.getCode());
-		cmd2.setContactToken(cmd.getEmail());
+		cmd2.setContactType(ContactType.MOBILE.getCode());
+		UserIdentifier useridentifier = this.getUserMobileIdentifier(userId);
+		cmd2.setContactToken(useridentifier.getIdentifierToken());
 		cmd2.setOrganizationId(cmd.getOrganizationId());
 		cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
 		cmd2.setTargetId(userId);

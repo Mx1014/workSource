@@ -25,6 +25,8 @@ import com.everhomes.acl.AclAccessor;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.appurl.AppUrlService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -67,6 +69,8 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalServiceErrorCode;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.appurl.AppUrlDTO;
+import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.ForumConstants;
@@ -178,6 +182,8 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.news.NewsServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -200,6 +206,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhForumPosts;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.OSType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserGroup;
@@ -224,6 +231,9 @@ public class GroupServiceImpl implements GroupService {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
+    
+    @Autowired
+    private AppUrlService appUrlService;
     
     @Autowired
     private GroupProvider groupProvider;
@@ -291,6 +301,9 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private GroupSettingProvider groupSettingProvider;
     
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+    
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
@@ -299,7 +312,7 @@ public class GroupServiceImpl implements GroupService {
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
     		groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
-        	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE) {
+        	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE && !checkAdmin(cmd.getVisibleRegionId())) {
         		Map<String, Object> map = new HashMap<String, Object>();
                 map.put("clubPlaceholderName", getClubPlaceholderName(namespaceId));
                
@@ -311,10 +324,20 @@ public class GroupServiceImpl implements GroupService {
         	//判断简介
         	if (cmd.getDescription() == null || cmd.getDescription().length() < 10) {
         		throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_DESCRIPTION_LENGTH,
-    					"title length cannot be less than 10!");
+    					"description length cannot be less than 10!");
 			}
 		}
     	return new RestResponse(createGroup(cmd, groupSetting));
+    }
+    
+    private boolean checkAdmin(Long communityId) {
+    	List<Long> organizationIdList = organizationService.getOrganizationIdsTreeUpToRoot(communityId);
+    	for (Long organizationId : organizationIdList) {
+			if (rolePrivilegeService.checkAdministrators(organizationId)) {
+				return true;
+			}
+		}
+    	return false;
     }
     
     private String getLocale() {
@@ -1456,7 +1479,10 @@ public class GroupServiceImpl implements GroupService {
                 deleteActiveGroupMember(userId, member, "leave group");
             }
             
-            sendGroupNotificationForMemberLeaveGroup(group, member);
+            // 俱乐部退出不发消息，add by tt, 20161115
+            if (GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+            	sendGroupNotificationForMemberLeaveGroup(group, member);
+			}
             break;
         default:
             LOGGER.error("Target user is not an active group member, operatorUid=" + userId + ", groupId=" + groupId 
@@ -1666,31 +1692,42 @@ public class GroupServiceImpl implements GroupService {
         //organization的member不在group里面 所以先去掉校验by xiongying 20160524
 //        checkGroupPrivilege(operator.getId(), cmd.getGroupId(), PrivilegeConstants.GroupListMember);
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
-        locator.setAnchor(cmd.getPageAnchor());
-        
-        List<GroupMember> members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
-            (loc,query) -> {
-                if(cmd.getStatus() != null) {
-                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
-                }
-                
-                // 俱乐部的成员需要按创建者、管理员、成员的顺序按加入时间倒序排列，add by tt, 20161103
-                if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
-                	if (TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.FALSE) {
-						query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
-					}
-					query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
-				}
-                
-                return query;
-            });
-        
+        Long pageAnchor = cmd.getPageAnchor() == null?0L:cmd.getPageAnchor();
+        List<GroupMember> members = null;
         Long nextPageAnchor = null;
-        if(members.size() > pageSize) {
-            members.remove(members.size() - 1);
-            nextPageAnchor = members.get(members.size() -1).getId();
-        }
+        
+        //如果是按创建者、管理员、成员顺序排序再按加入时间排序，不能按锚点分页，add by tt, 20161115
+
+        // 俱乐部的成员需要按创建者、管理员、成员的顺序按加入时间倒序排列，add by tt, 20161103
+        if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+//        	if (TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.FALSE) {
+//				query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_ID.ne(group.getCreatorUid()));
+//			}
+//			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
+			Long from = pageAnchor * pageSize;
+			members = groupProvider.listPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getStatus(), from, pageSize+1, TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE, group.getCreatorUid());
+			if(members.size() > pageSize) {
+	            members.remove(members.size() - 1);
+	            nextPageAnchor = pageAnchor + 1;
+	        }
+		}else {
+			CrossShardListingLocator locator = new CrossShardListingLocator(group.getId());
+	        locator.setAnchor(cmd.getPageAnchor());
+	        
+	        members = this.groupProvider.queryGroupMembers(locator, pageSize + 1,
+	            (loc,query) -> {
+	                if(cmd.getStatus() != null) {
+	                    query.addConditions(Tables.EH_GROUP_MEMBERS.MEMBER_STATUS.eq(cmd.getStatus()));
+	                }
+	                
+	                return query;
+	            });
+	        
+	        if(members.size() > pageSize) {
+	            members.remove(members.size() - 1);
+	            nextPageAnchor = members.get(members.size() -1).getId();
+	        }
+		}
 
         List<GroupMemberDTO> memberDtos = members.stream()
                 .map((r) -> { return ConvertHelper.convert(r, GroupMemberDTO.class);})
@@ -4186,22 +4223,25 @@ public class GroupServiceImpl implements GroupService {
 		if (checkIfOnlyOneGroupMember(userId, groupId)) {
 			deleteGroupByCreator(groupId);
 		}else{
-			dbProvider.execute(t->{
-				//从本群中退出
-				quitFromGroup(userId, gm);
-				//转移权限
-				GroupMember newCreator = transferPrivilege(userId, group);
-				//发消息
-				if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
-					//退出群聊时发送消息
-					sendNotificationToOldCreator(gm, user);
-					sendNotificationToNewCreator(newCreator, user.getLocale());
-				}else {
-					//退出俱乐部时发送消息，add by tt, 20161102
-					sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
-					sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
-				}
-				
+			coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()+groupId).enter(()-> {
+				dbProvider.execute(t->{
+					//从本群中退出
+					quitFromGroup(userId, gm);
+					//转移权限
+					GroupMember newCreator = transferPrivilege(userId, group);
+					//发消息
+					if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
+						//退出群聊时发送消息
+						sendNotificationToOldCreator(gm, user);
+						sendNotificationToNewCreator(newCreator, user.getLocale());
+					}else {
+						//退出俱乐部时发送消息，add by tt, 20161102
+						sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
+						sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
+					}
+					
+					return null;
+				});
 				return null;
 			});
 		}
@@ -4262,6 +4302,8 @@ public class GroupServiceImpl implements GroupService {
 		gm.setOperatorUid(userId);
 		groupProvider.updateGroupMember(gm);
 		
+		// 重新查，否则成员数量不对，20161119
+		group = this.groupProvider.findGroupById(gm.getGroupId());
 		group.setCreatorUid(gm.getMemberId());
 		groupProvider.updateGroup(group);
 		
@@ -4272,6 +4314,11 @@ public class GroupServiceImpl implements GroupService {
 		this.groupProvider.deleteGroupMember(gm);
         this.userProvider.deleteUserGroup(userId, gm.getGroupId());
         deleteUserGroupOpRequest(gm.getGroupId(), gm.getMemberId(), userId, "leave group");
+        Group group = this.groupProvider.findGroupById(gm.getGroupId());
+        long memberCount = group.getMemberCount() - 1;
+        memberCount = (memberCount < 0) ? 0 : memberCount;
+        group.setMemberCount(memberCount);
+        this.groupProvider.updateGroup(group);
 	}
 
 	private GroupMember checkTransferPrivilegeParameters(Long userId, Long groupId) {
@@ -4835,10 +4882,16 @@ public class GroupServiceImpl implements GroupService {
 	                ErrorCodes.ERROR_INVALID_PARAMETER, "invalid parameters, cmd"+cmd);
 		}
 		GetShareInfoResponse response = new GetShareInfoResponse();
-		VersionInfoDTO versionInfoDTO = versionService.getVersionInfo(cmd.getRealm());
-		response.setAppName(versionInfoDTO.getAppName());
-		response.setAppIconUrl(versionInfoDTO.getIconUrl());
-		response.setDownloadUrl(versionInfoDTO.getDownloadUrl());
+//		VersionInfoDTO versionInfoDTO = versionService.getVersionInfo(cmd.getRealm());
+//		response.setAppName(versionInfoDTO.getAppName());
+//		response.setAppIconUrl(versionInfoDTO.getIconUrl());
+//		response.setDownloadUrl(versionInfoDTO.getDownloadUrl());
+		// 熊颖之前有个接口可以获取app名称和图标, update by tt, 20161115
+		AppUrlDTO appUrlDTO = appUrlService.getAppInfo(new GetAppInfoCommand(cmd.getNamespaceId(),OSType.Android.getCode()));
+		response.setAppName(appUrlDTO.getName());
+		response.setAppIconUrl(appUrlDTO.getLogoUrl());
+		response.setDownloadUrl(appUrlDTO.getDownloadUrl());
+		response.setAppDescription(appUrlDTO.getDescription());
 		
 		Group group = groupProvider.findGroupById(cmd.getGroupId());
 		response.setGroupName(group.getName());

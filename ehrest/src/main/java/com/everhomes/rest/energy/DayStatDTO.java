@@ -1,5 +1,6 @@
 package com.everhomes.rest.energy;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 
 import com.everhomes.util.StringHelper;
@@ -13,7 +14,7 @@ import com.everhomes.util.StringHelper;
  *     <li>currentCost: 本次费用</li>
  * </ul>
  */
-public class DayStatDTO {
+public class DayStatDTO implements Serializable {
  
 	private Long statDate;
 	private String dateStr;

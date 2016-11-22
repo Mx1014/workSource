@@ -14,6 +14,7 @@ import java.util.List;
  *     <li>communityName: 物业服务中心</li> 
  *     <li>meterType: 类型</li> 
  *     <li>dateStr: 日期或年度</li> 
+ *     <li>dates: 表头的日期</li> 
  * </ul>
  */
 public class EnergyStatDTO {
@@ -32,6 +33,9 @@ public class EnergyStatDTO {
     private String meterType;
     
     private String dateStr ;
+
+    @ItemType(DayStatDTO.class)
+    private List<DayStatDTO> dates;  
 
     @Override
     public String toString() {
@@ -96,5 +100,15 @@ public class EnergyStatDTO {
 
 	public void setMeterType(String meterType) {
 		this.meterType = meterType;
+	}
+
+
+	public List<DayStatDTO> getDates() {
+		return dates;
+	}
+
+
+	public void setDates(List<DayStatDTO> dates) {
+		this.dates = dates;
 	}
 }

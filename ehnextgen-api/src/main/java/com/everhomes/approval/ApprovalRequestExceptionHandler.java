@@ -86,10 +86,12 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		description.setPunchDate(new Timestamp(content.getPunchDate()));
 		description.setExceptionRequestType(content.getExceptionRequestType());
-		description.setPunchDetail(content.getPunchDetail());
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(approvalRequest.getCreatorUid(), 
+				approvalRequest.getOwnerId(), dateSF.format(new Date(approvalRequest.getLongTag1())));
+		description.setPunchDetail(processPunchDetail(pdl,content));
 		description.setPunchStatusName(content.getPunchStatusName());
 		
-		approvalBasicInfo.setDescriptionJson(description);
+		approvalBasicInfo.setDescriptionJson(approvalRequest.getContentJson());
 		return approvalBasicInfo;
 	}
 
@@ -388,7 +390,9 @@ public class ApprovalRequestExceptionHandler extends ApprovalRequestDefaultHandl
 		ApprovalExceptionContent content = JSONObject.parseObject(approvalRequest.getContentJson(), ApprovalExceptionContent.class);
 		result.setPunchDate( content.getPunchDate() );
 		result.setExceptionRequestType(content.getExceptionRequestType()); 
-		result.setPunchDetail(content.getPunchDetail());
+		PunchDayLog pdl = this.punchProvider.getDayPunchLogByDate(approvalRequest.getCreatorUid(), 
+				approvalRequest.getOwnerId(), dateSF.format(new Date(approvalRequest.getLongTag1())));
+		result.setPunchDetail(processPunchDetail(pdl,content));
 		result.setPunchStatusName(content.getPunchStatusName());
 		return null;
 	}

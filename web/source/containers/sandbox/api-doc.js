@@ -1,11 +1,12 @@
 import React, { PropTypes, Component} from 'react'
 
+import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
+
 import jsonStringify from 'json-pretty'
 
-import {registerComponent, getComponentState, WidgetComponent} from 'widget-redux-util/redux-enhancer'
 import Sandbox from './sandbox'
 
-import {getServiceRoot} from '../actions'
+import {getServiceRoot} from '../../actions'
 
 class ApiDoc extends WidgetComponent {
 
@@ -32,9 +33,8 @@ class ApiDoc extends WidgetComponent {
     render() {
         let {responseSchema, javadocUrl, apiUri} = this.props;
 
-        if (process.env.NODE_ENV === 'production') {
-            javadocUrl = getServiceRoot() + javadocUrl;
-        }
+        // attach random info to disable browser caching mechanism
+        javadocUrl = javadocUrl + '?r=' + Math.random();
 
         if(responseSchema) {
             let obj = responseSchema;

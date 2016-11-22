@@ -230,6 +230,8 @@ public class PunchServiceImpl implements PunchService {
 		if(null == status){
 			return "";
 		}
+		if(status.equals(ApprovalStatus.FORGOT.getCode()))
+			return "忘打卡";
 		if(status.equals(ApprovalStatus.HALFABSENCE.getCode()))
 			return "半天事假";
 		if(status.equals(ApprovalStatus.HALFEXCHANGE.getCode()))
@@ -835,9 +837,9 @@ public class PunchServiceImpl implements PunchService {
 			}
 			// 如果是当日，则设置打卡考勤为正常并返回
 			if (!isWorkDay(logDay.getTime(),pr)){
-				pdl.setPunchStatus(PunchStatus.OVERTIME.getCode());
-				pdl.setMorningPunchStatus(PunchStatus.OVERTIME.getCode());
-				pdl.setAfternoonPunchStatus(PunchStatus.OVERTIME.getCode());
+				pdl.setPunchStatus(PunchStatus.NORMAL.getCode());
+				pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+				pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
 				return pdl;
 			}
@@ -988,8 +990,8 @@ public class PunchServiceImpl implements PunchService {
 			punchDayLog.setWorkTime(convertTime(realWorkTime));
 			// 如果是当日，则设置打卡考勤为正常并返回
 			if (!isWorkDay(logDay.getTime(),pr)){
-				pdl.setMorningPunchStatus(PunchStatus.OVERTIME.getCode());
-				pdl.setAfternoonPunchStatus(PunchStatus.OVERTIME.getCode());
+				pdl.setMorningPunchStatus(PunchStatus.NORMAL.getCode());
+				pdl.setAfternoonPunchStatus(PunchStatus.NORMAL.getCode());
 				pdl.setExceptionStatus(ExceptionStatus.NORMAL.getCode()); 
 				return pdl;
 			}

@@ -3,7 +3,7 @@ import React, { PropTypes, Component} from 'react'
 import {SplitPane, Pane} from 'widget-splitter'
 import {WidgetComponent} from 'widget-redux-util/redux-enhancer'
 
-import styles from '../shared/style/app.css'
+import styles from '../../shared/style/app.css'
 
 export default class HelpDesk extends WidgetComponent {
     render() {
