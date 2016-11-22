@@ -1727,7 +1727,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
 //	    String rootPath = null;
 	    Set<Long> organizationIds = new HashSet<>();
-	    for(Organization org : orgDbist) {
+	    if (orgDbist != null && !orgDbist.isEmpty()) {
+	    	for(Organization org : orgDbist) {
 //	        orgResultist.add(org);
 //	        rootPath = getOrganizationRootPath(org.getPath());
 //	        if(rootPath != null && rootPath.length() > 0) {
@@ -1736,13 +1737,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 //	                orgResultist.addAll(tempDbist);
 //	            }
 //	        }
-
-			if(org != null && org.getPath() != null){
-				organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
-												.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
-												.filter(f->f!=null).collect(Collectors.toSet()));
-			}
-	    }
+	    		
+	    		if(org != null && org.getPath() != null){
+	    			organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
+	    					.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
+	    					.filter(f->f!=null).collect(Collectors.toSet()));
+	    		}
+	    	}
+		}
 	    return new ArrayList<>(organizationIds);
 	}
 	
