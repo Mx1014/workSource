@@ -18,6 +18,6 @@ public interface FlowNodeProvider {
 	List<FlowNode> queryFlowNodes(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
-	FlowNode findFlowNodeByName(Flow flow, String nodeName);
+	public FlowNode findFlowNodeByName(Long flowMainId, Integer flowVersion, String nodeName);
 
 }

@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowNodeStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowNodesDao;
@@ -112,8 +114,26 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
     }
 
 	@Override
-	public FlowNode findFlowNodeByName(Flow flow, String nodeName) {
-		// TODO Auto-generated method stub
-		return null;
+	public FlowNode findFlowNodeByName(Long flowMainId, Integer flowVersion, String nodeName) {
+		ListingLocator locator = new ListingLocator();
+		List<FlowNode> flowNodes = this.queryFlowNodes(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_NODES.FLOW_MAIN_ID.eq(flowMainId));
+				query.addConditions(Tables.EH_FLOW_NODES.FLOW_VERSION.eq(flowVersion));
+				query.addConditions(Tables.EH_FLOW_NODES.NODE_NAME.eq(nodeName));
+				query.addConditions(Tables.EH_FLOW_NODES.STATUS.eq(FlowNodeStatus.VISIBLE.getCode()));
+				return query;
+			}
+			
+		});
+		
+		if(flowNodes == null || flowNodes.size() == 0) {
+			return null;
+		}
+		
+		return flowNodes.get(0);
 	}
 }

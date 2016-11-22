@@ -193,4 +193,16 @@ public class FlowProviderImpl implements FlowProvider {
 		
 		return flows;
 	}
+	
+	@Override
+	public void flowMarkUpdated(Flow flow) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		flow.setUpdateTime(now);
+		if(!flow.getStatus().equals(FlowStatusType.CONFIG.getCode())) {
+			//update new version
+			flow.setFlowVersion(flow.getFlowVersion()+1);
+			flow.setStatus(FlowStatusType.CONFIG.getCode());
+		}
+		updateFlow(flow);
+	}
 }

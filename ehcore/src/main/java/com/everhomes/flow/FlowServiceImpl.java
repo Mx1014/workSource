@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -9,10 +10,12 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 
+import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
+import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.flow.ActionStepType;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
@@ -20,14 +23,17 @@ import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowNodeStatus;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
@@ -35,6 +41,7 @@ import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -53,6 +60,7 @@ import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -69,6 +77,9 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private FlowNodeProvider flowNodeProvider;
+    
+    @Autowired
+    private FlowButtonProvider flowButtonProvider;
 	
 	@Override
 	public FlowDTO createFlow(CreateFlowCommand cmd) {
@@ -181,10 +192,65 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
 		}
 		
-		FlowNode flowNode = flowNodeProvider.findFlowNodeByName(flow, cmd.getNodeName());
+		FlowNode flowNode = this.dbProvider.execute(new TransactionCallback<FlowNode>() {
+			@Override
+			public FlowNode doInTransaction(TransactionStatus arg0) {
+				FlowNode nodeObj = flowNodeProvider.findFlowNodeByName(flow.getId(), flow.getFlowVersion(), cmd.getNodeName());	
+				if(nodeObj != null) {
+					return null;
+				}
+				
+				//step1 mark flow as updated
+				flowProvider.flowMarkUpdated(flow);
+				
+				//step2 create node
+				nodeObj = new FlowNode();
+				nodeObj.setNodeName(cmd.getNodeName());
+				nodeObj.setFlowMainId(flow.getId());
+				nodeObj.setFlowVersion(flow.getFlowVersion());
+				nodeObj.setNamespaceId(flow.getNamespaceId());
+				nodeObj.setStatus(FlowNodeStatus.VISIBLE.getCode());
+				flowNodeProvider.createFlowNode(nodeObj);
+				
+				//step2 create node buttons
+				createDefaultButtons(flow, nodeObj);
+				
+				return nodeObj;
+			}
+		});
 		
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	private void createDefaultButtons(Flow flow, FlowNode flowNode) {
+		FlowStepType[] steps = {FlowStepType.APPROVE_STEP, FlowStepType.REJECT_STEP, FlowStepType.TRANSFER_STEP, FlowStepType.COMMENT_STEP, FlowStepType.ABSORT_STEP};
+		for(FlowStepType step : steps) {
+			createDefButton(flow, flowNode, FlowUserType.PROCESSOR, step);
+		}
+		
+		FlowStepType[] steps2 = {FlowStepType.REMINDER_STEP, FlowStepType.COMMENT_STEP, FlowStepType.ABSORT_STEP};
+		for(FlowStepType step : steps2) {
+			createDefButton(flow, flowNode, FlowUserType.APPLIER, step);
+		}
+	}
+	
+	private void createDefButton(Flow flow, FlowNode flowNode, FlowUserType userType, FlowStepType stepType) {
+		FlowButton button = new FlowButton();
+		button.setFlowMainId(flow.getId());
+		button.setFlowVersion(flow.getFlowVersion());
+		button.setFlowNodeId(flowNode.getId());
+		button.setNamespaceId(flow.getNamespaceId());
+		button.setStatus(FlowButtonStatus.ENABLED.getCode());
+		button.setFlowStepType(stepType.getCode());
+		button.setNeedSubject((byte)1);
+		flowButtonProvider.createFlowButton(button);
+	}
+	
+	private String buttonDefName(Integer namespaceId, FlowStepType step) {
+		String code = step.getCode();
+		String conf = FlowConstants.FLOW_STEP_NAME_PREFIX + code;
+		return configProvider.getValue(namespaceId, conf, code);
 	}
 	
 	@Override

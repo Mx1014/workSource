@@ -23,5 +23,7 @@ public interface FlowProvider {
 			Long ownerId, String ownerType, String name);
 
 	List<Flow> findFlowsByModule(ListingLocator locator, ListFlowCommand cmd);
+
+	void flowMarkUpdated(Flow flow);
 	
 }
