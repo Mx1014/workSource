@@ -756,6 +756,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.DELAY.getCode()));
 		if(targetType != null && targetType.size() > 0)
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_TYPE.in(targetType));
 		
@@ -817,9 +818,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasks> listTasksByEquipmentId(
-			Long equipmentId, List<Long> standardIds,
-			CrossShardListingLocator locator, Integer pageSize) {
+	public List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, 
+			CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus) {
 		List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
 		
 		if (locator.getShardIterator() == null) {
@@ -839,9 +839,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             if(standardIds != null && standardIds.size() > 0)
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
             
+            if(taskStatus != null && taskStatus.size() > 0)
+            	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
+            	
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
             query.addLimit(pageSize - tasks.size());
+            
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("listTasksByEquipmentId, sql=" + query.getSQL());
+                LOGGER.debug("listTasksByEquipmentId, bindValues=" + query.getBindValues());
+            }
             
             query.fetch().map((r) -> {
             	
@@ -1413,8 +1421,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(task.getStatus().equals(EquipmentTaskStatus.IN_MAINTENANCE.getCode()))
 			task.setResult(EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_DELAY.getCode());
 		
-		task.setStatus(EquipmentTaskStatus.NONE.getCode());
-		task.setResult(EquipmentTaskResult.NONE.getCode());
+		task.setStatus(EquipmentTaskStatus.DELAY.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);

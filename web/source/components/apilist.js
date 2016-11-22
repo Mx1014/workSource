@@ -42,7 +42,7 @@ export default class ApiList extends Component {
         }
 
         this.asyncRenderingTimer = setInterval(()=> {
-            let {items, onItemClick} = this.props;
+            let {items = [], onItemClick} = this.props;
             let itemsToRender = items.slice(this.asyncRenderingPos, this.asyncRenderingPos + PAGE_SIZE);
             if(itemsToRender.length > 0) {
                 for(let i = 0; i < itemsToRender.length; i++) {
@@ -62,7 +62,7 @@ export default class ApiList extends Component {
 
                 this.asyncRenderingPos += itemsToRender.length;
             } else {
-                this.lastRenderedCount = this.props.items.length;
+                this.lastRenderedCount = items.length;
                 this.clearAsyncRendering();
             }
         }, RENDER_INTERVAL);
