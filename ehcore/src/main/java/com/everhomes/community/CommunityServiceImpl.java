@@ -2495,6 +2495,7 @@ public class CommunityServiceImpl implements CommunityService {
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name);
 			checkResourceCategoryExsit(category);
 			category = new ResourceCategory();
+			category.setParentId(0L);
 		}else{
 			parentCategory = communityProvider.findResourceCategoryById(parentId);
 			checkResourceCategoryIsNull(parentCategory);
@@ -2502,6 +2503,7 @@ public class CommunityServiceImpl implements CommunityService {
 			checkResourceCategoryExsit(category);
 			category = new ResourceCategory();
 			category.setPath(parentCategory.getPath());
+			category.setParentId(parentId);
 		}
 		
 		category.setCreateTime(new Timestamp(System.currentTimeMillis()));
@@ -2509,7 +2511,6 @@ public class CommunityServiceImpl implements CommunityService {
 		category.setName(name);
 		category.setNamespaceId(namespaceId);
 		
-		category.setParentId(parentId);
 		category.setStatus(ResourceCategoryStatus.ACTIVE.getCode());
 		category.setOwnerType(ownerType);
 		category.setOwnerId(ownerId);
