@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.flow.FlowService;
@@ -42,7 +43,7 @@ import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 @RestDoc(value="Flow Admin controller", site="core")
 @RestController
 @RequestMapping("/admin/flow")
-public class FlowAdminController {
+public class FlowAdminController extends ControllerBase {
 	
 	@Autowired
 	private FlowService flowService;
