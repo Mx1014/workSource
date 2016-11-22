@@ -20,7 +20,6 @@ import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
 
 @RestDoc(value="Flow controller", site="core")
 @RestController
