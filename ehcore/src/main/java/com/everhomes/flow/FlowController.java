@@ -12,7 +12,9 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
+import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
@@ -79,6 +81,20 @@ public class FlowController {
     @RestReturn(value=FlowButtonDTO.class)
     public RestResponse fireButton(@Valid FlowFireButtonCommand cmd) {
         RestResponse response = new RestResponse(flowService.fireButton(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /flow/postEvaluate</b>
+     * <p> 对节点进行评价 </p>
+     * @return 返回评价信息
+     */
+    @RequestMapping("postEvaluate")
+    @RestReturn(value=FlowEvaluateDTO.class)
+    public RestResponse postEvaluate(@Valid FlowPostEvaluateCommand cmd) {
+        RestResponse response = new RestResponse(flowService.postEvaluate(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

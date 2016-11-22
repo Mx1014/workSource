@@ -13,10 +13,12 @@ import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.FlowStepType;
@@ -324,6 +326,13 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowButtonDTO fireButton(FlowFireButtonCommand cmd);
+
+	/**
+	 * 在某一个节点中进行评价
+	 * @param cmd
+	 * @return
+	 */
+	FlowEvaluateDTO postEvaluate(FlowPostEvaluateCommand cmd);
 	
 	//TODO 日志信息分类：
 	

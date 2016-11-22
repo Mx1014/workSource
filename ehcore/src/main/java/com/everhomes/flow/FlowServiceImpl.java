@@ -15,10 +15,12 @@ import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.FlowStepType;
@@ -301,6 +303,12 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public FlowEvaluateDTO postEvaluate(FlowPostEvaluateCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}
