@@ -40,6 +40,7 @@ import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
@@ -128,5 +129,7 @@ public interface ActivityService {
 	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
 
 	void activityWarningSchedule();
+	
+	ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd);
 
 }

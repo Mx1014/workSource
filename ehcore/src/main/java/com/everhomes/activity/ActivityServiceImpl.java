@@ -2243,7 +2243,8 @@ public class ActivityServiceImpl implements ActivityService {
 		return activities;
 	}
 	
-	private ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd) {
+	@Override
+	public ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd) {
 		long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();

@@ -85,6 +85,7 @@ import com.everhomes.rest.activity.ActivityWarningResponse;
 import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
 import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
 import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
@@ -1291,59 +1292,89 @@ public class ForumServiceImpl implements ForumService {
          	forumIds.add(community.getDefaultForumId());
          }
          
-         Condition privateCond = null;
-         if(PostPrivacy.PRIVATE == PostPrivacy.fromCode(cmd.getPrivateFlag())){
-        	 Condition creatorCondition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(operator.getId());
-             
-             // 只有公开的帖子才能查到
-        	 privateCond = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
-        	 privateCond = creatorCondition.or(privateCond);
-         }
-         
-        
-         
-         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
-         
-         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
-         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
-         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
-         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
-         Condition condition = communityCondition.or(regionCondition).and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
-         if(null != cmd.getEmbeddedAppId()){
-        	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
-        	 //如果是活动且查询官方活动，则加上官方活动条件
-//        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())==OfficialFlag.YES) {
-//				condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
-//        	 }
-        	 // 如果officialFlag传了值，按传的值算，如果没传值则查所有，updated by tt, 20161017
-        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())!=null) {
-        		 condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
+         if(null != cmd.getEmbeddedAppId() && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
+        	 ListActivitiesReponse response = activityService.listOfficialActivities(cmd);
+        	 
+        	 ListPostCommandResponse postResponse = new ListPostCommandResponse();
+        	 if(null != response) {
+        		 if(response.getNextPageAnchor() != null) {
+        			 postResponse.setNextPageAnchor(response.getNextPageAnchor());
+        		 }
+        		
+        		 if(response.getActivities() != null) {
+        			 List<Post> posts = response.getActivities().stream().map((activity) -> {
+        				 Post post = forumProvider.findPostById(activity.getPostId());
+        				 return post;
+        			 }).collect(Collectors.toList());
+        			 
+        			 this.forumProvider.populatePostAttachments(posts);
+        			 
+        			 populatePosts(operatorId, posts, communityId, false);
+         	        
+         	        List<PostDTO> postDtoList = posts.stream().map((r) -> {
+         	          return ConvertHelper.convert(r, PostDTO.class);  
+         	        }).collect(Collectors.toList());
+         	        
+         	       postResponse.setPosts(postDtoList);
+        		 }
         	 }
+        	  return postResponse;
          }
-         if(null != unCateGoryCondition){
-        	 condition = condition.and(unCateGoryCondition);
-         }
-         
-         if(null != cmd.getContentCategory()){
-        	 Category contentCatogry = this.categoryProvider.findCategoryById(cmd.getContentCategory());
-        	 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
-         }
-         
-         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
-         locator.setAnchor(cmd.getPageAnchor());
-         
-         if(null != privateCond){
-        	 condition = condition.and(privateCond);
-         }
-         
-         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
-    	 if(LOGGER.isInfoEnabled()) {
-             long endTime = System.currentTimeMillis();
-             LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
-                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
-         }   
-    	 return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+         else {
+	         Condition privateCond = null;
+	         if(PostPrivacy.PRIVATE == PostPrivacy.fromCode(cmd.getPrivateFlag())){
+	        	 Condition creatorCondition = Tables.EH_FORUM_POSTS.CREATOR_UID.eq(operator.getId());
+	             
+	             // 只有公开的帖子才能查到
+	        	 privateCond = Tables.EH_FORUM_POSTS.PRIVATE_FLAG.notEqual(PostPrivacy.PRIVATE.getCode());
+	        	 privateCond = creatorCondition.or(privateCond);
+	         }
+	         
+	        
+	         
+	         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
+	         
+	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
+	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
+	         Condition regionCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.REGION.getCode());
+	         regionCondition = regionCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.eq(organizationId));
+	         Condition condition = communityCondition.or(regionCondition).and(Tables.EH_FORUM_POSTS.FORUM_ID.in(forumIds));
+	         if(null != cmd.getEmbeddedAppId()){
+	        	 condition = condition.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(cmd.getEmbeddedAppId()));
+	        	 //如果是活动且查询官方活动，则加上官方活动条件
+	//        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())==OfficialFlag.YES) {
+	//				condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+	//        	 }
+	        	 // 如果officialFlag传了值，按传的值算，如果没传值则查所有，updated by tt, 20161017
+	        	 if (cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && OfficialFlag.fromCode(cmd.getOfficialFlag())!=null) {
+	        		 condition = condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
+	        	 }
+	         }
+	         if(null != unCateGoryCondition){
+	        	 condition = condition.and(unCateGoryCondition);
+	         }
+	         
+	         if(null != cmd.getContentCategory()){
+	        	 Category contentCatogry = this.categoryProvider.findCategoryById(cmd.getContentCategory());
+	        	 condition = condition.and(Tables.EH_FORUM_POSTS.CATEGORY_PATH.like(contentCatogry.getPath() + "%"));
+	         }
+	         
+	         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+	         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
+	         locator.setAnchor(cmd.getPageAnchor());
+	         
+	         if(null != privateCond){
+	        	 condition = condition.and(privateCond);
+	         }
+	         
+	         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
+	    	 if(LOGGER.isInfoEnabled()) {
+	             long endTime = System.currentTimeMillis();
+	             LOGGER.info("Query organization topics, userId=" + operatorId + ", size=" + dtos.size() 
+	                 + ", elapse=" + (endTime - startTime) + ", cmd=" + cmd);
+	         }   
+	    	 return new ListPostCommandResponse(locator.getAnchor(), dtos); 
+	    }
     }
     
     /**
