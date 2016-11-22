@@ -1507,7 +1507,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, null, locator, pageSize);
+        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, null, locator, pageSize, null);
             
             if(tasks.size() > 0) {
                 for(EquipmentInspectionTasks task : tasks) {
@@ -1533,7 +1533,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         standardIds.add(standardId);
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, standardIds, locator, pageSize);
+        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, standardIds, locator, pageSize, null);
             
             if(tasks.size() > 0) {
                 for(EquipmentInspectionTasks task : tasks) {
@@ -3123,7 +3123,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         	standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
         }
         
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, locator, pageSize+1);
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, locator, pageSize+1, null);
 		
 		if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
@@ -3408,7 +3408,11 @@ public class EquipmentServiceImpl implements EquipmentService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1);
+        List<Byte> taskStatus = new ArrayList<Byte>();
+        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+        taskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
 		
 		if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
