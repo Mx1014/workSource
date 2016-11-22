@@ -25,6 +25,7 @@ import com.everhomes.acl.AclAccessor;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.appurl.AppUrlService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
@@ -181,6 +182,8 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.news.NewsServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -298,6 +301,9 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private GroupSettingProvider groupSettingProvider;
     
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+    
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
@@ -306,7 +312,7 @@ public class GroupServiceImpl implements GroupService {
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
     		groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
-        	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE) {
+        	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE && !checkAdmin(cmd.getVisibleRegionId())) {
         		Map<String, Object> map = new HashMap<String, Object>();
                 map.put("clubPlaceholderName", getClubPlaceholderName(namespaceId));
                
@@ -322,6 +328,16 @@ public class GroupServiceImpl implements GroupService {
 			}
 		}
     	return new RestResponse(createGroup(cmd, groupSetting));
+    }
+    
+    private boolean checkAdmin(Long communityId) {
+    	List<Long> organizationIdList = organizationService.getOrganizationIdsTreeUpToRoot(communityId);
+    	for (Long organizationId : organizationIdList) {
+			if (rolePrivilegeService.checkAdministrators(organizationId)) {
+				return true;
+			}
+		}
+    	return false;
     }
     
     private String getLocale() {
