@@ -846,6 +846,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
             query.addLimit(pageSize - tasks.size());
             
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("listTasksByEquipmentId, sql=" + query.getSQL());
+                LOGGER.debug("listTasksByEquipmentId, bindValues=" + query.getBindValues());
+            }
+            
             query.fetch().map((r) -> {
             	
             	tasks.add(ConvertHelper.convert(r, EquipmentInspectionTasks.class));
