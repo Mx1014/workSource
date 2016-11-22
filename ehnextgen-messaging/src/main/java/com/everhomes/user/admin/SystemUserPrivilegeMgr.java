@@ -77,6 +77,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         }
         if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
             return true;
+        }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId){
+            return false;
         }
 
         roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(ownerType, ownerId, EntityType.USER.getCode(), userId);
@@ -161,6 +163,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
         if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
             return true;
+        }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId){
+            return false;
         }
 
         return aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors);
