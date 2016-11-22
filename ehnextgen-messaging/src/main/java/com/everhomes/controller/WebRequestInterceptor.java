@@ -500,6 +500,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 				e.printStackTrace();
 			}
 			Clients ci = new Clients();
+			LOGGER.error("~~~~~~~~~~~~~~~~~~~~~~~~"+param);
 			String responseString = ci.restCall("GET", param, null, null, null);
 			LOGGER.error("~~~~~~~~~~~~~~~~~~~~~~~~"+responseString);
 
