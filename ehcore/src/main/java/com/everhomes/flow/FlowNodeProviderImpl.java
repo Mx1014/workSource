@@ -110,4 +110,10 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
 
     private void prepareObj(FlowNode obj) {
     }
+
+	@Override
+	public FlowNode findFlowNodeByName(Flow flow, String nodeName) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

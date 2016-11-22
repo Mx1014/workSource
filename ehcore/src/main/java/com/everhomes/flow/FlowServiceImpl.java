@@ -66,6 +66,9 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private ConfigurationProvider  configProvider;
+    
+    @Autowired
+    private FlowNodeProvider flowNodeProvider;
 	
 	@Override
 	public FlowDTO createFlow(CreateFlowCommand cmd) {
@@ -169,6 +172,19 @@ public class FlowServiceImpl implements FlowService {
 		
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
+	}
+	
+	@Override
+	public FlowNodeDTO createFlowNode(CreateFlowNodeCommand cmd) {
+		Flow flow = flowProvider.getFlowById(cmd.getFlowMainId());
+		if(flow == null || flow.getStatus().equals(FlowStatusType.INVALID.getCode()) || !flow.getFlowMainId().equals(0l)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
+		}
+		
+		FlowNode flowNode = flowNodeProvider.findFlowNodeByName(flow, cmd.getNodeName());
+		
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	@Override
@@ -311,12 +327,6 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return flow;
-	}
-
-	@Override
-	public FlowNodeDTO createFlowNode(CreateFlowNodeCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
