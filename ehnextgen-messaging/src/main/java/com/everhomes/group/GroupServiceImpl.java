@@ -4207,22 +4207,25 @@ public class GroupServiceImpl implements GroupService {
 		if (checkIfOnlyOneGroupMember(userId, groupId)) {
 			deleteGroupByCreator(groupId);
 		}else{
-			dbProvider.execute(t->{
-				//从本群中退出
-				quitFromGroup(userId, gm);
-				//转移权限
-				GroupMember newCreator = transferPrivilege(userId, group);
-				//发消息
-				if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
-					//退出群聊时发送消息
-					sendNotificationToOldCreator(gm, user);
-					sendNotificationToNewCreator(newCreator, user.getLocale());
-				}else {
-					//退出俱乐部时发送消息，add by tt, 20161102
-					sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
-					sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
-				}
-				
+			coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()+groupId).enter(()-> {
+				dbProvider.execute(t->{
+					//从本群中退出
+					quitFromGroup(userId, gm);
+					//转移权限
+					GroupMember newCreator = transferPrivilege(userId, group);
+					//发消息
+					if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
+						//退出群聊时发送消息
+						sendNotificationToOldCreator(gm, user);
+						sendNotificationToNewCreator(newCreator, user.getLocale());
+					}else {
+						//退出俱乐部时发送消息，add by tt, 20161102
+						sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
+						sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
+					}
+					
+					return null;
+				});
 				return null;
 			});
 		}
@@ -4283,6 +4286,8 @@ public class GroupServiceImpl implements GroupService {
 		gm.setOperatorUid(userId);
 		groupProvider.updateGroupMember(gm);
 		
+		// 重新查，否则成员数量不对，20161119
+		group = this.groupProvider.findGroupById(gm.getGroupId());
 		group.setCreatorUid(gm.getMemberId());
 		groupProvider.updateGroup(group);
 		
@@ -4293,6 +4298,11 @@ public class GroupServiceImpl implements GroupService {
 		this.groupProvider.deleteGroupMember(gm);
         this.userProvider.deleteUserGroup(userId, gm.getGroupId());
         deleteUserGroupOpRequest(gm.getGroupId(), gm.getMemberId(), userId, "leave group");
+        Group group = this.groupProvider.findGroupById(gm.getGroupId());
+        long memberCount = group.getMemberCount() - 1;
+        memberCount = (memberCount < 0) ? 0 : memberCount;
+        group.setMemberCount(memberCount);
+        this.groupProvider.updateGroup(group);
 	}
 
 	private GroupMember checkTransferPrivilegeParameters(Long userId, Long groupId) {

@@ -50,10 +50,10 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
     
-    @Caching(evict = { @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories")})
+    @Caching(evict = { @CacheEvict(value="listChildCategory", allEntries=true),
+            @CacheEvict(value="listDescendantCategory", allEntries=true),
+            @CacheEvict(value="listAllCategory", allEntries=true),
+            @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -75,10 +75,10 @@ public class CategoryProviderImpl implements CategoryProvider {
     }
 
     @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
-            @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories")})
+            @CacheEvict(value="listChildCategory", allEntries=true),
+            @CacheEvict(value="listDescendantCategory", allEntries=true),
+            @CacheEvict(value="listAllCategory", allEntries=true),
+            @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
     public void updateCategory(Category category) {
         assert(category.getId() != null);
@@ -92,9 +92,9 @@ public class CategoryProviderImpl implements CategoryProvider {
 
     @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
             @CacheEvict(value="listChildCategory",allEntries=true),
-            @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories")})
+            @CacheEvict(value="listDescendantCategory", allEntries=true),
+            @CacheEvict(value="listAllCategory", allEntries=true),
+            @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
     public void deleteCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());

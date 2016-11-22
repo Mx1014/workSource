@@ -7622,8 +7622,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		// 添加联系人
 		CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
-		cmd2.setContactType(ContactType.EMAIL.getCode());
-		cmd2.setContactToken(cmd.getEmail());
+		cmd2.setContactType(ContactType.MOBILE.getCode());
+		UserIdentifier useridentifier = this.getUserMobileIdentifier(userId);
+		cmd2.setContactToken(useridentifier.getIdentifierToken());
 		cmd2.setOrganizationId(cmd.getOrganizationId());
 		cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
 		cmd2.setTargetId(userId);

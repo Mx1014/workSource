@@ -20,7 +20,6 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.math.RandomUtils;
-import org.apache.commons.lang.math.RandomUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,15 +27,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.c;
 
 @Component
 public class YellowPageServiceImpl implements YellowPageService {
@@ -581,7 +577,8 @@ public class YellowPageServiceImpl implements YellowPageService {
     private void processDetailUrl(ServiceAllianceDTO dto) {
         try {
             String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
-            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(dto.getName(), "UTF-8"), RandomUtils.nextInt(2));
+            String name = org.apache.commons.lang.StringUtils.trimToEmpty(dto.getName());
+            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
             dto.setDetailUrl(url);
         } catch (Exception e) {
             e.printStackTrace();
@@ -935,18 +932,19 @@ public class YellowPageServiceImpl implements YellowPageService {
     }
 
     @Override
-    public List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(cmd.getOwnerType(), cmd.getOwnerId(), namespaceId,
-                cmd.getParentId(), CategoryAdminStatus.ACTIVE);
-        return entityResultList.stream().map(r -> {
-            List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(cmd.getOwnerType(), cmd.getOwnerId(), namespaceId,
-                    r.getId(), CategoryAdminStatus.ACTIVE);
+    public ServiceAllianceDisplayModeDTO getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd) {
+        ServiceAllianceDisplayModeDTO displayModeDTO = new ServiceAllianceDisplayModeDTO();
+        displayModeDTO.setDisplayMode(ServiceAllianceCategoryDisplayMode.LIST.getCode());
+
+        ServiceAllianceCategories parentCategory = this.yellowPageProvider.findCategoryById(cmd.getParentId());
+        if (parentCategory != null) {
+            List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(null, null,
+                    UserContext.getCurrentNamespaceId(), parentCategory.getId(), CategoryAdminStatus.ACTIVE);
             if (childCategories != null && childCategories.size() > 0) {
-                r.setDisplayMode(childCategories.get(0).getDisplayMode());
+                displayModeDTO.setDisplayMode(childCategories.get(0).getDisplayMode());
             }
-            return ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
-        }).collect(Collectors.toList());
+        }
+        return displayModeDTO;
     }
 
 }
