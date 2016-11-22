@@ -32,7 +32,7 @@ CREATE TABLE `eh_quality_inspection_specifications` (
   `scope_code` TINYINT NOT NULL DEFAULT '0' COMMENT '0: all, 1: community',
   `scope_id` BIGINT NOT NULL DEFAULT '0',
   `parent_id` BIGINT NOT NULL DEFAULT '0',
-  `name` VARCHAR(64) NOT NULL,
+  `name` VARCHAR(64) NOT NULL DEFAULT '',,
   `path` VARCHAR(128),
   `score` DOUBLE NOT NULL DEFAULT '100',
   `description` TEXT COMMENT 'content data',
