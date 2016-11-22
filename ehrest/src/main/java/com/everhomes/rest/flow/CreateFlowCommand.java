@@ -3,7 +3,11 @@ package com.everhomes.rest.flow;
 import com.everhomes.util.StringHelper;
 
 /**
- * 创建新的工作流。工作流下的 flowName 在某一个业务下是独一无二的。
+ * 创建新的工作流。
+ * <ul>
+ * <li>flowName: 工作流下的 flowName 在某一个业务下是独一无二的。</li>
+ * <li>ownerType: {@link com.everhomes.rest.flow.FlowOwnerType} </li>
+ * </ul>
  * @author janson
  *
  */
@@ -13,7 +17,7 @@ public class CreateFlowCommand {
     private Long     ownerId;
     private String     ownerType;
     private String     moduleType;
-    private Integer     moduleId;
+    private Long     moduleId;
 	public String getFlowName() {
 		return flowName;
 	}
@@ -44,14 +48,14 @@ public class CreateFlowCommand {
 	public void setModuleType(String moduleType) {
 		this.moduleType = moduleType;
 	}
-	public Integer getModuleId() {
+
+    public Long getModuleId() {
 		return moduleId;
 	}
-	public void setModuleId(Integer moduleId) {
+	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
 	}
-
-    @Override
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

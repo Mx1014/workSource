@@ -13,10 +13,14 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowStatusType;
+import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowsDao;
@@ -117,4 +121,76 @@ public class FlowProviderImpl implements FlowProvider {
         obj.setRunTime(obj.getCreateTime());
         obj.setUpdateTime(obj.getCreateTime());
     }
+
+	@Override
+	public Flow findFlowByName(Integer namespaceId, Long moduleId,
+			String moduleType, Long ownerId, String ownerType, String name) {
+		ListingLocator locator = new ListingLocator();
+		List<Flow> flows = this.queryFlows(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
+				query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(moduleId));
+				query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));
+				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));
+				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));
+				query.addConditions(Tables.EH_FLOWS.FLOW_NAME.eq(name));
+				query.addConditions(Tables.EH_FLOWS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0l)); // Got a main flow, not snapshot flow.
+				return query;
+			}
+			
+		});
+		
+		if(flows != null && flows.size() > 0) {
+			return flows.get(0);
+		}
+		
+		return null;
+	}
+	
+	@Override
+	public List<Flow> findFlowsByModule(ListingLocator locator, ListFlowCommand cmd) {
+		if(locator.getAnchor() == null) {
+			locator.setAnchor(cmd.getPageAnchor());	
+		}
+		
+		if(cmd.getModuleType() == null) {
+			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		}
+		
+		List<Flow> flows = this.queryFlows(locator, cmd.getPageSize(), new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+				query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(cmd.getModuleId()));
+				query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(cmd.getModuleType()));
+				if(cmd.getOwnerId() != null) {
+					query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(cmd.getOwnerId()));	
+				}
+				if(cmd.getOwnerType() != null) {
+					query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(cmd.getModuleType()));	
+				}
+				
+				query.addConditions(Tables.EH_FLOWS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				
+				if(cmd.getFlowVersion() != null) {
+					// Got snapshot flow
+					query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(cmd.getFlowMainId()));
+					query.addConditions(Tables.EH_FLOWS.FLOW_VERSION.eq(cmd.getFlowVersion()));
+				} else {
+					query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0l)); // Got a main flow, not snapshot flow.	
+				}
+				
+				return query;
+			}
+			
+		});
+		
+		return flows;
+	}
 }

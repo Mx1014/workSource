@@ -7,7 +7,9 @@ public class ListFlowCommand {
     private Long     ownerId;
     private String     ownerType;
     private String     moduleType;
-    private Integer     moduleId;
+    private Long     moduleId;
+    private Long flowMainId;
+    private Integer flowVersion;
     private Long pageAnchor;
     private Integer pageSize;
     
@@ -35,14 +37,13 @@ public class ListFlowCommand {
 	public void setModuleType(String moduleType) {
 		this.moduleType = moduleType;
 	}
-	public Integer getModuleId() {
+    public Long getModuleId() {
 		return moduleId;
 	}
-	public void setModuleId(Integer moduleId) {
+	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
 	}
-
-    public Long getPageAnchor() {
+	public Long getPageAnchor() {
 		return pageAnchor;
 	}
 	public void setPageAnchor(Long pageAnchor) {
@@ -53,6 +54,19 @@ public class ListFlowCommand {
 	}
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Integer getFlowVersion() {
+		return flowVersion;
+	}
+	public void setFlowVersion(Integer flowVersion) {
+		this.flowVersion = flowVersion;
+	}
+	public Long getFlowMainId() {
+		return flowMainId;
+	}
+	public void setFlowMainId(Long flowMainId) {
+		this.flowMainId = flowMainId;
 	}
 	@Override
     public String toString() {

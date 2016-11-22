@@ -6,6 +6,7 @@ public class CreateFlowNodeCommand {
 	private Integer     namespaceId;
 	private String     nodeName;
 	private Long     flowMainId;
+	
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

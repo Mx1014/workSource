@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.ListFlowCommand;
 
 public interface FlowProvider {
 
@@ -17,5 +18,10 @@ public interface FlowProvider {
 
 	List<Flow> queryFlows(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
+
+	Flow findFlowByName(Integer namespaceId, Long moduleId, String moduleType,
+			Long ownerId, String ownerType, String name);
+
+	List<Flow> findFlowsByModule(ListingLocator locator, ListFlowCommand cmd);
 	
 }

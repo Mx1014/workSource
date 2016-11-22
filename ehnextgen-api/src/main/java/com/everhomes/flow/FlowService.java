@@ -219,8 +219,9 @@ public interface FlowService {
 	/**
 	 * 删除某一个工作流
 	 * @param flowId
+	 * @return 
 	 */
-	void deleteFlow(Long flowId);
+	Flow deleteFlow(Long flowId);
 
 	/**
 	 * 修改工作流的名字
@@ -228,8 +229,18 @@ public interface FlowService {
 	 */
 	FlowDTO updateFlowName(UpdateFlowNameCommand cmd);
 
+	/**
+	 * 创建一个新的节点
+	 * @param cmd
+	 * @return
+	 */
 	FlowNodeDTO createFlowNode(CreateFlowNodeCommand cmd);
 
+	/**
+	 * 删除工作流的节点
+	 * @param flowNodeId
+	 * @return
+	 */
 	FlowNode deleteFlowNode(Long flowNodeId);
 
 	ListBriefFlowNodeResponse listBriefFlowNodes(Long flowId);

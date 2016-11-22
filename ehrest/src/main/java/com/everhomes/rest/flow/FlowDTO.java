@@ -20,7 +20,7 @@ public class FlowDTO {
     private Integer     flowVersion;
     private Timestamp     runTime;
     private Timestamp     createTime;
-    private Integer     moduleId;
+    private Long     moduleId;
     private Long     startNode;
     private Long     ownerId;
 
@@ -128,11 +128,11 @@ public class FlowDTO {
 		this.createTime = createTime;
 	}
 
-	public Integer getModuleId() {
+	public Long getModuleId() {
 		return moduleId;
 	}
 
-	public void setModuleId(Integer moduleId) {
+	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
 	}
 
