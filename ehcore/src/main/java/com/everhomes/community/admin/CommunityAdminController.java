@@ -424,7 +424,9 @@ public class CommunityAdminController extends ControllerBase {
     @RequestMapping("qryCommunityUserEnterpriseByUserId")
     @RestReturn(value=CommunityUserAddressDTO.class)
     public RestResponse qryCommunityUserEnterpriseByUserId(@Valid QryCommunityUserAddressByUserIdCommand cmd) {
-        
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         RestResponse response =  new RestResponse(communityService.qryCommunityUserEnterpriseByUserId(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -875,6 +875,9 @@ public class UserProviderImpl implements UserProvider {
             	user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
             	user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
             	user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+            	user.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
+            	user.setPositionTag(r.getValue(Tables.EH_USERS.POSITION_TAG));
+            	user.setIdentityNumberTag(r.getValue(Tables.EH_USERS.IDENTITY_NUMBER_TAG));
             	list.add(user);
             	return null;
             });
