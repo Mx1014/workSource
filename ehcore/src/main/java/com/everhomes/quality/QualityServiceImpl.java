@@ -62,6 +62,7 @@ import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -2202,6 +2203,11 @@ public class QualityServiceImpl implements QualityService {
 		standard.setReviewerUid(UserContext.current().getUser().getId());
 		standard.setReviewTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		
+		if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult()))) {
+			standard.setStatus(QualityStandardStatus.ACTIVE.getCode());
+		} else {
+			standard.setStatus(QualityStandardStatus.INACTIVE.getCode());
+		}
 		qualityProvider.updateQualityInspectionStandards(standard);
 	}
 
