@@ -1,11 +1,13 @@
 package com.everhomes.rest.pmtask;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 public class TaskOperatorStatisticsDTO {
 
 	private String operatorName;
-	private Long avgStar;
+	private BigDecimal avgStar;
 	private Long taskCategoryId;
 	private String taskCategoryName;
 	public String getOperatorName() {
@@ -14,10 +16,11 @@ public class TaskOperatorStatisticsDTO {
 	public void setOperatorName(String operatorName) {
 		this.operatorName = operatorName;
 	}
-	public Long getAvgStar() {
+	
+	public BigDecimal getAvgStar() {
 		return avgStar;
 	}
-	public void setAvgStar(Long avgStar) {
+	public void setAvgStar(BigDecimal avgStar) {
 		this.avgStar = avgStar;
 	}
 	public Long getTaskCategoryId() {

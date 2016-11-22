@@ -51,5 +51,10 @@ public interface PmTaskProvider {
 	
 	List<PmTask> listPmTask(String ownerType, Long ownerId, Long taskCategoryId, Byte status);
 	
-	List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId);
+	List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId, Long userId);
+	
+	void createTaskTargetStatistic(PmTaskTargetStatistic pmTaskTargetStatistic);
+	
+	List<PmTaskTargetStatistic> searchTaskTargetStatistics(Integer namespaceId, Long ownerId, Long taskCategoryId, Long userId, Timestamp dateStr,
+			Long pageAnchor, Integer pageSize);
 }

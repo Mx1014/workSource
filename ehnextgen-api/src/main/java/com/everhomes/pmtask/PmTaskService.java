@@ -112,4 +112,6 @@ public interface PmTaskService {
 	SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskStatisticsCommand cmd);
 	
 	void exportTaskOperatorStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
+	
+	void createTaskTargetStatistics();
 }

@@ -2,8 +2,10 @@ package com.everhomes.pmtask;
 
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -17,10 +19,19 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -36,6 +47,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+
+
+
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
@@ -131,6 +146,7 @@ import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
 import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
+import com.everhomes.rest.pmtask.TaskOperatorStatisticsDTO;
 import com.everhomes.rest.pmtask.TaskStatisticsDTO;
 import com.everhomes.rest.pmtask.UpdateTaskCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
@@ -1095,36 +1111,49 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), cmd.getPageSize());
 		
-		Workbook wb = new XSSFWorkbook();
+		File file = new File("/config/download/pmtask.xlsx");
 		
-		Font font = wb.createFont();   
-		font.setFontName("黑体");   
-		font.setFontHeightInPoints((short) 16);
-		CellStyle style = wb.createCellStyle();
-		style.setFont(font);
-		
-		Sheet sheet = wb.createSheet("task");
-		sheet.setDefaultColumnWidth(20);  
-		sheet.setDefaultRowHeightInPoints(20); 
-		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("服务类型");
-		row.createCell(1).setCellValue("内容");
-		row.createCell(2).setCellValue("发起人");
-		row.createCell(3).setCellValue("联系电话");
-		row.createCell(4).setCellValue("发起时间");
-		row.createCell(5).setCellValue("状态");
-		for(int i=0;i<list.size();i++){
-			Row tempRow = sheet.createRow(i + 1);
-			PmTaskDTO task = list.get(i);
-			Category category = checkCategory(task.getTaskCategoryId());
-			tempRow.createCell(0).setCellValue(category.getName());
-			tempRow.createCell(1).setCellValue(task.getContent());
-			tempRow.createCell(2).setCellValue(task.getRequestorName());
-			tempRow.createCell(3).setCellValue(task.getRequestorPhone());
-			tempRow.createCell(4).setCellValue(datetimeSF.format(task.getCreateTime()));
-			tempRow.createCell(5).setCellValue(convertStatus(task.getStatus()));
-			
+		Workbook wb;
+		try {
+			wb = new XSSFWorkbook(file);
+		} catch (InvalidFormatException e1) {
+			LOGGER.error("Invalid Format file, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Invalid Format file.");
+		} catch (IOException e1) {
+			LOGGER.error("ExportTasks failed, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"ExportTasks failed.");
 		}
+		
+//		Font font = wb.createFont();   
+//		font.setFontName("黑体");   
+//		font.setFontHeightInPoints((short) 16);
+//		CellStyle style = wb.createCellStyle();
+//		style.setFont(font);
+//		
+//		Sheet sheet = wb.createSheet("task");
+//		sheet.setDefaultColumnWidth(20);  
+//		sheet.setDefaultRowHeightInPoints(20); 
+//		Row row = sheet.createRow(0);
+//		row.createCell(0).setCellValue("服务类型");
+//		row.createCell(1).setCellValue("内容");
+//		row.createCell(2).setCellValue("发起人");
+//		row.createCell(3).setCellValue("联系电话");
+//		row.createCell(4).setCellValue("发起时间");
+//		row.createCell(5).setCellValue("状态");
+//		for(int i=0;i<list.size();i++){
+//			Row tempRow = sheet.createRow(i + 1);
+//			PmTaskDTO task = list.get(i);
+//			Category category = checkCategory(task.getTaskCategoryId());
+//			tempRow.createCell(0).setCellValue(category.getName());
+//			tempRow.createCell(1).setCellValue(task.getContent());
+//			tempRow.createCell(2).setCellValue(task.getRequestorName());
+//			tempRow.createCell(3).setCellValue(task.getRequestorPhone());
+//			tempRow.createCell(4).setCellValue(datetimeSF.format(task.getCreateTime()));
+//			tempRow.createCell(5).setCellValue(convertStatus(task.getStatus()));
+//			
+//		}
 		ByteArrayOutputStream out = null;
 		try {
 			out = new ByteArrayOutputStream();
@@ -1391,52 +1420,68 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 	}
 
-//	@Scheduled(cron="0 5 0 1 * ? ")
-//	public void createTaskTargetStatistics(){
-//		
-//		this.coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_TARGET_STATISTICS.getCode()).enter(()-> {
-//			List<Namespace> namepaces = pmTaskProvider.listNamespace();
-//			long now = System.currentTimeMillis();
-//			Timestamp startDate = getBeginOfMonth(now);     
-//			Timestamp endDate = getEndOfMonth(now);
-//			boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
-//			if(isOperateByAdmin){
-//				startDate = getEndOfMonth(now);
-//				endDate = null;
-//			}
-//			for(Namespace n: namepaces){
-//				Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-//				Category ancestor = categoryProvider.findCategoryById(defaultId);
-//				
-//				if(ancestor != null){
-//					//防止定时任务重复执行
-//					List<PmTaskStatistics> list = pmTaskProvider.searchTaskStatistics(n.getId(), null, null, null, startDate,
-//							null, 10);
-//					if(list.size() != 0)
-//						break;
-//					
-//					List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
-//					if(null != categories && !categories.isEmpty()){
-//						List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
-//						for(Community community:communities){
-//							for(Category taskCategory: categories) {
-//								List<PmTask> tasks = pmTaskProvider.listPmTask4Stat(PmTaskOwnerType.COMMUNITY.getCode(), community.getId(), taskCategory.getId());
-//								PmTaskTargetStatistic statistic = new PmTaskTargetStatistic();
-//								statistic.setOwnerId(community.getId());
-//								statistic.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-//								statistic.set
-//							}
-//						}
-//						
-//					}
-//					
-//				}
-//			}
-//		return null;
-//        });
-//		
-//	}
-	
+	@Scheduled(cron="0 5 0 1 * ? ")
+	public void createTaskTargetStatistics(){
+		
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_TARGET_STATISTICS.getCode()).enter(()-> {
+			List<Namespace> namepaces = pmTaskProvider.listNamespace();
+			long now = System.currentTimeMillis();
+			Timestamp startDate = getBeginOfMonth(now);     
+			Timestamp endDate = getEndOfMonth(now);
+			boolean isOperateByAdmin = configProvider.getBooleanValue("pmtask.statistics.create", false);
+			if(isOperateByAdmin){
+				startDate = getEndOfMonth(now);
+				endDate = null;
+			}
+			for(Namespace n: namepaces){
+				Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+				Category ancestor = categoryProvider.findCategoryById(defaultId);
+				
+				if(ancestor != null){
+					//防止定时任务重复执行
+					List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(n.getId(), null, null, null, startDate,
+							null, 10);
+					if(list.size() != 0)
+						break;
+					
+					List<Category> categories = categoryProvider.listTaskCategories(n.getId(), ancestor.getId(), null, null, null);
+					if(null != categories && !categories.isEmpty()){
+						List<Community> communities = communityProvider.listCommunitiesByNamespaceId(n.getId());
+						for(Community community:communities){
+							List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(PmTaskOwnerType.COMMUNITY.getCode(),community.getId(), RoleConstants.PM_TASK_REPAIRMEN,
+									null, null);
+							for(PmTaskTarget t: targets) {
+								for(Category taskCategory: categories) {
+									List<PmTask> tasks = pmTaskProvider.listPmTask4Stat(PmTaskOwnerType.COMMUNITY.getCode(), community.getId(), taskCategory.getId(),
+											t.getTargetId());
+									double starSum = 0;
+									int size = tasks.size();
+									for(PmTask task: tasks) {
+										starSum += task.getOperatorStar();
+									}
+									PmTaskTargetStatistic statistic = new PmTaskTargetStatistic();
+									statistic.setOwnerId(community.getId());
+									statistic.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
+									statistic.setCreateTime(new Timestamp(now));
+									statistic.setDateStr(startDate);
+									statistic.setNamespaceId(n.getId());
+									statistic.setTargetId(t.getTargetId());
+									statistic.setTaskCategoryId(taskCategory.getId());
+									statistic.setAvgStar(size != 0?new BigDecimal(starSum / size):new BigDecimal(0));
+									pmTaskProvider.createTaskTargetStatistic(statistic);
+								}
+							}
+						}
+						
+					}
+					   
+				}
+			}
+		return null;
+        });
+		
+	}
+
 	private void createTaskStatistics(Long communityId, Long taskCategoryId, Long categoryId, Timestamp startDate,
 			Timestamp endDate, Long now, Integer namespaceId) {
 		PmTaskStatistics statistics = new PmTaskStatistics();
@@ -2212,13 +2257,94 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskStatisticsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		SearchTaskOperatorStatisticsResponse response = new SearchTaskOperatorStatisticsResponse();
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, null, cmd.getTaskCategoryId(), null,
+				new Timestamp(cmd.getDateStr()), cmd.getPageAnchor(), cmd.getPageSize());
+		int size = list.size();
+		if(size > 0){
+    		response.setRequests(list.stream().map(r -> {
+    			TaskOperatorStatisticsDTO dto = new TaskOperatorStatisticsDTO();
+    			List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(r.getOwnerId());
+	            if(null != orgs && orgs.size() != 0) {
+	            	Long organizationId = orgs.get(0).getOrganizationId();
+	            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), organizationId);
+	            	if(null != member)
+	            	dto.setOperatorName(member.getContactName());
+	            }
+    			dto.setTaskCategoryId(r.getTaskCategoryId());
+    			Category taskCategory = checkCategory(r.getTaskCategoryId());
+    			dto.setTaskCategoryName(taskCategory.getName());
+    			dto.setAvgStar(r.getAvgStar());
+    			return dto;
+    		}).collect(Collectors.toList()));
+    		if(size != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(size-1).getId());
+        	}
+    	}
+		
+		return response;
 	}
 
 	@Override
 	public void exportTaskOperatorStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
-		// TODO Auto-generated method stub
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		
+		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, null, cmd.getTaskCategoryId(), 
+				null, new Timestamp(cmd.getDateStr()), cmd.getPageAnchor(), cmd.getPageSize());
+		
+		XSSFWorkbook wb = new XSSFWorkbook();
+		
+		Font font = wb.createFont();   
+		font.setFontName("黑体");   
+		font.setFontHeightInPoints((short) 16);
+		CellStyle style = wb.createCellStyle();
+		style.setFont(font);
+		
+		Sheet sheet = wb.createSheet("task");
+		sheet.setDefaultColumnWidth(20);  
+		sheet.setDefaultRowHeightInPoints(20); 
+		Row row = sheet.createRow(0);
+		row.createCell(0).setCellValue("项目名称");
+		row.createCell(1).setCellValue("服务类别");
+		row.createCell(2).setCellValue("人员名称");
+		row.createCell(3).setCellValue("平均得分");
+		for(int i=0;i<list.size();i++){
+			Row tempRow = sheet.createRow(i + 1);
+			PmTaskTargetStatistic pts = list.get(i);
+			Category taskCategory = checkCategory(pts.getTaskCategoryId());
+			Community community = communityProvider.findCommunityById(pts.getOwnerId());
+			tempRow.createCell(0).setCellValue(community.getName());
+			tempRow.createCell(1).setCellValue(taskCategory.getName());
+			
+			List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(pts.getOwnerId());
+            if(null != orgs && orgs.size() != 0) {
+            	Long organizationId = orgs.get(0).getOrganizationId();
+            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(pts.getTargetId(), organizationId);
+            	if(null != member)
+            		tempRow.createCell(2).setCellValue(member.getContactName());
+            }
+			
+			tempRow.createCell(3).setCellValue(pts.getAvgStar().doubleValue());
+			
+		}
+		ByteArrayOutputStream out = null;
+		try {
+			out = new ByteArrayOutputStream();
+			wb.write(out);
+			download(out, resp);
+		} catch (IOException e) {
+			LOGGER.error("ExportTaskOperatorStatistics is fail, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"ExportTaskOperatorStatistics is fail.");
+		}
 		
 	}
+	
 }
