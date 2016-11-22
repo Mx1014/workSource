@@ -1082,7 +1082,7 @@ public class FamilyServiceImpl implements FamilyService {
     @Override
     public void adminApproveMember(ApproveMemberCommand cmd) {
         cmd.setOperatorRole(Role.SystemAdmin);
-        //if address status is unactive,change status
+        //if address status is unactive,changeEnergyMeter status
         Address address = getAddressByFamilyId(cmd.getId());
         if(address == null){
             LOGGER.error("Address is not exists,find by familyId.familyId=" + cmd.getId());

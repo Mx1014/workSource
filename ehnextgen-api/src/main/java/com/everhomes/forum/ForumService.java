@@ -32,6 +32,7 @@ import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
 import com.everhomes.rest.forum.UsedAndRentalCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.group.ListUserGroupPostResponse;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
 import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
@@ -41,6 +42,7 @@ import com.everhomes.rest.ui.forum.TopicFilterDTO;
 import com.everhomes.rest.ui.forum.TopicScopeDTO;
 import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
 import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
+import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
 
 public interface ForumService {
@@ -115,4 +117,5 @@ public interface ForumService {
     SearchContentsBySceneReponse searchContents(SearchContentsBySceneCommand cmd, SearchContentType contentType);
 	ListPostCommandResponse listOfficialActivityByNamespace(ListOfficialActivityByNamespaceCommand cmd);
 	GetActivityDetailByIdResponse getActivityDetailById(GetActivityDetailByIdCommand cmd); 
+	ListUserGroupPostResponse listUserGroupPost(VisibilityScope scope, Long communityId, List<Long> forumIdList, Long userId, Long pageAnchor, Integer pageSize); 
 }

@@ -3,7 +3,10 @@
 /atomikos
 /logs
 /statistics
-
+ehnextgen-api/target/
+ehnextgen-forum/target/
+ehnextgen-messaging/target/
+ehtest-integration/target/
 *.gitignore
 *.classpath
 *.settings

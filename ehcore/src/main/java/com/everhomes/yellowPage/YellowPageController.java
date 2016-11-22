@@ -145,14 +145,14 @@ public class YellowPageController  extends ControllerBase {
 	}
 
     /**
-	 * <b>URL: /yellowPage/getParentServiceAllianceCategory</b>
-	 * <p> 获取服务联盟父分类 </p>
+	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
+	 * <p>获取服务联盟机构的展示类型</p>
 	 */
     @RequireAuthentication(false)
-	@RequestMapping("getParentServiceAllianceCategory")
-	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
-	public RestResponse getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.getParentServiceAllianceCategory(cmd));
+	@RequestMapping("getServiceAllianceDisplayMode")
+	@RestReturn(value = ServiceAllianceDisplayModeDTO.class)
+	public RestResponse getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd) {
+		return new RestResponse(yellowPageService.getServiceAllianceDisplayMode(cmd));
 	}
 
     /**

@@ -245,6 +245,69 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, '805', 1002,0,1,now());
     
---用uuid代替原有encodetoken生成的二维码好扫一点 add by xiongying 20161104
+-- 用uuid代替原有encodetoken生成的二维码好扫一点 add by xiongying 20161104
 update eh_equipment_inspection_equipments set qr_code_token = UUID();
-	
+
+
+
+--
+-- 删除深业的家庭及家庭里的成员信息		add by xq.tian	2016/11/08
+--
+DELETE FROM eh_user_groups WHERE group_id IN (
+  SELECT id FROM eh_groups WHERE discriminator = 'family' AND integral_tag1 IN (
+    SELECT id FROM eh_addresses WHERE namespace_id = '999992'
+  )
+);
+
+DELETE FROM eh_group_members WHERE group_id IN (
+  SELECT id FROM eh_groups WHERE discriminator = 'family' AND integral_tag1 IN (
+    SELECT id FROM eh_addresses WHERE namespace_id = '999992'
+  )
+);
+
+DELETE FROM eh_groups WHERE discriminator = 'family' AND integral_tag1 IN (
+  SELECT id FROM eh_addresses WHERE namespace_id = '999992'
+);
+
+UPDATE eh_organization_address_mappings SET living_status = '0' WHERE address_id IN (
+  SELECT id FROM eh_addresses WHERE namespace_id = '999992'
+);
+
+--
+-- 删除深业的客户资料信息		add by xq.tian	2016/11/08
+--
+DELETE FROM eh_organization_owner_address WHERE organization_owner_id IN (
+  SELECT id FROM eh_organization_owners WHERE namespace_id = '999992' AND community_id IN (
+    SELECT community_id FROM eh_addresses WHERE namespace_id = '999992'
+  )
+);
+
+DELETE FROM eh_organization_owners WHERE namespace_id = '999992' AND community_id IN (
+  SELECT community_id FROM eh_addresses WHERE namespace_id = '999992'
+);
+
+DELETE FROM eh_organization_owner_behaviors WHERE namespace_id = '999992';
+DELETE FROM eh_organization_owner_attachments WHERE namespace_id = '999992';
+DELETE FROM eh_organization_owner_cars WHERE namespace_id = '999992';
+DELETE FROM eh_organization_owner_car_attachments WHERE namespace_id = '999992';
+DELETE FROM eh_organization_owner_owner_car WHERE namespace_id = '999992';
+
+--
+-- 删除深业的家庭及家庭里的成员信息		add by xq.tian	2016/11/010
+--
+DELETE FROM eh_user_groups WHERE group_id IN (
+  SELECT id FROM eh_groups WHERE discriminator = 'family' AND integral_tag2 IN (240111044331051300, 240111044331051301, 240111044331051302, 240111044331051303, 240111044331051304)
+);
+
+DELETE FROM eh_group_members WHERE group_id IN (
+  SELECT id FROM eh_groups WHERE discriminator = 'family' AND integral_tag2 IN (240111044331051300, 240111044331051301, 240111044331051302, 240111044331051303, 240111044331051304)
+);
+
+DELETE FROM eh_groups WHERE discriminator = 'family' AND integral_tag2 IN (240111044331051300, 240111044331051301, 240111044331051302, 240111044331051303, 240111044331051304);
+
+
+-- 新增科技服务模板 add by xiongying 20161111
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`)
+    VALUES ('8', 'ReserveTech', '科技服务', '我要预约', '1', '1', '{"fields":[{"fieldName":"reserveOrganization","fieldDisplayName":"预约机构","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入公司名称","requiredFlag":"1"},{"fieldName":"reserveTime","fieldDisplayName":"预约时间","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入预约时间段","requiredFlag":"1"},{"fieldName":"contact","fieldDisplayName":"联系人","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入联系人姓名","requiredFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"联系电话","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入联系电话","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"选填，若还有其他要求，可在此填写","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (8, '999984', '8');
+INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (9, '999984', '1');

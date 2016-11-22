@@ -25,6 +25,8 @@ public class BusinessMessageCommand {
     
     @ItemType(String.class)
     private Map<String, String> meta = new HashMap<String, String>();
+    
+    private Byte bizMessageType;
 
     public Long getTimestamp() {
         return timestamp;
@@ -73,5 +75,13 @@ public class BusinessMessageCommand {
     public void setMeta(Map<String, String> meta) {
         this.meta = meta;
     }
+
+	public Byte getBizMessageType() {
+		return bizMessageType;
+	}
+
+	public void setBizMessageType(Byte bizMessageType) {
+		this.bizMessageType = bizMessageType;
+	}
     
 }

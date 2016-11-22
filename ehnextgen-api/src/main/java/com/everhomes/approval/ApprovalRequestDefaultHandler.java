@@ -1,18 +1,27 @@
 package com.everhomes.approval;
 
+import java.sql.Date;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.List;
+import java.util.Locale;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.approval.ApprovalBasicInfoOfRequestDTO;
 import com.everhomes.rest.approval.ApprovalOwnerInfo;
 import com.everhomes.rest.approval.ApprovalStatus;
 import com.everhomes.rest.approval.BriefApprovalRequestDTO;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.CreateApprovalRequestBySceneCommand;
+import com.everhomes.rest.approval.ListApprovalLogAndFlowOfRequestBySceneResponse;
+import com.everhomes.rest.approval.RequestDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
+import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
+import com.everhomes.techpark.punch.PunchDayLog;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.ListUtils;
 import com.everhomes.util.WebTokenGenerator;
@@ -33,7 +42,13 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	
 	@Autowired
 	private ApprovalService approvalService;
+	
 
+	@Autowired
+	LocaleTemplateService localeTemplateService;
+
+	@Autowired
+	LocaleStringProvider localeStringProvider;
 	@Override
 	public ApprovalBasicInfoOfRequestDTO processApprovalBasicInfoOfRequest(ApprovalRequest approvalRequest) {
 		return new ApprovalBasicInfoOfRequestDTO(approvalRequest.getApprovalType(), approvalRequest.getApprovalStatus());
@@ -77,6 +92,9 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 
 	private ApprovalRequest generateApprovalRequest(Long userId, ApprovalOwnerInfo ownerInfo, CreateApprovalRequestBySceneCommand cmd) {
 		ApprovalRequest approvalRequest = new ApprovalRequest();
+		if(null != cmd.getEffectiveDate())
+			approvalRequest.setEffectiveDate(new Date(cmd.getEffectiveDate()));
+		approvalRequest.setHourLength(cmd.getHourLength());
 		approvalRequest.setNamespaceId(ownerInfo.getNamespaceId());
 		approvalRequest.setOwnerType(ownerInfo.getOwnerType());
 		approvalRequest.setOwnerId(ownerInfo.getOwnerId());
@@ -97,6 +115,15 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 		return approvalRequest;
 	}
 
+	public static final SimpleDateFormat mmDDSF = new SimpleDateFormat("MM-dd");
+	
+	public static final SimpleDateFormat weekdaySF =  new SimpleDateFormat("EEEE",Locale.CHINA);
+	 
+	public String processRequestDate(Date effectiveDate ) {
+		return mmDDSF.format(effectiveDate)+"("+weekdaySF.format(effectiveDate)+") ";
+	}
+ 
+
 	@Override
 	public void processCancelApprovalRequest(ApprovalRequest approvalRequest) {
 		
@@ -107,7 +134,7 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	}
 
 	@Override
-	public String processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
+	public List<RequestDTO> processListApprovalRequest(List<ApprovalRequest> approvalRequestList) {
 		return null;
 	}
 
@@ -120,6 +147,63 @@ public class ApprovalRequestDefaultHandler implements ApprovalRequestHandler {
 	public String processMessageToNextLevelBody(ApprovalRequest approvalRequest) {
 		return null;
 	}
-	
+
+	@Override
+	public String ApprovalLogAndFlowOfRequestResponseTitle(
+			ApprovalRequest approvalRequest) { 
+		return null;
+	} 
+
+	private static final SimpleDateFormat minSecSF = new SimpleDateFormat("HH:mm");
+	 
+
+	protected String processPunchDetail(PunchDayLog pdl) {
+		String punchDetail = null;
+		if(null == pdl )
+			return "无";
+		if(PunchTimesPerDay.TWICE.getCode().equals(pdl.getPunchTimesPerDay())){
+			if(null != pdl.getArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getArriveTime());
+				if(null != pdl.getLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+			}else{
+				punchDetail = "无";
+			}
+			
+		}
+		else if(PunchTimesPerDay.FORTH.getCode().equals(pdl.getPunchTimesPerDay())){
+			if(null != pdl.getArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getArriveTime());
+				if(null != pdl.getNoonLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getNoonLeaveTime());
+				}
+			else
+				punchDetail = "无";
+			punchDetail += "|";
+			if(null != pdl.getAfternoonArriveTime() ){
+				punchDetail = minSecSF.format(pdl.getAfternoonArriveTime());
+				if(null != pdl.getLeaveTime() )
+					punchDetail  = punchDetail +"/"+ minSecSF.format(pdl.getLeaveTime());
+				}
+			else
+				punchDetail = "无";
+			
+		}
+		return punchDetail;
+	}
+
+	@Override
+	public ListApprovalLogAndFlowOfRequestBySceneResponse processListApprovalLogAndFlowOfRequestBySceneResponse(
+			ListApprovalLogAndFlowOfRequestBySceneResponse result,
+			ApprovalRequest approvalRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	public BriefApprovalRequestDTO processApprovalRequestByScene(
+			ApprovalRequest approvalRequest) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 	
 }

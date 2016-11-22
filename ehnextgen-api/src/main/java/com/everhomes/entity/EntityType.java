@@ -1,22 +1,9 @@
 // @formatter:off
 package com.everhomes.entity;
 
+import com.everhomes.schema.tables.pojos.EhAclRoles;
 import com.everhomes.schema.tables.pojos.EhNamespaces;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhAddresses;
-import com.everhomes.server.schema.tables.pojos.EhAppUrls;
-import com.everhomes.server.schema.tables.pojos.EhBuildings;
-import com.everhomes.server.schema.tables.pojos.EhCategories;
-import com.everhomes.server.schema.tables.pojos.EhCommunities;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
-import com.everhomes.server.schema.tables.pojos.EhForums;
-import com.everhomes.server.schema.tables.pojos.EhGroups;
-import com.everhomes.server.schema.tables.pojos.EhNews;
-import com.everhomes.server.schema.tables.pojos.EhOrganizations;
-import com.everhomes.server.schema.tables.pojos.EhRegions;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
-import com.everhomes.server.schema.tables.pojos.EhUserImpersonations;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.pojos.*;
 
 /**
  * <p>实体类型:</p>
@@ -57,7 +44,9 @@ public enum EntityType {
     APPURLS(EhAppUrls.class.getSimpleName()),
     NEWS(EhNews.class.getSimpleName()),
     IMPERSONATION(EhUserImpersonations.class.getSimpleName()),
-    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName());
+    SACATEGORY(EhServiceAllianceCategories.class.getSimpleName()),
+    ROLE(EhAclRoles.class.getSimpleName()),
+    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName());
     private String code;
     
     private EntityType(String code) {
@@ -90,6 +79,10 @@ public enum EntityType {
             return FAMILY;
         else if(code.equalsIgnoreCase(POST.getCode()))
             return POST;
+        else if(code.equalsIgnoreCase(ORGANIZATIONS.getCode()))
+            return ORGANIZATIONS;
+        else if(code.equalsIgnoreCase(ROLE.getCode()))
+            return ROLE;
         else if(code.equalsIgnoreCase("EhFamilies"))
             return FAMILY;
         else if(code.equalsIgnoreCase("EhFleaMarkets"))
