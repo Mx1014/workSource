@@ -31,6 +31,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -6770,26 +6771,28 @@ System.out.println();
 	    public ListPostCommandResponse listAllTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
 	    	
-	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-	    	
-			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
+//	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+
+			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+
+			if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)){
 				
-			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)){
 				if(StringUtils.isEmpty(cmd.getTaskType())){
 					cmd.setTargetId(user.getId());
 				}else if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
-					returnNoPrivileged(privileges, user);
+					returnNoPrivileged(null, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
-			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)){
 				if(StringUtils.isEmpty(cmd.getTaskType())){
 					cmd.setTargetId(user.getId());
 				}else if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
-					returnNoPrivileged(privileges, user);
+					returnNoPrivileged(null, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
 			}else{
-				returnNoPrivileged(privileges, user);
+				returnNoPrivileged(null, user);
 			}
 			
 			return this.listTaskTopicsByType(cmd);
@@ -6799,26 +6802,27 @@ System.out.println();
 	    public ListPostCommandResponse listMyTaskTopics(ListTopicsByTypeCommand cmd){
 	    	User user = UserContext.current().getUser();
 	    	
-	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
-	    	
+//	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+			resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
 			/* 根据用户不同 查询不同的任务类型贴*/
 			
 			cmd.setTargetId(user.getId());
-			if(privileges.contains(PrivilegeConstants.TaskAllListPosts)){
-			}else if(privileges.contains(PrivilegeConstants.TaskGuaranteeListPosts)){
+			if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)){
+			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)){
 				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
-					returnNoPrivileged(privileges, user);
+					returnNoPrivileged(null, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
-			}else if(privileges.contains(PrivilegeConstants.TaskSeekHelpListPosts)){
+			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)){
 				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
-					returnNoPrivileged(privileges, user);
+					returnNoPrivileged(null, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.EMERGENCY_HELP.getCode());
 			}else{
-				returnNoPrivileged(privileges, user);
+				returnNoPrivileged(null, user);
 			}
-			
+
 			return this.listTaskTopicsByType(cmd);
 	    }
 	    

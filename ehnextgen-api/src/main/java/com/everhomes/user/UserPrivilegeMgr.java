@@ -11,6 +11,17 @@ public interface UserPrivilegeMgr {
      * @param ownerId
      * @param organizationId
      * @param privilegeId
+     * @return
+     */
+    boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId);
+
+
+    /**
+     * 新权限校验
+     * @param ownerType
+     * @param ownerId
+     * @param organizationId
+     * @param privilegeId
      */
     void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId);
 

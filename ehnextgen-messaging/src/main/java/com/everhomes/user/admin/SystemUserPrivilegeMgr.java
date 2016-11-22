@@ -10,7 +10,6 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.serviceModule.ServiceModulePrivilege;
 import com.everhomes.serviceModule.ServiceModulePrivilegeType;
@@ -52,6 +51,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
 
     @Override
+    @Deprecated
     public void checkUserPrivilege(long userId, long ownerId) {
         ResourceUserRoleResolver resolver = PlatformContext.getComponent(EntityType.USER.getCode());
         List<Long> roles = resolver.determineRoleInResource(userId, null, EntityType.USER.getCode(), null);
@@ -163,7 +163,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
 
         if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
             return true;
-        }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId){
+        }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType)){
             return false;
         }
 
@@ -171,28 +171,35 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     }
 
     @Override
-    public void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-
+    public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
         if(checkSuperAdmin(userId, organizationId)){
             LOGGER.debug("check super admin privilege success...");
-            return;
+            return true;
         }
 
         if(checkModuleAdmin(userId, ownerType, ownerId, organizationId, privilegeId)){
             LOGGER.debug("check module admin privilege success...");
-            return;
+            return true;
         }
 
         if(checkAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
             LOGGER.debug("check privilege success...");
-            return;
+            return true;
         }
 
         if(checkRoleAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
             LOGGER.debug("check role privilege success...");
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public void checkUserAuthority(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+        if(checkUserPrivilege(userId, ownerType, ownerId, organizationId, privilegeId)){
+            LOGGER.debug("authority success...");
             return;
         }
-
         LOGGER.error("Insufficient privilege, privilegeId={}, organizationId = {}", privilegeId, organizationId);
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
