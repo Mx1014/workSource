@@ -53,6 +53,7 @@ import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
@@ -435,8 +436,8 @@ public class CommunityAdminController extends ControllerBase {
      * <p>园区管理员更新用户信息</p>
      */
     @RequestMapping("updateCommunityUser")
-    @RestReturn(value=CommunityUserAddressDTO.class)
-    public RestResponse updateCommunityUser(@Valid CommunityUserAddressDTO cmd) {
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunityUser(@Valid UpdateCommunityUserCommand cmd) {
     	communityService.updateCommunityUser(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

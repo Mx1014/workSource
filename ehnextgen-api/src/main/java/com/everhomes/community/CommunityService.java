@@ -46,6 +46,7 @@ import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
@@ -128,5 +129,5 @@ public interface CommunityService {
 
 	ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd);
 
-	void updateCommunityUser(CommunityUserAddressDTO cmd);
+	void updateCommunityUser(UpdateCommunityUserCommand cmd);
 }

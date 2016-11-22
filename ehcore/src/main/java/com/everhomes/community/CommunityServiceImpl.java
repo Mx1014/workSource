@@ -119,6 +119,7 @@ import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.SmsTemplate;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
@@ -2485,7 +2486,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	@Override
-	public void updateCommunityUser(CommunityUserAddressDTO cmd) { 
+	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
 		if(null == cmd.getUserId() )
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid userid parameter");
