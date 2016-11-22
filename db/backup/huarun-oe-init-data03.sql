@@ -2048,7 +2048,9 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 UPDATE `eh_launch_pad_items` SET `action_type`=33, `action_data`='{"type":200971,"parentId":200971,"displayType": "list"}' WHERE `id` in (112580, 112591);
 
 
-
+-- 应产品朱兰兰要求，删除“招租管理/入住申请”菜单，并把服务市场上的“白领社团/OE大讲堂/OE微商城”改为不可以删除 by lqs 20161122
+delete  from eh_web_menu_scopes where menu_id in (43000, 43100, 43200) and owner_id=999985;
+update eh_launch_pad_items set delete_flag=0 where id in (112573, 112584, 112575, 112586, 112574, 112585);
 
 
 
