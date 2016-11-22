@@ -1,6 +1,9 @@
 package com.everhomes.rest.acl;
 
 
+import com.everhomes.discover.ItemType;
+
+import java.util.List;
 
 /**
  * <p>项目/p>
@@ -10,9 +13,14 @@ package com.everhomes.rest.acl;
  * </ul>
  */
 public class ProjectDTO {
-	
+
+	private Long parentId;
 	private Long    projectId;
+	private String projectName;
 	private String  projectType;
+
+	@ItemType(ProjectDTO.class)
+	private List<ProjectDTO> projects;
 
 	public Long getProjectId() {
 		return projectId;
@@ -26,7 +34,31 @@ public class ProjectDTO {
 		return projectType;
 	}
 
+	public String getProjectName() {
+		return projectName;
+	}
+
+	public void setProjectName(String projectName) {
+		this.projectName = projectName;
+	}
+
+	public List<ProjectDTO> getProjects() {
+		return projects;
+	}
+
+	public void setProjects(List<ProjectDTO> projects) {
+		this.projects = projects;
+	}
+
 	public void setProjectType(String projectType) {
 		this.projectType = projectType;
+	}
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
 	}
 }

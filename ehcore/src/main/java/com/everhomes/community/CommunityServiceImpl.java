@@ -2735,7 +2735,7 @@ public class CommunityServiceImpl implements CommunityService {
 	public List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd) {
 		if(null == cmd.getParentId())
 			cmd.setParentId(0L);
-		List<ResourceCategoryDTO> list = listResourceCategories(cmd);
+		List<ResourceCategoryDTO> list = listTreeResourceCategories(cmd);
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 
 		setresourceDTOs(list, namespaceId);
