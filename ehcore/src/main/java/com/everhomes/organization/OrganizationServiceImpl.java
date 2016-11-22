@@ -6804,7 +6804,6 @@ System.out.println();
 	    	
 //	    	List<Long> privileges = rolePrivilegeService.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.ADMIN_MANAGE);
 			/* 根据用户不同 查询不同的任务类型贴*/
 			
 			cmd.setTargetId(user.getId());
