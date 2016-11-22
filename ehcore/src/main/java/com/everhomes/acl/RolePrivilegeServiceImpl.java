@@ -62,7 +62,6 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
@@ -78,7 +77,6 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.serviceModule.*;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
@@ -847,17 +845,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Deprecated
     public boolean checkAuthority(String ownerType, Long ownerId, Long privilegeId){
     	User user = UserContext.current().getUser();
-		try{
-			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			resolver.checkUserAuthority(user.getId(), ownerType, ownerId, ownerId, privilegeId);
-		}catch (Exception e){
-			List<Long> privileges = this.getUserPrivileges(null, ownerId, user.getId());
-			List<Long> ids = this.getAllResourcePrivilegeIds(ownerId, user.getId());
-			if(null != ids){
-				privileges.addAll(ids);
-			}
-			this.returnNoPrivileged(privileges, user);
+
+    	List<Long> privileges = this.getUserPrivileges(null, ownerId, user.getId());
+
+    	if(!privileges.contains(privilegeId)){
+
+    		this.returnNoPrivileged(privileges, user);
+    	}
+
+		List<Long> ids = this.getAllResourcePrivilegeIds(ownerId, user.getId());
+		if(null != ids){
+			privileges.addAll(ids);
 		}
+
     	return true;
     }
 

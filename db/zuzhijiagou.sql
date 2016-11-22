@@ -62,10 +62,14 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('2', '10100', '1', '10002', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('3', '10400', '1', '10003', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('4', '10600', '1', '10004', NULL, '0', UTC_TIMESTAMP());
+
+
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('5', '10800', '1', '10005', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('6', '11000', '1', '10006', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('7', '20000', '1', '10007', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('8', '20100', '1', '10008', NULL, '0', UTC_TIMESTAMP());
+
+
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('9', '20400', '1', '10009', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('10', '20600', '1', '10010', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('11', '20800', '1', '10011', NULL, '0', UTC_TIMESTAMP());
@@ -682,6 +686,20 @@ INSERT INTO `eh_web_menus` VALUES ('10752', '审核俱乐部', '10750', null, 'a
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10750', '俱乐部', '10000', '/10000/10750', '0', '2', '2', '0', UTC_TIMESTAMP());
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('53', '10750', '1', '10055', NULL, '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('54', '20100', '0', '904', '新的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('55', '20100', '0', '805', '新的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('56', '20100', '0', '331', '新的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('57', '20100', '0', '332', '新的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('58', '20100', '0', '333', '新的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('59', '20100', '0', '920', '新的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('60', '20100', '0', '303', '老的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('61', '20100', '0', '304', '老的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('62', '20100', '0', '305', '老的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('63', '20100', '0', '306', '老的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('64', '20100', '0', '307', '老的物业报修权限', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('65', '10600', '0', '310', NULL, '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('66', '10400', '0', '200', NULL, '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('67', '41000', '0', '720', NULL, '0', UTC_TIMESTAMP());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10055, '0', '俱乐部 管理员', '俱乐部 业务模块权限', NULL);
 -- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10056, '0', '俱乐部管理', '俱乐部管理 全部权限', NULL);

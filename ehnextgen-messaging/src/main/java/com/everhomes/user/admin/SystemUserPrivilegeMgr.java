@@ -25,7 +25,6 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
-import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component("SystemUser")
@@ -68,58 +67,56 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @param privilegeId
      * @return
      */
-    private boolean checkOrganizationRoleAccess(Long userId, Long organizationId, Long privilegeId){
+    @Override
+    public boolean checkRoleAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
         List<RoleAssignment> roleAssignments = rolePrivilegeService.getUserAllOrgRoles(organizationId, userId);
-
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         for (RoleAssignment roleAssignment: roleAssignments) {
             AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleAssignment.getRoleId());
             descriptors.add(descriptor);
         }
-        return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors);
-    }
-
-    /**
-     * 校验模块管理员权限
-     * @param ownerType
-     * @param ownerId
-     * @param organizationId
-     * @param privilegeId
-     * @return
-     */
-    private boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-        List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
-        List<ServiceModulePrivilege> moduleAdmins = new ArrayList<>();
-        for (ServiceModulePrivilege serviceModule:serviceModules) {
-            moduleAdmins.addAll(serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(serviceModule.getPrivilegeId(), ServiceModulePrivilegeType.ORDINARY));
+        if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
+            return true;
         }
 
-        for (ServiceModulePrivilege moduleAdmin:moduleAdmins) {
-            if(checkAccess(userId, ownerType, ownerId, organizationId, moduleAdmin.getPrivilegeId())){
-                return true;
+        roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(ownerType, ownerId, EntityType.USER.getCode(), userId);
+        descriptors = new ArrayList<>();
+        for (RoleAssignment roleAssignment: roleAssignments) {
+            AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), roleAssignment.getRoleId());
+            descriptors.add(descriptor);
+        }
+        return aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors);
+    }
+
+    @Override
+    public boolean checkModuleAdmin(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
+        List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
+        List<Long> moduleIds = new ArrayList<>();
+        for (ServiceModulePrivilege serviceModule: serviceModules) {
+            if(!moduleIds.contains(serviceModule.getPrivilegeId()))
+                moduleIds.add(serviceModule.getModuleId());
+        }
+        if(0 < moduleIds.size()){
+            List<ServiceModulePrivilege> moduleAdmins = serviceModuleProvider.listServiceModulePrivileges(moduleIds, ServiceModulePrivilegeType.SUPER);
+            for (ServiceModulePrivilege moduleAdmin:moduleAdmins) {
+                if(checkAccess(userId, ownerType, ownerId, organizationId, moduleAdmin.getPrivilegeId())){
+                    return true;
+                }
             }
         }
         return false;
     }
 
-    /**
-     * 校验超级管理员
-     * @param organizationId
-     * @return
-     */
-    private boolean checkSuperAdmin(Long userId, Long organizationId){
+    @Override
+    public boolean checkSuperAdmin(Long userId, Long organizationId){
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
         return aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.ORGANIZATION_SUPER_ADMIN, descriptors);
     }
 
-    /**
-     * 校验超级管理员
-     * @param organizationId
-     * @return
-     */
-    private boolean checkOrganizationAdmin(Long userId, Long organizationId){
+    @Override
+    public boolean checkOrganizationAdmin(Long userId, Long organizationId){
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
         descriptors.add(descriptor);
@@ -187,7 +184,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             return;
         }
 
-        if(checkOrganizationRoleAccess(userId, organizationId, privilegeId)){
+        if(checkRoleAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
             LOGGER.debug("check role privilege success...");
             return;
         }

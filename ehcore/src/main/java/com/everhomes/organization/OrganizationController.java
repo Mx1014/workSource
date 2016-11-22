@@ -5,6 +5,9 @@ import java.util.List;
 
 import javax.validation.Valid;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -284,7 +287,8 @@ public class OrganizationController extends ControllerBase {
 			/**
 			 * 校验权限
 			 */
-			rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
+			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+			resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
 		}
 		ListPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
 		RestResponse response = new RestResponse(cmdResponse);
