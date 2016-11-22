@@ -129,7 +129,7 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         AclinkWebSocketState state = session2State.remove(session);
         uuid2Session.remove(uuid);
         
-        LOGGER.info("Aclink disConnected: uuid= " + uuid);
+        LOGGER.info("Aclink disConnected: uuid= " + uuid + " info=" + info);
         
         if(state != null) {
             Map<String, String> params = new HashMap<String, String>();
