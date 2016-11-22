@@ -1162,6 +1162,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 		resourceCategory.setId(id);
 		if(null != resourceCategory.getPath())
 			resourceCategory.setPath(resourceCategory.getPath() + "/" + id);
+		else
+			resourceCategory.setPath("/" + id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhResourceCategoriesDao dao = new EhResourceCategoriesDao(context.configuration());
         dao.insert(resourceCategory);

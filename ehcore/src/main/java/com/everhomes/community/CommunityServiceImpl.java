@@ -2490,7 +2490,7 @@ public class CommunityServiceImpl implements CommunityService {
 		Long parentId = cmd.getParentId();
 		ResourceCategory category = null;
 		ResourceCategory parentCategory = null;
-		if(null == parentId){
+		if(null == parentId || parentId == 0){
 			
 			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name);
 			checkResourceCategoryExsit(category);
