@@ -3,9 +3,15 @@ package com.everhomes.pmtask;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.net.URISyntaxException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -23,7 +29,19 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
+
+
 
 
 
@@ -47,6 +65,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+
+
+
+
+
 
 
 
@@ -169,6 +193,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public static final String CATEGORY_SEPARATOR = "/";
 
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(PmTaskServiceImpl.class);
 	@Autowired
@@ -1111,49 +1136,80 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
 				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), cmd.getPageSize());
 		
-		File file = new File("/config/download/pmtask.xlsx");
 		
-		Workbook wb;
+		Workbook wb = null;
+		Path path;
+		OutputStream fileOut = null;
 		try {
-			wb = new XSSFWorkbook(file);
-		} catch (InvalidFormatException e1) {
-			LOGGER.error("Invalid Format file, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"Invalid Format file.");
-		} catch (IOException e1) {
+			path = Paths.get(PmTaskServiceImpl.class.getResource("pmtask.xlsx").toURI());
+			
+			fileOut = new FileOutputStream(PmTaskServiceImpl.class.getResource("temp-pmtask.xlsx").getPath());
+			Files.copy(path, fileOut);
+			wb = new XSSFWorkbook(PmTaskServiceImpl.class.getResource("temp-pmtask.xlsx").getPath());
+		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("ExportTasks failed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"ExportTasks failed.");
 		}
+			
+		Sheet sheet = wb.getSheetAt(0);
+		Row defaultRow = sheet.getRow(4);
+		Cell cell = defaultRow.getCell(1);
+		CellStyle style = cell.getCellStyle();
+		int size = list.size();
+		for(int i=0;i<size;i++){
+			Row tempRow = sheet.createRow(i + 4);
+			PmTaskDTO task = list.get(i);
+			Category category = checkCategory(task.getTaskCategoryId());
+			Cell cell1 = tempRow.createCell(1);
+			cell1.setCellStyle(style);
+			cell1.setCellValue(i + 1);
+			Cell cell2 = tempRow.createCell(2);
+			cell2.setCellStyle(style);
+			cell2.setCellValue(datetimeSF.format(task.getCreateTime()));
+			Cell cell3 = tempRow.createCell(3);
+			cell3.setCellStyle(style);
+			cell3.setCellValue(task.getRequestorName());
+			Cell cell4 = tempRow.createCell(4);
+			cell4.setCellStyle(style);
+			PmTask pmTask = pmTaskProvider.findTaskById(task.getId());
+			if(pmTask.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
+				Address address = addressProvider.findAddressById(pmTask.getAddressId());
+				if(null != address) 
+					cell4.setCellValue(address.getAddress());
+			}else {
+				Organization organization = organizationProvider.findOrganizationById(pmTask.getAddressOrgId());
+				if(null != organization)
+					cell4.setCellValue(organization.getName());
+			}
+			
+			Cell cell5 = tempRow.createCell(5);
+			cell5.setCellStyle(style);
+			cell5.setCellValue(task.getRequestorPhone());
+			Cell cell6 = tempRow.createCell(6);
+			cell6.setCellStyle(style);
+			cell6.setCellValue(task.getContent());
+			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskStatus.PROCESSING.getCode());
+			int logSize = logs.size();
+			Cell cell7 = tempRow.createCell(7);
+			cell7.setCellStyle(style);
+			if(logSize != 0){
+				User user = userProvider.findUserById(logs.get(logSize-1).getTargetId());
+				cell7.setCellValue(user.getNickName());
+			}
+			Cell cell8 = tempRow.createCell(8);
+			cell8.setCellStyle(style);
+			cell8.setCellValue(category.getName());
+			Cell cell9 = tempRow.createCell(9);
+			cell9.setCellStyle(style);
+			cell9.setCellValue(convertStatus(task.getStatus()));
+			
+		}
 		
-//		Font font = wb.createFont();   
-//		font.setFontName("黑体");   
-//		font.setFontHeightInPoints((short) 16);
-//		CellStyle style = wb.createCellStyle();
-//		style.setFont(font);
-//		
-//		Sheet sheet = wb.createSheet("task");
-//		sheet.setDefaultColumnWidth(20);  
-//		sheet.setDefaultRowHeightInPoints(20); 
-//		Row row = sheet.createRow(0);
-//		row.createCell(0).setCellValue("服务类型");
-//		row.createCell(1).setCellValue("内容");
-//		row.createCell(2).setCellValue("发起人");
-//		row.createCell(3).setCellValue("联系电话");
-//		row.createCell(4).setCellValue("发起时间");
-//		row.createCell(5).setCellValue("状态");
-//		for(int i=0;i<list.size();i++){
-//			Row tempRow = sheet.createRow(i + 1);
-//			PmTaskDTO task = list.get(i);
-//			Category category = checkCategory(task.getTaskCategoryId());
-//			tempRow.createCell(0).setCellValue(category.getName());
-//			tempRow.createCell(1).setCellValue(task.getContent());
-//			tempRow.createCell(2).setCellValue(task.getRequestorName());
-//			tempRow.createCell(3).setCellValue(task.getRequestorPhone());
-//			tempRow.createCell(4).setCellValue(datetimeSF.format(task.getCreateTime()));
-//			tempRow.createCell(5).setCellValue(convertStatus(task.getStatus()));
-//			
-//		}
+		Row tempRow4 = sheet.createRow(size + 4);
+		tempRow4.createCell(1).setCellValue("物业服务中心主任");
+		tempRow4.createCell(5).setCellValue("日期：" + dateSF.format(new Date()));
+		
 		ByteArrayOutputStream out = null;
 		try {
 			out = new ByteArrayOutputStream();
@@ -1163,8 +1219,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 			LOGGER.error("ExportTasks is fail, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"ExportTasks is fail.");
+		}finally{
+			try {
+				fileOut.close();
+				out.close();
+				wb.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
 		}
 	}
+	
+	private Row createRow(Row row, CellStyle style) {
+		
+		for(int i=1;i<=9;i++) {
+			Cell cell1 = row.createCell(i);
+			cell1.setCellStyle(style);
+			cell1.setCellValue("123");
+		}
+		return row;
+	}
+	
 	private String convertStatus(Byte status){
 		if(status.byteValue() == 1)
 			return "未处理";
