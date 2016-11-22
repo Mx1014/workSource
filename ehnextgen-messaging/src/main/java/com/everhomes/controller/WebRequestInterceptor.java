@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.controller;
 
-import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
 import java.net.URLEncoder;
 import java.util.ArrayList;
@@ -468,7 +467,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	private UserInfo getBizUserInfo(String zlSignature,String zlAppKey,String id,String randomNum,String timeStamp) {
 		//2016-07-29:modify by liujinwne,parameter name don't be signed.
 		
-//		try{
+		try{
 			String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
 			String getUserInfoUri = homeUrl+"/evh/openapi/getUserInfoById";
 			String appKey = configurationProvider.getValue(ZUOLIN_APP_KEY, "f9392ce2-341b-40c1-9c2c-99c702215535");
@@ -487,23 +486,14 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			params.put("timeStamp", timeStamp);
 			String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
 
-			String param = null;
-			try {
-				param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
-						getUserInfoUri,
-						URLEncoder.encode(zlSignature,"UTF-8"),zlAppKey,
-						id,
-						randomNum,timeStamp,
-						appKey,URLEncoder.encode(signature,"UTF-8"));
-			} catch (UnsupportedEncodingException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
+			String param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
+					getUserInfoUri,
+					URLEncoder.encode(zlSignature,"UTF-8"),zlAppKey,
+					id,
+					randomNum,timeStamp,
+					appKey,URLEncoder.encode(signature,"UTF-8"));
 			Clients ci = new Clients();
-			LOGGER.error("~~~~~~~~~~~~~~~~~~~~~~~~"+param);
 			String responseString = ci.restCall("GET", param, null, null, null);
-			LOGGER.error("~~~~~~~~~~~~~~~~~~~~~~~~"+responseString);
-
 			Gson gson = new Gson();
 			CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
 			UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
@@ -513,12 +503,12 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 						"userInfo don't get.");
 			}
 			return userInfo;
-//		}
-//		catch(Exception e){
-//			LOGGER.error("getUserInfo method error.e="+e.getMessage());
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//					"getUserInfo method error.");
-//		}
+		}
+		catch(Exception e){
+			LOGGER.error("getUserInfo method error.e="+e.getMessage());
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"getUserInfo method error.");
+		}
 	}
 
 	// 改为public方法，使得第三方帐号的登录也可以使用同一套代码，见UserServiceImpl.logonBythirdPartAccount by lqs 20160922
