@@ -501,6 +501,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			}
 			Clients ci = new Clients();
 			String responseString = ci.restCall("GET", param, null, null, null);
+			LOGGER.error("~~~~~~~~~~~~~~~~~~~~~~~~"+responseString);
+
 			Gson gson = new Gson();
 			CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
 			UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
