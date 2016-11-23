@@ -1197,7 +1197,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Workbook wb = null;
 		InputStream in;
-		LOGGER.debug("~~~~~~~~~~~~~~~~~~"+PmTaskServiceImpl.class.getClassLoader().getResourceAsStream(""));
+		LOGGER.debug("~~~~~~~~~~~~~~~~~~"+PmTaskServiceImpl.class.getClassLoader().getResource(""));
 
 		in = PmTaskServiceImpl.class.getClassLoader().getResourceAsStream("WEB-INF/classes/excels/pmtask.xlsx");
 		
