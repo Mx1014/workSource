@@ -1,11 +1,13 @@
 package com.everhomes.pmtask;
 
 import java.io.BufferedOutputStream;
+import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.net.URISyntaxException;
@@ -38,8 +40,18 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
+
 
 
 
@@ -87,6 +99,11 @@ import org.springframework.transaction.TransactionStatus;
 
 
 
+
+
+
+
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
@@ -107,6 +124,8 @@ import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceDetail;
+import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunity;
@@ -124,6 +143,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -187,6 +207,7 @@ import com.everhomes.rest.pmtask.TaskStatisticsDTO;
 import com.everhomes.rest.pmtask.UpdateTaskCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
+import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -244,6 +265,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private AddressProvider addressProvider;
 	@Autowired
     private FamilyService familyService;
+	@Autowired
+	private NamespaceResourceProvider namespaceResourceProvider;
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
@@ -1167,19 +1190,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		
 		Workbook wb = null;
-		Path path;
-		OutputStream fileOut = null;
+		InputStream in;
+
+		in = PmTaskServiceImpl.class.getClassLoader().getResourceAsStream("WEB-INF/classes/excels/pmtask.xlsx");
+		
 		try {
-			LOGGER.debug(PmTaskServiceImpl.class.getClassLoader().getResource("").getPath());
-			path = Paths.get(PmTaskServiceImpl.class.getClassLoader().getResource("WEB-INF/classes/excels/pmtask.xlsx").toURI());
-			
-			fileOut = new FileOutputStream(PmTaskServiceImpl.class.getClassLoader().getResource("WEB-INF/classes/excels/temp-pmtask.xlsx").getPath());
-			Files.copy(path, fileOut);
-			wb = new XSSFWorkbook(PmTaskServiceImpl.class.getClassLoader().getResource("WEB-INF/classes/excels/temp-pmtask.xlsx").getPath());
-		} catch (IOException | URISyntaxException e) {
-			LOGGER.error("ExportTasks failed, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"ExportTasks failed.");
+			wb = new XSSFWorkbook(copyInputStream(in));
+		} catch (IOException e) {
 		}
 			
 		Sheet sheet = wb.getSheetAt(0);
@@ -1251,13 +1268,33 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"ExportTasks is fail.");
 		}finally{
 			try {
-				fileOut.close();
 				out.close();
 				wb.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
 		}
+	}
+	
+	private InputStream copyInputStream(InputStream source) {
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();  
+		  
+		byte[] buffer = new byte[1024];  
+		int len;  
+		try {
+			while ((len = source.read(buffer)) > -1 ) {  
+			    baos.write(buffer, 0, len);  
+			}
+			baos.flush();  
+		} catch (IOException e) {
+			LOGGER.error("ExportTasks is fail, cmd={}");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"ExportTasks is fail.");
+		}  
+		// 打开一个新的输入流  
+		InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
+		
+		return is1;
 	}
 	
 	private Row createRow(Row row, CellStyle style) {
@@ -2337,26 +2374,48 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
-
 		GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
-		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
-		List<FamilyDTO> families = new ArrayList<FamilyDTO>();
-		for(FamilyDTO f: familyList) {
-			if(f.getCommunityId().equals(communityId))
-				families.add(f);
-		}
-		
-		response.setFamilyList(families);
 
-		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
-		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
-		List<OrganizationDTO> organizations = new ArrayList<OrganizationDTO>();
-		for(OrganizationDTO o: organizationList) {
-			if(o.getCommunityId().equals(communityId))
-				organizations.add(o);
-		}
-		response.setOrganizationList(organizations);
-
+	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
+	    if(null != namespaceDetail) {
+	    	NamespaceCommunityType type = NamespaceCommunityType.fromCode(namespaceDetail.getResourceType());
+	    	if(type== NamespaceCommunityType.COMMUNITY_COMMERCIAL) {
+	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+	    		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+	    		List<OrganizationDTO> organizations = new ArrayList<OrganizationDTO>();
+	    		for(OrganizationDTO o: organizationList) {
+	    			if(o.getCommunityId().equals(communityId))
+	    				organizations.add(o);
+	    		}
+	    		response.setOrganizationList(organizations);
+	    	}else if(type== NamespaceCommunityType.COMMUNITY_RESIDENTIAL) {
+	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+	    		List<FamilyDTO> families = new ArrayList<FamilyDTO>();
+	    		for(FamilyDTO f: familyList) {
+	    			if(f.getCommunityId().equals(communityId))
+	    				families.add(f);
+	    		}
+	    		
+	    		response.setFamilyList(families);
+	    	}else {
+	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
+	    		List<FamilyDTO> families = new ArrayList<FamilyDTO>();
+	    		for(FamilyDTO f: familyList) {
+	    			if(f.getCommunityId().equals(communityId))
+	    				families.add(f);
+	    		}
+	    		response.setFamilyList(families);
+	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
+	    		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
+	    		List<OrganizationDTO> organizations = new ArrayList<OrganizationDTO>();
+	    		for(OrganizationDTO o: organizationList) {
+	    			if(o.getCommunityId().equals(communityId))
+	    				organizations.add(o);
+	    		}
+	    		response.setOrganizationList(organizations);
+	    	}
+	    }
+	    
 		return response;
 	}
 
