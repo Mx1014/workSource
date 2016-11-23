@@ -321,6 +321,10 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<QualityInspectionSpecificationDTO>();
 		if(standard.getSpecifications() != null && standard.getSpecifications().size() > 0) {
 			for(QualityInspectionSpecifications specification : standard.getSpecifications()) {
+				if(!StringUtils.isNullOrEmpty(specification.getPath())) {
+					String path = getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId());
+				}
+				
 				specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
 			}
 			dto.setSpecifications(specifications);
@@ -1648,6 +1652,13 @@ public class QualityServiceImpl implements QualityService {
 		processRepeatSetting(standard);
 		QualityStandardsDTO standardDto = ConvertHelper.convert(standard, QualityStandardsDTO.class);
 		RepeatSettingsDTO repeatDto = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+		
+		if(standardDto.getTargetId() != null) {
+			Community community = communityProvider.findCommunityById(standardDto.getTargetId());
+			if(community != null) {
+				standardDto.setTargetName(community.getName());
+			}
+		}
 		
 		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
         	

@@ -26,6 +26,7 @@ import com.everhomes.util.StringHelper;
  *  <li>deleterUid: 删除该标准的用户id</li>
  *  <li>deleteTime: 删除该标准的时间</li>
  *  <li>targetId: 标准所属的项目id</li>
+ *  <li>targetName: 标准所属的项目名</li>
  *  <li>targetType: 标准所属项目类型</li>
  *  <li>reviewResult: 标准审阅结果 {@link com.everhomes.rest.equipment.ReviewResult}</li>
  *  <li>reviewerUid: 标准审阅人id</li>
@@ -74,6 +75,8 @@ public class QualityStandardsDTO {
 	private Long targetId;
 	
 	private String targetType;
+	
+	private String targetName;
 	
 	private Byte reviewResult;
 	
@@ -258,6 +261,14 @@ public class QualityStandardsDTO {
 	public void setSpecifications(
 			List<QualityInspectionSpecificationDTO> specifications) {
 		this.specifications = specifications;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	@Override
