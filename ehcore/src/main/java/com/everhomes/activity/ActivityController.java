@@ -388,6 +388,6 @@ public class ActivityController extends ControllerBase {
 	@RequestMapping("listActivityEntryCategories")
 	@RestReturn(value = ActivityCategoryDTO.class, collection = true)
 	public RestResponse listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd) {
-		return new RestResponse(activityService.listActivityCategories(cmd));
+		return new RestResponse(activityService.listActivityEntryCategories(cmd));
 	}
 }
