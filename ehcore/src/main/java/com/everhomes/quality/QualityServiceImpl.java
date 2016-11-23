@@ -323,6 +323,7 @@ public class QualityServiceImpl implements QualityService {
 			for(QualityInspectionSpecifications specification : standard.getSpecifications()) {
 				if(!StringUtils.isNullOrEmpty(specification.getPath())) {
 					String path = getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId());
+					specification.setPath(path);
 				}
 				
 				specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
