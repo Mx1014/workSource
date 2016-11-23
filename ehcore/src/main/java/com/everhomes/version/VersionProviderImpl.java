@@ -226,7 +226,9 @@ public class VersionProviderImpl implements VersionProvider {
             .where(Tables.EH_VERSION_UPGRADE_RULES.REALM_ID.eq(realmId))
             .and(Tables.EH_VERSION_UPGRADE_RULES.MATCHING_LOWER_BOUND.lessThan(encodedValue))
             .and(Tables.EH_VERSION_UPGRADE_RULES.MATCHING_UPPER_BOUND.greaterThan(encodedValue))
-            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+//            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionUpgradeRule.class);
             });
@@ -243,7 +245,9 @@ public class VersionProviderImpl implements VersionProvider {
 
         List<VersionUpgradeRule> rules = context.select().from(Tables.EH_VERSION_UPGRADE_RULES)
             .where(Tables.EH_VERSION_UPGRADE_RULES.REALM_ID.eq(realmId))
-            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+//            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionUpgradeRule.class);
             });
@@ -327,7 +331,9 @@ public class VersionProviderImpl implements VersionProvider {
             .where(Tables.EH_VERSIONED_CONTENT.REALM_ID.eq(realmId))
             .and(Tables.EH_VERSIONED_CONTENT.MATCHING_LOWER_BOUND.lessThan(encodedValue))
             .and(Tables.EH_VERSIONED_CONTENT.MATCHING_UPPER_BOUND.greaterThan(encodedValue))
-            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+//            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSIONED_CONTENT.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionedContent.class);
             });
@@ -344,7 +350,9 @@ public class VersionProviderImpl implements VersionProvider {
 
         List<VersionedContent> contentPojos = context.select().from(Tables.EH_VERSIONED_CONTENT)
             .where(Tables.EH_VERSIONED_CONTENT.REALM_ID.eq(realmId))
-            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+//            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSIONED_CONTENT.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionedContent.class);
             });
