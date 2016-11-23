@@ -20,4 +20,6 @@ public interface FlowNodeProvider {
 
 	public FlowNode findFlowNodeByName(Long flowMainId, Integer flowVersion, String nodeName);
 
+	List<FlowNode> findFlowNodesByFlowId(Long flowMainId, Integer flowVersion);
+
 }

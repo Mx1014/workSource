@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 
@@ -33,6 +34,7 @@ import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowNodePriority;
 import com.everhomes.rest.flow.FlowNodeStatus;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
@@ -44,6 +46,7 @@ import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
+import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
@@ -81,6 +84,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowButtonProvider flowButtonProvider;
 	
+    /**
+     * create config flow
+     */
 	@Override
 	public FlowDTO createFlow(CreateFlowCommand cmd) {
 		if(cmd.getNamespaceId() == null) {
@@ -101,7 +107,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setModuleId(cmd.getModuleId());
     	obj.setModuleType(cmd.getModuleType());
     	obj.setFlowName(cmd.getFlowName());
-    	obj.setFlowVersion(0);
+    	obj.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
     	obj.setStatus(FlowStatusType.CONFIG.getCode());
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
@@ -207,9 +213,11 @@ public class FlowServiceImpl implements FlowService {
 				nodeObj = new FlowNode();
 				nodeObj.setNodeName(cmd.getNodeName());
 				nodeObj.setFlowMainId(flow.getId());
-				nodeObj.setFlowVersion(flow.getFlowVersion());
+				nodeObj.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
 				nodeObj.setNamespaceId(flow.getNamespaceId());
 				nodeObj.setStatus(FlowNodeStatus.VISIBLE.getCode());
+				nodeObj.setNodeLevel(cmd.getNodeLevel());
+				nodeObj.setDescription("");
 				flowNodeProvider.createFlowNode(nodeObj);
 				
 				//step2 create node buttons
@@ -219,31 +227,35 @@ public class FlowServiceImpl implements FlowService {
 			}
 		});
 		
-		// TODO Auto-generated method stub
-		return null;
+		return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
 	}
 	
 	private void createDefaultButtons(Flow flow, FlowNode flowNode) {
-		FlowStepType[] steps = {FlowStepType.APPROVE_STEP, FlowStepType.REJECT_STEP, FlowStepType.TRANSFER_STEP, FlowStepType.COMMENT_STEP, FlowStepType.ABSORT_STEP};
+		FlowStepType[] steps = {FlowStepType.APPROVE_STEP, FlowStepType.REJECT_STEP, 
+				FlowStepType.TRANSFER_STEP, FlowStepType.COMMENT_STEP, FlowStepType.ABSORT_STEP};
 		for(FlowStepType step : steps) {
-			createDefButton(flow, flowNode, FlowUserType.PROCESSOR, step);
+			createDefButton(flow, flowNode, FlowUserType.PROCESSOR, step, FlowButtonStatus.ENABLED);
 		}
 		
 		FlowStepType[] steps2 = {FlowStepType.REMINDER_STEP, FlowStepType.COMMENT_STEP, FlowStepType.ABSORT_STEP};
 		for(FlowStepType step : steps2) {
-			createDefButton(flow, flowNode, FlowUserType.APPLIER, step);
+			createDefButton(flow, flowNode, FlowUserType.APPLIER, step, FlowButtonStatus.ENABLED);
 		}
+		
+		createDefButton(flow, flowNode, FlowUserType.APPLIER, FlowStepType.EVALUATE_STEP, FlowButtonStatus.DISABLED);
 	}
 	
-	private void createDefButton(Flow flow, FlowNode flowNode, FlowUserType userType, FlowStepType stepType) {
+	private void createDefButton(Flow flow, FlowNode flowNode, FlowUserType userType, FlowStepType stepType, FlowButtonStatus enabled) {
 		FlowButton button = new FlowButton();
 		button.setFlowMainId(flow.getId());
-		button.setFlowVersion(flow.getFlowVersion());
+		button.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
 		button.setFlowNodeId(flowNode.getId());
 		button.setNamespaceId(flow.getNamespaceId());
-		button.setStatus(FlowButtonStatus.ENABLED.getCode());
+		button.setStatus(enabled.getCode());
 		button.setFlowStepType(stepType.getCode());
 		button.setNeedSubject((byte)1);
+		button.setFlowUserType(userType.getCode());
+		button.setButtonName(buttonDefName(flow.getNamespaceId(), stepType));
 		flowButtonProvider.createFlowButton(button);
 	}
 	
@@ -251,6 +263,98 @@ public class FlowServiceImpl implements FlowService {
 		String code = step.getCode();
 		String conf = FlowConstants.FLOW_STEP_NAME_PREFIX + code;
 		return configProvider.getValue(namespaceId, conf, code);
+	}
+	
+	@Override
+	public Flow deleteFlow(Long flowId) {
+		Flow flow = flowProvider.getFlowById(flowId);
+		if(flow != null) {
+			flow.setStatus(FlowStatusType.INVALID.getCode());
+			flowProvider.updateFlow(flow);
+		}
+		
+		return flow;
+	}
+
+	@Override
+	public FlowNode deleteFlowNode(Long flowNodeId) {
+		FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowNodeId);
+		flowNode.setStatus(FlowNodeStatus.INVALID.getCode());
+		flowNodeProvider.updateFlowNode(flowNode);
+		
+		return flowNode;
+	}
+
+	@Override
+	public ListBriefFlowNodeResponse listBriefFlowNodes(Long flowId) {
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		ListBriefFlowNodeResponse resp = new ListBriefFlowNodeResponse();
+		List<FlowNodeDTO> dtos = new ArrayList<FlowNodeDTO>(); 
+		resp.setFlowNodes(dtos);
+		for(FlowNode fn : flowNodes) {
+			dtos.add(ConvertHelper.convert(fn, FlowNodeDTO.class));
+		}
+		
+		return resp;
+	}
+	
+	@Override
+	public ListBriefFlowNodeResponse updateNodePriority(
+			UpdateFlowNodePriorityCommand cmd) {
+		Flow flow = flowProvider.getFlowById(cmd.getFlowMainId());
+		if(flow == null || flow.getStatus().equals(FlowStatusType.INVALID.getCode()) || !flow.getFlowMainId().equals(0l)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
+		}
+		
+		if(cmd.getFlowNodes() == null) {
+			return listBriefFlowNodes(cmd.getFlowMainId());
+		}
+		
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(cmd.getFlowMainId(), FlowConstants.FLOW_CONFIG_VER);
+		
+		this.dbProvider.execute(new TransactionCallback<Boolean>() {
+
+			@Override
+			public Boolean doInTransaction(TransactionStatus arg0) {
+				for(FlowNodePriority pr : cmd.getFlowNodes()) {
+					for(FlowNode fn : flowNodes) {
+						if(fn.getId().equals(pr.getId())) {
+							if(pr.getNodeLevel() != null) {
+								fn.setNodeLevel(pr.getNodeLevel());	
+							}
+							if(pr.getNodeName() != null) {
+								fn.setNodeName(pr.getNodeName());
+							}
+							if(pr.getDescription() != null) {
+								fn.setDescription(pr.getDescription());
+							}
+							
+							flowNodeProvider.updateFlowNode(fn);
+							break;
+						}
+					}
+				}
+				
+				return true;
+			}
+    	});
+		
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		ListBriefFlowNodeResponse resp = new ListBriefFlowNodeResponse();
+		List<FlowNodeDTO> dtos = new ArrayList<FlowNodeDTO>(); 
+		resp.setFlowNodes(dtos);
+		for(FlowNode fn : flowNodes) {
+			dtos.add(ConvertHelper.convert(fn, FlowNodeDTO.class));
+		}
+		
+		return resp;
 	}
 	
 	@Override
@@ -385,36 +489,6 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public Flow deleteFlow(Long flowId) {
-		Flow flow = flowProvider.getFlowById(flowId);
-		if(flow != null) {
-			flow.setStatus(FlowStatusType.INVALID.getCode());
-			flowProvider.updateFlow(flow);
-		}
-		
-		return flow;
-	}
-
-	@Override
-	public FlowNode deleteFlowNode(Long flowNodeId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ListBriefFlowNodeResponse listBriefFlowNodes(Long flowId) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public ListBriefFlowNodeResponse updateNodePriority(
-			UpdateFlowNodePriorityCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
@@ -498,6 +572,13 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowEvaluateDTO postEvaluate(FlowPostEvaluateCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public ListFlowUserSelectionResponse listButtonProcessorSelections(
+			ListButtonProcessorSelectionsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

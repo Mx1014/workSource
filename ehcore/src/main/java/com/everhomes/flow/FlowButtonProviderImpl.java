@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowButtonsDao;
@@ -25,6 +27,7 @@ import com.everhomes.server.schema.tables.records.EhFlowButtonsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +112,57 @@ public class FlowButtonProviderImpl implements FlowButtonProvider {
     }
 
     private void prepareObj(FlowButton obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public FlowButton findFlowButtonByStepType(Long flowNodeId, Integer flowVer, String flowStepType, String userType) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowButton> buttons = this.queryFlowButtons(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_NODE_ID.eq(flowNodeId));
+				query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_VERSION.eq(flowVer));
+				query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_STEP_TYPE.eq(flowStepType));
+				if(userType != null) {
+					query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_USER_TYPE.eq(userType));
+				}
+				
+				query.addConditions(Tables.EH_FLOW_BUTTONS.STATUS.ne(FlowButtonStatus.INVALID.getCode()));
+				return query;
+			}
+    		
+    	});
+    	
+    	if(buttons == null || buttons.size() == 0) {
+    		return null;
+    	}
+    	
+    	return buttons.get(0);
+    }
+    
+    @Override
+    public List<FlowButton> findFlowButtonsByUserType(Long flowNodeId, Integer flowVer, String userType) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowButton> buttons = this.queryFlowButtons(locator, 20, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_NODE_ID.eq(flowNodeId));
+				query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_VERSION.eq(flowVer));
+				if(userType != null) {
+					query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_USER_TYPE.eq(userType));	
+				}
+				query.addConditions(Tables.EH_FLOW_BUTTONS.STATUS.ne(FlowButtonStatus.INVALID.getCode()));
+				return query;
+			}
+    		
+    	});
+    	
+    	return buttons;
     }
 }

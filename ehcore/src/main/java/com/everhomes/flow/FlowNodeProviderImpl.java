@@ -27,6 +27,7 @@ import com.everhomes.server.schema.tables.records.EhFlowNodesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -111,6 +112,8 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
     }
 
     private void prepareObj(FlowNode obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
 
 	@Override
@@ -135,5 +138,24 @@ public class FlowNodeProviderImpl implements FlowNodeProvider {
 		}
 		
 		return flowNodes.get(0);
+	}
+	
+	@Override
+	public List<FlowNode> findFlowNodesByFlowId(Long flowMainId, Integer flowVersion) {
+		ListingLocator locator = new ListingLocator();
+		List<FlowNode> flowNodes = this.queryFlowNodes(locator, 100, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_NODES.FLOW_MAIN_ID.eq(flowMainId));
+				query.addConditions(Tables.EH_FLOW_NODES.FLOW_VERSION.eq(flowVersion));
+				query.addConditions(Tables.EH_FLOW_NODES.STATUS.ne(FlowNodeStatus.INVALID.getCode()));
+				return query;
+			}
+			
+		});
+		
+		return flowNodes;
 	}
 }

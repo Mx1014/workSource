@@ -7,10 +7,9 @@ import com.everhomes.util.StringHelper;
 
 public class UpdateFlowNodePriorityCommand {
 	private Long flowMainId;
-	private Long lastUpdateTime;
 	
-	@ItemType(FlowNodeDTO.class)
-	List<FlowNodeDTO> flowNodes;
+	@ItemType(FlowNodePriority.class)
+	List<FlowNodePriority> flowNodes;
 
 	public Long getFlowMainId() {
 		return flowMainId;
@@ -20,21 +19,14 @@ public class UpdateFlowNodePriorityCommand {
 		this.flowMainId = flowMainId;
 	}
 
-	public Long getLastUpdateTime() {
-		return lastUpdateTime;
-	}
-
-	public void setLastUpdateTime(Long lastUpdateTime) {
-		this.lastUpdateTime = lastUpdateTime;
-	}
-
-	public List<FlowNodeDTO> getFlowNodes() {
+	public List<FlowNodePriority> getFlowNodes() {
 		return flowNodes;
 	}
 
-	public void setFlowNodes(List<FlowNodeDTO> flowNodes) {
+	public void setFlowNodes(List<FlowNodePriority> flowNodes) {
 		this.flowNodes = flowNodes;
 	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

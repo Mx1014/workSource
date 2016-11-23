@@ -6,6 +6,7 @@ public class CreateFlowNodeCommand {
 	private Integer     namespaceId;
 	private String     nodeName;
 	private Long     flowMainId;
+	private Integer nodeLevel;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -25,7 +26,13 @@ public class CreateFlowNodeCommand {
 	public void setFlowMainId(Long flowMainId) {
 		this.flowMainId = flowMainId;
 	}
-	
+
+	public Integer getNodeLevel() {
+		return nodeLevel;
+	}
+	public void setNodeLevel(Integer nodeLevel) {
+		this.nodeLevel = nodeLevel;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -19,6 +19,8 @@ import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
+import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
+import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 
@@ -81,6 +83,20 @@ public class FlowController extends ControllerBase {
     @RestReturn(value=FlowButtonDTO.class)
     public RestResponse fireButton(@Valid FlowFireButtonCommand cmd) {
         RestResponse response = new RestResponse(flowService.fireButton(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /flow/listButtonSelections</b>
+     * <p> 对节点进行评价 </p>
+     * @return 返回评价信息
+     */
+    @RequestMapping("listButtonProcessorSelections")
+    @RestReturn(value=ListFlowUserSelectionResponse.class)
+    public RestResponse listButtonSelections(@Valid ListButtonProcessorSelectionsCommand cmd) {
+        RestResponse response = new RestResponse(flowService.listButtonProcessorSelections(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

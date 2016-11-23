@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.junit.After;
@@ -16,13 +17,21 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.everhomes.rest.flow.CreateFlowCommand;
+import com.everhomes.rest.flow.CreateFlowNodeCommand;
+import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowNodeDTO;
+import com.everhomes.rest.flow.FlowNodePriority;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowStatusType;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
+import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.user.base.LoginAuthTestCase;
 
 public class FlowServiceTest extends LoginAuthTestCase {
@@ -44,6 +53,12 @@ public class FlowServiceTest extends LoginAuthTestCase {
     
     @Autowired
     private FlowService flowService;
+    
+    @Autowired
+    private FlowNodeProvider flowNodeProvider;
+    
+    @Autowired
+    private FlowButtonProvider flowButtonProvider;
     
     @Before
     public void setUp() throws Exception {
@@ -170,5 +185,125 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Assert.assertTrue(newObj.getFlowName().equals(cmd.getNewFlowName()));
     	
     	flowProvider.deleteFlow(obj);
+    }
+    
+    @Test
+    public void testCreateFlowNode() {
+    	Long ownerId = 5l;
+    	Long moduleId = 6l;
+    	CreateFlowCommand cmd = new CreateFlowCommand();
+    	cmd.setFlowName("test-flow2");
+    	cmd.setModuleId(moduleId);
+    	cmd.setOwnerId(ownerId);
+    	cmd.setOwnerType(FlowOwnerType.ENTERPRISE.getCode());
+    	FlowDTO dto = flowService.createFlow(cmd);
+    	Assert.assertTrue(dto.getId() > 0);
+    	
+    	CreateFlowNodeCommand cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(1);
+    	cmdNode.setNodeName("test-node-001");
+    	FlowNodeDTO nodeDTO = flowService.createFlowNode(cmdNode);
+    	
+    	FlowNode flowNode = flowNodeProvider.getFlowNodeById(nodeDTO.getId());
+    	Assert.assertTrue(flowNode.getId() > 0);
+    	Assert.assertTrue(nodeDTO.getId().equals(flowNode.getId()));
+    	
+    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.APPLIER.getCode());
+    	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(flowNode.getId(), flowNode.getFlowVersion(), FlowStepType.EVALUATE_STEP.getCode(), FlowUserType.APPLIER.getCode());
+    	Assert.assertTrue(flowButton1.getId() > 0 && flowButton2.getId() > 0 && !flowButton1.getId().equals(flowButton2.getId()));
+    	Assert.assertTrue(flowButton3.getStatus().equals(FlowButtonStatus.DISABLED.getCode()));
+    	
+    	List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowNode.getId(), flowNode.getFlowVersion(), FlowUserType.APPLIER.getCode());
+    	Assert.assertTrue(buttons.size() == 4);
+    	
+    	flowService.deleteFlowNode(nodeDTO.getId());
+    	flowService.deleteFlow(dto.getId());
+    }
+    
+    @Test
+    public void testFlowNodeList() {
+    	Long ownerId = 7l;
+    	Long moduleId = 8l;
+    	CreateFlowCommand cmd = new CreateFlowCommand();
+    	cmd.setFlowName("test-flow2");
+    	cmd.setModuleId(moduleId);
+    	cmd.setOwnerId(ownerId);
+    	cmd.setOwnerType(FlowOwnerType.ENTERPRISE.getCode());
+    	FlowDTO dto = flowService.createFlow(cmd);
+    	Assert.assertTrue(dto.getId() > 0);
+    	
+    	CreateFlowNodeCommand cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(1);
+    	cmdNode.setNodeName("test-node-001");
+    	FlowNodeDTO nodeDTO001 = flowService.createFlowNode(cmdNode);
+    	
+    	cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(2);
+    	cmdNode.setNodeName("test-node-002");
+    	FlowNodeDTO nodeDTO002 = flowService.createFlowNode(cmdNode);
+    	
+    	cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(3);
+    	cmdNode.setNodeName("test-node-003");
+    	FlowNodeDTO nodeDTO003 = flowService.createFlowNode(cmdNode);
+    	
+    	cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(4);
+    	cmdNode.setNodeName("test-node-004");
+    	FlowNodeDTO nodeDTO004 = flowService.createFlowNode(cmdNode);
+    	ListBriefFlowNodeResponse resp1 = flowService.listBriefFlowNodes(dto.getId());
+    	int i = 1;
+    	for(FlowNodeDTO nodeDTO : resp1.getFlowNodes()) {
+    		Assert.assertTrue(nodeDTO.getNodeLevel().equals(i));
+    		Assert.assertTrue(nodeDTO.getNodeName().equals("test-node-00" + i));
+    		i++;
+    	}
+    	
+    	UpdateFlowNodePriorityCommand priorityCommand = new UpdateFlowNodePriorityCommand();
+    	priorityCommand.setFlowMainId(dto.getId());
+    	
+    	List<FlowNodePriority> nodePriorities = new ArrayList<FlowNodePriority>();
+    	priorityCommand.setFlowNodes(nodePriorities);
+    	
+    	FlowNodePriority np = new FlowNodePriority();
+    	np.setId(nodeDTO001.getId());
+    	np.setNodeLevel(4);
+    	nodePriorities.add(np);
+    	
+    	np = new FlowNodePriority();
+    	np.setId(nodeDTO002.getId());
+    	np.setNodeLevel(3);
+    	nodePriorities.add(np);
+    	
+    	np = new FlowNodePriority();
+    	np.setId(nodeDTO003.getId());
+    	np.setNodeLevel(2);
+    	nodePriorities.add(np);
+    	
+    	np = new FlowNodePriority();
+    	np.setId(nodeDTO004.getId());
+    	np.setNodeLevel(1);
+    	nodePriorities.add(np);
+    	
+    	ListBriefFlowNodeResponse resp2 = flowService.updateNodePriority(priorityCommand);
+    	i = 1;
+    	for(FlowNodeDTO nodeDTO : resp2.getFlowNodes()) {
+    		Assert.assertTrue(nodeDTO.getNodeLevel().equals(i));
+    		Assert.assertTrue(nodeDTO.getNodeName().equals("test-node-00" + (5-i)));
+    		i++;
+    	}
+    	
+    	flowService.deleteFlow(dto.getId());
     }
 }

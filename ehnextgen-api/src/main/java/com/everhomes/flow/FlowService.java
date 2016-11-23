@@ -25,6 +25,7 @@ import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
+import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
@@ -344,6 +345,14 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowEvaluateDTO postEvaluate(FlowPostEvaluateCommand cmd);
+
+	/**
+	 * 获取按钮下个节点的处理人员选择
+	 * @param cmd
+	 * @return
+	 */
+	ListFlowUserSelectionResponse listButtonProcessorSelections(
+			ListButtonProcessorSelectionsCommand cmd);
 	
 	//TODO 日志信息分类：
 	

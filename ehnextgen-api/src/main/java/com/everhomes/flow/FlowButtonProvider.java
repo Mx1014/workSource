@@ -18,4 +18,10 @@ public interface FlowButtonProvider {
 	List<FlowButton> queryFlowButtons(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	FlowButton findFlowButtonByStepType(Long flowNodeId, Integer flowVer,
+			String flowStepType, String userType);
+
+	List<FlowButton> findFlowButtonsByUserType(Long flowNodeId,
+			Integer flowVer, String userType);
+
 }

@@ -61,7 +61,7 @@ CREATE TABLE `eh_flow_nodes` (
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
     `node_name` VARCHAR(64) NOT NULL,
-    `description` VARCHAR(1024) NOT NULL,
+    `description` VARCHAR(1024),
     `node_level` INTEGER NOT NULL,
     `auto_step_minute` INTEGER NOT NULL DEFAULT 0 COMMENT 'after hour, step next',
     `auto_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, EndStep',

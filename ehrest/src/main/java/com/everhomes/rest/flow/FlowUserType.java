@@ -1,7 +1,7 @@
 package com.everhomes.rest.flow;
 
 public enum FlowUserType {
-	APPLIER("applier"), PROCESSOR("processor");
+	NO_USER("no_user"), APPLIER("applier"), PROCESSOR("processor");
 	
 	private String code;
     private FlowUserType(String code) {
