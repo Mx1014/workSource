@@ -1460,6 +1460,10 @@ public class QualityProviderImpl implements QualityProvider {
                 assert(standard != null);
                 QualityInspectionSpecifications specification = findSpecificationById(record.getSpecificationId(), standard.getOwnerType(), standard.getOwnerId());
             
+                if(standard.getSpecifications() == null) {
+                	standard.setSpecifications(new ArrayList<QualityInspectionSpecifications>());
+                }
+                
                 standard.getSpecifications().add(specification);
                 return null;
             });
