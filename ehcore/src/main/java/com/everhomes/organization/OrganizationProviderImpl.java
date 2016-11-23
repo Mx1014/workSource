@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.community.Community;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -35,6 +36,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -2552,5 +2554,33 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		if(null == result || result.size() == 0 )
 			return null;
 		return result.get(0);
+	}
+
+	@Override
+	public List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Community> result  = new ArrayList<Community>();
+		SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+		if(orgId != null && orgId > 0){
+			query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID));
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId));
+		}
+		if(!StringUtils.isEmpty(keyword)) {
+			query.addConditions(Tables.EH_COMMUNITIES.NAME.like("%"+keyword+"%")
+					.or(Tables.EH_COMMUNITIES.ALIAS_NAME.like("%"+keyword+"%")));
+		}
+			
+		query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
+		result = query.fetch().map(new DefaultRecordMapper(Tables.EH_COMMUNITIES.recordType(), Community.class));
+
+		if(result == null || result.size() == 0) {
+			if(LOGGER.isWarnEnabled()) {
+				LOGGER.warn("The community for the organization is not found, organizationId=" + orgId);
+				LOGGER.warn(query.getSQL());
+			}
+		}
+
+		return result;
 	}
 }

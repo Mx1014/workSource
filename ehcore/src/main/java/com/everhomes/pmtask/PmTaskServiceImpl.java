@@ -45,8 +45,12 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -85,6 +89,8 @@ import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+
 
 
 
@@ -1191,6 +1197,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Workbook wb = null;
 		InputStream in;
+		LOGGER.debug("~~~~~~~~~~~~~~~~~~"+PmTaskServiceImpl.class.getClassLoader().getResourceAsStream(""));
 
 		in = PmTaskServiceImpl.class.getClassLoader().getResourceAsStream("WEB-INF/classes/excels/pmtask.xlsx");
 		
@@ -1277,6 +1284,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 	
 	private InputStream copyInputStream(InputStream source) {
+		if(null == source)
+			 return null;
 		ByteArrayOutputStream baos = new ByteArrayOutputStream();  
 		  
 		byte[] buffer = new byte[1024];  
@@ -2363,11 +2372,44 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		checkOrganizationId(cmd.getOrganizationId());
 		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
-		List<CommunityDTO> dtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+		List<CommunityDTO> dtos = listAllChildrenOrganizationCoummunities(cmd.getOrganizationId(), cmd.getKeyword());
 		response.setCommunities(dtos);
 		return response;
 	}
 
+	private List<CommunityDTO> listAllChildrenOrganizationCoummunities(Long organizationId, String keyword){
+		
+		Organization organization = this.checkOrganization(organizationId);
+		
+		List<String> groupTypes = new ArrayList<String>();
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+		
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
+		orgs.add(organization);
+		if(LOGGER.isDebugEnabled())
+        	LOGGER.info("orgs:" + orgs);
+		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
+		
+		for (Organization org : orgs) {
+			List<Community> communities = organizationProvider.listOrganizationCommunitiesByKeyword(org.getId(), keyword);
+			if(null != communities && communities.size() != 0)
+				dtos.addAll(communities.stream().map(r -> ConvertHelper.convert(r, CommunityDTO.class)).collect(Collectors.toList()));
+		}
+		
+		return dtos;
+	}
+	
+	private Organization checkOrganization(Long orgId) {
+		Organization org = organizationProvider.findOrganizationById(orgId);
+		if(org == null){
+			LOGGER.error("Unable to find the organization.organizationId=" + orgId);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Unable to find the organization.");
+		}
+		return org;
+	}
+	
 	@Override
 	public GetUserRelatedAddressResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 		User user = UserContext.current().getUser();

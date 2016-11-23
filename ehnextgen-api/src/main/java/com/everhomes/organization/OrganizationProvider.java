@@ -9,6 +9,7 @@ import com.everhomes.rest.organization.VisibleFlag;
 
 import org.jooq.Condition;
 
+import com.everhomes.community.Community;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -234,4 +235,5 @@ public interface OrganizationProvider {
 	
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
  
+	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
 }
