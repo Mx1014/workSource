@@ -27,6 +27,7 @@ import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.GetFlowNodeDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
@@ -37,7 +38,7 @@ import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminder;
+import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 
 @RestDoc(value="Flow Admin controller", site="core")
@@ -218,6 +219,20 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /admin/flow/getFlowNodeDetail</b>
+     * <p> 创建一波用户选择项 </p>
+     * @return
+     */
+    @RequestMapping("updateFlowNodeReminder")
+    @RestReturn(value=FlowNodeDetailDTO.class)
+    public RestResponse updateFlowNodeReminder(@Valid GetFlowNodeDetailCommand cmd) {
+        RestResponse response = new RestResponse(flowService.getFlowNodeDetail(cmd.getFlowNodeId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
      * <b>URL: /admin/flow/updateFlowNodeReminder</b>
@@ -226,7 +241,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("updateFlowNodeReminder")
     @RestReturn(value=FlowNodeDetailDTO.class)
-    public RestResponse updateFlowNodeReminder(@Valid UpdateFlowNodeReminder cmd) {
+    public RestResponse updateFlowNodeReminder(@Valid UpdateFlowNodeReminderCommand cmd) {
         RestResponse response = new RestResponse(flowService.updateFlowNodeReminder(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

@@ -18,4 +18,7 @@ public interface FlowActionProvider {
 	List<FlowAction> queryFlowActions(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	FlowAction findFlowActionByBelong(Long belong, String entityType,
+			String actionType, String actionStepType, String flowStepType);
+
 }

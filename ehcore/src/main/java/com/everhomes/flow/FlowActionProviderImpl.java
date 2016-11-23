@@ -13,10 +13,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowActionStatus;
+import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowActionsDao;
@@ -25,6 +28,7 @@ import com.everhomes.server.schema.tables.records.EhFlowActionsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +113,34 @@ public class FlowActionProviderImpl implements FlowActionProvider {
     }
 
     private void prepareObj(FlowAction obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public FlowAction findFlowActionByBelong(Long belong, String entityType, String actionType, String actionStepType, String flowStepType) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowAction> flowActions = this.queryFlowActions(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_TO.eq(belong));
+				query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_TYPE.eq(entityType));
+				query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_TYPE.eq(actionType));
+				query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_STEP_TYPE.eq(actionStepType));
+				if(flowStepType != null) {
+					query.addConditions(Tables.EH_FLOW_ACTIONS.FLOW_STEP_TYPE.eq(flowStepType));	
+				}
+				query.addConditions(Tables.EH_FLOW_ACTIONS.STATUS.ne(FlowActionStatus.INVALID.getCode()));
+				return query;
+			}
+    	});
+    	
+    	if(flowActions != null && flowActions.size() != 0) {
+    		return flowActions.get(0);
+    	}
+    	
+    	return null;
     }
 }

@@ -38,7 +38,7 @@ import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminder;
+import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 
 public interface FlowService {
@@ -295,7 +295,7 @@ public interface FlowService {
 	 * @param cmd
 	 * @return
 	 */
-	FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminder cmd);
+	FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminderCommand cmd);
 
 	/**
 	 * 任务跟踪
@@ -353,6 +353,13 @@ public interface FlowService {
 	 */
 	ListFlowUserSelectionResponse listButtonProcessorSelections(
 			ListButtonProcessorSelectionsCommand cmd);
+
+	/**
+	 * 获取某配置节点的详细信息
+	 * @param flowNodeId
+	 * @return
+	 */
+	FlowNodeDetailDTO getFlowNodeDetail(Long flowNodeId);
 	
 	//TODO 日志信息分类：
 	

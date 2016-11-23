@@ -7,6 +7,38 @@ public class FlowAction extends EhFlowActions {
 	 * 
 	 */
 	private static final long serialVersionUID = -3805976892366556884L;
+	
+	public Long getReminderAfterMinute() {
+		return FlowActionCustomField.REMINDER_AFTER_MINUTE.getIntegralValue(this);
+	}
+
+	public void setReminderAfterMinute(Long reminderAfterMinute) {
+		FlowActionCustomField.REMINDER_AFTER_MINUTE.setIntegralValue(this, reminderAfterMinute);
+	}
+
+	public Long getReminderTickMinute() {
+		return FlowActionCustomField.REMINDER_TICK_MINUTE.getIntegralValue(this);
+	}
+
+	public void setReminderTickMinute(Long reminderTickMinute) {
+		FlowActionCustomField.REMINDER_TICK_MINUTE.setIntegralValue(this, reminderTickMinute);
+	}
+
+	public Long getTrackerProcessor() {
+		return FlowActionCustomField.TRACKER_PROCESSOR.getIntegralValue(this);
+	}
+
+	public void setTrackerProcessor(Long trackerProcessor) {
+		FlowActionCustomField.TRACKER_PROCESSOR.setIntegralValue(this, trackerProcessor);
+	}
+
+	public Long getTrackerApplier() {
+		return FlowActionCustomField.TRACKER_APLIER.getIntegralValue(this);
+	}
+
+	public void setTrackerApplier(Long trackerApplier) {
+		FlowActionCustomField.TRACKER_APLIER.setIntegralValue(this, trackerApplier);
+	}
 
 	@Override
     public String toString() {

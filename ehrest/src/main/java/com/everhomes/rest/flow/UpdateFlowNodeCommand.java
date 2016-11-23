@@ -5,13 +5,20 @@ import com.everhomes.util.StringHelper;
 public class UpdateFlowNodeCommand {
 	private Long flowNodeId;
 	private String flowNodeName;
-	private Long autoStepMinute;
+	private Integer autoStepMinute;
 	private Byte allowApplierUpdate;
+	private String autoStepType;
 
-	public Long getAutoStepMinute() {
+	public String getAutoStepType() {
+		return autoStepType;
+	}
+	public void setAutoStepType(String autoStepType) {
+		this.autoStepType = autoStepType;
+	}
+	public Integer getAutoStepMinute() {
 		return autoStepMinute;
 	}
-	public void setAutoStepMinute(Long autoStepMinute) {
+	public void setAutoStepMinute(Integer autoStepMinute) {
 		this.autoStepMinute = autoStepMinute;
 	}
 	public Byte getAllowApplierUpdate() {

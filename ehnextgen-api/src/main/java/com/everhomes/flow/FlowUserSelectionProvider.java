@@ -18,4 +18,7 @@ public interface FlowUserSelectionProvider {
 	List<FlowUserSelection> queryFlowUserSelections(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<FlowUserSelection> findSelectionByBelong(Long belongId,
+			String belongEntity, String flowUserBelongType);
+
 }

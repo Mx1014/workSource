@@ -23,19 +23,25 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowActionDTO;
+import com.everhomes.rest.flow.FlowActionStepType;
+import com.everhomes.rest.flow.FlowActionType;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowNodePriority;
+import com.everhomes.rest.flow.FlowNodeReminderDTO;
 import com.everhomes.rest.flow.FlowNodeStatus;
+import com.everhomes.rest.flow.FlowNodeTrackerDTO;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
@@ -58,7 +64,7 @@ import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminder;
+import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
@@ -83,6 +89,12 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private FlowButtonProvider flowButtonProvider;
+    
+    @Autowired
+    private FlowUserSelectionProvider flowUserSelectionProvider;
+    
+    @Autowired
+    private FlowActionProvider flowActionProvider;
 	
     /**
      * create config flow
@@ -358,6 +370,92 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
+	public FlowNodeDetailDTO getFlowNodeDetail(Long flowNodeId) {
+		FlowNodeDetailDTO detail = new FlowNodeDetailDTO();
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+		detail.setProcessors(new ArrayList<FlowUserSelectionDTO>());
+		if(selections != null) {
+			selections.stream().forEach((s) -> {
+				detail.getProcessors().add(ConvertHelper.convert(s, FlowUserSelectionDTO.class));
+			});
+		}
+		
+		detail.setReminder(getReminderDTO(flowNodeId));
+		detail.setTracker(getTrackerDTO(flowNodeId));
+		return detail;
+	}
+	
+	private FlowNodeReminderDTO getReminderDTO(Long flowNodeId) {
+		FlowNodeReminderDTO dto = new FlowNodeReminderDTO();
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+		if(action != null) {
+			dto.setReminderMessageEnabled((byte)1);
+			dto.setMessageAction(actionToDTO(action));
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+		if(action != null) {
+			dto.setReminderSMSEnabled((byte)1);
+			dto.setSmsAction(actionToDTO(action));
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TICK_MESSAGE.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
+		if(action != null) {
+			dto.setReminderTickMsgEnabled((byte)1);
+			dto.setTickMessageAction(actionToDTO(action));
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TICK_SMS.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
+		if(action != null) {
+			dto.setReminderTickSMSEnabled((byte)1);
+			dto.setTickSMSAction(actionToDTO(action));
+		}
+		
+		return dto;
+	}
+	
+	private FlowNodeTrackerDTO getTrackerDTO(Long flowNodeId) {
+		FlowNodeTrackerDTO dto = new FlowNodeTrackerDTO();
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.APPROVE_STEP.getCode());
+		if(action != null) {
+			dto.setEnterTracker(ConvertHelper.convert(action, FlowActionDTO.class));	
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.REJECT_STEP.getCode());
+		if(action != null) {
+			dto.setRejectTracker(ConvertHelper.convert(action, FlowActionDTO.class));	
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_LEAVE.getCode(), FlowStepType.TRANSFER_STEP.getCode());
+		if(action != null) {
+			dto.setTransferTracker(ConvertHelper.convert(action, FlowActionDTO.class));
+		}
+		
+		return dto;
+	}
+	
+	private FlowActionDTO actionToDTO(FlowAction action) {
+		FlowActionDTO actionDTO = ConvertHelper.convert(action, FlowActionDTO.class);
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
+		if(selections != null) {
+			List<FlowUserSelectionDTO> userSeles = new ArrayList<FlowUserSelectionDTO>();
+			selections.stream().forEach((s) -> {
+				userSeles.add(ConvertHelper.convert(s, FlowUserSelectionDTO.class));
+			});
+			actionDTO.setProcessors(userSeles);
+		}	
+		
+		return actionDTO;
+	}
+	
+	@Override
 	public Long createNodeEnterAction(FlowNode flowNode, FlowAction flowAction) {
 		// TODO Auto-generated method stub
 		return null;
@@ -490,8 +588,15 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		FlowNode flowNode = new FlowNode();
+		flowNode.setId(cmd.getFlowNodeId());
+		flowNode.setNodeName(cmd.getFlowNodeName());
+		flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
+		flowNode.setAutoStepType(cmd.getAutoStepType());
+		flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+		flowNodeProvider.updateFlowNode(flowNode);
+		
+		return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
 	}
 
 	@Override
@@ -528,8 +633,8 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminder cmd) {
-		// TODO Auto-generated method stub
+	public FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminderCommand cmd) {
+		
 		return null;
 	}
 

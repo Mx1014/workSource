@@ -1,10 +1,10 @@
 package com.everhomes.rest.flow;
 
-public enum FlowUserType {
-	NO_USER("no_user"), APPLIER("node_applier"), PROCESSOR("processor"), SUPERVISER("superviser");
+public enum FlowActionType {
+	MESSAGE("message"), SMS("sms"), TICK_MESSAGE("tick_message"), TICK_SMS("tick_sms"), TRACK("track");
 	
 	private String code;
-    private FlowUserType(String code) {
+    private FlowActionType(String code) {
         this.code = code;
     }
     
@@ -12,12 +12,12 @@ public enum FlowUserType {
         return this.code;
     }
     
-    public static FlowUserType fromCode(String code) {
+    public static FlowActionType fromCode(String code) {
     	if(code == null) {
     		return null;
     	}
     	
-    	for(FlowUserType t : FlowUserType.values()) {
+    	for(FlowActionType t : FlowActionType.values()) {
     		if(code.equalsIgnoreCase(t.getCode())) {
     			return t;
     		}

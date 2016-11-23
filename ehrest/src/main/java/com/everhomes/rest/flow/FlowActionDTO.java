@@ -1,12 +1,14 @@
 package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
+
 import java.util.List;
 import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
 public class FlowActionDTO {
+	private Long     id;
     private Byte     status;
     private String     renderText;
     private Long     flowMainId;
@@ -15,9 +17,15 @@ public class FlowActionDTO {
     private String     actionType;
     private Timestamp     createTime;
     private Integer     flowVersion;
-    private Long     id;
     private Long     belongTo;
     private String     belongType;
+    private Long reminderAfterMinute;
+    private Long reminderTickMinute;
+    private Long trackerProcessor;
+    private Long trackerApplier;
+    
+	@ItemType(FlowUserSelectionDTO.class)
+	List<FlowUserSelectionDTO> processors;
 
     public Byte getStatus() {
 		return status;
@@ -105,6 +113,46 @@ public class FlowActionDTO {
 
 	public void setBelongType(String belongType) {
 		this.belongType = belongType;
+	}
+
+	public Long getReminderAfterMinute() {
+		return reminderAfterMinute;
+	}
+
+	public void setReminderAfterMinute(Long reminderAfterMinute) {
+		this.reminderAfterMinute = reminderAfterMinute;
+	}
+
+	public Long getReminderTickMinute() {
+		return reminderTickMinute;
+	}
+
+	public void setReminderTickMinute(Long reminderTickMinute) {
+		this.reminderTickMinute = reminderTickMinute;
+	}
+
+	public Long getTrackerProcessor() {
+		return trackerProcessor;
+	}
+
+	public void setTrackerProcessor(Long trackerProcessor) {
+		this.trackerProcessor = trackerProcessor;
+	}
+
+	public Long getTrackerApplier() {
+		return trackerApplier;
+	}
+
+	public void setTrackerApplier(Long trackerApplier) {
+		this.trackerApplier = trackerApplier;
+	}
+
+	public List<FlowUserSelectionDTO> getProcessors() {
+		return processors;
+	}
+
+	public void setProcessors(List<FlowUserSelectionDTO> processors) {
+		this.processors = processors;
 	}
 
 	@Override

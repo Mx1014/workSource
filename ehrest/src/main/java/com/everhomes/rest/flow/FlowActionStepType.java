@@ -1,10 +1,10 @@
 package com.everhomes.rest.flow;
 
-public enum FlowUserBelongType {
-	FLOW_SUPERVISER("flow_superviser"), FLOW_NODE_PROCESSOR("flow_node_processor"), FLOW_NODE_APPLIER("flow_node_applier");
+public enum FlowActionStepType {
+	STEP_NONE("step_none"), STEP_TIMEOUT("step_timeout"), STEP_ENTER("step_enter"), STEP_LEAVE("step_leave");
 	
 	private String code;
-    private FlowUserBelongType(String code) {
+    private FlowActionStepType(String code) {
         this.code = code;
     }
     
@@ -12,12 +12,12 @@ public enum FlowUserBelongType {
         return this.code;
     }
     
-    public static FlowUserBelongType fromCode(String code) {
+    public static FlowStepType fromCode(String code) {
     	if(code == null) {
     		return null;
     	}
     	
-    	for(FlowUserBelongType t : FlowUserBelongType.values()) {
+    	for(FlowStepType t : FlowStepType.values()) {
     		if(code.equalsIgnoreCase(t.getCode())) {
     			return t;
     		}

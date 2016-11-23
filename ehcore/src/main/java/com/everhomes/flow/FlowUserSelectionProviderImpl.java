@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowUserSelectionsDao;
@@ -25,6 +27,7 @@ import com.everhomes.server.schema.tables.records.EhFlowUserSelectionsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +112,24 @@ public class FlowUserSelectionProviderImpl implements FlowUserSelectionProvider 
     }
 
     private void prepareObj(FlowUserSelection obj) {
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public List<FlowUserSelection> findSelectionByBelong(Long belongId, String belongEntity, String flowUserBelongType) {
+    	ListingLocator locator = new ListingLocator();
+    	return queryFlowUserSelections(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_TO.eq(belongId));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_ENTITY.eq(belongEntity));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_TYPE.eq(flowUserBelongType));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				return query;
+			}
+    		
+    	});
     }
 }
