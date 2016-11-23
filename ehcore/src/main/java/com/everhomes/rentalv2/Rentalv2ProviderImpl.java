@@ -1874,16 +1874,16 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		int compareValue = workdayPrice.compareTo(weekendPrice);
 		switch(compareValue){
 			case -1:
-				minPrice = weekendPrice;
-				maxPrice = workdayPrice;
+				minPrice = workdayPrice;
+				maxPrice = weekendPrice;
 				break;
 			case 0:
 				minPrice = weekendPrice;
 				maxPrice = weekendPrice;
 				break;
 			case 1:
-				minPrice = workdayPrice;
-				maxPrice = weekendPrice;
+				minPrice = weekendPrice;
+				maxPrice = workdayPrice;
 				break;
 		}
 		BigDecimal min2 = context.select(Tables.EH_RENTALV2_CELLS.PRICE.min())
