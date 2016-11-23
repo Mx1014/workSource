@@ -2,6 +2,7 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.category.CategoryDTO;
@@ -71,7 +72,7 @@ public interface PmTaskService {
 	
 	List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd);
 	
-	void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp);
+	void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req);
 	
 	SearchTaskStatisticsResponse searchTaskStatistics(SearchTaskStatisticsCommand cmd);
 	

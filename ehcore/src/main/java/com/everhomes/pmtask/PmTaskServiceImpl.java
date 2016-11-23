@@ -35,7 +35,10 @@ import java.util.stream.Collectors;
 
 
 
+
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -65,6 +68,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 
@@ -1146,7 +1150,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 	
 	@Override
-	public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp) {
+	public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		if(null == cmd.getPageSize())
@@ -1159,12 +1163,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Path path;
 		OutputStream fileOut = null;
 		try {
+
 			LOGGER.debug(PmTaskServiceImpl.class.getClassLoader().getResource("").getPath());
-			path = Paths.get(PmTaskServiceImpl.class.getClassLoader().getResource("excels/pmtask.xlsx").toURI());
+			path = Paths.get(PmTaskServiceImpl.class.getClassLoader().getResource("WEB-INF/classes/excels/pmtask.xlsx").toURI());
 			
-			fileOut = new FileOutputStream(PmTaskServiceImpl.class.getClassLoader().getResource("excels/temp-pmtask.xlsx").getPath());
+			fileOut = new FileOutputStream(PmTaskServiceImpl.class.getClassLoader().getResource("WEB-INF/classes/excels/temp-pmtask.xlsx").getPath());
 			Files.copy(path, fileOut);
-			wb = new XSSFWorkbook(PmTaskServiceImpl.class.getClassLoader().getResource("excels/temp-pmtask.xlsx").getPath());
+			wb = new XSSFWorkbook(PmTaskServiceImpl.class.getClassLoader().getResource("WEB-INF/classes/excels/temp-pmtask.xlsx").getPath());
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("ExportTasks failed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,

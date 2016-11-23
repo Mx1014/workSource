@@ -3,6 +3,7 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -403,8 +404,8 @@ public class PmTaskController extends ControllerBase {
      * <p>任务导出</p>
      */
     @RequestMapping("exportTasks")
-    public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp) {
-  	  	pmTaskService.exportTasks(cmd, resp);
+    public void exportTasks(SearchTasksCommand cmd, HttpServletResponse resp, HttpServletRequest req) {
+  	  	pmTaskService.exportTasks(cmd, resp, req);
     }
     
     /**
