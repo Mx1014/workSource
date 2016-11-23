@@ -1197,9 +1197,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Workbook wb = null;
 		InputStream in;
-		LOGGER.debug("~~~~~~~~~~~~~~~~~~"+PmTaskServiceImpl.class.getClassLoader().getResource(""));
+		LOGGER.debug("!!!!!!!!!!!!!!!"+this.getClass().getResource("").getPath());
+		LOGGER.debug("~~~~~~~~~~~~~~"+this.getClass().getResource("/").getPath());
 
-		in = PmTaskServiceImpl.class.getClassLoader().getResourceAsStream("WEB-INF/classes/excels/pmtask.xlsx");
+		LOGGER.debug("@@@@@@@@@@@@@@@@@@@@@@"+this.getClass().getResource("/").getPath());
+		in = this.getClass().getResourceAsStream("/excels/pmtask.xlsx");
 		
 		try {
 			wb = new XSSFWorkbook(copyInputStream(in));
