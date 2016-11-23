@@ -345,12 +345,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	public void evaluateTask(EvaluateTaskCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
-		if(null == cmd.getStar()){
-			cmd.setStar((byte)0);
-		}
-		if(null == cmd.getOperatorStar()){
-			cmd.setOperatorStar((byte)0);
-		}
+//		if(null == cmd.getStar()){
+//			cmd.setStar((byte)0);
+//		}
+//		if(null == cmd.getOperatorStar()){
+//			cmd.setOperatorStar((byte)0);
+//		}
 		PmTask task = checkPmTask(cmd.getId());
 		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
 			LOGGER.error("Task have not been completed, cmd={}", cmd);
