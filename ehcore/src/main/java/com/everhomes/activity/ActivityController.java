@@ -19,6 +19,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
 import com.everhomes.rest.activity.ActivityDTO;
@@ -40,6 +41,7 @@ import com.everhomes.rest.activity.ListActivitiesCommand;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategories;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
@@ -53,6 +55,8 @@ import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.VideoSupportType;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.yellowPage.ListServiceAllianceCategoriesCommand;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.Tuple;
@@ -375,4 +379,15 @@ public class ActivityController extends ControllerBase {
     public RestResponse getActivityWarning(GetActivityWarningCommand cmd){
     	return new RestResponse(activityService.queryActivityWarning(cmd));
     }
+    
+    /**
+	 * <b>URL: /yellowPage/listActivityEntryCategories</b> 
+	 * <p> 列出活动类型 </p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("listActivityEntryCategories")
+	@RestReturn(value = ActivityCategoryDTO.class, collection = true)
+	public RestResponse listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd) {
+		return new RestResponse(activityService.listActivityCategories(cmd));
+	}
 }

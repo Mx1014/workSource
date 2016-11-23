@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
 import com.everhomes.rest.activity.ActivityDTO;
@@ -29,6 +30,7 @@ import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
@@ -131,5 +133,7 @@ public interface ActivityService {
 	void activityWarningSchedule();
 	
 	ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd);
+	
+	List<ActivityCategoryDTO> listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd);
 
 }

@@ -68,6 +68,7 @@ import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
 import com.everhomes.rest.activity.ActivityDTO;
@@ -95,6 +96,7 @@ import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
@@ -150,6 +152,8 @@ import com.everhomes.rest.user.UserFavoriteDTO;
 import com.everhomes.rest.user.UserFavoriteTargetType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceLocalStringCode;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
@@ -172,6 +176,7 @@ import com.everhomes.util.StatusChecker;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
 
 
 @Component
@@ -2906,5 +2911,17 @@ public class ActivityServiceImpl implements ActivityService {
         		});
         	});
     	});
+	}
+
+	@Override
+	public List<ActivityCategoryDTO> listActivityEntryCategories(
+			ListActivityEntryCategoriesCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+        List<ActivityCategories> entityResultList = this.activityProvider.listActivityEntryCategories(namespaceId,
+                cmd.getOwnerType(), cmd.getOwnerId(), null, CategoryAdminStatus.ACTIVE);
+        return entityResultList.stream().map(r -> {
+        	ActivityCategoryDTO dto = ConvertHelper.convert(r, ActivityCategoryDTO.class);
+            return dto;
+        }).collect(Collectors.toList());
 	}
 }
