@@ -261,17 +261,27 @@ public class PmProviderImpl implements PmTaskProvider{
         			.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId))));
         	query.groupBy(Tables.EH_PM_TASKS.ID);
+        	query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
         	
     	}else if(null != status && status.equals(PmTaskProcessStatus.PROCESSED.getCode())){
     		
-    		query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
-    		condition = condition.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
+//    		query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+    		
+    		query.join(context.select(Tables.EH_PM_TASK_LOGS.OPERATOR_UID,Tables.EH_PM_TASK_LOGS.OPERATOR_TIME,Tables.EH_PM_TASK_LOGS.TASK_ID)
+    				.from(Tables.EH_PM_TASK_LOGS).where(Tables.EH_PM_TASK_LOGS.STATUS.ge(PmTaskStatus.PROCESSING.getCode()))
+    				.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId))
+    				.and(Tables.EH_PM_TASK_LOGS.ID.in(context.select(Tables.EH_PM_TASK_LOGS.ID.max())
+    	    				.from(Tables.EH_PM_TASK_LOGS).groupBy(Tables.EH_PM_TASK_LOGS.TASK_ID)))
+    				.asTable(Tables.EH_PM_TASK_LOGS.getName()))
+    		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+    		
+//    		condition = condition.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
 //    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode())
 //    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
 //    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.CLOSED.getCode())));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode()));
-    		query.groupBy(Tables.EH_PM_TASKS.ID);
-
+//    		query.groupBy(Tables.EH_PM_TASKS.ID);
+    		query.orderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
     	}else if(null != status && status.equals(PmTaskProcessStatus.USER_UNPROCESSED.getCode())){
 //        	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
 //        	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
@@ -286,15 +296,16 @@ public class PmProviderImpl implements PmTaskProvider{
     		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
         	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
-        	
+        	query.orderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
         	
     	}else{
     		condition = condition.and(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
+    		query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
     	}
         
         
-        query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
+        
         if(null != pageSize)
         	query.limit(pageSize);
         

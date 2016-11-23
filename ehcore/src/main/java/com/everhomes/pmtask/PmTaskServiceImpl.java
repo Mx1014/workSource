@@ -509,7 +509,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask task = checkPmTask(cmd.getId());
 		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode() ){
 			LOGGER.error("Task cannot be completed. cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_TASK_PROCCESING,
     				"Task cannot be completed.");
 		}
 		
@@ -561,7 +561,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		PmTask task = checkPmTask(cmd.getId());
 		if(task.getStatus() >= PmTaskStatus.PROCESSED.getCode()){
 			LOGGER.error("Task cannot be closed. cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_TASK_PROCCESING,
     				"Task cannot be closed.");
 		}
 		setTaskStatus(cmd.getOrganizationId(), cmd.getOwnerType(), cmd.getOwnerId(), task, cmd.getContent(), 
@@ -628,8 +628,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 	    				"Task cannot be assigned.");
 			}
-			
-			Timestamp now = new Timestamp(System.currentTimeMillis());
+			long time = System.currentTimeMillis();
+			Timestamp now = new Timestamp(time);
 			if(!task.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
 				task.setStatus(PmTaskStatus.PROCESSING.getCode());
 				task.setProcessingTime(now);
@@ -672,8 +672,25 @@ public class PmTaskServiceImpl implements PmTaskService {
 			List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
 			smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
 			smsProvider.addToTupleList(variables, "categoryName", categoryName);
-			smsProvider.sendSms(targetUser.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
-
+			smsProvider.sendSms(user.getNamespaceId(), targetIdentifier.getIdentifierToken(), SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_CODE, user.getLocale(), variables);
+			// 给任务发起者 发短信
+			String phoneNumber = null;
+			if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
+				User creator = userProvider.findUserById(task.getCreatorUid());
+    			UserIdentifier creatorIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(creator.getId(), IdentifierType.MOBILE.getCode());
+    			phoneNumber = creatorIdentifier.getIdentifierToken();
+			}else{
+    			phoneNumber = task.getRequestorPhone();
+			}
+		    	Date d = new Date(time);
+		    	SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd");
+		    	SimpleDateFormat sdf2 = new SimpleDateFormat("HH:mm");
+				List<Tuple<String, Object>> variables2 = smsProvider.toTupleList("day", sdf1.format(d));
+				smsProvider.addToTupleList(variables2, "hour", sdf2.format(d));
+				smsProvider.addToTupleList(variables2, "operatorName", targetUser.getNickName());
+				smsProvider.addToTupleList(variables2, "operatorPhone", targetIdentifier.getIdentifierToken());
+				smsProvider.sendSms(user.getNamespaceId(), phoneNumber, SmsTemplateCode.SCOPE, SmsTemplateCode.PM_TASK_ASSIGN_TO_CREATOR_CODE, user.getLocale(), variables2);
+			
 			//elasticsearch更新
 			pmTaskSearch.deleteById(task.getId());
 			pmTaskSearch.feedDoc(task);

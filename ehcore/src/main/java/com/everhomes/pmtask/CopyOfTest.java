@@ -18,9 +18,9 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.util.RuntimeErrorException;
 
-public class Test {
+public class CopyOfTest {
 public static void main(String[] args) {
-	File file = new File("D:\\project\\git2\\ehnextgen\\ehcore\\pmtask.xlsx");
+	
 	File file1 = new File("D:\\project\\git2\\ehnextgen\\ehcore\\temp-pmtask.xlsx");
 	FileOutputStream o = null;
 	try {
@@ -30,35 +30,15 @@ public static void main(String[] args) {
 		e2.printStackTrace();
 	}
 	Workbook wb = null;
-	try {
-		wb = new XSSFWorkbook(file);
-	} catch (InvalidFormatException e1) {
+		wb = new XSSFWorkbook();
 		
-	} catch (IOException e1) {
-		
-	}
-		
-	Sheet sheet = wb.getSheetAt(0);
+	Sheet sheet = wb.createSheet();
 	
-		Row tempRow = sheet.getRow(4);
-		Cell cell = tempRow.getCell(1);
-		CellStyle style = cell.getCellStyle();
-		tempRow.getCell(1).setCellValue("123");
-		tempRow.getCell(2).setCellValue("123");
-		tempRow.getCell(3).setCellValue("123");
-		tempRow.getCell(4).setCellValue("qwe");
-		tempRow.getCell(5).setCellValue("123");
+		Row tempRow = sheet.createRow(0);
+		Cell cell = tempRow.createCell(0);
 		
-		Row tempRow1 = sheet.createRow(21);
-		Row tempRow2 = sheet.createRow(22);
-		Row tempRow3 = sheet.createRow(23);
-		createRow(tempRow1, style);
-		createRow(tempRow2, style);
-		createRow(tempRow3, style);
 		
-		Row tempRow4 = sheet.createRow(24);
-		tempRow4.createCell(1).setCellValue("物业服务中心主任");
-		tempRow4.createCell(5).setCellValue("日期：");
+		
 	try {
 		wb.write(o);
 //		o.close();
