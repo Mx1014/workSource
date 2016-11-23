@@ -10,16 +10,13 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
-<<<<<<< HEAD
 import com.everhomes.yellowPage.ServiceAllianceApartmentRequests;
-=======
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.util.List;
->>>>>>> master
 
 @Component
 public class SequenceServiceImpl implements SequenceService {
