@@ -35,6 +35,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.RevisitCommand;
 import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
+import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
@@ -110,9 +111,9 @@ public interface PmTaskService {
 	
 	GetUserRelatedAddressResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd);
 	
-	SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskStatisticsCommand cmd);
+	SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd);
 	
-	void exportTaskOperatorStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp);
+	void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp);
 	
 	void createTaskTargetStatistics();
 }

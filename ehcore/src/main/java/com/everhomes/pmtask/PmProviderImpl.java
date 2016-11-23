@@ -237,7 +237,8 @@ public class PmProviderImpl implements PmTaskProvider{
         }
         query.addConditions(Tables.EH_PM_TASKS.OPERATOR_STAR.ne((byte)0));
         
-        List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+        List<PmTask> result = query.fetch().map(
+                new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
         return result;
 	}
 	

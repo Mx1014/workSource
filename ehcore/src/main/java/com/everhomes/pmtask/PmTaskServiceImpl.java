@@ -36,8 +36,12 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -65,9 +69,12 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+
 
 
 
@@ -167,6 +174,7 @@ import com.everhomes.rest.pmtask.PmTaskTargetStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetType;
 import com.everhomes.rest.pmtask.RevisitCommand;
 import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
+import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
@@ -538,7 +546,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Timestamp now = new Timestamp(time);
 			task.setStatus(PmTaskStatus.REVISITED.getCode());
 			task.setRevisitTime(now);
-			task.setOperatorStar(cmd.getOperatorStar());
 			pmTaskProvider.updateTask(task);
 			
 			PmTaskLog pmTaskLog = new PmTaskLog();
@@ -1163,7 +1170,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Path path;
 		OutputStream fileOut = null;
 		try {
-
 			LOGGER.debug(PmTaskServiceImpl.class.getClassLoader().getResource("").getPath());
 			path = Paths.get(PmTaskServiceImpl.class.getClassLoader().getResource("WEB-INF/classes/excels/pmtask.xlsx").toURI());
 			
@@ -2355,13 +2361,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskStatisticsCommand cmd) {
+	public SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		SearchTaskOperatorStatisticsResponse response = new SearchTaskOperatorStatisticsResponse();
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, null, cmd.getTaskCategoryId(), null,
+		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, cmd.getOwnerId(), cmd.getTaskCategoryId(), null,
 				new Timestamp(cmd.getDateStr()), cmd.getPageAnchor(), cmd.getPageSize());
 		int size = list.size();
 		if(size > 0){
@@ -2391,11 +2397,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 
 	@Override
-	public void exportTaskOperatorStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
+	public void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp) {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		
-		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, null, cmd.getTaskCategoryId(), 
+		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, cmd.getOwnerId(), cmd.getTaskCategoryId(), 
 				null, new Timestamp(cmd.getDateStr()), cmd.getPageAnchor(), cmd.getPageSize());
 		
 		XSSFWorkbook wb = new XSSFWorkbook();

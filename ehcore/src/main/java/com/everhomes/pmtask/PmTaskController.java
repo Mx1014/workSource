@@ -47,6 +47,7 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.RevisitCommand;
 import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
+import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsResponse;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
 import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
@@ -442,7 +443,7 @@ public class PmTaskController extends ControllerBase {
      */
     @RequestMapping("searchTaskOperatorStatistics")
     @RestReturn(value=SearchTaskOperatorStatisticsResponse.class)
-    public RestResponse searchTaskOperatorStatistics(SearchTaskStatisticsCommand cmd) {
+    public RestResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd) {
     	SearchTaskOperatorStatisticsResponse resp = pmTaskService.searchTaskOperatorStatistics(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -455,7 +456,7 @@ public class PmTaskController extends ControllerBase {
      * <p>导出执行人员统计列表</p>
      */
     @RequestMapping("exportTaskOperatorStatistics")
-    public void exportTaskOperatorStatistics(SearchTaskStatisticsCommand cmd, HttpServletResponse resp) {
+    public void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp) {
     	pmTaskService.exportTaskOperatorStatistics(cmd, resp);
     }
     
