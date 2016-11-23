@@ -1159,11 +1159,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Path path;
 		OutputStream fileOut = null;
 		try {
-			path = Paths.get(PmTaskServiceImpl.class.getResource("pmtask.xlsx").toURI());
+			LOGGER.debug(PmTaskServiceImpl.class.getClassLoader().getResource("").getPath());
+			path = Paths.get(PmTaskServiceImpl.class.getClassLoader().getResource("excels/pmtask.xlsx").toURI());
 			
-			fileOut = new FileOutputStream(PmTaskServiceImpl.class.getResource("temp-pmtask.xlsx").getPath());
+			fileOut = new FileOutputStream(PmTaskServiceImpl.class.getClassLoader().getResource("excels/temp-pmtask.xlsx").getPath());
 			Files.copy(path, fileOut);
-			wb = new XSSFWorkbook(PmTaskServiceImpl.class.getResource("temp-pmtask.xlsx").getPath());
+			wb = new XSSFWorkbook(PmTaskServiceImpl.class.getClassLoader().getResource("excels/temp-pmtask.xlsx").getPath());
 		} catch (IOException | URISyntaxException e) {
 			LOGGER.error("ExportTasks failed, cmd={}", cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
