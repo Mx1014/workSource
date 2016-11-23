@@ -346,9 +346,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
 		if(null == cmd.getStar()){
-			LOGGER.error("Star cannot be null.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Star cannot be null.");
+			cmd.setStar((byte)0);
+		}
+		if(null == cmd.getOperatorStar()){
+			cmd.setOperatorStar((byte)0);
 		}
 		PmTask task = checkPmTask(cmd.getId());
 		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
