@@ -18,6 +18,16 @@ public class GetAppInfoCommand {
 	@NotNull
 	private Byte osType;
 	
+	public GetAppInfoCommand() {
+		super();
+	}
+
+	public GetAppInfoCommand(Integer namespaceId, Byte osType) {
+		super();
+		this.namespaceId = namespaceId;
+		this.osType = osType;
+	}
+
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}

@@ -2025,6 +2025,27 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `community_id`, `address_id`, `organization_address`, `living_status`)
 	VALUES (26442, 1007144, 240111044331055036, 239825274387128013, '华润大厦-159号商铺', '0');
 
+-- 把服务联盟调整为企业汇 by lqs 20161117
+INSERT INTO `eh_service_alliance_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`) 
+	VALUES (200971, 'community', 240111044331055035, '0', '项目介绍', '项目介绍', NULL, '2', '1', '2016-11-16 18:05:45', '0', NULL, 999985);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES ((@menu_scope_id := @menu_scope_id + 1), 44300, '', 'EhNamespaces', 999985, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+  VALUES ((@menu_scope_id := @menu_scope_id + 1), 44400, '', 'EhNamespaces', 999985, 2);
+  
+UPDATE `eh_service_alliance_categories` SET `name`='企办汇', `path`='企办汇'  WHERE `id`=150;
+UPDATE `eh_service_alliance_categories` SET `path`=REPLACE(`path`, '服务联盟', '企办汇') WHERE `namespace_id`=999985;
+UPDATE `eh_launch_pad_items` SET `item_name`='企办汇', `item_label`='企办汇' where id in (112582,112593) and `namespace_id`=999985;
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112701, 999985, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRwaVpqRmxPRE5sWTJJMU9USXhaVFJoWVdZME1UbGhNakl3TVdWak5USmpNUQ', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+    VALUES (112702, 999985, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRwaVpqRmxPRE5sWTJJMU9USXhaVFJoWVdZME1UbGhNakl3TVdWak5USmpNUQ', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+
+
+UPDATE `eh_launch_pad_items` SET `action_type`=33, `action_data`='{"type":200971,"parentId":200971,"displayType": "list"}' WHERE `id` in (112580, 112591);
 
 
 

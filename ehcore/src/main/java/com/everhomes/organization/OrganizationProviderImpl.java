@@ -357,7 +357,24 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		});
 		return result;
 	}
-	
+	@Override
+	public List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(orgId));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode())); 
+		if(memberUids != null ) {
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.in(memberUids));
+		}
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
+	}
 	@Override
 	public List<OrganizationMember> listOrganizationMembersByPhone(String phone) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1500,7 +1517,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 
 		query.addConditions(cond);
-		if(null != locator.getAnchor())
+		if(null != locator && null != locator.getAnchor())
 			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
 		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
 		query.addLimit(pageSize);
@@ -1508,7 +1525,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			result.add(ConvertHelper.convert(r, OrganizationMember.class));
 			return null;
 		});
-		locator.setAnchor(null);
+		if(null!= locator)
+			locator.setAnchor(null);
 
 		if(result.size() >= pageSize){
 			result.remove(result.size() - 1);
@@ -2476,8 +2494,31 @@ public class OrganizationProviderImpl implements OrganizationProvider {
     @Override
     public void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize) {
     }
+ 
+	@Override
+	public List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long communityId) { 
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 
+		SelectQuery<EhOrganizationsRecord> query = context.selectQuery(Tables.EH_ORGANIZATIONS);
+		query.addJoin(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS, JoinType.LEFT_OUTER_JOIN, 
+				Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.eq(Tables.EH_ORGANIZATIONS.ID)
+				.and(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode())));
+		query.setDistinct(true);
+		if(communityId != null)
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(communityId));
 
+		if(emailDomain != null)
+			query.addConditions(Tables.EH_ORGANIZATIONS.STRING_TAG1.eq(emailDomain)); 
+		List<EhOrganizationsRecord> records = query.fetch().map(new EhOrganizationRecordMapper());
+		List<Organization> organizations = records.stream().map((r) -> {
+			return ConvertHelper.convert(r, Organization.class);
+		}).collect(Collectors.toList());
+		 
+		if(organizations ==null || organizations.size()==0)
+			return null;
+		return organizations;
+	}
+	
 	@Override
 	public List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId) {
 		List<OrganizationCommunityRequest> results = new ArrayList<OrganizationCommunityRequest>();
@@ -2491,5 +2532,25 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return results;
+ 
+	}
+
+	@Override
+	public OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(email); 
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(currentNamespaceId));
+		condition = condition.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(condition);
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.asc());
+		query.fetch().map(r -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		if(null == result || result.size() == 0 )
+			return null;
+		return result.get(0);
 	}
 }

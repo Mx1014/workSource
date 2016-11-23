@@ -461,7 +461,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceCategories> listChildCategories(
-			Integer namespaceId, Long parentId, CategoryAdminStatus status) {
+			String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         List<ServiceAllianceCategories> result = new ArrayList<ServiceAllianceCategories>();
         
@@ -477,12 +477,20 @@ public class YellowPageProviderImpl implements YellowPageProvider {
             condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(status.getCode()));
 
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        
+        if(ownerId != null && ownerId != 0L)
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+
+    	if (!StringUtils.isEmpty(ownerType) )
+    		condition = condition.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+    	
         if(condition != null) {
         	query.addConditions(condition);
         }
         
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Query child categories, namespaceId=" + namespaceId + ", parentId=" + parentId + ", status=" + status);
+            LOGGER.debug("Query child categories, sql=" + query.getSQL());
+            LOGGER.debug("Query child categories, bindValues=" + query.getBindValues());
         }
 
         query.fetch().map((EhServiceAllianceCategoriesRecord record) -> {

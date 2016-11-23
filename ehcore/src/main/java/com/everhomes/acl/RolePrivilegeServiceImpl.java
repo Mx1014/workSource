@@ -1,164 +1,13 @@
 package com.everhomes.acl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import org.springframework.web.multipart.MultipartFile;
-
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationRoleMapProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.organization.OrganizationServiceImpl;
+import com.everhomes.organization.*;
 import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.acl.RoleConstants;
-import com.everhomes.rest.acl.WebMenuDTO;
-import com.everhomes.rest.acl.WebMenuPrivilegeDTO;
-import com.everhomes.rest.acl.WebMenuPrivilegeShowFlag;
-import com.everhomes.rest.acl.WebMenuScopeApplyPolicy;
-import com.everhomes.rest.acl.WebMenuType;
-import com.everhomes.rest.acl.admin.AddAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.CreateRolePrivilegeCommand;
-import com.everhomes.rest.acl.admin.DeleteAclRoleAssignmentCommand;
-import com.everhomes.rest.acl.admin.DeleteOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.DeleteRolePrivilegeCommand;
-import com.everhomes.rest.acl.admin.ExcelRoleExcelRoleAssignmentPersonnelCommand;
-import com.everhomes.rest.acl.admin.ListAclRolesCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeCommand;
-import com.everhomes.rest.acl.admin.ListWebMenuPrivilegeDTO;
-import com.everhomes.rest.acl.admin.ListWebMenuResponse;
-import com.everhomes.rest.acl.admin.QryRolePrivilegesCommand;
-import com.everhomes.rest.acl.admin.RoleDTO;
-import com.everhomes.rest.acl.admin.BatchAddTargetRoleCommand;
-import com.everhomes.rest.acl.admin.UpdateOrganizationAdminCommand;
-import com.everhomes.rest.acl.admin.UpdateRolePrivilegeCommand;
+import com.everhomes.rest.acl.*;
+import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
-import com.everhomes.rest.organization.CreateOrganizationCommand;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationPersonnelByRoleIdsCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.organization.SetAclRoleAssignmentCommand;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.user.User;
@@ -171,6 +20,21 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -742,7 +606,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     /**
      * 获取用户的权限列表
      * @param communityId
-     * @param organizationId
      * @param userId
      * @return
      */
@@ -1247,6 +1110,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				menus.add(webMenu);
 			}
 		}
+		menus.sort((o1, o2) -> o1.getSortNum() - o2.getSortNum());
     	return menus;
 	}
 	
