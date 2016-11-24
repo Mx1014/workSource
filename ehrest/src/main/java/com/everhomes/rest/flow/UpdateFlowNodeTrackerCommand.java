@@ -5,9 +5,9 @@ import com.everhomes.util.StringHelper;
 public class UpdateFlowNodeTrackerCommand {
 	private Long flowNodeId;
 	
-	UpdateFlowNodeSingleTracker enterTracker;
-	UpdateFlowNodeSingleTracker rejectTracker;
-	UpdateFlowNodeSingleTracker transferTracker;
+	FlowActionInfo enterTracker;
+	FlowActionInfo rejectTracker;
+	FlowActionInfo transferTracker;
 
 	public Long getFlowNodeId() {
 		return flowNodeId;
@@ -17,27 +17,27 @@ public class UpdateFlowNodeTrackerCommand {
 		this.flowNodeId = flowNodeId;
 	}
 
-	public UpdateFlowNodeSingleTracker getEnterTracker() {
+	public FlowActionInfo getEnterTracker() {
 		return enterTracker;
 	}
 
-	public void setEnterTracker(UpdateFlowNodeSingleTracker enterTracker) {
+	public void setEnterTracker(FlowActionInfo enterTracker) {
 		this.enterTracker = enterTracker;
 	}
 
-	public UpdateFlowNodeSingleTracker getRejectTracker() {
+	public FlowActionInfo getRejectTracker() {
 		return rejectTracker;
 	}
 
-	public void setRejectTracker(UpdateFlowNodeSingleTracker rejectTracker) {
+	public void setRejectTracker(FlowActionInfo rejectTracker) {
 		this.rejectTracker = rejectTracker;
 	}
 
-	public UpdateFlowNodeSingleTracker getTransferTracker() {
+	public FlowActionInfo getTransferTracker() {
 		return transferTracker;
 	}
 
-	public void setTransferTracker(UpdateFlowNodeSingleTracker transferTracker) {
+	public void setTransferTracker(FlowActionInfo transferTracker) {
 		this.transferTracker = transferTracker;
 	}
 

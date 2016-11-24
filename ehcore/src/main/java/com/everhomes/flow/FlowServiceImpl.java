@@ -463,18 +463,45 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminderCommand cmd) {
 		FlowNode flowNode = flowNodeProvider.getFlowNodeById(cmd.getFlowNodeId());
-		FlowAction action = null;
 		
 		if(cmd.getMessageAction() != null) {
-			action = createNodeAction(flowNode, cmd.getMessageAction(), FlowActionStepType.STEP_ENTER.getCode(), FlowUserType.PROCESSOR.getCode());
+			dbProvider.execute(new TransactionCallback<FlowAction>(){
+				@Override
+				public FlowAction doInTransaction(TransactionStatus arg0) {
+					return createNodeAction(flowNode, cmd.getMessageAction(), FlowActionType.MESSAGE.getCode()
+							, FlowActionStepType.STEP_ENTER.getCode(), null);
+				}
+			});
 		}
 		
-		return null;
+		if(cmd.getSmsAction() != null) {
+			dbProvider.execute((a) -> {
+				return createNodeAction(flowNode, cmd.getSmsAction(), FlowActionType.SMS.getCode()
+						, FlowActionStepType.STEP_ENTER.getCode(), null);
+			});
+		}
+		
+		if(cmd.getTickMessageAction() != null) {
+			dbProvider.execute((a) -> {
+				return createNodeAction(flowNode, cmd.getTickMessageAction(), FlowActionType.TICK_MESSAGE.getCode()
+						, FlowActionStepType.STEP_TIMEOUT.getCode(), null);
+			});
+		}
+		
+		if(cmd.getTickSMSAction() != null) {
+			dbProvider.execute((a) -> {
+				return createNodeAction(flowNode, cmd.getTickSMSAction(), FlowActionType.TICK_SMS.getCode()
+						, FlowActionStepType.STEP_TIMEOUT.getCode(), null);
+			});
+		}
+		
+		return getFlowNodeDetail(cmd.getFlowNodeId());
 	}
 	
-	private FlowAction createNodeAction(FlowNode flowNode, FlowActionInfo actionInfo, String flowStepType, String flowUserType) {
+	private FlowAction createNodeAction(FlowNode flowNode, FlowActionInfo actionInfo
+			, String actionType, String actionStepType, String flowStepType) {
 		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNode.getId(), FlowEntityType.FLOW_NODE.getCode()
-				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+				, actionType, actionStepType, flowStepType);
 		
 		CreateFlowUserSelectionCommand selectionCmd = actionInfo.getUserSelections();
 		boolean configUser = false;
@@ -486,17 +513,25 @@ public class FlowServiceImpl implements FlowService {
 			action = new FlowAction();
 			action.setFlowMainId(flowNode.getFlowMainId());
 			action.setFlowVersion(flowNode.getFlowVersion());
-			action.setActionStepType(FlowActionStepType.STEP_ENTER.getCode());
-			action.setActionType(FlowActionType.MESSAGE.getCode());
+			action.setActionStepType(actionStepType);
+			action.setActionType(actionType);
 			action.setBelongTo(flowNode.getId());
-			action.setBelongType(FlowEntityType.FLOW_NODE.getCode());
+			action.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
 			action.setNamespaceId(flowNode.getNamespaceId());
-			
+
+			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
+			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
+			action.setTrackerApplier(actionInfo.getTrackerApplier());
+			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
 			action.setStatus(FlowActionStatus.ENABLED.getCode());
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.createFlowAction(action);
 			
 		} else {
+			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
+			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
+			action.setTrackerApplier(actionInfo.getTrackerApplier());
+			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
 			action.setStatus(FlowActionStatus.ENABLED.getCode());
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
@@ -505,7 +540,6 @@ public class FlowServiceImpl implements FlowService {
 			if(configUser) {
 				flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
 			}
-			
 		}
 		
 		if(configUser) {
@@ -514,7 +548,7 @@ public class FlowServiceImpl implements FlowService {
 				FlowUserSelection userSel = new FlowUserSelection(); 
 				userSel.setBelongTo(action.getId());
 				userSel.setBelongEntity(FlowEntityType.FLOW_ACTION.getCode());
-				userSel.setBelongType(flowUserType);
+				userSel.setBelongType(FlowUserType.PROCESSOR.getCode());
 				userSel.setFlowMainId(action.getFlowMainId());
 				userSel.setFlowVersion(action.getFlowVersion());
 				userSel.setNamespaceId(action.getNamespaceId());
@@ -537,8 +571,29 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public FlowNodeDetailDTO updateFlowNodeTracker(
 			UpdateFlowNodeTrackerCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		FlowNode flowNode = flowNodeProvider.getFlowNodeById(cmd.getFlowNodeId());
+		if(cmd.getEnterTracker() != null) {
+			dbProvider.execute((a) -> {
+				return createNodeAction(flowNode, cmd.getEnterTracker(), FlowActionType.TRACK.getCode()
+						, FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.APPROVE_STEP.getCode());
+			});
+		}
+		
+		if(cmd.getRejectTracker() != null) {
+			dbProvider.execute((a) -> {
+				return createNodeAction(flowNode, cmd.getEnterTracker(), FlowActionType.TRACK.getCode()
+						, FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.REJECT_STEP.getCode());
+			});
+		}
+		
+		if(cmd.getTransferTracker() != null) {
+			dbProvider.execute((a) -> {
+				return createNodeAction(flowNode, cmd.getEnterTracker(), FlowActionType.TRACK.getCode()
+						, FlowActionStepType.STEP_LEAVE.getCode(), FlowStepType.TRANSFER_STEP.getCode());
+			});			
+		}
+		
+		return getFlowNodeDetail(cmd.getFlowNodeId());
 	}
 	
 	@Override
@@ -695,14 +750,28 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public ListFlowUserSelectionResponse listFlowUserSelection(
 			ListFlowUserSelectionCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
+		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+		resp.setSelections(selections);
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+		if(seles != null && seles.size() > 0) {
+			seles.stream().forEach((sel) -> {
+				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
+			});
+		}
+		
+		return resp;
 	}
 
 	@Override
 	public FlowUserSelectionDTO deleteUserSelection(
 			DeleteFlowUserSelectionCommand cmd) {
-		// TODO Auto-generated method stub
+		FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(cmd.getUserSelectionId());
+		if(sel != null) {
+			flowUserSelectionProvider.deleteFlowUserSelection(sel);
+			return ConvertHelper.convert(sel, FlowUserSelectionDTO.class);
+		}
+		
 		return null;
 	}
 

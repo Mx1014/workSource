@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 public class ListFlowUserSelectionCommand {
 	private Long belongTo;
 	private String flowEntityType;
-	private String flowUserBelongType;
+	private String flowUserType;
 	public Long getBelongTo() {
 		return belongTo;
 	}
@@ -18,13 +18,13 @@ public class ListFlowUserSelectionCommand {
 	public void setFlowEntityType(String flowEntityType) {
 		this.flowEntityType = flowEntityType;
 	}
-	public String getFlowUserBelongType() {
-		return flowUserBelongType;
+
+	public String getFlowUserType() {
+		return flowUserType;
 	}
-	public void setFlowUserBelongType(String flowUserBelongType) {
-		this.flowUserBelongType = flowUserBelongType;
+	public void setFlowUserType(String flowUserType) {
+		this.flowUserType = flowUserType;
 	}
-	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

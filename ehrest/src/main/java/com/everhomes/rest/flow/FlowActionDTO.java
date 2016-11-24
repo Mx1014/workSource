@@ -18,7 +18,7 @@ public class FlowActionDTO {
     private Timestamp     createTime;
     private Integer     flowVersion;
     private Long     belongTo;
-    private String     belongType;
+    private String     belongEntity;
     private Long reminderAfterMinute;
     private Long reminderTickMinute;
     private Long trackerProcessor;
@@ -107,12 +107,12 @@ public class FlowActionDTO {
 		this.belongTo = belongTo;
 	}
 
-	public String getBelongType() {
-		return belongType;
+	public String getBelongEntity() {
+		return belongEntity;
 	}
 
-	public void setBelongType(String belongType) {
-		this.belongType = belongType;
+	public void setBelongEntity(String belongEntity) {
+		this.belongEntity = belongEntity;
 	}
 
 	public Long getReminderAfterMinute() {
