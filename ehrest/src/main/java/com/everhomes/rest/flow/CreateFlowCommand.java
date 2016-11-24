@@ -17,6 +17,7 @@ public class CreateFlowCommand {
     private Long     ownerId;
     private String     ownerType;
     private String     moduleType;
+    private Long orgId;
     private Long     moduleId;
 	public String getFlowName() {
 		return flowName;
@@ -54,6 +55,13 @@ public class CreateFlowCommand {
 	}
 	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
+	}
+
+	public Long getOrgId() {
+		return orgId;
+	}
+	public void setOrgId(Long orgId) {
+		this.orgId = orgId;
 	}
 	@Override
     public String toString() {

@@ -333,4 +333,40 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ListOrganizationContactCommandResponse contactResp = organizationService.listOrganizationContacts(cmdContact);
     	Assert.assertTrue(contactResp.getMembers().size() > 0);
     }
+    
+    @Test
+    public void testFlowNodeDetail() {
+    	Long ownerId = 7l;
+    	Long moduleId = 8l;
+    	CreateFlowCommand cmd = new CreateFlowCommand();
+    	cmd.setFlowName("test-flow2");
+    	cmd.setModuleId(moduleId);
+    	cmd.setOwnerId(ownerId);
+    	cmd.setOwnerType(FlowOwnerType.ENTERPRISE.getCode());
+    	FlowDTO dto = flowService.createFlow(cmd);
+    	Assert.assertTrue(dto.getId() > 0);
+    	
+    	CreateFlowNodeCommand cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(1);
+    	cmdNode.setNodeName("test-node-001");
+    	FlowNodeDTO nodeDTO001 = flowService.createFlowNode(cmdNode);
+    	
+    	cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(2);
+    	cmdNode.setNodeName("test-node-002");
+    	FlowNodeDTO nodeDTO002 = flowService.createFlowNode(cmdNode);
+    	
+    	cmdNode = new CreateFlowNodeCommand();
+    	cmdNode.setFlowMainId(dto.getId());
+    	cmdNode.setNamespaceId(dto.getNamespaceId());
+    	cmdNode.setNodeLevel(4);
+    	cmdNode.setNodeName("test-node-004");
+    	FlowNodeDTO nodeDTO004 = flowService.createFlowNode(cmdNode);
+    	
+    	flowService.getFlowNodeDetail(nodeDTO001.getId());
+    }
 }

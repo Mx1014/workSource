@@ -14,6 +14,7 @@ import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -369,6 +370,14 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowButtonDetailDTO getFlowButtonDetail(Long flowButtonId);
+
+	/**
+	 * 获取某一个实体对应的顶级真实 Flow
+	 * @param entityId
+	 * @param entity
+	 * @return
+	 */
+	Flow getFlowByEntity(Long entityId, FlowEntityType entity);
 	
 	//TODO 日志信息分类：
 	

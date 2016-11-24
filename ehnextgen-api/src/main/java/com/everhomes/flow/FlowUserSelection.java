@@ -7,7 +7,7 @@ public class FlowUserSelection extends EhFlowUserSelections {
 	 * 
 	 */
 	private static final long serialVersionUID = 4326912846677972449L;
-
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
