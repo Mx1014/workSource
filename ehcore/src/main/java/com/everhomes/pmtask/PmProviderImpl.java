@@ -246,7 +246,7 @@ public class PmProviderImpl implements PmTaskProvider{
 //	@Cacheable(value="listPmTask",key="{#ownerType, #ownerId, #userId, #status}", unless="#result.size() == 0")
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status,
+	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status, Long taskCategoryId,
 			Long pageAnchor, Integer pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASKS.fields()).from(Tables.EH_PM_TASKS);
@@ -300,12 +300,12 @@ public class PmProviderImpl implements PmTaskProvider{
         	query.orderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
         	
     	}else{
+    		if(null != taskCategoryId)
+        		condition = condition.and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId));
     		condition = condition.and(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
     		query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
     	}
-        
-        
         
         if(null != pageSize)
         	query.limit(pageSize);

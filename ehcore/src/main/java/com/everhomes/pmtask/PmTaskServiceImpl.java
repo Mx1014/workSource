@@ -334,21 +334,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 			privileges.addAll(organizationPrivileges);
 			
 	    	if(privileges.contains(PrivilegeConstants.LISTALLTASK)){
-	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status,
+	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, null,
 	    				cmd.getPageAnchor(), cmd.getPageSize());
 			}else if(privileges.contains(PrivilegeConstants.LISTUSERTASK)){
 				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
 				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
-						cmd.getPageAnchor(), cmd.getPageSize());
+						null, cmd.getPageAnchor(), cmd.getPageSize());
 				else if(status.equals(PmTaskProcessStatus.PROCESSED.getCode()))
 					list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.PROCESSED.getCode(),
-							cmd.getPageAnchor(), cmd.getPageSize());
+							null, cmd.getPageAnchor(), cmd.getPageSize());
 			}else{
 				returnNoPrivileged(privileges, current.getId());
 			}
 	    	
 		}else{
-			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status,
+			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
 					cmd.getPageAnchor(), cmd.getPageSize());
 		}
 		
@@ -1127,10 +1127,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
-		List<Category> list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
-				cmd.getPageAnchor(), cmd.getPageSize());
-		
-		if(list.size() > 0){
+		List<Category> list = null;
+		if(null != cmd.getTaskCategoryId()) {
+			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
+			list = new ArrayList<Category>();
+			list.add(category);
+		}else{
+			list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
+					cmd.getPageAnchor(), cmd.getPageSize());
+		}
+				
+		int size = list.size();
+		if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
     			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId, null, r.getPath(),
@@ -1139,10 +1147,10 @@ public class PmTaskServiceImpl implements PmTaskService {
     					.collect(Collectors.toList()), dto);
     			return dto;
     		}).collect(Collectors.toList()));
-    		if(pageSize != null && list.size() != pageSize){
+    		if(pageSize != null && size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        		response.setNextPageAnchor(list.get(size-1).getId());
         	}
     	}
 		

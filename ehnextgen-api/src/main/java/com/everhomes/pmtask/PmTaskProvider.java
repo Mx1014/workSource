@@ -25,7 +25,7 @@ public interface PmTaskProvider {
 	
 	void createTaskLog(PmTaskLog pmTaskLog);
 	
-	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status,
+	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status, Long taskCategoryId,
 			Long pageAnchor, Integer pageSize);
 	
 	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Long pageAnchor, Integer pageSize);

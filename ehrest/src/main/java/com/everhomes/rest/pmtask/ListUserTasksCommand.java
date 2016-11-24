@@ -19,6 +19,7 @@ public class ListUserTasksCommand {
     private Long pageAnchor;
 	private Integer pageSize;
 	private Long organizationId;
+	private Long taskCategoryId;
 	
 	public String getOwnerType() {
 		return ownerType;
@@ -60,5 +61,11 @@ public class ListUserTasksCommand {
 	}
 	public void setOrganizationId(Long organizationId) {
 		this.organizationId = organizationId;
+	}
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
+	}
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
 	}
 }
