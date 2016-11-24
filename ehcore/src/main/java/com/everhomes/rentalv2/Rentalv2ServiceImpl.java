@@ -2032,6 +2032,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			Integer deleteCount = rentalProvider.deleteResourceCells(cmd.getRentalSiteId(), null, null);
 //			LOGGER.debug("delete count = " + String.valueOf(deleteCount)+ "  from rental site rules  ");
 			RentalResource rs = this.rentalProvider.getRentalSiteById(cmd.getRentalSiteId());
+			rs.setDiscountRatio(cmd.getDiscountRatio());
+			rs.setDiscountType(cmd.getDiscountType());
+			rs.setFullPrice(cmd.getFullPrice());
+			rs.setCutPrice(cmd.getCutPrice());
 			rs.setExclusiveFlag(cmd.getExclusiveFlag());
 			if(cmd.getExclusiveFlag().equals(NormalFlag.NEED.getCode())){
 				cmd.setUnit(1.0);
@@ -3451,14 +3455,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 								- rs.getRentalEndTime())))) {
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
-					} else {
+					}  else{
+						Long dayBeginTime = 0l; 
+						if(rsr.getAmorpm() != null){
+							if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode())){
+								dayBeginTime = 10*60*60*1000L; 
+							}else if(rsr.getAmorpm().equals(AmorpmFlag.PM.getCode())){
+								dayBeginTime = 15*60*60*1000L; 
+							}else if(rsr.getAmorpm().equals(AmorpmFlag.NIGHT.getCode())){
+								dayBeginTime = 20*60*60*1000L; 
+							}
+						}
 						if ((null!=rs.getRentalStartTime())&&(reserveTime.before(new java.util.Date(rsr
-								.getResourceRentalDate().getTime()
+								.getResourceRentalDate().getTime()+dayBeginTime
 								- rs.getRentalStartTime())))) {
 							dto.setStatus(SiteRuleStatus.EARLY.getCode());
 						}
 						if ((null!=rs.getRentalEndTime())&&(reserveTime.after(new java.util.Date(rsr
-								.getResourceRentalDate().getTime()
+								.getResourceRentalDate().getTime()+dayBeginTime
 								- rs.getRentalEndTime()))) ){
 							dto.setStatus(SiteRuleStatus.LATE.getCode());
 						}
@@ -4754,7 +4768,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void deleteResource(DeleteResourceCommand cmd) {
 
 		rentalProvider.deleteResourceCells(cmd.getId(), null, null); 
-		rentalProvider.deleteResource(cmd.getId());
+		RentalResource rs = rentalProvider.getRentalSiteById(cmd.getId());
+		if(rs == null )
+			return  ;
+		rs.setStatus(RentalSiteStatus.DISABLE.getCode());
+		rentalProvider.updateRentalSite(rs);
 		
 	}
 	
@@ -4790,7 +4808,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(LOGGER.isDebugEnabled()) {
             LOGGER.info("begin Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
                 + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
-        }
+        }	
 		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 
 		if(LOGGER.isDebugEnabled()) {

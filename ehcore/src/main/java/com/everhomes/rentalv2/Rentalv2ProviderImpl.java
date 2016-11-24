@@ -901,6 +901,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
         	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
 		if(null!= status&&status.size()!=0)
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.in(status));
+		else
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DISABLE.getCode()));
 		step.where(condition);
 
 		List<RentalResource> result = step
