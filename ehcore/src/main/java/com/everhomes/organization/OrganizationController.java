@@ -287,8 +287,8 @@ public class OrganizationController extends ControllerBase {
 			/**
 			 * 校验权限
 			 */
-			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-			resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
+//			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//			resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
 		}
 		ListPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
 		RestResponse response = new RestResponse(cmdResponse);
