@@ -6,6 +6,7 @@ CREATE TABLE `eh_flows` (
 
   `owner_id` BIGINT NOT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
+  `org_id` BIGINT NOT NULL DEFAULT 0,
   `module_id` BIGINT NOT NULL COMMENT 'the module id',
   `module_type` VARCHAR(64) NOT NULL,
 
