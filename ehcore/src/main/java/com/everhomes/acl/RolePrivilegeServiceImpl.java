@@ -1396,8 +1396,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
 			if(EntityType.USER ==EntityType.fromCode(serviceModuleAssignment.getTargetType())){
 				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(serviceModuleAssignment.getTargetId(), cmd.getOrganizationId());
-				OrganizationContactDTO contactDTO = ConvertHelper.convert(member,OrganizationContactDTO.class);
-				contactDTOs.add(contactDTO);
+				if(null != member){
+					OrganizationContactDTO contactDTO = ConvertHelper.convert(member,OrganizationContactDTO.class);
+					contactDTOs.add(contactDTO);
+				}
 			}
 		}
 		
