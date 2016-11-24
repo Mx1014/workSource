@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
  *  <li>targetType: 标准所属项目类型</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>reviewResult: 标准审阅结果 {@link com.everhomes.rest.equipment.ReviewResult}</li>
  * </ul>
  */
 public class ListQualityStandardsCommand {
@@ -28,6 +29,8 @@ public class ListQualityStandardsCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+	
+	private Byte reviewResult;
 	
 	public Long getOwnerId() {
 		return ownerId;
@@ -75,6 +78,14 @@ public class ListQualityStandardsCommand {
 
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
+	}
+
+	public Byte getReviewResult() {
+		return reviewResult;
+	}
+
+	public void setReviewResult(Byte reviewResult) {
+		this.reviewResult = reviewResult;
 	}
 
 	@Override

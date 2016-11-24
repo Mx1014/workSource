@@ -434,7 +434,8 @@ public class QualityServiceImpl implements QualityService {
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<QualityInspectionStandards> standards = qualityProvider.listQualityInspectionStandards(locator, pageSize+1, ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId());
+        List<QualityInspectionStandards> standards = qualityProvider.listQualityInspectionStandards(locator, pageSize+1, 
+        		ownerId, ownerType, cmd.getTargetType(), cmd.getTargetId(), cmd.getReviewResult());
 		
 		this.qualityProvider.populateStandardsGroups(standards);
 		this.qualityProvider.populateStandardsSpecifications(standards);

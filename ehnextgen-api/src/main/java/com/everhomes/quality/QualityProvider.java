@@ -30,7 +30,7 @@ public interface QualityProvider {
 	void updateQualityInspectionStandards(QualityInspectionStandards standard);
 	QualityInspectionStandards findStandardById(Long id);
 	List<QualityInspectionStandards> findStandardsByCategoryId(Long categoryId);
-	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId);
+	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult);
 	
 	void createQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
 	void updateQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);

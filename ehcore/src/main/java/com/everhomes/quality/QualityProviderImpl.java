@@ -85,6 +85,7 @@ import java.util.Map;
 
 
 
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -99,6 +100,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -454,7 +456,8 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId) {
+	public List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, 
+			Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandards.class, locator.getEntityId()));
 		List<QualityInspectionStandards> standards = new ArrayList<QualityInspectionStandards>();
@@ -475,6 +478,10 @@ public class QualityProviderImpl implements QualityProvider {
         }
 		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.TARGET_TYPE.eq(targetType));    	
+		}
+		
+		if(reviewResult != null) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.REVIEW_RESULT.eq(reviewResult));
 		}
 		
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.ne(QualityStandardStatus.INACTIVE.getCode()));
