@@ -115,8 +115,10 @@ public interface OrganizationProvider {
 	boolean updateOrganizationMemberByIds(List<Long> ids, Organization org);
 	
 	List<Organization> listOrganizationByGroupTypes(String superiorPath, List<String> groupTypes);
-	
+
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes);
+
+	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks);
 	
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 	

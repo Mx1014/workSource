@@ -1666,9 +1666,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		return result;
 	}
-	
 	@Override
 	public List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes) {
+		return this.listOrganizationByGroupTypes(parentId, groupTypes, null);
+	}
+
+	@Override
+	public List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
 
 		List<Organization> result  = new ArrayList<Organization>();
@@ -1679,7 +1683,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
-		
+
+		if(!StringUtils.isEmpty(keyworks)){
+			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.like(keyworks + "%"));
+		}
+
 		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
 		
 		query.fetch().map((r) -> {

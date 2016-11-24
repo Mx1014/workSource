@@ -5836,13 +5836,18 @@ System.out.println();
 		res.setOrganizationMenu(dto);
 		return res;
 	}
-	
+
+	@Override
+	public ListOrganizationsCommandResponse listChildrenOrganizations(Long id, List<String> groupTypes) {
+		return this.listChildrenOrganizations(id, groupTypes, null);
+	}
+
 	@Override
 	public ListOrganizationsCommandResponse listChildrenOrganizations(Long id,
-			List<String> groupTypes) {
+			List<String> groupTypes, String keywords) {
 		ListOrganizationsCommandResponse res = new ListOrganizationsCommandResponse();
 		Organization org = this.checkOrganization(id);
-		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getId(), groupTypes);
+		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getId(), groupTypes, keywords);
 		if(0 == orgs.size()){
 			return res;
 		}

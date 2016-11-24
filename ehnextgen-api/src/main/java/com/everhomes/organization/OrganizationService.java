@@ -156,9 +156,11 @@ public interface OrganizationService {
 	
 	ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id,
 			List<String> groupTypes);
-	
+
+	ListOrganizationsCommandResponse listChildrenOrganizations(Long id, List<String> groupTypes);
+
 	ListOrganizationsCommandResponse listChildrenOrganizations(Long id,
-			List<String> groupTypes);
+			List<String> groupTypes, String keywords);
 	
 	
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
