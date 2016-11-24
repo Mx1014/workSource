@@ -19,18 +19,26 @@ import org.springframework.context.annotation.Configuration;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
+import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.FlowActionInfo;
+import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
+import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowNodePriority;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
@@ -335,9 +343,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     }
     
     @Test
-    public void testFlowNodeDetail() {
-    	Long ownerId = 7l;
-    	Long moduleId = 8l;
+    public void testFlowButtonDetail() {
+    	Long ownerId = 9l;
+    	Long moduleId = 10l;
     	CreateFlowCommand cmd = new CreateFlowCommand();
     	cmd.setFlowName("test-flow2");
     	cmd.setModuleId(moduleId);
@@ -353,20 +361,84 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	cmdNode.setNodeName("test-node-001");
     	FlowNodeDTO nodeDTO001 = flowService.createFlowNode(cmdNode);
     	
-    	cmdNode = new CreateFlowNodeCommand();
-    	cmdNode.setFlowMainId(dto.getId());
-    	cmdNode.setNamespaceId(dto.getNamespaceId());
-    	cmdNode.setNodeLevel(2);
-    	cmdNode.setNodeName("test-node-002");
-    	FlowNodeDTO nodeDTO002 = flowService.createFlowNode(cmdNode);
+    	FlowNodeDetailDTO detail = flowService.getFlowNodeDetail(nodeDTO001.getId());
+    	Assert.assertTrue(detail.getTracker().getEnterTracker() == null);
+    	Assert.assertTrue(detail.getReminder().getMessageAction() == null);
+    	Assert.assertTrue(detail.getProcessors().size() == 0);
     	
-    	cmdNode = new CreateFlowNodeCommand();
-    	cmdNode.setFlowMainId(dto.getId());
-    	cmdNode.setNamespaceId(dto.getNamespaceId());
-    	cmdNode.setNodeLevel(4);
-    	cmdNode.setNodeName("test-node-004");
-    	FlowNodeDTO nodeDTO004 = flowService.createFlowNode(cmdNode);
+    	//got a button
+    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(nodeDTO001.getId(), nodeDTO001.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	
-    	flowService.getFlowNodeDetail(nodeDTO001.getId());
+    	FlowButtonDetailDTO btnDetail1 = flowService.getFlowButtonDetail(flowButton1.getId());
+    	Assert.assertTrue(btnDetail1.getPushMessage() == null);
+    	
+    	//try button update
+    	UpdateFlowButtonCommand upBtnCmd = new UpdateFlowButtonCommand();
+    	upBtnCmd.setButtonName("update-node-001");
+    	upBtnCmd.setDescription("test desc");
+    	upBtnCmd.setFlowButtonId(flowButton1.getId());
+    	FlowActionInfo actionInfo = new FlowActionInfo();
+    	actionInfo.setRenderText("test render text");
+    	
+    	CreateFlowUserSelectionCommand us = new CreateFlowUserSelectionCommand();
+    	List<FlowSingleUserSelectionCommand> sels = new ArrayList<FlowSingleUserSelectionCommand>();
+    	us.setSelections(sels);
+    	
+    	FlowSingleUserSelectionCommand selCmd = new FlowSingleUserSelectionCommand();
+    	selCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
+    	selCmd.setSourceIdA(11l);
+    	selCmd.setSourceTypeA(FlowEntityType.FLOW_USER.getCode());
+    	
+    	selCmd = new FlowSingleUserSelectionCommand();
+    	selCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
+    	selCmd.setSourceIdA(12l);
+    	selCmd.setSourceTypeA(FlowEntityType.FLOW_USER.getCode());
+    	sels.add(selCmd);
+    	
+    	actionInfo.setUserSelections(us);
+    	upBtnCmd.setMessageAction(actionInfo);
+    	
+    	FlowActionInfo actionInfo2 = new FlowActionInfo();
+    	actionInfo2.setRenderText("test render text2");
+    	CreateFlowUserSelectionCommand us2 = new CreateFlowUserSelectionCommand();
+    	List<FlowSingleUserSelectionCommand> sels2 = new ArrayList<FlowSingleUserSelectionCommand>();
+    	us2.setSelections(sels2);
+    	
+    	selCmd = new FlowSingleUserSelectionCommand();
+    	selCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
+    	selCmd.setSourceIdA(13l);
+    	selCmd.setSourceTypeA(FlowEntityType.FLOW_USER.getCode());
+    	
+    	selCmd = new FlowSingleUserSelectionCommand();
+    	selCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
+    	selCmd.setSourceIdA(14l);
+    	selCmd.setSourceTypeA(FlowEntityType.FLOW_USER.getCode());
+    	sels2.add(selCmd);
+    	
+    	actionInfo2.setUserSelections(us2);
+    	upBtnCmd.setSmsAction(actionInfo2);
+    	
+    	List<Long> scriptIds = new ArrayList<Long>();
+    	scriptIds.add(1l);
+    	scriptIds.add(2l);
+    	scriptIds.add(3l);
+    	upBtnCmd.setEnterScriptIds(scriptIds);
+    	
+    	FlowButtonDetailDTO btnDetail2 = flowService.updateFlowButton(upBtnCmd);
+    	Assert.assertTrue(btnDetail2.getPushMessage() != null);
+    	Assert.assertTrue(btnDetail2.getPushSms() != null);
+    	Assert.assertTrue(btnDetail2.getEnterScripts().size() == 3);
+    	
+    	flowService.deleteFlowNode(nodeDTO001.getId());
+    	flowService.deleteFlow(dto.getId());
+    }
+    
+    @Test
+    public void testFlowButtonDetail2() {
+    	Long flowButtonId = 252l;
+    	FlowButtonDetailDTO btnDetail2 = flowService.getFlowButtonDetail(flowButtonId);
+    	Assert.assertTrue(btnDetail2.getPushMessage() != null);
+    	Assert.assertTrue(btnDetail2.getPushSms() != null);
+    	Assert.assertTrue(btnDetail2.getEnterScripts().size() == 3);
     }
 }

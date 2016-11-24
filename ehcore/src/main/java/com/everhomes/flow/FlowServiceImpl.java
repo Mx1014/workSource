@@ -662,6 +662,7 @@ public class FlowServiceImpl implements FlowService {
 		userSel.setSourceIdB(selCmd.getSourceIdB());
 		userSel.setSourceTypeA(selCmd.getSourceTypeA());
 		userSel.setSourceTypeB(selCmd.getSourceTypeB());
+		userSel.setStatus(FlowStatusType.VALID.getCode());
 		flowUserSelectionProvider.createFlowUserSelection(userSel);		
 	}
 
@@ -803,8 +804,8 @@ public class FlowServiceImpl implements FlowService {
 				action.setFlowVersion(flowButton.getFlowVersion());
 				action.setActionStepType(FlowActionStepType.STEP_ENTER.getCode());
 				action.setActionType(FlowActionType.ENTER_SCRIPT.getCode());
-				action.setBelongTo(flowButton.getId());
-				action.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+				action.setBelongTo(flowButton.getId());//TODO fixme
+				action.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
 				action.setNamespaceId(flowButton.getNamespaceId());
 				action.setStatus(FlowActionStatus.ENABLED.getCode());
 				action.setScriptId(scriptId);
@@ -848,7 +849,7 @@ public class FlowServiceImpl implements FlowService {
 			action.setActionStepType(actionStepType);
 			action.setActionType(actionType);
 			action.setBelongTo(flowButton.getId());
-			action.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+			action.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
 			action.setNamespaceId(flowButton.getNamespaceId());
 
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
