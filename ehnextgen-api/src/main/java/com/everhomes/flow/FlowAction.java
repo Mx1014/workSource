@@ -7,7 +7,15 @@ public class FlowAction extends EhFlowActions {
 	 * 
 	 */
 	private static final long serialVersionUID = -3805976892366556884L;
-	
+
+	public Long getScriptId() {
+		return FlowActionCustomField.SCRIPT_ID.getIntegralValue(this);
+	}
+
+	public void setScriptId(Long scriptId) {
+		FlowActionCustomField.REMINDER_AFTER_MINUTE.setIntegralValue(this, scriptId);
+	}
+
 	public Long getReminderAfterMinute() {
 		return FlowActionCustomField.REMINDER_AFTER_MINUTE.getIntegralValue(this);
 	}

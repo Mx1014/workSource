@@ -21,4 +21,7 @@ public interface FlowActionProvider {
 	FlowAction findFlowActionByBelong(Long belong, String entityType,
 			String actionType, String actionStepType, String flowStepType);
 
+	List<FlowAction> findFlowActionsByBelong(Long belong, String entityType,
+			String actionType, String actionStepType, String flowStepType);
+
 }

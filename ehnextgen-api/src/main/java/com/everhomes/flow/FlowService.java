@@ -25,6 +25,7 @@ import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -361,6 +362,13 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowNodeDetailDTO getFlowNodeDetail(Long flowNodeId);
+
+	/**
+	 * 获取 FlowButton 的详细信息
+	 * @param cmd
+	 * @return
+	 */
+	FlowButtonDetailDTO getFlowButtonDetail(Long flowButtonId);
 	
 	//TODO 日志信息分类：
 	

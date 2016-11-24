@@ -16,8 +16,8 @@ public class UpdateFlowButtonCommand {
 	private FlowActionInfo messageAction;
 	private FlowActionInfo smsAction;
 	
-	@ItemType(String.class)
-	private List<String> flowScripts;
+	@ItemType(Long.class)
+	private List<Long> enterScriptIds;
 
 	public Long getFlowButtonId() {
 		return flowButtonId;
@@ -67,11 +67,12 @@ public class UpdateFlowButtonCommand {
 	public void setSmsAction(FlowActionInfo smsAction) {
 		this.smsAction = smsAction;
 	}
-	public List<String> getFlowScripts() {
-		return flowScripts;
+
+	public List<Long> getEnterScriptIds() {
+		return enterScriptIds;
 	}
-	public void setFlowScripts(List<String> flowScripts) {
-		this.flowScripts = flowScripts;
+	public void setEnterScriptIds(List<Long> enterScriptIds) {
+		this.enterScriptIds = enterScriptIds;
 	}
 	@Override
     public String toString() {

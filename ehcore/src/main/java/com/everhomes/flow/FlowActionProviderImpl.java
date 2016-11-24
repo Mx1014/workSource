@@ -143,4 +143,25 @@ public class FlowActionProviderImpl implements FlowActionProvider {
     	
     	return null;
     }
+    
+    @Override
+    public List<FlowAction> findFlowActionsByBelong(Long belong, String entityType, String actionType, String actionStepType, String flowStepType) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowActions(locator, 100, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_TO.eq(belong));
+				query.addConditions(Tables.EH_FLOW_ACTIONS.BELONG_ENTITY.eq(entityType));
+				query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_TYPE.eq(actionType));
+				query.addConditions(Tables.EH_FLOW_ACTIONS.ACTION_STEP_TYPE.eq(actionStepType));
+				if(flowStepType != null) {
+					query.addConditions(Tables.EH_FLOW_ACTIONS.FLOW_STEP_TYPE.eq(flowStepType));	
+				}
+				query.addConditions(Tables.EH_FLOW_ACTIONS.STATUS.ne(FlowActionStatus.INVALID.getCode()));
+				return query;
+			}
+    	});
+    }
 }

@@ -21,12 +21,14 @@ import com.everhomes.rest.flow.DeleteFlowNodeCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.GetFlowNodeDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -291,12 +293,26 @@ public class FlowAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/flow/getFlowButtonDetail</b>
+     * <p> 删除用户选择项 </p>
+     * @return
+     */
+    @RequestMapping("getFlowButtonDetail")
+    @RestReturn(value=FlowButtonDetailDTO.class)
+    public RestResponse getFlowButtonDetail(@Valid GetFlowButtonDetailByIdCommand cmd) {
+        RestResponse response = new RestResponse(flowService.getFlowButtonDetail(cmd.getFlowButtonId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/flow/updateFlowButton</b>
      * <p> 修改节点按钮信息 </p>
      * @return
      */
     @RequestMapping("updateFlowButton")
-    @RestReturn(value=FlowButtonDTO.class)
+    @RestReturn(value=FlowButtonDetailDTO.class)
     public RestResponse updateFlowButton(@Valid UpdateFlowButtonCommand cmd) {
         RestResponse response = new RestResponse(flowService.updateFlowButton(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

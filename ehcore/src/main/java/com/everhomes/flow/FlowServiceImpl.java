@@ -55,6 +55,7 @@ import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -596,6 +597,214 @@ public class FlowServiceImpl implements FlowService {
 		
 		return getFlowNodeDetail(cmd.getFlowNodeId());
 	}
+
+	@Override
+	public FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd) {
+		FlowNode flowNode = new FlowNode();
+		flowNode.setId(cmd.getFlowNodeId());
+		flowNode.setNodeName(cmd.getFlowNodeName());
+		flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
+		flowNode.setAutoStepType(cmd.getAutoStepType());
+		flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+		flowNodeProvider.updateFlowNode(flowNode);
+		
+		return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
+	}
+
+	@Override
+	public ListFlowUserSelectionResponse createFlowUserSelection(
+			CreateFlowUserSelectionCommand cmd) {
+		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
+		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+		resp.setSelections(selections);
+		
+		List<FlowSingleUserSelectionCommand> cmds = cmd.getSelections();
+		if(cmds != null && cmds.size() > 0) {
+			for(FlowSingleUserSelectionCommand sCmd : cmds) {
+				FlowUserSelection sel = ConvertHelper.convert(sCmd, FlowUserSelection.class);
+				sel.setBelongEntity(cmd.getFlowEntityType());
+				sel.setBelongTo(cmd.getBelongTo());
+				sel.setBelongType(cmd.getFlowUserType());	
+				flowUserSelectionProvider.createFlowUserSelection(sel);
+			}
+		}
+		
+		return resp;
+	}
+
+	@Override
+	public ListFlowUserSelectionResponse listFlowUserSelection(
+			ListFlowUserSelectionCommand cmd) {
+		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
+		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+		resp.setSelections(selections);
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+		if(seles != null && seles.size() > 0) {
+			seles.stream().forEach((sel) -> {
+				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
+			});
+		}
+		
+		return resp;
+	}
+
+	@Override
+	public FlowUserSelectionDTO deleteUserSelection(
+			DeleteFlowUserSelectionCommand cmd) {
+		FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(cmd.getUserSelectionId());
+		if(sel != null) {
+			flowUserSelectionProvider.deleteFlowUserSelection(sel);
+			return ConvertHelper.convert(sel, FlowUserSelectionDTO.class);
+		}
+		
+		return null;
+	}
+
+	@Override
+	public FlowButtonDetailDTO updateFlowButton(UpdateFlowButtonCommand cmd) {
+		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
+		flowButton.setButtonName(cmd.getButtonName());
+		flowButton.setDescription(cmd.getDescription());
+		flowButton.setGotoNodeId(cmd.getGotoNodeId());
+		flowButton.setNeedSubject(cmd.getNeedSubject());
+		flowButton.setNeedProcessor(cmd.getNeedProcessor());
+		flowButtonProvider.updateFlowButton(flowButton);
+		
+		if(null != cmd.getMessageAction()) {
+			dbProvider.execute((a) -> {
+				return createButtonAction(flowButton, cmd.getMessageAction(), FlowActionType.MESSAGE.getCode()
+						, FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+			});		
+		}
+		
+		if(null != cmd.getSmsAction()) {
+			dbProvider.execute((a) -> {
+				return createButtonAction(flowButton, cmd.getMessageAction(), FlowActionType.SMS.getCode()
+						, FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+			});	
+		}
+		
+		if(null != cmd.getEnterScriptIds()) {
+			for(Long scriptId : cmd.getEnterScriptIds()) {
+				FlowAction action = new FlowAction();
+				action.setFlowMainId(flowButton.getFlowMainId());
+				action.setFlowVersion(flowButton.getFlowVersion());
+				action.setActionStepType(FlowActionStepType.STEP_ENTER.getCode());
+				action.setActionType(FlowActionType.ENTER_SCRIPT.getCode());
+				action.setBelongTo(flowButton.getId());
+				action.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+				action.setNamespaceId(flowButton.getNamespaceId());
+				action.setStatus(FlowActionStatus.ENABLED.getCode());
+				action.setScriptId(scriptId);
+				flowActionProvider.createFlowAction(action);
+			}
+		}
+		
+		return getFlowButtonDetail(cmd.getFlowButtonId());
+	}
+
+	@Override
+	public FlowButtonDTO disableFlowButton(DisableFlowButtonCommand cmd) {
+		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
+		if(flowButton != null) {
+			flowButton.setStatus(FlowButtonStatus.DISABLED.getCode());
+			flowButtonProvider.updateFlowButton(flowButton);
+			return ConvertHelper.convert(flowButton, FlowButtonDTO.class);
+		}
+		
+		return null;
+	}
+	
+	private FlowAction createButtonAction(FlowButton flowButton, FlowActionInfo actionInfo
+			, String actionType, String actionStepType, String flowStepType) {
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
+				, actionType, actionStepType, flowStepType);
+		
+		CreateFlowUserSelectionCommand selectionCmd = actionInfo.getUserSelections();
+		boolean configUser = false;
+		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
+			configUser = true;
+		}
+		
+		if(action == null) {
+			action = new FlowAction();
+			action.setFlowMainId(flowButton.getFlowMainId());
+			action.setFlowVersion(flowButton.getFlowVersion());
+			action.setActionStepType(actionStepType);
+			action.setActionType(actionType);
+			action.setBelongTo(flowButton.getId());
+			action.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+			action.setNamespaceId(flowButton.getNamespaceId());
+
+			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
+			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
+			action.setTrackerApplier(actionInfo.getTrackerApplier());
+			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			action.setRenderText(actionInfo.getRenderText());
+			flowActionProvider.createFlowAction(action);
+			
+		} else {
+			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
+			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
+			action.setTrackerApplier(actionInfo.getTrackerApplier());
+			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			action.setRenderText(actionInfo.getRenderText());
+			flowActionProvider.updateFlowAction(action);
+			
+			//delete all old selections
+			if(configUser) {
+				flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
+			}
+		}
+		
+		if(configUser) {
+			List<FlowSingleUserSelectionCommand> seles = selectionCmd.getSelections();
+			for(FlowSingleUserSelectionCommand selCmd : seles) {
+				FlowUserSelection userSel = new FlowUserSelection(); 
+				userSel.setBelongTo(action.getId());
+				userSel.setBelongEntity(FlowEntityType.FLOW_ACTION.getCode());
+				userSel.setBelongType(FlowUserType.PROCESSOR.getCode());
+				userSel.setFlowMainId(action.getFlowMainId());
+				userSel.setFlowVersion(action.getFlowVersion());
+				userSel.setNamespaceId(action.getNamespaceId());
+				createUserSelection(userSel, selCmd);
+			}
+		}
+		
+		return action;
+	}
+	
+	@Override
+	public FlowButtonDetailDTO getFlowButtonDetail(Long flowButtonId) {
+		FlowButton flowButton = flowButtonProvider.getFlowButtonById(flowButtonId);
+		FlowButtonDetailDTO dto = ConvertHelper.convert(flowButton, FlowButtonDetailDTO.class);
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+		if(action != null) {
+			dto.setPushMessage(actionToDTO(action));	
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+		if(action != null) {
+			dto.setPushSms(actionToDTO(action));
+		}
+		
+		List<FlowAction> flowActions = flowActionProvider.findFlowActionsByBelong(flowButtonId, FlowEntityType.FLOW_BUTTON.getCode()
+				, FlowActionType.ENTER_SCRIPT.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+		List<FlowActionDTO> actionDTOS = new ArrayList<FlowActionDTO>();
+		if(flowActions != null) {
+			flowActions.stream().forEach((fa) -> {
+				actionDTOS.add(ConvertHelper.convert(fa, FlowActionDTO.class));	
+			});
+			
+			dto.setEnterScripts(actionDTOS);
+		}
+		
+		return dto;
+	}
 	
 	@Override
 	public Long createNodeEnterAction(FlowNode flowNode, FlowAction flowAction) {
@@ -725,95 +934,6 @@ public class FlowServiceImpl implements FlowService {
 	public List<FlowEventLog> findFlowEventDetail(FlowCase flowCase,
 			FlowNode flowNode) {
 		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd) {
-		FlowNode flowNode = new FlowNode();
-		flowNode.setId(cmd.getFlowNodeId());
-		flowNode.setNodeName(cmd.getFlowNodeName());
-		flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
-		flowNode.setAutoStepType(cmd.getAutoStepType());
-		flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
-		flowNodeProvider.updateFlowNode(flowNode);
-		
-		return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
-	}
-
-	@Override
-	public ListFlowUserSelectionResponse createFlowUserSelection(
-			CreateFlowUserSelectionCommand cmd) {
-		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
-		resp.setSelections(selections);
-		
-		List<FlowSingleUserSelectionCommand> cmds = cmd.getSelections();
-		if(cmds != null && cmds.size() > 0) {
-			for(FlowSingleUserSelectionCommand sCmd : cmds) {
-				FlowUserSelection sel = ConvertHelper.convert(sCmd, FlowUserSelection.class);
-				sel.setBelongEntity(cmd.getFlowEntityType());
-				sel.setBelongTo(cmd.getBelongTo());
-				sel.setBelongType(cmd.getFlowUserType());	
-				flowUserSelectionProvider.createFlowUserSelection(sel);
-			}
-		}
-		
-		return resp;
-	}
-
-	@Override
-	public ListFlowUserSelectionResponse listFlowUserSelection(
-			ListFlowUserSelectionCommand cmd) {
-		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
-		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
-		resp.setSelections(selections);
-		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
-		if(seles != null && seles.size() > 0) {
-			seles.stream().forEach((sel) -> {
-				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
-			});
-		}
-		
-		return resp;
-	}
-
-	@Override
-	public FlowUserSelectionDTO deleteUserSelection(
-			DeleteFlowUserSelectionCommand cmd) {
-		FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(cmd.getUserSelectionId());
-		if(sel != null) {
-			flowUserSelectionProvider.deleteFlowUserSelection(sel);
-			return ConvertHelper.convert(sel, FlowUserSelectionDTO.class);
-		}
-		
-		return null;
-	}
-
-	@Override
-	public FlowButtonDetailDTO updateFlowButton(UpdateFlowButtonCommand cmd) {
-		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
-		flowButton.setButtonName(cmd.getButtonName());
-		flowButton.setDescription(cmd.getDescription());
-//		flowButton.setGotoNodeId(cmd.getGotoNodeId());
-		flowButton.setNeedSubject(cmd.getNeedSubject());
-		flowButton.setNeedProcessor(cmd.getNeedProcessor());
-		flowButtonProvider.updateFlowButton(flowButton);
-		
-		FlowButtonDetailDTO dto = ConvertHelper.convert(flowButton, FlowButtonDetailDTO.class);
-		
-		return dto;
-	}
-
-	@Override
-	public FlowButtonDTO disableFlowButton(DisableFlowButtonCommand cmd) {
-		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
-		if(flowButton != null) {
-			flowButton.setStatus(FlowButtonStatus.DISABLED.getCode());
-			flowButtonProvider.updateFlowButton(flowButton);
-			return ConvertHelper.convert(flowButton, FlowButtonDTO.class);
-		}
-		
 		return null;
 	}
 
