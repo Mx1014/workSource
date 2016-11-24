@@ -48,6 +48,16 @@ CREATE TABLE `eh_terminal_app_version_statistics` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_terminal_statistics_tasks` (
+  `id` BIGINT NOT NULL,
+  `task_no` VARCHAR(20) NOT NULL,
+  `status` TINYINT DEFAULT NULL COMMENT '10 生成日统计数据 20 生成时统计数据 30 生成版本统计数据 100 完成',
+  `update_Time` DATETIME DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `task_no` (`task_no`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
 
 ALTER TABLE `eh_user_activities` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_user_activities` ADD COLUMN `version_realm` varchar(128) DEFAULT NULL;
