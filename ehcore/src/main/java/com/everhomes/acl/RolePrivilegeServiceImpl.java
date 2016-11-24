@@ -1637,9 +1637,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}else{
 					ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
 					dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
-					dtos.add(dto);
 				}
-
+				dtos.add(dto);
 				key = assignment.getOwnerType() + assignment.getOwnerId(); // 拼装Key
 			}
 		}
