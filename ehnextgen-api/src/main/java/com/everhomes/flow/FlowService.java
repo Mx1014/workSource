@@ -10,6 +10,7 @@ import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
@@ -260,7 +261,7 @@ public interface FlowService {
 	 * @param cmd
 	 * @return
 	 */
-	FlowUserSelectionDTO createFlowUserSelection(CreateFlowUserSelectionCommand cmd);
+	ListFlowUserSelectionResponse createFlowUserSelection(CreateFlowUserSelectionCommand cmd);
 
 	/**
 	 * 获取某一个项目下的所有用户选择实体
@@ -281,7 +282,7 @@ public interface FlowService {
 	 * @param cmd
 	 * @return
 	 */
-	FlowButtonDTO updateFlowButton(UpdateFlowButtonCommand cmd);
+	FlowButtonDetailDTO updateFlowButton(UpdateFlowButtonCommand cmd);
 
 	/**
 	 * 禁用按钮

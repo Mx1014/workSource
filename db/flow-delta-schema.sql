@@ -86,7 +86,7 @@ CREATE TABLE `eh_flow_buttons` (
     `flow_step_type` VARCHAR(64) COMMENT 'no_step, start_step, approve_step, reject_step, transfer_step, comment_step, end_step, notify_step',
     `flow_user_type` VARCHAR(64) COMMENT 'applier, processor',
     `goto_level` INTEGER NOT NULL DEFAULT 0,
-    `goto_node_id` INTEGER NOT NULL DEFAULT 0,
+    `goto_node_id` BIGINT NOT NULL DEFAULT 0,
     `need_subject` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need subject for this step, 1: need subject for this step',
     `need_processor` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need processor, 1: need only one processor',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',

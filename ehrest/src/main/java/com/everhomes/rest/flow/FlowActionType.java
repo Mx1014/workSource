@@ -1,7 +1,7 @@
 package com.everhomes.rest.flow;
 
 public enum FlowActionType {
-	MESSAGE("message"), SMS("sms"), TICK_MESSAGE("tick_message"), TICK_SMS("tick_sms"), TRACK("track");
+	MESSAGE("message"), SMS("sms"), TICK_MESSAGE("tick_message"), TICK_SMS("tick_sms"), TRACK("track"), ENTER_SCRIPT("enter_script");
 	
 	private String code;
     private FlowActionType(String code) {

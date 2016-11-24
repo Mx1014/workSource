@@ -6,10 +6,9 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class UpdateFlowButtonCommand {
-	private Long flowNodeId;
+	private Long flowButtonId;
 	private String buttonName;
 	private String description;
-	private String flowStepType;
 	private Long gotoNodeId;
 	private Byte needSubject;
 	private Byte needProcessor;
@@ -19,12 +18,12 @@ public class UpdateFlowButtonCommand {
 	
 	@ItemType(String.class)
 	private List<String> flowScripts;
-	
-	public Long getFlowNodeId() {
-		return flowNodeId;
+
+	public Long getFlowButtonId() {
+		return flowButtonId;
 	}
-	public void setFlowNodeId(Long flowNodeId) {
-		this.flowNodeId = flowNodeId;
+	public void setFlowButtonId(Long flowButtonId) {
+		this.flowButtonId = flowButtonId;
 	}
 	public String getButtonName() {
 		return buttonName;
@@ -37,12 +36,6 @@ public class UpdateFlowButtonCommand {
 	}
 	public void setDescription(String description) {
 		this.description = description;
-	}
-	public String getFlowStepType() {
-		return flowStepType;
-	}
-	public void setFlowStepType(String flowStepType) {
-		this.flowStepType = flowStepType;
 	}
 	public Long getGotoNodeId() {
 		return gotoNodeId;

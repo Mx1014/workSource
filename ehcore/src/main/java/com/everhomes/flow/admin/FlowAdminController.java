@@ -212,7 +212,7 @@ public class FlowAdminController extends ControllerBase {
      * @return
      */
     @RequestMapping("createFlowUserSelection")
-    @RestReturn(value=FlowUserSelectionDTO.class)
+    @RestReturn(value=ListFlowUserSelectionResponse.class)
     public RestResponse createFlowUserSelection(@Valid CreateFlowUserSelectionCommand cmd) {
         RestResponse response = new RestResponse(flowService.createFlowUserSelection(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

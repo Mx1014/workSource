@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 public class CreateFlowUserSelectionCommand {
 	private Long belongTo;
-	private String flowUserBelongType;
+	private String flowUserType;
 	private String flowEntityType;
 	
 	@ItemType(FlowSingleUserSelectionCommand.class)
@@ -21,12 +21,12 @@ public class CreateFlowUserSelectionCommand {
 		this.belongTo = belongTo;
 	}
 
-	public String getFlowUserBelongType() {
-		return flowUserBelongType;
+	public String getFlowUserType() {
+		return flowUserType;
 	}
 
-	public void setFlowUserBelongType(String flowUserBelongType) {
-		this.flowUserBelongType = flowUserBelongType;
+	public void setFlowUserType(String flowUserType) {
+		this.flowUserType = flowUserType;
 	}
 
 	public String getFlowEntityType() {

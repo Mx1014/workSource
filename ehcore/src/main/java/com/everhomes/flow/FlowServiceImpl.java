@@ -29,6 +29,7 @@ import com.everhomes.rest.flow.FlowActionStatus;
 import com.everhomes.rest.flow.FlowActionStepType;
 import com.everhomes.rest.flow.FlowActionType;
 import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
@@ -741,10 +742,24 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowUserSelectionDTO createFlowUserSelection(
+	public ListFlowUserSelectionResponse createFlowUserSelection(
 			CreateFlowUserSelectionCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
+		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+		resp.setSelections(selections);
+		
+		List<FlowSingleUserSelectionCommand> cmds = cmd.getSelections();
+		if(cmds != null && cmds.size() > 0) {
+			for(FlowSingleUserSelectionCommand sCmd : cmds) {
+				FlowUserSelection sel = ConvertHelper.convert(sCmd, FlowUserSelection.class);
+				sel.setBelongEntity(cmd.getFlowEntityType());
+				sel.setBelongTo(cmd.getBelongTo());
+				sel.setBelongType(cmd.getFlowUserType());	
+				flowUserSelectionProvider.createFlowUserSelection(sel);
+			}
+		}
+		
+		return resp;
 	}
 
 	@Override
@@ -776,14 +791,29 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowButtonDTO updateFlowButton(UpdateFlowButtonCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public FlowButtonDetailDTO updateFlowButton(UpdateFlowButtonCommand cmd) {
+		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
+		flowButton.setButtonName(cmd.getButtonName());
+		flowButton.setDescription(cmd.getDescription());
+//		flowButton.setGotoNodeId(cmd.getGotoNodeId());
+		flowButton.setNeedSubject(cmd.getNeedSubject());
+		flowButton.setNeedProcessor(cmd.getNeedProcessor());
+		flowButtonProvider.updateFlowButton(flowButton);
+		
+		FlowButtonDetailDTO dto = ConvertHelper.convert(flowButton, FlowButtonDetailDTO.class);
+		
+		return dto;
 	}
 
 	@Override
 	public FlowButtonDTO disableFlowButton(DisableFlowButtonCommand cmd) {
-		// TODO Auto-generated method stub
+		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
+		if(flowButton != null) {
+			flowButton.setStatus(FlowButtonStatus.DISABLED.getCode());
+			flowButtonProvider.updateFlowButton(flowButton);
+			return ConvertHelper.convert(flowButton, FlowButtonDTO.class);
+		}
+		
 		return null;
 	}
 
