@@ -715,3 +715,12 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10055', '1001', '0', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10055', '1005', '0', '1', UTC_TIMESTAMP());
+	
+DELETE FROM `eh_acls` WHERE `privilege_id` in (604, 605) AND `role_id` = 1005;
+
+
+SET @service_module_scopes_id = 0;
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+SELECT (@service_module_scopes_id := @service_module_scopes_id + 1), 999992,id,null,null,null,0,2 FROM `eh_service_modules` WHERE `type` = 0 AND `parent_id` <> 0;
+
+
