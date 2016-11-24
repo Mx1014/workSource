@@ -742,11 +742,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			privilegeIds.addAll(ids);
 		}
 		for (CommunityDTO communityDTO:communityDTOs) {
-			ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.USER.getCode(), userId);
-			if(null != ids){
-				privilegeIds.addAll(ids);
+			List<Long> pIds = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.USER.getCode(), userId);
+			if(null != pIds){
+				privilegeIds.addAll(pIds);
 			}
-			if(privilegeIds.size() == 0){
+			if(pIds.size() == 0){
 				for (OrganizationDTO dto: organizationDTOs) {
 					ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), dto.getId());
 					if(null != ids){
