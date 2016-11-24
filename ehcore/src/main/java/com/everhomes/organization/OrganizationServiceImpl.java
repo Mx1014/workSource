@@ -6780,16 +6780,16 @@ System.out.println();
 
 			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 
-			if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)){
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)){
 				
-			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)){
+			}else if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)){
 				if(StringUtils.isEmpty(cmd.getTaskType())){
 					cmd.setTargetId(user.getId());
 				}else if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
 					returnNoPrivileged(null, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
-			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)){
+			}else if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)){
 				if(StringUtils.isEmpty(cmd.getTaskType())){
 					cmd.setTargetId(user.getId());
 				}else if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
@@ -6812,13 +6812,13 @@ System.out.println();
 			/* 根据用户不同 查询不同的任务类型贴*/
 			
 			cmd.setTargetId(user.getId());
-			if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)){
-			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)){
+			if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskAllListPosts)){
+			}else if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskGuaranteeListPosts)){
 				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.REPAIRS ){
 					returnNoPrivileged(null, user);
 				}
 				cmd.setTaskType(OrganizationTaskType.REPAIRS.getCode());
-			}else if(resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)){
+			}else if(resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.TaskSeekHelpListPosts)){
 				if(!StringUtils.isEmpty(cmd.getTaskType()) && OrganizationTaskType.fromCode(cmd.getTaskType()) != OrganizationTaskType.EMERGENCY_HELP ){
 					returnNoPrivileged(null, user);
 				}
