@@ -12,6 +12,7 @@ public class UserContext {
     private App callerApp;
     private Integer namespaceId;
     private String version;
+    private String versionRealm;
     
     public UserContext() {
     }
@@ -96,4 +97,11 @@ public class UserContext {
 		
 	}
 
+    public String getVersionRealm() {
+        return versionRealm;
+    }
+
+    public void setVersionRealm(String versionRealm) {
+        this.versionRealm = versionRealm;
+    }
 }
