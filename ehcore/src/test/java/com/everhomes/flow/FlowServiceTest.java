@@ -16,6 +16,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.FlowButtonStatus;
@@ -32,6 +33,12 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommand;
+import com.everhomes.rest.organization.ListOrganizationContactCommandResponse;
+import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.user.base.LoginAuthTestCase;
 
 public class FlowServiceTest extends LoginAuthTestCase {
@@ -59,6 +66,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     
     @Autowired
     private FlowButtonProvider flowButtonProvider;
+    
+    @Autowired
+    private OrganizationService organizationService;
     
     @Before
     public void setUp() throws Exception {
@@ -305,5 +315,22 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	}
     	
     	flowService.deleteFlow(dto.getId());
+    }
+    
+    @Test
+    public void testTestMenus() {
+    	Long id = 1001027l;
+    	List<String> groupTypes = new ArrayList<String>();
+    	groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+    	ListOrganizationsCommandResponse orgResps = organizationService.listAllChildrenOrganizations(id, groupTypes);
+    	List<OrganizationDTO> orgs = orgResps.getDtos();
+    	Assert.assertTrue(orgs.size() > 0);
+    	
+    	OrganizationDTO org = orgs.get(0);
+    	ListOrganizationContactCommand cmdContact = new ListOrganizationContactCommand();
+    	cmdContact.setVisibleFlag(VisibleFlag.ALL.getCode());
+    	cmdContact.setOrganizationId(org.getId());
+    	ListOrganizationContactCommandResponse contactResp = organizationService.listOrganizationContacts(cmdContact);
+    	Assert.assertTrue(contactResp.getMembers().size() > 0);
     }
 }

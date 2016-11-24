@@ -132,4 +132,16 @@ public class FlowUserSelectionProviderImpl implements FlowUserSelectionProvider 
     		
     	});
     }
+    
+    @Override
+    public List<FlowUserSelection> deleteSelectionByBelong(Long belongId, String belongEntity, String flowUserBelongType) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowUserSelections.class));
+    	EhFlowUserSelectionsDao dao = new EhFlowUserSelectionsDao(context.configuration());
+    	List<FlowUserSelection> seles = findSelectionByBelong(belongId, belongEntity, flowUserBelongType);
+    	if(seles != null && seles.size() > 0) {
+    		dao.delete(seles.toArray(new FlowUserSelection[seles.size()]));	
+    	}
+    	
+    	return seles;
+    }
 }

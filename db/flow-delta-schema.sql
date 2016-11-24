@@ -119,7 +119,7 @@ CREATE TABLE `eh_flow_forms` (
     `form_default` TEXT,
     `form_render` TEXT,
     `belong_to` BIGINT NOT NULL,
-    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
+    `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
 
     `string_tag1` VARCHAR(128),
@@ -145,7 +145,7 @@ CREATE TABLE `eh_flow_actions` (
     `flow_version` INTEGER NOT NULL,
     `action_type` VARCHAR(64) NOT NULL COMMENT 'sms, message, tick_sms, tick_message, tracker, scripts',
     `belong_to` BIGINT NOT NULL,
-    `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
+    `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
     `flow_step_type` VARCHAR(64) COMMENT 'no_step, start_step, approve_step, reject_step, transfer_step, comment_step, end_step, notify_step',
     `action_step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',

@@ -24,6 +24,8 @@ import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowActionDTO;
+import com.everhomes.rest.flow.FlowActionInfo;
+import com.everhomes.rest.flow.FlowActionStatus;
 import com.everhomes.rest.flow.FlowActionStepType;
 import com.everhomes.rest.flow.FlowActionType;
 import com.everhomes.rest.flow.FlowButtonDTO;
@@ -46,6 +48,7 @@ import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
+import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
@@ -371,7 +374,8 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowNodeDetailDTO getFlowNodeDetail(Long flowNodeId) {
-		FlowNodeDetailDTO detail = new FlowNodeDetailDTO();
+		FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowNodeId);
+		FlowNodeDetailDTO detail = ConvertHelper.convert(flowNode, FlowNodeDetailDTO.class);
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
 		detail.setProcessors(new ArrayList<FlowUserSelectionDTO>());
 		if(selections != null) {
@@ -443,7 +447,8 @@ public class FlowServiceImpl implements FlowService {
 	
 	private FlowActionDTO actionToDTO(FlowAction action) {
 		FlowActionDTO actionDTO = ConvertHelper.convert(action, FlowActionDTO.class);
-		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(action.getId()
+				, FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
 		if(selections != null) {
 			List<FlowUserSelectionDTO> userSeles = new ArrayList<FlowUserSelectionDTO>();
 			selections.stream().forEach((s) -> {
@@ -453,6 +458,87 @@ public class FlowServiceImpl implements FlowService {
 		}	
 		
 		return actionDTO;
+	}
+
+	@Override
+	public FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminderCommand cmd) {
+		FlowNode flowNode = flowNodeProvider.getFlowNodeById(cmd.getFlowNodeId());
+		FlowAction action = null;
+		
+		if(cmd.getMessageAction() != null) {
+			action = createNodeAction(flowNode, cmd.getMessageAction(), FlowActionStepType.STEP_ENTER.getCode(), FlowUserType.PROCESSOR.getCode());
+		}
+		
+		return null;
+	}
+	
+	private FlowAction createNodeAction(FlowNode flowNode, FlowActionInfo actionInfo, String flowStepType, String flowUserType) {
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNode.getId(), FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+		
+		CreateFlowUserSelectionCommand selectionCmd = actionInfo.getUserSelections();
+		boolean configUser = false;
+		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
+			configUser = true;
+		}
+		
+		if(action == null) {
+			action = new FlowAction();
+			action.setFlowMainId(flowNode.getFlowMainId());
+			action.setFlowVersion(flowNode.getFlowVersion());
+			action.setActionStepType(FlowActionStepType.STEP_ENTER.getCode());
+			action.setActionType(FlowActionType.MESSAGE.getCode());
+			action.setBelongTo(flowNode.getId());
+			action.setBelongType(FlowEntityType.FLOW_NODE.getCode());
+			action.setNamespaceId(flowNode.getNamespaceId());
+			
+			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			action.setRenderText(actionInfo.getRenderText());
+			flowActionProvider.createFlowAction(action);
+			
+		} else {
+			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			action.setRenderText(actionInfo.getRenderText());
+			flowActionProvider.updateFlowAction(action);
+			
+			//delete all old selections
+			if(configUser) {
+				flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
+			}
+			
+		}
+		
+		if(configUser) {
+			List<FlowSingleUserSelectionCommand> seles = selectionCmd.getSelections();
+			for(FlowSingleUserSelectionCommand selCmd : seles) {
+				FlowUserSelection userSel = new FlowUserSelection(); 
+				userSel.setBelongTo(action.getId());
+				userSel.setBelongEntity(FlowEntityType.FLOW_ACTION.getCode());
+				userSel.setBelongType(flowUserType);
+				userSel.setFlowMainId(action.getFlowMainId());
+				userSel.setFlowVersion(action.getFlowVersion());
+				userSel.setNamespaceId(action.getNamespaceId());
+				createUserSelection(userSel, selCmd);
+			}
+		}
+		
+		return action;
+	}
+	
+	private void createUserSelection(FlowUserSelection userSel, FlowSingleUserSelectionCommand selCmd) {
+		userSel.setSelectType(selCmd.getFlowUserSelectionType());
+		userSel.setSourceIdA(selCmd.getSourceIdA());
+		userSel.setSourceIdB(selCmd.getSourceIdB());
+		userSel.setSourceTypeA(selCmd.getSourceTypeA());
+		userSel.setSourceTypeB(selCmd.getSourceTypeB());
+		flowUserSelectionProvider.createFlowUserSelection(userSel);		
+	}
+
+	@Override
+	public FlowNodeDetailDTO updateFlowNodeTracker(
+			UpdateFlowNodeTrackerCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 	@Override
@@ -628,19 +714,6 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowButtonDTO disableFlowButton(DisableFlowButtonCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public FlowNodeDetailDTO updateFlowNodeReminder(UpdateFlowNodeReminderCommand cmd) {
-		
-		return null;
-	}
-
-	@Override
-	public FlowNodeDetailDTO updateFlowNodeTracker(
-			UpdateFlowNodeTrackerCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

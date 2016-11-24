@@ -225,9 +225,9 @@ public class FlowAdminController extends ControllerBase {
      * <p> 创建一波用户选择项 </p>
      * @return
      */
-    @RequestMapping("updateFlowNodeReminder")
+    @RequestMapping("getFlowNodeDetail")
     @RestReturn(value=FlowNodeDetailDTO.class)
-    public RestResponse updateFlowNodeReminder(@Valid GetFlowNodeDetailCommand cmd) {
+    public RestResponse getFlowNodeDetail(@Valid GetFlowNodeDetailCommand cmd) {
         RestResponse response = new RestResponse(flowService.getFlowNodeDetail(cmd.getFlowNodeId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
