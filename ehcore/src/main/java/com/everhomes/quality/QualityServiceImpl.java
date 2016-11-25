@@ -321,12 +321,14 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionSpecificationDTO> specifications = new ArrayList<QualityInspectionSpecificationDTO>();
 		if(standard.getSpecifications() != null && standard.getSpecifications().size() > 0) {
 			for(QualityInspectionSpecifications specification : standard.getSpecifications()) {
-				if(!StringUtils.isNullOrEmpty(specification.getPath())) {
-					String path = getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId());
-					specification.setPath(path);
+				if(specification != null) {
+					if(!StringUtils.isNullOrEmpty(specification.getPath())) {
+						String path = getSpecificationNamePath(specification.getPath(), specification.getOwnerType(), specification.getOwnerId());
+						specification.setPath(path);
+					}
+					
+					specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
 				}
-				
-				specifications.add(ConvertHelper.convert(specification, QualityInspectionSpecificationDTO.class));
 			}
 			dto.setSpecifications(specifications);
 		}
