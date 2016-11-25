@@ -84,5 +84,7 @@ public interface YellowPageProvider {
 	void createApartmentRequests(ServiceAllianceApartmentRequests request);
 	ServiceAllianceApartmentRequests findApartmentRequests(Long id);
 	List<ServiceAllianceApartmentRequests> listApartmentRequests(CrossShardListingLocator locator, int pageSize);
+	
+	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
 
 }

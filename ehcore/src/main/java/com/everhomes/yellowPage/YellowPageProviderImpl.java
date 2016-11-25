@@ -836,4 +836,23 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
         return requests;
 	}
+
+	@Override
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId) {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceSkipRuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.SERVICE_ALLIANCE_CATEGORY_ID.in(categoryId,0L));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.NAMESPACE_ID.eq(namespaceId));
+
+		List<ServiceAllianceSkipRule> result = new ArrayList<ServiceAllianceSkipRule>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ServiceAllianceSkipRule.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
+	}
 }

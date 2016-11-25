@@ -544,6 +544,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 		}
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
+		response.setSkipType((byte) 0);
+
+		ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(cmd.getCategoryId());
+		if(rule != null) {
+			response.setSkipType((byte) 1);
+		}
+		
 		response.setDtos(new ArrayList<ServiceAllianceDTO>());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
