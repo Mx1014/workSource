@@ -280,5 +280,5 @@ public interface RolePrivilegeService {
 	 * @param moduleId
      * @param privilegeType
      */
-	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType)
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType);
 }
