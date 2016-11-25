@@ -1338,7 +1338,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	}
 
-	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds){
+	@Override
+	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds){
 		User user = UserContext.current().getUser();
 		if(null != privilegeIds){
 			for (Long privilegeId: privilegeIds) {
@@ -1358,7 +1359,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
+	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
 
 		List<ServiceModulePrivilege> serviceModulePrivileges = null;
 		if(0L == moduleId){
