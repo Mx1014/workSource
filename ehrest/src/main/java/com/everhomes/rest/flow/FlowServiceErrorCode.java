@@ -5,4 +5,6 @@ public interface FlowServiceErrorCode {
     
     static final int ERROR_FLOW_NAME_EXISTS = 10001;
     static final int ERROR_FLOW_NOT_EXISTS = 10002;
+    static final int ERROR_FLOW_NODE_LEVEL_ERR = 10003;
+    static final int ERROR_FLOW_CONFIG_BUSY = 10004;
 }

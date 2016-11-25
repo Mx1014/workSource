@@ -32,6 +32,7 @@ import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.GetFlowNodeDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
@@ -223,8 +224,22 @@ public class FlowAdminController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /admin/flow/listFlowNodeButtons</b>
+     * <p> 获取 FlowNode 节点的详细信息，buttons 信息不包含在内 </p>
+     * @return
+     */
+    @RequestMapping("listFlowNodeButtons")
+    @RestReturn(value=ListFlowButtonResponse.class)
+    public RestResponse listFlowNodeButtons(@Valid GetFlowNodeDetailCommand cmd) {
+        RestResponse response = new RestResponse(flowService.listFlowNodeButtons(cmd.getFlowNodeId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/flow/getFlowNodeDetail</b>
-     * <p> 创建一波用户选择项 </p>
+     * <p> 获取 FlowNode 节点的详细信息，buttons 信息不包含在内 </p>
      * @return
      */
     @RequestMapping("getFlowNodeDetail")

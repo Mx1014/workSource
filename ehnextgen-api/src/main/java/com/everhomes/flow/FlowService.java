@@ -30,6 +30,7 @@ import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
@@ -378,6 +379,13 @@ public interface FlowService {
 	 * @return
 	 */
 	Flow getFlowByEntity(Long entityId, FlowEntityType entity);
+
+	/**
+	 * 获取按钮的列表
+	 * @param flowNodeId
+	 * @return
+	 */
+	ListFlowButtonResponse listFlowNodeButtons(Long flowNodeId);
 	
 	//TODO 日志信息分类：
 	

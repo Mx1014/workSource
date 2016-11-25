@@ -2,7 +2,7 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowStepType;
 
-public class FlowStepStart extends FlowGraphNode {
+public class FlowGraphNodeStart extends FlowGraphNode {
 
 	@Override
 	public void stepEnter(FlowCaseState ctx, FlowGraphNode from)

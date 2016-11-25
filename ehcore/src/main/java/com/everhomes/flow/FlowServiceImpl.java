@@ -62,6 +62,7 @@ import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
@@ -463,6 +464,25 @@ public class FlowServiceImpl implements FlowService {
 		for(FlowNode fn : flowNodes) {
 			dtos.add(ConvertHelper.convert(fn, FlowNodeDTO.class));
 		}
+		
+		return resp;
+	}
+	
+	@Override
+	public ListFlowButtonResponse listFlowNodeButtons(Long flowNodeId) {
+		ListFlowButtonResponse resp = new ListFlowButtonResponse();
+		
+		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.APPLIER.getCode());
+		List<FlowButtonDTO> dtos1 = new ArrayList<FlowButtonDTO>();
+		buttons.stream().forEach((fb) ->{
+			dtos1.add(ConvertHelper.convert(fb, FlowButtonDTO.class));
+		});
+		
+		List<FlowButtonDTO> dtos2 = new ArrayList<FlowButtonDTO>();
+		buttons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.PROCESSOR.getCode());
+		buttons.stream().forEach((fb) ->{
+			dtos2.add(ConvertHelper.convert(fb, FlowButtonDTO.class));
+		});
 		
 		return resp;
 	}
@@ -981,8 +1001,125 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public Boolean enableFlow(Long flowId) {
-		// TODO Auto-generated method stub
-		return null;
+		FlowGraph flowGraph = new FlowGraph();
+		Flow flow = flowProvider.getFlowById(flowId);
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		int i = 1;
+		for(FlowNode fn : flowNodes) {
+			if(!fn.getNodeLevel().equals(i)) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error");	
+			}
+			i++;
+		}
+		
+		flowGraph.setFlow(flow);
+		flowGraph.getNodes().add(new FlowGraphNodeStart());
+		flowNodes.forEach((fn)->{
+			flowGraph.getNodes().add(getFlowGraphNode(fn));
+		});
+		
+		//now all the graph is collected, do snapshot
+		Flow flowNew = flowProvider.getFlowById(flowId);
+		if(!flowNew.getUpdateTime().equals(flow.getUpdateTime())) {
+			//the flow is updated, retry
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONFIG_BUSY, "flow has changed, retry");
+		}
+		flowNew.setStatus(FlowStatusType.SNAPSHOT.getCode());
+		flowProvider.updateFlow(flowNew);
+		
+		try {
+			dbProvider.execute((s)->{
+				doSnapshot(flowGraph);	
+				return true;
+			});
+			
+		} catch(Exception ex) {
+			LOGGER.info("do snapshot error", ex);
+		}
+		
+		return true;
+	}
+	
+	private FlowGraphNode getFlowGraphNode(FlowNode flowNode) {
+		FlowGraphNodeNormal graphNode = new FlowGraphNodeNormal();
+		Long flowNodeId = flowNode.getId();
+		
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+		FlowGraphAction graphAction = new FlowGraphMessageAction();
+		graphAction.setFlowAction(action);
+		graphNode.setMessageAction(graphAction);
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+		graphAction = new FlowGraphSMSAction();
+		graphAction.setFlowAction(action);
+		graphNode.setSmsAction(graphAction);
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TICK_MESSAGE.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
+		graphAction = new FlowGraphMessageAction();
+		graphAction.setFlowAction(action);
+		graphNode.setTickMessageAction(graphAction);
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TICK_SMS.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
+		graphAction = new FlowGraphSMSAction();
+		graphAction.setFlowAction(action);
+		graphNode.setTickMessageAction(graphAction);
+		
+		List<FlowButton> applierButtons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.APPLIER.getCode());
+		applierButtons.forEach((btn)->{
+			graphNode.getApplierButtons().add(getFlowGraphButton(btn));
+		});
+		
+		List<FlowButton> processorButtons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.PROCESSOR.getCode());
+		processorButtons.forEach((btn)->{
+			graphNode.getProcessorButtons().add(getFlowGraphButton(btn));
+		});
+		
+		return graphNode;
+	}
+	
+	private FlowGraphButton getFlowGraphButton(FlowButton flowButton) {
+		FlowGraphButton graphBtn = new FlowGraphButton();
+		graphBtn.setFlowButton(flowButton);
+		FlowGraphAction graphAction = null;
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+		if(action != null) {
+			graphAction = new FlowGraphMessageAction();
+			graphAction.setFlowAction(action);
+			graphBtn.setMessage(graphAction);
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+		if(action != null) {
+			graphAction = new FlowGraphSMSAction();
+			graphAction.setFlowAction(action);
+			graphBtn.setSms(graphAction);
+		}
+		
+		List<FlowAction> flowActions = flowActionProvider.findFlowActionsByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
+				, FlowActionType.ENTER_SCRIPT.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
+		if(flowActions != null && flowActions.size() > 0) {
+			for(FlowAction fa : flowActions) {
+				graphAction = new FlowGraphScriptAction();
+				graphAction.setFlowAction(fa);
+				graphBtn.getScripts().add(graphAction);				
+			}
+		}
+		
+		return graphBtn;
+	}
+	
+	private void doSnapshot(FlowGraph flowGraph) {
+		
 	}
 
 	@Override
@@ -1098,4 +1235,5 @@ public class FlowServiceImpl implements FlowService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
 }

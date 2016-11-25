@@ -1,7 +1,7 @@
 package com.everhomes.rest.flow;
 
 public enum FlowStatusType {
-	INVALID((byte)0), VALID((byte)1), CONFIG((byte)2), RUNNING((byte)3), STOP((byte)4);
+	INVALID((byte)0), VALID((byte)1), CONFIG((byte)2), SNAPSHOT((byte)3), RUNNING((byte)4), STOP((byte)5);
 	private byte code;
     
     public byte getCode() {

@@ -1,17 +1,35 @@
 package com.everhomes.flow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.rest.flow.FlowStepType;
 
 public abstract class FlowGraphNode {
 	private FlowNode flowNode;
+	
+	private FlowGraphAction messageAction;
+	private FlowGraphAction smsAction;
+	private FlowGraphAction tickMessageAction;
+	private FlowGraphAction tickSMSAction;
+	private FlowGraphAction trackApproveEnter;
+	private FlowGraphAction trackRejectEnter;
+	private FlowGraphAction trackTransferLeave;
+	
 	private List<FlowGraphButton> processorButtons;
 	private List<FlowGraphButton> applierButtons;
 	
 	private List<FlowGraphAction> enterActions;
 	private List<FlowGraphAction> leaveActions;
 	private List<FlowGraphAction> timeoutActions;
+	
+	public FlowGraphNode() {
+		processorButtons = new ArrayList<FlowGraphButton>();
+		applierButtons = new ArrayList<FlowGraphButton>();
+		enterActions = new ArrayList<FlowGraphAction>();
+		leaveActions = new ArrayList<FlowGraphAction>();
+		timeoutActions = new ArrayList<FlowGraphAction>();
+	}
 	
 	public abstract FlowStepType getStepType();
 	public abstract void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException;
@@ -53,5 +71,47 @@ public abstract class FlowGraphNode {
 	}
 	public void setTimeoutActions(List<FlowGraphAction> timeoutActions) {
 		this.timeoutActions = timeoutActions;
+	}
+	public FlowGraphAction getMessageAction() {
+		return messageAction;
+	}
+	public void setMessageAction(FlowGraphAction messageAction) {
+		this.messageAction = messageAction;
+	}
+	public FlowGraphAction getSmsAction() {
+		return smsAction;
+	}
+	public void setSmsAction(FlowGraphAction smsAction) {
+		this.smsAction = smsAction;
+	}
+	public FlowGraphAction getTickMessageAction() {
+		return tickMessageAction;
+	}
+	public void setTickMessageAction(FlowGraphAction tickMessageAction) {
+		this.tickMessageAction = tickMessageAction;
+	}
+	public FlowGraphAction getTickSMSAction() {
+		return tickSMSAction;
+	}
+	public void setTickSMSAction(FlowGraphAction tickSMSAction) {
+		this.tickSMSAction = tickSMSAction;
+	}
+	public FlowGraphAction getTrackApproveEnter() {
+		return trackApproveEnter;
+	}
+	public void setTrackApproveEnter(FlowGraphAction trackApproveEnter) {
+		this.trackApproveEnter = trackApproveEnter;
+	}
+	public FlowGraphAction getTrackRejectEnter() {
+		return trackRejectEnter;
+	}
+	public void setTrackRejectEnter(FlowGraphAction trackRejectEnter) {
+		this.trackRejectEnter = trackRejectEnter;
+	}
+	public FlowGraphAction getTrackTransferLeave() {
+		return trackTransferLeave;
+	}
+	public void setTrackTransferLeave(FlowGraphAction trackTransferLeave) {
+		this.trackTransferLeave = trackTransferLeave;
 	}
 }
