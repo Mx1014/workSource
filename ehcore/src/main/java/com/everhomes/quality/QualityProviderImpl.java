@@ -482,9 +482,19 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		if(reviewResult != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.REVIEW_RESULT.eq(reviewResult));
+			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(reviewResult))) {
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.eq(QualityStandardStatus.INACTIVE.getCode()));
+			}
+			if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(reviewResult))) {
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+			}
+			if(ReviewResult.NONE.equals(ReviewResult.fromStatus(reviewResult))) {
+				query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.eq(QualityStandardStatus.WAITING.getCode()));
+			}
+
 		}
 		
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.STATUS.ne(QualityStandardStatus.INACTIVE.getCode()));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.DELETER_UID.ne(0L));
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_STANDARDS.ID.desc());
         query.addLimit(count);
         
