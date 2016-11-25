@@ -185,6 +185,7 @@ import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.rentalv2.admin.RefundOrderDTO;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeDTO;
 import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
+import com.everhomes.rest.rentalv2.admin.SiteNumberDTO;
 import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
 import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
@@ -2107,12 +2108,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				HashSet<String> siteNumberSet = new HashSet<>();
 				if(cmd.getSiteCounts().equals(Double.valueOf(cmd.getSiteNumbers().size()))){
 					if( null!=cmd.getSiteNumbers())
-						for(String number : cmd.getSiteNumbers()){
-							siteNumberSet.add(number);
+						for(SiteNumberDTO number : cmd.getSiteNumbers()){
+							siteNumberSet.add(number.getSiteNumber());
 							RentalResourceNumber resourceNumber = new RentalResourceNumber();
 							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
 							resourceNumber.setOwnerId(rs.getId());
-							resourceNumber.setResourceNumber(number);
+							resourceNumber.setResourceNumber(number.getSiteNumber());
+							resourceNumber.setSiteNumberGroup(number.getSiteNumberGroup());
 							this.rentalProvider.createRentalResourceNumber(resourceNumber);
 						}
 				}
