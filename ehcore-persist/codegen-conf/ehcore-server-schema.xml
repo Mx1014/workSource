@@ -115,9 +115,9 @@
 		eh_warning_settings | eh_service_alliance_reservation_requests | eh_door_user_permission |
 		eh_group_settings | eh_broadcasts |
         eh_equipment_inspection_equipment_standard_map | eh_equipment_inspection_templates | eh_equipment_inspection_template_item_map | eh_equipment_inspection_items | eh_equipment_inspection_item_results | 
-        eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
         eh_energy_meters | eh_energy_meter_reading_logs | eh_energy_meter_change_logs | eh_energy_meter_categories | eh_energy_meter_setting_logs | eh_energy_meter_default_settings | eh_energy_meter_formulas | eh_energy_meter_formula_variables |
         eh_energy_date_statistics | eh_energy_month_statistics | eh_energy_count_statistics | eh_energy_yoy_statistics |
+        eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
 
         </includes>
             <!-- All elements that are excluded from your schema

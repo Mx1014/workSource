@@ -24,7 +24,7 @@ CREATE TABLE `eh_service_alliance_apartment_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_service_alliance_apartment_requests`;
+DROP TABLE IF EXISTS `eh_service_alliance_skip_rule`;
 CREATE TABLE `eh_service_alliance_skip_rule` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
