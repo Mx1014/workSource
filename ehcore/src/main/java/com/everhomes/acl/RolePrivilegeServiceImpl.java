@@ -1674,6 +1674,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 								if(0L == userAssignment.getModuleId()){
 									authorizationDTO.setAllModuleFlag((byte)1); // 加入moduleId是0 代表全部业务
 									break;
+								}else{
+									authorizationDTO.setAllModuleFlag((byte)0);
 								}
 								ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(userAssignment.getModuleId());
 								serviceModules.add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
