@@ -905,7 +905,7 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_SETTLE_REQUESTS.ID.max()).from(Tables.EH_SETTLE_REQUESTS).fetchOne().value1();
         });
         
-        syncTableSequence(null, EhSettleRequests.class, Tables.EH_PM_TASK_TARGETS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPmTaskTargets.class, Tables.EH_PM_TASK_TARGETS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_TASK_TARGETS.ID.max()).from(Tables.EH_PM_TASK_TARGETS).fetchOne().value1();
         });
 
