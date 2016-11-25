@@ -512,12 +512,22 @@ public class YellowPageServiceImpl implements YellowPageService {
 				return null;
 			}
 		populateServiceAlliance(sa);
-		ServiceAllianceDTO response = null;
-//		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
-//		response.setDisplayName(serviceAlliance.getNickName());
 		
-		return response;
+		if(null == sa.getServiceType() && null != sa.getCategoryId()) {
+			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(sa.getCategoryId());
+			sa.setServiceType(category.getName());
+		}
+		ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+		if(!StringUtils.isEmpty(dto.getTemplateType())) {
+			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
+			if(template != null) {
+				dto.setTemplateName(template.getName());
+				dto.setButtonTitle(template.getButtonTitle());
+			}
+		}
+		this.processDetailUrl(dto);
+		
+		return dto;
 	}
 
 	@Override
