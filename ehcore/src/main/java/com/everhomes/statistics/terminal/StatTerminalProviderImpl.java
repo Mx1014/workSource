@@ -79,12 +79,13 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
     }
 
     @Override
-    public void deleteTerminalAppVersionStatistics(String startDate) {
+    public void deleteTerminalAppVersionStatistics(String date) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         DeleteQuery<EhTerminalAppVersionStatisticsRecord> delete = context.deleteQuery(Tables.EH_TERMINAL_APP_VERSION_STATISTICS);
-        delete.addConditions(Tables.EH_TERMINAL_APP_VERSION_STATISTICS.STAT_START_DATE.eq(startDate));
+        delete.addConditions(Tables.EH_TERMINAL_APP_VERSION_STATISTICS.DATE.eq(date));
         delete.execute();
     }
+
 
     
 }
