@@ -14,7 +14,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
 	}
 
 	@Override
-	public void onFlowCaseStart(FlowCaseContext ctx) {
+	public void onFlowCaseStart(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
 		
 	}

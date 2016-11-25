@@ -4,5 +4,5 @@ public interface FlowListenerManager {
 
 	int getListenerSize();
 
-	void onFlowCaseStart(FlowCaseContext ctx);
+	void onFlowCaseStart(FlowCaseState ctx);
 }
