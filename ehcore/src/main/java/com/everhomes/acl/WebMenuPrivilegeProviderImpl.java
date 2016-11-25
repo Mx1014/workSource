@@ -19,6 +19,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.util.ArrayList;
 import java.util.List;
 @Component
 public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
@@ -91,5 +92,21 @@ public class WebMenuPrivilegeProviderImpl implements WebMenuPrivilegeProvider {
 		return query.fetch().map((r) -> {
 			return ConvertHelper.convert(r, WebMenuScope.class);
 		});
+	}
+
+	@Override
+	//@Caching(evict={@CacheEvict(value="ListWebMenuByPrivilegeIds", key="webMenuByPrivilegeIds")})
+	public List<WebMenuPrivilege> listWebMenuPrivilegeByMenuId(Long menuId) {
+		List<WebMenuPrivilege> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhWebMenuPrivilegesRecord> query = context.selectQuery(Tables.EH_WEB_MENU_PRIVILEGES);
+		Condition cond = Tables.EH_WEB_MENU_PRIVILEGES.MENU_ID.in(menuId);
+		query.addConditions(cond);
+	    query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, WebMenuPrivilege.class));
+			return null;
+		});
+
+		return results;
 	}
 }

@@ -19,6 +19,14 @@ public enum ActivityType {
             }
 
         }
+
+        for (ActivityType activity : ActivityType.values()) {
+            if (activity.getCode().toString().equals(val)) {
+                return activity;
+            }
+        }
+
         return UNKNOW;
     }
+
 }

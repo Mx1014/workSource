@@ -75,12 +75,17 @@ public class OrganizationMemberDTO {
 	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> departments;
-
+ 
     private Byte executiveFlag;
     private String position;
     private String idNumber;
-    
-    
+     
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPositions;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobLevels;
+	 
 	public OrganizationMemberDTO() {
     }
 
@@ -312,6 +317,23 @@ public class OrganizationMemberDTO {
 
     public void setVisibleFlag(Byte visibleFlag) {
         this.visibleFlag = visibleFlag;
+    }
+
+    public List<OrganizationDTO> getJobPositions() {
+        return jobPositions;
+    }
+
+    public void setJobPositions(List<OrganizationDTO> jobPositions) {
+        this.jobPositions = jobPositions;
+    }
+
+
+    public List<OrganizationDTO> getJobLevels() {
+        return jobLevels;
+    }
+
+    public void setJobLevels(List<OrganizationDTO> jobLevels) {
+        this.jobLevels = jobLevels;
     }
 
     @Override
