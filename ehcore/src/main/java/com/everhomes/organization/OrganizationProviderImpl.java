@@ -1685,7 +1685,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
 
 		if(!StringUtils.isEmpty(keyworks)){
-			query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.like(keyworks + "%"));
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyworks + "%"));
 		}
 
 		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
