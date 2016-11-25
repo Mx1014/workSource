@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +110,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     private void prepareObj(FlowCase obj) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		obj.setCreateTime(now);
+		obj.setLastStepTime(now);
     }
 }

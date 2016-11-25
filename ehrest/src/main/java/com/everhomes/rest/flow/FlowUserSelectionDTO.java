@@ -19,6 +19,7 @@ public class FlowUserSelectionDTO {
     private Integer     namespaceId;
     private Integer     flowVersion;
     private Long     id;
+    private String selectionName;
 
 
     public Byte getStatus() {
@@ -138,6 +139,16 @@ public class FlowUserSelectionDTO {
 
 	public void setBelongType(String belongType) {
 		this.belongType = belongType;
+	}
+
+
+	public String getSelectionName() {
+		return selectionName;
+	}
+
+
+	public void setSelectionName(String selectionName) {
+		this.selectionName = selectionName;
 	}
 
 

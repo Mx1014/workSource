@@ -78,6 +78,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     @Autowired
     private OrganizationService organizationService;
     
+    @Autowired
+    private FlowListenerManager flowListenerManager;
+    
     @Before
     public void setUp() throws Exception {
         super.setUp();
@@ -440,5 +443,10 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Assert.assertTrue(btnDetail2.getPushMessage() != null);
     	Assert.assertTrue(btnDetail2.getPushSms() != null);
     	Assert.assertTrue(btnDetail2.getEnterScripts().size() == 3);
+    }
+    
+    @Test
+    public void testFlowListenerManager() {
+    	Assert.assertTrue(flowListenerManager.getListenerSize() > 1);
     }
 }

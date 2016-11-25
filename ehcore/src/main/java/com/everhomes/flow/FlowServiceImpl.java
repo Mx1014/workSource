@@ -615,6 +615,7 @@ public class FlowServiceImpl implements FlowService {
 			action.setBelongTo(flowNode.getId());
 			action.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
 			action.setNamespaceId(flowNode.getNamespaceId());
+			action.setFlowStepType(flowStepType);
 
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
@@ -804,8 +805,9 @@ public class FlowServiceImpl implements FlowService {
 				action.setFlowVersion(flowButton.getFlowVersion());
 				action.setActionStepType(FlowActionStepType.STEP_ENTER.getCode());
 				action.setActionType(FlowActionType.ENTER_SCRIPT.getCode());
-				action.setBelongTo(flowButton.getId());//TODO fixme
+				action.setBelongTo(flowButton.getId());
 				action.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
+				action.setFlowStepType(FlowStepType.NO_STEP.getCode());
 				action.setNamespaceId(flowButton.getNamespaceId());
 				action.setStatus(FlowActionStatus.ENABLED.getCode());
 				action.setScriptId(scriptId);
@@ -851,6 +853,7 @@ public class FlowServiceImpl implements FlowService {
 			action.setBelongTo(flowButton.getId());
 			action.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
 			action.setNamespaceId(flowButton.getNamespaceId());
+			action.setFlowStepType(flowStepType);
 
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
