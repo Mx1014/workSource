@@ -41,9 +41,10 @@ CREATE TABLE `eh_terminal_app_version_statistics` (
   `new_user_number` BIGINT NOT NULL COMMENT 'number of new users',
   `start_number` BIGINT NOT NULL COMMENT 'number of starts',
   `active_user_number` BIGINT NOT NULL COMMENT 'number of active users',
+  `cumulative_user_number` BIGINT NOT NULL COMMENT 'cumulative of active users',
+  `version_cumulative_rate` DECIMAL NOT NUll,
   `version_active_rate` DECIMAL NOT NUll,
-  `stat_start_date` VARCHAR(32) DEFAULT NULL COMMENT 'stat start date',
-  `stat_end_date` VARCHAR(32) DEFAULT NULL  COMMENT 'stat end date',
+  `date` VARCHAR(32) DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
