@@ -494,7 +494,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 		}
 		
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.DELETER_UID.ne(0L));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARDS.DELETER_UID.eq(0L));
         query.addOrderBy(Tables.EH_QUALITY_INSPECTION_STANDARDS.ID.desc());
         query.addLimit(count);
         
