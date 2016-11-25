@@ -387,7 +387,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 //		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
 //		param.put("amount", order.getPrice().intValue()*100);
-		param.put("amount", order.getPrice());
+		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("discount", 0);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
 		String json = post(param, PAY_TEMP_FEE);
