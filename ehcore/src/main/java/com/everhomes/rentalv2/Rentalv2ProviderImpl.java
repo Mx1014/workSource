@@ -1117,6 +1117,24 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return result ;
 		return null;
 	}
+	@Override
+	public List<RentalOrder> listSuccessRentalBills() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_ORDERS);
+		//TODO：
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
+				.eq(SiteBillStatus.SUCCESS.getCode()); 
+		step.where(condition);
+		List<RentalOrder> result = step
+				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+	
 //
 //	@Override
 //	public void createRentalRule(RentalRule rentalRule) {
@@ -1916,6 +1934,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return "￥"+price.toString()+"/"+timeStep+"小时";
 		return "";
 	}
+
+	
  
 	
 }

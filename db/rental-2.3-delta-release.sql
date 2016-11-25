@@ -3,6 +3,7 @@
  
 ALTER TABLE `eh_rentalv2_resource_numbers` ADD COLUMN `group_id` INTEGER COMMENT '同一个groupid的两个编号资源被认为是一组资源';
 
+ALTER TABLE `eh_rentalv2_orders` ADD COLUMN `reminder_time` DATETIME DEFAULT NULL COMMENT '消息提醒时间';
 
 --  
 -- 资源预订签到权限表-- 这个表里有的 才能签到

@@ -34,7 +34,6 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.greghaines.jesque.Job;
 
-import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -53,6 +52,7 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.LinkedMultiValueMap;
@@ -197,13 +197,13 @@ import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
+import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -1278,35 +1278,39 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					
 				}
 				rentalSiteRules.add(rentalSiteRule);
-				if (null == rentalSiteRule.getBeginTime()) {
-					if (null == rentalBill.getStartTime()
-							|| rentalBill.getStartTime().after(
-									rentalSiteRule.getResourceRentalDate()))
-						rentalBill.setStartTime(new Timestamp(rentalSiteRule
-								.getResourceRentalDate().getTime()));
-				} else {
-					if (null == rentalBill.getStartTime()
-							|| rentalBill.getStartTime().after(
-									rentalSiteRule.getBeginTime())) {
-	
-						rentalBill.setStartTime(rentalSiteRule.getBeginTime());
+				//计算单元格的起止时间-小时单元格开始时间-30分钟,结束时间直接用
+				//按天和半天预定 开始时间: 前一天下午4点
+				//按天预订结束时间:第二天
+				//按半天预定 结束时间根据产品需求,早上 12 下午  18 晚上 21 
+				//计算的时间用于定时任务 起始时间:消息提醒  结束时间:订单过期
+				Timestamp startTime = null;
+				Timestamp endTime = null;
+				if(rentalSiteRule.getRentalType().equals(RentalType.HOUR.getCode())){
+					startTime =  new Timestamp(rentalSiteRule.getBeginTime().getTime() - 30*60*1000L);
+					endTime = rentalSiteRule.getEndTime();
+				}else if(rentalSiteRule.getRentalType().equals(RentalType.DAY.getCode())){
+					startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000l);
+					endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 24*60*60*1000l);
+				}else  {
+					if(rentalSiteRule.getAmorpm().equals(AmorpmFlag.AM.getCode())){
+						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000l);
+						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 12*60*60*1000l);
+					}else if(rentalSiteRule.getAmorpm().equals(AmorpmFlag.PM.getCode())){
+						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000l);
+						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 18*60*60*1000l);
+					}else   {
+						startTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() - 8*60*60*1000l);
+						endTime = new Timestamp(rentalSiteRule.getResourceRentalDate().getTime() + 21*60*60*1000l);
 					}
 				}
-	
-				if (null == rentalSiteRule.getEndTime()) {
-					if (null == rentalBill.getEndTime()
-							|| rentalBill.getEndTime().before(
-									rentalSiteRule.getResourceRentalDate()))
-						rentalBill.setEndTime(new Timestamp(rentalSiteRule
-								.getResourceRentalDate().getTime()));
-				} else {
-					if (null == rentalBill.getEndTime()
-							|| rentalBill.getEndTime().before(
-									rentalSiteRule.getEndTime())) {
-	
-						rentalBill.setEndTime(rentalSiteRule.getEndTime());
-					}
-				}
+				 //如果订单的起始时间在本单元格 起始时间之后 或者 订单时间为空
+				if (null == rentalBill.getStartTime()|| rentalBill.getStartTime().after(startTime))
+					rentalBill.setStartTime(startTime);
+			 
+				//如果订单的结束时间在本单元格 结束时间之前 或者 订单时间为空
+				if (null == rentalBill.getEndTime()|| rentalBill.getEndTime().before(endTime))
+					rentalBill.setEndTime(endTime);
+				 
 				if(rs.getNeedPay().equals(NormalFlag.NEED.getCode())){
 					if((siteRule.getRentalCount()-siteRule.getRentalCount().intValue())>0){
 						//有半个
@@ -1566,6 +1570,47 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		});
 		return billDTO;
 	}
+
+	/**
+	 * 每半小时的50秒钟时候开始执行
+	 * */
+	@Scheduled(cron = "50 0/30 * * * ?")
+	public void rentalSchedule(){
+		//把所有状态为success-已预约的捞出来 
+		Long currTime = DateHelper.currentGMTTime().getTime();
+		List<RentalOrder>  orders = rentalProvider.listSuccessRentalBills();
+		for(RentalOrder order : orders ){
+			//时间快到发推送
+			Long orderStartTimeLong = order.getStartTime().getTime();
+			Long orderEndTimeLong = order.getEndTime().getTime();
+			if(currTime<orderStartTimeLong && currTime + 30*60*1000l >= orderStartTimeLong){
+				Map<String, String> map = new HashMap<String, String>();  
+		        map.put("resourceName", order.getResourceName());
+		        map.put("startTime", order.getUseDetail()); 
+				String notifyTextForOther = localeTemplateService.getLocaleTemplateString(PunchNotificationTemplateCode.SCOPE, 
+						PunchNotificationTemplateCode.RENTAL_BEGIN_NOTIFY, PunchNotificationTemplateCode.locale, map, "");
+				final Job job3 = new Job(
+						SendMessageAction.class.getName(),
+						new Object[] {order.getRentalUid(),notifyTextForOther});
+				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+						orderStartTimeLong);
+			}
+			//订单过期,置状态
+			
+			if(orderEndTimeLong <= currTime){
+				order.setStatus(SiteBillStatus.OVERTIME.getCode());
+				rentalProvider.updateRentalBill(order);
+			}else if(currTime + 30*60*1000l >= orderStartTimeLong){
+				//超期未确认的置为超时
+				final Job job1 = new Job(
+						IncompleteUnsuccessRentalBillAction.class.getName(),
+						new Object[] { String.valueOf(order.getId()) });
+	
+				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
+						orderEndTimeLong); 
+			}
+		}
+	}
 	/**
 	 * 给成功的订单发推送
 	 * 
@@ -1591,27 +1636,27 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				SendMessageAction.class.getName(),
 				new Object[] {rentalBill.getRentalUid(),notifyTextForOther});
 		try{
-			if(rentalType != null) {
-				switch(rentalType) {
-				case HOUR:
-					// 在开始时间前30分钟提醒 
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-							rentalBill.getStartTime().getTime() - 30*60*1000L );
-					break; 
-				default:
-					// 在开始时间前一天的下午16点提醒
-					Calendar calendar = Calendar.getInstance();
-					calendar.setTime(rentalBill.getStartTime() );
-					calendar.add(Calendar.DATE, -1);
-					calendar.set(Calendar.HOUR_OF_DAY, 16);
-					calendar.set(Calendar.SECOND, 0);
-					calendar.set(Calendar.MINUTE, 0);
-					calendar.set(Calendar.MILLISECOND, 0);
-					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,calendar.getTimeInMillis() );
-					break;
-					
-				}
-			}  
+//			if(rentalType != null) {
+//				switch(rentalType) {
+//				case HOUR:
+//					// 在开始时间前30分钟提醒 
+//					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+//							rentalBill.getStartTime().getTime() - 30*60*1000L );
+//					break; 
+//				default:
+//					// 在开始时间前一天的下午16点提醒
+//					Calendar calendar = Calendar.getInstance();
+//					calendar.setTime(rentalBill.getStartTime() );
+//					calendar.add(Calendar.DATE, -1);
+//					calendar.set(Calendar.HOUR_OF_DAY, 16);
+//					calendar.set(Calendar.SECOND, 0);
+//					calendar.set(Calendar.MINUTE, 0);
+//					calendar.set(Calendar.MILLISECOND, 0);
+//					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,calendar.getTimeInMillis() );
+//					break;
+//					
+//				}
+//			}  
 		
 			map = new HashMap<String, String>(); 
 			map.put("userName", user.getNickName());
