@@ -386,6 +386,14 @@ public interface FlowService {
 	 * @return
 	 */
 	ListFlowButtonResponse listFlowNodeButtons(Long flowNodeId);
+
+	/**
+	 * 获取缓存的 FlowGraph
+	 * @param flowId
+	 * @param flowVer
+	 * @return
+	 */
+	FlowGraph getFlowGraph(Long flowId, Integer flowVer);
 	
 	//TODO 日志信息分类：
 	

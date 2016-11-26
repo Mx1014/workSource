@@ -1089,6 +1089,18 @@ public class FlowServiceImpl implements FlowService {
 			LOGGER.error("do snapshot error", ex);
 		}
 		
+		if(isOk) {
+			//TODO need this?
+			if(flowGraph.getFlow().getId().equals(flowNew.getId())) {
+				isOk = false;
+			} else {
+				Flow snapFlow = flowProvider.getFlowById(flowGraph.getFlow().getId());
+				if(snapFlow == null) {
+					isOk = false;
+				}	
+			}
+		}
+		
 		if(!isOk) {
 			//change back to config
 			now = new Timestamp(DateHelper.currentGMTTime().getTime());
@@ -1277,6 +1289,11 @@ public class FlowServiceImpl implements FlowService {
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
 		}
+	}
+	
+	@Override
+	public FlowGraph getFlowGraph(Long flowId, Integer flowVer) {
+		return null;
 	}
 
 	@Override
