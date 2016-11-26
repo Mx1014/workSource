@@ -1676,7 +1676,7 @@ public class QualityProviderImpl implements QualityProvider {
 			String superiorPath, Long startTime, Long endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		ScoreDTO score = new ScoreDTO();
-		
+		score.setScore(0.0);
 		
 		final Field<?>[] fields = {Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID, 
 				Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID, DSL.sum(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TOTAL_SCORE).as("totalScore")};
