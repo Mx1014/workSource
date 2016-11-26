@@ -1003,6 +1003,18 @@ public class FlowServiceImpl implements FlowService {
 	public Boolean enableFlow(Long flowId) {
 		FlowGraph flowGraph = new FlowGraph();
 		Flow flow = flowProvider.getFlowById(flowId);
+		if(flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
+			//restart it
+			flow.setStatus(FlowStatusType.RUNNING.getCode());
+			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+			flow.setUpdateTime(now);
+			flowProvider.updateFlow(flow);
+			return true;
+		} else if(flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+			//already running
+			return true;
+		}
+		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
 		flowNodes.sort((n1, n2) -> {
 			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
@@ -1017,10 +1029,35 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		flowGraph.setFlow(flow);
-		flowGraph.getNodes().add(new FlowGraphNodeStart());
+		
+		FlowNode nodeObj = null;
+		nodeObj = new FlowNode();
+		nodeObj.setNodeName("START");
+		nodeObj.setFlowMainId(flow.getId());
+		nodeObj.setFlowVersion(flow.getFlowVersion());
+		nodeObj.setNamespaceId(flow.getNamespaceId());
+		nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
+		nodeObj.setNodeLevel(0);
+		nodeObj.setDescription("");
+		FlowGraphNode start = new FlowGraphNodeStart();
+		start.setFlowNode(nodeObj);
+		flowGraph.getNodes().add(start);
+		
 		flowNodes.forEach((fn)->{
 			flowGraph.getNodes().add(getFlowGraphNode(fn));
 		});
+		
+		nodeObj = new FlowNode();
+		nodeObj.setNodeName("END");
+		nodeObj.setFlowMainId(flow.getId());
+		nodeObj.setFlowVersion(flow.getFlowVersion());
+		nodeObj.setNamespaceId(flow.getNamespaceId());
+		nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
+		nodeObj.setNodeLevel(flowGraph.getNodes().size());
+		nodeObj.setDescription("");
+		FlowGraphNode end = new FlowGraphNodeStart();
+		start.setFlowNode(nodeObj);		
+		flowGraph.getNodes().add(end);
 		
 		//now all the graph is collected, do snapshot
 		Flow flowNew = flowProvider.getFlowById(flowId);
@@ -1028,20 +1065,39 @@ public class FlowServiceImpl implements FlowService {
 			//the flow is updated, retry
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONFIG_BUSY, "flow has changed, retry");
 		}
+		
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		flowNew.setUpdateTime(now);
 		flowNew.setStatus(FlowStatusType.SNAPSHOT.getCode());
 		flowProvider.updateFlow(flowNew);
 		
+		boolean isOk = true;
 		try {
 			dbProvider.execute((s)->{
-				doSnapshot(flowGraph);	
+				doSnapshot(flowGraph);
 				return true;
 			});
 			
+			//running now
+			now = new Timestamp(DateHelper.currentGMTTime().getTime());
+			flowNew.setUpdateTime(now);
+			flowNew.setStatus(FlowStatusType.RUNNING.getCode());
+			flowProvider.updateFlow(flowNew);
+			
 		} catch(Exception ex) {
-			LOGGER.info("do snapshot error", ex);
+			isOk = false;
+			LOGGER.error("do snapshot error", ex);
 		}
 		
-		return true;
+		if(!isOk) {
+			//change back to config
+			now = new Timestamp(DateHelper.currentGMTTime().getTime());
+			flowNew.setUpdateTime(now);
+			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
+			flowProvider.updateFlow(flowNew);			
+		}
+		
+		return isOk;
 	}
 	
 	private FlowGraphNode getFlowGraphNode(FlowNode flowNode) {
@@ -1119,7 +1175,108 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	private void doSnapshot(FlowGraph flowGraph) {
+		//step1 create flow
+		Flow flow = flowGraph.getFlow();
+		flow.setFlowMainId(flow.getId());
+		flow.setId(null);
+		flowProvider.createFlow(flowGraph.getFlow());
 		
+		//step2 create flowNodes
+		for(FlowGraphNode node : flowGraph.getNodes()) {
+			FlowNode flowNode = node.getFlowNode();
+			Long oldFlowNodeId = flowNode.getId();
+			flowNode.setId(null);
+			flowNode.setFlowMainId(flow.getFlowMainId());
+			flowNode.setFlowVersion(flow.getFlowVersion());
+			flowNodeProvider.createFlowNode(flowNode);
+			if(oldFlowNodeId == null) {// start or end flowNode
+				continue;
+			}
+			
+			//step3 create flowNode's buttons
+			for(FlowGraphButton button : node.getApplierButtons()) {
+				doSnapshotButton(flow, flowNode, button);
+			}
+			for(FlowGraphButton button : node.getProcessorButtons()) {
+				doSnapshotButton(flow, flowNode, button);
+			}
+			
+			//step6 copy flowNode's processors
+			List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(oldFlowNodeId
+					, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+			if(selections != null && selections.size() > 0) {
+				for(FlowUserSelection sel: selections) {
+					sel.setBelongTo(flowNode.getId());
+					sel.setFlowMainId(flow.getFlowMainId());
+					sel.setFlowVersion(flow.getFlowVersion());
+					flowUserSelectionProvider.createFlowUserSelection(sel);
+				}
+			}
+			
+			//step7 copy flowNode's actions
+			doSnapshotAction(flow, flowNode.getId(), node.getMessageAction());
+			doSnapshotAction(flow, flowNode.getId(), node.getSmsAction());
+			doSnapshotAction(flow, flowNode.getId(), node.getTickMessageAction());
+			doSnapshotAction(flow, flowNode.getId(), node.getTickSMSAction());
+			doSnapshotAction(flow, flowNode.getId(), node.getTrackApproveEnter());
+			doSnapshotAction(flow, flowNode.getId(), node.getTrackRejectEnter());
+			doSnapshotAction(flow, flowNode.getId(), node.getTrackTransferLeave());
+		}
+		
+		//step8 copy flow's supervisor
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flow.getFlowMainId()
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+		if(selections != null && selections.size() > 0) {
+			for(FlowUserSelection sel: selections) {
+				sel.setBelongTo(flow.getFlowMainId());
+				sel.setFlowMainId(flow.getFlowMainId());
+				sel.setFlowVersion(flow.getFlowVersion());
+				flowUserSelectionProvider.createFlowUserSelection(sel);
+			}
+		}
+	}
+	
+	private void doSnapshotButton(Flow flow, FlowNode flowNode, FlowGraphButton button) {
+		FlowButton flowButton = button.getFlowButton();
+//		Long oldFlowButtonId = flowButton.getId();
+		
+		flowButton.setId(null);
+		flowButton.setFlowMainId(flow.getFlowMainId());
+		flowButton.setFlowVersion(flow.getFlowVersion());
+		flowButton.setFlowNodeId(flowNode.getId());
+		flowButtonProvider.createFlowButton(flowButton);
+		
+		//step4 create flowButton's actions
+		doSnapshotAction(flow, flowButton.getId(), button.getMessage());
+		doSnapshotAction(flow, flowButton.getId(), button.getSms());
+		if(null != button.getScripts()) {
+			for(FlowGraphAction action: button.getScripts()) {
+				doSnapshotAction(flow, flowButton.getId(), action);
+			}	
+		}
+	}
+	
+	private void doSnapshotAction(Flow flow, Long belongTo, FlowGraphAction action) {
+		if(action == null) {
+			return;
+		}
+		
+		FlowAction flowAction = action.getFlowAction();
+		Long oldFlowActionId = flowAction.getId();
+		flowAction.setId(null);
+		flowAction.setFlowMainId(flow.getFlowMainId());
+		flowAction.setFlowVersion(flow.getFlowVersion());
+		flowAction.setBelongTo(belongTo);
+		flowActionProvider.createFlowAction(flowAction);
+		
+		//step5 create user-selections
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(oldFlowActionId, FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
+		if(selections != null && selections.size() > 0) {
+			for(FlowUserSelection sel : selections) {
+				sel.setBelongTo(flowAction.getId());
+				flowUserSelectionProvider.createFlowUserSelection(sel);
+			}
+		}
 	}
 
 	@Override
