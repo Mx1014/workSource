@@ -3,13 +3,8 @@ package com.everhomes.quality;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.quality.QualityInspectionLogDTO;
-import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.ScoreDTO;
-import com.everhomes.rest.quality.ScoreGroupBySpecificationDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
 
 
@@ -102,7 +97,7 @@ public interface QualityProvider {
 	List<QualityInspectionSpecifications> listChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Long parentId, Byte inspectionType);
 
 	List<TaskCountDTO> countTasks(String ownerType, Long ownerId, String targetType, Long targetId, Long startTime, Long endTime, int offset, int count);
-	List<ScoreDTO> countScores(String ownerType, Long ownerId, String targetType, List<Long> targetIds, String superiorPath, Long startTime, Long endTime);
+	ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId, String superiorPath, Long startTime, Long endTime);
 	
 	void populateRecordItemResults(final List<QualityInspectionTaskRecords> records);
 	void populateRecordItemResult(QualityInspectionTaskRecords record);

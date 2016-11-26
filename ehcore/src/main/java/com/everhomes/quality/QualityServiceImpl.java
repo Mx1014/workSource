@@ -16,21 +16,17 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
 import java.util.HashMap;
-import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.stream.Collector;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
-import javax.validation.constraints.NotNull;
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.aspectj.weaver.Member;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -53,10 +49,6 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.quality.QualityService;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalResourceOrder;
-import com.everhomes.rentalv2.RentalItem;
 import com.everhomes.rentalv2.Rentalv2ServiceImpl;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.repeat.RepeatSettings;
@@ -64,17 +56,13 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.forum.PostContentType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationTreeDTO;
 import com.everhomes.rest.quality.CountScoresCommand;
 import com.everhomes.rest.quality.CountScoresResponse;
 import com.everhomes.rest.quality.CountTasksCommand;
@@ -88,7 +76,6 @@ import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
 import com.everhomes.rest.quality.EvaluationDTO;
 import com.everhomes.rest.quality.FactorsDTO;
-import com.everhomes.rest.quality.GetGroupMembersCommand;
 import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
@@ -133,7 +120,7 @@ import com.everhomes.rest.quality.ReportVerificationResultCommand;
 import com.everhomes.rest.quality.ReviewReviewQualityStandardCommand;
 import com.everhomes.rest.quality.ReviewVerificationResultCommand;
 import com.everhomes.rest.quality.ScoreDTO;
-import com.everhomes.rest.quality.ScoreGroupBySpecificationDTO;
+import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
 import com.everhomes.rest.quality.SpecificationApplyPolicy;
 import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.StandardGroupDTO;
@@ -142,10 +129,6 @@ import com.everhomes.rest.quality.UpdateQualityCategoryCommand;
 import com.everhomes.rest.quality.UpdateQualitySpecificationCommand;
 import com.everhomes.rest.quality.UpdateQualityStandardCommand;
 import com.everhomes.rest.quality.UpdateFactorCommand;
-import com.everhomes.rest.rentalv2.RentalBillDTO;
-import com.everhomes.rest.rentalv2.RentalServiceErrorCode;
-import com.everhomes.rest.rentalv2.SiteBillStatus;
-import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.rest.repeat.TimeRangeDTO;
 import com.everhomes.rest.user.MessageChannelType;
@@ -2411,7 +2394,7 @@ public class QualityServiceImpl implements QualityService {
 	@Override
 	public CountScoresResponse countScores(CountScoresCommand cmd) {
 		CountScoresResponse response = new CountScoresResponse();
-		List<ScoreGroupBySpecificationDTO> scoresBySpecification = new ArrayList<ScoreGroupBySpecificationDTO>();
+		List<ScoreGroupByTargetDTO> scoresByTarget= new ArrayList<ScoreGroupByTargetDTO>();
 		
 		List<QualityInspectionSpecifications> specifications = new ArrayList<QualityInspectionSpecifications>();
 		
@@ -2423,7 +2406,8 @@ public class QualityServiceImpl implements QualityService {
 			specifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, 0L, parent.getId(), null);
 		}
 
-		List<QualityInspectionSpecificationDTO> dtos = new ArrayList<QualityInspectionSpecificationDTO>();
+		Map<Long,List<QualityInspectionSpecificationDTO>> targetSpecifitionTree = new HashMap<Long,List<QualityInspectionSpecificationDTO>>();
+
 		if(cmd.getTargetIds() != null && cmd.getTargetIds().size() > 0) {
 			for(Long target : cmd.getTargetIds()) {
 				List<QualityInspectionSpecifications> scopeSpecifications = new ArrayList<QualityInspectionSpecifications>();
@@ -2433,61 +2417,53 @@ public class QualityServiceImpl implements QualityService {
 				} else {
 					scopeSpecifications = qualityProvider.listChildrenSpecifications(cmd.getOwnerType(), cmd.getOwnerId(), (byte)0, target, cmd.getSpecificationId(), null);
 				}
-				
-				dtos = dealWithScopeSpecifications(specifications, scopeSpecifications);
-			}
-		}
-				
-		if(dtos != null && dtos.size() > 0) {
-			for(QualityInspectionSpecificationDTO dto : dtos) {
-				List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
-				if(dto.getId() == null || dto.getId() == 0L) {
-					String superiorPath = "%";
-					scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime());
-				} else {
-					QualityInspectionSpecifications parent = verifiedSpecificationById(dto.getId(), cmd.getOwnerType(), cmd.getOwnerId());
-					String superiorPath = parent.getPath() + "%";
-					scores = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetIds(), superiorPath, cmd.getStartTime(), cmd.getEndTime());
+
+				//获得每个项目的specification tree
+//				targetSpecifitionTree.put(target, dealWithScopeSpecifications(specifications, scopeSpecifications));
+
+				List<QualityInspectionSpecificationDTO> specificationTree = dealWithScopeSpecifications(specifications, scopeSpecifications);
+
+				ScoreGroupByTargetDTO scoreGroupDto = new ScoreGroupByTargetDTO();
+				scoreGroupDto.setTargetId(target);
+				Community community = communityProvider.findCommunityById(target);
+				if(community != null) {
+					scoreGroupDto.setTargetName(community.getName());
 				}
-				
-				if(scores != null && scores.size() > 0) {
-					Map<Long, ScoreDTO> targetScores = new HashMap<Long, ScoreDTO>();
-					ScoreGroupBySpecificationDTO scoreBySpecification = new ScoreGroupBySpecificationDTO();
-					scoreBySpecification.setSpecificationId(dto.getId());
-					scoreBySpecification.setSpecificationName(dto.getName());
-					scoreBySpecification.setSpecificationInspectionType(dto.getInspectionType());
-					scoreBySpecification.setSpecificationScore(dto.getScore());
-					scoreBySpecification.setSpecificationWeight(dto.getWeight());
-					for(ScoreDTO scoreDto : scores) {
-						if(targetScores.get(scoreDto.getTargetId()) == null) {
-							Community community = communityProvider.findCommunityById(scoreDto.getTargetId());
-							if(community != null) {
-								scoreDto.setTargetName(community.getName());
-							}
-							
-							targetScores.put(scoreDto.getTargetId(), scoreDto);
+
+				if(specificationTree != null && specificationTree.size() > 0) {
+					List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+					for(QualityInspectionSpecificationDTO dto : specificationTree) {
+						ScoreDTO score = new ScoreDTO();
+						if(dto.getId() == null || dto.getId() == 0L) {
+							String superiorPath = "%";
+							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, cmd.getStartTime(), cmd.getEndTime());
 						} else {
-							ScoreDTO targetScore = targetScores.get(scoreDto.getTargetId());
-							targetScore.setScore(targetScore.getScore()+scoreDto.getScore());
-							targetScores.put(scoreDto.getTargetId(), targetScore);
+							QualityInspectionSpecifications parent = verifiedSpecificationById(dto.getId(), cmd.getOwnerType(), cmd.getOwnerId());
+							String superiorPath = parent.getPath() + "%";
+							score = qualityProvider.countScores(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), target, superiorPath, cmd.getStartTime(), cmd.getEndTime());
 						}
+
+						if(score != null) {
+							score.setSpecificationId(dto.getId());
+							score.setSpecificationName(dto.getName());
+							score.setSpecificationInspectionType(dto.getInspectionType());
+							score.setSpecificationScore(dto.getScore());
+							score.setSpecificationWeight(dto.getWeight());
+
+							Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
+							score.setScore(mark);
+
+						}
+						scores.add(score);
 					}
-					
-					List<ScoreDTO> scoreList = new ArrayList<ScoreDTO>();
-					for(ScoreDTO scoreDTO : targetScores.values()) {
-						Double score = (scoreBySpecification.getSpecificationScore() - scoreDTO.getScore()) * scoreBySpecification.getSpecificationWeight();
-						scoreDTO.setScore(score);
-						scoreList.add(scoreDTO);
-					}
-					scoreBySpecification.setScores(scoreList);
-					scoresBySpecification.add(scoreBySpecification);
-					
+
+					scoreGroupDto.setScores(scores);
 				}
-				
+				scoresByTarget.add(scoreGroupDto);
 			}
 		}
 
-		response.setScores(scoresBySpecification);
+		response.setScores(scoresByTarget);
 		return response;
 	}
 

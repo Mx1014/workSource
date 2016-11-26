@@ -5,18 +5,27 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>id: 参考主键id</li>
- *  <li>targetName: 项目名</li>
- *  <li>targetId: 项目id</li>
+ *  <li>specificationId: 类型/规范 id</li>
+ *  <li>specificationName: 类型/规范 名</li>
+ *  <li>specificationWeight: 类型/规范 权重</li>
+ *  <li>specificationScore: 类型/规范 分数</li>
+ *  <li>specificationInspectionType: 类型/规范 类型 0: 类型, 1: 规范, 2: 规范事项</li>
  *  <li>score: 分数</li>
  * </ul>
  */
 public class ScoreDTO {
 
 	private Long id;
-	
-	private Long targetId;
-	
-	private String targetName;
+
+	private Long specificationId;
+
+	private String specificationName;
+
+	private Double specificationWeight;
+
+	private Double specificationScore;
+
+	private Byte specificationInspectionType;
 	
 	private Double score;
 
@@ -28,20 +37,44 @@ public class ScoreDTO {
 		this.id = id;
 	}
 
-	public Long getTargetId() {
-		return targetId;
+	public Long getSpecificationId() {
+		return specificationId;
 	}
 
-	public void setTargetId(Long targetId) {
-		this.targetId = targetId;
+	public void setSpecificationId(Long specificationId) {
+		this.specificationId = specificationId;
 	}
 
-	public String getTargetName() {
-		return targetName;
+	public String getSpecificationName() {
+		return specificationName;
 	}
 
-	public void setTargetName(String targetName) {
-		this.targetName = targetName;
+	public void setSpecificationName(String specificationName) {
+		this.specificationName = specificationName;
+	}
+
+	public Double getSpecificationWeight() {
+		return specificationWeight;
+	}
+
+	public void setSpecificationWeight(Double specificationWeight) {
+		this.specificationWeight = specificationWeight;
+	}
+
+	public Double getSpecificationScore() {
+		return specificationScore;
+	}
+
+	public void setSpecificationScore(Double specificationScore) {
+		this.specificationScore = specificationScore;
+	}
+
+	public Byte getSpecificationInspectionType() {
+		return specificationInspectionType;
+	}
+
+	public void setSpecificationInspectionType(Byte specificationInspectionType) {
+		this.specificationInspectionType = specificationInspectionType;
 	}
 
 	public Double getScore() {

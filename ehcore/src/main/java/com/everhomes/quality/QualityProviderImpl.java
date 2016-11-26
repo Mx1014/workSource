@@ -102,120 +102,29 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import com.everhomes.community.Building;
-import com.everhomes.community.BuildingAttachment;
-import com.everhomes.community.CommunityProviderImpl;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.organization.Organization;
-import com.everhomes.quality.QualityProvider;
 import com.everhomes.rest.equipment.ReviewResult;
-import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
-import com.everhomes.rest.quality.QualityInspectionLogDTO;
-import com.everhomes.rest.quality.QualityInspectionLogType;
-import com.everhomes.rest.quality.QualityInspectionSpecificationDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewResult;
 import com.everhomes.rest.quality.QualityInspectionTaskReviewStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.rest.quality.QualityStandardStatus;
 import com.everhomes.rest.quality.ScoreDTO;
-import com.everhomes.rest.quality.ScoreGroupBySpecificationDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
 import com.everhomes.scheduler.QualityInspectionScheduleJob;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhForumPostsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionCategoriesDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationFactorsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionEvaluationsDao;
@@ -228,7 +137,6 @@ import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskRecordsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
-import com.everhomes.server.schema.tables.pojos.EhForumPosts;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionEvaluationFactors;
@@ -242,7 +150,6 @@ import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
-import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationsRecord;
@@ -1765,10 +1672,10 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<ScoreDTO> countScores(String ownerType, Long ownerId, String targetType, List<Long> targetIds,
+	public ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId,
 			String superiorPath, Long startTime, Long endTime) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		List<ScoreDTO> scores = new ArrayList<ScoreDTO>();
+		ScoreDTO score = new ScoreDTO();
 		
 		
 		final Field<?>[] fields = {Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID, 
@@ -1778,7 +1685,7 @@ public class QualityProviderImpl implements QualityProvider {
 		query.addFrom(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS);
 		
 		
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.in(targetIds));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.eq(targetId));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE.eq(targetType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.OWNER_ID.eq(ownerId));
@@ -1800,7 +1707,6 @@ public class QualityProviderImpl implements QualityProvider {
         }
 		
 		query.fetch().map((r) -> {
-			ScoreDTO score = new ScoreDTO();
 			Double totalScore = r.getValue("totalScore", Double.class);
 			QualityInspectionSpecifications parentSpecification = findSpecificationById(r.getValue(
 					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID), ownerType, ownerId);
@@ -1810,13 +1716,10 @@ public class QualityProviderImpl implements QualityProvider {
 				score.setScore(totalScore);
 			}
 			
-			score.setTargetId(r.getValue(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID));
-			
-			scores.add(score);
 			return null;
 		});
         
-		return scores;
+		return score;
 	}
 	
 }
