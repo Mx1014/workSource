@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -106,6 +107,12 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private FlowActionProvider flowActionProvider;
+    
+    private Map<String, FlowGraph> graphMap;
+    
+    public FlowServiceImpl() {
+    	graphMap = new ConcurrentHashMap<String, FlowGraph>();
+    }
 	
     /**
      * create config flow
@@ -1107,6 +1114,9 @@ public class FlowServiceImpl implements FlowService {
 			flowNew.setUpdateTime(now);
 			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
 			flowProvider.updateFlow(flowNew);			
+		} else {
+			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
+			graphMap.put(fmt, flowGraph);
 		}
 		
 		return isOk;
@@ -1293,7 +1303,44 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowGraph getFlowGraph(Long flowId, Integer flowVer) {
-		return null;
+		String fmt = String.format("%d:%d", flowId, flowVer);
+		FlowGraph flowGraph = graphMap.get(fmt);
+		if(flowGraph == null) {
+			flowGraph = getSnapshotGraph(flowId, flowVer);
+			graphMap.put(fmt, flowGraph);
+		}
+		
+		return flowGraph;
+	}
+	
+	private FlowGraph getSnapshotGraph(Long flowId, Integer flowVer) {
+		if(flowVer <= 0) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");	
+		}
+		
+		FlowGraph flowGraph = new FlowGraph();
+		Flow flow = flowProvider.findSnapshotFlow(flowId, flowVer);
+		if(flow == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");
+		}
+		
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, flowVer);
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		int i = 0;
+		for(FlowNode fn : flowNodes) {
+			if(!fn.getNodeLevel().equals(i)) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error");	
+			}
+			
+			flowGraph.getNodes().add(getFlowGraphNode(fn));
+			
+			i++;
+		}
+		
+		return flowGraph;
 	}
 
 	@Override

@@ -25,5 +25,7 @@ public interface FlowProvider {
 	List<Flow> findFlowsByModule(ListingLocator locator, ListFlowCommand cmd);
 
 	void flowMarkUpdated(Flow flow);
+
+	Flow findSnapshotFlow(Long flowId, Integer flowVer);
 	
 }

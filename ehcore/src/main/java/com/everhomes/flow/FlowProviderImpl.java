@@ -205,4 +205,28 @@ public class FlowProviderImpl implements FlowProvider {
 		}
 		updateFlow(flow);
 	}
+	
+	@Override
+	public Flow findSnapshotFlow(Long flowId, Integer flowVer) {
+		ListingLocator locator = new ListingLocator();
+		List<Flow> flows = this.queryFlows(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOWS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(flowId));
+				query.addConditions(Tables.EH_FLOWS.FLOW_VERSION.eq(flowVer));
+				
+				return query;
+			}
+			
+		});
+		
+		if(flows == null || flows.size() == 0) {
+			return null;
+		}
+		
+		return flows.get(0);
+	}
 }

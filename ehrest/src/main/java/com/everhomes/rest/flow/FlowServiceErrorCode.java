@@ -7,4 +7,5 @@ public interface FlowServiceErrorCode {
     static final int ERROR_FLOW_NOT_EXISTS = 10002;
     static final int ERROR_FLOW_NODE_LEVEL_ERR = 10003;
     static final int ERROR_FLOW_CONFIG_BUSY = 10004;
+    static final int ERROR_FLOW_SNAPSHOT_NOEXISTS = 10005;
 }
