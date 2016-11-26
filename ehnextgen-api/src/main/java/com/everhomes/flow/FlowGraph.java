@@ -38,4 +38,10 @@ public class FlowGraph {
 	public Map<Long, FlowGraphAction> getIdToAction() {
 		return idToAction;
 	}
+	public FlowGraphNode getGraphNode(Long id) {
+		return idToNode.get(id);
+	}
+	public FlowGraphButton getGraphButton(Long id) {
+		return idToButton.get(id);
+	}
 }

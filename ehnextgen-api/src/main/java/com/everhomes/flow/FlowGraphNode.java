@@ -34,7 +34,7 @@ public abstract class FlowGraphNode {
 	public abstract FlowStepType getStepType();
 	public abstract void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException;
 	public abstract void stepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException;
-	public abstract void onAction(FlowCaseState ctx, FlowGraphEvent event);
+	public abstract void onAction(FlowCaseState ctx, FlowStepType step);
 	
 	public FlowNode getFlowNode() {
 		return flowNode;

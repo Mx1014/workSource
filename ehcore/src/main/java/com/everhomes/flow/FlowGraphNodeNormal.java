@@ -25,9 +25,8 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 	}
 
 	@Override
-	public void onAction(FlowCaseState ctx, FlowGraphEvent event) {
-		// TODO Auto-generated method stub
-		
+	public void onAction(FlowCaseState ctx, FlowStepType nextStep) {
+		//TODO need this? the action is fired in action
 	}
 
 }

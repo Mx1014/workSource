@@ -10,6 +10,7 @@ public class FlowCaseState {
 	private FlowGraphNode prefixNode;
 	private FlowGraphNode currentNode;
 	private FlowGraphNode nextNode;
+	private FlowGraphEvent currentEvent;
 	private Map<String, Object> extra;
 
 	public String getModuleName() {
@@ -53,6 +54,12 @@ public class FlowCaseState {
 	}
 	public void setNextNode(FlowGraphNode nextNode) {
 		this.nextNode = nextNode;
+	}
+	public FlowGraphEvent getCurrentEvent() {
+		return currentEvent;
+	}
+	public void setCurrentEvent(FlowGraphEvent currentEvent) {
+		this.currentEvent = currentEvent;
 	}
 	public Map<String, Object> getExtra() {
 		return extra;

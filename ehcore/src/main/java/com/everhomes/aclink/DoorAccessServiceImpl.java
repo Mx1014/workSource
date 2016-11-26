@@ -169,7 +169,7 @@ import org.apache.commons.httpclient.util.DateUtil;
 
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AesServerKeyProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
