@@ -449,4 +449,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     public void testFlowListenerManager() {
     	Assert.assertTrue(flowListenerManager.getListenerSize() > 1);
     }
+    
+    @Test
+    public void testFlowScriptFired() {
+    	
+    }
 }

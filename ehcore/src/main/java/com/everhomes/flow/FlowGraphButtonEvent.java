@@ -1,7 +1,7 @@
 package com.everhomes.flow;
 
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEventType;
@@ -11,12 +11,11 @@ import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.User;
 import com.everhomes.util.RuntimeErrorException;
 
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 
-@Service
+@Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowUserType userType;
