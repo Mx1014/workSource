@@ -24,6 +24,8 @@ public class ListOrganizationContactCommand {
 	private Integer pageSize;
 	
 	private String keywords;
+
+	private Byte visibleFlag;
 	
 	public ListOrganizationContactCommand() {
     }
@@ -81,6 +83,13 @@ public class ListOrganizationContactCommand {
 		this.keywords = keywords;
 	}
 
+	public Byte getVisibleFlag() {
+		return visibleFlag;
+	}
+
+	public void setVisibleFlag(Byte visibleFlag) {
+		this.visibleFlag = visibleFlag;
+	}
 
 	@Override
     public String toString() {
