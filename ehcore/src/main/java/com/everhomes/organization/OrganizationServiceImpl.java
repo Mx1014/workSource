@@ -1,7 +1,57 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import com.everhomes.acl.*;
+import java.io.ByteArrayOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.io.UnsupportedEncodingException;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.stream.Collectors;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.jooq.Condition;
+import org.simplejavamail.email.Email;
+import org.simplejavamail.email.EmailBuilder;
+import org.simplejavamail.mailer.Mailer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.ResourceUserRoleResolver;
+import com.everhomes.acl.Role;
+import com.everhomes.acl.RoleAssignment;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -28,19 +78,21 @@ import com.everhomes.forum.Post;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupAdminStatus;
 import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
+import com.everhomes.rentalv2.PunchNotificationTemplateCode;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
@@ -50,21 +102,65 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
+import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
+import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
+import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
+import com.everhomes.rest.enterprise.RejectContactCommand;
+import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.enterprise.VerifyEnterpriseContactDTO;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
-import com.everhomes.rest.forum.*;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
+import com.everhomes.rest.forum.ForumConstants;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicByForumCommand;
+import com.everhomes.rest.forum.ListTopicCommand;
+import com.everhomes.rest.forum.ListTopicCommentCommand;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.OrganizationTopicMixType;
+import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.forum.PostPrivacy;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.launchpad.ItemKind;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaConstant;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
-import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.*;
+import com.everhomes.rest.organization.pm.AddPmBuildingCommand;
+import com.everhomes.rest.organization.pm.DeletePmCommunityCommand;
+import com.everhomes.rest.organization.pm.ListPmBuildingCommand;
+import com.everhomes.rest.organization.pm.ListPmManagementsCommand;
+import com.everhomes.rest.organization.pm.PmBuildingDTO;
+import com.everhomes.rest.organization.pm.PmManagementsDTO;
+import com.everhomes.rest.organization.pm.PmManagementsResponse;
+import com.everhomes.rest.organization.pm.PmMemberGroup;
+import com.everhomes.rest.organization.pm.PmMemberStatus;
+import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
+import com.everhomes.rest.organization.pm.UnassignedBuildingDTO;
+import com.everhomes.rest.organization.pm.UpdateOrganizationMemberByIdsCommand;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -74,7 +170,16 @@ import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.IdentifierClaimStatus;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserCurrentEntityType;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.UserStatus;
+import com.everhomes.rest.user.UserTokenCommand;
+import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.OrganizationSearcher;
@@ -84,38 +189,25 @@ import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.EncryptionUtils;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroup;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProfile;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.PinYinHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Condition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.servlet.http.HttpServletResponse;
-
-import java.io.*;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
 
 @Component
 public class OrganizationServiceImpl implements OrganizationService {
@@ -128,6 +220,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private DbProvider dbProvider;
 
+	@Autowired
+	private NamespaceProvider namespaceProvider;
+	
+	@Autowired
+	LocaleStringService localeStringService;
+	
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
@@ -388,6 +486,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		org.setDisplayName(organization.getName());
 		
 		OrganizationDetailDTO dto = ConvertHelper.convert(org, OrganizationDetailDTO.class);
+		dto.setEmailDomain(org.getEmailDomain());
 		dto.setName(organization.getName());
 		dto.setAvatarUri(org.getAvatar());
 		if(null != org.getCheckinDate())
@@ -536,6 +635,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			organization.setGroupId(group.getId());
+			organization.setEmailDomain(cmd.getEmailDomain());
 			organizationProvider.createOrganization(organization);
 			
 			OrganizationDetail enterprise = new OrganizationDetail();
@@ -551,6 +651,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setDisplayName(cmd.getDisplayName());
 			enterprise.setPostUri(cmd.getPostUri());
 			enterprise.setMemberCount(cmd.getMemberCount());
+			enterprise.setEmailDomain(cmd.getEmailDomain());
 			organizationProvider.createOrganizationDetail(enterprise);
 			
 			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
@@ -659,6 +760,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			organization.setId(cmd.getId());
 			organization.setName(cmd.getName());
 			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organization.setEmailDomain(cmd.getEmailDomain());
 			organizationProvider.updateOrganization(organization);
 			
 			OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organization.getId());
@@ -668,6 +770,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setCreateTime(organization.getCreateTime());
 				organizationDetail.setAddress(cmd.getAddress());
 				organizationDetail.setDescription(cmd.getDescription());
+				organizationDetail.setEmailDomain(cmd.getEmailDomain());
 				organizationDetail.setAvatar(cmd.getAvatar());
 				if(!StringUtils.isEmpty(cmd.getCheckinDate())){
 					organizationDetail.setCheckinDate(Timestamp.valueOf(cmd.getCheckinDate()));
@@ -677,6 +780,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setPostUri(cmd.getPostUri());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
+				organizationDetail.setEmailDomain(cmd.getEmailDomain());
 				organizationDetail.setAddress(cmd.getAddress());
 				organizationDetail.setDescription(cmd.getDescription());
 				organizationDetail.setAvatar(cmd.getAvatar());
@@ -1754,7 +1858,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	    List<Organization> orgDbist = this.organizationProvider.findOrganizationByCommunityId(communityId);
 //	    String rootPath = null;
 	    Set<Long> organizationIds = new HashSet<>();
-	    for(Organization org : orgDbist) {
+	    if (orgDbist != null && !orgDbist.isEmpty()) {
+	    	for(Organization org : orgDbist) {
 //	        orgResultist.add(org);
 //	        rootPath = getOrganizationRootPath(org.getPath());
 //	        if(rootPath != null && rootPath.length() > 0) {
@@ -1763,13 +1868,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 //	                orgResultist.addAll(tempDbist);
 //	            }
 //	        }
-
-			if(org != null && org.getPath() != null){
-				organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
-												.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
-												.filter(f->f!=null).collect(Collectors.toSet()));
-			}
-	    }
+	    		
+	    		if(org != null && org.getPath() != null){
+	    			organizationIds.addAll(Arrays.asList(org.getPath().trim().split("/"))
+	    					.stream().map(o->StringUtils.isEmpty(o.trim())?null:Long.valueOf(o))
+	    					.filter(f->f!=null).collect(Collectors.toSet()));
+	    		}
+	    	}
+		}
 	    return new ArrayList<>(organizationIds);
 	}
 	
@@ -5214,15 +5320,21 @@ public class OrganizationServiceImpl implements OrganizationService {
 	                + ", enterpriseId=" + member.getOrganizationId() + ", status=" + member.getStatus() + ", removeFromDb=" + member.getStatus());
 	        }
 	}
+	@Override
+	public List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,List<Long> memberUids ){
 
-
+		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationMembers(orgId, memberUids);
+		Organization org = this.checkOrganization(orgId); 
+		return this.convertDTO(organizationMembers, org);
+		
+	}
 	/**
 	 * 补充返回用户信息，部门 角色
 	 * @param organizationMembers
 	 * @param org
 	 * @return
      */
-	private List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
+	public List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
@@ -7472,6 +7584,100 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.error("Community not found in organization, userId={}, namespaceId={}, organizationId={}", 
                 userId, namespaceId, oranizationId);
         }
+	}
+
+	@Override
+	public List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd) { 
+		Long userId = UserContext.current().getUser().getId();
+//		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+		//通过namespace和email domain 找企业
+		String emailDomain = cmd.getEmail().substring(cmd.getEmail().indexOf("@")+1);
+		List<Organization> organizations = this.organizationProvider.listOrganizationByEmailDomainAndNamespace(emailDomain,cmd.getCommunityId());
+		//TODO: 判断邮箱是否被使用
+		OrganizationMember member = organizationProvider.getOrganizationMemberByContactToken(UserContext.getCurrentNamespaceId(),cmd.getEmail());
+		if(null != member ){
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_EMAIL_REPEAT,
+					"email already exists");
+		}
+		if(null == organizations || organizations.size() == 0){
+			return null;
+		}
+		//如果只有一个公司,直接认证
+		if(organizations.size() == 1){
+			ApplyForEnterpriseContactByEmailCommand cmd2 = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
+			cmd2.setOrganizationId(organizations.get(0).getId());
+			applyForEnterpriseContactByEmail(cmd2);
+		}
+		
+		return organizations.stream().map(r->{
+			return ConvertHelper.convert(r, OrganizationDTO.class); 
+			}).collect(Collectors.toList());
+	}
+
+	@Override
+	public void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd) {
+		Long userId = UserContext.current().getUser().getId();
+//		SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
+		VerifyEnterpriseContactDTO dto = ConvertHelper.convert(cmd, VerifyEnterpriseContactDTO.class);
+		dto.setUserId(userId);
+		dto.setEnterpriseId(cmd.getOrganizationId());
+		
+		// 添加联系人
+		CreateOrganizationMemberCommand cmd2 =  new CreateOrganizationMemberCommand();
+		cmd2.setContactType(ContactType.MOBILE.getCode());
+		UserIdentifier useridentifier = this.getUserMobileIdentifier(userId);
+		cmd2.setContactToken(useridentifier.getIdentifierToken());
+		cmd2.setOrganizationId(cmd.getOrganizationId());
+		cmd2.setTargetType(OrganizationMemberTargetType.USER.getCode());
+		cmd2.setTargetId(userId);
+		applyForEnterpriseContact(cmd2);
+		//目前写死30分钟
+		dto.setEndTime(DateHelper.currentGMTTime().getTime()+30*60*1000L);
+		String verifyToken = WebTokenGenerator.getInstance().toWebToken(dto);
+		String host =  configurationProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
+		String verifyUrl = host + "/evh/org/verifyEnterpriseContact?verifyToken="+verifyToken;
+		//TODO: send email
+		Map<String,Object> map = new HashMap<String, Object>();
+
+		String locale = "zh_CN";
+		map.put("nickName", UserContext.current().getUser().getNickName());
+		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
+		String appName = "左邻";
+		if(null != namespace && namespace.getName() != null)
+			appName = namespace.getName();
+		map.put("appName", appName);
+		map.put("verifyUrl", verifyUrl); 
+		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
+		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
+				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件"); 
+		Email email = new EmailBuilder()
+	    .from(appName, "zuolin@zuolin.com")
+	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
+	    .subject(mailSubject)
+	    .text(mailText)
+	    .build();
+		try{
+			new Mailer("smtp.mxhichina.com", 25, "zuolin@zuolin.com", "abc123!@#").sendMail(email);
+		}catch (Exception e){
+			LOGGER.error(e.getLocalizedMessage());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
+					"send email error");
+		}
+		
+	}
+
+	@Override
+	public void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) { 
+		VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(),VerifyEnterpriseContactDTO.class );
+		if(dto == null || dto.getEndTime() ==null || dto.getEnterpriseId() == null || dto.getUserId() == null ){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"参数错误");
+		}
+		if(DateHelper.currentGMTTime().getTime() >dto.getEndTime())
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_VERIFY_OVER_TIME,
+					"over time");
+		ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
+		approveForEnterpriseContact(cmd2);
 	}
 	
 }

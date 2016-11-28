@@ -212,4 +212,8 @@ public interface Rentalv2Service {
 
 	void cancelOrderSendMessage(RentalOrder rentalBill);
 
+
+	void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,
+			RentalOrder order);
+
 }

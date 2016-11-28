@@ -1,12 +1,11 @@
 package com.everhomes.test.core.util;
 
-import com.google.gson.*;
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
+import com.google.gson.JsonElement;
+import com.google.gson.JsonParser;
 
 import java.io.*;
-import java.lang.reflect.Type;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.Date;
 
 public class GsonHelper {
 	/**
@@ -66,17 +65,5 @@ public class GsonHelper {
         }
         
         return strBuilder.toString();
-    }
-
-    public static class DateAdapter implements JsonDeserializer<Date> {
-        @Override
-        public Date deserialize(JsonElement json, Type typeOfT, JsonDeserializationContext context) throws JsonParseException {
-            try {
-                return new SimpleDateFormat("yyyy-MM-dd").parse(json.getAsString());
-            } catch (ParseException e) {
-                e.printStackTrace();
-            }
-            return null;
-        }
     }
 }

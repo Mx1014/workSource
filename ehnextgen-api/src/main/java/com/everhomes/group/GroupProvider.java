@@ -78,4 +78,5 @@ public interface GroupProvider {
 	GroupMember findGroupMemberTopOne(Long groupId);
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize);
     void evictGroupMessageMembers(Integer namespaceId, ListingLocator locator, int pageSize);
+    List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize, boolean includeCreator, Long creatorId);
 }

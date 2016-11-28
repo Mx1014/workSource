@@ -33,6 +33,10 @@ import com.everhomes.util.StringHelper;
  * <li>memberGroupPrivileges: group成员的权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
  * <li>memberForumPrivileges: group成员的论坛权限列表，是group成员时字段才有效，参考{@link com.everhomes.rest.acl.PrivilegeConstants}</li>
  * <li>discriminator: group标识，参考{@link com.everhomes.rest.group.GroupDiscriminator}</li>
+ * <li>approvalStatus: 审核的状态，针对需要验证的才有此标记，参考{@link com.everhomes.rest.group.ApprovalStatus}</li>
+ * <li>operatorName: 操作人</li>
+ * <li>joinTime: 加入时间</li>
+ * <li>shareUrl: 分享链接</li>
  * </ul>
  */
 public class GroupDTO {
@@ -60,6 +64,9 @@ public class GroupDTO {
     private Byte postFlag;
     private String creatorName;
     private String creatorFamilyName;
+    private String operatorName;
+    private Timestamp joinTime;
+    private String shareUrl;
     
     @ItemType(Long.class)
     private List<Long> memberGroupPrivileges;
@@ -71,7 +78,41 @@ public class GroupDTO {
     
     private String discriminator;
     
-    public String getCreatorName() {
+    private Byte approvalStatus;
+    
+    public String getShareUrl() {
+		return shareUrl;
+	}
+
+	public void setShareUrl(String shareUrl) {
+		this.shareUrl = shareUrl;
+	}
+
+	public Timestamp getJoinTime() {
+		return joinTime;
+	}
+
+	public void setJoinTime(Timestamp joinTime) {
+		this.joinTime = joinTime;
+	}
+
+	public String getOperatorName() {
+		return operatorName;
+	}
+
+	public void setOperatorName(String operatorName) {
+		this.operatorName = operatorName;
+	}
+
+	public Byte getApprovalStatus() {
+		return approvalStatus;
+	}
+
+	public void setApprovalStatus(Byte approvalStatus) {
+		this.approvalStatus = approvalStatus;
+	}
+
+	public String getCreatorName() {
 		return creatorName;
 	}
 

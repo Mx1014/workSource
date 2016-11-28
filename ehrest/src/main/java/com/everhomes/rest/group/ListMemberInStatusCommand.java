@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>status: 成员在group里的状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>includeCreator: 是否包含创建者，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
 public class ListMemberInStatusCommand {
@@ -23,10 +24,20 @@ public class ListMemberInStatusCommand {
     
     private Integer pageSize;
     
+    private Byte includeCreator;
+    
     public ListMemberInStatusCommand() {
     }
 
-    public Long getGroupId() {
+    public Byte getIncludeCreator() {
+		return includeCreator;
+	}
+
+	public void setIncludeCreator(Byte includeCreator) {
+		this.includeCreator = includeCreator;
+	}
+
+	public Long getGroupId() {
         return groupId;
     }
 

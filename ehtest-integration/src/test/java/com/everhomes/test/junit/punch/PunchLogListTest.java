@@ -1,19 +1,31 @@
 package com.everhomes.test.junit.punch;
 
+import java.sql.Date;
 import java.sql.Time;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.List;
 
+import org.jooq.DSLContext;
+import org.jooq.exception.DataAccessException;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.techpark.punch.ListMonthPunchLogsCommand;
+import com.everhomes.rest.techpark.punch.NormalFlag;
 import com.everhomes.rest.techpark.punch.PunchClockCommand;
 import com.everhomes.rest.techpark.punch.PunchListMonthPunchLogsRestResponse;
 import com.everhomes.rest.techpark.punch.PunchLogsDay;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.techpark.punch.PunchStatus;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhPunchDayLogs;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2Items;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class PunchLogListTest extends BaseLoginAuthTestCase {
@@ -23,7 +35,7 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 	String plainTexPassword = "123456";
 	String ownerType = PunchOwnerType.ORGANIZATION.getCode();
 	Long ownerId = 100600L;
-
+	
 	@Before
 	public void setUp() {
 		super.setUp();
@@ -77,6 +89,7 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 	public void listMonthPunchLogsTest() {
 		logon(null, userIdentifier, plainTexPassword);
 
+		SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 		String commandRelativeUri = "/techpark/punch/listMonthPunchLogs";
 
 		ListMonthPunchLogsCommand cmd = new ListMonthPunchLogsCommand();
@@ -129,6 +142,49 @@ public class PunchLogListTest extends BaseLoginAuthTestCase {
 				assertEquals(PunchStatus.LEAVEEARLY, PunchStatus.fromCode(dayLog.getAfternoonPunchStatus()));
 			}
 		}
+		List<EhPunchDayLogs> result1 =new ArrayList<EhPunchDayLogs>();
+		DSLContext dslContext = dbProvider.getDslContext();
+		try {
+			dslContext.select()
+					.from(Tables.EH_PUNCH_DAY_LOGS)
+					.where(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(ownerId))
+					.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(Long.valueOf(userIdentifier)))
+					.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(new java.sql.Date(dateSF.parse("2016-8-10").getTime())))
+					.fetch()
+					.map((r) -> {
+						result1.add(ConvertHelper.convert(r,
+								EhPunchDayLogs.class));
+						return null;
+					});
+		} catch (DataAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		assertEquals(NormalFlag.NO.getCode(), result1.get(0).getDeviceChangeFlag().byteValue()); 
+		List<EhPunchDayLogs> result2 =new ArrayList<EhPunchDayLogs>(); 
+		try {
+			dslContext.select()
+					.from(Tables.EH_PUNCH_DAY_LOGS)
+					.where(Tables.EH_PUNCH_DAY_LOGS.ENTERPRISE_ID.eq(ownerId))
+					.and(Tables.EH_PUNCH_DAY_LOGS.USER_ID.eq(Long.valueOf(userIdentifier)))
+					.and(Tables.EH_PUNCH_DAY_LOGS.PUNCH_DATE.eq(new java.sql.Date(dateSF.parse("2016-8-9").getTime())))
+					.fetch()
+					.map((r) -> {
+						result2.add(ConvertHelper.convert(r,
+								EhPunchDayLogs.class));
+						return null;
+					});
+		} catch (DataAccessException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		} catch (ParseException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+		assertEquals(NormalFlag.YES.getCode(), result2.get(0).getDeviceChangeFlag().byteValue());
 		listMonthPunchLogsTest2();
 	}
 	 /**测试点:

@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>buildingName：楼栋名称</li>
  * <li>address：位置</li>
  * <li>avgPrice：平均价格</li>
+ * <li>avgPriceStr：平均价格字段(新需求新增加新版本用)</li>
  * <li>spec：规格：用户设置座位数等</li>
  * <li>companyId：场所隶属的公司id</li>
  * <li>longitude：经度</li>
@@ -66,6 +67,7 @@ public class RentalSiteDTO {
 	private Long communityId;
 	private String communityName;
 	private BigDecimal avgPrice;
+	private String avgPriceStr;
 	private String spec;
 	private String companyName;
 	private String contactName;
@@ -513,6 +515,16 @@ public class RentalSiteDTO {
 
 	public void setSiteNumbers(List<String> siteNumbers) {
 		this.siteNumbers = siteNumbers;
+	}
+
+
+	public String getAvgPriceStr() {
+		return avgPriceStr;
+	}
+
+
+	public void setAvgPriceStr(String avgPriceStr) {
+		this.avgPriceStr = avgPriceStr;
 	}
  
 }

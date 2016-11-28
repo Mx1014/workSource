@@ -2,17 +2,91 @@
 
 package com.everhomes.forum;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Calendar;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.LinkedHashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
+import com.everhomes.acl.ResourceUserRoleResolver;
+import com.everhomes.acl.Role;
+import com.everhomes.activity.*;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.family.FamilyProvider;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.NamespaceResource;
+import com.everhomes.namespace.NamespacesProvider;
+import com.everhomes.organization.*;
+import com.everhomes.point.UserPointService;
+import com.everhomes.queue.taskqueue.JesqueClientFactory;
+import com.everhomes.region.Region;
+import com.everhomes.region.RegionProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 
+import com.everhomes.rest.activity.ActivityDTO;
+import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.activity.ActivityTokenDTO;
+import com.everhomes.rest.activity.ActivityWarningResponse;
+import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
+import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
+import com.everhomes.rest.activity.GetActivityWarningCommand;
+import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
+
+import com.everhomes.rest.activity.*;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.forum.*;
+import com.everhomes.rest.forum.admin.PostAdminDTO;
+import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
+import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
+import com.everhomes.rest.group.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.point.AddUserPointCommand;
+import com.everhomes.rest.point.PointType;
+import com.everhomes.rest.search.SearchContentType;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.ui.forum.*;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.visibility.VisibilityScope;
+import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.search.PostAdminQueryFilter;
+import com.everhomes.search.PostSearcher;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhUsers;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import net.greghaines.jesque.Job;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.elasticsearch.common.text.Text;
@@ -28,190 +102,9 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.Privilege;
-import com.everhomes.acl.ResourceUserRoleResolver;
-import com.everhomes.acl.Role;
-import com.everhomes.activity.Activity;
-import com.everhomes.activity.ActivityProivider;
-import com.everhomes.activity.ActivityRoster;
-import com.everhomes.activity.ActivityService;
-import com.everhomes.activity.WarnActivityBeginningAction;
-import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigConstants;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerResource;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.contentserver.ResourceType;
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.family.FamilyProvider;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupMember;
-import com.everhomes.group.GroupProvider;
-import com.everhomes.group.GroupService;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.LocaleStringService;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.NamespaceProvider;
-import com.everhomes.namespace.NamespaceResource;
-import com.everhomes.namespace.NamespacesProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunityRequest;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
-import com.everhomes.organization.OrganizationTask;
-import com.everhomes.organization.OrganizationTaskTarget;
-import com.everhomes.point.UserPointService;
-import com.everhomes.queue.taskqueue.JesqueClientFactory;
-import com.everhomes.region.Region;
-import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityWarningResponse;
-import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
-import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
-import com.everhomes.rest.activity.GetActivityWarningCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-import com.everhomes.rest.address.CommunityAdminStatus;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.forum.AssignTopicScopeCommand;
-import com.everhomes.rest.forum.AssignedScopeDTO;
-import com.everhomes.rest.forum.AttachmentDTO;
-import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.forum.CancelLikeTopicCommand;
-import com.everhomes.rest.forum.CheckUserPostCommand;
-import com.everhomes.rest.forum.CheckUserPostDTO;
-import com.everhomes.rest.forum.CheckUserPostStatus;
-import com.everhomes.rest.forum.ForumAssignedScopeCode;
-import com.everhomes.rest.forum.ForumConstants;
-import com.everhomes.rest.forum.ForumLocalStringCode;
-import com.everhomes.rest.forum.ForumNotificationTemplateCode;
-import com.everhomes.rest.forum.ForumServiceErrorCode;
-import com.everhomes.rest.forum.FreeStuffCommand;
-import com.everhomes.rest.forum.FreeStuffStatus;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.LikeTopicCommand;
-import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.ListTopicAssignedScopeCommand;
-import com.everhomes.rest.forum.ListTopicByForumCommand;
-import com.everhomes.rest.forum.ListTopicCommand;
-import com.everhomes.rest.forum.ListTopicCommentCommand;
-import com.everhomes.rest.forum.ListUserRelatedTopicCommand;
-import com.everhomes.rest.forum.LostAndFoundCommand;
-import com.everhomes.rest.forum.LostAndFoundStatus;
-import com.everhomes.rest.forum.MessageType;
-import com.everhomes.rest.forum.NewCommentCommand;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.OrganizationTopicMixType;
-import com.everhomes.rest.forum.PostAssignedFlag;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PostEntityTag;
-import com.everhomes.rest.forum.PostFavoriteFlag;
-import com.everhomes.rest.forum.PostPrivacy;
-import com.everhomes.rest.forum.PostStatus;
-import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
-import com.everhomes.rest.forum.QueryTopicByCategoryCommand;
-import com.everhomes.rest.forum.QueryTopicByEntityAndCategoryCommand;
-import com.everhomes.rest.forum.TopicPublishStatus;
-import com.everhomes.rest.forum.UsedAndRentalCommand;
-import com.everhomes.rest.forum.UsedAndRentalStatus;
-import com.everhomes.rest.forum.admin.PostAdminDTO;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
-import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
-import com.everhomes.rest.group.GroupDTO;
-import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.group.GroupPrivacy;
-import com.everhomes.rest.group.ListPublicGroupCommand;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.namespace.NamespaceResourceType;
-import com.everhomes.rest.news.NewsServiceErrorCode;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
-import com.everhomes.rest.organization.OfficialFlag;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
-import com.everhomes.rest.organization.OrganizationNotificationTemplateCode;
-import com.everhomes.rest.organization.OrganizationStatus;
-import com.everhomes.rest.organization.OrganizationTaskType;
-import com.everhomes.rest.organization.OrganizationType;
-import com.everhomes.rest.point.AddUserPointCommand;
-import com.everhomes.rest.point.PointType;
-import com.everhomes.rest.search.SearchContentType;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.ui.forum.GetTopicQueryFilterCommand;
-import com.everhomes.rest.ui.forum.GetTopicSentScopeCommand;
-import com.everhomes.rest.ui.forum.ListNoticeBySceneCommand;
-import com.everhomes.rest.ui.forum.MediaDisplayFlag;
-import com.everhomes.rest.ui.forum.NewTopicBySceneCommand;
-import com.everhomes.rest.ui.forum.PostFilterType;
-import com.everhomes.rest.ui.forum.SearchTopicBySceneCommand;
-import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
-import com.everhomes.rest.ui.forum.TopicFilterDTO;
-import com.everhomes.rest.ui.forum.TopicScopeDTO;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserFavoriteDTO;
-import com.everhomes.rest.user.UserFavoriteTargetType;
-import com.everhomes.rest.user.UserLikeType;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.visibility.VisibilityScope;
-import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.search.PostAdminQueryFilter;
-import com.everhomes.search.PostSearcher;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.EhUsers;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.SearchTypes;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLike;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
-
-import net.greghaines.jesque.Job;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class ForumServiceImpl implements ForumService {
@@ -339,6 +232,9 @@ public class ForumServiceImpl implements ForumService {
         
         User user = UserContext.current().getUser();
         Long userId = user.getId();
+
+        // 阻止黑名单用户发帖(临时解决方案)
+        this.checkUserBlacklist(userId);
                 
         Post post = processTopicCommand(userId, cmd);
 
@@ -400,7 +296,21 @@ public class ForumServiceImpl implements ForumService {
         
         return postDto;
     }
-    
+
+    private void checkUserBlacklist(Long userId) {
+        String blackListStr = configProvider.getValue(UserContext.getCurrentNamespaceId(), "createTopic.blacklist", "");
+        if (org.apache.commons.lang.StringUtils.isNotEmpty(blackListStr)) {
+            UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+            String[] blackListArr = blackListStr.split(",");
+            List<String> blackList = Arrays.asList(blackListArr);
+            if (blackList.contains(identifier.getIdentifierToken().trim())) {
+                LOGGER.error("Black list user create topic, userId = {}", userId);
+                throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+                        ForumServiceErrorCode.ERROR_BLACK_LIST_USER_CREATE_TOPIC, "Sorry, you have disallow to post.");
+            }
+        }
+    }
+
     private void setActivitySchedule(Long activityId) {
     	Activity activity = activityProivider.findActivityById(activityId);
     	if (activity == null) {
@@ -5300,6 +5210,61 @@ public class ForumServiceImpl implements ForumService {
 		}
 		
 		return null;
+	}
+
+	//查询用户关注的俱乐部的帖子
+	@Override
+	public ListUserGroupPostResponse listUserGroupPost(VisibilityScope scope, Long communityId, List<Long> forumIdList, Long userId, Long pageAnchor, Integer pageSize) {
+        
+		final int thisPageSize = PaginationConfigHelper.getPageSize(configProvider, pageSize);
+        
+        Condition condition = this.notEqPostCategoryCondition(null, null);
+        
+        
+        
+        //由于论坛有可能是分库分表的，所以这里只能一个论坛一个论坛来查询，分页查询的时候需要每个论坛都查前20条，然后合并到一起再取前20条，最后再返回
+        //如果是第2页，那就要每个论坛取前40条，合并到一起再取第21到第40条，依次类推
+        //如果按照锚点来查的话，按照给定的锚点每个论坛取前20条，再合并到一起取前20条
+        List<Post> totalPostList = new ArrayList<>();
+        forumIdList.forEach(forumId->{
+        	CrossShardListingLocator locator = new CrossShardListingLocator();
+            locator.setAnchor(pageAnchor);
+        	locator.setEntityId(forumId);
+            List<Post> posts = this.forumProvider.queryPosts(locator, thisPageSize + 1, (loc, query) -> {
+                query.addConditions(Tables.EH_FORUM_POSTS.FORUM_ID.eq(forumId));
+                query.addConditions(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L));
+                query.addConditions(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()));
+                if(null != condition){
+                	query.addConditions(condition);
+                }
+                return query;
+            });
+            if (posts != null && posts.size() > 0) {
+                totalPostList.addAll(posts);
+			}
+        });
+        
+        //此处按id排序而不是创建时间，因为有可能创建时间是一样的，那样在分界点的数据就会有问题
+        totalPostList.sort((post1, post2)->post1.getId().longValue() > post2.getId().longValue()?-1:1);
+        
+        //取前21条，多一条是为了后面判断是否有下一页
+        List<Post> resultPostList = totalPostList.subList(0, totalPostList.size()>thisPageSize+1?thisPageSize+1:totalPostList.size());
+        
+        this.forumProvider.populatePostAttachments(resultPostList);
+        
+        Long nextPageAnchor = null;
+        if(resultPostList.size() > thisPageSize) {
+        	resultPostList.remove(resultPostList.size() - 1);
+            nextPageAnchor = resultPostList.get(resultPostList.size() - 1).getId();
+        }
+        
+        populatePosts(userId, resultPostList, communityId, false);
+        
+        List<PostDTO> postDtoList = resultPostList.stream().map((r) -> {
+          return ConvertHelper.convert(r, PostDTO.class);  
+        }).collect(Collectors.toList());
+        
+        return new ListUserGroupPostResponse(nextPageAnchor, postDtoList);
 	}
     
 }
