@@ -96,7 +96,10 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		
 		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
 		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
-		String categoryName = (category.getName() == null) ? "" : category.getName();
+		String categoryName = "";
+		if(category != null) {
+			categoryName = (category.getName() == null) ? "" : category.getName();
+		} 
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
@@ -124,7 +127,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
 			}
 			
-			sendEmail(serviceOrg.getEmail(), category.getName(), notifyTextForOrg);
+			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
 			
 		}
 		
@@ -151,7 +154,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
 				if(email.getStatus().byteValue() == 1) {
-					sendEmail(email.getContactToken(), category.getName(), notifyTextForAdmin);
+					sendEmail(email.getContactToken(), categoryName, notifyTextForAdmin);
 				}
 			}
 		}

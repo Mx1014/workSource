@@ -7,6 +7,7 @@ import javax.validation.Valid;
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
+import com.everhomes.rest.activity.ActivityCategoryDTO;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
 import com.everhomes.rest.activity.ActivityConfirmCommand;
 import com.everhomes.rest.activity.ActivityDTO;
@@ -29,6 +30,7 @@ import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
 import com.everhomes.rest.activity.ListActivitiesReponse;
 import com.everhomes.rest.activity.ListActivityCategoriesCommand;
+import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommand;
 import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
@@ -40,6 +42,7 @@ import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
@@ -128,5 +131,9 @@ public interface ActivityService {
 	ActivityWarningResponse queryActivityWarning(GetActivityWarningCommand cmd);
 
 	void activityWarningSchedule();
+	
+	ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd);
+	
+	List<ActivityCategoryDTO> listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd);
 
 }

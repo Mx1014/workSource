@@ -296,7 +296,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
-		return createParkingTempOrder(cmd, ParkingRechargeType.MONTHLY.getCode(), null);
+		return createParkingTempOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
 	}
 	
 	@Override
@@ -309,17 +309,18 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		return createParkingTempOrder(param, ParkingRechargeType.TEMPORARY.getCode(), cmd.getOrderToken());
+		return createParkingTempOrder(param, ParkingRechargeType.TEMPORARY.getCode());
 
 	}
 	
-	private CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType, String orderToken) {
+	private CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		String vendor = parkingLot.getVendorName();
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
     	
+    	ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
     	if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
 			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
@@ -327,9 +328,15 @@ public class ParkingServiceImpl implements ParkingService {
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
 						"Overdue fees");
 			}
+			parkingRechargeOrder.setPrice(cmd.getPrice());
+			parkingRechargeOrder.setOrderToken(dto.getOrderToken());
 		}
+    	//查询rate
+    	else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
+    		parkingRechargeOrder.setRateToken(cmd.getRateToken());
+    		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+    	}
     	
-    	ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
@@ -351,14 +358,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		parkingRechargeOrder.setVendorName(parkingLot.getVendorName());
 		parkingRechargeOrder.setCardNumber(cmd.getCardNumber());
-		//查询rate
-		if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
-			parkingRechargeOrder.setRateToken(cmd.getRateToken());
-			handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
-		}else{
-			parkingRechargeOrder.setPrice(cmd.getPrice());
-			parkingRechargeOrder.setOrderToken(orderToken);
-		}
+		
 		parkingRechargeOrder.setStatus(ParkingRechargeOrderStatus.UNPAID.getCode());
 		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
 		

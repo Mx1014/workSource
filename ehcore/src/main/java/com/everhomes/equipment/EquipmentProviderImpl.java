@@ -818,9 +818,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasks> listTasksByEquipmentId(
-			Long equipmentId, List<Long> standardIds,
-			CrossShardListingLocator locator, Integer pageSize) {
+	public List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, 
+			CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus) {
 		List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
 		
 		if (locator.getShardIterator() == null) {
@@ -840,9 +839,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             if(standardIds != null && standardIds.size() > 0)
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
             
+            if(taskStatus != null && taskStatus.size() > 0)
+            	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
+            	
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
             query.addLimit(pageSize - tasks.size());
+            
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("listTasksByEquipmentId, sql=" + query.getSQL());
+                LOGGER.debug("listTasksByEquipmentId, bindValues=" + query.getBindValues());
+            }
             
             query.fetch().map((r) -> {
             	

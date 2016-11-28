@@ -512,12 +512,22 @@ public class YellowPageServiceImpl implements YellowPageService {
 				return null;
 			}
 		populateServiceAlliance(sa);
-		ServiceAllianceDTO response = null;
-//		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
-		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
-//		response.setDisplayName(serviceAlliance.getNickName());
 		
-		return response;
+		if(null == sa.getServiceType() && null != sa.getCategoryId()) {
+			ServiceAllianceCategories category = yellowPageProvider.findCategoryById(sa.getCategoryId());
+			sa.setServiceType(category.getName());
+		}
+		ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
+		if(!StringUtils.isEmpty(dto.getTemplateType())) {
+			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
+			if(template != null) {
+				dto.setTemplateName(template.getName());
+				dto.setButtonTitle(template.getButtonTitle());
+			}
+		}
+		this.processDetailUrl(dto);
+		
+		return dto;
 	}
 
 	@Override
@@ -534,6 +544,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 		}
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
+		response.setSkipType((byte) 0);
+
+		ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(cmd.getCategoryId());
+		if(rule != null) {
+			response.setSkipType((byte) 1);
+		}
+		
 		response.setDtos(new ArrayList<ServiceAllianceDTO>());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -577,7 +594,8 @@ public class YellowPageServiceImpl implements YellowPageService {
     private void processDetailUrl(ServiceAllianceDTO dto) {
         try {
             String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
-            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(dto.getName(), "UTF-8"), RandomUtils.nextInt(2));
+            String name = org.apache.commons.lang.StringUtils.trimToEmpty(dto.getName());
+            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
             dto.setDetailUrl(url);
         } catch (Exception e) {
             e.printStackTrace();

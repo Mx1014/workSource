@@ -1362,4 +1362,9 @@ public class UserActivityServiceImpl implements UserActivityService {
             return homeUrl;
         }
 	}
+
+    public static void main(String[] args) {
+        System.out.println(ActivityType.fromString("logon").getCode());
+        System.out.println(ActivityType.fromString("1").getCode());
+    }
 }

@@ -25,6 +25,7 @@ import com.everhomes.acl.AclAccessor;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.appurl.AppUrlService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
@@ -181,6 +182,8 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.messaging.QuestionMetaObject;
 import com.everhomes.rest.news.NewsServiceErrorCode;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
@@ -298,6 +301,9 @@ public class GroupServiceImpl implements GroupService {
     @Autowired
     private GroupSettingProvider groupSettingProvider;
     
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+    
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
@@ -306,7 +312,7 @@ public class GroupServiceImpl implements GroupService {
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
     		groupSetting = groupSettingProvider.findGroupSettingByNamespaceId(namespaceId);
-        	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE) {
+        	if (groupSetting != null && groupSetting.getCreateFlag() != null && TrueOrFalseFlag.fromCode(groupSetting.getCreateFlag()) == TrueOrFalseFlag.FALSE && !checkAdmin(cmd.getVisibleRegionId())) {
         		Map<String, Object> map = new HashMap<String, Object>();
                 map.put("clubPlaceholderName", getClubPlaceholderName(namespaceId));
                
@@ -322,6 +328,16 @@ public class GroupServiceImpl implements GroupService {
 			}
 		}
     	return new RestResponse(createGroup(cmd, groupSetting));
+    }
+    
+    private boolean checkAdmin(Long communityId) {
+    	List<Long> organizationIdList = organizationService.getOrganizationIdsTreeUpToRoot(communityId);
+    	for (Long organizationId : organizationIdList) {
+			if (rolePrivilegeService.checkAdministrators(organizationId)) {
+				return true;
+			}
+		}
+    	return false;
     }
     
     private String getLocale() {
@@ -4207,22 +4223,25 @@ public class GroupServiceImpl implements GroupService {
 		if (checkIfOnlyOneGroupMember(userId, groupId)) {
 			deleteGroupByCreator(groupId);
 		}else{
-			dbProvider.execute(t->{
-				//从本群中退出
-				quitFromGroup(userId, gm);
-				//转移权限
-				GroupMember newCreator = transferPrivilege(userId, group);
-				//发消息
-				if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
-					//退出群聊时发送消息
-					sendNotificationToOldCreator(gm, user);
-					sendNotificationToNewCreator(newCreator, user.getLocale());
-				}else {
-					//退出俱乐部时发送消息，add by tt, 20161102
-					sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
-					sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
-				}
-				
+			coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_GROUP.getCode()+groupId).enter(()-> {
+				dbProvider.execute(t->{
+					//从本群中退出
+					quitFromGroup(userId, gm);
+					//转移权限
+					GroupMember newCreator = transferPrivilege(userId, group);
+					//发消息
+					if (GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PRIVATE) {
+						//退出群聊时发送消息
+						sendNotificationToOldCreator(gm, user);
+						sendNotificationToNewCreator(newCreator, user.getLocale());
+					}else {
+						//退出俱乐部时发送消息，add by tt, 20161102
+						sendNotificationToNewCreatorWhenTransferCreator(newCreator, user.getLocale());
+						sendNotificationToOthersWhenTransferCreator(groupId, newCreator, user.getLocale());
+					}
+					
+					return null;
+				});
 				return null;
 			});
 		}
@@ -4283,6 +4302,8 @@ public class GroupServiceImpl implements GroupService {
 		gm.setOperatorUid(userId);
 		groupProvider.updateGroupMember(gm);
 		
+		// 重新查，否则成员数量不对，20161119
+		group = this.groupProvider.findGroupById(gm.getGroupId());
 		group.setCreatorUid(gm.getMemberId());
 		groupProvider.updateGroup(group);
 		
@@ -4293,6 +4314,11 @@ public class GroupServiceImpl implements GroupService {
 		this.groupProvider.deleteGroupMember(gm);
         this.userProvider.deleteUserGroup(userId, gm.getGroupId());
         deleteUserGroupOpRequest(gm.getGroupId(), gm.getMemberId(), userId, "leave group");
+        Group group = this.groupProvider.findGroupById(gm.getGroupId());
+        long memberCount = group.getMemberCount() - 1;
+        memberCount = (memberCount < 0) ? 0 : memberCount;
+        group.setMemberCount(memberCount);
+        this.groupProvider.updateGroup(group);
 	}
 
 	private GroupMember checkTransferPrivilegeParameters(Long userId, Long groupId) {
