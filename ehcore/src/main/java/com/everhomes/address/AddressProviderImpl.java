@@ -10,6 +10,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -25,6 +26,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -323,7 +325,18 @@ public class AddressProviderImpl implements AddressProvider {
     public List<Address> listAddressByIds(Integer namespaceId, List<Long> ids) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.select().from(Tables.EH_ADDRESSES)
-                .where(Tables.EH_ADDRESSES.ID.in(ids))
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.ID.in(ids))
                 .fetchInto(Address.class);
+    }
+
+    @Override
+    public List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        return context.select().from(Tables.EH_ADDRESSES)
+                .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(DSL.concat("%", buildingName, "%")).or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(DSL.concat("%", buildingName, "%"))))
+                .fetchInto(AddressDTO.class);
     }
 }

@@ -34,6 +34,7 @@ import javax.servlet.http.HttpServletResponse;
 
 import net.greghaines.jesque.Job;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -192,6 +193,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceTypeCommand;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sequence.SequenceProvider;
@@ -200,6 +202,7 @@ import com.everhomes.server.schema.tables.pojos.EhRentalv2Cells;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.server.schema.tables.pojos.EhRentalv2Resources;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -272,6 +275,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private String queueName = "rentalService";
 
 	@Autowired
+	private SmsProvider smsProvider;
+	@Autowired
 	private MessagingService messagingService;
 	@Autowired
 	ContentServerService contentServerService;
@@ -307,6 +312,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private UserProvider userProvider;
 	@Autowired
 	private AppProvider appProvider;
+	private Integer namespaceId;
+	private Integer namespaceId2;
+	private String phoneNumber;
 	
 	 
 
@@ -1070,6 +1078,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dateSF.format(endCalendar.getTime()));
 			if(null == cells || cells.size() == 0)
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
+				
 			else {
 				BigDecimal sum = new BigDecimal(0);
 				for(RentalCell cell : cells)
@@ -1078,12 +1087,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				}
 				//四舍五入保留三位
 				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
+					
+				
 			}
 		} catch (ParseException e) {
 			 LOGGER.error("计算平均值-时间转换 异常");
 		}
-			 
-				
+
+//		if(rentalSite.getAvgPriceStr() == null){
+			rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
+			rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
+			rentalProvider.updateRentalSite(rentalSite);	
+//		}
 		return rSiteDTO;
 	}
 	private List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId, String beginTime, String endTime) throws ParseException {
@@ -1215,6 +1230,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else
 				rentalBill.setCancelTime(new Timestamp(rs.getCancelTime()));
 			rentalBill.setResourceName(rs.getResourceName());
+			rentalBill.setNamespaceId(UserContext.getCurrentNamespaceId()==null?0:
+			UserContext.getCurrentNamespaceId());
 			rentalBill.setRentalResourceId(cmd.getRentalSiteId());
 			rentalBill.setRentalUid(userId);
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
@@ -1573,33 +1590,38 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		final Job job3 = new Job(
 				SendMessageAction.class.getName(),
 				new Object[] {rentalBill.getRentalUid(),notifyTextForOther});
-		if(rentalType != null) {
-			switch(rentalType) {
-			case HOUR:
-				// 在开始时间前30分钟提醒 
-				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-						rentalBill.getStartTime().getTime() - 30*60*1000L );
-				break; 
-			default:
-				// 在开始时间前一天的下午16点提醒
-				Calendar calendar = Calendar.getInstance();
-				calendar.setTime(rentalBill.getStartTime() );
-				calendar.add(Calendar.DATE, -1);
-				calendar.set(Calendar.HOUR_OF_DAY, 16);
-				calendar.set(Calendar.SECOND, 0);
-				calendar.set(Calendar.MINUTE, 0);
-				calendar.set(Calendar.MILLISECOND, 0);
-				jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,calendar.getTimeInMillis() );
-				break;
-				
-			}
-		}  
-	  map = new HashMap<String, String>(); 
-      map.put("userName", user.getNickName());
-      map.put("resourceName", rentalBill.getResourceName());
-      map.put("useDetail", rentalBill.getUseDetail());
-      map.put("rentalCount", rentalBill.getRentalCount()==null?"1":""+rentalBill.getRentalCount());  
-      sendMessageCode(rs.getChargeUid(),  PunchNotificationTemplateCode.locale, map, PunchNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
+		try{
+			if(rentalType != null) {
+				switch(rentalType) {
+				case HOUR:
+					// 在开始时间前30分钟提醒 
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
+							rentalBill.getStartTime().getTime() - 30*60*1000L );
+					break; 
+				default:
+					// 在开始时间前一天的下午16点提醒
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTime(rentalBill.getStartTime() );
+					calendar.add(Calendar.DATE, -1);
+					calendar.set(Calendar.HOUR_OF_DAY, 16);
+					calendar.set(Calendar.SECOND, 0);
+					calendar.set(Calendar.MINUTE, 0);
+					calendar.set(Calendar.MILLISECOND, 0);
+					jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,calendar.getTimeInMillis() );
+					break;
+					
+				}
+			}  
+		
+			map = new HashMap<String, String>(); 
+			map.put("userName", user.getNickName());
+		    map.put("resourceName", rentalBill.getResourceName());
+		    map.put("useDetail", rentalBill.getUseDetail());
+		    map.put("rentalCount", rentalBill.getRentalCount()==null?"1":""+rentalBill.getRentalCount());  
+		    sendMessageCode(rs.getChargeUid(),  PunchNotificationTemplateCode.locale, map, PunchNotificationTemplateCode.RENTAL_ADMIN_NOTIFY);
+		}catch(Exception e){
+			LOGGER.error("SEND MESSAGE FAILED ,cause "+e.getLocalizedMessage());
+		}
 	}
 	
 
@@ -2003,7 +2025,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");   
 		this.dbProvider.execute((TransactionStatus status) -> {
-			//初始化
+			//初始化 
+			//设置新规则的时候就删除之前的旧单元格
+			this.rentalProvider.deleteRentalCellsByResourceId(cmd.getRentalSiteId());
 			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 			seqNum.set(0L);
 			//设置默认规则，删除所有的单元格
@@ -2065,6 +2089,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setUnit(cmd.getUnit());
 			rs.setBeginDate(new Date(cmd.getBeginDate()));
 			rs.setEndDate(new Date(cmd.getEndDate()));
+			//modify by wh 2016-11-11 修改时间点和修改操作人的记录
+			rs.setOperatorUid(UserContext.current().getUser().getId());
+			rs.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			String openWorkday = "0000000";
 			if(null!=cmd.getOpenWeekday()) {
 				int openWorkdayInt=0;
@@ -3078,6 +3105,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			else if(bill.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 				if(bill.getPayTotalMoney().equals(bill.getPaidMoney())){
 					bill.setStatus(SiteBillStatus.SUCCESS.getCode());
+					UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(bill.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
+					if(null == userIdentifier){
+						LOGGER.error("userIdentifier is null...userId = " + bill.getCreatorUid());
+					}else{
+						sendRentalSuccessSms(bill.getNamespaceId(),userIdentifier.getIdentifierToken(), bill); 
+					}
 				}
 				else{
 					LOGGER.error("待付款订单:id ["+bill.getId()+"]付款金额有问题： 应该付款金额："+bill.getPayTotalMoney()+"实际付款金额："+bill.getPaidMoney());
@@ -4054,7 +4087,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(null == defaultRule.getAutoAssign())
 				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter AutoAssign   is null");
-			
+			resource.setResourceCounts(defaultRule.getSiteCounts());
 			resource.setStatus(RentalSiteStatus.NORMAL.getCode());
 			resource.setAutoAssign(defaultRule.getAutoAssign());
 			resource.setMultiUnit(defaultRule.getMultiUnit());
@@ -4130,29 +4163,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				addSingleRules.add(signleCmd);
 			}
 
-			
-			//建立了resource之后才有id 
-			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
-				HashSet<String> siteNumberSet = new HashSet<>();
-				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
-					if( null!=defaultRule.getSiteNumbers())
-						for(String number : defaultRule.getSiteNumbers()){
-							siteNumberSet.add(number);
-							RentalResourceNumber resourceNumber = new RentalResourceNumber();
-							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
-							resourceNumber.setOwnerId(resource.getId());
-							resourceNumber.setResourceNumber(number);
-							this.rentalProvider.createRentalResourceNumber(resourceNumber);
-						}
-				}
-				else
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
-				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
-					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
-					
-			} 
 			seqNum.set(0L);
 			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 			for(AddRentalSiteSingleSimpleRule signleCmd : addSingleRules){
@@ -4176,6 +4186,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			resource.setCellEndId(cellBeginId+seqNum.get());
 			
 			Long siteId = rentalProvider.createRentalSite(resource);
+
+			
+			//建立了resource之后才有id 
+			if(defaultRule.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				HashSet<String> siteNumberSet = new HashSet<>();
+				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
+					if( null!=defaultRule.getSiteNumbers())
+						for(String number : defaultRule.getSiteNumbers()){
+							siteNumberSet.add(number);
+							RentalResourceNumber resourceNumber = new RentalResourceNumber();
+							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
+							resourceNumber.setOwnerId(siteId);
+							resourceNumber.setResourceNumber(number);
+							this.rentalProvider.createRentalResourceNumber(resourceNumber);
+						}
+				}
+				else
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+		                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter site counts is "+defaultRule.getSiteCounts()+".but site numbers size is "+defaultRule.getSiteNumbers().size());
+				if(!defaultRule.getSiteCounts().equals(Double.valueOf(siteNumberSet.size())))
+					throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+	                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter  site numbers repeat " );
+					
+			} 
 			if(cmd.getOwners() != null){
 				for(SiteOwnerDTO dto:cmd.getOwners()){
 					RentalSiteRange siteOwner = ConvertHelper.convert(dto, RentalSiteRange.class);
@@ -4339,7 +4373,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					"Invalid ruleId   parameter in the command");
 		
 		
-		if(null!=rs.getAutoAssign() && rs.getAutoAssign().equals(NormalFlag.NEED)){
+		if(null!=rs.getAutoAssign() && rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
 			cmd.setCounts(1.0);
 		}
 		this.dbProvider.execute((TransactionStatus status) -> {
@@ -4725,7 +4759,47 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		rentalProvider.deleteResource(cmd.getId());
 		
 	}
+	
+	/**
+	 * 发短信给付费成功的用户
+	 * */
+	@Override
+	public void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,RentalOrder order){  
+		String templateScope = SmsTemplateCode.SCOPE;
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("resourceName", order.getResourceName());
+		smsProvider.addToTupleList(variables, "useDetail", order.getUseDetail()); 
+		//根据条件找模板id
+		RentalResource rs = this.rentalProvider.getRentalSiteById(order.getRentalResourceId());
+		if(rs == null){
+			LOGGER.error("send message to user failed rental resource can not found [resource id = "+order.getRentalResourceId()+"]");
+			return ;
+		} 	
+		int templateId = SmsTemplateCode.RENTAL_SUCCESS_EXCLUSIVE_CODE;
+		//如果不是独占资源
+		if(rs.getExclusiveFlag().equals(NormalFlag.NONEED.getCode())){
+			if(rs.getAutoAssign().equals(NormalFlag.NEED.getCode())){
+				//带场所编号的
+				templateId = SmsTemplateCode.RENTAL_SUCCESS_SITENUMBER_CODE;
+			}
+			else{
+				//不带场所编号的
+				templateId = SmsTemplateCode.RENTAL_SUCCESS_NOSITENUMBER_CODE;
+				smsProvider.addToTupleList(variables, "count", order.getRentalCount()); 
+			}
+		}
+			
+		String templateLocale = PunchNotificationTemplateCode.locale;
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("begin Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
+		smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.info("end Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
+                + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
+        }
+	}
 	
  
 }

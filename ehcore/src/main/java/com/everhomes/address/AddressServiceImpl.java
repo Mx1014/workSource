@@ -137,7 +137,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     }
     
     public Action onLocalBusMessage(Object sender, String subject, Object args, String subscriptionPath) {
-        // TODO monitor change notifications for cache invalidation
+        // TODO monitor changeEnergyMeter notifications for cache invalidation
         return Action.none;
     }
     
@@ -596,8 +596,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         familyService.leave(leaveCmd, null);
 
         // 修改用户对应的客户资料认证状态  add by xq.tian  20160923
-        propertyMgrService.updateOrganizationOwnerAddressAuthType(UserContext.current().getUser().getId(), family.getCommunityId(),
-                family.getAddressId(), OrganizationOwnerAddressAuthType.INACTIVE);
+        propertyMgrService.updateOrganizationOwnerAddressAuthType(null, family.getCommunityId(), family.getAddressId(),
+                OrganizationOwnerAddressAuthType.INACTIVE);
     }
    
     private ClaimedAddressInfo processNewAddressClaim(ClaimAddressCommand cmd) {
@@ -1412,7 +1412,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			this.batchAddAddresses(community, datas);
 			
 		} catch (Exception e) {
-			throw new RuntimeErrorException("File parsing error");
+			throw new RuntimeErrorException("File parsing error", e);
 		}
 		
 	}
@@ -1468,7 +1468,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 	
 	private void batchAddAddresses(Community community, List<String[]> datas){
 		
-		
 		for (String[] arr : datas) {
 			
 			if(org.springframework.util.StringUtils.isEmpty(arr[0]) 
@@ -1481,6 +1480,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
 			
 			if(null == building){
 				building = new Building();
+				// 补充域空间信息，以免一直查到的都是左邻域的楼栋，从而产生重新 by lqs 20161110
+				building.setNamespaceId(community.getNamespaceId());
 				building.setCommunityId(community.getId());
 				building.setName(arr[0]);
 				building.setOperatorUid(UserContext.current().getUser().getId());
@@ -1700,4 +1701,9 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         
         return resp;
 	}
+
+    @Override
+    public List<AddressDTO> listAddressByBuildingName(ListApartmentByBuildingNameCommand cmd) {
+        return addressProvider.listAddressByBuildingName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), cmd.getBuildingName());
+    }
 }

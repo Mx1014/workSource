@@ -145,6 +145,17 @@ public class YellowPageController  extends ControllerBase {
 	}
 
     /**
+	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
+	 * <p>获取服务联盟机构的展示类型</p>
+	 */
+    @RequireAuthentication(false)
+	@RequestMapping("getServiceAllianceDisplayMode")
+	@RestReturn(value = ServiceAllianceDisplayModeDTO.class)
+	public RestResponse getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd) {
+		return new RestResponse(yellowPageService.getServiceAllianceDisplayMode(cmd));
+	}
+
+    /**
    	 * <b>URL: /yellowPage/getServiceAllianceEnterpriseDetail</b>
    	 * <p> 服务联盟企业详情 </p>
    	 */

@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>visibilityScopeId：根据group可见性类型对应的ID（如小区ID、城市ID等）</li>
  * <li>categoryId：group类型ID</li>
  * <li>tag：标签，用于搜索</li>
+ * <li>joinPolicy: 加入策略，参考{@link com.everhomes.rest.group.GroupJoinPolicy}</li>
  * </ul>
  */
 public class UpdateGroupCommand {
@@ -31,8 +32,17 @@ public class UpdateGroupCommand {
     private Long categoryId;
     
     private String tag;
+    private Integer joinPolicy;
 
-    public UpdateGroupCommand() {
+    public Integer getJoinPolicy() {
+		return joinPolicy;
+	}
+
+	public void setJoinPolicy(Integer joinPolicy) {
+		this.joinPolicy = joinPolicy;
+	}
+
+	public UpdateGroupCommand() {
     }
 
     public Long getGroupId() {

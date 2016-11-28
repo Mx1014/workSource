@@ -42,4 +42,10 @@ public interface YellowPageService {
      * @return
      */
     List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd);
+
+    /**
+     * 获取服务联盟机构的展示类型
+     * (用于客户端服务联盟类型displayType配置为list时获取displayMode使用)
+     */
+    ServiceAllianceDisplayModeDTO getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd);
 }

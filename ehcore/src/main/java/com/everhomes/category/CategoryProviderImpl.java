@@ -50,10 +50,10 @@ public class CategoryProviderImpl implements CategoryProvider {
     @Autowired
     private SequenceProvider sequenceProvider;
     
-    @Caching(evict = { @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories")})
+    @Caching(evict = { @CacheEvict(value="listChildCategory", allEntries=true),
+            @CacheEvict(value="listDescendantCategory", allEntries=true),
+            @CacheEvict(value="listAllCategory", allEntries=true),
+            @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
     public void createCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -75,10 +75,10 @@ public class CategoryProviderImpl implements CategoryProvider {
     }
 
     @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
-            @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories")})
+            @CacheEvict(value="listChildCategory", allEntries=true),
+            @CacheEvict(value="listDescendantCategory", allEntries=true),
+            @CacheEvict(value="listAllCategory", allEntries=true),
+            @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
     public void updateCategory(Category category) {
         assert(category.getId() != null);
@@ -91,10 +91,10 @@ public class CategoryProviderImpl implements CategoryProvider {
     }
 
     @Caching(evict = { /*@CacheEvict(value="Category", key="#category.id"),*/
-            @CacheEvict(value="listChildCategory"),
-            @CacheEvict(value="listDescendantCategory"),
-            @CacheEvict(value="listAllCategory"),
-            @CacheEvict(value="listBusinessSubCategories")})
+            @CacheEvict(value="listChildCategory",allEntries=true),
+            @CacheEvict(value="listDescendantCategory", allEntries=true),
+            @CacheEvict(value="listAllCategory", allEntries=true),
+            @CacheEvict(value="listBusinessSubCategories", allEntries=true)})
     @Override
     public void deleteCategory(Category category) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -375,7 +375,7 @@ public class CategoryProviderImpl implements CategoryProvider {
         if(null != parentId)
         	query.addConditions(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId));
         if(StringUtils.isNotBlank(keyword))
-        	query.addConditions(Tables.EH_CATEGORIES.NAME.like("%" + keyword + "%"));
+        	query.addConditions(Tables.EH_CATEGORIES.PATH.like("%" + keyword + "%"));
         if(null != pageAnchor && pageAnchor != 0)
         	query.addConditions(Tables.EH_CATEGORIES.ID.gt(pageAnchor));
         query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
@@ -399,4 +399,25 @@ public class CategoryProviderImpl implements CategoryProvider {
         query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
         return ConvertHelper.convert(query.fetchOne(), Category.class);
 	}
+
+	@Override
+	public Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId, String categoryName) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
+		
+		Record record = context.select()
+				.from(Tables.EH_CATEGORIES)
+				.where(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CATEGORIES.NAME.eq(categoryName))
+				.and(Tables.EH_CATEGORIES.PARENT_ID.eq(parentId))
+				.and(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()))
+				.fetchAny();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, Category.class);
+		}
+		
+		return null;
+	}
+    
+    
 }
