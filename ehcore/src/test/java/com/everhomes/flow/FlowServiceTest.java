@@ -486,4 +486,10 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	
     	flowScriptProvider.deleteFlowScript(script);
     }
+    
+    @Test
+    public void testVariables() {
+    	String renderText = "abc${pa1}.${pa2}asdf";
+    	flowService.getAllParams(renderText);
+    }
 }

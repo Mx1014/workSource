@@ -6,6 +6,8 @@ import java.util.Arrays;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 import org.apache.poi.hslf.record.CurrentUserAtom;
 import org.slf4j.Logger;
@@ -122,6 +124,8 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private FlowEventLogProvider flowEventLogProvider;
+    
+    private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
     private StringTemplateLoader templateLoader;
     private Configuration templateConfig;
@@ -1542,8 +1546,25 @@ public class FlowServiceImpl implements FlowService {
 		});
 	}
 	
-	public String parseActionTemplate(Long actionId, String renderText, Map<String, String> model) {
+	private List<String> getAllParams(String renderText) {
+        Matcher m = pParam.matcher(renderText);
+        while(m.find()) {
+        	LOGGER.info("param=" + m.group(1));
+        }
+        
+        return null;
+	}
+	
+	@Override
+	public String parseActionTemplate(FlowCaseState ctx, Long actionId, String renderText) {
         String templateKey = String.format("action:%d", actionId);
+        Map<String, String> model = null;
+        List<String> params = getAllParams(renderText);
+        if(params == null) {
+        	return renderText;
+        }
+        //TODO render model.
+        
         try {
         		templateLoader.putTemplate(templateKey, renderText);
         		Template freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");

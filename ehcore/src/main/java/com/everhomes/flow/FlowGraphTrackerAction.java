@@ -1,14 +1,16 @@
 package com.everhomes.flow;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowStepType;
 
 public class FlowGraphTrackerAction extends FlowGraphAction {
 	FlowStepType stepType;
+	private FlowService flowService;
 
 	FlowGraphTrackerAction() {
-		
+		flowService = PlatformContext.getComponent(FlowService.class);
 	}
 	
 	FlowGraphTrackerAction(FlowStepType step) {
@@ -35,6 +37,7 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		log.setFlowCaseId(ctx.getFlowCase().getId());
 		log.setFlowUserId(ctx.getOperator().getId());
 		log.setFlowUserName(ctx.getOperator().getNickName());
+		log.setLogContent(flowService.parseActionTemplate(ctx, this.getFlowAction().getId(), this.getFlowAction().getRenderText()));
 		
 		log.setLogType(FlowLogType.NODE_TRACKER.getCode());
 		log.setTrackerApplier(this.getFlowAction().getTrackerApplier());

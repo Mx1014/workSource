@@ -405,6 +405,9 @@ public interface FlowService {
 	ListFlowModulesResponse listModules(ListFlowModulesCommand cmd);
 
 	void createEventLogs(List<FlowEventLog> logs);
+
+	String parseActionTemplate(FlowCaseState ctx, Long actionId,
+			String renderText);
 	
 	//TODO 日志信息分类：
 	
