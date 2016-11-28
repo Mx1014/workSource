@@ -3,17 +3,10 @@ package com.everhomes.pmtask;
 import java.io.BufferedOutputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.math.BigDecimal;
-import java.net.URISyntaxException;
-import java.nio.file.Files;
-import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -27,52 +20,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.openxml4j.exceptions.InvalidFormatException;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -85,36 +37,16 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.core.io.ClassPathResource;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -213,7 +145,6 @@ import com.everhomes.rest.pmtask.TaskStatisticsDTO;
 import com.everhomes.rest.pmtask.UpdateTaskCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -709,7 +640,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
 	        
 	        String categoryName = category.getName();
-	    	//TODO:添加 消息推送
+
 			List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", user.getNickName());
 			smsProvider.addToTupleList(variables, "operatorPhone", userIdentifier.getIdentifierToken());
 			smsProvider.addToTupleList(variables, "categoryName", categoryName);
@@ -772,6 +703,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
 		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
 			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
+			
 			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
 	                EntityType.USER.getCode(), r.getCreatorUid());
 			attachmentDto.setContentUrl(contentUrl);
@@ -781,6 +713,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		//查询task log
 		List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(dto);
 		dto.setTaskLogs(taskLogDtos);
+		
+		
 		
 		return dto;
 	}
@@ -903,12 +837,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Long taskCategoryId = cmd.getTaskCategoryId();
 		String content = cmd.getContent();
 		checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
+		Category taskCategory = checkCategory(taskCategoryId);
 		
+		User user = UserContext.current().getUser();
 		PmTask task = new PmTask();
 		dbProvider.execute((TransactionStatus status) -> {
 			Timestamp now = new Timestamp(System.currentTimeMillis());
-			User user = UserContext.current().getUser();
-
+			
 			task.setAddressType(cmd.getAddressType());
 			
 			if(cmd.getAddressType().equals(PmTaskAddressType.ORGANIZATION.getCode())) {
@@ -965,8 +900,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			pmTaskSearch.feedDoc(task);
 			
-			Category taskCategory = categoryProvider.findCategoryById(taskCategoryId);
-	    	
 	    	Long organizationId = cmd.getOrganizationId();
 	    	if(null == organizationId) {
 	            List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(ownerId);
@@ -985,7 +918,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    	}
 			return null;
 		});
-    	
+    	//同步数据到科技园
+//		if(user.getNamespaceId() == 1000000) {
+//			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
+//			Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
+//			handler.synchronizedData(task, cmd.getAttachments(), taskCategory, category);
+//		}
+		
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
@@ -1314,16 +1253,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		InputStream is1 = new ByteArrayInputStream(baos.toByteArray());
 		
 		return is1;
-	}
-	
-	private Row createRow(Row row, CellStyle style) {
-		
-		for(int i=1;i<=9;i++) {
-			Cell cell1 = row.createCell(i);
-			cell1.setCellStyle(style);
-			cell1.setCellValue("123");
-		}
-		return row;
 	}
 	
 	private String convertStatus(Byte status){
@@ -1757,7 +1686,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Invalid content parameter.");
         }
-    	checkCategory(taskCategoryId);
+    	
     }
 	
 	private Category checkCategory(Long id){

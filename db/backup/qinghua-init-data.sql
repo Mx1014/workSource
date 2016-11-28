@@ -2124,4 +2124,17 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
     VALUES(203153, 2008, 0, '旅游', '兴趣/旅游摄影/旅游', 0, 2, UTC_TIMESTAMP(), 999984);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
     VALUES(203154, 2008, 0, '摄影', '兴趣/旅游摄影/摄影', 0, 2, UTC_TIMESTAMP(), 999984);
-	
+
+SET @eh_categories = (SELECT max(id) FROM `eh_categories`);   
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '科技园大讲堂', '活动/科技园大讲堂', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '项目对接会', '活动/项目对接会', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '总裁沙龙', '活动/总裁沙龙', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '创客', '活动/创客', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '联谊', '活动/联谊', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '其他', '活动/其他', '1', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
