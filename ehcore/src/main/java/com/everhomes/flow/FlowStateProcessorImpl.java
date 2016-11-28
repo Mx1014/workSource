@@ -33,7 +33,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
    @Autowired
    BigCollectionProvider bigCollectionProvider;
     
-	@Autowired
 	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
 	public FlowCaseState prepareButtonFire(User logonUser, FlowFireButtonCommand cmd) {
