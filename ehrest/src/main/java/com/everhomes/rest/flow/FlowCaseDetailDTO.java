@@ -238,6 +238,22 @@ public class FlowCaseDetailDTO {
 		this.buttons = buttons;
 	}
 
+	public List<FlowCaseEntity> getEntities() {
+		return entities;
+	}
+
+	public void setEntities(List<FlowCaseEntity> entities) {
+		this.entities = entities;
+	}
+
+	public List<FlowNodeLogDTO> getNodes() {
+		return nodes;
+	}
+
+	public void setNodes(List<FlowNodeLogDTO> nodes) {
+		this.nodes = nodes;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

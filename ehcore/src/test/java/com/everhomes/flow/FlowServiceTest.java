@@ -30,6 +30,7 @@ import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowNodePriority;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowScriptScriptType;
 import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
@@ -80,6 +81,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     
     @Autowired
     private FlowListenerManager flowListenerManager;
+    
+    @Autowired
+    private FlowScriptProvider flowScriptProvider;
     
     @Before
     public void setUp() throws Exception {
@@ -452,6 +456,26 @@ public class FlowServiceTest extends LoginAuthTestCase {
     
     @Test
     public void testFlowScriptFired() {
+    	Long ownerId = 11l;
+    	Long moduleId = 12l;
+    	FlowScript script = new FlowScript();
+    	script.setFlowStepType(FlowStepType.APPROVE_STEP.getCode());
+    	script.setModuleId(moduleId);
+    	script.setOwnerId(ownerId);
+    	script.setOwnerType(FlowOwnerType.ENTERPRISE.getCode());
+    	script.setModuleType(FlowModuleType.NO_MODULE.getCode());
+    	script.setScriptType(FlowScriptScriptType.PROTOTYPE.getCode());
+    	script.setScriptCls(FlowScriptFireDummy.class.getName());
+    	flowScriptProvider.createFlowScript(script);
     	
+    	FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
+    	FlowCaseState ctx = new FlowCaseState();
+    	try {
+			scriptAction.fireAction(ctx, null);
+		} catch (FlowStepErrorException e) {
+			e.printStackTrace();
+		}
+    	
+    	flowScriptProvider.deleteFlowScript(script);
     }
 }
