@@ -6,7 +6,7 @@ CREATE TABLE `eh_flows` (
 
   `owner_id` BIGINT NOT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
-  `org_id` BIGINT NOT NULL DEFAULT 0,
+  `organization_id` BIGINT NOT NULL DEFAULT 0,
   `module_id` BIGINT NOT NULL COMMENT 'the module id',
   `module_type` VARCHAR(64) NOT NULL,
 
@@ -173,6 +173,7 @@ CREATE TABLE `eh_flow_user_selections` (
 
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
+    `organization_id` BIGINT NOT NULL DEFAULT 0,
 
     `select_type` VARCHAR(64) NOT NULL COMMENT 'department, position, manager, variable',
     `source_id_a` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other user object id',

@@ -7,6 +7,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
+import org.apache.poi.hslf.record.CurrentUserAtom;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -107,6 +108,8 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private FlowActionProvider flowActionProvider;
+    
+    private FlowStateProcessor flowStateProcessor;
     
     private Map<String, FlowGraph> graphMap;
     
@@ -1375,6 +1378,15 @@ public class FlowServiceImpl implements FlowService {
 		
 		return flowGraph;
 	}
+	
+	@Override
+	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
+		FlowCaseState ctx = flowStateProcessor.prepareButtonFire(UserContext.current().getUser(), cmd);
+		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
+		
+		FlowButton btn = flowButtonProvider.getFlowButtonById(cmd.getButtonId());
+		return ConvertHelper.convert(btn, FlowButtonDTO.class);
+	}
 
 	@Override
 	public void disableFlow(Long flowId) {
@@ -1467,12 +1479,6 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowPostSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

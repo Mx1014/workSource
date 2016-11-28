@@ -11,6 +11,8 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowCaseEntity;
+
 @Component
 public class FlowListenerManagerImpl implements FlowListenerManager {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowListenerManagerImpl.class);
@@ -54,4 +56,74 @@ public class FlowListenerManagerImpl implements FlowListenerManager {
 	  public int getListenerSize() {
 		  return allListeners.size();  
 	  }
+
+	@Override
+	public void onFlowCaseAbsorted(FlowCaseState ctx) {
+		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  if(inst != null) {
+			  ctx.setModule(inst.getInfo());
+			  FlowModuleListener listener = inst.getListener();
+			  listener.onFlowCaseAbsorted(ctx);  
+		  }		
+	}
+
+	@Override
+	public void onFlowCaseStateChanged(FlowCaseState ctx) {
+		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  if(inst != null) {
+			  ctx.setModule(inst.getInfo());
+			  FlowModuleListener listener = inst.getListener();
+			  listener.onFlowCaseStateChanged(ctx);  
+		  }		
+	}
+
+	@Override
+	public void onFlowCaseEnd(FlowCaseState ctx) {
+		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  if(inst != null) {
+			  ctx.setModule(inst.getInfo());
+			  FlowModuleListener listener = inst.getListener();
+			  listener.onFlowCaseEnd(ctx);  
+		  }		
+	}
+
+	@Override
+	public void onFlowCaseActionFired(FlowCaseState ctx) {
+		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  if(inst != null) {
+			  ctx.setModule(inst.getInfo());
+			  FlowModuleListener listener = inst.getListener();
+			  listener.onFlowCaseActionFired(ctx);  
+		  }		
+	}
+
+	@Override
+	public String onFlowCaseBriefRender(FlowCase flowCase) {
+		  FlowModuleInst inst = moduleMap.get(flowCase.getModuleName());
+		  if(inst != null) {
+			  FlowModuleListener listener = inst.getListener();
+			  return listener.onFlowCaseBriefRender(flowCase);  
+		  }		
+		  return null;
+	}
+
+	@Override
+	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase) {
+		  FlowModuleInst inst = moduleMap.get(flowCase.getModuleName());
+		  if(inst != null) {
+			  FlowModuleListener listener = inst.getListener();
+			  return listener.onFlowCaseDetailRender(flowCase);  
+		  }		
+		  return null;
+	}
+
+	@Override
+	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
+		FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  if(inst != null) {
+			  FlowModuleListener listener = inst.getListener();
+			  return listener.onFlowVariableRender(ctx, variable);  
+		  }		
+		  return null;
+	}
 }
