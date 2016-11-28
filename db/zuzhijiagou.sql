@@ -205,20 +205,17 @@ INSERT INTO `eh_web_menus` VALUES ('20420', '设置', '20400', null, 'property_f
 
 
 INSERT INTO `eh_web_menus` VALUES ('20600', '品质核查', '20000', null, null, '1', '2', '/20000/20600', 'park', '260');
-INSERT INTO `eh_web_menus` VALUES ('20610', '手动核查', '20600', null, null, '1', '2', '/20000/20600/20610', 'park', '261');
-INSERT INTO `eh_web_menus` VALUES ('20611', '行为规范', '20610', null, 'behavior_standard', '0', '2', '/20000/20600/20610/20611', 'park', '262');
-INSERT INTO `eh_web_menus` VALUES ('20612', '绩效统计', '20610', null, 'performance_statistics', '0', '2', '/20000/20600/20610/20612', 'park', '263');
+INSERT INTO `eh_web_menus` VALUES ('20610', '类型管理', '20600', null, 'react:/type-management/type-list', '1', '2', '/20000/20600/20610', 'park', '261');
+INSERT INTO `eh_web_menus` VALUES ('20620', '规范管理', '20600', null, 'react:/specification-management/specification-list', '1', '2', '/20000/20600/20620', 'park', '265');
+INSERT INTO `eh_web_menus` VALUES ('20630', '标准管理', '20600', null, 'reference_standard', '0', '2', '/20000/20600/20630', 'park', '266');
+INSERT INTO `eh_web_menus` VALUES ('20640', '标准审批', '20600', null, 'react:/standard-check/standard-check-list', '0', '2', '/20000/20600/20640', 'park', '267');
+INSERT INTO `eh_web_menus` VALUES ('20650', '任务查询', '20600', null, 'task_list', '0', '2', '/20000/20600/20650', 'park', '268');
 
-INSERT INTO `eh_web_menus` VALUES ('20620', '作业标准', '20600', null, null, '1', '2', '/20000/20600/20620', 'park', '265');
-INSERT INTO `eh_web_menus` VALUES ('20621', '参考标准', '20620', null, 'reference_standard', '0', '2', '/20000/20600/20620/20621', 'park', '266');
-INSERT INTO `eh_web_menus` VALUES ('20622', '类型管理', '20620', null, 'type_management', '0', '2', '/20000/20600/20620/20622', 'park', '267');
-INSERT INTO `eh_web_menus` VALUES ('20623', '绩效统计', '20620', null, 'performance_statistics', '0', '2', '/20000/20600/20620/20623', 'park', '268');
+INSERT INTO `eh_web_menus` VALUES ('20660', '统计', '20600', null, null, '1', '2', '/20000/20600/20660', 'park', '269');
+INSERT INTO `eh_web_menus` VALUES ('20661', '分数统计', '20660', null, 'react:/statistics-management/fractional-report', '0', '2', '/20000/20600/20660/20661', 'park', '270');
+INSERT INTO `eh_web_menus` VALUES ('20662', '任务数统计', '20660', null, 'react:/statistics-management/task-report', '0', '2', '/20000/20600/20660/20662', 'park', '271');
 
-INSERT INTO `eh_web_menus` VALUES ('20630', '任务列表', '20600', null, null, '1', '2', '/20000/20600/20630', 'park', '269');
-INSERT INTO `eh_web_menus` VALUES ('20631', '任务列表', '20630', null, 'task_list', '0', '2', '/20000/20600/20630/20631', 'park', '270');
-INSERT INTO `eh_web_menus` VALUES ('20632', '任务审阅', '20630', null, 'task_review', '0', '2', '/20000/20600/20630/20632', 'park', '271');
-
-INSERT INTO `eh_web_menus` VALUES ('20640', '修改记录', '20600', null, 'edit_record', '0', '2', '/20000/20600/20640', 'park', '272');
+INSERT INTO `eh_web_menus` VALUES ('20670', '修改记录', '20600', null, 'edit_record', '0', '2', '/20000/20600/20670', 'park', '272');
 
 INSERT INTO `eh_web_menus` VALUES ('20800', '设备巡检', '20000', null, null, '1', '2', '/20000/20800', 'park', '280');
 INSERT INTO `eh_web_menus` VALUES ('20810', '参考标准', '20800', null, null, '1', '2', '/20000/20800/20810', 'park', '281');
