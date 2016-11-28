@@ -2,11 +2,14 @@ package com.everhomes.flow;
 
 import java.util.Map;
 
+import com.everhomes.rest.flow.FlowStepType;
+
 public class FlowCaseState {
 	private String moduleName;
 	private FlowModuleInfo module;
 	private FlowCase flowCase;
 	private FlowGraph flowGraph;
+	private FlowStepType stepType;
 	private FlowGraphNode prefixNode;
 	private FlowGraphNode currentNode;
 	private FlowGraphNode nextNode;
@@ -67,5 +70,10 @@ public class FlowCaseState {
 	public void setExtra(Map<String, Object> extra) {
 		this.extra = extra;
 	}
-
+	public FlowStepType getStepType() {
+		return stepType;
+	}
+	public void setStepType(FlowStepType stepType) {
+		this.stepType = stepType;
+	}
 }

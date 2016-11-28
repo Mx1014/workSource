@@ -2,8 +2,10 @@ package com.everhomes.flow;
 
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.util.RuntimeErrorException;
 
 public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowUserType userType;
@@ -46,15 +48,17 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		//TODO create logs
 		FlowGraphButton btn = ctx.getFlowGraph().getGraphButton(cmd.getButtonId());
 		FlowStepType nextStep = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
+		ctx.setStepType(nextStep);
 		
 		//current state change to next step
+		FlowGraphNode current = null;
+		FlowGraphNode next = null;
 		switch(nextStep) {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
-			ctx.getCurrentEvent();
-			FlowGraphNode current = ctx.getCurrentNode();
-			FlowGraphNode next = null;
+			current = ctx.getCurrentNode();
+			next = null;
 			if(!btn.getFlowButton().getGotoNodeId().equals(0)) {
 				next = ctx.getFlowGraph().getGraphNode(btn.getFlowButton().getGotoNodeId());
 			}
@@ -65,16 +69,27 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			ctx.setNextNode(next);
 			break;
 		case REJECT_STEP:
+			current = ctx.getCurrentNode();
+			if(current.getFlowNode().getNodeLevel() < 1) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "flow node step error");
+			}
+			next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()-1);
+			ctx.setNextNode(next);
 			break;
 		case TRANSFER_STEP:
+			//TODO processor changed, add a log
 			break;
 		case COMMENT_STEP:
 			break;
 		case ABSORT_STEP:
+			next = ctx.getFlowGraph().getNodes().get(ctx.getFlowGraph().getNodes().size()-1);
+			ctx.setNextNode(next);
 			break;
 		case REMINDER_STEP:
+			//TODO resend a message
 			break;
 		case EVALUATE_STEP:
+			//TODO save evaluate score
 			break;
 		default:
 			break;

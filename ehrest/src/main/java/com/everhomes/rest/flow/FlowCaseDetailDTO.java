@@ -5,6 +5,13 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul> 工作流的详细信息
+ * <li>entities: 实体的详细信息 {@link com.everhomes.rest.flow.FlowCaseEntity}</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class FlowCaseDetailDTO {
     private Long     id;
     private Long     applyUserId;
@@ -29,6 +36,9 @@ public class FlowCaseDetailDTO {
     private Byte isEvaluate;
     private Integer evaluateScore;
     private Long lastStepTime;
+    
+    @ItemType(FlowCaseEntity.class)
+    private List<FlowCaseEntity> entities;
     
 	@ItemType(FlowNodeLogDTO.class)
 	private List<FlowNodeLogDTO> nodes;
