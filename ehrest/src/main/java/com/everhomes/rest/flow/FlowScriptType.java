@@ -1,10 +1,10 @@
 package com.everhomes.rest.flow;
 
-public enum FlowScriptScriptType {
+public enum FlowScriptType {
 	PROTOTYPE("prototype"), BEAN_ID("bean_id");
 	
 	private String code;
-    private FlowScriptScriptType(String code) {
+    private FlowScriptType(String code) {
         this.code = code;
     }
     
@@ -12,12 +12,12 @@ public enum FlowScriptScriptType {
         return this.code;
     }
     
-    public static FlowScriptScriptType fromCode(String code) {
+    public static FlowScriptType fromCode(String code) {
     	if(code == null) {
     		return null;
     	}
     	
-    	for(FlowScriptScriptType t : FlowScriptScriptType.values()) {
+    	for(FlowScriptType t : FlowScriptType.values()) {
     		if(code.equalsIgnoreCase(t.getCode())) {
     			return t;
     		}

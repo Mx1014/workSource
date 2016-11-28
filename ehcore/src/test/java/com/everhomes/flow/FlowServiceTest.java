@@ -16,11 +16,13 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.FlowActionInfo;
+import com.everhomes.rest.flow.FlowActionStepType;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowDTO;
@@ -30,7 +32,7 @@ import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowNodePriority;
 import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowScriptScriptType;
+import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
@@ -459,16 +461,22 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Long ownerId = 11l;
     	Long moduleId = 12l;
     	FlowScript script = new FlowScript();
+    	script.setName("test-dummpy");
     	script.setFlowStepType(FlowStepType.APPROVE_STEP.getCode());
     	script.setModuleId(moduleId);
     	script.setOwnerId(ownerId);
     	script.setOwnerType(FlowOwnerType.ENTERPRISE.getCode());
     	script.setModuleType(FlowModuleType.NO_MODULE.getCode());
-    	script.setScriptType(FlowScriptScriptType.PROTOTYPE.getCode());
+    	script.setScriptType(FlowScriptType.PROTOTYPE.getCode());
     	script.setScriptCls(FlowScriptFireDummy.class.getName());
+    	script.setStepType(FlowActionStepType.STEP_ENTER.getCode());
     	flowScriptProvider.createFlowScript(script);
     	
     	FlowGraphScriptAction scriptAction = new FlowGraphScriptAction();
+    	FlowAction flowAction = new FlowAction();
+    	flowAction.setScriptId(script.getId());
+    	scriptAction.setFlowAction(flowAction);
+    	
     	FlowCaseState ctx = new FlowCaseState();
     	try {
 			scriptAction.fireAction(ctx, null);

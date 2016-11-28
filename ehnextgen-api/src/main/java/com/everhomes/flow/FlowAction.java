@@ -13,7 +13,7 @@ public class FlowAction extends EhFlowActions {
 	}
 
 	public void setScriptId(Long scriptId) {
-		FlowActionCustomField.REMINDER_AFTER_MINUTE.setIntegralValue(this, scriptId);
+		FlowActionCustomField.SCRIPT_ID.setIntegralValue(this, scriptId);
 	}
 
 	public Long getReminderAfterMinute() {

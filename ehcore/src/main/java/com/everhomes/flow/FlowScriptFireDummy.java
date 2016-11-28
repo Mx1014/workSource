@@ -4,9 +4,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.stereotype.Service;
+import org.springframework.stereotype.Component;
 
-@Service
+@Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FlowScriptFireDummy implements FlowScriptFire {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowScriptFireDummy.class);
