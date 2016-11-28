@@ -24,6 +24,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>postUri: 标题图</li>
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
+ *  <li>serviceUserId: 客服服务人员id</li>
  * </ul>
  * @author janson
  *
@@ -50,6 +51,8 @@ public class CreateEnterpriseCommand {
     
     private String latitude;
     
+    private Long serviceUserId;
+    
     @ItemType(OrganizationAddressDTO.class)
 	private List<OrganizationAddressDTO> addressDTOs;
     
@@ -57,6 +60,12 @@ public class CreateEnterpriseCommand {
     private List<AttachmentDescriptor> attachments;
     
     
+	public Long getServiceUserId() {
+		return serviceUserId;
+	}
+	public void setServiceUserId(Long serviceUserId) {
+		this.serviceUserId = serviceUserId;
+	}
 	public Long getMemberCount() {
 		return memberCount;
 	}

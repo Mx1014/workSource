@@ -374,11 +374,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
-		Long communityId = appNamespaceMapping.getCommunityId();
-		Community community = communityProvider.findCommunityById(communityId);
-		if (community == null) {
-			community = new Community();
-		}
 		
 		List<CustomerRental> list = JSONObject.parseArray(varDataList, CustomerRental.class);
 		for (CustomerRental customerRental : list) {

@@ -55,3 +55,5 @@ CREATE TABLE `eh_app_namespace_mappings` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+ALTER TABLE `eh_organization_details` ADD COLUMN `service_user_id` BIGINT NULL COMMENT 'customer service staff';

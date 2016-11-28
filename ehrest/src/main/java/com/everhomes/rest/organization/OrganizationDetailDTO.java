@@ -32,6 +32,11 @@ import com.everhomes.util.StringHelper;
  *  <li>attachments: 机构banner图</li>
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
+ *  <li>signupCount: 注册人数</li>
+ *  <li>serviceUserId: 客服服务人员id</li>
+ *  <li>serviceUserName: 客服服务人员名称</li>
+ *  <li>serviceUserPhone: 客服服务人员电话</li>
+ *  <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationMemberDTO}</li>
  * </ul>
  *
  */
@@ -69,8 +74,7 @@ public class OrganizationDetailDTO {
     private OrganizationMemberDTO member;
     
     private CommunityDTO community;
-    
-    
+
 	//TODO address info ?
     @ItemType(value = AddressDTO.class)
     private List<AddressDTO> addresses;
@@ -79,7 +83,78 @@ public class OrganizationDetailDTO {
     private List<AttachmentDescriptor> attachments = new ArrayList<AttachmentDescriptor>();
     
     private Long communityId;
+
+    private Integer signupCount;
     
+    private Long serviceUserId;
+    
+    private String serviceUserName;
+    
+    private String serviceUserPhone;
+    
+    @ItemType(OrganizationMemberDTO.class)
+    private List<OrganizationMemberDTO> adminMembers;
+    
+	public Integer getSignupCount() {
+		return signupCount;
+	}
+
+
+
+	public void setSignupCount(Integer signupCount) {
+		this.signupCount = signupCount;
+	}
+
+
+
+	public List<OrganizationMemberDTO> getAdminMembers() {
+		return adminMembers;
+	}
+
+
+
+	public void setAdminMembers(List<OrganizationMemberDTO> adminMembers) {
+		this.adminMembers = adminMembers;
+	}
+
+
+
+	public Long getServiceUserId() {
+		return serviceUserId;
+	}
+
+
+
+	public void setServiceUserId(Long serviceUserId) {
+		this.serviceUserId = serviceUserId;
+	}
+
+
+
+	public String getServiceUserName() {
+		return serviceUserName;
+	}
+
+
+
+	public void setServiceUserName(String serviceUserName) {
+		this.serviceUserName = serviceUserName;
+	}
+
+
+
+	public String getServiceUserPhone() {
+		return serviceUserPhone;
+	}
+
+
+
+	public void setServiceUserPhone(String serviceUserPhone) {
+		this.serviceUserPhone = serviceUserPhone;
+	}
+
+
+
 	public Long getId() {
 		return id;
 	}

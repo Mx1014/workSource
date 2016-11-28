@@ -23,6 +23,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>enterpriseAddress: 公司地址</li>
  *  <li>enterpriseCheckinDate: 公司入驻时间</li>
  *  <li>postUri: 标题图</li>
+ *  <li>serviceUserId: 客服服务人员id</li>
  * </ul>
  *
  */
@@ -41,6 +42,7 @@ public class UpdateEnterpriseCommand {
     private String checkinDate;
     private String postUri;
     private Integer namespaceId;
+    private Long serviceUserId;
 	
 	@ItemType(OrganizationAddressDTO.class)
 	private List<OrganizationAddressDTO> addressDTOs;
@@ -48,6 +50,12 @@ public class UpdateEnterpriseCommand {
     @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
+	public Long getServiceUserId() {
+		return serviceUserId;
+	}
+	public void setServiceUserId(Long serviceUserId) {
+		this.serviceUserId = serviceUserId;
+	}
 	public Long getMemberCount() {
 		return memberCount;
 	}
