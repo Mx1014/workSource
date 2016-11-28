@@ -1914,6 +1914,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return "￥"+price.toString()+"/"+timeStep+"小时";
 		return "";
 	}
+
+	@Override
+	public void deleteRentalCellsByResourceId(Long rentalSiteId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2CellsRecord> step = context
+				.delete(Tables.EH_RENTALV2_CELLS);
+		Condition condition = Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID
+				.equal(rentalSiteId);
+		step.where(condition);
+		step.execute();
+	}
  
 	
 }
