@@ -960,25 +960,25 @@ public class BusinessServiceImpl implements BusinessService {
 				.filter(r ->{
 					if(r.getDisplayFlag().byteValue() == ItemDisplayFlag.DISPLAY.getCode())
 						return true;
-					removeIds.add(r.getTargetId());
+					removeIds.add(Long.valueOf(r.getTargetId()));
 					return false;
-				}).map(r ->r.getTargetId()).collect(Collectors.toList());
+				}).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 
 		List<Long> cmmtyBizIds = null;
 		if(cmmtyId!=0){
 			cmmtyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 					0, ScopeType.COMMUNITY.getCode(), cmmtyId,namesapceId).stream()
-					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r -> Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 		}
 		List<Long> cityBizIds = null;
 		if(cityId!=0){
 			cityBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 					0, ScopeType.CITY.getCode(), cityId,namesapceId).stream()
-					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+					.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 		}
 		List<Long> countyBizIds = this.launchPadProvider.findLaunchPadItemByTargetAndScope(ItemTargetType.BIZ.getCode(), 
 				0, ScopeType.ALL.getCode(), 0,namesapceId).stream()
-				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->r.getTargetId()).collect(Collectors.toList());
+				.filter(r -> !removeIds.contains(r.getTargetId())).map(r ->Long.valueOf(r.getTargetId())).collect(Collectors.toList());
 
 		List<Long> favoriteBizIds = new ArrayList<Long>();
 		if(userBizIds != null && !userBizIds.isEmpty())

@@ -21,5 +21,7 @@ public interface WebMenuPrivilegeProvider {
 	 * @return
 	 */
 	List<WebMenuScope> listWebMenuScopeByOwnerId(String ownerType, Long ownerId);
+
+	List<WebMenuPrivilege> listWebMenuPrivilegeByMenuId(Long menuId);
 	
 }
