@@ -59,8 +59,8 @@ public class QueryDefaultRuleAdminResponse {
 	private BigDecimal weekendPrice;
 	private Double siteCounts;
 
-	@ItemType(String.class)
-	private List<String> siteNumbers;
+	@ItemType(SiteNumberDTO.class)
+	private List<SiteNumberDTO> siteNumbers;
 	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
@@ -243,11 +243,11 @@ public class QueryDefaultRuleAdminResponse {
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
 	}
-	public List<String> getSiteNumbers() {
+	public List<SiteNumberDTO> getSiteNumbers() {
 		return siteNumbers;
 	}
-	public void setSiteNumbers(List<String> siteNumbers) {
+	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
-	}
+	} 
 
 }

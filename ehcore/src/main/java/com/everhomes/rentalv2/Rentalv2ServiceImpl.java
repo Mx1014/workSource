@@ -536,9 +536,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		 
 		List<RentalResourceNumber> resourceNumbers = this.rentalProvider.queryRentalResourceNumbersByOwner(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 		if(null!=resourceNumbers){
-			response.setSiteNumbers (new ArrayList<String>());
+			response.setSiteNumbers (new ArrayList<SiteNumberDTO>());
 			for(RentalResourceNumber number:resourceNumbers){
-				response.getSiteNumbers().add( number.getResourceNumber());
+				SiteNumberDTO dto = new SiteNumberDTO();
+				dto.setSiteNumber(number.getResourceNumber());
+				dto.setSiteNumberGroup(number.getSiteNumberGroup());
+				response.getSiteNumbers().add(dto);
 			}
 		}
 		 
@@ -609,11 +612,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.rentalProvider.deleteRentalConfigAttachmentsByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 			this.rentalProvider.deleteRentalResourceNumbersByOwnerId(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 			if( null!=cmd.getSiteNumbers())
-				for(String number : cmd.getSiteNumbers()){
+				for(SiteNumberDTO number : cmd.getSiteNumbers()){
 					RentalResourceNumber resourceNumber = new RentalResourceNumber();
 					resourceNumber.setOwnerType(EhRentalv2DefaultRules.class.getSimpleName());
 					resourceNumber.setOwnerId(defaultRule.getId());
-					resourceNumber.setResourceNumber(number);
+					resourceNumber.setResourceNumber(number.getSiteNumber());
+					resourceNumber.setSiteNumberGroup(number.getSiteNumberGroup());
 					this.rentalProvider.createRentalResourceNumber(resourceNumber);
 				}
 			//time intervals
@@ -4261,12 +4265,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				HashSet<String> siteNumberSet = new HashSet<>();
 				if(defaultRule.getSiteCounts().equals(Double.valueOf(defaultRule.getSiteNumbers().size()))){
 					if( null!=defaultRule.getSiteNumbers())
-						for(String number : defaultRule.getSiteNumbers()){
-							siteNumberSet.add(number);
+						for(SiteNumberDTO number : defaultRule.getSiteNumbers()){
+							siteNumberSet.add(number.getSiteNumber());
 							RentalResourceNumber resourceNumber = new RentalResourceNumber();
 							resourceNumber.setOwnerType(EhRentalv2Resources.class.getSimpleName());
 							resourceNumber.setOwnerId(siteId);
-							resourceNumber.setResourceNumber(number);
+							resourceNumber.setResourceNumber(number.getSiteNumber());
+							resourceNumber.setSiteNumberGroup(number.getSiteNumberGroup());
 							this.rentalProvider.createRentalResourceNumber(resourceNumber);
 						}
 				}

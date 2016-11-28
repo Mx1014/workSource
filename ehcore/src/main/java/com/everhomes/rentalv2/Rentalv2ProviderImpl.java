@@ -1921,6 +1921,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		return priceToString(minPrice,rentalType,timeStep)+"~" +priceToString(maxPrice,rentalType,timeStep);
 	}
 
+	private boolean isInteger(double d){
+		double eps = 0.0001;
+		return Math.abs(d - (double)((int)d)) < eps;
+	}
 	private String priceToString(BigDecimal price, Byte rentalType, Double timeStep) {
 		if(price.compareTo(new BigDecimal(0)) == 0)
 			return "免费";
@@ -1931,7 +1935,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
 			return "￥"+price.toString()+"/半天";
 		if(rentalType.equals(RentalType.HOUR.getCode()))
-			return "￥"+price.toString()+"/"+timeStep+"小时";
+			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
 		return "";
 	}
 
