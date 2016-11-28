@@ -1,6 +1,5 @@
 package com.everhomes.yellowPage;
 
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -32,6 +31,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
+import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.CustomRequestHandler;
@@ -42,10 +42,10 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.mysql.jdbc.StringUtils;
 
-@Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.SETTLE_REQUEST_CUSTOM)
-public class SettleCustomRequestHandler implements CustomRequestHandler {
+@Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.APARTMENT_REQUEST_CUSTOM)
+public class ApartmentCustomRequestHandler implements CustomRequestHandler {
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(SettleCustomRequestHandler.class);
+private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomRequestHandler.class);
 	
 	@Autowired
 	private UserProvider userProvider;
@@ -66,11 +66,11 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private SettleRequestInfoSearcher settleRequestInfoSearcher;
+	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
 	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
-		SettleRequests request = GsonUtil.fromJson(cmd.getRequestJson(), SettleRequests.class);
+		ServiceAllianceApartmentRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ServiceAllianceApartmentRequests.class);
 		
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
 
@@ -88,9 +88,9 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		if(identifier != null)
 			request.setCreatorMobile(identifier.getIdentifierToken());
 		
-		LOGGER.info("SettleCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createSettleRequests(request);
-		settleRequestInfoSearcher.feedDoc(request);
+		LOGGER.info("ApartmentCustomRequestHandler addCustomRequest request:" + request);
+		yellowPageProvider.createApartmentRequests(request);
+		apartmentRequestInfoSearcher.feedDoc(request);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
 		
@@ -162,12 +162,13 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	}
 	
 
-	private String getNote(SettleRequests request) {
+	private String getNote(ServiceAllianceApartmentRequests request) {
 		String name = (request.getName() == null) ? "" : request.getName();
 		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
 		String organizationName = (request.getOrganizationName() == null) ? "" : request.getOrganizationName();
+		Double areaSize = (request.getAreaSize() == null) ? 0.0 : request.getAreaSize();
 		
-		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "企业名称:" + organizationName + "\n" ;
+		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "公司:" + organizationName + "\n" + "面积需求:" + areaSize + "\n";
 		return note;
 	}
 	
@@ -203,7 +204,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 
 	@Override
 	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
-		SettleRequests request = yellowPageProvider.findSettleRequests(id);
+		ServiceAllianceApartmentRequests request = yellowPageProvider.findApartmentRequests(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
@@ -213,7 +214,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	}
 	
 	//硬转，纯体力
-	private List<RequestFieldDTO> toFieldDTOList(SettleRequests fields) {
+	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceApartmentRequests fields) {
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
 		RequestFieldDTO dto = new RequestFieldDTO();
 		dto.setFieldType(FieldType.STRING.getCode());
@@ -236,7 +237,16 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		dto.setFieldContentType(FieldContentType.TEXT.getCode());
 		
 		dto.setFieldValue(fields.getOrganizationName());
-		dto.setFieldName("企业名称");
+		dto.setFieldName("公司");
+		
+		dto = new RequestFieldDTO();
+		dto.setFieldType(FieldType.NUMBER.getCode());
+		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		
+		if(fields.getAreaSize() != null) {
+			dto.setFieldValue(fields.getAreaSize().toString());
+		}
+		dto.setFieldName("面积需求");
 		list.add(dto);
 		
 		return list;
