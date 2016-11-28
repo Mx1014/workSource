@@ -33,8 +33,27 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
    @Autowired
    BigCollectionProvider bigCollectionProvider;
     
-	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+//	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
+	@Override
+	public FlowCaseState prepareStart(User logonUser, FlowCase flowCase) {
+		FlowCaseState ctx = new FlowCaseState();
+		if(flowCase == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
+		}
+		ctx.setFlowCase(flowCase);
+		ctx.setModuleName(flowCase.getModuleName());
+		
+		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		ctx.setFlowGraph(flowGraph);
+		
+		FlowGraphStartEvent event = new FlowGraphStartEvent();
+		ctx.setCurrentEvent(event);
+		
+		return ctx;
+	}
+	
+	@Override
 	public FlowCaseState prepareButtonFire(User logonUser, FlowFireButtonCommand cmd) {
 		FlowCaseState ctx = new FlowCaseState();
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
@@ -62,18 +81,20 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		return ctx;
 	}
 	
+	@Override
 	public void step(FlowCaseState ctx, FlowGraphEvent event) {
 		boolean stepOK = true;
 		FlowGraphNode currentNode = ctx.getCurrentNode();
 		if(event != null) {
 			event.fire(ctx);
-		} else {
-			currentNode.onAction(ctx, FlowStepType.NO_STEP);	
 		}
 		FlowGraphNode nextNode = ctx.getNextNode();
 		if(nextNode != currentNode) {
 			try {
-				currentNode.stepLeave(ctx, nextNode);
+				if(currentNode != null) {
+					currentNode.stepLeave(ctx, nextNode);	
+				}
+				
 				ctx.setPrefixNode(currentNode);
 				ctx.setCurrentNode(nextNode);
 				ctx.setNextNode(null);

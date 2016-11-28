@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.records.EhFlowEventLogsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +110,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
 
     private void prepareObj(FlowEventLog obj) {
+    	Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+    	obj.setCreateTime(now);
     }
 }

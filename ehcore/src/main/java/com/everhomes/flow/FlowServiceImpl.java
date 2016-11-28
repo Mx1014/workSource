@@ -1128,27 +1128,60 @@ public class FlowServiceImpl implements FlowService {
 		
 		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
-		FlowGraphAction graphAction = new FlowGraphMessageAction();
-		graphAction.setFlowAction(action);
-		graphNode.setMessageAction(graphAction);
+		FlowGraphAction graphAction = null;
+		if(action != null) {
+			graphAction = new FlowGraphMessageAction();
+			graphAction.setFlowAction(action);
+			graphNode.setMessageAction(graphAction);	
+		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
-		graphAction = new FlowGraphSMSAction();
-		graphAction.setFlowAction(action);
-		graphNode.setSmsAction(graphAction);
+		if(action != null) {
+			graphAction = new FlowGraphSMSAction();
+			graphAction.setFlowAction(action);
+			graphNode.setSmsAction(graphAction);	
+		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.TICK_MESSAGE.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
-		graphAction = new FlowGraphMessageAction();
-		graphAction.setFlowAction(action);
-		graphNode.setTickMessageAction(graphAction);
+		if(action != null) {
+			graphAction = new FlowGraphMessageAction();
+			graphAction.setFlowAction(action);
+			graphNode.setTickMessageAction(graphAction);	
+		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.TICK_SMS.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
-		graphAction = new FlowGraphSMSAction();
-		graphAction.setFlowAction(action);
-		graphNode.setTickMessageAction(graphAction);
+		if(action != null) {
+			graphAction = new FlowGraphSMSAction();
+			graphAction.setFlowAction(action);
+			graphNode.setTickMessageAction(graphAction);	
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.APPROVE_STEP.getCode());
+		if(action != null) {
+			graphAction = new FlowGraphTrackerAction(FlowStepType.APPROVE_STEP);
+			graphAction.setFlowAction(action);
+			graphNode.setTrackApproveEnter(graphAction);
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.REJECT_STEP.getCode());
+		if(action != null) {
+			graphAction = new FlowGraphTrackerAction(FlowStepType.REJECT_STEP);
+			graphAction.setFlowAction(action);
+			graphNode.setTrackRejectEnter(graphAction);
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
+				, FlowActionType.TRACK.getCode(), FlowActionStepType.STEP_LEAVE.getCode(), FlowStepType.TRANSFER_STEP.getCode());
+		if(action != null) {
+			graphAction = new FlowGraphTrackerAction(FlowStepType.TRANSFER_STEP);
+			graphAction.setFlowAction(action);
+			graphNode.setTrackTransferLeave(graphAction);
+		}
 		
 		List<FlowButton> applierButtons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.APPLIER.getCode());
 		applierButtons.forEach((btn)->{

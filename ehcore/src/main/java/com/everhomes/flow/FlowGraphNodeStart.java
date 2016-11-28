@@ -19,12 +19,6 @@ public class FlowGraphNodeStart extends FlowGraphNode {
 	}
 
 	@Override
-	public void onAction(FlowCaseState ctx, FlowStepType step) {
-		// TODO Auto-generated method stub
-		
-	}
-
-	@Override
 	public FlowStepType getStepType() {
 		return FlowStepType.START_STEP;
 	}

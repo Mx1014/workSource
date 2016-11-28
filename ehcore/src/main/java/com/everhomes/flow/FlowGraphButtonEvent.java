@@ -1,15 +1,26 @@
 package com.everhomes.flow;
 
+import org.springframework.context.annotation.Scope;
+import org.springframework.stereotype.Service;
+
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.User;
 import com.everhomes.util.RuntimeErrorException;
 
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+
+@Service
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
 public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowUserType userType;
-	private Long firedUserId;
+	private UserInfo firedUser;
 	private FlowFireButtonCommand cmd;
 	
 	@Override
@@ -24,15 +35,19 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 
 	@Override
 	public Long getFiredUserId() {
-		return firedUserId;
+		return firedUser.getId();
+	}
+
+	public UserInfo getFiredUser() {
+		return firedUser;
+	}
+
+	public void setFiredUser(UserInfo firedUser) {
+		this.firedUser = firedUser;
 	}
 
 	public void setUserType(FlowUserType userType) {
 		this.userType = userType;
-	}
-
-	public void setFiredUserId(Long firedUserId) {
-		this.firedUserId = firedUserId;
 	}
 
 	public FlowFireButtonCommand getCmd() {
@@ -94,5 +109,25 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		default:
 			break;
 		}
+		
+		FlowEventLog log = new FlowEventLog();
+		log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
+		log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+		log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+		log.setFlowButtonId(btn.getFlowButton().getId());
+		log.setFlowNodeId(next.getFlowNode().getId());
+		log.setParentId(0l);
+		log.setFlowCaseId(ctx.getFlowCase().getId());
+		log.setFlowUserId(firedUser.getId());
+		log.setFlowUserName(firedUser.getNickName());
+		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
+			log.setFlowSelectionId(cmd.getEntityId());
+		}
+		
+		log.setLogType(FlowLogType.BUTTON_FIRED.getCode());
+		log.setLogTitle("");
+		log.setButtonFiredStep(nextStep.getCode());
+		log.setButtonFiredFromNode(current.getFlowNode().getId());
+		ctx.getLogs().add(log);	//added but not save to database now.
 	}
 }

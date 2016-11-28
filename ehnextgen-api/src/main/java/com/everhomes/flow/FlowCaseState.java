@@ -1,5 +1,8 @@
 package com.everhomes.flow;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.flow.FlowStepType;
@@ -15,6 +18,12 @@ public class FlowCaseState {
 	private FlowGraphNode nextNode;
 	private FlowGraphEvent currentEvent;
 	private Map<String, Object> extra;
+	private List<FlowEventLog> logs;
+	
+	public FlowCaseState() {
+		extra = new HashMap<String, Object>();
+		logs = new ArrayList<FlowEventLog>();
+	}
 
 	public String getModuleName() {
 		return moduleName;
@@ -76,4 +85,13 @@ public class FlowCaseState {
 	public void setStepType(FlowStepType stepType) {
 		this.stepType = stepType;
 	}
+
+	public List<FlowEventLog> getLogs() {
+		return logs;
+	}
+
+	public void setLogs(List<FlowEventLog> logs) {
+		this.logs = logs;
+	}
+
 }

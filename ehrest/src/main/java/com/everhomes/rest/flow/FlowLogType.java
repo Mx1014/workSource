@@ -1,10 +1,10 @@
 package com.everhomes.rest.flow;
 
-public enum FlowEventType {
-	STEP_START("step_start"), STEP_TIMEOUT("step_timeout"), BUTTON_FIRED("button_fired");
+public enum FlowLogType {
+	BUTTON_FIRED("button_fired"), NODE_TRACKER("node_tracker");
 	
 	private String code;
-    private FlowEventType(String code) {
+    private FlowLogType(String code) {
         this.code = code;
     }
     
@@ -12,12 +12,12 @@ public enum FlowEventType {
         return this.code;
     }
     
-    public static FlowEventType fromCode(String code) {
+    public static FlowLogType fromCode(String code) {
     	if(code == null) {
     		return null;
     	}
     	
-    	for(FlowEventType t : FlowEventType.values()) {
+    	for(FlowLogType t : FlowLogType.values()) {
     		if(code.equalsIgnoreCase(t.getCode())) {
     			return t;
     		}

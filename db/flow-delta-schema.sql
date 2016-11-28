@@ -237,7 +237,7 @@ CREATE TABLE `eh_flow_event_logs` (
     `id` BIGINT NOT NULL,
     `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
-    `parent_id` BIGINT NOT NULL,
+    `parent_id` BIGINT NOT NULL DEFAULT 0,
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
     `flow_node_id` BIGINT NOT NULL DEFAULT 0,
