@@ -31,7 +31,6 @@ public abstract class FlowGraphNode {
 		timeoutActions = new ArrayList<FlowGraphAction>();
 	}
 	
-	public abstract FlowStepType getStepType();
 	public abstract void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException;
 	public abstract void stepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException;
 	

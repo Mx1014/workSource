@@ -103,14 +103,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			} catch(FlowStepErrorException ex) {
 				stepOK = false;
 			}
-			
 		}
 		
 		//Now save info to databases here
-		if(stepOK) {
-			
-		} else {
-			
+		if(stepOK && ctx.getLogs().size() > 0) {
+			flowService.createEventLogs(ctx.getLogs());
 		}
 	}
 }

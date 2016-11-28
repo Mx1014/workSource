@@ -113,4 +113,21 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
     	obj.setCreateTime(now);
     }
+    
+    @Override
+    public Long getNextId() {
+    	return this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowEventLogs.class));
+    }
+    
+    @Override
+    public void createFlowEventLogs(List<FlowEventLog> objs) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEventLogs.class));
+    	EhFlowEventLogsDao dao = new EhFlowEventLogsDao(context.configuration());
+    	
+    	for(FlowEventLog obj : objs) {
+    		prepareObj(obj);	
+    	}
+        
+        dao.insert(objs.toArray(new FlowEventLog[objs.size()]));
+    }
 }

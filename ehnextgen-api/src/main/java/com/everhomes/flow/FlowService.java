@@ -31,6 +31,8 @@ import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
+import com.everhomes.rest.flow.ListFlowModulesCommand;
+import com.everhomes.rest.flow.ListFlowModulesResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
@@ -394,6 +396,15 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowGraph getFlowGraph(Long flowId, Integer flowVer);
+
+	/**
+	 * 返回模块信息
+	 * @param cmd
+	 * @return
+	 */
+	ListFlowModulesResponse listModules(ListFlowModulesCommand cmd);
+
+	void createEventLogs(List<FlowEventLog> logs);
 	
 	//TODO 日志信息分类：
 	

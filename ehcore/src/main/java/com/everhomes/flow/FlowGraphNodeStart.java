@@ -18,9 +18,4 @@ public class FlowGraphNodeStart extends FlowGraphNode {
 		
 	}
 
-	@Override
-	public FlowStepType getStepType() {
-		return FlowStepType.START_STEP;
-	}
-
 }

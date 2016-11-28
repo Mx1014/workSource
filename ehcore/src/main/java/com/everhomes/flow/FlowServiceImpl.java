@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -43,6 +44,7 @@ import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
@@ -65,6 +67,8 @@ import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
+import com.everhomes.rest.flow.ListFlowModulesCommand;
+import com.everhomes.rest.flow.ListFlowModulesResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
@@ -82,6 +86,10 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 
 @Component
 public class FlowServiceImpl implements FlowService {
@@ -109,12 +117,23 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowActionProvider flowActionProvider;
     
+    @Autowired
     private FlowStateProcessor flowStateProcessor;
+    
+    @Autowired
+    private FlowEventLogProvider flowEventLogProvider;
+    
+    private StringTemplateLoader templateLoader;
+    private Configuration templateConfig;
     
     private Map<String, FlowGraph> graphMap;
     
     public FlowServiceImpl() {
     	graphMap = new ConcurrentHashMap<String, FlowGraph>();
+    	templateLoader = new StringTemplateLoader();
+    	templateConfig = new Configuration(Configuration.DEFAULT_INCOMPATIBLE_IMPROVEMENTS);
+    	templateConfig.setTemplateLoader(templateLoader);
+    	templateConfig.setTemplateUpdateDelay(0);
     }
 	
     /**
@@ -142,7 +161,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setFlowName(cmd.getFlowName());
     	obj.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
     	obj.setStatus(FlowStatusType.CONFIG.getCode());
-    	obj.setOrgId(cmd.getOrgId());
+    	obj.setOrganizationId(cmd.getOrgId());
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
 
@@ -1494,6 +1513,48 @@ public class FlowServiceImpl implements FlowService {
 			ListButtonProcessorSelectionsCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ListFlowModulesResponse listModules(ListFlowModulesCommand cmd) {
+		ListFlowModulesResponse resp = new ListFlowModulesResponse();
+		List<FlowModuleDTO> modules = new ArrayList<FlowModuleDTO>();
+		resp.setModules(modules);
+		
+		FlowModuleDTO dto = new FlowModuleDTO();
+		dto.setModuleId(111l);
+		dto.setModuleName("园区入驻");
+		dto.setModuleId(112l);
+		dto.setModuleName("物业保修");
+		dto.setModuleId(113l);
+		dto.setModuleName("月卡申请");
+		dto.setModuleId(114l);
+		dto.setModuleName("交流大厅");
+		
+		return resp;
+	}
+	
+	@Override
+	public void createEventLogs(List<FlowEventLog> logs) {
+		dbProvider.execute((s) -> {
+			flowEventLogProvider.createFlowEventLogs(logs);
+			return true;
+		});
+	}
+	
+	public String parseActionTemplate(Long actionId, String renderText, Map<String, String> model) {
+        String templateKey = String.format("action:%d", actionId);
+        try {
+        		templateLoader.putTemplate(templateKey, renderText);
+        		Template freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
+            if(freeMarkerTemplate != null) {
+            	return FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, model);
+            	}
+        } catch (Exception ex) {
+        	  LOGGER.error("load template actionId=" + actionId + " renderText=" + renderText, ex);
+          }
+        
+        return null;
 	}
 
 }

@@ -5,13 +5,6 @@ import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.util.RuntimeErrorException;
 
 public class FlowGraphNodeNormal extends FlowGraphNode {
-
-	@Override
-	public FlowStepType getStepType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	@Override
 	public void stepEnter(FlowCaseState ctx, FlowGraphNode from)
 			throws FlowStepErrorException {

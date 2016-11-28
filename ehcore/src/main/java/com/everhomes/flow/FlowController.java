@@ -20,6 +20,8 @@ import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
+import com.everhomes.rest.flow.ListFlowModulesCommand;
+import com.everhomes.rest.flow.ListFlowModulesResponse;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
@@ -111,6 +113,20 @@ public class FlowController extends ControllerBase {
     @RestReturn(value=FlowEvaluateDTO.class)
     public RestResponse postEvaluate(@Valid FlowPostEvaluateCommand cmd) {
         RestResponse response = new RestResponse(flowService.postEvaluate(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /flow/listModules</b>
+     * <p> 对节点进行评价 </p>
+     * @return 返回评价信息
+     */
+    @RequestMapping("listModules")
+    @RestReturn(value=ListFlowModulesResponse.class)
+    public RestResponse listModules(@Valid ListFlowModulesCommand cmd) {
+        RestResponse response = new RestResponse(flowService.listModules(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

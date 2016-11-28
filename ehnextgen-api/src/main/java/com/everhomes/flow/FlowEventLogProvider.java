@@ -18,4 +18,8 @@ public interface FlowEventLogProvider {
 	List<FlowEventLog> queryFlowEventLogs(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	Long getNextId();
+
+	void createFlowEventLogs(List<FlowEventLog> objs);
+
 }

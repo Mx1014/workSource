@@ -5,12 +5,6 @@ import com.everhomes.rest.flow.FlowStepType;
 public class FlowGraphNodeEnd extends FlowGraphNode {
 
 	@Override
-	public FlowStepType getStepType() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
 	public void stepEnter(FlowCaseState ctx, FlowGraphNode from)
 			throws FlowStepErrorException {
 		// TODO Auto-generated method stub

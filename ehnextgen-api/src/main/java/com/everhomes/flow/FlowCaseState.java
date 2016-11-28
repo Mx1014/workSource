@@ -6,11 +6,13 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.user.UserInfo;
 
 public class FlowCaseState {
 	private String moduleName;
 	private FlowModuleInfo module;
 	private FlowCase flowCase;
+	private UserInfo operator;
 	private FlowGraph flowGraph;
 	private FlowStepType stepType;
 	private FlowGraphNode prefixNode;
@@ -92,6 +94,14 @@ public class FlowCaseState {
 
 	public void setLogs(List<FlowEventLog> logs) {
 		this.logs = logs;
+	}
+
+	public UserInfo getOperator() {
+		return operator;
+	}
+
+	public void setOperator(UserInfo operator) {
+		this.operator = operator;
 	}
 
 }

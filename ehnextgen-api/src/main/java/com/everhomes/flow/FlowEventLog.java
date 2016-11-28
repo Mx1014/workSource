@@ -7,7 +7,8 @@ public class FlowEventLog extends EhFlowEventLogs {
 	 * 
 	 */
 	private static final long serialVersionUID = 6063163152705295466L;
-
+	private Long trackerProcessor;
+	private Long trackerApplier;
 	public Long getButtonFiredFromNode() {
 		return FlowEventCustomField.BUTTON_FIRED_FROM_NODE.getIntegralValue(this);
 	}
@@ -22,6 +23,22 @@ public class FlowEventLog extends EhFlowEventLogs {
 
 	public void setButtonFiredStep(String buttonFiredStep) {
 		FlowEventCustomField.BUTTON_FIRED_STEP.setStringValue(this, buttonFiredStep);
+	}
+
+	public Long getTrackerProcessor() {
+		return FlowEventCustomField.TRACKER_PROCESSOR.getIntegralValue(this);
+	}
+
+	public void setTrackerProcessor(Long trackerProcessor) {
+		FlowEventCustomField.TRACKER_PROCESSOR.setIntegralValue(this, trackerProcessor);
+	}
+
+	public Long getTrackerApplier() {
+		return FlowEventCustomField.TRACKER_APLIER.getIntegralValue(this);
+	}
+
+	public void setTrackerApplier(Long trackerApplier) {
+		FlowEventCustomField.TRACKER_APLIER.setIntegralValue(this, trackerApplier);
 	}
 
 	@Override
