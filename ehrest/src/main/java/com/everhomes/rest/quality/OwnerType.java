@@ -8,11 +8,12 @@ package com.everhomes.rest.quality;
  * <li>GROUP: 机构成员</li>
  * <li>PM: 物业</li>
  * <li>DEPARTMENT: 部门</li>
+ * <li>COMMUNITY: 小区</li>
  * </ul>
  */
 public enum OwnerType {
 
-	ENTERPRISE("enterprise"), USER("user"), GROUP("group"), PM("pm"), DEPARTMENT("department");
+	ENTERPRISE("enterprise"), USER("user"), GROUP("group"), PM("pm"), DEPARTMENT("department"), COMMUNITY("community");
 	
 	private String code;
     private OwnerType(String code) {

@@ -15,4 +15,7 @@ public interface PmTaskErrorCode {
     int ERROR_SERVICE_CATEGORY_EXIST = 10005;  //服务类型已存在
     
     int ERROR_SERVICE_CATEGORY_NULL = 10006;  //服务类型不存在
+    
+    int ERROR_TASK_PROCCESING = 10007;  //该单已被其他人处理，请返回主界面刷新任务
+    
 }

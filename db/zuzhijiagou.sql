@@ -205,20 +205,17 @@ INSERT INTO `eh_web_menus` VALUES ('20420', '设置', '20400', null, 'property_f
 
 
 INSERT INTO `eh_web_menus` VALUES ('20600', '品质核查', '20000', null, null, '1', '2', '/20000/20600', 'park', '260');
-INSERT INTO `eh_web_menus` VALUES ('20610', '手动核查', '20600', null, null, '1', '2', '/20000/20600/20610', 'park', '261');
-INSERT INTO `eh_web_menus` VALUES ('20611', '行为规范', '20610', null, 'behavior_standard', '0', '2', '/20000/20600/20610/20611', 'park', '262');
-INSERT INTO `eh_web_menus` VALUES ('20612', '绩效统计', '20610', null, 'performance_statistics', '0', '2', '/20000/20600/20610/20612', 'park', '263');
+INSERT INTO `eh_web_menus` VALUES ('20610', '类型管理', '20600', null, 'react:/type-management/type-list', '1', '2', '/20000/20600/20610', 'park', '261');
+INSERT INTO `eh_web_menus` VALUES ('20620', '规范管理', '20600', null, 'react:/specification-management/specification-list', '1', '2', '/20000/20600/20620', 'park', '265');
+INSERT INTO `eh_web_menus` VALUES ('20630', '标准管理', '20600', null, 'reference_standard', '0', '2', '/20000/20600/20630', 'park', '266');
+INSERT INTO `eh_web_menus` VALUES ('20640', '标准审批', '20600', null, 'react:/standard-check/standard-check-list', '0', '2', '/20000/20600/20640', 'park', '267');
+INSERT INTO `eh_web_menus` VALUES ('20650', '任务查询', '20600', null, 'task_list', '0', '2', '/20000/20600/20650', 'park', '268');
 
-INSERT INTO `eh_web_menus` VALUES ('20620', '作业标准', '20600', null, null, '1', '2', '/20000/20600/20620', 'park', '265');
-INSERT INTO `eh_web_menus` VALUES ('20621', '参考标准', '20620', null, 'reference_standard', '0', '2', '/20000/20600/20620/20621', 'park', '266');
-INSERT INTO `eh_web_menus` VALUES ('20622', '类型管理', '20620', null, 'type_management', '0', '2', '/20000/20600/20620/20622', 'park', '267');
-INSERT INTO `eh_web_menus` VALUES ('20623', '绩效统计', '20620', null, 'performance_statistics', '0', '2', '/20000/20600/20620/20623', 'park', '268');
+INSERT INTO `eh_web_menus` VALUES ('20660', '统计', '20600', null, null, '1', '2', '/20000/20600/20660', 'park', '269');
+INSERT INTO `eh_web_menus` VALUES ('20661', '分数统计', '20660', null, 'react:/statistics-management/fractional-report', '0', '2', '/20000/20600/20660/20661', 'park', '270');
+INSERT INTO `eh_web_menus` VALUES ('20662', '任务数统计', '20660', null, 'react:/statistics-management/task-report', '0', '2', '/20000/20600/20660/20662', 'park', '271');
 
-INSERT INTO `eh_web_menus` VALUES ('20630', '任务列表', '20600', null, null, '1', '2', '/20000/20600/20630', 'park', '269');
-INSERT INTO `eh_web_menus` VALUES ('20631', '任务列表', '20630', null, 'task_list', '0', '2', '/20000/20600/20630/20631', 'park', '270');
-INSERT INTO `eh_web_menus` VALUES ('20632', '任务审阅', '20630', null, 'task_review', '0', '2', '/20000/20600/20630/20632', 'park', '271');
-
-INSERT INTO `eh_web_menus` VALUES ('20640', '修改记录', '20600', null, 'edit_record', '0', '2', '/20000/20600/20640', 'park', '272');
+INSERT INTO `eh_web_menus` VALUES ('20670', '修改记录', '20600', null, 'edit_record', '0', '2', '/20000/20600/20670', 'park', '272');
 
 INSERT INTO `eh_web_menus` VALUES ('20800', '设备巡检', '20000', null, null, '1', '2', '/20000/20800', 'park', '280');
 INSERT INTO `eh_web_menus` VALUES ('20810', '参考标准', '20800', null, null, '1', '2', '/20000/20800/20810', 'park', '281');
@@ -583,7 +580,7 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('121', '716', '40750', '日活统�
 
 -- 工位预定
 INSERT INTO `eh_web_menu_privileges` VALUES ('122', '558', '40210', '空间管理', '1', '1', '空间管理 全部权限', '341');
-INSERT INTO `eh_web_menu_privileges` VALUES ('166', '559', '40220', '预订详情', '1', '1', '预订详情 全部权限', '342');
+INSERT INTO `eh_web_menu_privileges` VALUES ('145', '559', '40220', '预订详情', '1', '1', '预订详情 全部权限', '342');
 -- 资源预订：
 INSERT INTO `eh_web_menu_privileges` VALUES ('123', '565', '40410', '默认参数', '1', '1', '默认参数  全部权限', '343');
 INSERT INTO `eh_web_menu_privileges` VALUES ('124', '566', '40420', '资源发布', '1', '1', '资源发布 全部权限', '344');
@@ -670,12 +667,11 @@ SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 -- SELECT ((@web_menu_privilegel_id := @web_menu_privilegel_id + 1), '10008', `id` , '物业报修', '1', '1', '物业报修 全部权限', '710') FROM `eh_web_menus` WHERE `path` like '20100/%';
 	
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-
 SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
 (select t.* FROM eh_web_menus m
 JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
 ON m.id = t.menu_id
-) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges where privilege_id>=10000)
+) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges where privilege_id>=10000);
 
 
 -- 新增俱乐部菜单
@@ -718,9 +714,6 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	
 DELETE FROM `eh_acls` WHERE `privilege_id` in (604, 605) AND `role_id` = 1005;
 
-
-SET @service_module_scopes_id = 0;
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
-SELECT (@service_module_scopes_id := @service_module_scopes_id + 1), 999992,id,null,null,null,0,2 FROM `eh_service_modules` WHERE `type` = 0 AND `parent_id` <> 0;
-
+-- 更新acl表
+UPDATE `eh_acls` SET `role_type` = 'EhAclRoles' WHERE `role_type` IS NULL AND `owner_type` = 'EhOrganizations';
 

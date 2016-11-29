@@ -1920,7 +1920,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return priceToString(minPrice,rentalType,timeStep)+"~" +priceToString(maxPrice,rentalType,timeStep);
 	}
-
+ 
 	private boolean isInteger(double d){
 		double eps = 0.0001;
 		return Math.abs(d - (double)((int)d)) < eps;
@@ -1938,8 +1938,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
 		return "";
 	}
-
-	
+ 
+	@Override
+	public void deleteRentalCellsByResourceId(Long rentalSiteId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DeleteWhereStep<EhRentalv2CellsRecord> step = context
+				.delete(Tables.EH_RENTALV2_CELLS);
+		Condition condition = Tables.EH_RENTALV2_CELLS.RENTAL_RESOURCE_ID
+				.equal(rentalSiteId);
+		step.where(condition);
+		step.execute();
+	} 
  
 	
 }

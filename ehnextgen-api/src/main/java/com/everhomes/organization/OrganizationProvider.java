@@ -9,6 +9,7 @@ import com.everhomes.rest.organization.*;
 
 import org.jooq.Condition;
 
+import com.everhomes.community.Community;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -255,4 +256,6 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
 
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
+ 
+	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
 }

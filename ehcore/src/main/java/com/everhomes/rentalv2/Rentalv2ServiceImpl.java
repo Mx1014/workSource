@@ -2147,7 +2147,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");   
 		this.dbProvider.execute((TransactionStatus status) -> {
-			//初始化
+			//初始化 
+			//设置新规则的时候就删除之前的旧单元格
+			this.rentalProvider.deleteRentalCellsByResourceId(cmd.getRentalSiteId());
 			currentId.set(sequenceProvider.getCurrentSequence(NameMapper.getSequenceDomainFromTablePojo(EhRentalv2Cells.class)) );
 			seqNum.set(0L);
 			//设置默认规则，删除所有的单元格

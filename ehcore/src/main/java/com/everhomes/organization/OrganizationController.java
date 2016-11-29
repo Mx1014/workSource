@@ -70,6 +70,7 @@ import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.ListUserTaskCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.organization.OrganizationTreeDTO;
@@ -89,6 +90,19 @@ import com.everhomes.rest.organization.UserJoinOrganizationCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+
+import java.util.List;
+
 import com.everhomes.util.RequireAuthentication;
 
 @RestController
@@ -1222,6 +1236,25 @@ public class OrganizationController extends ControllerBase {
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
+	}
+
+	/**
+	 * <b>URL: /org/getUserRelatedEnterprises</b>
+	 * <p>获取用户所属公司</p>
+	 */
+	@RequestMapping("getUserRelatedEnterprises")
+	@RestReturn(value=OrganizationDTO.class, collection = true)
+	public RestResponse getUserRelatedEnterprises(){
+		
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(); 
+		
+		List<OrganizationDTO> enterpriseDtos = organizationService.listUserRelateOrganizations(namespaceId, user.getId(), OrganizationGroupType.ENTERPRISE);
+		
+		RestResponse res = new RestResponse(enterpriseDtos);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
 	}
 
 }

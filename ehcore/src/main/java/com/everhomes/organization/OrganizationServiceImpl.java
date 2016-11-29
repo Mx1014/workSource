@@ -4561,11 +4561,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
          
-        if(cmd.getEnterpriseId() != null && cmd.getUserIds() != null && cmd.getUserIds().size()>0) {
-            for(Long userId : cmd.getUserIds()){
-            	ApproveContactCommand approvalCmd = new ApproveContactCommand();
-            	approvalCmd.setEnterpriseId(cmd.getEnterpriseId());
-            	approvalCmd.setUserId(userId);
+        if( cmd.getApproveInfo() != null && cmd.getApproveInfo().size()>0) {
+            for(ApproveContactCommand approvalCmd : cmd.getApproveInfo()){  
             	this.approveForEnterpriseContact(approvalCmd);
             	
             }
@@ -4584,11 +4581,8 @@ public class OrganizationServiceImpl implements OrganizationService {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
          
-        if(cmd.getEnterpriseId() != null && cmd.getUserIds() != null && cmd.getUserIds().size()>0) {
-            for(Long userId : cmd.getUserIds()){
-            	RejectContactCommand rejectCmd = new RejectContactCommand();
-            	rejectCmd.setEnterpriseId(cmd.getEnterpriseId());
-            	rejectCmd.setUserId(userId);
+        if( cmd.getRejectInfo() != null && cmd.getRejectInfo().size()>0) {
+            for(RejectContactCommand rejectCmd : cmd.getRejectInfo()){ 
             	rejectCmd.setRejectText(cmd.getRejectText());
             	this.rejectForEnterpriseContact(rejectCmd);
             	

@@ -8,7 +8,7 @@ package com.everhomes.rest.pmtask;
  * </ul>
  */
 public enum PmTaskOperateType {
-	EXECUTOR((byte)1), REPAIR((byte)2);
+	ALL((byte)0), EXECUTOR((byte)1), REPAIR((byte)2);
     
     private byte code;
     private PmTaskOperateType(byte code) {
