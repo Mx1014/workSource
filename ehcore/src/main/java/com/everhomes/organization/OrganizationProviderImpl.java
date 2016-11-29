@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import com.everhomes.community.Community;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -1666,9 +1668,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		return result;
 	}
-	
 	@Override
 	public List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes) {
+		return this.listOrganizationByGroupTypes(parentId, groupTypes, null);
+	}
+
+	@Override
+	public List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class));
 
 		List<Organization> result  = new ArrayList<Organization>();
@@ -1679,7 +1685,11 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		query.addConditions(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()));
 		
 		query.addConditions(Tables.EH_ORGANIZATIONS.GROUP_TYPE.in(groupTypes));
-		
+
+		if(!StringUtils.isEmpty(keyworks)){
+			query.addConditions(Tables.EH_ORGANIZATIONS.NAME.like(keyworks + "%"));
+		}
+
 		query.addOrderBy(Tables.EH_ORGANIZATIONS.ID.desc());
 		
 		query.fetch().map((r) -> {
@@ -2618,6 +2628,32 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<Community> result  = new ArrayList<Community>();
+		SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+		if(orgId != null && orgId > 0){
+			query.addJoin(Tables.EH_ORGANIZATION_COMMUNITIES, Tables.EH_COMMUNITIES.ID.eq(Tables.EH_ORGANIZATION_COMMUNITIES.COMMUNITY_ID));
+			query.addConditions(Tables.EH_ORGANIZATION_COMMUNITIES.ORGANIZATION_ID.eq(orgId));
+		}
+		if(!StringUtils.isEmpty(keyword)) {
+			query.addConditions(Tables.EH_COMMUNITIES.NAME.like("%"+keyword+"%")
+					.or(Tables.EH_COMMUNITIES.ALIAS_NAME.like("%"+keyword+"%")));
+		}
+			
+		query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITIES.ID.desc());
+		result = query.fetch().map(new DefaultRecordMapper(Tables.EH_COMMUNITIES.recordType(), Community.class));
+
+		if(result == null || result.size() == 0) {
+			if(LOGGER.isWarnEnabled()) {
+				LOGGER.warn("The community for the organization is not found, organizationId=" + orgId);
+				LOGGER.warn(query.getSQL());
+			}
+		}
+
+		return result;
+	}
 	public List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId) {
 		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());

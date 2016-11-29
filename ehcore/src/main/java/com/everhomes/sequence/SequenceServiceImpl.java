@@ -10,6 +10,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+import com.everhomes.yellowPage.ServiceAllianceApartmentRequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -905,7 +906,7 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_SETTLE_REQUESTS.ID.max()).from(Tables.EH_SETTLE_REQUESTS).fetchOne().value1();
         });
         
-        syncTableSequence(null, EhSettleRequests.class, Tables.EH_PM_TASK_TARGETS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPmTaskTargets.class, Tables.EH_PM_TASK_TARGETS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_TASK_TARGETS.ID.max()).from(Tables.EH_PM_TASK_TARGETS).fetchOne().value1();
         });
 
@@ -943,6 +944,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhOrganizationJobPositions.class, Tables.EH_ORGANIZATION_JOB_POSITIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ORGANIZATION_JOB_POSITIONS.ID.max()).from(Tables.EH_ORGANIZATION_JOB_POSITIONS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhOrganizationJobPositionMaps.class, Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.ID.max()).from(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS).fetchOne().value1();
         });
 
         syncTableSequence(null, EhServiceModules.class, Tables.EH_SERVICE_MODULES.getName(), (dbContext) -> {
@@ -1031,6 +1036,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhFlowEvaluates.class, Tables.EH_FLOW_EVALUATES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FLOW_EVALUATES.ID.max()).from(Tables.EH_FLOW_EVALUATES).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhServiceAllianceApartmentRequests.class, Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS).fetchOne().value1();
+        });
         syncTableSequence(null, EhEnergyMeters.class, Tables.EH_ENERGY_METERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ENERGY_METERS.ID.max()).from(Tables.EH_ENERGY_METERS).fetchOne().value1();
         });
@@ -1077,6 +1086,9 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_FLOW_ATTACHMENTS.ID.max()).from(Tables.EH_FLOW_ATTACHMENTS).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhPmTaskTargetStatistics.class, Tables.EH_PM_TASK_TARGET_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.max()).from(Tables.EH_PM_TASK_TARGET_STATISTICS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

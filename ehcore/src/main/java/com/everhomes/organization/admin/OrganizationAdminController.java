@@ -472,7 +472,7 @@ public class OrganizationAdminController extends ControllerBase {
     @RequestMapping("listChildrenOrganizations")
     @RestReturn(value = ListOrganizationsCommandResponse.class)
     public RestResponse listChildrenOrganizations(@Valid ListAllChildrenOrganizationsCommand cmd) {
-        RestResponse response = new RestResponse(organizationService.listChildrenOrganizations(cmd.getId(), cmd.getGroupTypes()));
+        RestResponse response = new RestResponse(organizationService.listChildrenOrganizations(cmd.getId(), cmd.getGroupTypes(), cmd.getKeywords()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

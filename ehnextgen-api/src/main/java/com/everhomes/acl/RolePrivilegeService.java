@@ -10,6 +10,7 @@ import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
+import com.everhomes.serviceModule.ServiceModulePrivilegeType;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
@@ -257,4 +258,27 @@ public interface RolePrivilegeService {
 	 * @return
      */
 	List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd);
+
+	/**
+	 * 分配权限
+	 * @param ownerType
+	 * @param ownerId
+	 * @param targetType
+	 * @param targetId
+	 * @param scope
+     * @param privilegeIds
+     */
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds);
+
+	/**
+	 * 分配模块权限
+	 * @param ownerType
+	 * @param ownerId
+	 * @param targetType
+	 * @param targetId
+	 * @param scope
+	 * @param moduleId
+     * @param privilegeType
+     */
+	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType);
 }

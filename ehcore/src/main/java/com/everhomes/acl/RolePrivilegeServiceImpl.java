@@ -742,11 +742,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			privilegeIds.addAll(ids);
 		}
 		for (CommunityDTO communityDTO:communityDTOs) {
-			ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.USER.getCode(), userId);
-			if(null != ids){
-				privilegeIds.addAll(ids);
+			List<Long> pIds = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.USER.getCode(), userId);
+			if(null != pIds){
+				privilegeIds.addAll(pIds);
 			}
-			if(privilegeIds.size() == 0){
+			if(pIds.size() == 0){
 				for (OrganizationDTO dto: organizationDTOs) {
 					ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), dto.getId());
 					if(null != ids){
@@ -848,13 +848,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
     	List<Long> privileges = this.getUserPrivileges(null, ownerId, user.getId());
 
+    	if(!privileges.contains(privilegeId)){
+
+    		this.returnNoPrivileged(privileges, user);
+    	}
+
 		List<Long> ids = this.getAllResourcePrivilegeIds(ownerId, user.getId());
 		if(null != ids){
 			privileges.addAll(ids);
 		}
-    	if(!privileges.contains(privilegeId)){
-    		this.returnNoPrivileged(privileges, user);
-    	}
 
     	return true;
     }
@@ -1336,7 +1338,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	}
 
-	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds){
+	@Override
+	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope,  List<Long> privilegeIds){
 		User user = UserContext.current().getUser();
 		if(null != privilegeIds){
 			for (Long privilegeId: privilegeIds) {
@@ -1356,7 +1359,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
+	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
 
 		List<ServiceModulePrivilege> serviceModulePrivileges = null;
 		if(0L == moduleId){
@@ -1394,8 +1397,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
 			if(EntityType.USER ==EntityType.fromCode(serviceModuleAssignment.getTargetType())){
 				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(serviceModuleAssignment.getTargetId(), cmd.getOrganizationId());
-				OrganizationContactDTO contactDTO = ConvertHelper.convert(member,OrganizationContactDTO.class);
-				contactDTOs.add(contactDTO);
+				if(null != member){
+					OrganizationContactDTO contactDTO = ConvertHelper.convert(member,OrganizationContactDTO.class);
+					contactDTOs.add(contactDTO);
+				}
 			}
 		}
 		
@@ -1633,9 +1638,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}else{
 					ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
 					dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
-					dtos.add(dto);
 				}
-
+				dtos.add(dto);
 				key = assignment.getOwnerType() + assignment.getOwnerId(); // 拼装Key
 			}
 		}
@@ -1671,6 +1675,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 								if(0L == userAssignment.getModuleId()){
 									authorizationDTO.setAllModuleFlag((byte)1); // 加入moduleId是0 代表全部业务
 									break;
+								}else{
+									authorizationDTO.setAllModuleFlag((byte)0);
 								}
 								ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(userAssignment.getModuleId());
 								serviceModules.add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
@@ -1754,14 +1760,13 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		for (WebMenuPrivilege webMenuPrivilege:webMenuPrivileges) {
 			// 用户有此菜单的权限，则获取全部的园区项目
 			if(privilegeIds.contains(webMenuPrivilege.getPrivilegeId())){
-				communitydtos.stream().map(r -> {
+				for (CommunityDTO community: communitydtos) {
 					ProjectDTO dto = new ProjectDTO();
-					dto.setProjectId(r.getId());
-					dto.setProjectName(r.getName());
+					dto.setProjectId(community.getId());
+					dto.setProjectName(community.getName());
 					dto.setProjectType(EntityType.COMMUNITY.getCode());
 					projectDTOs.add(dto);
-					return null;
-				});
+				}
 				break;
 			}
 		}
@@ -1819,7 +1824,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if(null != category && !StringUtils.isEmpty(category.getPath())){
 						String[] idStrs = category.getPath().split("/");
 						for (String idStr:idStrs) {
-							categoryIds.add(Long.valueOf(idStr));
+							if(!StringUtils.isEmpty(idStr) && !categoryIds.contains(Long.valueOf(idStr)))
+								categoryIds.add(Long.valueOf(idStr));
 						}
 					}
 				}else{
@@ -1829,26 +1835,26 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 
 		List<ProjectDTO> projects = new ArrayList<>();
-		List<ProjectDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), categoryIds)
-				.stream().map(r -> {
-					ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
-					dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
-					dto.setProjectName(r.getName());
-					dto.setProjectId(r.getId());
-					return dto;
-				}).collect(Collectors.toList());
+		if(0 != categoryIds.size()){
+			List<ProjectDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), categoryIds)
+					.stream().map(r -> {
+						ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
+						dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+						dto.setProjectName(r.getName());
+						dto.setProjectId(r.getId());
+						return dto;
+					}).collect(Collectors.toList());
 
-		for(ProjectDTO project: temp) {
-			getChildCategories(temp, project);
-			if(project.getParentId() == 0L) {
-				projects.add(project);
+			for(ProjectDTO project: temp) {
+				getChildCategories(temp, project);
+				if(project.getParentId() == 0L) {
+					projects.add(project);
+				}
 			}
+			setResourceDTOs(projects, namespaceId);
 		}
-
-		setResourceDTOs(projects, namespaceId);
 		projects.addAll(entityts);
-
-		return projectDTOs;
+		return projects;
 	}
 
 
@@ -1884,7 +1890,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					return dto;
 				}).collect(Collectors.toList());
 				setResourceDTOs(project.getProjects(), namespaceId);
-				project.setProjects(projects);
+				if(null == project.getProjects()){
+					project.setProjects(projects);
+				}else{
+					project.getProjects().addAll(projects);
+				}
+
 			}
 		}
 

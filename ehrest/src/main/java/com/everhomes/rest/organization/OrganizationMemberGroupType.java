@@ -42,6 +42,10 @@ public enum OrganizationMemberGroupType {
         if(code.equalsIgnoreCase(KEFU.getCode())) {
         	return KEFU;
         }
+
+        if(code.equalsIgnoreCase(HECHA.getCode())) {
+            return HECHA;
+        }
         
         return null;
     }

@@ -2053,4 +2053,9 @@ delete  from eh_web_menu_scopes where menu_id in (43000, 43100, 43200) and owner
 update eh_launch_pad_items set delete_flag=0 where id in (112573, 112584, 112575, 112586, 112574, 112585);
 
 
+-- 微商城增加"Love Fitt 健人邦"店铺
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+	VALUES (112711, 999985, 0, 0, 0, '/home/Biz', 'BizList', 'Love Fitt 健人邦', 'Love Fitt 健人邦', 'cs://1/image/aW1hZ2UvTVRvd1lUVXhPVFl6TW1FNU0yUTBOak01TmpWbU5qSXpZakZtWXpZM1pUTTFaQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/nar/biz/web/app/user/index.html?mallId=2000000&originId=1#/store/details/14797145180329304737?_k=49zw5y"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
+	VALUES (112712, 999985, 0, 0, 0, '/home/Biz', 'BizList', 'Love Fitt 健人邦', 'Love Fitt 健人邦', 'cs://1/image/aW1hZ2UvTVRvd1lUVXhPVFl6TW1FNU0yUTBOak01TmpWbU5qSXpZakZtWXpZM1pUTTFaQQ', 1, 1, 14, '{"url":"https://biz.zuolin.com/nar/biz/web/app/user/index.html?mallId=2000000&originId=1#/store/details/14797145180329304737?_k=49zw5y"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'pm_admin');
 

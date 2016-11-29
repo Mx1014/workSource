@@ -3172,7 +3172,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Category category = getEquipmentCategory(parentId);
 		path = category.getPath() + "/" + cmd.getName();
 		
-		category = categoryProvider.findCategoryByPath(namespaceId, path);
+		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, cmd.getName());
+//		category = categoryProvider.findCategoryByPath(namespaceId, path);
 		if(category != null) {
 			LOGGER.error("equipment category have been in existing");
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE, EquipmentServiceErrorCode.ERROR_CATEGORY_EXIST,
@@ -3404,16 +3405,55 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		
+		User user = UserContext.current().getUser();
+		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-        List<Byte> taskStatus = new ArrayList<Byte>();
-        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-        taskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
+        List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
+        
+        boolean isAdmin = false;
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), equipment.getOwnerId(), EntityType.USER.getCode(), user.getId());
+		if(null != resources && 0 != resources.size()){
+			for (RoleAssignment resource : resources) {
+				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN 
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN 
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					isAdmin = true;
+					break;
+				}
+			}
+		}
+		 
+		if(!isAdmin) {
+			List<RoleAssignment> res = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), equipment.getTargetId(), EntityType.USER.getCode(), user.getId());
+			if(null != res && 0 != res.size()){
+				for (RoleAssignment resource : res) {
+					if(resource.getRoleId() == RoleConstants.EQUIPMENT_MANAGER) {
+						isAdmin = true;
+						break;
+					}
+				}
+			}
+		}
 		
+		
+		if(isAdmin) {
+			List<Byte> taskStatus = new ArrayList<Byte>();
+	        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+	        taskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+	        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+			tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
+			
+		} else {
+				List<Byte> taskStatus = new ArrayList<Byte>();
+		        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+		        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+				tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
+		}
+        
 		if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
         	response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
