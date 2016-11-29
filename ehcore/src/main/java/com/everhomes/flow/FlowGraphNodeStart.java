@@ -4,6 +4,14 @@ import com.everhomes.rest.flow.FlowStepType;
 
 public class FlowGraphNodeStart extends FlowGraphNode {
 
+	public FlowGraphNodeStart() {
+		
+	}
+	
+	public FlowGraphNodeStart(FlowNode flowNode) {
+		this.setFlowNode(flowNode);
+	}
+	
 	@Override
 	public void stepEnter(FlowCaseState ctx, FlowGraphNode from)
 			throws FlowStepErrorException {

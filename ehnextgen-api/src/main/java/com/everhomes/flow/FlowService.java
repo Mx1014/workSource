@@ -4,6 +4,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.rest.flow.ActionStepType;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
@@ -130,14 +131,6 @@ public interface FlowService {
 	 * @param flowId
 	 */
 	void disableFlow(Long flowId);
-	
-	/**
-	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
-	 * @param snapshotFlow
-	 * @param flowCase
-	 * @return
-	 */
-	Long createFlowCase(Flow snapshotFlow, FlowCase flowCase);
 	
 	/**
 	 * 获取当前运行的 Flow 下的某一个节点的任务。业务上层需要此接口进行搜索
@@ -413,6 +406,13 @@ public interface FlowService {
 	 */
 	Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType,
 			Long ownerId, String ownerType);
+
+	/**
+	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
+	 * @param flowCaseCmd
+	 * @return
+	 */
+	FlowCase createFlowCase(CreateFlowCaseCommand flowCaseCmd);
 	
 	//TODO 日志信息分类：
 	

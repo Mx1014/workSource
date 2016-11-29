@@ -19,6 +19,7 @@ import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.news.NewsCommentContentType;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.user.User;
@@ -52,7 +53,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 //	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
 	@Override
-	public FlowCaseState prepareStart(User logonUser, FlowCase flowCase) {
+	public FlowCaseState prepareStart(UserInfo logonUser, FlowCase flowCase) {
 		FlowCaseState ctx = new FlowCaseState();
 		if(flowCase == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
@@ -65,12 +66,13 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		FlowGraphStartEvent event = new FlowGraphStartEvent();
 		ctx.setCurrentEvent(event);
+		ctx.setOperator(logonUser);
 		
 		return ctx;
 	}
 	
 	@Override
-	public FlowCaseState prepareButtonFire(User logonUser, FlowFireButtonCommand cmd) {
+	public FlowCaseState prepareButtonFire(UserInfo logonUser, FlowFireButtonCommand cmd) {
 		FlowCaseState ctx = new FlowCaseState();
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
 		if(flowCase == null) {

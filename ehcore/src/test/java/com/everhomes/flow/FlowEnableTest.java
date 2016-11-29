@@ -26,6 +26,7 @@ import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowIdCommand;
+import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
@@ -194,8 +195,33 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	Boolean ok = flowService.enableFlow(flowDTO.getId());
     	Assert.assertTrue(ok);
+    }
+    
+    @Test
+    public void testFlowGraph() {
+    	Integer namespaceId = 0;
+    	Long moduleId = 111l;
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = 1001027l;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	Assert.assertTrue(flow.getFlowVersion().equals(1));
     	
-//    	FlowGraph flowGraph = flowService.getFlowGraph(flowId, flowVer);
+    	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), flow.getFlowVersion());
+    	Assert.assertTrue(flowGraph.getNodes().size() == 5);
+    	
+    	FlowGraphNode node1 = flowGraph.getNodes().get(1);
+    	Assert.assertTrue(node1.getApplierButtons().size() == 4);
+    	Assert.assertTrue(node1.getProcessorButtons().size() == 5);
+    	Assert.assertTrue(node1.getMessageAction() != null);
+    	
+    	for(FlowGraphButton btn : node1.getProcessorButtons()) {
+    		if(btn.getFlowButton().getFlowStepType().equals(FlowStepType.APPROVE_STEP.getCode())) {
+    			Assert.assertTrue(btn.getMessage() != null);
+        		Assert.assertTrue(btn.getFlowButton().getButtonName().equals("new-next-step-name"));	
+    		}
+    	}
+    	
     }
     
     private void addNodeProcessor(FlowNodeDTO dto, Long orgId) {

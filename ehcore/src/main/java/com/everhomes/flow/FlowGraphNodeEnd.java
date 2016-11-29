@@ -3,7 +3,13 @@ package com.everhomes.flow;
 import com.everhomes.rest.flow.FlowStepType;
 
 public class FlowGraphNodeEnd extends FlowGraphNode {
-
+	public FlowGraphNodeEnd() {
+		
+	}
+	public FlowGraphNodeEnd(FlowNode flowNode) {
+		this.setFlowNode(flowNode);
+	}
+	
 	@Override
 	public void stepEnter(FlowCaseState ctx, FlowGraphNode from)
 			throws FlowStepErrorException {

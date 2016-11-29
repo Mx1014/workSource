@@ -29,6 +29,7 @@ import com.everhomes.pusher.PusherServiceImpl;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.flow.ActionStepType;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
@@ -44,6 +45,7 @@ import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
@@ -87,10 +89,13 @@ import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -142,6 +147,12 @@ public class FlowServiceImpl implements FlowService {
     
 	@Autowired
 	private ContentServerService contentServerService;
+	
+	@Autowired
+	private UserProvider userProvider;
+	
+	@Autowired
+	private UserService userService;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -1097,7 +1108,7 @@ public class FlowServiceImpl implements FlowService {
 		flowGraph.getNodes().add(start);
 		
 		flowNodes.forEach((fn)->{
-			flowGraph.getNodes().add(getFlowGraphNode(fn));
+			flowGraph.getNodes().add(getFlowGraphNode(fn, FlowConstants.FLOW_CONFIG_VER));
 		});
 		
 		nodeObj = new FlowNode();
@@ -1169,7 +1180,7 @@ public class FlowServiceImpl implements FlowService {
 		return isOk;
 	}
 	
-	private FlowGraphNode getFlowGraphNode(FlowNode flowNode) {
+	private FlowGraphNode getFlowGraphNode(FlowNode flowNode, Integer flowVersion) {
 		FlowGraphNodeNormal graphNode = new FlowGraphNodeNormal();
 		graphNode.setFlowNode(flowNode);
 		Long flowNodeId = flowNode.getId();
@@ -1231,12 +1242,12 @@ public class FlowServiceImpl implements FlowService {
 			graphNode.setTrackTransferLeave(graphAction);
 		}
 		
-		List<FlowButton> applierButtons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.APPLIER.getCode());
+		List<FlowButton> applierButtons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, flowVersion, FlowUserType.APPLIER.getCode());
 		applierButtons.forEach((btn)->{
 			graphNode.getApplierButtons().add(getFlowGraphButton(btn));
 		});
 		
-		List<FlowButton> processorButtons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.PROCESSOR.getCode());
+		List<FlowButton> processorButtons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, flowVersion, FlowUserType.PROCESSOR.getCode());
 		processorButtons.forEach((btn)->{
 			graphNode.getProcessorButtons().add(getFlowGraphButton(btn));
 		});
@@ -1418,7 +1429,13 @@ public class FlowServiceImpl implements FlowService {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error");	
 			}
 			
-			flowGraph.getNodes().add(getFlowGraphNode(fn));
+			if(fn.getNodeName().equals("START")) {
+				flowGraph.getNodes().add(new FlowGraphNodeStart(fn));
+			} else if(fn.getNodeName().equals("END")) {
+				flowGraph.getNodes().add(new FlowGraphNodeEnd(fn));
+			} else {
+				flowGraph.getNodes().add(getFlowGraphNode(fn, flowVer));	
+			}
 			
 			i++;
 		}
@@ -1430,7 +1447,8 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
-		FlowCaseState ctx = flowStateProcessor.prepareButtonFire(UserContext.current().getUser(), cmd);
+		UserInfo userInfo = userService.getUserInfo(UserContext.current().getUser().getId());
+		FlowCaseState ctx = flowStateProcessor.prepareButtonFire(userInfo, cmd);
 		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
 		
 		FlowButton btn = flowButtonProvider.getFlowButtonById(cmd.getButtonId());
@@ -1439,8 +1457,17 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public void disableFlow(Long flowId) {
-		// TODO Auto-generated method stub
+		Flow flow = flowProvider.getFlowById(flowId);
+		if(flow == null || !flow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow not exists");	
+		}
 		
+		if(FlowStatusType.RUNNING.equals(flow.getStatus())) {
+			flow.setStatus(FlowStatusType.STOP.getCode());
+			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+			flow.setUpdateTime(now);
+			flowProvider.updateFlow(flow);
+		}
 	}
 
 	@Override
@@ -1449,9 +1476,35 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public Long createFlowCase(Flow snapshotFlow, FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		return null;
+	public FlowCase createFlowCase(CreateFlowCaseCommand flowCaseCmd) {
+		Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCaseCmd.getFlowMainId(), flowCaseCmd.getFlowVersion());
+		if(snapshotFlow == null || snapshotFlow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow node error");	
+		}
+		
+		FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
+		flowCase.setCurrentNodeId(0l);
+		if(flowCase.getApplyUserId() == null) {
+			flowCase.setApplyUserId(UserContext.current().getUser().getId());	
+		}
+		UserInfo userInfo = userService.getUserInfo(flowCase.getApplyUserId());
+		flowCase.setApplierName(userInfo.getNickName());
+		if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+			flowCase.setApplierPhone(userInfo.getPhones().get(0));	
+		}
+		
+		flowCase.setNamespaceId(snapshotFlow.getNamespaceId());
+		flowCase.setModuleId(snapshotFlow.getModuleId());
+		flowCase.setModuleType(snapshotFlow.getModuleType());
+		flowCase.setOwnerId(snapshotFlow.getOwnerId());
+		flowCase.setOwnerType(snapshotFlow.getOwnerType());
+		flowCase.setCaseType(FlowCaseType.INNER.getCode());
+		flowCaseProvider.createFlowCase(flowCase);
+		
+		FlowCaseState ctx = flowStateProcessor.prepareStart(userInfo, flowCase);
+		flowStateProcessor.step(ctx, null);
+		
+		return flowCase;
 	}
 
 	@Override
