@@ -1008,18 +1008,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Category category = null;
 		if(null == parentId){
 			
-//			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
 			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			parentId = ancestor.getId();
 			path = ancestor.getPath() + CATEGORY_SEPARATOR + cmd.getName();
 			
-			category = categoryProvider.findCategoryByPath(namespaceId, path);
-			if(category != null) {
-				LOGGER.error("PmTask category have been in existing");
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_SERVICE_CATEGORY_EXIST,
-						"PmTask category have been in existing");
-			}
 		}else{
 			category = categoryProvider.findCategoryById(parentId);
 			if(category == null) {
@@ -1029,12 +1022,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 			path = category.getPath() + CATEGORY_SEPARATOR + cmd.getName();
 			
-			category = categoryProvider.findCategoryByPath(namespaceId, path);
-			if(category != null) {
-				LOGGER.error("PmTask category have been in existing");
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
-						"PmTask category have been in existing");
-			}
+		}
+		
+		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, cmd.getName());
+		if(category != null) {
+			LOGGER.error("PmTask category have been in existing");
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_EXIST,
+					"PmTask category have been in existing");
 		}
 		
 		category = new Category();
@@ -1058,8 +1052,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer pageSize = cmd.getPageSize();
 		Long parentId = cmd.getParentId();
 		if(null == parentId){
-//			String defaultName = configProvider.getValue("pmtask.category.ancestor", "");
-//			Category ancestor = categoryProvider.findCategoryByPath(cmd.getNamespaceId(), defaultName);
 			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
 			Category ancestor = categoryProvider.findCategoryById(defaultId);
 			parentId = ancestor.getId();
@@ -1791,17 +1783,11 @@ public class PmTaskServiceImpl implements PmTaskService {
 			//评价人数
 			int evaluateCount = 0;
 			int totalStar = 0;
-//			int[] stars = new int[5];
 			for(PmTaskStatistics statistics: temp){
 				i++;
 				totalCount += statistics.getTotalCount();
 				evaluateCount += calculatePerson(statistics);
 				totalStar += calculateStar(statistics);
-//				stars[0] += statistics.getStar1();
-//				stars[1] += statistics.getStar2();
-//				stars[2] += statistics.getStar3();
-//				stars[3] += statistics.getStar4();
-//				stars[4] += statistics.getStar5();
 				
 				Category category = checkCategory(statistics.getTaskCategoryId());
 				Row tempRow = sheet.createRow(i);
