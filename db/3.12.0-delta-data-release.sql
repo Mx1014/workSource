@@ -494,3 +494,11 @@ DELETE FROM `eh_acls` WHERE `privilege_id` in (604, 605) AND `role_id` = 1005;
 UPDATE `eh_acls` SET `role_type` = 'EhAclRoles' WHERE `role_type` IS NULL AND `owner_type` = 'EhOrganizations';
 
 
+-- 设备巡检增加设备类型 add by xiongying20161129
+SET @category_id = (SELECT MAX(id) FROM `eh_categories`);
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+    VALUES ((@category_id := @category_id + 1), '7', '0', '空调', '设备类型/空调', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+    VALUES ((@category_id := @category_id + 1), '7', '0', '给排水', '设备类型/给排水', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+    VALUES ((@category_id := @category_id + 1), '7', '0', '电梯', '设备类型/电梯', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
