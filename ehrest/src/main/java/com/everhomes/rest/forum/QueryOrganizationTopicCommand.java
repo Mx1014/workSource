@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
+ * <li>categoryId: 活动类型id</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
@@ -33,15 +34,25 @@ public class QueryOrganizationTopicCommand {
     private Long embeddedAppId; 
     private Byte officialFlag;
     private Byte privateFlag;
+    private Long categoryId;
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
     
     public QueryOrganizationTopicCommand() {
     }
-    
 
-    public Byte getOfficialFlag() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+
+	public Byte getOfficialFlag() {
 		return officialFlag;
 	}
 

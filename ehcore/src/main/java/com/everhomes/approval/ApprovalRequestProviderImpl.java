@@ -113,20 +113,32 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
-				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
 				
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		if(null!= approvalType){
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType));
+			if(approvalType.equals(ApprovalType.EXCEPTION.getCode())){
+				if (fromDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.greaterOrEqual(fromDate));
+				}
+				
+				if (endDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.lessOrEqual(endDate));
+				}
+			}
+			else if(approvalType.equals(ApprovalType.OVERTIME.getCode())){
+				if (fromDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(new Date(fromDate)));
+				}
+				
+				if (endDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lessOrEqual(new Date(endDate)));
+				}
+			}
+		}
 		if (categoryId != null) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(categoryId));
-		}
-		
-		if (fromDate != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.ge(fromDate));
-		}
-		
-		if (endDate != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.le(endDate));
-		}
+		} 
 		
 		step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.eq(ApprovalStatus.WAITING_FOR_APPROVING.getCode()));
 		
@@ -142,6 +154,41 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 		}
 		
 		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).limit(pageSize).fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
+		}
+		
+		return new ArrayList<ApprovalRequest>();
+	}
+
+	@Override
+	public List<ApprovalRequest> listApprovalRequestByEffectiveDateAndCreateUid(Integer namespaceId, String ownerType, Long ownerId,
+			Byte approvalType, Date effectiveDate,Long createUid,List<Byte> approvalStatus) {
+		
+		SelectConditionStep<Record> step = getReadOnlyContext().select().from(Tables.EH_APPROVAL_REQUESTS)
+				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
+				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+				
+		if (effectiveDate != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.eq(effectiveDate));
+		}
+		
+		if (createUid != null) {
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.eq(createUid));
+		}
+		if(null == approvalStatus){
+			approvalStatus= new ArrayList<Byte>();
+			approvalStatus.add(ApprovalStatus.WAITING_FOR_APPROVING.getCode());
+			approvalStatus.add(ApprovalStatus.AGREEMENT.getCode());
+		}
+		step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_STATUS.in(approvalStatus));
+		  
+		
+		Result<Record> result = step.orderBy(Tables.EH_APPROVAL_REQUESTS.ID.desc()).fetch();
 		
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->ConvertHelper.convert(r, ApprovalRequest.class));
@@ -181,20 +228,35 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 				.where(Tables.EH_APPROVAL_REQUESTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_APPROVAL_REQUESTS.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType))
 				.and(Tables.EH_APPROVAL_REQUESTS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
+		
+		if(null!= approvalType){
+			step = step.and(Tables.EH_APPROVAL_REQUESTS.APPROVAL_TYPE.eq(approvalType));
+			if(approvalType.equals(ApprovalType.EXCEPTION.getCode())){
+				if (fromDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.greaterOrEqual(fromDate));
+				}
+				
+				if (endDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.lessOrEqual(endDate));
+				}
+			}
+			else if(approvalType.equals(ApprovalType.OVERTIME.getCode())){
+				if (fromDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.greaterOrEqual(new Date(fromDate)));
+				}
+				
+				if (endDate != null) {
+					step = step.and(Tables.EH_APPROVAL_REQUESTS.EFFECTIVE_DATE.lessOrEqual(new Date(endDate)));
+				}
+			}
+		}
+		
 				
 		if (categoryId != null) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CATEGORY_ID.eq(categoryId));
 		}
-		
-		if (fromDate != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.ge(fromDate));
-		}
-		
-		if (endDate != null) {
-			step = step.and(Tables.EH_APPROVAL_REQUESTS.LONG_TAG1.le(endDate));
-		}
+		 
 		
 		if (ListUtils.isNotEmpty(userIds)) {
 			step = step.and(Tables.EH_APPROVAL_REQUESTS.CREATOR_UID.in(userIds));
@@ -265,5 +327,11 @@ public class ApprovalRequestProviderImpl implements ApprovalRequestProvider {
 
 	private DSLContext getContext(AccessSpec accessSpec) {
 		return dbProvider.getDslContext(accessSpec);
+	}
+
+	@Override
+	public void deleteApprovalRequest(ApprovalRequest approvalRequest) {
+		getReadWriteDao().delete(approvalRequest);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhApprovalRequests.class, null);
 	}
 }

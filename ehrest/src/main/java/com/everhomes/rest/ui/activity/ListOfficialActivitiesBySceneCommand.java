@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>scope: 范围，{@link com.everhomes.rest.ui.user.ActivityLocationScope}</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>categoryId: 活动类型</li>
  *</ul>
  */
 public class ListOfficialActivitiesBySceneCommand {
@@ -21,6 +22,8 @@ public class ListOfficialActivitiesBySceneCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    
+    private Long categoryId;
 
     public String getSceneToken() {
         return sceneToken;
@@ -62,7 +65,15 @@ public class ListOfficialActivitiesBySceneCommand {
         this.pageSize = pageSize;
     }
 
-    @Override
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

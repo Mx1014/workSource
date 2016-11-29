@@ -23,6 +23,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>enterpriseAddress: 公司地址</li>
  *  <li>enterpriseCheckinDate: 公司入驻时间</li>
  *  <li>postUri: 标题图</li>
+ *  <li>emailDomain: 邮箱域名 </li>
  *  <li>serviceUserId: 客服服务人员id</li>
  * </ul>
  *
@@ -42,6 +43,7 @@ public class UpdateEnterpriseCommand {
     private String checkinDate;
     private String postUri;
     private Integer namespaceId;
+    private String emailDomain;
     private Long serviceUserId;
 	
 	@ItemType(OrganizationAddressDTO.class)
@@ -151,6 +153,12 @@ public class UpdateEnterpriseCommand {
 	}
 	public void setAddressDTOs(List<OrganizationAddressDTO> addressDTOs) {
 		this.addressDTOs = addressDTOs;
+	}
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
 	}
    
 }

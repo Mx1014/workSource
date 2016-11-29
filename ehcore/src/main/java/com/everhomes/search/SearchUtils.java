@@ -42,11 +42,17 @@ public class SearchUtils {
     public static final String SAREQUEST = "saRequest";
     
     public static final String SETTLEREQUEST = "settleRequest";
-    
+
     public static final String RESERVEREQUEST = "reserveRequest";
 
     public static final String EQUIPMENTSTANDARDMAP = "equipmentStandardMap";
+
+    public static final String APARTMENTREQUEST = "apartmentRequest";
     
+    public static final String ENERGY_METER = "energyMeter";
+
+    public static final String ENERGY_METER_READING_LOG = "energyMeterReadingLog";
+
     public static Long getLongField(Object o) {
         Long v = -1l;
         String s = "";

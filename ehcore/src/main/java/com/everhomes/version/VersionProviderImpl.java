@@ -226,7 +226,9 @@ public class VersionProviderImpl implements VersionProvider {
             .where(Tables.EH_VERSION_UPGRADE_RULES.REALM_ID.eq(realmId))
             .and(Tables.EH_VERSION_UPGRADE_RULES.MATCHING_LOWER_BOUND.lessThan(encodedValue))
             .and(Tables.EH_VERSION_UPGRADE_RULES.MATCHING_UPPER_BOUND.greaterThan(encodedValue))
-            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+//            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionUpgradeRule.class);
             });
@@ -243,7 +245,9 @@ public class VersionProviderImpl implements VersionProvider {
 
         List<VersionUpgradeRule> rules = context.select().from(Tables.EH_VERSION_UPGRADE_RULES)
             .where(Tables.EH_VERSION_UPGRADE_RULES.REALM_ID.eq(realmId))
-            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+//            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSION_UPGRADE_RULES.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionUpgradeRule.class);
             });
@@ -327,7 +331,9 @@ public class VersionProviderImpl implements VersionProvider {
             .where(Tables.EH_VERSIONED_CONTENT.REALM_ID.eq(realmId))
             .and(Tables.EH_VERSIONED_CONTENT.MATCHING_LOWER_BOUND.lessThan(encodedValue))
             .and(Tables.EH_VERSIONED_CONTENT.MATCHING_UPPER_BOUND.greaterThan(encodedValue))
-            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+//            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSIONED_CONTENT.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionedContent.class);
             });
@@ -344,7 +350,9 @@ public class VersionProviderImpl implements VersionProvider {
 
         List<VersionedContent> contentPojos = context.select().from(Tables.EH_VERSIONED_CONTENT)
             .where(Tables.EH_VERSIONED_CONTENT.REALM_ID.eq(realmId))
-            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+//            .orderBy(Tables.EH_VERSIONED_CONTENT.ORDER.asc())
+            //取最新的版本, update by tt, 20161122
+            .orderBy(Tables.EH_VERSIONED_CONTENT.ID.desc())
             .fetch().map((record)-> {
                 return ConvertHelper.convert(record, VersionedContent.class);
             });
@@ -446,7 +454,7 @@ public class VersionProviderImpl implements VersionProvider {
 		com.everhomes.server.schema.tables.EhVersionRealm t1 = Tables.EH_VERSION_REALM.as("t1");
 		com.everhomes.server.schema.tables.EhVersionUpgradeRules t2 = Tables.EH_VERSION_UPGRADE_RULES.as("t2");
 		com.everhomes.server.schema.tables.EhVersionUrls t3 = Tables.EH_VERSION_URLS.as("t3");
-		SelectConditionStep<?> step = context.select(t2.ID, t2.REALM_ID, t1.REALM, t1.DESCRIPTION, t2.MATCHING_LOWER_BOUND, t2.MATCHING_UPPER_BOUND, t2.TARGET_VERSION, t2.FORCE_UPGRADE, t3.ID.as("url_id"), t3.APP_NAME, t3.PUBLISH_TIME, t3.DOWNLOAD_URL, t3.UPGRADE_DESCRIPTION)
+		SelectConditionStep<?> step = context.select(t2.ID, t2.REALM_ID, t1.REALM, t1.DESCRIPTION, t2.MATCHING_LOWER_BOUND, t2.MATCHING_UPPER_BOUND, t2.TARGET_VERSION, t2.FORCE_UPGRADE, t3.ID.as("url_id"), t3.APP_NAME, t3.PUBLISH_TIME, t3.DOWNLOAD_URL, t3.UPGRADE_DESCRIPTION, t3.ICON_URL)
 											.from(t2)
 											.leftOuterJoin(t1).on(t2.REALM_ID.eq(t1.ID))
 											.leftOuterJoin(t3).on(t2.REALM_ID.eq(t3.REALM_ID)).and(t2.TARGET_VERSION.eq(t3.TARGET_VERSION))
@@ -469,6 +477,63 @@ public class VersionProviderImpl implements VersionProvider {
 		}
 			
 		return new ArrayList<VersionInfoDTO>();
+	}
+
+	@Override
+	public String findAppNameByRealm(Long realmId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select()
+			.from(Tables.EH_VERSION_URLS)
+			.where(Tables.EH_VERSION_URLS.REALM_ID.eq(realmId))
+			.and(Tables.EH_VERSION_URLS.APP_NAME.isNotNull())
+			.orderBy(Tables.EH_VERSION_URLS.ID.desc())
+			.limit(1)
+			.fetchOne();
+			
+		if (record != null) {
+			VersionUrl versionUrl = ConvertHelper.convert(record, VersionUrl.class);
+			return versionUrl.getAppName();
+		}
+		
+		return "";
+	}
+
+	@Override
+	public String findIconUrlByRealm(Long realmId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select()
+			.from(Tables.EH_VERSION_URLS)
+			.where(Tables.EH_VERSION_URLS.REALM_ID.eq(realmId))
+			.and(Tables.EH_VERSION_URLS.ICON_URL.isNotNull())
+			.orderBy(Tables.EH_VERSION_URLS.ID.desc())
+			.limit(1)
+			.fetchOne();
+			
+		if (record != null) {
+			VersionUrl versionUrl = ConvertHelper.convert(record, VersionUrl.class);
+			return versionUrl.getIconUrl();
+		}
+		
+		return "";
+	}
+
+	@Override
+	public String findDownloadUrlByRealm(Long realmId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select()
+			.from(Tables.EH_VERSION_URLS)
+			.where(Tables.EH_VERSION_URLS.REALM_ID.eq(realmId))
+			.and(Tables.EH_VERSION_URLS.DOWNLOAD_URL.isNotNull())
+			.orderBy(Tables.EH_VERSION_URLS.ID.desc())
+			.limit(1)
+			.fetchOne();
+			
+		if (record != null) {
+			VersionUrl versionUrl = ConvertHelper.convert(record, VersionUrl.class);
+			return versionUrl.getDownloadUrl();
+		}
+		
+		return "";
 	}
 	
 }

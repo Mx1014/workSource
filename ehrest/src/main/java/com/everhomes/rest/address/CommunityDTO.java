@@ -34,6 +34,8 @@ import com.everhomes.util.StringHelper;
  * <li>feedbackForumId: 意见论坛ID，每个园区都有一个自己的意见反馈论坛用于放园区意见反馈帖子</li>
  * <li>areaSize: 面积</li>
  * <li>updateTime: 更新时间</li>
+ * <li>categoryId: 分类id</li>
+ * <li>categoryName: 分类名称</li>
  * </ul>
  */
 public class CommunityDTO {
@@ -66,6 +68,10 @@ public class CommunityDTO {
     private Long feedbackForumId;
     private Timestamp updateTime;
     private Double areaSize;
+
+    private String categoryName;
+
+    private Long categoryId;
     
     @ItemType(CommunityGeoPointDTO.class)
     private List<CommunityGeoPointDTO> geoPointList;
@@ -313,7 +319,23 @@ public class CommunityDTO {
 		this.areaSize = areaSize;
 	}
 
-	@Override
+    public String getCategoryName() {
+        return categoryName;
+    }
+
+    public void setCategoryName(String categoryName) {
+        this.categoryName = categoryName;
+    }
+
+    public Long getCategoryId() {
+        return categoryId;
+    }
+
+    public void setCategoryId(Long categoryId) {
+        this.categoryId = categoryId;
+    }
+
+    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

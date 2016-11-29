@@ -24,6 +24,7 @@ import com.everhomes.rest.organization.OrganizationAddressDTO;
  *  <li>postUri: 标题图</li>
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
+ *  <li>emailDomain: 邮箱域名 -非必填</li>
  *  <li>serviceUserId: 客服服务人员id</li>
  * </ul>
  * @author janson
@@ -50,7 +51,7 @@ public class CreateEnterpriseCommand {
     private String longitude;
     
     private String latitude;
-    
+    private String emailDomain;
     private Long serviceUserId;
     
     @ItemType(OrganizationAddressDTO.class)
@@ -175,6 +176,12 @@ public class CreateEnterpriseCommand {
 	}
 	public void setLatitude(String latitude) {
 		this.latitude = latitude;
+	}
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
 	}
     
 }

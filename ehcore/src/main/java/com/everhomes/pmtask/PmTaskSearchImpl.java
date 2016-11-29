@@ -84,10 +84,12 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
             if(null == task.getOrganizationId() || task.getOrganizationId() ==0){
+            	LOGGER.debug("Create PmTaskDoc, taskId={}", task.getId());
 				User user = userProvider.findUserById(task.getCreatorUid());
     			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
     			b.field("requestorName", user.getNickName());
                 b.field("requestorPhone", userIdentifier.getIdentifierToken());
+    			
 			}else{
 				b.field("requestorName", task.getRequestorName());
 	            b.field("requestorPhone", task.getRequestorPhone());

@@ -461,7 +461,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceCategories> listChildCategories(
-			Integer namespaceId, Long parentId, CategoryAdminStatus status) {
+			String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         List<ServiceAllianceCategories> result = new ArrayList<ServiceAllianceCategories>();
         
@@ -477,12 +477,20 @@ public class YellowPageProviderImpl implements YellowPageProvider {
             condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.STATUS.eq(status.getCode()));
 
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        
+        if(ownerId != null && ownerId != 0L)
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+
+    	if (!StringUtils.isEmpty(ownerType) )
+    		condition = condition.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+    	
         if(condition != null) {
         	query.addConditions(condition);
         }
         
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Query child categories, namespaceId=" + namespaceId + ", parentId=" + parentId + ", status=" + status);
+            LOGGER.debug("Query child categories, sql=" + query.getSQL());
+            LOGGER.debug("Query child categories, bindValues=" + query.getBindValues());
         }
 
         query.fetch().map((EhServiceAllianceCategoriesRecord record) -> {
@@ -770,5 +778,81 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         });
 
         return requests;
+	}
+
+
+	@Override
+	public void createApartmentRequests(ServiceAllianceApartmentRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceApartmentRequests.class));
+		request.setId(id);
+
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceApartmentRequestsDao dao = new EhServiceAllianceApartmentRequestsDao(context.configuration());
+        dao.insert(request);
+	}
+
+
+	@Override
+	public ServiceAllianceApartmentRequests findApartmentRequests(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceApartmentRequestsDao dao = new EhServiceAllianceApartmentRequestsDao(context.configuration());
+        return ConvertHelper.convert(dao.findById(id), ServiceAllianceApartmentRequests.class);
+	}
+
+
+	@Override
+	public List<ServiceAllianceApartmentRequests> listApartmentRequests(
+			CrossShardListingLocator locator, int pageSize) {
+
+		List<ServiceAllianceApartmentRequests> requests = new ArrayList<ServiceAllianceApartmentRequests>();
+		
+		if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceApartmentRequests.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceApartmentRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS);
+            if(locator.getAnchor() != null)
+            	query.addConditions(Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS.ID.gt(locator.getAnchor()));
+            
+            query.addLimit(pageSize - requests.size());
+            
+            query.fetch().map((r) -> {
+            	
+            	requests.add(ConvertHelper.convert(r, ServiceAllianceApartmentRequests.class));
+                return null;
+            });
+
+            if (requests.size() >= pageSize) {
+                locator.setAnchor(requests.get(requests.size() - 1).getId());
+                return AfterAction.done;
+            } else {
+                locator.setAnchor(null);
+            }
+            return AfterAction.next;
+        });
+
+        return requests;
+	}
+
+	@Override
+	public ServiceAllianceSkipRule getCateorySkipRule(Long categoryId) {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceSkipRuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.SERVICE_ALLIANCE_CATEGORY_ID.in(categoryId,0L));
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_SKIP_RULE.NAMESPACE_ID.eq(namespaceId));
+
+		List<ServiceAllianceSkipRule> result = new ArrayList<ServiceAllianceSkipRule>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, ServiceAllianceSkipRule.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+		return result.get(0);
 	}
 }

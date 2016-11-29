@@ -384,10 +384,10 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
+//		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
 //		param.put("amount", order.getPrice().intValue()*100);
-		param.put("amount", tempFee.getPayable());
+		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("discount", 0);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
 		String json = post(param, PAY_TEMP_FEE);

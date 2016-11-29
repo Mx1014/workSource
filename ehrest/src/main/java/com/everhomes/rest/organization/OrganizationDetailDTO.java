@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  *  <li>attachments: 机构banner图</li>
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
+ *  <li>emailDomain: 邮箱域名 </li>
  *  <li>signupCount: 注册人数</li>
  *  <li>serviceUserId: 客服服务人员id</li>
  *  <li>serviceUserName: 客服服务人员名称</li>
@@ -75,7 +76,8 @@ public class OrganizationDetailDTO {
     
     private CommunityDTO community;
 
-	//TODO address info ?
+    private String emailDomain;
+    	//TODO address info ?
     @ItemType(value = AddressDTO.class)
     private List<AddressDTO> addresses;
     
@@ -487,5 +489,17 @@ public class OrganizationDetailDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public String getEmailDomain() {
+		return emailDomain;
+	}
+
+
+
+	public void setEmailDomain(String emailDomain) {
+		this.emailDomain = emailDomain;
+	}
 
 }
