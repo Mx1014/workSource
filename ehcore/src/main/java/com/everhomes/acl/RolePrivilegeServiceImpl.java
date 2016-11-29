@@ -796,7 +796,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}else{
 				Role role = aclProvider.getRoleById(roleId);
 				if(null != role){
-					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), roleId);
+					acls = aclProvider.getResourceAclByRole(role.getOwnerType(), role.getOwnerId(), new AclRoleDescriptor(EntityType.ROLE.getCode(), roleId));
 				}
 				LOGGER.debug("user["+userId+"], role = " + StringHelper.toJsonString(role));
 			}
@@ -1908,7 +1908,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param targetType
 	 * @param targetId
      */
-	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds){
+	@Override
+	public void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds){
 		if(null != moduleId){
 			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.SUPER);
 			if(null == privilegeIds){
