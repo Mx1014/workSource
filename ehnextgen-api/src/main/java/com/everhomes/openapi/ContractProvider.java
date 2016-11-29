@@ -17,4 +17,8 @@ public interface ContractProvider {
 
 	void deleteContractByOrganizationName(Integer namespaceId, String name);
 
+	List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers);
+
+	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize);
+
 }

@@ -1,11 +1,15 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Record2;
+import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -16,11 +20,13 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhContractBuildingMappingsDao;
 import com.everhomes.server.schema.tables.pojos.EhContractBuildingMappings;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RecordHelper;
 
 @Component
 public class ContractBuildingMappingProviderImpl implements ContractBuildingMappingProvider {
@@ -83,6 +89,48 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
 		.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ORGANIZATION_NAME.eq(organizationName))
 		.execute();
+	}
+
+	@Override
+	public List<String> listContractByKeywords(Integer namespaceId, String buildingName, String keywords) {
+		SelectConditionStep<Record1<String>> step = getReadOnlyContext().selectDistinct(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER)
+		.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+		.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+		.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.NAMESPACE_ID.eq(namespaceId));
+		
+		if (StringUtils.isNotBlank(buildingName)) {
+			step = step.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName));
+		}
+		
+		if (StringUtils.isNotBlank(keywords)) {
+			step = step.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.like("%"+keywords+"%"))
+					.or(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ORGANIZATION_NAME.like("%"+keywords+"%"));
+		}
+		
+		Result<Record1<String>> result = step.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, String.class));
+		}
+		
+		return new ArrayList<String>();
+	}
+
+	@Override
+	public List<BuildingApartmentDTO> listBuildingsByContractNumber(Integer namespaceId, String contractNumber) {
+		Result<Record2<String, String>> result = getReadOnlyContext().select(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME, Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME)
+				.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
+				.orderBy(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.asc(), Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.asc())
+				.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, BuildingApartmentDTO.class));
+		}
+		
+		return new ArrayList<BuildingApartmentDTO>();
 	}
 
 	private EhContractBuildingMappingsDao getReadWriteDao() {

@@ -1,10 +1,12 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.jooq.DSLContext;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -78,6 +80,40 @@ public class ContractProviderImpl implements ContractProvider {
 			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_CONTRACTS.ORGANIZATION_NAME.eq(organizationName))
 			.execute();
+	}
+
+	@Override
+	public List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers) {
+		Result<Record> result = getReadOnlyContext().select()
+			.from(Tables.EH_CONTRACTS)
+			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.in(contractNumbers))
+			.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+			.fetch();
+		
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+		
+		return new ArrayList<Contract>();
+	}
+
+	@Override
+	public List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize) {
+		Result<Record> result = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc())
+				.limit(from, pageSize)
+				.fetch();
+			
+			if (result != null) {
+				return result.map(r->ConvertHelper.convert(r, Contract.class));
+			}
+			
+			return new ArrayList<Contract>();
 	}
 
 	private EhContractsDao getReadWriteDao() {

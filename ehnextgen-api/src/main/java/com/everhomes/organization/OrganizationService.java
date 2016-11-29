@@ -15,8 +15,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchRejectContactCommand;
@@ -351,4 +353,5 @@ public interface OrganizationService {
 	OrganizationDTO getContactTopDepartment(GetContactTopDepartmentCommand cmd);
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
+	ContractDTO processContract(Contract c);
 }

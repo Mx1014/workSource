@@ -18,6 +18,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -35,6 +36,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.openapi.Contract;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -50,6 +52,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
@@ -516,42 +519,57 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	private void addAdmins(OrganizationDetailDTO organizationDetailDTO) {
+		organizationDetailDTO.setAdminMembers(getAdmins(organizationDetailDTO.getOrganizationId()));
+	}
+	
+	private List<OrganizationMemberDTO> getAdmins(Long organizationId) {
 		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
-		cmd.setOrganizationId(organizationDetailDTO.getOrganizationId());
+		cmd.setOrganizationId(organizationId);
 		ListOrganizationMemberCommandResponse  response = rolePrivilegeService.listOrganizationAdministrators(cmd);
-		organizationDetailDTO.setAdminMembers(response.getMembers());
+		return response.getMembers();
 	}
 
 	private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
-		if (organizationDetailDTO.getServiceUserId() == null) {
-			return;
+		Map<String, String> map = getServiceUser(organizationDetailDTO.getOrganizationId(), organizationDetailDTO.getServiceUserId());
+		organizationDetailDTO.setServiceUserName(map.get("serviceUserName"));
+		organizationDetailDTO.setServiceUserPhone(map.get("serviceUserPhone"));
+	}
+	
+	private Map<String, String> getServiceUser(Long organizationId, Long serviceUserId) {
+		Map<String, String> map = new HashMap<>();
+		if (serviceUserId == null) {
+			return map;
 		}
 		//1. 找到企业入驻的园区
-		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationDetailDTO.getOrganizationId());
+		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
 		if (organizationCommunityRequest == null) {
-			return ;
+			return map;
 		}
 		//2. 找到园区对应的管理公司
 		List<OrganizationCommunityDTO> organizationCommunityList = organizationProvider.findOrganizationCommunityByCommunityId(organizationCommunityRequest.getCommunityId());
 		if (organizationCommunityList == null || organizationCommunityList.size() == 0) {
-			return;
+			return map;
 		}
 		//3. 找到管理公司的这个人
 		for (OrganizationCommunityDTO organizationCommunityDTO : organizationCommunityList) {
-			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(organizationDetailDTO.getServiceUserId(), organizationCommunityDTO.getOrganizationId());
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(serviceUserId, organizationCommunityDTO.getOrganizationId());
 			if (organizationMember != null) {
-				organizationDetailDTO.setServiceUserName(organizationMember.getContactName());
-				organizationDetailDTO.setServiceUserPhone(organizationMember.getContactToken());
-				return;
+				map.put("serviceUserName", organizationMember.getContactName());
+				map.put("serviceUserPhone", organizationMember.getContactToken());
+				return map;
 			}
 		}
+		return map;
 	}
 
 	private void addSignupCount(OrganizationDetailDTO organizationDetailDTO) {
-		Integer count = organizationProvider.getSignupCount(organizationDetailDTO.getOrganizationId());
-		organizationDetailDTO.setSignupCount(count);
+		organizationDetailDTO.setSignupCount(getSignupCount(organizationDetailDTO.getOrganizationId()));
 	}
 
+	private Integer getSignupCount(Long organizationId) {
+		return organizationProvider.getSignupCount(organizationId);
+	}
+	
 	@Override
 	public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
 		
@@ -7528,6 +7546,28 @@ public class OrganizationServiceImpl implements OrganizationService {
             LOGGER.error("Community not found in organization, userId={}, namespaceId={}, organizationId={}", 
                 userId, namespaceId, oranizationId);
         }
+	}
+
+	@Override
+	public ContractDTO processContract(Contract contract) {
+		ContractDTO contractDTO = new ContractDTO();
+		contractDTO.setContractNumber(contract.getContractNumber());
+		contractDTO.setContractEndDate(contract.getContractEndDate());
+		contractDTO.setOrganizationName(contract.getOrganizationName());
+		contractDTO.setAdminMembers(getAdmins(contract.getOrganizationId()));
+		contractDTO.setSignupCount(getSignupCount(contract.getOrganizationId()));
+		
+		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getOrganizationId());
+		contractDTO.setContract(organizationDetail.getContact());
+		contractDTO.setContactor(organizationDetail.getContactor());
+		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+		
+		Map<String, String> map = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
+		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+		contractDTO.setServiceUserName(map.get("serviceUserName"));
+		contractDTO.setServiceUserPhone(map.get("serviceUserPhone"));
+		
+		return contractDTO;
 	}
 	
 }

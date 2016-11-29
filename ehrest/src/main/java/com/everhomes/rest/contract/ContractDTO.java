@@ -44,7 +44,18 @@ public class ContractDTO {
     private String serviceUserName;
     
     private String serviceUserPhone;
+    
+    @ItemType(BuildingApartmentDTO.class)
+    private List<BuildingApartmentDTO> buildings;
 	
+	public List<BuildingApartmentDTO> getBuildings() {
+		return buildings;
+	}
+
+	public void setBuildings(List<BuildingApartmentDTO> buildings) {
+		this.buildings = buildings;
+	}
+
 	public String getContractNumber() {
 		return contractNumber;
 	}
