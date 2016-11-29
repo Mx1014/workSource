@@ -72,5 +72,7 @@ public interface PrivilegeConstants {
 
     //业务授权
     public static final long SERVICE_AUTHORIZATION = 10044L;
-
+    
+    //11开头是资源预约权限 
+    public static final long RENTAL_CHECK = 1101L; 
 }
