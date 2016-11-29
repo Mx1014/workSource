@@ -386,7 +386,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
 				organization.setName(customerRental.getName());
 				organization.setAddressId(0L);
-				organization.setDescription(customerRental.getNumber());
+//				organization.setDescription(customerRental.getNumber());
 				organization.setPath("");
 				organization.setLevel(1);
 				organization.setStatus(OrganizationStatus.ACTIVE.getCode());
@@ -400,21 +400,27 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.createOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationMembers(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
 			}else {
 				organization.setName(customerRental.getName());
-				organization.setDescription(customerRental.getNumber());
+//				organization.setDescription(customerRental.getNumber());
 				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				organization.setNamespaceOrganizationType(NamespaceOrganizationType.JINDIE.getCode());
 				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.updateOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationMembers(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
 			}
 		}
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~end sync insert or update rentings, total="+list.size());
 		}
+	}
+
+	private void insertOrUpdateOrganizationMembers(Organization organization, String contact, String contactPhone) {
+		
 	}
 
 	private void insertOrUpdateContracts(Organization organization, List<CustomerContract> contracts) {
@@ -528,9 +534,10 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		for (CustomerRental customerRental : list) {
 			Organization organization = organizationProvider.findOrganizationByName(customerRental.getName(), namespaceId);
 			if (organization != null) {
-				organization.setStatus(OrganizationStatus.DELETED.getCode());
-				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				organizationProvider.updateOrganization(organization);
+				// 组织应该不能删除
+//				organization.setStatus(OrganizationStatus.DELETED.getCode());
+//				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//				organizationProvider.updateOrganization(organization);
 				contractProvider.deleteContractByOrganizationName(namespaceId, organization.getName());
 				contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, organization.getName());
 			}
