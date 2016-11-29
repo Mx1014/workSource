@@ -32,11 +32,13 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTaskLogsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTaskStatisticsDao;
+import com.everhomes.server.schema.tables.daos.EhPmTaskTargetStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTaskTargetsDao;
 import com.everhomes.server.schema.tables.daos.EhPmTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskStatistics;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskTargetStatistics;
 import com.everhomes.server.schema.tables.pojos.EhPmTaskTargets;
 import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
@@ -196,11 +198,55 @@ public class PmProviderImpl implements PmTaskProvider{
         List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
         return result;
 	}
+	
+	@Override
+	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long taskCategoryId, Byte status){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType));
+        if(null != ownerId)
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
+        if(null != taskCategoryId)
+        	query.addConditions(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId));
+        if(null != status)
+        	query.addConditions(Tables.EH_PM_TASKS.STATUS.eq(status));
+        
+        List<PmTask> result = query.fetch().stream().map(r -> ConvertHelper.convert(r, PmTask.class)).collect(Collectors.toList());
+        return result;
+	}
+	
+	@Override
+	public List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId, Long userId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
+
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType));
+        if(null != ownerId)
+        	query.addConditions(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
+        if(null != taskCategoryId)
+        	query.addConditions(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId));
+        if(null != userId) {
+        	query.addJoin(Tables.EH_PM_TASK_LOGS, Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+        	query.addConditions(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
+        	query.addConditions(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()).
+        			or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.REVISITED.getCode())));
+        	query.addGroupBy(Tables.EH_PM_TASKS.ID);
+        }
+        query.addConditions(Tables.EH_PM_TASKS.OPERATOR_STAR.ne((byte)0));
+        
+        List<PmTask> result = query.fetch().map(
+                new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
+        return result;
+	}
+	
 	//查询管理员已办任务，未办任务， 用户发的任务
 //	@Cacheable(value="listPmTask",key="{#ownerType, #ownerId, #userId, #status}", unless="#result.size() == 0")
 	@SuppressWarnings({ "unchecked", "rawtypes" })
 	@Override
-	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status,
+	public List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status, Long taskCategoryId,
 			Long pageAnchor, Integer pageSize){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASKS.fields()).from(Tables.EH_PM_TASKS);
@@ -216,24 +262,34 @@ public class PmProviderImpl implements PmTaskProvider{
         			.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId))));
         	query.groupBy(Tables.EH_PM_TASKS.ID);
+        	query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
         	
     	}else if(null != status && status.equals(PmTaskProcessStatus.PROCESSED.getCode())){
     		
-    		query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
-    		condition = condition.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
+//    		query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+    		
+    		query.join(context.select(Tables.EH_PM_TASK_LOGS.OPERATOR_UID,Tables.EH_PM_TASK_LOGS.OPERATOR_TIME,Tables.EH_PM_TASK_LOGS.TASK_ID)
+    				.from(Tables.EH_PM_TASK_LOGS).where(Tables.EH_PM_TASK_LOGS.STATUS.ge(PmTaskStatus.PROCESSING.getCode()))
+    				.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId))
+    				.and(Tables.EH_PM_TASK_LOGS.ID.in(context.select(Tables.EH_PM_TASK_LOGS.ID.max())
+    	    				.from(Tables.EH_PM_TASK_LOGS).groupBy(Tables.EH_PM_TASK_LOGS.TASK_ID)))
+    				.asTable(Tables.EH_PM_TASK_LOGS.getName()))
+    		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+    		
+//    		condition = condition.and(Tables.EH_PM_TASK_LOGS.OPERATOR_UID.eq(userId));
 //    		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode())
 //    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSED.getCode()))
 //    				.or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.CLOSED.getCode())));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ge(PmTaskStatus.PROCESSING.getCode()));
-    		query.groupBy(Tables.EH_PM_TASKS.ID);
-
+//    		query.groupBy(Tables.EH_PM_TASKS.ID);
+    		query.orderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
     	}else if(null != status && status.equals(PmTaskProcessStatus.USER_UNPROCESSED.getCode())){
 //        	query.join(Tables.EH_PM_TASK_LOGS).on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
 //        	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
 //        					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
 //        	query.groupBy(Tables.EH_PM_TASKS.ID);   
     		
-    		query.join(context.select(Tables.EH_PM_TASK_LOGS.TARGET_ID,Tables.EH_PM_TASK_LOGS.TASK_ID)
+    		query.join(context.select(Tables.EH_PM_TASK_LOGS.TARGET_ID,Tables.EH_PM_TASK_LOGS.OPERATOR_TIME,Tables.EH_PM_TASK_LOGS.TASK_ID)
     				.from(Tables.EH_PM_TASK_LOGS).where(Tables.EH_PM_TASK_LOGS.STATUS.eq(PmTaskStatus.PROCESSING.getCode()))
     				.and(Tables.EH_PM_TASK_LOGS.ID.in(context.select(Tables.EH_PM_TASK_LOGS.ID.max())
     	    				.from(Tables.EH_PM_TASK_LOGS).groupBy(Tables.EH_PM_TASK_LOGS.TASK_ID)))
@@ -241,21 +297,41 @@ public class PmProviderImpl implements PmTaskProvider{
     		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
         	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
         					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));
-        	
+        	query.orderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.desc());
         	
     	}else{
+    		if(null != taskCategoryId)
+        		condition = condition.and(Tables.EH_PM_TASKS.TASK_CATEGORY_ID.eq(taskCategoryId));
     		condition = condition.and(Tables.EH_PM_TASKS.CREATOR_UID.eq(userId));
     		condition = condition.and(Tables.EH_PM_TASKS.STATUS.ne(PmTaskStatus.INACTIVE.getCode()));
+    		query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
     	}
         
-        
-        query.orderBy(Tables.EH_PM_TASKS.CREATE_TIME.desc());
         if(null != pageSize)
         	query.limit(pageSize);
         
         List<PmTask> result = query.where(condition).fetch().map(
             new DefaultRecordMapper(Tables.EH_PM_TASKS.recordType(), PmTask.class));
         return result;
+	}
+	
+	@Override
+	public Integer countUserProccsingPmTask(String ownerType, Long ownerId, Long userId){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASKS.fields()).from(Tables.EH_PM_TASKS);
+        Condition condition = Tables.EH_PM_TASKS.OWNER_TYPE.eq(ownerType);
+        condition = condition.and(Tables.EH_PM_TASKS.OWNER_ID.eq(ownerId));
+        
+        query.join(context.select(Tables.EH_PM_TASK_LOGS.TARGET_ID,Tables.EH_PM_TASK_LOGS.TASK_ID)
+				.from(Tables.EH_PM_TASK_LOGS).where(Tables.EH_PM_TASK_LOGS.STATUS.eq(PmTaskStatus.PROCESSING.getCode()))
+				.and(Tables.EH_PM_TASK_LOGS.ID.in(context.select(Tables.EH_PM_TASK_LOGS.ID.max())
+	    				.from(Tables.EH_PM_TASK_LOGS).groupBy(Tables.EH_PM_TASK_LOGS.TASK_ID)))
+				.asTable(Tables.EH_PM_TASK_LOGS.getName()))
+		.on(Tables.EH_PM_TASK_LOGS.TASK_ID.eq(Tables.EH_PM_TASKS.ID));
+    	condition = condition.and(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.PROCESSING.getCode())
+    					.and(Tables.EH_PM_TASK_LOGS.TARGET_ID.eq(userId)));	
+        	
+        return query.where(condition).fetchCount();
 	}
 	
 	@Override
@@ -367,6 +443,32 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
+	public List<PmTaskTargetStatistic> searchTaskTargetStatistics(Integer namespaceId, Long ownerId, Long taskCategoryId, Long userId, 
+			Timestamp dateStr, Long pageAnchor, Integer pageSize){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTaskTargetStatistics.class));
+        
+        SelectJoinStep<Record> query = context.select(Tables.EH_PM_TASK_TARGET_STATISTICS.fields()).from(Tables.EH_PM_TASK_TARGET_STATISTICS);
+        Condition condition = Tables.EH_PM_TASK_TARGET_STATISTICS.NAMESPACE_ID.eq(namespaceId);
+        
+        if(null != taskCategoryId)
+        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.TASK_CATEGORY_ID.eq(taskCategoryId));
+        if(null != ownerId)
+        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.OWNER_ID.eq(ownerId));
+        if(null != dateStr)
+        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.DATE_STR.eq(dateStr));
+        if(null != userId){
+        	condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.TARGET_ID.eq(userId));        }
+        if(null != pageAnchor)
+            condition = condition.and(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.gt(pageAnchor));
+        query.orderBy(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.asc());
+        if(null != pageSize)
+        	query.limit(pageSize);
+        
+		return query.where(condition).fetch().map(new DefaultRecordMapper(Tables.EH_PM_TASK_TARGET_STATISTICS.recordType(), 
+				PmTaskTargetStatistic.class));
+	}
+	
+	@Override
 	public Integer countTaskStatistics(Long ownerId, Long taskCategoryId, Timestamp dateStr){
         //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         final Integer[] count = new Integer[1];
@@ -386,4 +488,15 @@ public class PmProviderImpl implements PmTaskProvider{
                 });
 		return count[0];
 	}
+	
+	@Override
+    public void createTaskTargetStatistic(PmTaskTargetStatistic pmTaskTargetStatistic) {
+    	long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhPmTaskTargetStatistics.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        EhPmTaskTargetStatisticsDao dao = new EhPmTaskTargetStatisticsDao(context.configuration());
+        pmTaskTargetStatistic.setId(id);
+    	dao.insert(pmTaskTargetStatistic);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskTargetStatistics.class, null);
+    }
 }

@@ -3,15 +3,15 @@ package com.everhomes.rest.pmtask;
 
 /**
  * <ul>
- * <li>1: 执行人员</li>
- * <li>2: 维修人员</li>
+ * <li>1: 小区家庭门牌地址</li>
+ * <li>2: 园区公司地址</li>
  * </ul>
  */
-public enum PmTaskOperateType {
-	ALL((byte)0), EXECUTOR((byte)1), REPAIR((byte)2);
+public enum PmTaskAddressType {
+	FAMILY((byte)1), ORGANIZATION((byte)2);
     
     private byte code;
-    private PmTaskOperateType(byte code) {
+    private PmTaskAddressType(byte code) {
         this.code = code;
     }
     
@@ -19,10 +19,10 @@ public enum PmTaskOperateType {
         return this.code;
     }
     
-    public static PmTaskOperateType fromCode(Byte code) {
+    public static PmTaskAddressType fromCode(Byte code) {
         if(code != null) {
-            PmTaskOperateType[] values = PmTaskOperateType.values();
-            for(PmTaskOperateType value : values) {
+            PmTaskAddressType[] values = PmTaskAddressType.values();
+            for(PmTaskAddressType value : values) {
                 if(value.code == code.byteValue()) {
                     return value;
                 }

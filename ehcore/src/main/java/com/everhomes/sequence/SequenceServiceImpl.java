@@ -906,7 +906,7 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_SETTLE_REQUESTS.ID.max()).from(Tables.EH_SETTLE_REQUESTS).fetchOne().value1();
         });
         
-        syncTableSequence(null, EhSettleRequests.class, Tables.EH_PM_TASK_TARGETS.getName(), (dbContext) -> {
+        syncTableSequence(null, EhPmTaskTargets.class, Tables.EH_PM_TASK_TARGETS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_TASK_TARGETS.ID.max()).from(Tables.EH_PM_TASK_TARGETS).fetchOne().value1();
         });
 
@@ -1039,6 +1039,10 @@ public class SequenceServiceImpl implements SequenceService {
     
         syncTableSequence(null, EhEnergyMeterSettingLogs.class, Tables.EH_ENERGY_METER_SETTING_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ENERGY_METER_SETTING_LOGS.ID.max()).from(Tables.EH_ENERGY_METER_SETTING_LOGS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhPmTaskTargetStatistics.class, Tables.EH_PM_TASK_TARGET_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.max()).from(Tables.EH_PM_TASK_TARGET_STATISTICS).fetchOne().value1();
         });
     }
 
