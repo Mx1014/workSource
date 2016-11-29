@@ -404,10 +404,12 @@ public interface FlowService {
 	 */
 	ListFlowModulesResponse listModules(ListFlowModulesCommand cmd);
 
-	void createEventLogs(List<FlowEventLog> logs);
-
 	String parseActionTemplate(FlowCaseState ctx, Long actionId,
 			String renderText);
+
+	void flushState(FlowCaseState ctx);
+
+	void createNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
 	
 	//TODO 日志信息分类：
 	

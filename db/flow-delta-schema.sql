@@ -338,6 +338,7 @@ CREATE TABLE `eh_flow_subjects` (
     `belong_to` BIGINT NOT NULL,
     `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
+    `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

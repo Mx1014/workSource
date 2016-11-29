@@ -46,6 +46,7 @@ import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
@@ -124,6 +125,9 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private FlowEventLogProvider flowEventLogProvider;
+    
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -1502,7 +1506,7 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowPostSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
-		// TODO Auto-generated method stub
+		// TODO Auto-generated method stub AttachmentProviderImpl
 		return null;
 	}
 
@@ -1539,11 +1543,49 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
-	public void createEventLogs(List<FlowEventLog> logs) {
+	public void createNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
+				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+		if(selections != null && selections.size() > 0) {
+			for(FlowUserSelection sel : selections) {
+				FlowEventLog log = new FlowEventLog();
+				log.setId(flowEventLogProvider.getNextId());
+				log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
+				log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+				log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+				if(ctx.getCurrentEvent() != null) {
+					log.setFlowButtonId(ctx.getCurrentEvent().getFiredButtonId());	
+				}
+				
+				log.setFlowNodeId(nextNode.getFlowNode().getId());
+				log.setParentId(0l);
+				log.setFlowCaseId(ctx.getFlowCase().getId());
+				if(ctx.getOperator() != null) {
+					log.setFlowUserId(ctx.getOperator().getId());
+					log.setFlowUserName(ctx.getOperator().getNickName());	
+				}
+				
+//				if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
+//					log.setFlowSelectionId(cmd.getEntityId());
+//				}
+				
+				log.setLogType(FlowLogType.NODE_ENTER.getCode());
+				log.setLogTitle("");
+			}
+		} else {
+			LOGGER.warn("not processors for nodeId=" + nextNode.getFlowNode().getId() + " flowCaseId=" + ctx.getFlowCase().getId());
+		}
+	}
+	
+	@Override
+	public void flushState(FlowCaseState ctx) {
+		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		dbProvider.execute((s) -> {
-			flowEventLogProvider.createFlowEventLogs(logs);
+			ctx.getFlowCase().setLastStepTime(now);
+			flowCaseProvider.updateFlowCase(ctx.getFlowCase());
+			flowEventLogProvider.createFlowEventLogs(ctx.getLogs());
 			return true;
-		});
+		});		
 	}
 	
 	private List<String> getAllParams(String renderText) {

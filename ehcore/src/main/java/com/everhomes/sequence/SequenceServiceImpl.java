@@ -1068,6 +1068,14 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhFlowScripts.class, Tables.EH_FLOW_SCRIPTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FLOW_SCRIPTS.ID.max()).from(Tables.EH_FLOW_SCRIPTS).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhFlowSubjects.class, Tables.EH_FLOW_SUBJECTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_SUBJECTS.ID.max()).from(Tables.EH_FLOW_SUBJECTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhFlowAttachments.class, Tables.EH_FLOW_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_ATTACHMENTS.ID.max()).from(Tables.EH_FLOW_ATTACHMENTS).fetchOne().value1();
+        });
 
     }
 

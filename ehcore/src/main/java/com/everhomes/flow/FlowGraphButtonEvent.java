@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
@@ -14,6 +15,11 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowUserType userType;
 	private UserInfo firedUser;
 	private FlowFireButtonCommand cmd;
+	private FlowEventLogProvider flowEventLogProvider;
+	
+	public FlowGraphButtonEvent() {
+		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
+	}
 	
 	@Override
 	public FlowUserType getUserType() {
@@ -103,6 +109,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		}
 		
 		FlowEventLog log = new FlowEventLog();
+		log.setId(flowEventLogProvider.getNextId());
 		log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
 		log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
 		log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
@@ -121,5 +128,10 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
 		ctx.getLogs().add(log);	//added but not save to database now.
+	}
+
+	@Override
+	public Long getFiredButtonId() {
+		return cmd.getButtonId();
 	}
 }

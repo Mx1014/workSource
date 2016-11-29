@@ -29,4 +29,9 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 	public void fire(FlowCaseState ctx) {
 	}
 
+	@Override
+	public Long getFiredButtonId() {
+		return 0l;
+	}
+
 }

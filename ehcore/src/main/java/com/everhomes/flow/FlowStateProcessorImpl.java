@@ -98,6 +98,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				ctx.setPrefixNode(currentNode);
 				ctx.setCurrentNode(nextNode);
 				ctx.setNextNode(null);
+				
+				//create processor's
+				flowService.createNodeProcessors(ctx, nextNode);
+				
 				nextNode.stepEnter(ctx, currentNode);	
 				stepOK = true;
 			} catch(FlowStepErrorException ex) {
@@ -106,8 +110,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		
 		//Now save info to databases here
-		if(stepOK && ctx.getLogs().size() > 0) {
-			flowService.createEventLogs(ctx.getLogs());
+		if(stepOK) {
+			flowService.flushState(ctx);
 		}
 	}
 }

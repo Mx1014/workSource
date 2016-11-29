@@ -7,6 +7,7 @@ public interface FlowGraphEvent {
 	FlowUserType getUserType();
 	FlowEventType getEventType();
 	Long getFiredUserId();
+	Long getFiredButtonId();
 	
 	void fire(FlowCaseState ctx);
 }

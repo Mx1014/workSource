@@ -14,10 +14,16 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
-			curr.getTrackApproveEnter().fireAction(ctx, null);
+			if(curr.getTrackApproveEnter() != null) {
+				curr.getTrackApproveEnter().fireAction(ctx, null);	
+			}
+			
 			break;
 		case REJECT_STEP:
-			curr.getTrackRejectEnter().fireAction(ctx, null);
+			if(curr.getTrackRejectEnter() != null) {
+				curr.getTrackRejectEnter().fireAction(ctx, null);	
+			}
+			
 			break;
 		case TRANSFER_STEP:
 			break;
@@ -47,7 +53,10 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 		case REJECT_STEP:
 			break;
 		case TRANSFER_STEP:
-			curr.getTrackTransferLeave().fireAction(ctx, null);
+			if(curr.getTrackTransferLeave() != null) {
+				curr.getTrackTransferLeave().fireAction(ctx, null);	
+			}
+			
 			break;
 		case COMMENT_STEP:
 			break;
