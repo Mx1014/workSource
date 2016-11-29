@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.user.CustomRequestConstants;
@@ -36,6 +37,9 @@ public class YellowPageController  extends ControllerBase {
 	
 	@Autowired
 	private SettleRequestInfoSearcher settleRequestInfoSearcher;
+
+    @Autowired
+	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -380,6 +384,20 @@ public class YellowPageController  extends ControllerBase {
           	response.setErrorDescription("OK");
           	return response;
           }
-       
-       
+
+    /**
+     * <b>URL: /yellowPage/syncApartmentRequestInfo</b>
+     * <p> 同步申请信息</p>
+     */
+    @RequestMapping("syncApartmentRequestInfo")
+    @RestReturn(value = String.class)
+    public RestResponse syncApartmentRequestInfo() {
+
+        this.apartmentRequestInfoSearcher.syncFromDb();
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
