@@ -110,7 +110,7 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		Result<Record1<String>> result = step.fetch();
 		
 		if (result != null && result.isNotEmpty()) {
-			return result.map(r->RecordHelper.convert(r, String.class));
+			return result.map(r->r.value1());
 		}
 		
 		return new ArrayList<String>();

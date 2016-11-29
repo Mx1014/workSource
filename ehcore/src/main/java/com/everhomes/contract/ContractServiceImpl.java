@@ -37,7 +37,7 @@ public class ContractServiceImpl implements ContractService {
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Integer namespaceId = cmd.getNamespaceId()==null?UserContext.getCurrentNamespaceId():cmd.getNamespaceId();
 		
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Long pageAnchor = cmd.getPageAnchor() == null?0L:cmd.getPageAnchor();
@@ -46,7 +46,7 @@ public class ContractServiceImpl implements ContractService {
 		
 		List<Contract> contractList = null;
 		//1. 有关键字
-		if (StringUtils.isNotBlank(cmd.getBuildingName()) && StringUtils.isNotBlank(cmd.getKeywords())) {
+		if (StringUtils.isNotBlank(cmd.getBuildingName()) || StringUtils.isNotBlank(cmd.getKeywords())) {
 			List<String> contractNumbers = contractBuildingMappingProvider.listContractByKeywords(namespaceId, cmd.getBuildingName(), cmd.getKeywords());
 			contractNumbers.sort((t1, t2)->{
 				if (t1.compareTo(t2) > 1) {

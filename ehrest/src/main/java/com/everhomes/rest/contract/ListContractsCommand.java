@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>参数:
+ * <li>namespaceId: 域空间id</li>
  * <li>buildingName: 楼栋名称</li>
  * <li>keywords: 查询关键词</li>
  * <li>pageAnchor: 锚点</li>
@@ -14,6 +15,8 @@ import com.everhomes.util.StringHelper;
  */
 public class ListContractsCommand {
 
+	private Integer namespaceId;
+	
 	private String buildingName;
 
 	private String keywords;
@@ -26,12 +29,12 @@ public class ListContractsCommand {
 
 	}
 
-	public ListContractsCommand(String buildingName, String keywords, Long pageAnchor, Integer pageSize) {
-		super();
-		this.buildingName = buildingName;
-		this.keywords = keywords;
-		this.pageAnchor = pageAnchor;
-		this.pageSize = pageSize;
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
 	}
 
 	public String getBuildingName() {
