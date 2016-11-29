@@ -139,7 +139,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				ctx.setNextNode(null);
 				
 				//create processor's
-				flowService.createNodeProcessors(ctx, nextNode);
+				flowService.createSnapshotNodeProcessors(ctx, nextNode);
 				
 				nextNode.stepEnter(ctx, currentNode);	
 				stepOK = true;

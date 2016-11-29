@@ -44,4 +44,55 @@ public class FlowGraph {
 	public FlowGraphButton getGraphButton(Long id) {
 		return idToButton.get(id);
 	}
+	
+	private void saveNodeIds(FlowGraphNode node) {
+		for(FlowGraphButton btn : node.getApplierButtons()) {
+			if(btn.getMessage() != null) {
+				idToAction.put(btn.getMessage().getFlowAction().getId(), btn.getMessage());
+			}
+			if(btn.getMessage() != null) {
+				idToAction.put(btn.getSms().getFlowAction().getId(), btn.getSms());
+			}
+			if(btn.getScripts() != null) {
+				for(FlowGraphAction action : btn.getScripts()) {
+					idToAction.put(action.getFlowAction().getId(), action);
+				}	
+			}
+			
+			idToButton.put(btn.getFlowButton().getId(), btn);
+		}
+		
+		for(FlowGraphButton btn : node.getProcessorButtons()) {
+			idToButton.put(btn.getFlowButton().getId(), btn);
+		}
+	}
+	
+	public void saveIds() {
+		for(FlowGraphNode node : nodes) {
+			if(null != node.getMessageAction()) {
+				idToAction.put(node.getMessageAction().getFlowAction().getId(), node.getMessageAction());	
+			}
+			if(null != node.getSmsAction()) {
+				idToAction.put(node.getSmsAction().getFlowAction().getId(), node.getSmsAction());
+			}
+			if(null != node.getTickMessageAction()) {
+				idToAction.put(node.getTickMessageAction().getFlowAction().getId(), node.getTickMessageAction());
+			}
+			if(null != node.getTickSMSAction()) {
+				idToAction.put(node.getTickSMSAction().getFlowAction().getId(), node.getTickSMSAction());
+			}
+			if(null != node.getTrackApproveEnter()) {
+				idToAction.put(node.getTrackApproveEnter().getFlowAction().getId(), node.getTrackApproveEnter());
+			}
+			if(null != node.getTrackRejectEnter()) {
+				idToAction.put(node.getTrackRejectEnter().getFlowAction().getId(), node.getTrackRejectEnter());
+			}
+			if(null != node.getTrackTransferLeave()) {
+				idToAction.put(node.getTrackTransferLeave().getFlowAction().getId(), node.getTrackTransferLeave());
+			}
+			idToNode.put(node.getFlowNode().getId(), node);
+			
+			saveNodeIds(node);
+		}
+	}
 }

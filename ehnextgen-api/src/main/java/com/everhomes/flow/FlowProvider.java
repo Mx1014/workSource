@@ -27,5 +27,8 @@ public interface FlowProvider {
 	void flowMarkUpdated(Flow flow);
 
 	Flow findSnapshotFlow(Long flowId, Integer flowVer);
+
+	Flow findEnabledFlow(Integer namespaceId, Long moduleId, String moduleType,
+			Long ownerId, String ownerType);
 	
 }

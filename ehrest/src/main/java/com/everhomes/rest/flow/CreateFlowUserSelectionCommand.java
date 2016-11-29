@@ -1,5 +1,6 @@
 package com.everhomes.rest.flow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -12,6 +13,10 @@ public class CreateFlowUserSelectionCommand {
 	
 	@ItemType(FlowSingleUserSelectionCommand.class)
 	List<FlowSingleUserSelectionCommand> selections;
+	
+	public CreateFlowUserSelectionCommand() {
+		selections = new ArrayList<>();
+	}
 
 	public Long getBelongTo() {
 		return belongTo;

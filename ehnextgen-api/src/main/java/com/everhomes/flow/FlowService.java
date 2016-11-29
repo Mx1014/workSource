@@ -132,14 +132,6 @@ public interface FlowService {
 	void disableFlow(Long flowId);
 	
 	/**
-	 * 获取当前业务模块下启用的工作流
-	 * @param moduleId
-	 * @param moduleType
-	 * @return
-	 */
-	Flow getEnabledFlow(Long moduleId, FlowModuleType moduleType);
-	
-	/**
 	 * 添加一个 Case 到工作流中，注意此时为 snapshotFlow，即为运行中的 Flow 副本。
 	 * @param snapshotFlow
 	 * @param flowCase
@@ -409,7 +401,18 @@ public interface FlowService {
 
 	void flushState(FlowCaseState ctx);
 
-	void createNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
+	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
+
+	/**
+	 * 获取当前业务模块下启用的工作流
+	 * @param moduleId
+	 * @param moduleType
+	 * @param ownerId
+	 * @param ownerType
+	 * @return
+	 */
+	Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType,
+			Long ownerId, String ownerType);
 	
 	//TODO 日志信息分类：
 	

@@ -181,7 +181,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setModuleId(cmd.getModuleId());
     	obj.setModuleType(cmd.getModuleType());
     	obj.setFlowName(cmd.getFlowName());
-    	obj.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
+    	obj.setFlowVersion(FlowConstants.FLOW_CONFIG_START);
     	obj.setStatus(FlowStatusType.CONFIG.getCode());
     	obj.setOrganizationId(cmd.getOrgId());
     	
@@ -804,6 +804,8 @@ public class FlowServiceImpl implements FlowService {
 				sel.setBelongType(cmd.getFlowUserType());	
 				sel.setFlowMainId(flow.getTopId());
 				sel.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
+				sel.setSelectType(sCmd.getFlowUserSelectionType());
+				sel.setStatus(FlowStatusType.VALID.getCode());
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
 		}
@@ -1052,7 +1054,7 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public Boolean enableFlow(Long flowId) {
-		FlowGraph flowGraph = new FlowGraph();
+		final FlowGraph flowGraph = new FlowGraph();
 		Flow flow = flowProvider.getFlowById(flowId);
 		if(flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
 			//restart it
@@ -1085,7 +1087,7 @@ public class FlowServiceImpl implements FlowService {
 		nodeObj = new FlowNode();
 		nodeObj.setNodeName("START");
 		nodeObj.setFlowMainId(flow.getId());
-		nodeObj.setFlowVersion(flow.getFlowVersion());
+		nodeObj.setFlowVersion(flow.getFlowVersion());//now not use config version, but real flow version 
 		nodeObj.setNamespaceId(flow.getNamespaceId());
 		nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
 		nodeObj.setNodeLevel(0);
@@ -1106,9 +1108,10 @@ public class FlowServiceImpl implements FlowService {
 		nodeObj.setStatus(FlowNodeStatus.HIDDEN.getCode());
 		nodeObj.setNodeLevel(flowGraph.getNodes().size());
 		nodeObj.setDescription("");
-		FlowGraphNode end = new FlowGraphNodeStart();
-		start.setFlowNode(nodeObj);		
+		FlowGraphNode end = new FlowGraphNodeEnd();
+		end.setFlowNode(nodeObj);		
 		flowGraph.getNodes().add(end);
+//		flowGraph.saveIds();
 		
 		//now all the graph is collected, do snapshot
 		Flow flowNew = flowProvider.getFlowById(flowId);
@@ -1168,6 +1171,7 @@ public class FlowServiceImpl implements FlowService {
 	
 	private FlowGraphNode getFlowGraphNode(FlowNode flowNode) {
 		FlowGraphNodeNormal graphNode = new FlowGraphNodeNormal();
+		graphNode.setFlowNode(flowNode);
 		Long flowNodeId = flowNode.getId();
 		
 		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
@@ -1278,6 +1282,7 @@ public class FlowServiceImpl implements FlowService {
 		Flow flow = flowGraph.getFlow();
 		flow.setFlowMainId(flow.getId());
 		flow.setId(null);
+		flow.setStatus(FlowStatusType.RUNNING.getCode());
 		flowProvider.createFlow(flowGraph.getFlow());
 		
 		//step2 create flowNodes
@@ -1373,6 +1378,7 @@ public class FlowServiceImpl implements FlowService {
 		if(selections != null && selections.size() > 0) {
 			for(FlowUserSelection sel : selections) {
 				sel.setBelongTo(flowAction.getId());
+				sel.setFlowVersion(flowAction.getFlowVersion());
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
 		}
@@ -1417,13 +1423,13 @@ public class FlowServiceImpl implements FlowService {
 			i++;
 		}
 		
+		flowGraph.saveIds();
+		
 		return flowGraph;
 	}
 	
 	@Override
 	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
-		//step1 create subject for this button
-		
 		FlowCaseState ctx = flowStateProcessor.prepareButtonFire(UserContext.current().getUser(), cmd);
 		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
 		
@@ -1438,9 +1444,8 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public Flow getEnabledFlow(Long moduleId, FlowModuleType moduleType) {
-		// TODO Auto-generated method stub
-		return null;
+	public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+		return flowProvider.findEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
 	}
 
 	@Override
@@ -1578,7 +1583,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
-	public void createNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
+	public void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
 				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
 		List<Long> users = resolvUserSelections(selections);
@@ -1587,7 +1592,7 @@ public class FlowServiceImpl implements FlowService {
 				FlowEventLog log = new FlowEventLog();
 				log.setId(flowEventLogProvider.getNextId());
 				log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
-				log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+				log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());//get real version
 				log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
 				if(ctx.getCurrentEvent() != null) {
 					log.setFlowButtonId(ctx.getCurrentEvent().getFiredButtonId());	

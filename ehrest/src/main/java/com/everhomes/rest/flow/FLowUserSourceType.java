@@ -1,7 +1,7 @@
 package com.everhomes.rest.flow;
 
 public enum FLowUserSourceType {
-	SOURCE_DEPARTMENT("source_department"), SOURCE_POSITION("source_position");
+	SOURCE_USER("source_user"), SOURCE_DEPARTMENT("source_department"), SOURCE_POSITION("source_position");
 	
 	private String code;
     private FLowUserSourceType(String code) {

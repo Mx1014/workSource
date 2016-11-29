@@ -96,10 +96,11 @@ public class FlowProviderImpl implements FlowProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_FLOWS.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_FLOWS.ID.lt(locator.getAnchor()));
             }
 
         query.addLimit(count);
+        query.addOrderBy(Tables.EH_FLOWS.ID.desc());
         List<Flow> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, Flow.class);
         });
@@ -173,7 +174,7 @@ public class FlowProviderImpl implements FlowProvider {
 					query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(cmd.getOwnerId()));	
 				}
 				if(cmd.getOwnerType() != null) {
-					query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(cmd.getModuleType()));	
+					query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(cmd.getOwnerType()));	
 				}
 				
 				query.addConditions(Tables.EH_FLOWS.STATUS.ne(FlowStatusType.INVALID.getCode()));
@@ -228,5 +229,34 @@ public class FlowProviderImpl implements FlowProvider {
 		}
 		
 		return flows.get(0);
+	}
+	
+	@Override
+	public Flow findEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+		List<Flow> flows = this.queryFlows(new ListingLocator(), 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
+				query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(moduleId));
+				if(moduleType != null) {
+					query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));	
+				}
+				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));	
+				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
+				query.addConditions(Tables.EH_FLOWS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.ne(0l)); // Got a main flow, not snapshot flow.	
+				
+				return query;
+			}
+			
+		});
+		
+		if(flows != null && flows.size() > 0) {
+			return flows.get(0);
+		}
+		
+		return null;
 	}
 }
