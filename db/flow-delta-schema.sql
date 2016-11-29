@@ -213,6 +213,7 @@ CREATE TABLE `eh_flow_cases` (
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, initial, process, end',
     `reject_count` INTEGER NOT NULL DEFAULT 0,
     `reject_node_id` BIGINT NOT NULL DEFAULT 0,
+    `step_count` BIGINT NOT NULL DEFAULT 0,
     `last_step_time` DATETIME NOT NULL COMMENT 'state change time',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `case_type` VARCHAR(64) COMMENT 'inner, outer etc',
@@ -249,6 +250,7 @@ CREATE TABLE `eh_flow_event_logs` (
     `flow_user_name` VARCHAR(64),
     `flow_selection_id` BIGINT NOT NULL DEFAULT 0,
     `subject_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the post id for this event',
+    `step_count` BIGINT NOT NULL DEFAULT 0,
     `log_type` VARCHAR(64) NOT NULL COMMENT 'flow_step, button_click, action_result',
     `log_title` VARCHAR(64) COMMENT 'the title of this log',
     `log_content` TEXT,
@@ -323,5 +325,32 @@ CREATE TABLE `eh_flow_scripts` (
     `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
 
     PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_flow_subjects`;
+CREATE TABLE `eh_flow_subjects` (
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `title` VARCHAR(64),
+    `content` TEXT,
+
+    `belong_to` BIGINT NOT NULL,
+    `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow_node, flow_button, flow',
+    `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_flow_attachments`;
+CREATE TABLE `eh_flow_attachments` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `owner_id` BIGINT NOT NULL COMMENT 'owner id, e.g comment_id',
+  `content_type` VARCHAR(32) COMMENT 'attachment object content type',
+  `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
+  `creator_uid` BIGINT NOT NULL,
+  `create_time` DATETIME NOT NULL,
+
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
