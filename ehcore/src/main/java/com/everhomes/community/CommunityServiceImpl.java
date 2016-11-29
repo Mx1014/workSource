@@ -2515,6 +2515,9 @@ public class CommunityServiceImpl implements CommunityService {
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
 		user.setPositionTag(cmd.getPosition());
 		userProvider.updateUser(user); 
+		
+	}
+	
 	public void createResourceCategory(CreateResourceCategoryCommand cmd) {
 		
 		Long ownerId = cmd.getOwnerId();
