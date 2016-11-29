@@ -15,6 +15,8 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowUserType userType;
 	private UserInfo firedUser;
 	private FlowFireButtonCommand cmd;
+	private FlowSubject subject;
+	
 	private FlowEventLogProvider flowEventLogProvider;
 	
 	public FlowGraphButtonEvent() {
@@ -56,6 +58,14 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		this.cmd = cmd;
 	}
 
+	public FlowSubject getSubject() {
+		return subject;
+	}
+
+	public void setSubject(FlowSubject subject) {
+		this.subject = subject;
+	}
+
 	@Override
 	public void fire(FlowCaseState ctx) {
 		//TODO create logs
@@ -80,6 +90,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 				next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()+1);
 			}
 			ctx.setNextNode(next);
+			ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1l);
 			break;
 		case REJECT_STEP:
 			current = ctx.getCurrentNode();
@@ -88,6 +99,11 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			}
 			next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()-1);
 			ctx.setNextNode(next);
+			
+			FlowCase flowCase = ctx.getFlowCase();
+			flowCase.setRejectNodeId(current.getFlowNode().getId());
+			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
+			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
 		case TRANSFER_STEP:
 			//TODO processor changed, add a log
@@ -122,9 +138,9 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
 			log.setFlowSelectionId(cmd.getEntityId());
 		}
-		
+		log.setSubjectId(subject.getId());
 		log.setLogType(FlowLogType.BUTTON_FIRED.getCode());
-		log.setLogTitle("");
+//		log.setLogTitle("");
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
 		ctx.getLogs().add(log);	//added but not save to database now.

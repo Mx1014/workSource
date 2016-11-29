@@ -20,8 +20,11 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.news.Attachment;
+import com.everhomes.news.AttachmentProvider;
 import com.everhomes.pusher.PusherServiceImpl;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
@@ -84,7 +87,9 @@ import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -128,6 +133,15 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+    
+    @Autowired
+    private FlowSubjectProvider flowSubjectProvider;
+    
+    @Autowired
+    private AttachmentProvider attachmentProvider;
+    
+	@Autowired
+	private ContentServerService contentServerService;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -1408,6 +1422,8 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
+		//step1 create subject for this button
+		
 		FlowCaseState ctx = flowStateProcessor.prepareButtonFire(UserContext.current().getUser(), cmd);
 		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
 		
@@ -1507,6 +1523,10 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public FlowPostSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
 		// TODO Auto-generated method stub AttachmentProviderImpl
+		
+		final List<Attachment> attachments = new ArrayList<>();
+		attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+		
 		return null;
 	}
 
@@ -1542,12 +1562,28 @@ public class FlowServiceImpl implements FlowService {
 		return resp;
 	}
 	
+	private List<Long> resolvUserSelections(List<FlowUserSelection> selections) {
+		List<Long> users = new ArrayList<Long>();
+		if(selections == null) {
+			return users;
+		}
+		
+		for(FlowUserSelection sel : selections) {
+			if(FlowEntityType.FLOW_USER.getCode().equals(sel.getBelongEntity())) {
+				users.add(sel.getSourceIdA());
+			}	
+		}
+		
+		return users;
+	}
+	
 	@Override
 	public void createNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
 				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
-		if(selections != null && selections.size() > 0) {
-			for(FlowUserSelection sel : selections) {
+		List<Long> users = resolvUserSelections(selections);
+		if(users.size() > 0) {
+			for(Long selUser : users) {
 				FlowEventLog log = new FlowEventLog();
 				log.setId(flowEventLogProvider.getNextId());
 				log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
@@ -1560,17 +1596,20 @@ public class FlowServiceImpl implements FlowService {
 				log.setFlowNodeId(nextNode.getFlowNode().getId());
 				log.setParentId(0l);
 				log.setFlowCaseId(ctx.getFlowCase().getId());
-				if(ctx.getOperator() != null) {
-					log.setFlowUserId(ctx.getOperator().getId());
-					log.setFlowUserName(ctx.getOperator().getNickName());	
-				}
 				
+//				if(ctx.getOperator() != null) {
+//					log.setFlowUserId(ctx.getOperator().getId());
+//					log.setFlowUserName(ctx.getOperator().getNickName());	
+//				}
 //				if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
 //					log.setFlowSelectionId(cmd.getEntityId());
 //				}
+				log.setFlowUserId(selUser);
+				log.setStepCount(ctx.getFlowCase().getStepCount());
 				
 				log.setLogType(FlowLogType.NODE_ENTER.getCode());
 				log.setLogTitle("");
+				ctx.getLogs().add(log);
 			}
 		} else {
 			LOGGER.warn("not processors for nodeId=" + nextNode.getFlowNode().getId() + " flowCaseId=" + ctx.getFlowCase().getId());

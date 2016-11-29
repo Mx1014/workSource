@@ -41,13 +41,16 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 
     @Override
     public Long createFlowEventLog(FlowEventLog obj) {
-        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowEventLogs.class));
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEventLogs.class));
-        obj.setId(id);
+        if(obj.getId() == null || obj.getId() <= 0) {
+        	long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowEventLogs.class));
+         obj.setId(id);	
+        }
+        
         prepareObj(obj);
         EhFlowEventLogsDao dao = new EhFlowEventLogsDao(context.configuration());
         dao.insert(obj);
-        return id;
+        return obj.getId();
     }
 
     @Override
