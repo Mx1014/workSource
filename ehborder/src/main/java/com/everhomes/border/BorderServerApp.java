@@ -24,7 +24,7 @@ import org.springframework.context.annotation.ComponentScan;
 public class BorderServerApp {
     public static void main(String[] args) {
         SpringApplication app = new SpringApplication(BorderServerApp.class);
-        app.setShowBanner(false);
+        // app.setShowBanner(false);
         app.run(args);
     }
 }

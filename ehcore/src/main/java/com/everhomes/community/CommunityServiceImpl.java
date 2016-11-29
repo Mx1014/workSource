@@ -9,6 +9,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
 import org.slf4j.Logger;
@@ -68,6 +69,8 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.community.BuildingServiceErrorCode;
 import com.everhomes.rest.community.BuildingStatus;
@@ -75,6 +78,8 @@ import com.everhomes.rest.community.CommunityGeoPointDTO;
 import com.everhomes.rest.community.CommunityNotificationTemplateCode;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
+import com.everhomes.rest.community.CreateResourceCategoryCommand;
 import com.everhomes.rest.community.GetBuildingCommand;
 import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
@@ -85,7 +90,13 @@ import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.community.ListCommunitesByStatusCommand;
 import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
+import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
 import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
+import com.everhomes.rest.community.ListResourceCategoryCommand;
+import com.everhomes.rest.community.ResourceCategoryAssignmentDTO;
+import com.everhomes.rest.community.ResourceCategoryDTO;
+import com.everhomes.rest.community.ResourceCategoryErrorCode;
+import com.everhomes.rest.community.ResourceCategoryStatus;
 import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
@@ -103,6 +114,7 @@ import com.everhomes.rest.community.admin.CountCommunityUsersCommand;
 import com.everhomes.rest.community.admin.CreateCommunityCommand;
 import com.everhomes.rest.community.admin.CreateCommunityResponse;
 import com.everhomes.rest.community.admin.DeleteBuildingAdminCommand;
+import com.everhomes.rest.community.admin.DeleteResourceCategoryCommand;
 import com.everhomes.rest.community.admin.ImportCommunityCommand;
 import com.everhomes.rest.community.admin.ListBuildingsByStatusCommandResponse;
 import com.everhomes.rest.community.admin.ListCommunityAuthPersonnelsCommand;
@@ -120,6 +132,7 @@ import com.everhomes.rest.community.admin.SmsTemplate;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
+import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
@@ -149,6 +162,8 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.PrivateFlag;
+import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.region.RegionServiceErrorCode;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.IdentifierType;
@@ -179,7 +194,6 @@ import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.version.VersionProvider;
 import com.everhomes.version.VersionRealm;
 import com.everhomes.version.VersionUpgradeRule;
-import com.mysql.jdbc.StringUtils;
 
 @Component
 public class CommunityServiceImpl implements CommunityService {
@@ -908,7 +922,7 @@ public class CommunityServiceImpl implements CommunityService {
 		building.setPosterUri(cmd.getPosterUri());
 		building.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		building.setNamespaceId(null == cmd.getNamespaceId() ? Namespace.DEFAULT_NAMESPACE : cmd.getNamespaceId());
-		if(!StringUtils.isNullOrEmpty(cmd.getGeoString())){
+		if(StringUtils.isNotBlank(cmd.getGeoString())){
 			String[] geoString = cmd.getGeoString().split(",");
 			double longitude = Double.valueOf(geoString[0]);
 			double latitude = Double.valueOf(geoString[1]);
@@ -1320,7 +1334,7 @@ public class CommunityServiceImpl implements CommunityService {
 			groupIds.add(group.getId());
 		}
 		
-		if(!StringUtils.isNullOrEmpty(cmd.getKeywords())){
+		if(StringUtils.isNotBlank(cmd.getKeywords())){
 			UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId , cmd.getKeywords());
 			
 			if(null == identifier){
@@ -1449,7 +1463,8 @@ public class CommunityServiceImpl implements CommunityService {
 			List<AddressDTO> addressDtos = new ArrayList<AddressDTO>();
 			for (OrganizationOwner organizationOwner : owners) {
 				Address address = addressProvider.findAddressById(organizationOwner.getAddressId());
-				addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+				if(null != address)
+					addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
 			}
 			return dto;
 		}
@@ -1461,9 +1476,10 @@ public class CommunityServiceImpl implements CommunityService {
 				Group group = groupProvider.findGroupById(userGroup.getGroupId());
 				if(null != group && group.getFamilyCommunityId().equals(cmd.getCommunityId())){
 					Address address = addressProvider.findAddressById(group.getFamilyAddressId());
-					address.setMemberStatus(userGroup.getMemberStatus());
-					if(null != address)
+					if(null != address){
+						address.setMemberStatus(userGroup.getMemberStatus());
 						addressDtos.add(ConvertHelper.convert(address, AddressDTO.class));
+					}
 				}
 			}
 		}
@@ -1571,7 +1587,7 @@ public class CommunityServiceImpl implements CommunityService {
 			cond = cond.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()));
 		}
 		
-		if(!StringUtils.isNullOrEmpty(cmd.getKeywords())){
+		if(StringUtils.isNotBlank(cmd.getKeywords())){
 			Condition condition = Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(cmd.getKeywords());
 			condition = condition.or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.eq(cmd.getKeywords()));
 			cond = cond.and(condition);
@@ -1989,9 +2005,9 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 	private void checkCreateCommunityParameters(final Long userId, final CreateCommunityCommand cmd) {
-		if (cmd.getNamespaceId() == null || StringUtils.isEmptyOrWhitespaceOnly(cmd.getName()) || cmd.getCommunityType() == null 
-				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getProvinceName()) || StringUtils.isEmptyOrWhitespaceOnly(cmd.getCityName())
-				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getAreaName()) || CommunityType.fromCode(cmd.getCommunityType()) == null) {
+		if (cmd.getNamespaceId() == null || StringUtils.isBlank(cmd.getName()) || cmd.getCommunityType() == null 
+				|| StringUtils.isBlank(cmd.getProvinceName()) || StringUtils.isBlank(cmd.getCityName())
+				|| StringUtils.isBlank(cmd.getAreaName()) || CommunityType.fromCode(cmd.getCommunityType()) == null) {
 			LOGGER.error(
 					"Invalid parameters, operatorId=" + userId + ", cmd=" + cmd);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
@@ -2097,7 +2113,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void communityImportBaseConfig(CommunityImportBaseConfigCommand cmd) {
-		if (StringUtils.isEmptyOrWhitespaceOnly(cmd.getNamespaceName()) || StringUtils.isEmptyOrWhitespaceOnly(cmd.getCommunityType()) 
+		if (StringUtils.isBlank(cmd.getNamespaceName()) || StringUtils.isBlank(cmd.getCommunityType()) 
 				|| NamespaceCommunityType.fromCode(cmd.getCommunityType())==null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: "+cmd);
@@ -2142,7 +2158,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 	
 	private void createVersion(Integer namespaceId, String realm, String description, String versionRange, String targetVersion, Byte forceUpgrade){
-		if(StringUtils.isEmptyOrWhitespaceOnly(realm)){
+		if(StringUtils.isBlank(realm)){
 			return ;
 		}
 		VersionRealm versionRealm = new VersionRealm();
@@ -2154,7 +2170,7 @@ public class CommunityServiceImpl implements CommunityService {
 			LOGGER.info("create version realm success: namespaceId="+namespaceId+", realm="+realm);
 		}
 		
-		if(StringUtils.isEmptyOrWhitespaceOnly(versionRange) || StringUtils.isEmptyOrWhitespaceOnly(targetVersion)){
+		if(StringUtils.isBlank(versionRange) || StringUtils.isBlank(targetVersion)){
 			return;
 		}
 		VersionUpgradeRule rule = new VersionUpgradeRule();
@@ -2176,7 +2192,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return;
 		}
 		smsTemplates.forEach(s->{
-			if(!StringUtils.isEmptyOrWhitespaceOnly(s.getTitle())){
+			if(StringUtils.isNotBlank(s.getTitle())){
 				LocaleTemplate localeTemplate = new LocaleTemplate();
 				localeTemplate.setCode(s.getCode());
 				localeTemplate.setDescription(s.getTitle());
@@ -2194,7 +2210,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	private void createAppAgreementsUrl(Integer namespaceId, String appAgreementsUrl) {
-		if (StringUtils.isEmptyOrWhitespaceOnly(appAgreementsUrl)) {
+		if (StringUtils.isBlank(appAgreementsUrl)) {
 			return ;
 		}
 		Configurations configurations = new Configurations();
@@ -2209,7 +2225,7 @@ public class CommunityServiceImpl implements CommunityService {
 
 
 	private void createHomeUrl(Integer namespaceId, String homeUrl) {
-		if (StringUtils.isEmptyOrWhitespaceOnly(homeUrl)) {
+		if (StringUtils.isBlank(homeUrl)) {
 			return ;
 		}
 		Configurations configurations = new Configurations();
@@ -2228,7 +2244,7 @@ public class CommunityServiceImpl implements CommunityService {
 			return;
 		}
 		postTypes.forEach(p->{
-			if(!StringUtils.isEmptyOrWhitespaceOnly(p)){
+			if(StringUtils.isNotBlank(p)){
 				Category category = new Category();
 				category.setParentId(1L);
 				category.setLinkId(0L);
@@ -2249,9 +2265,9 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd) {
-		if (StringUtils.isEmptyOrWhitespaceOnly(cmd.getOrganizationName()) || StringUtils.isEmptyOrWhitespaceOnly(cmd.getAdminNickname()) 
-				|| cmd.getNamespaceId() == null || cmd.getCommunityId() == null || StringUtils.isEmptyOrWhitespaceOnly(cmd.getAdminPhone())
-				|| StringUtils.isEmptyOrWhitespaceOnly(cmd.getGroupName())) {
+		if (StringUtils.isBlank(cmd.getOrganizationName()) || StringUtils.isBlank(cmd.getAdminNickname()) 
+				|| cmd.getNamespaceId() == null || cmd.getCommunityId() == null || StringUtils.isBlank(cmd.getAdminPhone())
+				|| StringUtils.isBlank(cmd.getGroupName())) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid parameters: "+cmd);
 		}
@@ -2485,7 +2501,7 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
-	@Override
+	@Override 
 	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
 		if(null == cmd.getUserId() )
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
@@ -2498,8 +2514,332 @@ public class CommunityServiceImpl implements CommunityService {
 		user.setExecutiveTag(cmd.getExecutiveFlag());
 		user.setIdentityNumberTag(cmd.getIdentityNumber());
 		user.setPositionTag(cmd.getPosition());
-		userProvider.updateUser(user);
+		userProvider.updateUser(user); 
+	public void createResourceCategory(CreateResourceCategoryCommand cmd) {
+		
+		Long ownerId = cmd.getOwnerId();
+		String ownerType = cmd.getOwnerType();
+		String name = cmd.getName();
+		checkResourceCategoryName(name);
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		Long parentId = cmd.getParentId();
+		ResourceCategory category = null;
+		ResourceCategory parentCategory = null;
+		if(null == parentId || parentId == 0){
+			
+			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name);
+			checkResourceCategoryExsit(category);
+			category = new ResourceCategory();
+			category.setParentId(0L);
+		}else{
+			parentCategory = communityProvider.findResourceCategoryById(parentId);
+			checkResourceCategoryIsNull(parentCategory);
+			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, parentId, name);
+			checkResourceCategoryExsit(category);
+			category = new ResourceCategory();
+			category.setPath(parentCategory.getPath());
+			category.setParentId(parentId);
+		}
+		
+		category.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		category.setCreatorUid(UserContext.current().getUser().getId());   
+		category.setName(name);
+		category.setNamespaceId(namespaceId);
+		
+		category.setStatus(ResourceCategoryStatus.ACTIVE.getCode());
+		category.setOwnerType(ownerType);
+		category.setOwnerId(ownerId);
+		communityProvider.createResourceCategory(category);
+		
+	}
+
+
+	@Override
+	public void updateResourceCategory(UpdateResourceCategoryCommand cmd) {
+		checkResourceCategoryId(cmd.getId());
+		checkResourceCategoryName(cmd.getName());
+		
+		ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getId());
+		checkResourceCategoryIsNull(category);
+		
+		category.setName(cmd.getName());
+//		String path = category.getPath();
+//		path = path.substring(0, path.lastIndexOf("/"));
+//
+//		category.setPath(path + "/" + cmd.getName());
+		category.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+		communityProvider.updateResourceCategory(category);
+	}
+
+
+	@Override
+	public void deleteResourceCategory(DeleteResourceCategoryCommand cmd) {
+		checkResourceCategoryId(cmd.getId());
+		
+		ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getId());
+		checkResourceCategoryIsNull(category);
+		
+		category.setStatus(ResourceCategoryStatus.INACTIVE.getCode());
+		communityProvider.updateResourceCategory(category);
+		
+	}
+
+
+	@Override
+	public void createResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd) {
+		if(null == cmd.getResourceId()) {
+        	LOGGER.error("ResourceId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ResourceId cannot be null.");
+        }
+    	
+    	if(StringUtils.isBlank(cmd.getResourceType())) {
+        	LOGGER.error("ResourceType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ResourceType cannot be null.");
+        }
+		
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
+				namespaceId);
+		if(null != rca) {
+			if(null != cmd.getResourceCategoryId()) {
+				ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
+				checkResourceCategoryIsNull(category);
+				rca.setResourceCategryId(category.getId());
+				communityProvider.updateResourceCategoryAssignment(rca);
+			}else{
+				communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
+			}
+		}else{
+			if(null == cmd.getResourceCategoryId()) {
+	        	LOGGER.error("CategoryId cannot be null.");
+	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+	    				"CategoryId cannot be null.");
+	        }
+			ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
+			checkResourceCategoryIsNull(category);
+			rca = new ResourceCategoryAssignment();
+			rca.setCreateTime(new Timestamp(System.currentTimeMillis()));
+			rca.setCreatorUid(UserContext.current().getUser().getId());
+			rca.setNamespaceId(namespaceId);
+			rca.setResourceCategryId(category.getId());
+			rca.setResourceId(cmd.getResourceId());
+			rca.setResourceType(cmd.getResourceType());
+			communityProvider.createResourceCategoryAssignment(rca);
+		}
+		
+	}
+
+
+	@Override
+	public void deleteResourceCategoryAssignment(CreateResourceCategoryAssignmentCommand cmd) {
+		if(null == cmd.getResourceId()) {
+        	LOGGER.error("ResourceId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ResourceId cannot be null.");
+        }
+    	
+    	if(StringUtils.isBlank(cmd.getResourceType())) {
+        	LOGGER.error("ResourceType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"ResourceType cannot be null.");
+        }
+		
+//    	ResourceCategory category = communityProvider.findResourceCategoryById(cmd.getResourceCategoryId());
+//		checkResourceCategoryIsNull(category);
+		
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
+				namespaceId);
+		if(null != rca)
+			communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
+		 
 	}
 	
+	private void checkResourceCategoryId(Long id) {
+		if(null == id) {
+        	LOGGER.error("Id cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Id cannot be null.");
+        }
+	}
 	
+	private void checkResourceCategoryName(String name) {
+		if(StringUtils.isBlank(name)) {
+        	LOGGER.error("Name cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Name cannot be null.");
+        }
+	}
+	
+	private void checkResourceCategoryIsNull(ResourceCategory category) {
+		if(null == category) {
+			LOGGER.error("ResourceCategory not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"ResourceCategory not found.");
+		}
+	}
+	
+	private void checkResourceCategoryExsit(ResourceCategory category) {
+		if(null != category) {
+			LOGGER.error("ResourceCategory have been in existing");
+			throw RuntimeErrorException.errorWith(ResourceCategoryErrorCode.SCOPE, ResourceCategoryErrorCode.ERROR_RESOURCE_CATEGORY_EXIST,
+					"ResourceCategory have been in existing");
+		}
+	}
+	
+	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
+		if(null == ownerId) {
+        	LOGGER.error("OwnerId cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OwnerId cannot be null.");
+        }
+    	
+    	if(StringUtils.isBlank(ownerType)) {
+        	LOGGER.error("OwnerType cannot be null.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"OwnerType cannot be null.");
+        }
+	}
+
+
+	@Override
+	public ListCommunitiesByKeywordCommandResponse listCommunitiesByCategory(ListCommunitiesByCategoryCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int namespaceId =UserContext.getCurrentNamespaceId(null);
+
+		List<Community> list = communityProvider.listCommunitiesByCategory(cmd.getCityId(), cmd.getAreaId(), 
+				cmd.getCategoryId(), cmd.getKeywords(), cmd.getPageAnchor(), pageSize);
+
+		ListCommunitiesByKeywordCommandResponse response = new ListCommunitiesByKeywordCommandResponse();
+		
+		if(list.size() > 0){
+			List<CommunityDTO> resultList = list.stream().map((c) -> {
+				CommunityDTO dto = ConvertHelper.convert(c, CommunityDTO.class);
+				ResourceCategoryAssignment ra = communityProvider.findResourceCategoryAssignment(c.getId(), EntityType.COMMUNITY.getCode(), namespaceId);
+				if(null != ra) {
+					ResourceCategory category = communityProvider.findResourceCategoryById(ra.getResourceCategryId());
+					dto.setCategoryId(category.getId());
+					dto.setCategoryName(category.getName());
+				}
+				
+				return dto;
+			}).collect(Collectors.toList());
+    		response.setRequests(resultList);
+    		if(list.size() != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(list.size()-1).getId());
+        	}
+    	}
+		
+		return response;
+	}
+	
+	@Override
+	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		
+//		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
+//		String path = null;
+//		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
+//		if(null != cmd.getParentId()) {
+//			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
+//			checkResourceCategoryIsNull(resourceCategory);
+//			path = resourceCategory.getPath();
+//		}
+		
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null)
+			.stream().map(r -> {
+				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
+				
+				return dto;
+			}).collect(Collectors.toList());
+		
+//		for(ResourceCategoryDTO s: temp) {
+//			getChildCategories(temp, s);
+//			if(s.getParentId() == parentId) {
+//				result.add(s);
+//			}
+//		}
+		
+		return temp;
+	}
+	
+	@Override
+	public List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd) {
+		if(null == cmd.getParentId())
+			cmd.setParentId(0L);
+		List<ResourceCategoryDTO> list = listTreeResourceCategories(cmd);
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+
+		setresourceDTOs(list, namespaceId);
+		
+		return list;
+	}
+	
+	private void setresourceDTOs(List<ResourceCategoryDTO> list, Integer namespaceId){
+		if(null != list) {
+			for(ResourceCategoryDTO r: list) {
+				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(r.getId(), namespaceId);
+				List<ResourceCategoryAssignmentDTO> resourceDTOs = resourceCategoryAssignments.stream().map(ra -> {
+					ResourceCategoryAssignmentDTO dto = ConvertHelper.convert(ra, ResourceCategoryAssignmentDTO.class);
+					Community community = communityProvider.findCommunityById(ra.getResourceId());
+					dto.setResourceName(community.getName());
+					return dto;
+				}).collect(Collectors.toList());
+				setresourceDTOs(r.getCategoryDTOs(), namespaceId);
+				r.setResourceDTOs(resourceDTOs);
+			}
+		}
+		
+	}
+	
+	private ResourceCategoryDTO getChildCategories(List<ResourceCategoryDTO> list, ResourceCategoryDTO dto){
+		
+		List<ResourceCategoryDTO> childrens = new ArrayList<ResourceCategoryDTO>();
+		
+		for (ResourceCategoryDTO resourceCategoryDTO : list) {
+			if(dto.getId().equals(resourceCategoryDTO.getParentId())){
+				childrens.add(getChildCategories(list, resourceCategoryDTO));
+			}
+		}
+		dto.setCategoryDTOs(childrens);
+		
+		return dto;
+	}
+
+
+	@Override
+	public List<ResourceCategoryDTO> listTreeResourceCategories(ListResourceCategoryCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		
+		List<ResourceCategoryDTO> result = new ArrayList<ResourceCategoryDTO>();
+		String path = null;
+		Long parentId = null == cmd.getParentId() ? 0L : cmd.getParentId();
+		if(null != cmd.getParentId()) {
+			ResourceCategory resourceCategory = communityProvider.findResourceCategoryById(cmd.getParentId());
+			checkResourceCategoryIsNull(resourceCategory);
+			path = resourceCategory.getPath();
+		}
+		
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, path)
+			.stream().map(r -> {
+				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
+				
+				return dto;
+			}).collect(Collectors.toList());
+		
+		for(ResourceCategoryDTO s: temp) {
+			getChildCategories(temp, s);
+			if(s.getParentId() == parentId) {
+				result.add(s);
+			}
+		}
+		
+		return result;
+	}
 }

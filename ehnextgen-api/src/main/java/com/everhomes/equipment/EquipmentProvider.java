@@ -54,7 +54,7 @@ public interface EquipmentProvider {
 	
 	List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments();
 	
-	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, CrossShardListingLocator locator, Integer pageSize);
+	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus);
 	List<EquipmentInspectionTasks> listTasksByStandardId(Long standardId, CrossShardListingLocator locator, Integer pageSize);
 
 	List<Long> listStandardIdsByType(Byte type);

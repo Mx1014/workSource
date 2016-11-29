@@ -10,10 +10,20 @@ package com.everhomes.rest.launchpad;
  * <li>ACTIONBARS：工具栏</li>
  * <li>CALLPHONES：电话组件</li>
  * <li>BULLETINS：滚动广告组件</li>
+ * <li>NEWS：园区快讯</li>
+ * <li>NEWS_FLASH：园区快讯新样式</li>
  * </ul>
  */
 public enum Widget {
-    NAVIGATOR("Navigator"),BANNERS("Banners"),COUPONS("Coupons"),POSTS("Posts"),ACTIONBARS("ActionBars"),CALLPHONES("CallPhones"), BULLETINS("Bulletins");
+    NAVIGATOR("Navigator"),
+    BANNERS("Banners"),
+    COUPONS("Coupons"),
+    POSTS("Posts"),
+    ACTIONBARS("ActionBars"),
+    CALLPHONES("CallPhones"), 
+    NEWS("News"),
+    NEWS_FLASH("NewsFlash"),
+    BULLETINS("Bulletins");
     
     private String code;
        

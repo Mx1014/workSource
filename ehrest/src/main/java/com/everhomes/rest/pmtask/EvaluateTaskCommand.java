@@ -7,7 +7,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>id: 任务ID</li>
- * <li>star: 评价分数</li>
+ * <li>star: 服务评价分数</li>
+ * <li>operatorStar: 处理人员评价分数</li>
  * </ul>
  */
 public class EvaluateTaskCommand {
@@ -15,6 +16,7 @@ public class EvaluateTaskCommand {
     private Long ownerId;
     private Long id;
     private Byte star;
+    private Byte operatorStar;
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -40,6 +42,13 @@ public class EvaluateTaskCommand {
 	public void setStar(Byte star) {
 		this.star = star;
 	}
+	public Byte getOperatorStar() {
+		return operatorStar;
+	}
+	public void setOperatorStar(Byte operatorStar) {
+		this.operatorStar = operatorStar;
+	}
+	
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

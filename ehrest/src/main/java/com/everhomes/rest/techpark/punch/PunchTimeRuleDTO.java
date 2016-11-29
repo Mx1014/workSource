@@ -25,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime：创建时间</li>
  * <li>updateUid：更新人id</li>
  * <li>updateTime：更新时间</li>
+ * <li>punchTimesPerDay：每天打卡次数，2次或者4次)</li>
  * <li>daySplitTime：前一天与后一天的分界点</li>
  * </ul>
  */

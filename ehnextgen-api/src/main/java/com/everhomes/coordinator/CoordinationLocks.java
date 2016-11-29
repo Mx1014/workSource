@@ -29,6 +29,8 @@ public enum CoordinationLocks {
 	UPDATE_APPROVAL_RULE("update_approval_rule"),
 	UPDATE_APPROVAL_FLOW("update_approval_flow"),
 	UPDATE_APPROVAL_REQUEST("update_approval_request"),
+
+	UPDATE_APPROVAL_TARGET_RULE("update_approval_target_rule"),
     STAT_SETTLEMENT("stat.settlement"),
 
     UPDATE_ORGANIZATION_OWNER("organization.owner.update"),
@@ -36,7 +38,8 @@ public enum CoordinationLocks {
     
     WARNING_ACTIVITY_SCHEDULE("warning.activity.schedule"),
 
-    PMTASK_STATISTICS("pmtask.statistics");
+    PMTASK_STATISTICS("pmtask.statistics"),
+    PMTASK_TARGET_STATISTICS("pmtask.target.statistics");
 
     private String code;
     private CoordinationLocks(String code) {

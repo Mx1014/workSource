@@ -5,10 +5,11 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
-import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.organization.*;
 
 import org.jooq.Condition;
 
+import com.everhomes.community.Community;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -16,9 +17,6 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
-import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationDTO;
 
 public interface OrganizationProvider {
 	void createOrganization(Organization organization);
@@ -118,8 +116,10 @@ public interface OrganizationProvider {
 	boolean updateOrganizationMemberByIds(List<Long> ids, Organization org);
 	
 	List<Organization> listOrganizationByGroupTypes(String superiorPath, List<String> groupTypes);
-	
+
 	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes);
+
+	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyworks);
 	
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, Organization orgCommoand, Byte contactSignedupStatus, VisibleFlag visibleFlag, CrossShardListingLocator locator, Integer pageSize);
 	
@@ -221,11 +221,46 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMemberByContactTokens(List<String> contactTokens, Long organizationId);
 	List<OrganizationMember> listOrganizationPersonnels(String keywords, List<Long> orgIds, Byte memberStatus,
 			Byte contactSignedupStatus, CrossShardListingLocator locator, Integer pageSize);
+
+	List<OrganizationMember> listOrganizationPersonnels(String keywords, Long organizationId, OrganizationMemberStatus memberStatus,OrganizationMemberTargetType targetType);
 	
     GroupMemberCaches listGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
-    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize);
-
+ 
+    void evictGroupMessageMembers(Integer namespaceId, Long groupId, int pageSize); 
+	List<Organization> listOrganizationByEmailDomainAndNamespace(String emailDomain, Long  communityId);
+  
+  
+	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
+ 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+ 
 	void createOrganizationMemberLog(OrganizationMemberLog orgLog);
 	List<OrganizationMemberLog> listOrganizationMemberLogs(Long id);
+ 
+
+	List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId);
+
+	void deleteOrganizationJobPositionMapById(Long id);
+
+	void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap);
+	
+	void createOrganizationJobPosition(OrganizationJobPosition organizationJobPosition);
+	
+	void updateOrganizationJobPosition(OrganizationJobPosition organizationJobPosition);
+	
+	OrganizationJobPosition findOrganizationJobPositionById(Long id);
+	
+	OrganizationJobPosition findOrganizationJobPositionByName(String ownerType, Long ownerId, String name);
+	
+	void deleteOrganizationJobPositionById(Long id);
+	
+	List<OrganizationJobPosition> listOrganizationJobPositions(String ownerType, Long ownerId, String keyword,
+			Long pageAnchor, Integer pageSize);
+	
+	List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes, String keyword, Long pageAnchor, Integer pageSize);
+
+	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
+ 
+	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
+ 
 }

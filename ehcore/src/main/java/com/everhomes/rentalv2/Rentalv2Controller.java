@@ -501,7 +501,7 @@ public class Rentalv2Controller extends ControllerBase {
 	/**
 	 * <b>URL: /rental/onlinePayCallback</b>
 	 * <p>
-	 * 取消订单
+	 * 付款成功的回调函数
 	 * </p>
 	 */
 	@RequestMapping("onlinePayCallback")

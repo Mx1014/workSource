@@ -40,4 +40,9 @@ public interface SmsTemplateCode {
     
     int PM_TASK_ASSIGN_CODE = 10; //任务分配消息
     int PM_TASK_CREATOR_CODE = 11;//任务创建消息
+    int PM_TASK_ASSIGN_TO_CREATOR_CODE = 15;//任务分配，发送给任务发起者
+
+    int RENTAL_SUCCESS_EXCLUSIVE_CODE = 12;//付费预约成功 独占资源
+    int RENTAL_SUCCESS_NOSITENUMBER_CODE = 13;//付费预约成功 非独占资源，不需要选择资源编号
+    int RENTAL_SUCCESS_SITENUMBER_CODE = 14;//付费预约成功 非独占资源，需要选择资源编号
 }

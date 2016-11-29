@@ -18,7 +18,8 @@ import com.everhomes.util.StringHelper;
  * <li>gender：性别</li>
  * <li>employeeNo：工号</li>
  * <li>contactDescription：描述</li>
- * <li>childOrganizationIds：添加到多部门或者多群组</li>
+ * <li>departmentIds：添加到多部门</li>
+ * <li>jobPositionIds：添加到多群组</li>
  * </ul>
  */
 public class AddOrganizationPersonnelCommand {
@@ -39,7 +40,16 @@ public class AddOrganizationPersonnelCommand {
 	private String employeeNo;
 	
 	@ItemType(Long.class)
-	private List<Long> childOrganizationIds;
+	private List<Long> departmentIds;
+
+	@ItemType(Long.class)
+	private List<Long> groupIds;
+
+	@ItemType(Long.class)
+	private List<Long> jobPositionIds;
+	
+	@ItemType(Long.class)
+	private List<Long> jobLevelIds;
 	
 
 	public Long getOrganizationId() {
@@ -110,14 +120,36 @@ public class AddOrganizationPersonnelCommand {
 		this.employeeNo = employeeNo;
 	}
 
-
-	public List<Long> getChildOrganizationIds() {
-		return childOrganizationIds;
+	public List<Long> getDepartmentIds() {
+		return departmentIds;
 	}
 
+	public void setDepartmentIds(List<Long> departmentIds) {
+		this.departmentIds = departmentIds;
+	}
 
-	public void setChildOrganizationIds(List<Long> childOrganizationIds) {
-		this.childOrganizationIds = childOrganizationIds;
+	public List<Long> getJobPositionIds() {
+		return jobPositionIds;
+	}
+
+	public void setJobPositionIds(List<Long> jobPositionIds) {
+		this.jobPositionIds = jobPositionIds;
+	}
+
+	public List<Long> getGroupIds() {
+		return groupIds;
+	}
+
+	public void setGroupIds(List<Long> groupIds) {
+		this.groupIds = groupIds;
+	}
+
+	public List<Long> getJobLevelIds() {
+		return jobLevelIds;
+	}
+
+	public void setJobLevelIds(List<Long> jobLevelIds) {
+		this.jobLevelIds = jobLevelIds;
 	}
 
 

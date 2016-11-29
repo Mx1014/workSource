@@ -5,6 +5,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.user.CustomRequestConstants;
@@ -36,6 +37,9 @@ public class YellowPageController  extends ControllerBase {
 	
 	@Autowired
 	private SettleRequestInfoSearcher settleRequestInfoSearcher;
+
+    @Autowired
+	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
     
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -145,14 +149,14 @@ public class YellowPageController  extends ControllerBase {
 	}
 
     /**
-	 * <b>URL: /yellowPage/getParentServiceAllianceCategory</b>
-	 * <p> 获取服务联盟父分类 </p>
+	 * <b>URL: /yellowPage/getServiceAllianceDisplayMode</b>
+	 * <p>获取服务联盟机构的展示类型</p>
 	 */
     @RequireAuthentication(false)
-	@RequestMapping("getParentServiceAllianceCategory")
-	@RestReturn(value = ServiceAllianceCategoryDTO.class, collection = true)
-	public RestResponse getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd) {
-		return new RestResponse(yellowPageService.getParentServiceAllianceCategory(cmd));
+	@RequestMapping("getServiceAllianceDisplayMode")
+	@RestReturn(value = ServiceAllianceDisplayModeDTO.class)
+	public RestResponse getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd) {
+		return new RestResponse(yellowPageService.getServiceAllianceDisplayMode(cmd));
 	}
 
     /**
@@ -380,6 +384,20 @@ public class YellowPageController  extends ControllerBase {
           	response.setErrorDescription("OK");
           	return response;
           }
-       
-       
+
+    /**
+     * <b>URL: /yellowPage/syncApartmentRequestInfo</b>
+     * <p> 同步申请信息</p>
+     */
+    @RequestMapping("syncApartmentRequestInfo")
+    @RestReturn(value = String.class)
+    public RestResponse syncApartmentRequestInfo() {
+
+        this.apartmentRequestInfoSearcher.syncFromDb();
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

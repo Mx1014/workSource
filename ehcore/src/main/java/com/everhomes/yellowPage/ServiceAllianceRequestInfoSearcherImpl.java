@@ -248,7 +248,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             	dtos.add(dto);
             }
             catch(Exception ex) {
-                LOGGER.info("getTopicIds error " + ex.getMessage());
+                LOGGER.info("getRequestInfoDTOs error " + ex.getMessage());
             }
         }
         
