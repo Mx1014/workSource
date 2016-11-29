@@ -25,6 +25,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.address.NamespaceBuildingType;
 import com.everhomes.rest.approval.CommonStatus;
@@ -36,6 +38,7 @@ import com.everhomes.rest.openapi.techpark.CustomerContractBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerLivingStatus;
 import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
+import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationStatus;
@@ -63,6 +66,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private OrganizationService organizationService;
 	
 	@Autowired
 	private ContractProvider contractProvider;
@@ -400,7 +406,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.createOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateOrganizationMembers(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
 			}else {
 				organization.setName(customerRental.getName());
@@ -410,7 +416,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.updateOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateOrganizationMembers(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
 			}
 		}
@@ -419,8 +425,28 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 	}
 
-	private void insertOrUpdateOrganizationMembers(Organization organization, String contact, String contactPhone) {
-		
+	// 需要把金蝶同步过来的业务人员添加为我司系统对应组织的管理员
+	private void insertOrUpdateOrganizationMembers(Integer namespaceId, Organization organization, String contact, String contactPhone) {
+		if (StringUtils.isBlank(contact) || StringUtils.isBlank(contactPhone) || organization == null) {
+			return ;
+		}
+		try {
+			String[] contactArray = contact.split(",");
+			String[] contactPhoneArray = contactPhone.split(",");
+			int length = Math.min(contactArray.length, contactPhoneArray.length);
+			
+			for(int i=0; i<length; i++) {
+				if (StringUtils.isNotBlank(contactArray[i]) && StringUtils.isNotBlank(contactPhoneArray[i])) {
+					CreateOrganizationAccountCommand cmd = new CreateOrganizationAccountCommand();
+					cmd.setAccountName(contactArray[i]);
+					cmd.setAccountPhone(contactPhoneArray[i]);
+					cmd.setOrganizationId(organization.getId());
+					organizationService.createOrganizationAccount(cmd, RoleConstants.ENTERPRISE_SUPER_ADMIN, namespaceId);
+				}
+			}
+		} catch (Exception e) {
+			LOGGER.error("sync organization members error: organizationId="+organization.getId()+", contact="+contact+", contactPhone="+contactPhone);
+		}
 	}
 
 	private void insertOrUpdateContracts(Organization organization, List<CustomerContract> contracts) {

@@ -390,4 +390,6 @@ public interface OrganizationService {
 
 	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId);
 	ContractDTO processContract(Contract c);
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
+			Integer namespaceId);
 }

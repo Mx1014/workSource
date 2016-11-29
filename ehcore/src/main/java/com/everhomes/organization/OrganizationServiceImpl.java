@@ -5100,6 +5100,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId){
+		return createOrganizationAccount(cmd, roleId, null);
+	}
+	
+	@Override
+	public OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId, Integer exNamespaceId){
 
 		if(null == cmd.getAccountPhone()){
 			LOGGER.error("contactToken can not be empty.");
@@ -5110,8 +5115,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("contactName can not be empty.");
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactName can not be empty.");
 		}
-
-		int namespaceId = UserContext.getCurrentNamespaceId(null);
+		if (exNamespaceId == null) {
+			exNamespaceId = UserContext.getCurrentNamespaceId(null);
+		}
+		Integer namespaceId = exNamespaceId;
+		
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 		
 		return this.dbProvider.execute((TransactionStatus status) -> {
@@ -5188,9 +5196,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null == detail){
 				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
 			}else{
-				detail.setContactor(cmd.getAccountName());
-				detail.setContact(cmd.getAccountPhone());
-				organizationProvider.updateOrganizationDetail(detail);
+				// 如果是金蝶过来的数据，则不更新此两列
+				if (detail.getNamespaceOrganizationType() == null || !detail.getNamespaceOrganizationType().equals(NamespaceOrganizationType.JINDIE.getCode())) {
+					detail.setContactor(cmd.getAccountName());
+					detail.setContact(cmd.getAccountPhone());
+					organizationProvider.updateOrganizationDetail(detail);
+				}
 			}
 			return m;
 		});
