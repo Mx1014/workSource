@@ -11,7 +11,7 @@ public class ContractServiceImpl implements ContractService {
 
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
-	
+		
 		return new ListContractsResponse();
 	}
 

@@ -428,6 +428,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		dto.setAccountName(org.getContactor());
 		dto.setAccountPhone(org.getContact());
+		
+		dto.setServiceUserId(org.getServiceUserId());
 		return dto;
 	}
 	
@@ -455,6 +457,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        	if(null != dto)
 	        		dtos.add(dto);
 	        }
+	        addExtraInfo(dtos);
 	        resp.setDtos(dtos);
 			return resp;
 		}
@@ -493,12 +496,62 @@ public class OrganizationServiceImpl implements OrganizationService {
 					dtos.add(dto);
 			}
 		}
+		addExtraInfo(dtos);
 		resp.setDtos(dtos);
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
 	}
 	
+	private void addExtraInfo(List<OrganizationDetailDTO> organizationDetailList) {
+		for (OrganizationDetailDTO organizationDetailDTO : organizationDetailList) {
+			addExtraInfo(organizationDetailDTO);
+		}
+	}
 	
+	// 添加管理员列表，添加客服人员，添加注册人数, add by tt, 20161129
+	private void addExtraInfo(OrganizationDetailDTO organizationDetailDTO) {
+		addAdmins(organizationDetailDTO);
+		addServiceUser(organizationDetailDTO);
+		addSignupCount(organizationDetailDTO);
+	}
+	
+	private void addAdmins(OrganizationDetailDTO organizationDetailDTO) {
+		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
+		cmd.setOrganizationId(organizationDetailDTO.getOrganizationId());
+		ListOrganizationMemberCommandResponse  response = rolePrivilegeService.listOrganizationAdministrators(cmd);
+		organizationDetailDTO.setAdminMembers(response.getMembers());
+	}
+
+	private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
+		if (organizationDetailDTO.getServiceUserId() == null) {
+			return;
+		}
+		//1. 找到企业入驻的园区
+		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationDetailDTO.getOrganizationId());
+		if (organizationCommunityRequest == null) {
+			return ;
+		}
+		//2. 找到园区对应的管理公司
+		List<OrganizationCommunityDTO> organizationCommunityList = organizationProvider.findOrganizationCommunityByCommunityId(organizationCommunityRequest.getCommunityId());
+		if (organizationCommunityList == null || organizationCommunityList.size() == 0) {
+			return;
+		}
+		//3. 找到管理公司的这个人
+		for (OrganizationCommunityDTO organizationCommunityDTO : organizationCommunityList) {
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(organizationDetailDTO.getServiceUserId(), organizationCommunityDTO.getOrganizationId());
+			if (organizationMember != null) {
+				organizationDetailDTO.setServiceUserName(organizationMember.getContactName());
+				organizationDetailDTO.setServiceUserPhone(organizationMember.getContactToken());
+				return;
+			}
+		}
+	}
+
+	private void addSignupCount(OrganizationDetailDTO organizationDetailDTO) {
+		Integer count = organizationProvider.getSignupCount(organizationDetailDTO.getOrganizationId());
+		organizationDetailDTO.setSignupCount(count);
+	}
+
 	@Override
 	public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
 		
@@ -551,6 +604,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setDisplayName(cmd.getDisplayName());
 			enterprise.setPostUri(cmd.getPostUri());
 			enterprise.setMemberCount(cmd.getMemberCount());
+			enterprise.setServiceUserId(cmd.getServiceUserId());
 			organizationProvider.createOrganizationDetail(enterprise);
 			
 			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
@@ -675,6 +729,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setContact(cmd.getContactsPhone());
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
+				organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
 				organizationDetail.setAddress(cmd.getAddress());
@@ -686,6 +741,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setContact(cmd.getContactsPhone());
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
+				organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationProvider.updateOrganizationDetail(organizationDetail);
 			}
 			

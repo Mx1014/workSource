@@ -227,4 +227,5 @@ public interface OrganizationProvider {
 
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
 	Organization findOrganizationByName(String name, Integer namespaceId);
+	Integer getSignupCount(Long organizationId);
 }

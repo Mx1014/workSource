@@ -28,6 +28,7 @@ import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.TargetType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -1109,6 +1110,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
+	@Override
+	public Integer getSignupCount(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
+			.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.fetchOne()
+			.value1();
+	}
 
 	@Override
 	public Organization findOrganizationByName(String name) {
@@ -1800,7 +1812,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
         query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(comunityId));
-        query.addGroupBy(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID);
+        query.addGroupBy(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID);  //也就mysql支持这种错误的语法
         query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.desc());
         query.addLimit(count - contacts.size());
         query.fetch().map((r) -> {
