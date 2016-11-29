@@ -38,13 +38,6 @@ SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
 
--- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10056, '0', '俱乐部管理', '俱乐部管理 全部权限', NULL);
--- INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10057, '0', '审核俱乐部', '审核俱乐部 全部权限', NULL);
-
-INSERT INTO `eh_web_menu_privileges` VALUES ('300', '907', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('301', '907', '20191', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
-
-
 
 -- 组织架构 add by sw 20161128
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10000', '信息发布', '0', '/10000', '0', '1', '2', '0', UTC_TIMESTAMP());

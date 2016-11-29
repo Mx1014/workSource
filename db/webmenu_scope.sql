@@ -2018,3 +2018,9 @@ INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '60100', '', 'EhNamespaces', '999983', '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '60200', '', 'EhNamespaces', '999983', '2');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+select (@menu_scope_id := @menu_scope_id + 1), '20191', '', 'EhNamespaces', owner_id, '2' from eh_web_menu_scopes where menu_id = 20190;
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	select (@menu_scope_id := @menu_scope_id + 1), '20192', '', 'EhNamespaces', owner_id, '2' from eh_web_menu_scopes where menu_id = 20190;
