@@ -1,11 +1,16 @@
 // @formatter:off
 package com.everhomes.contract;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
@@ -83,4 +88,74 @@ public class ContractServiceImpl implements ContractService {
 		return new ListContractsResponse(nextPageAnchor, resultList);
 	}
 
+	/**
+	 * 合同管理定时期，每天上午跑一下，把以下三种类型的客户抓取出来发短信：
+	 * 1. 租期到期前两个月
+	 * 2. 租期到期前一个月
+	 * 3. 新增客户当天早上10点
+	 */
+    @Scheduled(cron="0 0 10 * * ?")
+    @Override
+    public void contractSchedule(){
+    	sendMessageToBackTwoMonthsOrganizations();
+    	sendMessageToBackOneMonthOrganizations();
+    	sendMessageToNewOrganizations();
+    }
+
+	private void sendMessageToBackTwoMonthsOrganizations() {
+		Timestamp now = getCurrentDate();
+		Timestamp lastNow = getNextNow(now);
+		long offset = 60*ONE_DAY_MS;
+		Timestamp minValue = new Timestamp(lastNow.getTime()+offset);
+		Timestamp maxValue = new Timestamp(now.getTime()+offset);
+		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue);
+		
+		
+		
+	}
+	
+	private void sendMessageToBackOneMonthOrganizations() {
+		Timestamp now = getCurrentDate();
+		Timestamp lastNow = getNextNow(now);
+		long offset = 30*ONE_DAY_MS;
+		Timestamp minValue = new Timestamp(lastNow.getTime()+offset);
+		Timestamp maxValue = new Timestamp(now.getTime()+offset);
+		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue);
+		
+		
+		
+		
+	}
+
+	private void sendMessageToNewOrganizations() {
+		Timestamp now = getCurrentDate();
+		Timestamp lastNow = getNextNow(now);
+		List<Contract> contractList = contractProvider.listContractsByCreateDateRange(lastNow, now);
+		
+		
+		
+		
+	}
+	
+	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private static final long ONE_DAY_MS = 24*3600*1000;
+	// 获取今天10点钟的这个时间
+	private Timestamp getCurrentDate() {
+		Date date = new Date();
+		String dateStr = dateSF.format(date);
+		try {
+			return new Timestamp(datetimeSF.parse(dateStr+" 10:00:00").getTime());
+		} catch (ParseException e) {
+			return new Timestamp(date.getTime());
+		}
+	}
+
+	//获取昨天上午10点这个时间
+	private Timestamp getNextNow(Timestamp now) {
+		return new Timestamp(now.getTime()-ONE_DAY_MS);
+	}
+
+	
+	
 }

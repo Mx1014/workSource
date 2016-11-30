@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -109,11 +110,43 @@ public class ContractProviderImpl implements ContractProvider {
 				.limit(from, pageSize)
 				.fetch();
 			
-			if (result != null) {
-				return result.map(r->ConvertHelper.convert(r, Contract.class));
-			}
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+		
+		return new ArrayList<Contract>();
+	}
+
+	@Override
+	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue) {
+		Result<Record> result = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.CONTRACT_END_DATE.gt(minValue))
+				.and(Tables.EH_CONTRACTS.CONTRACT_END_DATE.le(maxValue))
+				.fetch();
 			
-			return new ArrayList<Contract>();
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+		
+		return new ArrayList<Contract>();
+	}
+
+	@Override
+	public List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue) {
+		Result<Record> result = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.and(Tables.EH_CONTRACTS.CREATE_TIME.gt(minValue))
+				.and(Tables.EH_CONTRACTS.CREATE_TIME.le(maxValue))
+				.fetch();
+			
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+		
+		return new ArrayList<Contract>();
 	}
 
 	private EhContractsDao getReadWriteDao() {

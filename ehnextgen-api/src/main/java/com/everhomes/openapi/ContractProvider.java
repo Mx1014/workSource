@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 public interface ContractProvider {
@@ -20,5 +21,9 @@ public interface ContractProvider {
 	List<Contract> listContractByContractNumbers(Integer namespaceId, List<String> contractNumbers);
 
 	List<Contract> listContractByNamespaceId(Integer namespaceId, int from, int pageSize);
+
+	List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue);
+
+	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue);
 
 }

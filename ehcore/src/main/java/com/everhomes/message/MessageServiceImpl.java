@@ -19,6 +19,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.message.PushMessageToAdminAndBusinessContactsCommand;
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
@@ -46,6 +47,9 @@ public class MessageServiceImpl implements MessageService {
 	@Autowired
 	private CommunityProvider communityProvider;
 	
+	@Autowired
+	private OrganizationService organizationService;
+	
 	@Override
 	public void pushMessageToAdminAndBusinessContacts(PushMessageToAdminAndBusinessContactsCommand cmd) {
 		if (cmd.getCommunityId() == null 
@@ -71,26 +75,15 @@ public class MessageServiceImpl implements MessageService {
 		for (Long organizationId : organizationIdSet) {
 			//如果需要业务联系人
 			if (TrueOrFalseFlag.fromCode(cmd.getBusinessContactFlag()) == TrueOrFalseFlag.TRUE) {
-				OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
-				if (organizationDetail != null) {
-					String contact = organizationDetail.getContact();
-					if (StringUtils.isNotBlank(contact)) {
-						String[] contactArray = contact.split(",");
-						for (String phone : contactArray) {
-							if (StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
-								phoneSet.add(phone);
-							}
-						}
-					}
+				List<String> phoneList = organizationService.getBusinessContactPhone(organizationId);
+				if (phoneList != null && !phoneList.isEmpty()) {
+					phoneSet.addAll(phoneList);
 				}
 			}
 			
 			//如果需要管理员
 			if (TrueOrFalseFlag.fromCode(cmd.getAdminFlag()) == TrueOrFalseFlag.TRUE) {
-				ListOrganizationAdministratorCommand listOrganizationAdministratorCommand = new ListOrganizationAdministratorCommand();
-				listOrganizationAdministratorCommand.setOrganizationId(organizationId);
-				ListOrganizationMemberCommandResponse  response = rolePrivilegeService.listOrganizationAdministrators(listOrganizationAdministratorCommand);
-				List<OrganizationMemberDTO> organizationMemberList = response.getMembers();
+				List<OrganizationMemberDTO> organizationMemberList = organizationService.getAdmins(organizationId);
 				if (organizationMemberList != null && !organizationMemberList.isEmpty()) {
 					for (OrganizationMemberDTO organizationMemberDTO : organizationMemberList) {
 						String phone = organizationMemberDTO.getContactToken();

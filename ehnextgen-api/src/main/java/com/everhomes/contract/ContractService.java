@@ -9,4 +9,6 @@ public interface ContractService {
 
 	public ListContractsResponse listContracts(ListContractsCommand cmd);
 
+	void contractSchedule();
+
 }

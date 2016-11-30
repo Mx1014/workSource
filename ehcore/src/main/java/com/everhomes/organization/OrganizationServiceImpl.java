@@ -32,6 +32,7 @@ import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -220,7 +221,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -805,7 +805,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationDetailDTO.setAdminMembers(getAdmins(organizationDetailDTO.getOrganizationId()));
 	}
 	
-	private List<OrganizationMemberDTO> getAdmins(Long organizationId) {
+	@Override
+	public List<OrganizationMemberDTO> getAdmins(Long organizationId) {
 		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
 		cmd.setOrganizationId(organizationId);
 		ListOrganizationMemberCommandResponse  response = rolePrivilegeService.listOrganizationAdministrators(cmd);
@@ -818,7 +819,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		organizationDetailDTO.setServiceUserPhone(map.get("serviceUserPhone"));
 	}
 	
-	private Map<String, String> getServiceUser(Long organizationId, Long serviceUserId) {
+	@Override
+	public Map<String, String> getServiceUser(Long organizationId, Long serviceUserId) {
 		Map<String, String> map = new HashMap<>();
 		if (serviceUserId == null) {
 			return map;
@@ -851,6 +853,24 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	private Integer getSignupCount(Long organizationId) {
 		return organizationProvider.getSignupCount(organizationId);
+	}
+	
+	@Override
+	public List<String> getBusinessContactPhone(Long organizationId) {
+		List<String> phoneList = new ArrayList<>();
+		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+		if (organizationDetail != null) {
+			String contact = organizationDetail.getContact();
+			if (org.apache.commons.lang.StringUtils.isNotBlank(contact)) {
+				String[] contactArray = contact.trim().split(",");
+				for (String phone : contactArray) {
+					if (org.apache.commons.lang.StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
+						phoneList.add(phone);
+					}
+				}
+			}
+		}
+		return phoneList;
 	}
 	
 	@Override
