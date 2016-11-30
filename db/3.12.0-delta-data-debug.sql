@@ -20,15 +20,17 @@ INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `tem
 
 -- 物业报修2.6 merge from pmtask-delta-data.sql by sw 20161128
 update eh_pm_tasks set address_type = 1 where address_type is NULL;
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ('340', 'pmtask', '10007', 'zh_CN', '该单已被其他人处理，请返回主界面刷新任务');
+SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'pmtask', '10007', 'zh_CN', '该单已被其他人处理，请返回主界面刷新任务');
 
 delete from eh_locale_templates where scope = 'pmtask.notification' and code = 7;
 
+SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-	VALUES ('205', 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个${categoryName}单，请尽快处理', '0');
+	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个${categoryName}单，请尽快处理', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-	VALUES ('350', 'sms.default.yzx', '15', 'zh_CN', '物业任务3-深业', '32949', '999992');
+	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'sms.default.yzx', '15', 'zh_CN', '物业任务3-深业', '32949', '999992');
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
 	VALUES ('20190', '统计', '20100', NULL, null, '0', '2', '/20000/20100/20190', 'park', '245');
