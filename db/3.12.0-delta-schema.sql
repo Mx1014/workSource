@@ -273,6 +273,8 @@ CREATE TABLE `eh_service_alliance_skip_rule` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 物业报修2.6 merge from pmtask-delta-schema.sql by sw 20161128
+update eh_pm_task_targets set role_id = 1 where role_id = 1017;
+update eh_pm_task_targets set role_id = 2 where role_id = 1018;
 ALTER TABLE eh_pm_task_targets CHANGE role_id role_id TINYINT NOT NUll;
 
 ALTER TABLE eh_pm_tasks ADD COLUMN `operator_star` TINYINT NOT NULL DEFAULT 0 COMMENT 'task star of operator';
