@@ -5682,21 +5682,31 @@ System.out.println();
 				if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
 					departments.add(orgDTO);
 				}
+				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, dto.getContactToken(), org.getPath()));
 				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
 				departments = departments.stream().map(r -> {
 					String[] pathStrs = r.getPath().split("/");
 					String pathName = "";
 					for (String idStr: pathStrs) {
 						if(!"".equals(idStr)){
 							Long id = Long.valueOf(idStr);
-							if(id.equals(r.getDirectlyEnterpriseId())){
-								Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
-								pathName = "未知";
-								if(null != o )pathName = o.getName();
-							}else if(!"".equals(pathName)){
-								Organization o = organizationProvider.findOrganizationById(id);
+//							if(id.equals(r.getDirectlyEnterpriseId())){
+//								Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+//								pathName = "未知";
+//								if(null != o )pathName = o.getName();
+//							}else if(!"".equals(pathName)){
+//								Organization o = organizationProvider.findOrganizationById(id);
+//								if(null != o )pathName += "-" + o.getName();
+//							}
+						    Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+							if(!"".equals(pathName)){
 								if(null != o )pathName += "-" + o.getName();
+								pathName += null != o ?  "-" + o.getName() : "-未知";
+							}else{
+								pathName = null != o ?  o.getName() : "未知";
 							}
+
 						}
 					}
 					r.setPathName(pathName);
