@@ -28,6 +28,9 @@ import com.everhomes.util.StringHelper;
  * <li>groups：群组列表</li>
  * <li>employeeNo：工号</li>
  * <li>initial：首字母</li>
+ * <li>executiveFlag：是否高管 1-是 0-否</li>
+ * <li>position：职位</li>
+ * <li>idNumber：身份证号码</li>
  * </ul>
  */
 public class OrganizationMemberDTO {
@@ -72,9 +75,38 @@ public class OrganizationMemberDTO {
 	
 	@ItemType(OrganizationDTO.class)
 	private List<OrganizationDTO> departments;
-	
+
+    private Byte executiveFlag;
+    private String position;
+    private String idNumber;
+    
+    
 	public OrganizationMemberDTO() {
     }
+
+	public Byte getExecutiveFlag() {
+		return executiveFlag;
+	}
+
+	public void setExecutiveFlag(Byte executiveFlag) {
+		this.executiveFlag = executiveFlag;
+	}
+
+	public String getPosition() {
+		return position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public String getIdNumber() {
+		return idNumber;
+	}
+
+	public void setIdNumber(String idNumber) {
+		this.idNumber = idNumber;
+	}
 
 	public Long getId() {
         return id;

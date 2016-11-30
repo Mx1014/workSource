@@ -1944,7 +1944,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	
 	
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112896, 999984, 0, 0, 0, '/home', 'Bizs', 'RENTAL', '会议室预约', 'cs://1/image/aW1hZ2UvTVRvNE16UTFaakZtWlRBeE5ETmhZVEkxT0ROa1pEVXdNall5WkRObU0yUmlOQQ', 1, 1, 49,'{\"resourceTypeId\":10100,\"pageType\":0}', 0, 0, 1, 1, '', '1', NULL, NULL, NULL, '1', 'pm_admin');        
+    VALUES (112896, 999984, 0, 0, 0, '/home', 'Bizs', 'MEETING', '会议室', 'cs://1/image/aW1hZ2UvTVRvNE16UTFaakZtWlRBeE5ETmhZVEkxT0ROa1pEVXdNall5WkRObU0yUmlOQQ', 1, 1, 49,'{\"resourceTypeId\":10100,\"pageType\":0}', 0, 0, 1, 1, '', '1', NULL, NULL, NULL, '1', 'pm_admin');        
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (112897, 999984, '0', '0', '0', '/home', 'Bizs', '园区入驻', '园区入驻', 'cs://1/image/aW1hZ2UvTVRvd1pqaGxOVEl4WldZMlpUbGpNRGs1TURsallUQTFNR0kzWVdZME5UTmxPUQ', '1', '1', '28', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 
@@ -1985,7 +1985,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	
 	
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112910, 999984, 0, 0, 0, '/home', 'Bizs', 'RENTAL', '会议室预约', 'cs://1/image/aW1hZ2UvTVRvNE16UTFaakZtWlRBeE5ETmhZVEkxT0ROa1pEVXdNall5WkRObU0yUmlOQQ', 1, 1, 49,'{\"resourceTypeId\":10100,\"pageType\":0}', 0, 0, 1, 1, '', '1', NULL, NULL, NULL, '1', 'park_tourist');        
+    VALUES (112910, 999984, 0, 0, 0, '/home', 'Bizs', 'MEETING', '会议室', 'cs://1/image/aW1hZ2UvTVRvNE16UTFaakZtWlRBeE5ETmhZVEkxT0ROa1pEVXdNall5WkRObU0yUmlOQQ', 1, 1, 49,'{\"resourceTypeId\":10100,\"pageType\":0}', 0, 0, 1, 1, '', '1', NULL, NULL, NULL, '1', 'park_tourist');        
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (112911, 999984, '0', '0', '0', '/home', 'Bizs', '园区入驻', '园区入驻', 'cs://1/image/aW1hZ2UvTVRvd1pqaGxOVEl4WldZMlpUbGpNRGs1TURsallUQTFNR0kzWVdZME5UTmxPUQ', '1', '1', '28', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 

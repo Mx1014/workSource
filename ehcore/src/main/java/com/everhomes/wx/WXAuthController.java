@@ -1,28 +1,45 @@
 package com.everhomes.wx;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.HashMap;
 import java.util.Iterator;
+import java.util.List;
 import java.util.Map;
 import java.util.Map.Entry;
 
+import javax.annotation.PostConstruct;
+import javax.servlet.ServletOutputStream;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.http.Consts;
 import org.apache.http.HeaderElement;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpHeaders;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.ParseException;
+import org.apache.http.client.ClientProtocolException;
+import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.client.methods.HttpUriRequest;
+import org.apache.http.client.methods.RequestBuilder;
+import org.apache.http.client.protocol.HttpClientContext;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.impl.conn.PoolingHttpClientConnectionManager;
+import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.protocol.HttpContext;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +55,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.namespace.Namespace;
+import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.oauth2.OAuth2ServiceErrorCode;
 import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.NamespaceUserType;
@@ -46,6 +64,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SimpleConvertHelper;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -91,6 +110,31 @@ public class WXAuthController {// extends ControllerBase
     
     @Value("${server.contextPath:}")
     private String contextPath;
+    
+    private CloseableHttpClient httpClient;
+    
+    private HttpContext httpClientContext;
+    
+    @PostConstruct
+    private CloseableHttpClient openHttpClient() {
+        if (isHttpClientOpen()) {
+            return this.httpClient;
+        }
+
+        PoolingHttpClientConnectionManager cm = new PoolingHttpClientConnectionManager();
+        this.httpClient = HttpClients.custom().setConnectionManager(cm).build();
+        this.httpClientContext = HttpClientContext.create();
+
+        if (this.httpClient == null) {
+            throw new IllegalStateException("Unable to create HttpClient object");
+        }
+        
+        return this.httpClient;
+    }  
+    
+    private boolean isHttpClientOpen() {
+        return this.httpClient != null;
+    }
     
 	/**
 	 * <b>URL: /wxauth/authReq</b>
@@ -437,5 +481,67 @@ public class WXAuthController {// extends ControllerBase
         }
         
         return charset;   
-    }  
+    }      
+    
+    @RequestMapping("cross")
+    public void crossSiteRedirect(HttpServletRequest request, HttpServletResponse response) throws Exception {
+        Map<String, String> params = getRequestParams(request);
+        String crossUrl = params.get("crossUrl");
+        if(crossUrl != null && crossUrl.trim().length() > 0) {
+            String targetUrl = URLDecoder.decode(crossUrl, "UTF-8");
+            redirect(response, targetUrl);
+        }
+    }
+    
+    private void redirect(HttpServletResponse response, String targetUrl) {
+        CloseableHttpClient client = openHttpClient();
+        CloseableHttpResponse res = null;
+        InputStream in = null;
+        ServletOutputStream out = null;
+        
+        try {
+            HttpGet post = new HttpGet(targetUrl);
+            res = client.execute(post, this.httpClientContext);
+            HttpEntity resEntity = res.getEntity();
+            in = resEntity.getContent();
+            out = response.getOutputStream();
+            byte[] buf = new byte[1024];
+            int len = -1;
+            long totalLength = 0;
+            while((len = in.read(buf)) != -1) {
+                out.write(buf, 0, len);
+                totalLength += len;
+            }
+            
+            if(LOGGER.isInfoEnabled()) {
+                LOGGER.info("Redirect url, length={}, url={}", totalLength, targetUrl);
+            }
+        } catch (Exception e) {
+            LOGGER.error("Failed to redirect url, url={}", targetUrl, e);
+        } finally {
+            if(out != null) {
+                try {
+                    out.close();
+                } catch(Exception e) {
+                    LOGGER.error("Failed to close ServletOutputStream", e);
+                }
+            }
+            
+            if(in != null) {
+                try {
+                    in.close();
+                } catch(Exception e) {
+                    LOGGER.error("Failed to close target IputStream", e);
+                }
+            }
+            
+            if(res != null) {
+                try {
+                    res.close();
+                } catch(Exception e) {
+                    LOGGER.error("Failed to close CloseableHttpResponse", e);
+                }
+            }
+        }
+    }
 }
