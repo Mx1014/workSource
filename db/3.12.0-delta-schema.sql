@@ -298,7 +298,7 @@ CREATE TABLE `eh_pm_task_target_statistics` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 为activity category增加default_flag add by xiongying20161130
-ALTER TABLE eh_activity_categories ADD COLUMN `default_flag` TINYINT COMMENT '0: no , 1: yes';
+ALTER TABLE eh_activity_categories ADD COLUMN `default_flag` TINYINT  NOT NUll DEFAULT 0 COMMENT '0: no , 1: yes';
 
 
 
