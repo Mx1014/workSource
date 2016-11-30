@@ -1658,7 +1658,7 @@ public class PmTaskServiceImpl implements PmTaskService {
     	
     	if(StringUtils.isBlank(content)) {
         	LOGGER.error("Invalid content parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
     				"Invalid content parameter.");
         }
     	
