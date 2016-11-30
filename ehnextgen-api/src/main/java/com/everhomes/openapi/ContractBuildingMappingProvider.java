@@ -24,4 +24,8 @@ public interface ContractBuildingMappingProvider {
 
 	List<BuildingApartmentDTO> listBuildingsByContractNumber(Integer namespaceId, String contractNumber);
 
+	void deleteContractBuildingMapping(ContractBuildingMapping contractBuildingMapping);
+
+	ContractBuildingMapping findAnyContractBuildingMappingByNumber(String contractNumber);
+
 }

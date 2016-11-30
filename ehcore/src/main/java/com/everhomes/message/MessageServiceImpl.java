@@ -83,14 +83,9 @@ public class MessageServiceImpl implements MessageService {
 			
 			//如果需要管理员
 			if (TrueOrFalseFlag.fromCode(cmd.getAdminFlag()) == TrueOrFalseFlag.TRUE) {
-				List<OrganizationMemberDTO> organizationMemberList = organizationService.getAdmins(organizationId);
-				if (organizationMemberList != null && !organizationMemberList.isEmpty()) {
-					for (OrganizationMemberDTO organizationMemberDTO : organizationMemberList) {
-						String phone = organizationMemberDTO.getContactToken();
-						if (StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
-							phoneSet.add(phone);
-						}
-					}
+				List<String> phoneList = organizationService.getAdminPhone(organizationId);
+				if (phoneList != null && !phoneList.isEmpty()) {
+					phoneSet.addAll(phoneList);
 				}
 			}
 		}

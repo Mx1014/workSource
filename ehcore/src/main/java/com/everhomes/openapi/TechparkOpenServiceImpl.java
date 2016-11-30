@@ -384,8 +384,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		List<CustomerRental> list = JSONObject.parseArray(varDataList, CustomerRental.class);
 		for (CustomerRental customerRental : list) {
 			Organization organization = organizationProvider.findOrganizationByName(customerRental.getName(), namespaceId);
-			contractProvider.deleteContractByOrganizationName(namespaceId, customerRental.getName());
-			contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, customerRental.getName());
+//			contractProvider.deleteContractByOrganizationName(namespaceId, customerRental.getName());
+//			contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, customerRental.getName());
 			if (organization == null) {
 				organization = new Organization();
 				organization.setParentId(0L);
@@ -564,8 +564,34 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 //				organization.setStatus(OrganizationStatus.DELETED.getCode());
 //				organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //				organizationProvider.updateOrganization(organization);
-				contractProvider.deleteContractByOrganizationName(namespaceId, organization.getName());
-				contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, organization.getName());
+//				contractProvider.deleteContractByOrganizationName(namespaceId, organization.getName());
+//				contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(namespaceId, organization.getName());
+				
+				List<CustomerContract> customerContractList = customerRental.getContracts();
+				if (customerContractList != null && !customerContractList.isEmpty()) {
+					for (CustomerContract customerContract : customerContractList) {
+						Contract contract = contractProvider.findContractByNumber(organization.getNamespaceId(), organization.getId(), customerContract.getContractNumber());
+						if (contract != null) {
+							List<CustomerContractBuilding> customerContractBuildingList = customerContract.getBuildings();
+							if (customerContractBuildingList != null && !customerContractBuildingList.isEmpty()) {
+								for (CustomerContractBuilding customerContractBuilding : customerContractBuildingList) {
+									ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+									if (contractBuildingMapping != null) {
+										contractBuildingMappingProvider.deleteContractBuildingMapping(contractBuildingMapping);
+									}
+								}
+								//判断这个合同下还有没有楼栋，如果没有了，把这个合同删除了
+								ContractBuildingMapping anyContractBuildingMapping = contractBuildingMappingProvider.findAnyContractBuildingMappingByNumber(contract.getContractNumber());
+								if (anyContractBuildingMapping == null) {
+									contractProvider.deleteContract(contract);
+								}
+							}
+						}
+						
+					}
+				}
+				
+				
 			}
 		}
 		if (LOGGER.isDebugEnabled()) {

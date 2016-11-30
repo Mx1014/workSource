@@ -46,6 +46,13 @@ public class ContractProviderImpl implements ContractProvider {
 		getReadWriteDao().update(contract);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContracts.class, contract.getId());
 	}
+	
+	@Override
+	public void deleteContract(Contract contract) {
+		assert (contract.getId() != null);
+		getReadWriteDao().delete(contract);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContracts.class, contract.getId());
+	}
 
 	@Override
 	public Contract findContractById(Long id) {

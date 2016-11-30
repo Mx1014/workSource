@@ -26,4 +26,6 @@ public interface ContractProvider {
 
 	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue);
 
+	void deleteContract(Contract contract);
+
 }

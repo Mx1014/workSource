@@ -3,6 +3,7 @@ package com.everhomes.organization;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -393,6 +394,9 @@ public interface OrganizationService {
 	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
 			Integer namespaceId);
 	List<OrganizationMemberDTO> getAdmins(Long organizationId);
-	Map<String, String> getServiceUser(Long organizationId, Long serviceUserId);
+	OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId);
 	List<String> getBusinessContactPhone(Long organizationId);
+	Set<String> getOrganizationContactPhone(Long organizationId);
+	List<String> getAdminPhone(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId);
 }

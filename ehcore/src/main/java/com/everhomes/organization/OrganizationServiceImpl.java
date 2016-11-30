@@ -814,37 +814,47 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 
 	private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
-		Map<String, String> map = getServiceUser(organizationDetailDTO.getOrganizationId(), organizationDetailDTO.getServiceUserId());
-		organizationDetailDTO.setServiceUserName(map.get("serviceUserName"));
-		organizationDetailDTO.setServiceUserPhone(map.get("serviceUserPhone"));
+		OrganizationServiceUser user = getServiceUser(organizationDetailDTO.getOrganizationId(), organizationDetailDTO.getServiceUserId());
+		organizationDetailDTO.setServiceUserName(user.getServiceUserName());
+		organizationDetailDTO.setServiceUserPhone(user.getServiceUserPhone());
 	}
 	
 	@Override
-	public Map<String, String> getServiceUser(Long organizationId, Long serviceUserId) {
-		Map<String, String> map = new HashMap<>();
+	public OrganizationServiceUser getServiceUser(Long organizationId){
+		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+		if (organizationDetail == null) {
+			return null;
+		}
+		return getServiceUser(organizationId, organizationDetail.getServiceUserId());
+	}
+	
+	@Override
+	public OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId) {
 		if (serviceUserId == null) {
-			return map;
+			return null;
 		}
 		//1. 找到企业入驻的园区
 		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
 		if (organizationCommunityRequest == null) {
-			return map;
+			return null;
 		}
 		//2. 找到园区对应的管理公司
 		List<OrganizationCommunityDTO> organizationCommunityList = organizationProvider.findOrganizationCommunityByCommunityId(organizationCommunityRequest.getCommunityId());
 		if (organizationCommunityList == null || organizationCommunityList.size() == 0) {
-			return map;
+			return null;
 		}
 		//3. 找到管理公司的这个人
 		for (OrganizationCommunityDTO organizationCommunityDTO : organizationCommunityList) {
 			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(serviceUserId, organizationCommunityDTO.getOrganizationId());
 			if (organizationMember != null) {
-				map.put("serviceUserName", organizationMember.getContactName());
-				map.put("serviceUserPhone", organizationMember.getContactToken());
-				return map;
+				OrganizationServiceUser user = new OrganizationServiceUser();
+				user.setServiceUserId(serviceUserId);
+				user.setServiceUserName(organizationMember.getContactName());
+				user.setServiceUserPhone(organizationMember.getContactToken());
+				return user;
 			}
 		}
-		return map;
+		return null;
 	}
 
 	private void addSignupCount(OrganizationDetailDTO organizationDetailDTO) {
@@ -871,6 +881,30 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 		}
 		return phoneList;
+	}
+
+	@Override
+	public List<String> getAdminPhone(Long organizationId) {
+		List<String> phoneList = new ArrayList<>();
+		List<OrganizationMemberDTO> organizationMemberList = getAdmins(organizationId);
+		if (organizationMemberList != null && !organizationMemberList.isEmpty()) {
+			for (OrganizationMemberDTO organizationMemberDTO : organizationMemberList) {
+				String phone = organizationMemberDTO.getContactToken();
+				if (org.apache.commons.lang.StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
+					phoneList.add(phone);
+				}
+			}
+		}
+		return phoneList;
+	}
+
+	@Override
+	public Set<String> getOrganizationContactPhone(Long organizationId) {
+		Set<String> phoneSet = new HashSet<>();
+		phoneSet.addAll(getBusinessContactPhone(organizationId));
+		phoneSet.addAll(getAdminPhone(organizationId));
+		
+		return phoneSet;
 	}
 	
 	@Override
@@ -8180,10 +8214,10 @@ System.out.println();
 		contractDTO.setContactor(organizationDetail.getContactor());
 		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
 		
-		Map<String, String> map = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
+		OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
 		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
-		contractDTO.setServiceUserName(map.get("serviceUserName"));
-		contractDTO.setServiceUserPhone(map.get("serviceUserPhone"));
+		contractDTO.setServiceUserName(user.getServiceUserName());
+		contractDTO.setServiceUserPhone(user.getServiceUserPhone());
 		
 		return contractDTO;
 	}

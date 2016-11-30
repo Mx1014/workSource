@@ -51,6 +51,13 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		getReadWriteDao().update(contractBuildingMapping);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractBuildingMappings.class, contractBuildingMapping.getId());
 	}
+	
+	@Override
+	public void deleteContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
+		assert (contractBuildingMapping.getId() != null);
+		getReadWriteDao().delete(contractBuildingMapping);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhContractBuildingMappings.class, contractBuildingMapping.getId());
+	}
 
 	@Override
 	public ContractBuildingMapping findContractBuildingMappingById(Long id) {
@@ -76,6 +83,19 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 			step = step.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName));
 		}
 		Record record = step.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, ContractBuildingMapping.class);
+		}
+		return null;
+	}
+
+	@Override
+	public ContractBuildingMapping findAnyContractBuildingMappingByNumber(String contractNumber) {
+		Record record = getReadOnlyContext().select()
+			.from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+			.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
+			.fetchAny();
 		if (record != null) {
 			return ConvertHelper.convert(record, ContractBuildingMapping.class);
 		}

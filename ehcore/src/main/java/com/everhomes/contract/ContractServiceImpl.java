@@ -4,11 +4,19 @@ package com.everhomes.contract;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
+import java.util.Map;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
@@ -22,11 +30,18 @@ import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.contract.ListContractsCommand;
 import com.everhomes.rest.contract.ListContractsResponse;
+import com.everhomes.rest.organization.OrganizationServiceUser;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.Tuple;
 
 @Component
 public class ContractServiceImpl implements ContractService {
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(ContractServiceImpl.class);
 
 	@Autowired
 	private ContractProvider contractProvider;
@@ -39,6 +54,9 @@ public class ContractServiceImpl implements ContractService {
 	
 	@Autowired
 	private OrganizationService organizationService;
+	
+	@Autowired
+	private SmsProvider smsProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -109,9 +127,35 @@ public class ContractServiceImpl implements ContractService {
 		Timestamp minValue = new Timestamp(lastNow.getTime()+offset);
 		Timestamp maxValue = new Timestamp(now.getTime()+offset);
 		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue);
+		if (contractList == null || contractList.isEmpty()) {
+			return;
+		}
 		
-		
-		
+		for (Contract contract : contractList) {
+			Long organizationId = contract.getOrganizationId();
+			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
+			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
+			if (phoneSet != null && !phoneSet.isEmpty()) {
+				Integer code = null;
+				List<Tuple<String, Object>> params = new ArrayList<>();
+				if (serviceUser == null || StringUtils.isBlank(serviceUser.getServiceUserName()) || StringUtils.isBlank(serviceUser.getServiceUserPhone())) {
+					//尊敬的客户您好，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装。
+					code = SmsTemplateCode.PUSH_MESSAGE_BACK_TWO_MONTHS_WITHOUT_SERVICE_USER_CODE;
+					smsProvider.addToTupleList(params, "contractEndDate", getChinaDate(contract.getContractEndDate()));
+					smsProvider.addToTupleList(params, "appName1", "");
+					smsProvider.addToTupleList(params, "appName2", "");
+				}else {
+					//尊敬的客户您好，我是您的专属客服经理${serviceUserName}，电话${serviceUserPhone}，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装。
+					code = SmsTemplateCode.PUSH_MESSAGE_BACK_TWO_MONTHS_WITH_SERVICE_USER_CODE;
+					smsProvider.addToTupleList(params, "serviceUserName", serviceUser.getServiceUserName());
+					smsProvider.addToTupleList(params, "serviceUserPhone", serviceUser.getServiceUserPhone());
+					smsProvider.addToTupleList(params, "contractEndDate", getChinaDate(contract.getContractEndDate()));
+					smsProvider.addToTupleList(params, "appName1", "");
+					smsProvider.addToTupleList(params, "appName2", "");
+				}
+				sendMessageToUser(contract.getNamespaceId(), phoneSet, SmsTemplateCode.SCOPE, code, params);
+			}
+		}
 	}
 	
 	private void sendMessageToBackOneMonthOrganizations() {
@@ -121,7 +165,35 @@ public class ContractServiceImpl implements ContractService {
 		Timestamp minValue = new Timestamp(lastNow.getTime()+offset);
 		Timestamp maxValue = new Timestamp(now.getTime()+offset);
 		List<Contract> contractList = contractProvider.listContractsByEndDateRange(minValue, maxValue);
+		if (contractList == null || contractList.isEmpty()) {
+			return;
+		}
 		
+		for (Contract contract : contractList) {
+			Long organizationId = contract.getOrganizationId();
+			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
+			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
+			if (phoneSet != null && !phoneSet.isEmpty()) {
+				Integer code = null;
+				List<Tuple<String, Object>> params = new ArrayList<>();
+				if (serviceUser == null || StringUtils.isBlank(serviceUser.getServiceUserName()) || StringUtils.isBlank(serviceUser.getServiceUserPhone())) {
+					//尊敬的客户您好，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装，如果您已经与科技园联系过，请忽略该短信。
+					code = SmsTemplateCode.PUSH_MESSAGE_BACK_ONE_MONTH_WITHOUT_SERVICE_USER_CODE;
+					smsProvider.addToTupleList(params, "contractEndDate", getChinaDate(contract.getContractEndDate()));
+					smsProvider.addToTupleList(params, "appName1", "");
+					smsProvider.addToTupleList(params, "appName2", "");
+				}else {
+					//尊敬的客户您好，我是您的专属客服经理${serviceUserName}，电话${serviceUserPhone}，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装，如果您已经与科技园联系过，请忽略该短信。
+					code = SmsTemplateCode.PUSH_MESSAGE_BACK_ONE_MONTH_WITH_SERVICE_USER_CODE;
+					smsProvider.addToTupleList(params, "serviceUserName", serviceUser.getServiceUserName());
+					smsProvider.addToTupleList(params, "serviceUserPhone", serviceUser.getServiceUserPhone());
+					smsProvider.addToTupleList(params, "contractEndDate", getChinaDate(contract.getContractEndDate()));
+					smsProvider.addToTupleList(params, "appName1", "");
+					smsProvider.addToTupleList(params, "appName2", "");
+				}
+				sendMessageToUser(contract.getNamespaceId(), phoneSet, SmsTemplateCode.SCOPE, code, params);
+			}
+		}
 		
 		
 		
@@ -131,13 +203,52 @@ public class ContractServiceImpl implements ContractService {
 		Timestamp now = getCurrentDate();
 		Timestamp lastNow = getNextNow(now);
 		List<Contract> contractList = contractProvider.listContractsByCreateDateRange(lastNow, now);
+		if (contractList == null || contractList.isEmpty()) {
+			return;
+		}
 		
+		for (Contract contract : contractList) {
+			Long organizationId = contract.getOrganizationId();
+			OrganizationServiceUser serviceUser = organizationService.getServiceUser(organizationId);
+			Set<String> phoneSet = organizationService.getOrganizationContactPhone(organizationId);
+			if (phoneSet != null && !phoneSet.isEmpty()) {
+				Integer code = null;
+				List<Tuple<String, Object>> params = new ArrayList<>();
+				if (serviceUser == null || StringUtils.isBlank(serviceUser.getServiceUserName()) || StringUtils.isBlank(serviceUser.getServiceUserPhone())) {
+					//尊敬的客户您好，欢迎入住${communityName}。为更好地为您做好服务，请下载安装“${appName}app”，体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。
+					code = SmsTemplateCode.PUSH_MESSAGE_BACK_ONE_MONTH_WITHOUT_SERVICE_USER_CODE;
+					smsProvider.addToTupleList(params, "communityName", "");
+					smsProvider.addToTupleList(params, "appName", "");
+				}else {
+					//尊敬的客户您好，我是您的专属客服经理${serviceUserName}，电话${serviceUserPhone}，欢迎入住${communityName}，有任何问题请随时与我联系。为更好地为您做好服务，请下载安装“${appName}app”，体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。
+					code = SmsTemplateCode.PUSH_MESSAGE_BACK_ONE_MONTH_WITH_SERVICE_USER_CODE;
+					smsProvider.addToTupleList(params, "serviceUserName", serviceUser.getServiceUserName());
+					smsProvider.addToTupleList(params, "serviceUserPhone", serviceUser.getServiceUserPhone());
+					smsProvider.addToTupleList(params, "communityName", "");
+					smsProvider.addToTupleList(params, "appName", "");
+				}
+				sendMessageToUser(contract.getNamespaceId(), phoneSet, SmsTemplateCode.SCOPE, code, params);
+			}
+		}
 		
 		
 		
 	}
 	
+	private void sendMessageToUser(Integer namespaceId, Set<String> phoneNumbers, String templateScope, int code, List<Tuple<String, Object>> params) {
+		sendMessageToUser(namespaceId, phoneNumbers.toArray(new String[phoneNumbers.size()]), templateScope, code, getLocale(), params);
+	}
+	
+	private void sendMessageToUser(Integer namespaceId, String[] phoneNumbers, String templateScope, int templateId, String templateLocale, List<Tuple<String, Object>> variables) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("send message parameters are: namespaceId="+namespaceId+", phoneNumbers="+Arrays.toString(phoneNumbers)+", templateScope="+templateScope+", code="+templateId);
+		}
+		
+		smsProvider.sendSms(namespaceId, phoneNumbers, templateScope, templateId, templateLocale, variables);
+	}
+	
 	private static final SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
+	private static final SimpleDateFormat chineDateSF = new SimpleDateFormat("yyyy年MM月dd日");
 	private static final SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 	private static final long ONE_DAY_MS = 24*3600*1000;
 	// 获取今天10点钟的这个时间
@@ -156,6 +267,14 @@ public class ContractServiceImpl implements ContractService {
 		return new Timestamp(now.getTime()-ONE_DAY_MS);
 	}
 
-	
-	
+    private String getLocale() {
+        User user = UserContext.current().getUser();
+        if(user != null && user.getLocale() != null)
+            return user.getLocale();
+        return Locale.SIMPLIFIED_CHINESE.toString();
+    }
+    
+	private String getChinaDate(Timestamp date) {
+		return chineDateSF.format(date);
+	} 
 }
