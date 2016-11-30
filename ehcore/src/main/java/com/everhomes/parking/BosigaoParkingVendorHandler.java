@@ -122,7 +122,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         return resultList;
     }
 
-    private static BosigaoCardInfo getCardInfo(String plateNumber){
+    private BosigaoCardInfo getCardInfo(String plateNumber){
     	
     	URL wsdlURL = Service1.WSDL_LOCATION;
 		Service1 ss = new Service1(wsdlURL, Service1.SERVICE);
@@ -134,7 +134,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			LOGGER.debug("Parking bosigao json={}", json);
         
         ResultHolder resultHolder = JSONObject.parseObject(json, ResultHolder.class);
-//        this.checkResultHolderIsNull(resultHolder, plateNumber);
+        this.checkResultHolderIsNull(resultHolder, plateNumber);
         
         BosigaoCardInfo card = null;
         
@@ -147,9 +147,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         }
     	return card;
     }
-    public static void main(String[] args) {
-    	getCardInfo("粤B20P15");
-	}
+
     public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
     	URL wsdlURL = Service1.WSDL_LOCATION;
