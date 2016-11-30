@@ -5691,21 +5691,12 @@ System.out.println();
 					for (String idStr: pathStrs) {
 						if(!"".equals(idStr)){
 							Long id = Long.valueOf(idStr);
-//							if(id.equals(r.getDirectlyEnterpriseId())){
-//								Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
-//								pathName = "未知";
-//								if(null != o )pathName = o.getName();
-//							}else if(!"".equals(pathName)){
-//								Organization o = organizationProvider.findOrganizationById(id);
-//								if(null != o )pathName += "-" + o.getName();
-//							}
-						    Organization o = organizationProvider.findOrganizationById(id);
-							if(!"".equals(pathName)){
-								pathName += null != o ?  "-" + o.getName() : "-未知";
-							}else{
+							Organization o = organizationProvider.findOrganizationById(id);
+							if(id.equals(organizationId)){
 								pathName = null != o ?  o.getName() : "未知";
+							}else if(!"".equals(pathName)){
+								pathName += null != o ?  "-" + o.getName() : "-未知";
 							}
-
 						}
 					}
 					r.setPathName(pathName);
