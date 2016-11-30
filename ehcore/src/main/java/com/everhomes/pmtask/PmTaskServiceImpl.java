@@ -2065,7 +2065,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		dbProvider.execute((TransactionStatus status) -> {
 			List<Long> privilegeIds = new ArrayList<Long>();
+			
+			PmTaskTarget pmTaskTarget2 = null;
 			if(cmd.getOperateType().equals(PmTaskOperateType.EXECUTOR.getCode())) {
+				privilegeIds.add(PrivilegeConstants.LISTUSERTASK);
+				privilegeIds.add(PrivilegeConstants.COMPLETETASK);
+				pmTaskTarget2 = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), PmTaskOperateType.REPAIR.getCode(),
+						EntityType.USER.getCode(), cmd.getTargetId());
+			}
+			else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode())) {
+				pmTaskTarget2 = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), PmTaskOperateType.EXECUTOR.getCode(),
+						EntityType.USER.getCode(), cmd.getTargetId());
 				privilegeIds.add(PrivilegeConstants.LISTALLTASK);
 				privilegeIds.add(PrivilegeConstants.LISTUSERTASK);
 				privilegeIds.add(PrivilegeConstants.ASSIGNTASK);
@@ -2073,25 +2083,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 				privilegeIds.add(PrivilegeConstants.CLOSETASK);
 				privilegeIds.add(PrivilegeConstants.REVISITTASK);
 			}
-			else if(cmd.getOperateType().equals(PmTaskOperateType.REPAIR.getCode())) {
-				privilegeIds.add(PrivilegeConstants.LISTUSERTASK);
-				privilegeIds.add(PrivilegeConstants.COMPLETETASK);
-			}
 			PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
 					EntityType.USER.getCode(), cmd.getTargetId());
 			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
 			
 			pmTaskProvider.updateTaskTarget(pmTaskTarget);
 			
-//			List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
-//					cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getTargetId());
-//			for(RoleAssignment r: roleAssignments) {
-//				if(r.getRoleId().equals(roleId)) {
-//					aclProvider.deleteRoleAssignment(r);
-//				}
-//			}
 			rolePrivilegeService.deleteAcls(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
-					EntityType.USER.getCode(), cmd.getTargetId(), null, privilegeIds);
+					EntityType.USER.getCode(), cmd.getTargetId(), null, null);
+			if(null != pmTaskTarget2) {
+				rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
+						EntityType.USER.getCode(), cmd.getTargetId(), "pmtask", privilegeIds);
+			}
 		return null;
 		});
 		
