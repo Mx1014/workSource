@@ -77,7 +77,7 @@ public class MessageServiceImpl implements MessageService {
 					if (StringUtils.isNotBlank(contact)) {
 						String[] contactArray = contact.split(",");
 						for (String phone : contactArray) {
-							if (StringUtils.isNotBlank(phone)) {
+							if (StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
 								phoneSet.add(phone);
 							}
 						}
@@ -94,7 +94,7 @@ public class MessageServiceImpl implements MessageService {
 				if (organizationMemberList != null && !organizationMemberList.isEmpty()) {
 					for (OrganizationMemberDTO organizationMemberDTO : organizationMemberList) {
 						String phone = organizationMemberDTO.getContactToken();
-						if (StringUtils.isNotBlank(phone)) {
+						if (StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
 							phoneSet.add(phone);
 						}
 					}
