@@ -534,3 +534,9 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
     VALUES ((@category_id := @category_id + 1), '7', '0', '给排水', '设备类型/给排水', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
     VALUES ((@category_id := @category_id + 1), '7', '0', '电梯', '设备类型/电梯', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
+
+-- Officeasy白领活动和OE大讲堂
+update eh_launch_pad_items set action_data = '{"categoryId":1000001}' where id in(112574, 112585) and namespace_id = 999985;
+
+INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000001', 'OE大讲堂', '/1000001', '0', '2', '1', UTC_TIMESTAMP(), '999985');
+INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000000', '白领活动', '/1000000', '0', '2', '1', UTC_TIMESTAMP(), '999985')

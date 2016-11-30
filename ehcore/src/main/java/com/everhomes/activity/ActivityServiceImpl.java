@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
 import org.jooq.JoinType;
@@ -1636,7 +1637,12 @@ public class ActivityServiceImpl implements ActivityService {
 
         //增加活动类型判断add by xiongying 20161117
         if(null != cmd.getCategoryId()) {
-        	condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+            ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getCategoryId());
+            if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
+                condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
+            } else {
+                condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
         }
         
         CrossShardListingLocator locator=new CrossShardListingLocator();
@@ -2287,7 +2293,12 @@ public class ActivityServiceImpl implements ActivityService {
         
         //增加categoryId add by xiongying 20161118
         if(null != cmd.getCategoryId()) {
-        	activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+            ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getCategoryId());
+            if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
+                activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
+            } else {
+                activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+            }
         }
         
         
