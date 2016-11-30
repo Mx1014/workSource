@@ -18,6 +18,12 @@ INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title
     VALUES ('9', 'Apartment', '预约看楼', '预约看楼', '1', '1', ' {"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"userName","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"mobile","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"organizationName","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"areaSize","fieldDisplayName":"面积需求","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入面积需求","requiredFlag":"1","dynamicFlag":"0"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0","dynamicFlag":"0"}]}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ', '1', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (10, '999985', '9');
 
+<<<<<<< HEAD
+--
+-- 修改能耗管理的入口页面地址  add by xq.tian  2016/11/30
+--
+UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"http://core.zuolin.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_name` = 'Energy' AND `namespace_id` = '999992';
+=======
 -- 物业报修2.6 merge from pmtask-delta-data.sql by sw 20161128
 update eh_pm_tasks set address_type = 1 where address_type is NULL;
 SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);

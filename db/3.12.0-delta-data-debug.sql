@@ -518,6 +518,15 @@ DELETE FROM `eh_acls` WHERE `privilege_id` in (604, 605) AND `role_id` = 1005;
 -- 更新acl表
 UPDATE `eh_acls` SET `role_type` = 'EhAclRoles' WHERE `role_type` IS NULL AND `owner_type` = 'EhOrganizations';
 
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('300', '907', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('301', '907', '20191', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
+
+--
+-- 修改能耗管理的入口页面地址  add by xq.tian  2016/11/30
+--
+UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"http://alpha.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_name` = 'Energy' AND `namespace_id` = '999992';
+
 -- 设备巡检增加设备类型 add by xiongying20161129
 SET @category_id = (SELECT MAX(id) FROM `eh_categories`);
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
