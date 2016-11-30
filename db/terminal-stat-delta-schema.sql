@@ -64,6 +64,18 @@ CREATE TABLE `eh_terminal_statistics_tasks` (
   UNIQUE KEY `task_no` (`task_no`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_app_version`;
+CREATE TABLE `eh_app_version` (
+  `id` BIGINT NOT NULL,
+  `type` VARCHAR(20) NOT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `realm` VARCHAR(64) NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `default_order` INTEGER NOT NULL DEFAULT '0',
+  `create_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 
 ALTER TABLE `eh_user_activities` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_user_activities` ADD COLUMN `version_realm` varchar(128) DEFAULT NULL;
