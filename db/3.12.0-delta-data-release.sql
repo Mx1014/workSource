@@ -32,6 +32,9 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'sms.default.yzx', '15', 'zh_CN', '物业任务3-深业', '32949', '999992');
 
+	select * from eh_locale_templates where scope = 'pmtask.notification' and code in (5,6);
+update eh_locale_templates set namespace_id = 0 where scope = 'pmtask.notification' and code in (5,6);
+	
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
 	VALUES ('20190', '统计', '20100', NULL, null, '0', '2', '/20000/20100/20190', 'park', '245');
 INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', null, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
