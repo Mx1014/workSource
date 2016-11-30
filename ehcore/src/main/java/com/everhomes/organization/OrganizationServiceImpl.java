@@ -5699,9 +5699,8 @@ System.out.println();
 //								Organization o = organizationProvider.findOrganizationById(id);
 //								if(null != o )pathName += "-" + o.getName();
 //							}
-						    Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
+						    Organization o = organizationProvider.findOrganizationById(id);
 							if(!"".equals(pathName)){
-								if(null != o )pathName += "-" + o.getName();
 								pathName += null != o ?  "-" + o.getName() : "-未知";
 							}else{
 								pathName = null != o ?  o.getName() : "未知";
