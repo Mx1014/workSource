@@ -54,6 +54,7 @@ CREATE TABLE `eh_terminal_app_version_statistics` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_app_version`;
 CREATE TABLE `eh_terminal_statistics_tasks` (
   `id` BIGINT NOT NULL,
   `task_no` VARCHAR(20) NOT NULL,

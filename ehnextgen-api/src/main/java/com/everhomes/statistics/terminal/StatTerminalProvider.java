@@ -21,4 +21,16 @@ public interface StatTerminalProvider {
 
 	void deleteTerminalAppVersionStatistics(String startDate);
 
+	TerminalDayStatistics statisticalUserActivity(String date, String hour, Integer namespaceId);
+
+	TerminalAppVersionStatistics statisticalAppVersionUserActivity(List<String> notVersions,String version, String date, Integer namespaceId);
+
+	TerminalDayStatistics getTerminalDayStatisticsByDay(String date, Integer namespaceId);
+
+	Long getTerminalActiveUserNumberByDate(String startDate, String endDate, Integer namespaceId);
+
+	List<TerminalHourStatistics> listTerminalHourStatisticsByDay(String date, Integer namespaceId);
+
+	List<TerminalDayStatistics> listTerminalDayStatisticsByDate(String startDate, String endDate, Integer namespaceId);
+	
 }
