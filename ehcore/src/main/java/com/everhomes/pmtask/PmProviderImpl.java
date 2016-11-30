@@ -80,7 +80,7 @@ public class PmProviderImpl implements PmTaskProvider{
     }
 	
 	@Override
-    public List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize){
+    public List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Byte roleId, Long pageAnchor, Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectQuery<EhPmTaskTargetsRecord> query = context.selectQuery(Tables.EH_PM_TASK_TARGETS);
 
@@ -102,7 +102,7 @@ public class PmProviderImpl implements PmTaskProvider{
     }
 	
 	@Override
-    public PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId){
+    public PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Byte roleId, String targetType, Long targetId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectQuery<EhPmTaskTargetsRecord> query = context.selectQuery(Tables.EH_PM_TASK_TARGETS);
 
