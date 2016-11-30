@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 import org.junit.After;
 import org.junit.Assert;
@@ -17,11 +18,13 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.FLowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
+import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
@@ -33,6 +36,8 @@ import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
@@ -44,6 +49,10 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
 
 public class FlowEnableTest  extends LoginAuthTestCase {
@@ -81,9 +90,27 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     @Autowired
     private FlowScriptProvider flowScriptProvider;
     
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private UserProvider userProvider;
+    
+    private User testUser1;
+    private User testUser2;
+    private Integer namespaceId = 0;
+    private Long moduleId = 111l;
+    private Long orgId = 1001027l;
+    
+    
     @Before
     public void setUp() throws Exception {
         super.setUp();
+        
+    	String u1 = "15002095483";
+    	String u2 = "17788754324";
+    	testUser1 = userService.findUserByIndentifier(namespaceId, u1);
+    	testUser2 = userService.findUserByIndentifier(namespaceId, u2);
     }
     
     @After
@@ -92,9 +119,6 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Test
     public void testUserSelections() {
-    	Long moduleId = 111l;
-    	Long orgId = 1001027l;
-    	Integer namespaceId = 0;
     	
     	//step1 create flow
     	CreateFlowCommand flowCmd = new CreateFlowCommand();
@@ -118,13 +142,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Test
     public void testFlowEnable() {
-    	Long moduleId = 111l;
-    	Long orgId = 1001027l;
-    	Integer namespaceId = 0;
-    	
     	//step1 create flow
     	CreateFlowCommand flowCmd = new CreateFlowCommand();
-    	flowCmd.setFlowName("test-flow-3");
+    	flowCmd.setFlowName("test-flow-1");
     	flowCmd.setModuleId(moduleId);
     	flowCmd.setNamespaceId(namespaceId);
     	flowCmd.setOrgId(orgId);
@@ -224,6 +244,35 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     }
     
+    private void setTestContext(Long userId) {
+    	User user = userProvider.findUserById(userId);
+    	UserContext.current().setUser(user);;
+    }
+    
+    @Test
+    public void testFlowCase() {
+    	Long applyUserId = testUser1.getId();
+    	setTestContext(applyUserId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = 1001027l;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+    	cmd.setApplyUserId(applyUserId);
+    	cmd.setFlowMainId(flow.getFlowMainId());
+    	cmd.setFlowVersion(flow.getFlowVersion());
+    	cmd.setReferId(0l);
+    	cmd.setReferType("test-type");
+    	
+    	Random r = new Random();
+    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
+    	
+    	FlowCase flowCase = flowService.createFlowCase(cmd);
+    	Assert.assertTrue(flowCase.getId() > 0);
+    }
+    
     private void addNodeProcessor(FlowNodeDTO dto, Long orgId) {
     	CreateFlowUserSelectionCommand seleCmd = new CreateFlowUserSelectionCommand();
     	seleCmd.setBelongTo(dto.getId());
@@ -310,13 +359,57 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     		}
     	}
     	
+    	//add two test users
+    	users.add(testUser1.getId());
+    	users.add(testUser2.getId());
+    	
     	return users;
     }
     
     @Test
     public void testOrgUsers() {
-    	Long orgId = 1001027l;
     	List<Long> users = getOrgUsers(orgId);
     	Assert.assertTrue(users.size() > 0);
+    	
+    	String u1 = "15002095483";
+    	String u2 = "17788754324";
+    	User user1 = userService.findUserByIndentifier(namespaceId, u1);
+    	User user2 = userService.findUserByIndentifier(namespaceId, u2);
+    	Assert.assertTrue(user1 != null);
+    	Assert.assertTrue(user2 != null);
+    }
+    
+    @Test
+    public void testFlowCaseSearch() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+//    	Integer namespaceId = 0;
+//    	Long moduleId = 111l;
+//    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+//		Long ownerId = 1001027l;
+//		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+//    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    }
+    
+    @Test
+    public void testFlowCaseApplierSearch() {
+    	Long userId = testUser1.getId();
+    	setTestContext(userId);
+    	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);    	
+    }
+    
+    @Test
+    public void testFlowCaseButton() {
+    	
     }
 }

@@ -1,7 +1,7 @@
 package com.everhomes.rest.flow;
 
 public enum FlowCaseSearchType {
-	APPLIER((byte)0), TODO_LIST((byte)1), DONE_LIST((byte)2), SUPERVISER((byte)3);
+	APPLIER((byte)0), TODO_LIST((byte)1), DONE_LIST((byte)2), SUPERVISOR((byte)3);
 	private byte code;
     
     public byte getCode() {
@@ -24,7 +24,7 @@ public enum FlowCaseSearchType {
         case 2 :
             return DONE_LIST;
         case 3 :
-            return SUPERVISER;
+            return SUPERVISOR;
         }
         
         return null;

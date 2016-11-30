@@ -18,6 +18,7 @@ import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowModulesCommand;
@@ -56,7 +57,7 @@ public class FlowController extends ControllerBase {
     @RequestMapping("getFlowCaseDetailById")
     @RestReturn(value=FlowCaseDetailDTO.class)
     public RestResponse getFlowCaseDetailById(@Valid GetFlowCaseDetailByIdCommand cmd) {
-        RestResponse response = new RestResponse(flowService.getFlowCaseDetail(cmd.getFlowCaseId()));
+        RestResponse response = new RestResponse(flowService.getFlowCaseDetail(cmd.getFlowCaseId(), FlowUserType.fromCode(cmd.getFlowUserType())));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

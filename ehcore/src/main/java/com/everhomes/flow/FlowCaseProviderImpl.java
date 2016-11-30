@@ -12,11 +12,15 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowCasesDao;
@@ -113,5 +117,58 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		obj.setCreateTime(now);
 		obj.setLastStepTime(now);
+    }
+    
+    @Override
+    public List<FlowCaseDetail> findApplierFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+    	Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
+    			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+    	
+    	if(locator.getAnchor() == null) {
+    		locator.setAnchor(cmd.getAnchor());
+    	}
+    	
+    	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+    	if(FlowCaseSearchType.APPLIER.equals(searchType)) {
+    		cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
+    		
+    	    if(locator.getAnchor() != null) {
+    	        cond.and(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));
+    	        }
+    	    
+        	if(cmd.getModuleId() != null) {
+        		cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+        	}
+        	if(cmd.getFlowCaseStatus() != null) {
+        		cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+        	}
+        	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
+        		cond.and(
+        				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
+        				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
+        				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
+        				);
+        	}
+    		
+    		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
+    		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+    		    	.where(cond).limit(count).fetch().map(new FlowCaseRecordMapper());
+    		
+    		List<FlowCaseDetail> objs = records.stream().map((r) -> {
+    			return ConvertHelper.convert(r, FlowCaseDetail.class);
+    		}).collect(Collectors.toList());
+    		
+            if(objs.size() >= count) {
+                locator.setAnchor(objs.get(objs.size() - 1).getId());
+            } else {
+                locator.setAnchor(null);
+            }
+            
+            return objs;
+    		
+    	} else {
+    		return null;
+    	}   	
     }
 }

@@ -7,8 +7,7 @@ public class FlowEventLog extends EhFlowEventLogs {
 	 * 
 	 */
 	private static final long serialVersionUID = 6063163152705295466L;
-	private Long trackerProcessor;
-	private Long trackerApplier;
+
 	public Long getButtonFiredFromNode() {
 		return FlowEventCustomField.BUTTON_FIRED_FROM_NODE.getIntegralValue(this);
 	}

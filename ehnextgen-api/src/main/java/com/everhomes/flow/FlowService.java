@@ -18,6 +18,7 @@ import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
@@ -26,6 +27,7 @@ import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
@@ -310,13 +312,6 @@ public interface FlowService {
 	SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd);
 
 	/**
-	 * 获取 FlowCase 的详细日志信息
-	 * @param flowCaseId
-	 * @return
-	 */
-	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId);
-
-	/**
 	 * 创建工作流相关的帖子信息
 	 * @param cmd
 	 * @return
@@ -413,6 +408,16 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowCase createFlowCase(CreateFlowCaseCommand flowCaseCmd);
+
+	FlowModuleDTO getModuleById(Long moduleId);
+
+	/**
+	 * 获取 FlowCase 的详细日志信息
+	 * @param flowCaseId
+	 * @return
+	 */
+	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId,
+			FlowUserType flowUserType);
 	
 	//TODO 日志信息分类：
 	

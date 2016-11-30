@@ -8,6 +8,7 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+import java.util.stream.Collectors;
 
 import org.apache.poi.hslf.record.CurrentUserAtom;
 import org.slf4j.Logger;
@@ -35,6 +36,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FLowUserSourceType;
 import com.everhomes.rest.flow.FlowActionDTO;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStatus;
@@ -43,7 +45,9 @@ import com.everhomes.rest.flow.FlowActionType;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowButtonStatus;
+import com.everhomes.rest.flow.FlowCaseDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
+import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowCaseType;
 import com.everhomes.rest.flow.FlowConstants;
@@ -1417,6 +1421,7 @@ public class FlowServiceImpl implements FlowService {
 		if(flow == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");
 		}
+		flowGraph.setFlow(flow);
 		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, flowVer);
 		flowNodes.sort((n1, n2) -> {
@@ -1447,7 +1452,7 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
-		UserInfo userInfo = userService.getUserInfo(UserContext.current().getUser().getId());
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.current().getUser().getId());
 		FlowCaseState ctx = flowStateProcessor.prepareButtonFire(userInfo, cmd);
 		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
 		
@@ -1487,22 +1492,27 @@ public class FlowServiceImpl implements FlowService {
 		if(flowCase.getApplyUserId() == null) {
 			flowCase.setApplyUserId(UserContext.current().getUser().getId());	
 		}
-		UserInfo userInfo = userService.getUserInfo(flowCase.getApplyUserId());
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
 		flowCase.setApplierName(userInfo.getNickName());
 		if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
 			flowCase.setApplierPhone(userInfo.getPhones().get(0));	
 		}
 		
+		FlowModuleDTO moduleDTO = this.getModuleById(snapshotFlow.getModuleId());
+		
 		flowCase.setNamespaceId(snapshotFlow.getNamespaceId());
 		flowCase.setModuleId(snapshotFlow.getModuleId());
+		flowCase.setModuleName(moduleDTO.getDisplayName());
 		flowCase.setModuleType(snapshotFlow.getModuleType());
 		flowCase.setOwnerId(snapshotFlow.getOwnerId());
 		flowCase.setOwnerType(snapshotFlow.getOwnerType());
 		flowCase.setCaseType(FlowCaseType.INNER.getCode());
+		flowCase.setStatus(FlowCaseStatus.INITIAL.getCode());
 		flowCaseProvider.createFlowCase(flowCase);
+		flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());//get again for default values
 		
 		FlowCaseState ctx = flowStateProcessor.prepareStart(userInfo, flowCase);
-		flowStateProcessor.step(ctx, null);
+		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
 		
 		return flowCase;
 	}
@@ -1568,14 +1578,78 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		SearchFlowCaseResponse resp = new SearchFlowCaseResponse();
+		if(cmd.getUserId() == null) {
+			cmd.setUserId(UserContext.current().getUser().getId());
+		}
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
+		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		cmd.setPageSize(count);
+		ListingLocator locator = new ListingLocator();
+		
+		List<FlowCaseDetail> details = null;
+		
+		if(FlowCaseSearchType.APPLIER.equals(cmd.getFlowCaseSearchType())) {
+			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
+		} else {
+			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
+		}
+		
+		List<FlowCaseDTO> dtos = new ArrayList<FlowCaseDTO>();
+		if(details != null) {
+			for(FlowCaseDetail detail : details) {
+				FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
+				dtos.add(dto);
+			}	
+			resp.setNextPageAnchor(locator.getAnchor());
+		} else {
+			resp.setNextPageAnchor(null);
+		}
+		
+		resp.setFlowCases(dtos);
+		return resp;
 	}
 
 	@Override
-	public FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId) {
-		// TODO Auto-generated method stub
-		return null;
+	public FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, FlowUserType flowUserType) {
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+		FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
+		if(dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
+			return dto;
+		}
+		
+		if(flowUserType == FlowUserType.PROCESSOR) {
+			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
+			List<FlowButtonDTO> btnDTOS = buttons.stream().map((b)->{
+				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
+					return ConvertHelper.convert(b, FlowButtonDTO.class);	
+				}
+				
+				return null;
+				
+			}).collect(Collectors.toList());
+			
+			dto.setButtons(btnDTOS);
+		} else if(flowUserType == FlowUserType.APPLIER) {
+			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
+			List<FlowButtonDTO> btnDTOS = buttons.stream().map((b)->{
+				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
+					return ConvertHelper.convert(b, FlowButtonDTO.class);	
+				}
+				
+				return null;
+				
+			}).collect(Collectors.toList());			
+		} else {
+			return dto;
+		}
+		
+		//got all nodes tracker logs
+		
+		return dto;
 	}
 
 	@Override
@@ -1600,6 +1674,43 @@ public class FlowServiceImpl implements FlowService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	@Override
+	public FlowModuleDTO getModuleById(Long moduleId) {
+		if(moduleId.equals(111l)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(111l);
+			dto.setModuleName("yuanqu");
+			dto.setDisplayName("园区入驻");
+			return dto;
+		}
+		
+		if(moduleId.equals(112l)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(112l);
+			dto.setModuleName("wuye");
+			dto.setDisplayName("物业保修");
+			return dto;
+		}
+		
+		if(moduleId.equals(113l)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(113l);
+			dto.setModuleName("yueka");
+			dto.setDisplayName("月卡申请");
+			return dto;
+		}
+		
+		if(moduleId.equals(114l)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(114l);
+			dto.setModuleName("jiaoliu");
+			dto.setDisplayName("交流大厅");
+			return dto;
+		}
+		
+		return null;
+	}
 
 	@Override
 	public ListFlowModulesResponse listModules(ListFlowModulesCommand cmd) {
@@ -1609,13 +1720,27 @@ public class FlowServiceImpl implements FlowService {
 		
 		FlowModuleDTO dto = new FlowModuleDTO();
 		dto.setModuleId(111l);
-		dto.setModuleName("园区入驻");
+		dto.setModuleName("yuanqu");
+		dto.setDisplayName("园区入驻");
+		modules.add(dto);
+		
+		dto = new FlowModuleDTO();
 		dto.setModuleId(112l);
-		dto.setModuleName("物业保修");
+		dto.setModuleName("wuye");
+		dto.setDisplayName("物业保修");
+		modules.add(dto);
+		
+		dto = new FlowModuleDTO();
 		dto.setModuleId(113l);
-		dto.setModuleName("月卡申请");
+		dto.setModuleName("yueka");
+		dto.setDisplayName("月卡申请");
+		modules.add(dto);
+		
+		dto = new FlowModuleDTO();
 		dto.setModuleId(114l);
-		dto.setModuleName("交流大厅");
+		dto.setModuleName("jiaoliu");
+		dto.setDisplayName("交流大厅");
+		modules.add(dto);
 		
 		return resp;
 	}
@@ -1627,7 +1752,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		for(FlowUserSelection sel : selections) {
-			if(FlowEntityType.FLOW_USER.getCode().equals(sel.getBelongEntity())) {
+			if(FLowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
 			}	
 		}
@@ -1644,7 +1769,7 @@ public class FlowServiceImpl implements FlowService {
 			for(Long selUser : users) {
 				FlowEventLog log = new FlowEventLog();
 				log.setId(flowEventLogProvider.getNextId());
-				log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
+				log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
 				log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());//get real version
 				log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
 				if(ctx.getCurrentEvent() != null) {

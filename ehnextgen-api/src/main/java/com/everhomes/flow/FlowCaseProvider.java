@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
 
 public interface FlowCaseProvider {
 
@@ -17,5 +18,8 @@ public interface FlowCaseProvider {
 
 	List<FlowCase> queryFlowCases(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
+
+	List<FlowCaseDetail> findApplierFlowCases(ListingLocator locator,
+			int count, SearchFlowCaseCommand cmd);
 
 }

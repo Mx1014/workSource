@@ -58,6 +58,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		if(flowCase == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
 		}
+		
 		ctx.setFlowCase(flowCase);
 		ctx.setModuleName(flowCase.getModuleName());
 		
@@ -80,6 +81,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		ctx.setFlowCase(flowCase);
 		ctx.setModuleName(flowCase.getModuleName());
+		ctx.setOperator(logonUser);
 		
 		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		ctx.setFlowGraph(flowGraph);
@@ -153,6 +155,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		//Now save info to databases here
 		if(stepOK) {
 			flowService.flushState(ctx);
+		} else {
+			LOGGER.warn("step error flowCaseId=" + ctx.getFlowCase().getId());
 		}
 	}
 }

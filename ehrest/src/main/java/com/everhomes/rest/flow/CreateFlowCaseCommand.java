@@ -8,6 +8,7 @@ public class CreateFlowCaseCommand {
 	private Long     applyUserId;
 	private Long     referId;
 	private String     referType;
+	private String content;
 	public Long getFlowMainId() {
 		return flowMainId;
 	}
@@ -38,7 +39,13 @@ public class CreateFlowCaseCommand {
 	public void setReferType(String referType) {
 		this.referType = referType;
 	}
-	
+
+	public String getContent() {
+		return content;
+	}
+	public void setContent(String content) {
+		this.content = content;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

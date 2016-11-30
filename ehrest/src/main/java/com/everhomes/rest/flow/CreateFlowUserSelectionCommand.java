@@ -6,6 +6,16 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul> 创建用户选择
+ * <li>belongTo: 属于的上级对象ID flow, flow_node, flow_action, flow_button, flow_selection, flow_user 的ID</li>
+ * <li>flowEntityType: {@link com.everhomes.rest.flow.FlowEntityType} </li>
+ * <li>flowUserType: supervisor 或者 processor</li>
+ * <li>selections: 用户选择的信息列表 </li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class CreateFlowUserSelectionCommand {
 	private Long belongTo;
 	private String flowUserType;

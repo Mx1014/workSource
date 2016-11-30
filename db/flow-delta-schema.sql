@@ -206,7 +206,7 @@ CREATE TABLE `eh_flow_cases` (
     `flow_version` INTEGER NOT NULL,
 
     `apply_user_id` BIGINT NOT NULL,
-    `process_user_id` BIGINT NOT NULL,
+    `process_user_id` BIGINT NOT NULL DEFAULT 0,
     `refer_id` BIGINT NOT NULL DEFAULT 0,
     `refer_type` VARCHAR(64) NOT NULL,
     `current_node_id` BIGINT NOT NULL DEFAULT 0,

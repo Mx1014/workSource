@@ -2,6 +2,15 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>flowUserSelectionType: department, position, manager, variable</li>
+ * <li>flowUserSourceType: source_user, source_department, source_position</li>
+ * <li>sourceIdA: 具体的 ID 值 </li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class FlowSingleUserSelectionCommand {
 	private String flowUserSelectionType;
 	private Long sourceIdA;

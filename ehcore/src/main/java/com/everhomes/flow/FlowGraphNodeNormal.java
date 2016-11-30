@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.util.RuntimeErrorException;
@@ -10,6 +11,11 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 			throws FlowStepErrorException {
 		FlowStepType fromStep = ctx.getStepType();
 		FlowGraphNode curr = ctx.getCurrentNode();
+		
+		if(curr.getFlowNode().getNodeLevel() >= 1) {
+			ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
+		}
+		
 		switch(fromStep) {
 		case NO_STEP:
 			break;

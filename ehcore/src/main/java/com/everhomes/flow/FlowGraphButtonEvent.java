@@ -140,7 +140,6 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		}
 		log.setSubjectId(subject.getId());
 		log.setLogType(FlowLogType.BUTTON_FIRED.getCode());
-//		log.setLogTitle("");
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
 		ctx.getLogs().add(log);	//added but not save to database now.

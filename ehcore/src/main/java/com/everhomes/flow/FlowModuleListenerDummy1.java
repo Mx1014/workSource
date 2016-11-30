@@ -2,18 +2,25 @@ package com.everhomes.flow;
 
 import java.util.List;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowModuleDTO;
 
 @Component
 public class FlowModuleListenerDummy1 implements FlowModuleListener {
-
+	@Autowired
+	private FlowService flowService;
+	
+	private Long moduleId = 111l;
+	
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
-		module.setModuleName("dummy-module1");
-		module.setModuleId(1l);
+		FlowModuleDTO moduleDTO = flowService.getModuleById(moduleId);
+		module.setModuleName(moduleDTO.getDisplayName());
+		module.setModuleId(moduleId);
 		return module;
 	}
 
