@@ -7630,6 +7630,8 @@ System.out.println();
 
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
 		groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
 
