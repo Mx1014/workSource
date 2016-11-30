@@ -45,4 +45,6 @@ public interface SmsTemplateCode {
     int RENTAL_SUCCESS_EXCLUSIVE_CODE = 12;//付费预约成功 独占资源
     int RENTAL_SUCCESS_NOSITENUMBER_CODE = 13;//付费预约成功 非独占资源，不需要选择资源编号
     int RENTAL_SUCCESS_SITENUMBER_CODE = 14;//付费预约成功 非独占资源，需要选择资源编号
+    
+    int PUSH_MESSAGE_TO_BUSINESS_AND_ADMIN_CODE = 16;//发送短信给业务联系人和管理员
 }
