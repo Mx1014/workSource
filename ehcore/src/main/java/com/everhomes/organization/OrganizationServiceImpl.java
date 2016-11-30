@@ -5693,7 +5693,9 @@ System.out.println();
 							Long id = Long.valueOf(idStr);
 							Organization o = organizationProvider.findOrganizationById(id);
 							if(id.equals(organizationId)){
-								pathName = null != o ?  o.getName() : "未知";
+								pathName = "start";
+							}else if("start".equals(pathName)){
+								pathName = null != o ? o.getName() : "未知";
 							}else if(!"".equals(pathName)){
 								pathName += null != o ?  "-" + o.getName() : "-未知";
 							}
