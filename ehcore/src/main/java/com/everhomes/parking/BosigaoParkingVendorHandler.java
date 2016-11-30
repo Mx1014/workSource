@@ -92,7 +92,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			Long endTime = strToLong(validEnd);
 			long now = System.currentTimeMillis();
 			
-			if(endTime < now){
+			if(endTime <= now){
 				return resultList;
 			}
 			

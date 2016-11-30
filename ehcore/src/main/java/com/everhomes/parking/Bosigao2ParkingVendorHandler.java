@@ -90,7 +90,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			long expireTime = strToLong(expireDate);
 			long now = System.currentTimeMillis();
 			
-			if(expireTime < now){
+			if(expireTime <= now){
 				return resultList;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
