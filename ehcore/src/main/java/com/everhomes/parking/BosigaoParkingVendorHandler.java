@@ -92,7 +92,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			Long endTime = strToLong(validEnd);
 			long now = System.currentTimeMillis();
 			
-			if(endTime < now){
+			if(endTime <= now){
 				return resultList;
 			}
 			
@@ -147,7 +147,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         }
     	return card;
     }
-    
+
     public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
     	URL wsdlURL = Service1.WSDL_LOCATION;
