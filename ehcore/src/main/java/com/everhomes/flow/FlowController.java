@@ -15,6 +15,7 @@ import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowGetSubjectDetailById;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
@@ -74,6 +75,20 @@ public class FlowController extends ControllerBase {
     @RestReturn(value=FlowPostSubjectDTO.class)
     public RestResponse postSubject(@Valid FlowPostSubjectCommand cmd) {
         RestResponse response = new RestResponse(flowService.postSubject(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /flow/getSubjectById</b>
+     * <p> 显示用户所有的 FlowCase </p>
+     * @return FlowCase 的列表信息
+     */
+    @RequestMapping("getSubjectById")
+    @RestReturn(value=FlowPostSubjectDTO.class)
+    public RestResponse postSubject(@Valid FlowGetSubjectDetailById cmd) {
+        RestResponse response = new RestResponse(flowService.getSubectById(cmd.getSubjectId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

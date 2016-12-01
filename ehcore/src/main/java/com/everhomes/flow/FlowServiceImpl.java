@@ -1946,4 +1946,10 @@ public class FlowServiceImpl implements FlowService {
         return null;
 	}
 
+	@Override
+	public FlowPostSubjectDTO getSubectById(Long subjectId) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }

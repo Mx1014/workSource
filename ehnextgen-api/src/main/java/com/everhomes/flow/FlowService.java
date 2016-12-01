@@ -418,6 +418,13 @@ public interface FlowService {
 	 */
 	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long userId,
 			FlowUserType flowUserType);
+
+	/**
+	 * Subject 的详细信息
+	 * @param subjectId
+	 * @return
+	 */
+	FlowPostSubjectDTO getSubectById(Long subjectId);
 	
 	//TODO 日志信息分类：
 	
