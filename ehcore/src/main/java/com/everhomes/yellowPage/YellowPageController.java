@@ -45,7 +45,7 @@ public class YellowPageController  extends ControllerBase {
     @Autowired
     private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
 
-    @RequireAuthentication(false)
+	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
     @RestReturn(value=YellowPageDTO.class)
     public RestResponse getYellowPageDetail(@Valid GetYellowPageDetailCommand cmd) {
@@ -341,7 +341,7 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("searchRequestInfo")
     @RestReturn(value = SearchRequestInfoResponse.class)
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
-    	SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
 
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
