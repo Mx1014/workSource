@@ -522,6 +522,37 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	
 DELETE FROM `eh_acls` WHERE `privilege_id` in (604, 605) AND `role_id` = 1005;
 
+-- 合同管理菜单, add by tt, 20161201
+INSERT INTO `eh_web_menus` VALUES ('32500', '合同管理', '30000', null, 'contract_management', '0', '2', '/30000/32500', 'park', '325');
+INSERT INTO `eh_web_menu_privileges` VALUES ('185', '10065', '32500', '合同管理', '1', '1', '合同管理 全部权限', '710');
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('32500', '合同管理', '30000', '/30000/32500', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('75', '32500', '1', '10065', NULL, '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10065, '0', '合同 管理员', '合同管理 业务模块权限', NULL);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10065', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10065', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+
+
+-- 短信推送菜单, add by tt, 20161201
+INSERT INTO `eh_web_menus` VALUES ('12200', '短信推送', '10000', null, 'sms_push', '0', '2', '/10000/12200', 'park', '325');
+INSERT INTO `eh_web_menu_privileges` VALUES ('195', '10075', '12200', '短信推送', '1', '1', '短信推送 全部权限', '710');
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('12200', '短信推送', '10000', '/10000/12200', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('76', '12200', '1', '10075', NULL, '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10075, '0', '短信推送 管理员', '短信推送 业务模块权限', NULL);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10075', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10075', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+
 -- 更新acl表
 UPDATE `eh_acls` SET `role_type` = 'EhAclRoles' WHERE `role_type` IS NULL AND `owner_type` = 'EhOrganizations';
 
