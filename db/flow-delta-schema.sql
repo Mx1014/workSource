@@ -303,6 +303,7 @@ CREATE TABLE `eh_flow_evaluates` (
     `flow_case_id` BIGINT NOT NULL,
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
+    `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

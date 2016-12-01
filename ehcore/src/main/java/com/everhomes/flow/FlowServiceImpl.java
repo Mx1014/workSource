@@ -48,6 +48,7 @@ import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowCaseDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
+import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowCaseType;
@@ -160,6 +161,9 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Autowired
 	private UserService userService;
+	
+	@Autowired
+	private FlowListenerManager flowListenerManager;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -1628,10 +1632,15 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+		List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase);
+		
 		FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
+		dto.setEntities(entities);
 		if(dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
 			return dto;
 		}
+		
+		flowListenerManager.onFlowCaseDetailRender(flowCase);
 		
 		List<FlowButtonDTO> btnDTOS = new ArrayList<>();
 		if(flowUserType == FlowUserType.PROCESSOR) {

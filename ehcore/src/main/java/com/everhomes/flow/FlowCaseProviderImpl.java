@@ -131,20 +131,20 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(FlowCaseSearchType.APPLIER.equals(searchType)) {
-    		cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
+    		cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
     		
     	    if(locator.getAnchor() != null) {
-    	        cond.and(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));
+    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));
     	        }
     	    
         	if(cmd.getModuleId() != null) {
-        		cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+        		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
         	}
         	if(cmd.getFlowCaseStatus() != null) {
-        		cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+        		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
         	}
         	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
-        		cond.and(
+        		cond = cond.and(
         				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
         				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
         				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))

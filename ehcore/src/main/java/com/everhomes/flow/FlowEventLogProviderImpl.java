@@ -159,27 +159,27 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
-    		cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
+    		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
     		.and(Tables.EH_FLOW_CASES.STEP_COUNT.eq(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT)); //step_cout must equal the same
     	} else if (FlowCaseSearchType.DONE_LIST.equals(searchType)) {
-    		cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()))
+    		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()));    		
     	} else if(FlowCaseSearchType.SUPERVISOR.equals(searchType)) {
-    		cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()))
+    		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId())); 
     	} else {
     		return null;
     	}
     	
     	if(cmd.getModuleId() != null) {
-    		cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+    		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
     	}
     	if(cmd.getFlowCaseStatus() != null) {
-    		cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+    		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
     	}
     	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
-    		cond.and(
+    		cond = cond.and(
     				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
     				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
     				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
@@ -187,7 +187,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	}
     	
     if(locator.getAnchor() != null) {
-        cond.and(Tables.EH_FLOW_EVENT_LOGS.ID.gt(locator.getAnchor()));
+    	cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.ID.gt(locator.getAnchor()));
         }
     	
     	final List<FlowCaseDetail> objs = new ArrayList<FlowCaseDetail>();

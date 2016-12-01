@@ -1,11 +1,13 @@
 package com.everhomes.flow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 
 @Component
@@ -62,8 +64,32 @@ public class FlowModuleListenerDummy2 implements FlowModuleListener {
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		return null;
+		List<FlowCaseEntity> entities = new ArrayList<>();
+		FlowCaseEntity e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("test-list-key");
+		e.setValue("test-list-value");
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("test-list-key2");
+		e.setValue("test-list-value2");
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+		e.setKey("test-multi-key3");
+		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+		e.setKey("test-text-key2");
+		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
+		entities.add(e);		
+		
+		return entities;
 	}
 
 	@Override

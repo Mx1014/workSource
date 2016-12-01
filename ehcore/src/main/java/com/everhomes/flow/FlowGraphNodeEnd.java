@@ -45,7 +45,7 @@ public class FlowGraphNodeEnd extends FlowGraphNode {
 			UserInfo firedUser = ctx.getOperator();
 			FlowEventLog log = new FlowEventLog();
 			log.setId(flowEventLogProvider.getNextId());
-			log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
+			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
 			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
 			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
 			log.setFlowNodeId(curr.getFlowNode().getId());
