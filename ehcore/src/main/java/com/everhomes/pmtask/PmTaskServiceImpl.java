@@ -2414,8 +2414,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	            if(null != orgs && orgs.size() != 0) {
 	            	Long organizationId = orgs.get(0).getOrganizationId();
 	            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), organizationId);
-	            	if(null != member)
-	            	dto.setOperatorName(member.getContactName());
+	            	if(null != member) {
+	            		dto.setOperatorName(member.getContactName());
+	            	}else {
+	            		LOGGER.error("OrganizationMember not found, orgId={}, targetId={}, ownerId={}", organizationId, r.getTargetId(), r.getOwnerId());
+	            	}
+	            	
 	            }
     			dto.setTaskCategoryId(r.getTaskCategoryId());
     			Category taskCategory = checkCategory(r.getTaskCategoryId());
