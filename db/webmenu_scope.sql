@@ -227,6 +227,8 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '10750', '俱乐部', 'EhNamespaces', '1000000', '1');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '10751', '俱乐部管理', 'EhNamespaces', '1000000', '1');
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '10752', '审核俱乐部', 'EhNamespaces', '1000000', '1');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '32500', '合同管理', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES ((@menu_scope_id := @menu_scope_id + 1), '12200', '短信推送', 'EhNamespaces', '1000000', '2');
 
 -- 迅美
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
@@ -1154,6 +1156,19 @@ INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '60200', '', 'EhNamespaces', '1000000', '2');
 
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10750', '', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10751', '', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10752', '', 'EhNamespaces', '1000000', '2');
+
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 	
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '32500', '', 'EhNamespaces', '1000000', '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 	
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '12200', '', 'EhNamespaces', '1000000', '2');
+
+	
 -- 迅美
 SET @eh_service_module_scopes = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 
@@ -1885,6 +1900,13 @@ INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '60200', '', 'EhNamespaces', '999985', '2');
 
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10750', '社团', 'EhNamespaces', '999985', '1');
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10751', '社团管理', 'EhNamespaces', '999985', '1');
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10752', '审核社团', 'EhNamespaces', '999985', '1');
+
 -- 	清华信息港
 SET @eh_service_module_scopes = (SELECT MAX(id) FROM `eh_service_module_scopes`);
 
@@ -1954,6 +1976,13 @@ INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '60100', '', 'EhNamespaces', '999984', '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '60200', '', 'EhNamespaces', '999984', '2');
+
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10750', '', 'EhNamespaces', '999984', '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10751', '', 'EhNamespaces', '999984', '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10752', '', 'EhNamespaces', '999984', '2');
 
 -- 	科兴科学园
 SET @eh_service_module_scopes = (SELECT MAX(id) FROM `eh_service_module_scopes`);

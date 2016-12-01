@@ -15,6 +15,10 @@ ALTER TABLE `eh_addresses` ADD COLUMN `rent_area` DOUBLE,
 	ADD COLUMN `namespace_address_type` VARCHAR(128),
 	ADD COLUMN `namespace_address_token` VARCHAR(128);
 
+ALTER TABLE `eh_organization_details` ADD COLUMN `service_user_id` BIGINT NULL COMMENT 'customer service staff';
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_type` VARCHAR(128);
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_token` VARCHAR(128);
+
 -- DROP TABLE IF EXISTS `eh_contracts`;
 CREATE TABLE `eh_contracts` (
   `id` BIGINT NOT NULL,
@@ -55,10 +59,6 @@ CREATE TABLE `eh_app_namespace_mappings` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-ALTER TABLE `eh_organization_details` ADD COLUMN `service_user_id` BIGINT NULL COMMENT 'customer service staff';
-ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_type` VARCHAR(128);
-ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_token` VARCHAR(128);
 
 
 
