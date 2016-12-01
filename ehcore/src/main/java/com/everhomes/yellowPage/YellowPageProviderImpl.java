@@ -479,10 +479,10 @@ public class YellowPageProviderImpl implements YellowPageProvider {
         condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
         
         if(ownerId != null && ownerId != 0L)
-        	condition = condition.and(Tables.EH_SERVICE_ALLIANCES.OWNER_ID.eq(ownerId));
+        	condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_ID.eq(ownerId));
 
     	if (!StringUtils.isEmpty(ownerType) )
-    		condition = condition.and(Tables.EH_SERVICE_ALLIANCES.OWNER_TYPE.eq(ownerType));
+    		condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
     	
         if(condition != null) {
         	query.addConditions(condition);
