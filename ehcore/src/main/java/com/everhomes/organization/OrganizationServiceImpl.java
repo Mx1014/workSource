@@ -100,6 +100,7 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rentalv2.PunchNotificationTemplateCode;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
@@ -806,11 +807,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 	}
 	
 	@Override
-	public List<OrganizationMemberDTO> getAdmins(Long organizationId) {
-		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
-		cmd.setOrganizationId(organizationId);
-		ListOrganizationMemberCommandResponse  response = rolePrivilegeService.listOrganizationAdministrators(cmd);
-		return response.getMembers();
+	public List<OrganizationContactDTO> getAdmins(Long organizationId) {
+//		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
+//		cmd.setOrganizationId(organizationId);
+//		ListOrganizationMemberCommandResponse  response = rolePrivilegeService.listOrganizationAdministrators(cmd);
+//		return response.getMembers();
+		ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+		command.setOrganizationId(organizationId);
+		return rolePrivilegeService.listOrganizationAdministrators(command);
 	}
 
 	private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
@@ -888,9 +892,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Override
 	public List<String> getAdminPhone(Long organizationId) {
 		List<String> phoneList = new ArrayList<>();
-		List<OrganizationMemberDTO> organizationMemberList = getAdmins(organizationId);
+		List<OrganizationContactDTO> organizationMemberList = getAdmins(organizationId);
 		if (organizationMemberList != null && !organizationMemberList.isEmpty()) {
-			for (OrganizationMemberDTO organizationMemberDTO : organizationMemberList) {
+			for (OrganizationContactDTO organizationMemberDTO : organizationMemberList) {
 				String phone = organizationMemberDTO.getContactToken();
 				if (org.apache.commons.lang.StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
 					phoneList.add(phone);

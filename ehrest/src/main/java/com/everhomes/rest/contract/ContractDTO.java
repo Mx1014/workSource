@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.util.StringHelper;
 
@@ -31,8 +32,8 @@ public class ContractDTO {
 	
 	private String organizationName;
 	
-	@ItemType(OrganizationMemberDTO.class)
-	private List<OrganizationMemberDTO> adminMembers;
+	@ItemType(OrganizationContactDTO.class)
+	private List<OrganizationContactDTO> adminMembers;
 	
 	private String contactor;
 	
@@ -81,11 +82,11 @@ public class ContractDTO {
 		this.organizationName = organizationName;
 	}
 
-	public List<OrganizationMemberDTO> getAdminMembers() {
+	public List<OrganizationContactDTO> getAdminMembers() {
 		return adminMembers;
 	}
 
-	public void setAdminMembers(List<OrganizationMemberDTO> adminMembers) {
+	public void setAdminMembers(List<OrganizationContactDTO> adminMembers) {
 		this.adminMembers = adminMembers;
 	}
 

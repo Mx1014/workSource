@@ -35,6 +35,15 @@ public class YellowPageController  extends ControllerBase {
 	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
+	
+	@Autowired
+	private SettleRequestInfoSearcher settleRequestInfoSearcher;
+
+    @Autowired
+	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
+
+    @Autowired
+    private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
 
 	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
@@ -324,25 +333,22 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
-    
+
     /**
-	 * <b>URL: /yellowPage/searchRequestInfo</b>
-	 * <p> 搜索申请信息</p>
-	 */
+     * <b>URL: /yellowPage/searchRequestInfo</b>
+     * <p> 搜索申请信息</p>
+     */
     @RequestMapping("searchRequestInfo")
     @RestReturn(value = SearchRequestInfoResponse.class)
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
-
         SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
 
-
-    	 
-    	RestResponse response = new RestResponse(resp);
-    	response.setErrorCode(ErrorCodes.SUCCESS);
-    	response.setErrorDescription("OK");
-    	return response;
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
-    
+
     /**
    	 * <b>URL: /yellowPage/syncSARequestInfo</b>
    	 * <p> 同步申请信息</p>
@@ -359,5 +365,35 @@ public class YellowPageController  extends ControllerBase {
        	return response;
        }
        
-       
+//    /**
+//     * <b>URL: /yellowPage/syncSettleRequestInfo</b>
+//     * <p> 同步申请信息</p>
+//     */
+//    @RequestMapping("syncSettleRequestInfo")
+//    @RestReturn(value = String.class)
+//    public RestResponse syncSettleRequestInfo() {
+//
+//        this.settleRequestInfoSearcher.syncFromDb();
+//
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
+//
+//    /**
+//     * <b>URL: /yellowPage/syncReserveRequestInfo</b>
+//     * <p> 同步申请信息</p>
+//     */
+//    @RequestMapping("syncReserveRequestInfo")
+//    @RestReturn(value = String.class)
+//    public RestResponse syncReserveRequestInfo() {
+//
+//        this.reserveRequestInfoSearcher.syncFromDb();
+//
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
 }
