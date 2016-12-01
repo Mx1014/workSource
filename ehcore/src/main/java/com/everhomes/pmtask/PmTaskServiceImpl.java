@@ -2447,7 +2447,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 				tempMap.put(id, temp);
 				continue;
 			}
-			p.setOwnerId(null);
 			tempMap.put(id, Collections.singletonList(p));
 		}
 		
