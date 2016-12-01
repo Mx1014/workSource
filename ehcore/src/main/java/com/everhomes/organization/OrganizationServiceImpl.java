@@ -5739,20 +5739,22 @@ System.out.println();
 				if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT){
 					departments.add(orgDTO);
 				}
+				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, dto.getContactToken(), org.getPath()));
 				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, dto.getContactToken(), org.getPath()));
+				departments.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
 				departments = departments.stream().map(r -> {
 					String[] pathStrs = r.getPath().split("/");
 					String pathName = "";
 					for (String idStr: pathStrs) {
 						if(!"".equals(idStr)){
 							Long id = Long.valueOf(idStr);
-							if(id.equals(r.getDirectlyEnterpriseId())){
-								Organization o = organizationProvider.findOrganizationById(r.getDirectlyEnterpriseId());
-								pathName = "未知";
-								if(null != o )pathName = o.getName();
+							Organization o = organizationProvider.findOrganizationById(id);
+							if(id.equals(organizationId)){
+								pathName = "start";
+							}else if("start".equals(pathName)){
+								pathName = null != o ? o.getName() : "未知";
 							}else if(!"".equals(pathName)){
-								Organization o = organizationProvider.findOrganizationById(id);
-								if(null != o )pathName += "-" + o.getName();
+								pathName += null != o ?  "-" + o.getName() : "-未知";
 							}
 						}
 					}
@@ -7695,6 +7697,8 @@ System.out.println();
 
 		List<String> groupTypes = new ArrayList<String>();
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
 		groupTypes.add(OrganizationGroupType.JOB_LEVEL.getCode());
 		groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
 

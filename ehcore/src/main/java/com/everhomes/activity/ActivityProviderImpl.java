@@ -6,6 +6,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
+import com.everhomes.server.schema.tables.daos.EhActivityCategoriesDao;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
@@ -525,6 +527,17 @@ public class ActivityProviderImpl implements ActivityProivider {
         
         return result;
 	}
-	
-	
+
+    @Override
+    public ActivityCategories findActivityCategoriesById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class, id));
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        com.everhomes.server.schema.tables.pojos.EhActivityCategories result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, ActivityCategories.class);
+    }
+
+
 }

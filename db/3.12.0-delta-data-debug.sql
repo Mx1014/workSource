@@ -20,24 +20,30 @@ INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `tem
 
 -- 物业报修2.6 merge from pmtask-delta-data.sql by sw 20161128
 update eh_pm_tasks set address_type = 1 where address_type is NULL;
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ('340', 'pmtask', '10007', 'zh_CN', '该单已被其他人处理，请返回主界面刷新任务');
+SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'pmtask', '10007', 'zh_CN', '该单已被其他人处理，请返回主界面刷新任务');
 
 delete from eh_locale_templates where scope = 'pmtask.notification' and code = 7;
 
+SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-	VALUES ('205', 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个${categoryName}单，请尽快处理', '0');
+	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个${categoryName}单，请尽快处理', '0');
 
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-	VALUES ('350', 'sms.default.yzx', '15', 'zh_CN', '物业任务3-深业', '32949', '999992');
+	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'sms.default.yzx', '15', 'zh_CN', '物业任务3-深业', '32949', '999992');
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
-VALUES ('20190', '统计', '20100', NULL, null, '0', '2', '/20000/20100/20190', 'park', '245');
+	VALUES ('20190', '统计', '20100', NULL, null, '0', '2', '/20000/20100/20190', 'park', '245');
 INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', null, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
 INSERT INTO `eh_web_menus` VALUES ('20192', '人员评分统计', '20190', null, 'staffScore_statistics', '0', '2', '/20000/20100/20190/20192', 'park', '181');
 
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
+
+SET @eh_launch_pad_items = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999992', '0', '0', '0', '/home', 'Bizs', '物业测试', '物业测试', 'cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ', '1', '1', '14', '{\"url\":\"http://alpha.lab.everhomes.com/property_service/index.html?taskCategoryId=200903&hideNavigationBar=1#/my_service#sign_suffix\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'default', '0', NULL);
 
 
 -- 组织架构 add by sw 20161128
@@ -511,6 +517,15 @@ DELETE FROM `eh_acls` WHERE `privilege_id` in (604, 605) AND `role_id` = 1005;
 
 -- 更新acl表
 UPDATE `eh_acls` SET `role_type` = 'EhAclRoles' WHERE `role_type` IS NULL AND `owner_type` = 'EhOrganizations';
+
+
+INSERT INTO `eh_web_menu_privileges` VALUES ('300', '907', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ('301', '907', '20191', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
+
+--
+-- 修改能耗管理的入口页面地址  add by xq.tian  2016/11/30
+--
+UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"http://alpha.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_name` = 'Energy' AND `namespace_id` = '999992';
 
 -- 设备巡检增加设备类型 add by xiongying20161129
 SET @category_id = (SELECT MAX(id) FROM `eh_categories`);

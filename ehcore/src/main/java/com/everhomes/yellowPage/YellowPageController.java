@@ -6,6 +6,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.yellowPage.*;
 import com.everhomes.search.ApartmentRequestInfoSearcher;
+import com.everhomes.search.ReserveRequestInfoSearcher;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.user.CustomRequestConstants;
@@ -40,7 +41,12 @@ public class YellowPageController  extends ControllerBase {
 
     @Autowired
 	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
-    
+
+    @Autowired
+    private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
+
+
+
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
     @RestReturn(value=YellowPageDTO.class)
@@ -346,6 +352,16 @@ public class YellowPageController  extends ControllerBase {
     	if(CustomRequestConstants.SETTLE_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
     		resp = this.settleRequestInfoSearcher.searchRequestInfo(cmd);
     	}
+
+        if(cmd.getTemplateType() != null && cmd.getTemplateType().length() > 7
+                && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(cmd.getTemplateType().substring(0, 7))) {
+            resp = this.reserveRequestInfoSearcher.searchRequestInfo(cmd);
+        }
+
+        if(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
+            resp = this.apartmentRequestInfoSearcher.searchRequestInfo(cmd);
+        }
+
     	 
     	RestResponse response = new RestResponse(resp);
     	response.setErrorCode(ErrorCodes.SUCCESS);
@@ -384,6 +400,22 @@ public class YellowPageController  extends ControllerBase {
           	response.setErrorDescription("OK");
           	return response;
           }
+
+    /**
+     * <b>URL: /yellowPage/syncReserveRequestInfo</b>
+     * <p> 同步申请信息</p>
+     */
+    @RequestMapping("syncReserveRequestInfo")
+    @RestReturn(value = String.class)
+    public RestResponse syncReserveRequestInfo() {
+
+        this.reserveRequestInfoSearcher.syncFromDb();
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <b>URL: /yellowPage/syncApartmentRequestInfo</b>
