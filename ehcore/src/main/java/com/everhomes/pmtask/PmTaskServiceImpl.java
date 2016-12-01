@@ -1518,14 +1518,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 							for(PmTaskTarget t: targets) {
 								for(Category taskCategory: categories) {
 									List<PmTask> tasks = pmTaskProvider.listPmTask4Stat(PmTaskOwnerType.COMMUNITY.getCode(), community.getId(), taskCategory.getId(),
-											t.getTargetId());
+											t.getTargetId(), startDate, endDate);
 									double starSum = 0;
 									int size = tasks.size();
 									for(PmTask task: tasks) {
 										starSum += task.getOperatorStar();
 									}
 									PmTaskTargetStatistic statistic = new PmTaskTargetStatistic();
-									statistic.setOwnerId(community.getId());
+									statistic.setOwnerId(community.getId());   
 									statistic.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
 									statistic.setCreateTime(new Timestamp(now));
 									statistic.setDateStr(startDate);
@@ -2400,8 +2400,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		SearchTaskOperatorStatisticsResponse response = new SearchTaskOperatorStatisticsResponse();
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 
-		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, cmd.getOwnerId(), cmd.getTaskCategoryId(), null,
+		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, null, cmd.getTaskCategoryId(), null,
 				new Timestamp(cmd.getDateStr()), cmd.getPageAnchor(), cmd.getPageSize());
+//		if(null == cmd.getOwnerId()) {
+			list = mergeTaskOperatorList(list);
+//		}
+		
 		int size = list.size();
 		if(size > 0){
     		response.setRequests(list.stream().map(r -> {
@@ -2429,6 +2433,58 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 
+	private List<PmTaskTargetStatistic> mergeTaskOperatorList(List<PmTaskTargetStatistic> list) {
+		
+		List<PmTaskTargetStatistic> result = new ArrayList<PmTaskTargetStatistic>();
+		Map<Long, List<PmTaskTargetStatistic>> tempMap = new HashMap<>();
+		for(PmTaskTargetStatistic p: list){
+			Long id = p.getTargetId();
+			if(tempMap.containsKey(id)){
+				List<PmTaskTargetStatistic> ptsList = tempMap.get(id);
+				List<PmTaskTargetStatistic> temp = new ArrayList<PmTaskTargetStatistic>();
+				temp.addAll(ptsList);
+				temp.add(p);
+				tempMap.put(id, temp);
+				continue;
+			}
+			p.setOwnerId(null);
+			tempMap.put(id, Collections.singletonList(p));
+		}
+		
+		for(List<PmTaskTargetStatistic>  l:tempMap.values()){
+			l = mergeTaskOperatorCategoryList(l);
+			result.addAll(l);
+		}
+		return result;
+	}
+	
+	private List<PmTaskTargetStatistic> mergeTaskOperatorCategoryList(List<PmTaskTargetStatistic> list) {
+		
+		Map<Long, PmTaskTargetStatistic> tempMap = new HashMap<>();
+		for(PmTaskTargetStatistic p: list){
+			Long id = p.getTaskCategoryId();
+			PmTaskTargetStatistic pts = null;
+			if(tempMap.containsKey(id)){
+				pts = tempMap.get(id);
+				if(pts.getAvgStar().intValue() != 0) {
+					if(p.getAvgStar().intValue() != 0)
+						pts.setAvgStar(pts.getAvgStar().add(p.getAvgStar()).divide(new BigDecimal(2)));
+				}else {
+					pts.setAvgStar(pts.getAvgStar().add(p.getAvgStar()));
+				}
+				continue;
+			}
+			tempMap.put(id, p);
+		}
+	
+		List<PmTaskTargetStatistic> result = new ArrayList<PmTaskTargetStatistic>();
+		for(PmTaskTargetStatistic p1:tempMap.values()){
+			result.add(p1);
+		}
+		
+		return result;
+	}
+	
 	@Override
 	public void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp) {
 		Integer namespaceId = cmd.getNamespaceId();
