@@ -23,6 +23,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -40,6 +41,8 @@ import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
+import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
+import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
@@ -380,6 +383,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
+		Long communityId = appNamespaceMapping.getCommunityId();
 		
 		List<CustomerRental> list = JSONObject.parseArray(varDataList, CustomerRental.class);
 		for (CustomerRental customerRental : list) {
@@ -406,6 +410,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.createOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationCommunityRequest(communityId, organization);
 				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
 			}else {
@@ -416,12 +421,35 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				organization.setNamespaceOrganizationToken(customerRental.getNumber());
 				organizationProvider.updateOrganization(organization);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationCommunityRequest(communityId, organization);
 				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateContracts(organization, customerRental.getContracts());
 			}
 		}
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~end sync insert or update rentings, total="+list.size());
+		}
+	}
+
+	private void insertOrUpdateOrganizationCommunityRequest(Long communityId, Organization organization) {
+		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
+		if (organizationCommunityRequest == null) {
+			organizationCommunityRequest = new OrganizationCommunityRequest();
+			organizationCommunityRequest.setCommunityId(communityId);
+			organizationCommunityRequest.setMemberType(OrganizationCommunityRequestType.Organization.getCode());
+			organizationCommunityRequest.setMemberId(organization.getId());
+			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+			organizationCommunityRequest.setCreatorUid(1L);
+			organizationCommunityRequest.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organizationCommunityRequest.setOperatorUid(1L);
+			organizationCommunityRequest.setApproveTime(organizationCommunityRequest.getCreateTime());
+			organizationCommunityRequest.setUpdateTime(organizationCommunityRequest.getCreateTime());
+			organizationProvider.createOrganizationCommunityRequest(organizationCommunityRequest);
+		}else {
+			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.ACTIVE.getCode());
+			organizationCommunityRequest.setOperatorUid(1L);
+			organizationCommunityRequest.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
 		}
 	}
 
