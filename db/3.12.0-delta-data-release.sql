@@ -558,14 +558,14 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10058, '0', '白领活动 管理员', '白领活动 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10059, '0', 'OE大讲堂 管理员', 'OE大讲堂 业务模块权限', NULL);
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1001', '0', '1', UTC_TIMESTAMP());
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1005', '0', '1', UTC_TIMESTAMP());
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1001', '0', '1', UTC_TIMESTAMP());
-INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
-	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1005', '0', '1', UTC_TIMESTAMP());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
 	VALUES ('10610', '白领活动', '10000', '/10000/10610', '0', '2', '2', '0', '2016-11-28 10:21:45');
