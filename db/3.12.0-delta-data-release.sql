@@ -18,12 +18,12 @@ INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title
     VALUES ('9', 'Apartment', '预约看楼', '预约看楼', '1', '1', ' {"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"userName","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"mobile","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"organizationName","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"areaSize","fieldDisplayName":"面积需求","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入面积需求","requiredFlag":"1","dynamicFlag":"0"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0","dynamicFlag":"0"}]}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ', '1', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (10, '999985', '9');
 
-<<<<<<< HEAD
+
 --
 -- 修改能耗管理的入口页面地址  add by xq.tian  2016/11/30
 --
 UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"http://core.zuolin.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_name` = 'Energy' AND `namespace_id` = '999992';
-=======
+
 -- 物业报修2.6 merge from pmtask-delta-data.sql by sw 20161128
 update eh_pm_tasks set address_type = 1 where address_type is NULL;
 SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
@@ -50,8 +50,34 @@ SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 
--- 组织架构 add by sw 20161128
+INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '904', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '805', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+ select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '331', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '332', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+ select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '333', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '920', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '805', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 2;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '332', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 2;
+
 
 -- 组织架构 add by sw 20161128
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10000', '信息发布', '0', '/10000', '0', '1', '2', '0', UTC_TIMESTAMP());
