@@ -311,7 +311,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (SearchHit sd : docs) {
             try {
             	RequestInfoDTO dto = new RequestInfoDTO();
-            	dto.setId(Long.parseLong(sd.getId()));
+            	String[] ids = sd.getId().split("-");
+            	dto.setId(Long.parseLong(ids[0]));
             	Map<String, Object> source = sd.getSource();
             	
             	dto.setCreatorName(String.valueOf(source.get("creatorName")));
