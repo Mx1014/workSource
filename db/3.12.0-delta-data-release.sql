@@ -539,4 +539,4 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 update eh_launch_pad_items set action_data = '{"categoryId":1000001}' where id in(112574, 112585) and namespace_id = 999985;
 
 INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000001', 'OE大讲堂', '/1000001', '0', '2', '1', UTC_TIMESTAMP(), '999985');
-INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000000', '白领活动', '/1000000', '0', '2', '1', UTC_TIMESTAMP(), '999985')
+INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000000', '白领活动', '/1000000', '0', '2', '1', UTC_TIMESTAMP(), '999985');
