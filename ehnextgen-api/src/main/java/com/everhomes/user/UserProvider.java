@@ -63,7 +63,8 @@ public interface UserProvider {
     void cleanupZombies();
     List<InvitationRoster> listInvitationRostor(CrossShardListingLocator locator, int count, 
             ListingQueryBuilderCallback queryBuilderCallback);
-	List<User> listUserByKeyword(String keyword,Integer namespaceId, CrossShardListingLocator locator, int pageSize);
+	List<User> listUserByKeyword(String keyword, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
+	List<User> listUserByKeyword(String keyword,Byte executiveFlag, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
 	User findUserByNamespace(Integer namespaceId, String namespaceUserToken);
 	void createUserCommunity(UserCommunity userCommunity);
 	UserCommunity findUserCommunityByOwnerAndCommunity(long ownerUid, long communityId);
