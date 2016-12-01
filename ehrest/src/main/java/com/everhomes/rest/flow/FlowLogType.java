@@ -1,7 +1,7 @@
 package com.everhomes.rest.flow;
 
 public enum FlowLogType {
-	BUTTON_FIRED("button_fired"), NODE_ENTER("node enter"), NODE_TRACKER("node_tracker"), FLOW_SUPERVISOR("flow_supervisor");
+	BUTTON_FIRED("button_fired"), NODE_ENTER("node enter"), STEP_TRACKER("step_tracker"), NODE_TRACKER("node_tracker"), FLOW_SUPERVISOR("flow_supervisor");
 	
 	private String code;
     private FlowLogType(String code) {

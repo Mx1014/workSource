@@ -416,7 +416,7 @@ public interface FlowService {
 	 * @param flowCaseId
 	 * @return
 	 */
-	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId,
+	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long userId,
 			FlowUserType flowUserType);
 	
 	//TODO 日志信息分类：

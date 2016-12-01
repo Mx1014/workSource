@@ -8,12 +8,15 @@ import com.everhomes.rest.flow.FlowStepType;
 public class FlowGraphTrackerAction extends FlowGraphAction {
 	FlowStepType stepType;
 	private FlowService flowService;
+	private FlowEventLogProvider flowEventLogProvider;
 
 	FlowGraphTrackerAction() {
-		flowService = PlatformContext.getComponent(FlowService.class);
+		this(null);
 	}
 	
 	FlowGraphTrackerAction(FlowStepType step) {
+		flowService = PlatformContext.getComponent(FlowService.class);
+		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
 		this.stepType = step;
 	}
 	
@@ -29,6 +32,7 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 	public void fireAction(FlowCaseState ctx, FlowGraphEvent event)
 			throws FlowStepErrorException {
 		FlowEventLog log = new FlowEventLog();
+		log.setId(flowEventLogProvider.getNextId());
 		log.setFlowMainId(ctx.getFlowGraph().getFlow().getModuleId());
 		log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
 		log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
@@ -38,7 +42,7 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		log.setFlowUserId(ctx.getOperator().getId());
 		log.setFlowUserName(ctx.getOperator().getNickName());
 		log.setLogContent(flowService.parseActionTemplate(ctx, this.getFlowAction().getId(), this.getFlowAction().getRenderText()));
-		
+		log.setStepCount(ctx.getFlowCase().getStepCount());
 		log.setLogType(FlowLogType.NODE_TRACKER.getCode());
 		log.setTrackerApplier(this.getFlowAction().getTrackerApplier());
 		log.setTrackerProcessor(this.getFlowAction().getTrackerProcessor());

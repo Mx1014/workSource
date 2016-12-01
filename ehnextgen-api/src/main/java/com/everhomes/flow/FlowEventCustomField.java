@@ -15,8 +15,8 @@ public enum FlowEventCustomField {
     BUTTON_FIRED_FROM_NODE("integral_tag1", "integralTag1", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG1),
     BUTTON_FIRED_STEP("string_tag1", "stringTag1", Tables.EH_FLOW_EVENT_LOGS.STRING_TAG1),
     
-    TRACKER_PROCESSOR("integral_tag1", "integralTag1", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG1),
-    TRACKER_APLIER("integral_tag2", "integralTag2", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG2),
+    TRACKER_PROCESSOR("integral_tag1", "integralTag1", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG1),
+    TRACKER_APLIER("integral_tag2", "integralTag2", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG2),
 
     NONE("integral_tag2", "integralTag2", Tables.EH_FLOW_EVENT_LOGS.INTEGRAL_TAG2);
     

@@ -24,10 +24,12 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.FLowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
+import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
+import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
@@ -36,6 +38,8 @@ import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
+import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
@@ -219,10 +223,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Test
     public void testFlowGraph() {
-    	Integer namespaceId = 0;
-    	Long moduleId = 111l;
     	String moduleType = FlowModuleType.NO_MODULE.getCode();
-		Long ownerId = 1001027l;
+		Long ownerId = orgId;
 		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
     	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
     	Assert.assertTrue(flow.getFlowVersion().equals(1));
@@ -234,6 +236,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(node1.getApplierButtons().size() == 4);
     	Assert.assertTrue(node1.getProcessorButtons().size() == 5);
     	Assert.assertTrue(node1.getMessageAction() != null);
+    	Assert.assertTrue(node1.getTrackApproveEnter() != null);
     	
     	for(FlowGraphButton btn : node1.getProcessorButtons()) {
     		if(btn.getFlowButton().getFlowStepType().equals(FlowStepType.APPROVE_STEP.getCode())) {
@@ -247,30 +250,6 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     private void setTestContext(Long userId) {
     	User user = userProvider.findUserById(userId);
     	UserContext.current().setUser(user);;
-    }
-    
-    @Test
-    public void testFlowCase() {
-    	Long applyUserId = testUser1.getId();
-    	setTestContext(applyUserId);
-    	
-    	String moduleType = FlowModuleType.NO_MODULE.getCode();
-		Long ownerId = 1001027l;
-		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
-    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
-    	
-    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
-    	cmd.setApplyUserId(applyUserId);
-    	cmd.setFlowMainId(flow.getFlowMainId());
-    	cmd.setFlowVersion(flow.getFlowVersion());
-    	cmd.setReferId(0l);
-    	cmd.setReferType("test-type");
-    	
-    	Random r = new Random();
-    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
-    	
-    	FlowCase flowCase = flowService.createFlowCase(cmd);
-    	Assert.assertTrue(flowCase.getId() > 0);
     }
     
     private void addNodeProcessor(FlowNodeDTO dto, Long orgId) {
@@ -329,15 +308,19 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     private void updateNodeTracker(FlowNodeDTO dto, Long orgId) {
     	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
+    	cmd.setFlowNodeId(dto.getId());
+    	
     	FlowActionInfo action = createActionInfo("test-track-enter-action-" + dto.getId(), orgId);
     	action.setTrackerApplier(1l);
     	action.setTrackerProcessor(1l);
+    	cmd.setEnterTracker(action);
     	
     	action = createActionInfo("test-track-reject-action-" + dto.getId(), orgId);
     	action.setTrackerApplier(0l);
     	action.setTrackerProcessor(1l);
     	
     	cmd.setRejectTracker(action);
+    	flowService.updateFlowNodeTracker(cmd);
     }
     
     private List<Long> getOrgUsers(Long id) {
@@ -398,6 +381,30 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     }
     
     @Test
+    public void testFlowCase() {
+    	Long applyUserId = testUser1.getId();
+    	setTestContext(applyUserId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = 1001027l;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+    	cmd.setApplyUserId(applyUserId);
+    	cmd.setFlowMainId(flow.getFlowMainId());
+    	cmd.setFlowVersion(flow.getFlowVersion());
+    	cmd.setReferId(0l);
+    	cmd.setReferType("test-type");
+    	
+    	Random r = new Random();
+    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
+    	
+    	FlowCase flowCase = flowService.createFlowCase(cmd);
+    	Assert.assertTrue(flowCase.getId() > 0);
+    }
+    
+    @Test
     public void testFlowCaseApplierSearch() {
     	Long userId = testUser1.getId();
     	setTestContext(userId);
@@ -409,7 +416,124 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     }
     
     @Test
-    public void testFlowCaseButton() {
+    public void testFlowCaseDetailStep0() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
     	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    	
+    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
+    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getNodes().size() == 5);
+    	Assert.assertTrue(dto.getNodes().get(1).getLogs().size() == 1);
+    	Assert.assertTrue(dto.getNodes().get(1).getIsCurrentNode().equals((byte)1));
+    }
+    
+    @Test
+    public void testFlowCaseSteps() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	Assert.assertTrue(flow.getFlowVersion().equals(1));
+    	
+    	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), flow.getFlowVersion());
+    	Assert.assertTrue(flowGraph.getNodes().size() == 5);
+    	
+    	int nodeIndex = 1;
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    			, flow.getFlowVersion()
+    			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	Assert.assertTrue(flowButton != null);
+    	
+    	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	
+    	ListButtonProcessorSelectionsCommand selCmd = new ListButtonProcessorSelectionsCommand();
+    	selCmd.setButtonId(flowButton.getId());
+    	ListFlowUserSelectionResponse selResp = flowService.listButtonProcessorSelections(selCmd);
+    	Assert.assertTrue(selResp.getSelections().size() > 0);
+    	
+    	FlowFireButtonCommand fireButton = new FlowFireButtonCommand();
+    	fireButton.setButtonId(flowButton.getId());
+    	fireButton.setContent("test-approve-content");
+    	fireButton.setFlowCaseId(flowCaseId);
+    	fireButton.setTitle("test-title");
+    	fireButton.setEntityId(selResp.getSelections().get(0).getId());
+    	fireButton.setFlowEntityType(FlowEntityType.FLOW_SELECTION.getCode());
+    	fireButton.getImages().add("cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ");
+    	flowService.fireButton(fireButton);
+    	
+    	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
+    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getNodes().size() == 5);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getAllowComment().equals((byte)1));
+    	
+    	//step 2 test
+    	++nodeIndex;
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    			, flow.getFlowVersion()
+    			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	Assert.assertTrue(flowButton != null);
+    	
+    	selCmd = new ListButtonProcessorSelectionsCommand();
+    	selCmd.setButtonId(flowButton.getId());
+    	selResp = flowService.listButtonProcessorSelections(selCmd);
+    	Assert.assertTrue(selResp.getSelections().size() > 0);
+    	
+    	fireButton = new FlowFireButtonCommand();
+    	fireButton.setButtonId(flowButton.getId());
+    	fireButton.setContent("test-approve-content");
+    	fireButton.setFlowCaseId(flowCaseId);
+    	fireButton.setTitle("test-title");
+    	fireButton.setEntityId(selResp.getSelections().get(0).getId());
+    	fireButton.setFlowEntityType(FlowEntityType.FLOW_SELECTION.getCode());
+    	fireButton.getImages().add("cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ");
+    	flowService.fireButton(fireButton);
+    	
+    	dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
+    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getNodes().size() == 5);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
+    	
+    	//step 3 test
+    	++nodeIndex;
+    	flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    			, flow.getFlowVersion()
+    			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	Assert.assertTrue(flowButton != null);
+    	
+    	selCmd = new ListButtonProcessorSelectionsCommand();
+    	selCmd.setButtonId(flowButton.getId());
+    	selResp = flowService.listButtonProcessorSelections(selCmd);
+    	Assert.assertTrue(selResp.getSelections().size() > 0);
+    	
+    	fireButton = new FlowFireButtonCommand();
+    	fireButton.setButtonId(flowButton.getId());
+    	fireButton.setContent("test-approve-content");
+    	fireButton.setFlowCaseId(flowCaseId);
+    	fireButton.setTitle("test-title");
+    	fireButton.setEntityId(selResp.getSelections().get(0).getId());
+    	fireButton.setFlowEntityType(FlowEntityType.FLOW_SELECTION.getCode());
+    	fireButton.getImages().add("cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ");
+    	flowService.fireButton(fireButton);
+    	
+    	dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
+    	Assert.assertTrue(dto.getButtons().size() == 0);
+    	Assert.assertTrue(dto.getNodes().size() == 5);
     }
 }

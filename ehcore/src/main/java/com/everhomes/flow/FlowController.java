@@ -26,6 +26,7 @@ import com.everhomes.rest.flow.ListFlowModulesResponse;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
+import com.everhomes.user.UserContext;
 
 @RestDoc(value="Flow controller", site="core")
 @RestController
@@ -57,7 +58,8 @@ public class FlowController extends ControllerBase {
     @RequestMapping("getFlowCaseDetailById")
     @RestReturn(value=FlowCaseDetailDTO.class)
     public RestResponse getFlowCaseDetailById(@Valid GetFlowCaseDetailByIdCommand cmd) {
-        RestResponse response = new RestResponse(flowService.getFlowCaseDetail(cmd.getFlowCaseId(), FlowUserType.fromCode(cmd.getFlowUserType())));
+    	Long userId = UserContext.current().getUser().getId();
+        RestResponse response = new RestResponse(flowService.getFlowCaseDetail(cmd.getFlowCaseId(), userId, FlowUserType.fromCode(cmd.getFlowUserType())));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -93,7 +95,7 @@ public class FlowController extends ControllerBase {
     
     /**
      * <b>URL: /flow/listButtonSelections</b>
-     * <p> 对节点进行评价 </p>
+     * <p> 列出按钮对应的用户列表 </p>
      * @return 返回评价信息
      */
     @RequestMapping("listButtonProcessorSelections")

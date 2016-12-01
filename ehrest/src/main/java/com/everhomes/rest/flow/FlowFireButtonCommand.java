@@ -1,5 +1,6 @@
 package com.everhomes.rest.flow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -30,6 +31,10 @@ public class FlowFireButtonCommand {
 	
 	private Long entityId;
 	private String flowEntityType;
+	
+	public FlowFireButtonCommand() {
+		images = new ArrayList<String>();
+	}
 
 	public Long getFlowCaseId() {
 		return flowCaseId;

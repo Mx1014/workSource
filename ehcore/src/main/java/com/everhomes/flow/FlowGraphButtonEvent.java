@@ -68,7 +68,6 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 
 	@Override
 	public void fire(FlowCaseState ctx) {
-		//TODO create logs
 		FlowGraphButton btn = ctx.getFlowGraph().getGraphButton(cmd.getButtonId());
 		FlowStepType nextStep = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
 		ctx.setStepType(nextStep);

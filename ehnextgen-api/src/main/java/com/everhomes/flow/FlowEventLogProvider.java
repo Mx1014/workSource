@@ -27,7 +27,9 @@ public interface FlowEventLogProvider {
 	List<FlowCaseDetail> findProcessorFlowCases(ListingLocator locator,
 			int count, SearchFlowCaseCommand cmd);
 
-	List<FlowEventLog> findEventLogsByNodeId(Long caseId, Long nodeId,
-			FlowUserType flowUserType);
+	List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId,
+			Long stepCount, FlowUserType flowUserType);
+
+	List<FlowEventLog> findStepEventLogs(Long caseId);
 
 }

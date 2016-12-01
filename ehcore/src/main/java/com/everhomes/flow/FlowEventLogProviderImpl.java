@@ -254,12 +254,39 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
     
     @Override
-    public List<FlowEventLog> findEventLogsByNodeId(Long caseId, Long nodeId, FlowUserType flowUserType) {
+    public List<FlowEventLog> findStepEventLogs(Long caseId) {
     	ListingLocator locator = new ListingLocator();
     	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(
 					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+				
+				return query;
+			}
+    	});    	
+    }
+    
+    @Override
+    public List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, FlowUserType flowUserType) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
+				query.addConditions(
+						Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_TRACKER.getCode())
+						);
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
+				if(flowUserType == FlowUserType.APPLIER) {
+					query.addConditions(FlowEventCustomField.TRACKER_APLIER.getField().eq(1l));
+				} else if(flowUserType == FlowUserType.PROCESSOR) {
+					query.addConditions(FlowEventCustomField.TRACKER_PROCESSOR.getField().eq(1l));
+				}
+				
 				return query;
 			}
     	});

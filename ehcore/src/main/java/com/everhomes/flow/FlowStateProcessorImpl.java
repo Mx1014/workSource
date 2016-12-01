@@ -12,6 +12,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
@@ -76,7 +77,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	public FlowCaseState prepareButtonFire(UserInfo logonUser, FlowFireButtonCommand cmd) {
 		FlowCaseState ctx = new FlowCaseState();
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
-		if(flowCase == null) {
+		if(flowCase == null 
+				|| flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
+				|| flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
+				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
 		}
 		ctx.setFlowCase(flowCase);
@@ -119,6 +123,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		event.setUserType(FlowUserType.fromCode(button.getFlowButton().getFlowUserType()));
 		event.setCmd(cmd);
 		event.setSubject(subject);
+		event.setFiredUser(ctx.getOperator());
 		ctx.setCurrentEvent(event);
 		
 		return ctx;
@@ -132,7 +137,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			event.fire(ctx);
 		}
 		FlowGraphNode nextNode = ctx.getNextNode();
-		if(nextNode != currentNode) {
+		if(ctx.getStepType() != null) {
 			try {
 				if(currentNode != null) {
 					currentNode.stepLeave(ctx, nextNode);	

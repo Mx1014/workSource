@@ -1,5 +1,6 @@
 package com.everhomes.rest.flow;
 
+import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -21,10 +22,15 @@ public class FlowNodeLogDTO {
 	private Integer nodeLevel;
 	private String nodeName;
 	private Byte allowComment;
+	private Byte isCurrentNode;
 
 	@ItemType(FlowEventLogDTO.class)
 	private List<FlowEventLogDTO> logs;
 
+	public FlowNodeLogDTO() {
+		logs = new ArrayList<>();
+	}
+	
 	public Long getNodeId() {
 		return nodeId;
 	}
@@ -63,6 +69,14 @@ public class FlowNodeLogDTO {
 
 	public void setNodeLevel(Integer nodeLevel) {
 		this.nodeLevel = nodeLevel;
+	}
+
+	public Byte getIsCurrentNode() {
+		return isCurrentNode;
+	}
+
+	public void setIsCurrentNode(Byte isCurrentNode) {
+		this.isCurrentNode = isCurrentNode;
 	}
 
 	@Override
