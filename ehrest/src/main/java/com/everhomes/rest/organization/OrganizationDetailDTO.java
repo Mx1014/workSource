@@ -37,7 +37,7 @@ import com.everhomes.util.StringHelper;
  *  <li>serviceUserId: 客服服务人员id</li>
  *  <li>serviceUserName: 客服服务人员名称</li>
  *  <li>serviceUserPhone: 客服服务人员电话</li>
- *  <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationMemberDTO}</li>
+ *  <li>adminMembers: 管理员列表，参考{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  * </ul>
  *
  */
@@ -95,7 +95,7 @@ public class OrganizationDetailDTO {
     private String serviceUserPhone;
     
     @ItemType(OrganizationMemberDTO.class)
-    private List<OrganizationMemberDTO> adminMembers;
+    private List<OrganizationContactDTO> adminMembers;
     
 	public Integer getSignupCount() {
 		return signupCount;
@@ -109,13 +109,14 @@ public class OrganizationDetailDTO {
 
 
 
-	public List<OrganizationMemberDTO> getAdminMembers() {
+
+	public List<OrganizationContactDTO> getAdminMembers() {
 		return adminMembers;
 	}
 
 
 
-	public void setAdminMembers(List<OrganizationMemberDTO> adminMembers) {
+	public void setAdminMembers(List<OrganizationContactDTO> adminMembers) {
 		this.adminMembers = adminMembers;
 	}
 

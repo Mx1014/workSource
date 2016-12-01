@@ -284,4 +284,6 @@ public interface RolePrivilegeService {
 	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType);
 
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds);
+
+	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
 }
