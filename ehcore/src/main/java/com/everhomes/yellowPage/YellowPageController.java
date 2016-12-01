@@ -35,19 +35,8 @@ public class YellowPageController  extends ControllerBase {
 	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
-	
-	@Autowired
-	private SettleRequestInfoSearcher settleRequestInfoSearcher;
 
-    @Autowired
-	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
-
-    @Autowired
-    private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
-
-
-
-    @RequireAuthentication(false)
+	@RequireAuthentication(false)
     @RequestMapping("getYellowPageDetail")
     @RestReturn(value=YellowPageDTO.class)
     public RestResponse getYellowPageDetail(@Valid GetYellowPageDetailCommand cmd) {
@@ -343,24 +332,9 @@ public class YellowPageController  extends ControllerBase {
     @RequestMapping("searchRequestInfo")
     @RestReturn(value = SearchRequestInfoResponse.class)
     public RestResponse searchRequestInfo(@Valid SearchRequestInfoCommand cmd) {
-    	
-    	SearchRequestInfoResponse resp = new SearchRequestInfoResponse();
-    	if(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
-    		resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
-    	}
-    	
-    	if(CustomRequestConstants.SETTLE_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
-    		resp = this.settleRequestInfoSearcher.searchRequestInfo(cmd);
-    	}
 
-        if(cmd.getTemplateType() != null && cmd.getTemplateType().length() > 7
-                && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(cmd.getTemplateType().substring(0, 7))) {
-            resp = this.reserveRequestInfoSearcher.searchRequestInfo(cmd);
-        }
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchRequestInfo(cmd);
 
-        if(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM.equals(cmd.getTemplateType())) {
-            resp = this.apartmentRequestInfoSearcher.searchRequestInfo(cmd);
-        }
 
     	 
     	RestResponse response = new RestResponse(resp);
@@ -385,51 +359,5 @@ public class YellowPageController  extends ControllerBase {
        	return response;
        }
        
-       /**
-      	 * <b>URL: /yellowPage/syncSettleRequestInfo</b>
-      	 * <p> 同步申请信息</p>
-      	 */
-          @RequestMapping("syncSettleRequestInfo")
-          @RestReturn(value = String.class)
-          public RestResponse syncSettleRequestInfo() {
-          	
-          	this.settleRequestInfoSearcher.syncFromDb();
-          	 
-          	RestResponse response = new RestResponse();
-          	response.setErrorCode(ErrorCodes.SUCCESS);
-          	response.setErrorDescription("OK");
-          	return response;
-          }
-
-    /**
-     * <b>URL: /yellowPage/syncReserveRequestInfo</b>
-     * <p> 同步申请信息</p>
-     */
-    @RequestMapping("syncReserveRequestInfo")
-    @RestReturn(value = String.class)
-    public RestResponse syncReserveRequestInfo() {
-
-        this.reserveRequestInfoSearcher.syncFromDb();
-
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
-    /**
-     * <b>URL: /yellowPage/syncApartmentRequestInfo</b>
-     * <p> 同步申请信息</p>
-     */
-    @RequestMapping("syncApartmentRequestInfo")
-    @RestReturn(value = String.class)
-    public RestResponse syncApartmentRequestInfo() {
-
-        this.apartmentRequestInfoSearcher.syncFromDb();
-
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+       
 }
