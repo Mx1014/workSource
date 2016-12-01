@@ -883,14 +883,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			pmTaskSearch.feedDoc(task);
 			
-	    	Long organizationId = cmd.getOrganizationId();
-	    	if(null == organizationId) {
-	            List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(ownerId);
-	            if(null != orgs && orgs.size() != 0) {
-	            	organizationId = orgs.get(0).getOrganizationId();
-	            }
-			}
-	    	
 	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(), 
 	    			PmTaskOperateType.EXECUTOR.getCode(), null, null);
 	    	int size = targets.size();
@@ -2410,13 +2402,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(size > 0){
     		response.setRequests(list.stream().map(r -> {
     			TaskOperatorStatisticsDTO dto = new TaskOperatorStatisticsDTO();
-    			List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(r.getOwnerId());
-	            if(null != orgs && orgs.size() != 0) {
-	            	Long organizationId = orgs.get(0).getOrganizationId();
-	            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), organizationId);
-	            	if(null != member)
-	            	dto.setOperatorName(member.getContactName());
-	            }
+//    			
+	            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), cmd.getOrganizationId());
+	            	if(null != member) {
+	            		dto.setOperatorName(member.getContactName());
+	            	}else {
+	            		LOGGER.error("OrganizationMember not found, orgId={}, targetId={}, ownerId={}", cmd.getOrganizationId(), r.getTargetId(), r.getOwnerId());
+	            	}
+	            	
     			dto.setTaskCategoryId(r.getTaskCategoryId());
     			Category taskCategory = checkCategory(r.getTaskCategoryId());
     			dto.setTaskCategoryName(taskCategory.getName());
@@ -2516,13 +2509,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			tempRow.createCell(0).setCellValue(community.getName());
 			tempRow.createCell(1).setCellValue(taskCategory.getName());
 			
-			List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(pts.getOwnerId());
-            if(null != orgs && orgs.size() != 0) {
-            	Long organizationId = orgs.get(0).getOrganizationId();
-            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(pts.getTargetId(), organizationId);
+            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(pts.getTargetId(), cmd.getOrganizationId());
             	if(null != member)
             		tempRow.createCell(2).setCellValue(member.getContactName());
-            }
 			
 			tempRow.createCell(3).setCellValue(pts.getAvgStar().doubleValue());
 			
