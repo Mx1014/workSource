@@ -815,8 +815,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
 		OrganizationServiceUser user = getServiceUser(organizationDetailDTO.getOrganizationId(), organizationDetailDTO.getServiceUserId());
-		organizationDetailDTO.setServiceUserName(user.getServiceUserName());
-		organizationDetailDTO.setServiceUserPhone(user.getServiceUserPhone());
+		if (user != null) {
+			organizationDetailDTO.setServiceUserName(user.getServiceUserName());
+			organizationDetailDTO.setServiceUserPhone(user.getServiceUserPhone());
+		}
 	}
 	
 	@Override
@@ -8293,9 +8295,11 @@ System.out.println();
 		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
 		
 		OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
-		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
-		contractDTO.setServiceUserName(user.getServiceUserName());
-		contractDTO.setServiceUserPhone(user.getServiceUserPhone());
+		if (user != null) {
+			contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+			contractDTO.setServiceUserName(user.getServiceUserName());
+			contractDTO.setServiceUserPhone(user.getServiceUserPhone());
+		}
 		
 		return contractDTO;
 	}
