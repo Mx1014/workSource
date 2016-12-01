@@ -10,6 +10,7 @@ import java.util.List;
 import java.util.Map;
 
 import com.everhomes.util.ConvertHelper;
+
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -32,14 +33,9 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.videoconf.ConfServiceErrorCode;
+import com.everhomes.rest.wifi.WifiOwnerType;
 import com.everhomes.rest.yellowPage.RequestInfoDTO;
 import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
 import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
@@ -47,9 +43,6 @@ import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.DateHelper;
-import com.everhomes.videoconf.ConfAccounts;
 
 @Component
 public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearch
@@ -148,7 +141,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             requestInfo.setTemplateType("EhServiceAllianceRequests");
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
-                LOGGER.info("service alliance request id:" + request.getId());
+                LOGGER.info("service alliance request id:" + request.getId()+"-EhServiceAllianceRequests");
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
                         .id(request.getId()+"-EhServiceAllianceRequests").source(source));
             }
@@ -168,7 +161,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             requestInfo.setTemplateType("EhSettleRequests");
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
-                LOGGER.info("settle request id:" + request.getId());
+                LOGGER.info("settle request id:" + request.getId() + "-EhSettleRequests");
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
                         .id(request.getId().toString() + "-EhSettleRequests").source(source));
             }
@@ -187,7 +180,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
-                LOGGER.info("reserve request id:" + request.getId());
+                LOGGER.info("reserve request id:" + request.getId() + "-" + request.getTemplateType());
                 brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
                         .id(request.getId().toString() + "-" + request.getTemplateType()).source(source));
             }
@@ -224,7 +217,10 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             
         }
         
-        FilterBuilder fb = FilterBuilders.termFilter("type", cmd.getCategoryId());
+        FilterBuilder fb = FilterBuilders.termFilter("ownerType", WifiOwnerType.fromCode(cmd.getOwnerType()).getCode());
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+        if(cmd.getCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("type", cmd.getCategoryId()));
         
         RangeFilterBuilder rf = new RangeFilterBuilder("createDate");
         if(cmd.getStartDay() != null) {
