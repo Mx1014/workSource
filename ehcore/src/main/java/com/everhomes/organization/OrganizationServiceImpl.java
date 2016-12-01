@@ -32,6 +32,7 @@ import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -72,6 +73,7 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -90,6 +92,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
+import com.everhomes.openapi.Contract;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -119,7 +122,8 @@ import com.everhomes.rest.enterprise.RejectContactCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
 import com.everhomes.rest.enterprise.VerifyEnterpriseContactDTO;
-import com.everhomes.rest.family.LeaveFamilyCommand;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.enterprise.*;import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
 import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.forum.CancelLikeTopicCommand;
@@ -217,7 +221,6 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 
@@ -711,6 +714,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 		
 		dto.setAccountName(org.getContactor());
 		dto.setAccountPhone(org.getContact());
+		
+		dto.setServiceUserId(org.getServiceUserId());
 		return dto;
 	}
 	
@@ -738,6 +743,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	        	if(null != dto)
 	        		dtos.add(dto);
 	        }
+	        addExtraInfo(dtos);
 	        resp.setDtos(dtos);
 			return resp;
 		}
@@ -776,11 +782,130 @@ public class OrganizationServiceImpl implements OrganizationService {
 					dtos.add(dto);
 			}
 		}
+		addExtraInfo(dtos);
 		resp.setDtos(dtos);
 		resp.setNextPageAnchor(locator.getAnchor());
 		return resp;
 	}
 	
+	private void addExtraInfo(List<OrganizationDetailDTO> organizationDetailList) {
+		for (OrganizationDetailDTO organizationDetailDTO : organizationDetailList) {
+			addExtraInfo(organizationDetailDTO);
+		}
+	}
+	
+	// 添加管理员列表，添加客服人员，添加注册人数, add by tt, 20161129
+	private void addExtraInfo(OrganizationDetailDTO organizationDetailDTO) {
+		addAdmins(organizationDetailDTO);
+		addServiceUser(organizationDetailDTO);
+		addSignupCount(organizationDetailDTO);
+	}
+	
+	private void addAdmins(OrganizationDetailDTO organizationDetailDTO) {
+		organizationDetailDTO.setAdminMembers(getAdmins(organizationDetailDTO.getOrganizationId()));
+	}
+	
+	@Override
+	public List<OrganizationMemberDTO> getAdmins(Long organizationId) {
+		ListOrganizationAdministratorCommand cmd = new ListOrganizationAdministratorCommand();
+		cmd.setOrganizationId(organizationId);
+		ListOrganizationMemberCommandResponse  response = rolePrivilegeService.listOrganizationAdministrators(cmd);
+		return response.getMembers();
+	}
+
+	private void addServiceUser(OrganizationDetailDTO organizationDetailDTO) {
+		OrganizationServiceUser user = getServiceUser(organizationDetailDTO.getOrganizationId(), organizationDetailDTO.getServiceUserId());
+		organizationDetailDTO.setServiceUserName(user.getServiceUserName());
+		organizationDetailDTO.setServiceUserPhone(user.getServiceUserPhone());
+	}
+	
+	@Override
+	public OrganizationServiceUser getServiceUser(Long organizationId){
+		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+		if (organizationDetail == null) {
+			return null;
+		}
+		return getServiceUser(organizationId, organizationDetail.getServiceUserId());
+	}
+	
+	@Override
+	public OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId) {
+		if (serviceUserId == null) {
+			return null;
+		}
+		//1. 找到企业入驻的园区
+		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
+		if (organizationCommunityRequest == null) {
+			return null;
+		}
+		//2. 找到园区对应的管理公司
+		List<OrganizationCommunityDTO> organizationCommunityList = organizationProvider.findOrganizationCommunityByCommunityId(organizationCommunityRequest.getCommunityId());
+		if (organizationCommunityList == null || organizationCommunityList.size() == 0) {
+			return null;
+		}
+		//3. 找到管理公司的这个人
+		for (OrganizationCommunityDTO organizationCommunityDTO : organizationCommunityList) {
+			OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(serviceUserId, organizationCommunityDTO.getOrganizationId());
+			if (organizationMember != null) {
+				OrganizationServiceUser user = new OrganizationServiceUser();
+				user.setServiceUserId(serviceUserId);
+				user.setServiceUserName(organizationMember.getContactName());
+				user.setServiceUserPhone(organizationMember.getContactToken());
+				return user;
+			}
+		}
+		return null;
+	}
+
+	private void addSignupCount(OrganizationDetailDTO organizationDetailDTO) {
+		organizationDetailDTO.setSignupCount(getSignupCount(organizationDetailDTO.getOrganizationId()));
+	}
+
+	private Integer getSignupCount(Long organizationId) {
+		return organizationProvider.getSignupCount(organizationId);
+	}
+	
+	@Override
+	public List<String> getBusinessContactPhone(Long organizationId) {
+		List<String> phoneList = new ArrayList<>();
+		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(organizationId);
+		if (organizationDetail != null) {
+			String contact = organizationDetail.getContact();
+			if (org.apache.commons.lang.StringUtils.isNotBlank(contact)) {
+				String[] contactArray = contact.trim().split(",");
+				for (String phone : contactArray) {
+					if (org.apache.commons.lang.StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
+						phoneList.add(phone);
+					}
+				}
+			}
+		}
+		return phoneList;
+	}
+
+	@Override
+	public List<String> getAdminPhone(Long organizationId) {
+		List<String> phoneList = new ArrayList<>();
+		List<OrganizationMemberDTO> organizationMemberList = getAdmins(organizationId);
+		if (organizationMemberList != null && !organizationMemberList.isEmpty()) {
+			for (OrganizationMemberDTO organizationMemberDTO : organizationMemberList) {
+				String phone = organizationMemberDTO.getContactToken();
+				if (org.apache.commons.lang.StringUtils.isNotBlank(phone) && (phone=phone.trim()).startsWith("1") && phone.length()==11) {
+					phoneList.add(phone);
+				}
+			}
+		}
+		return phoneList;
+	}
+
+	@Override
+	public Set<String> getOrganizationContactPhone(Long organizationId) {
+		Set<String> phoneSet = new HashSet<>();
+		phoneSet.addAll(getBusinessContactPhone(organizationId));
+		phoneSet.addAll(getAdminPhone(organizationId));
+		
+		return phoneSet;
+	}
 	
 	@Override
 	public OrganizationDTO createEnterprise(CreateEnterpriseCommand cmd) {
@@ -836,6 +961,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			enterprise.setPostUri(cmd.getPostUri());
 			enterprise.setMemberCount(cmd.getMemberCount());
 			enterprise.setEmailDomain(cmd.getEmailDomain());
+			enterprise.setServiceUserId(cmd.getServiceUserId());
 			organizationProvider.createOrganizationDetail(enterprise);
 			
 			// 把代码移到一个独立的方法，以便其它地方也可以调用 by lqs 20161101
@@ -962,6 +1088,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setContact(cmd.getContactsPhone());
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
+				organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationProvider.createOrganizationDetail(organizationDetail);
 			}else{
 				organizationDetail.setEmailDomain(cmd.getEmailDomain());
@@ -974,6 +1101,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				organizationDetail.setContact(cmd.getContactsPhone());
 				organizationDetail.setDisplayName(cmd.getDisplayName());
 				organizationDetail.setPostUri(cmd.getPostUri());
+				organizationDetail.setServiceUserId(cmd.getServiceUserId());
 				organizationProvider.updateOrganizationDetail(organizationDetail);
 			}
 			
@@ -5083,6 +5211,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId){
+		return createOrganizationAccount(cmd, roleId, null);
+	}
+	
+	@Override
+	public OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId, Integer exNamespaceId){
 
 		if(null == cmd.getAccountPhone()){
 			LOGGER.error("contactToken can not be empty.");
@@ -5093,8 +5226,11 @@ public class OrganizationServiceImpl implements OrganizationService {
 			LOGGER.error("contactName can not be empty.");
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_INVALID_PARAMETER, "contactName can not be empty.");
 		}
-
-		int namespaceId = UserContext.getCurrentNamespaceId(null);
+		if (exNamespaceId == null) {
+			exNamespaceId = UserContext.getCurrentNamespaceId(null);
+		}
+		Integer namespaceId = exNamespaceId;
+		
 		OrganizationMember member = organizationProvider.findOrganizationPersonnelByPhone(cmd.getOrganizationId(), cmd.getAccountPhone());
 		
 		return this.dbProvider.execute((TransactionStatus status) -> {
@@ -5171,9 +5307,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 			if(null == detail){
 				LOGGER.error("organization detail is null, organizationId = {}", cmd.getOrganizationId());
 			}else{
-				detail.setContactor(cmd.getAccountName());
-				detail.setContact(cmd.getAccountPhone());
-				organizationProvider.updateOrganizationDetail(detail);
+				// 如果是金蝶过来的数据，则不更新此两列
+				if (detail.getNamespaceOrganizationType() == null || !detail.getNamespaceOrganizationType().equals(NamespaceOrganizationType.JINDIE.getCode())) {
+					detail.setContactor(cmd.getAccountName());
+					detail.setContact(cmd.getAccountPhone());
+					organizationProvider.updateOrganizationDetail(detail);
+				}
 			}
 			return m;
 		});
@@ -8137,6 +8276,28 @@ System.out.println();
 		}
 		
 		return response;
+	}
+
+	@Override
+	public ContractDTO processContract(Contract contract) {
+		ContractDTO contractDTO = new ContractDTO();
+		contractDTO.setContractNumber(contract.getContractNumber());
+		contractDTO.setContractEndDate(contract.getContractEndDate());
+		contractDTO.setOrganizationName(contract.getOrganizationName());
+		contractDTO.setAdminMembers(getAdmins(contract.getOrganizationId()));
+		contractDTO.setSignupCount(getSignupCount(contract.getOrganizationId()));
+		
+		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getOrganizationId());
+		contractDTO.setContract(organizationDetail.getContact());
+		contractDTO.setContactor(organizationDetail.getContactor());
+		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+		
+		OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
+		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+		contractDTO.setServiceUserName(user.getServiceUserName());
+		contractDTO.setServiceUserPhone(user.getServiceUserPhone());
+		
+		return contractDTO;
 	}
 	
 	@Override

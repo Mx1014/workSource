@@ -262,5 +262,7 @@ public interface OrganizationProvider {
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
  
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
+	Organization findOrganizationByName(String name, Integer namespaceId);
+	Integer getSignupCount(Long organizationId);
  
 }

@@ -326,3 +326,70 @@ CREATE TABLE `eh_organization_member_logs` (
 ALTER TABLE `eh_users` ADD COLUMN `executive_tag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管';
 ALTER TABLE `eh_users` ADD COLUMN `position_tag` VARCHAR(128) DEFAULT NULL COMMENT '职位';
 ALTER TABLE `eh_users` ADD COLUMN `identity_number_tag` VARCHAR(20) DEFAULT NULL COMMENT '身份证号';
+
+
+
+-- 金蝶数据同步， add by tt, 20161117
+ALTER TABLE `eh_buildings` ADD COLUMN `product_type` VARCHAR(128);
+ALTER TABLE `eh_buildings` ADD COLUMN `complete_date` DATETIME;
+ALTER TABLE `eh_buildings` ADD COLUMN `joinin_date` DATETIME;
+ALTER TABLE `eh_buildings` ADD COLUMN `floor_count` VARCHAR(64);
+ALTER TABLE `eh_buildings` ADD COLUMN `namespace_building_type` VARCHAR(128);
+ALTER TABLE `eh_buildings` ADD COLUMN `namespace_building_token` VARCHAR(128);
+
+-- 下面这种写法速度更快点， add by tt, 20161117
+ALTER TABLE `eh_addresses` ADD COLUMN `rent_area` DOUBLE,
+	ADD COLUMN `build_area` DOUBLE,
+	ADD COLUMN `inner_area` DOUBLE,
+	ADD COLUMN `layout` VARCHAR(128),
+	ADD COLUMN `living_status` TINYINT,
+	ADD COLUMN `namespace_address_type` VARCHAR(128),
+	ADD COLUMN `namespace_address_token` VARCHAR(128);
+
+ALTER TABLE `eh_organization_details` ADD COLUMN `service_user_id` BIGINT NULL COMMENT 'customer service staff';
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_type` VARCHAR(128);
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_token` VARCHAR(128);
+
+-- 合同表， add by tt, 20161117
+-- DROP TABLE IF EXISTS `eh_contracts`;
+CREATE TABLE `eh_contracts` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
+  `contract_number` VARCHAR(128) NOT NULL,
+  `contract_end_date` DATETIME NOT NULL,
+  `status` TINYINT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 合同与楼栋门牌对应表， add by tt, 20161117
+-- DROP TABLE IF EXISTS `eh_contract_building_mappings`;
+CREATE TABLE `eh_contract_building_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
+  `contract_id` BIGINT,
+  `contract_number` VARCHAR(128),
+  `building_name` VARCHAR(128),
+  `apartment_name` VARCHAR(128),
+  `area_size` DOUBLE,
+  `status` TINYINT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- app与namespace映射关系表， add by tt, 20161117
+-- DROP TABLE IF EXISTS `eh_app_namespace_mappings`;
+CREATE TABLE `eh_app_namespace_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INT(11),
+  `app_key` VARCHAR(64),
+  `community_id` BIGINT,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

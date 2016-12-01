@@ -15,7 +15,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.openapi.techpark.CustomerResponse;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
 import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserService;
@@ -33,20 +35,22 @@ public class TechparkOpenController extends ControllerBase {
 	private AppProvider appProvider;
 	@Autowired
 	private UserActivityService userActivityService;
+	@Autowired
+	private TechparkOpenService techparkOpenService;
 
 
 	/**
 	 * <b>URL: /openapi/techpark/syncData</b>
 	 */
+	@SuppressDiscover
 	@RequireAuthentication(false)
 	@RequestMapping("syncData")
 	@RestReturn(String.class)
-	public RestResponse initBizInfo(@Valid SyncDataCommand cmd,HttpServletRequest request, HttpServletResponse response) {
+	public CustomerResponse initBizInfo(@Valid SyncDataCommand cmd,HttpServletRequest request, HttpServletResponse response) {
 		LOGGER.debug("Sync techpark data, cmd={}", cmd);
-
-		RestResponse result =  new RestResponse();
-		result.setErrorCode(ErrorCodes.SUCCESS);
-		result.setErrorDescription("OK");
-		return result;
+		
+		techparkOpenService.syncData(cmd);
+		
+		return new CustomerResponse(cmd.getSyncState(), cmd.getDataType());
 	}
 }
