@@ -8,9 +8,11 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhTerminalAppVersionStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhTerminalDayStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhTerminalHourStatisticsDao;
+import com.everhomes.server.schema.tables.pojos.EhAppVersion;
 import com.everhomes.server.schema.tables.pojos.EhTerminalAppVersionStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalDayStatistics;
 import com.everhomes.server.schema.tables.pojos.EhTerminalHourStatistics;
+import com.everhomes.server.schema.tables.records.EhAppVersionRecord;
 import com.everhomes.server.schema.tables.records.EhTerminalAppVersionStatisticsRecord;
 import com.everhomes.server.schema.tables.records.EhTerminalDayStatisticsRecord;
 import com.everhomes.server.schema.tables.records.EhTerminalHourStatisticsRecord;
@@ -241,7 +243,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""))
                 .and(versionCond);
-        LOGGER.debug("statistical start number and active user number sql:{}", step1.getSQL());
+        LOGGER.debug("statistical app version start number and active user number sql:{}", step1.getSQL());
         step1.fetchOne().map(r ->{
             statistics.setStartNumber(Long.valueOf(r.getValue(0).toString()));
             statistics.setActiveUserNumber(Long.valueOf(r.getValue(1).toString()));
@@ -266,7 +268,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""))
                 .and(versionCond)
                 .and(newUserCond);
-        LOGGER.debug("statistical start number and active user number sql:{}", step1.getSQL());
+        LOGGER.debug("statistical app version start number and active user number sql:{}", step1.getSQL());
         step1.fetchOne().map(r ->{
             statistics.setNewUserNumber(Long.valueOf(r.getValue(0).toString()));
             return null;
@@ -283,7 +285,7 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull())
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.ne(""))
                 .and(versionCond);
-        LOGGER.debug("statistical new user number sql:{}", step3.getSQL());
+        LOGGER.debug("statistical app version new user number sql:{}", step3.getSQL());
         step3.fetchOne().map(r ->{
             statistics.setCumulativeUserNumber(Long.valueOf(r.getValue(0).toString()));
             return null;
@@ -304,9 +306,25 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
                 .from(Tables.EH_USER_ACTIVITIES)
                 .where(condition)
                 .and(Tables.EH_USER_ACTIVITIES.IMEI_NUMBER.isNotNull());
-        LOGGER.debug("statistical cumulative user number sql:{}", step.getSQL());
+        LOGGER.debug("statistical active user number sql:{}", step.getSQL());
         return step.fetchOne().map(r ->{
             return Long.valueOf(r.getValue(0).toString());
         });
     }
+
+    @Override
+    public List<AppVersion> listAppVersions(Integer namespaceId) {
+        List<AppVersion> resules = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAppVersionRecord> query = context.selectQuery(Tables.EH_APP_VERSION);
+        query.addOrderBy(Tables.EH_APP_VERSION.DEFAULT_ORDER.desc());
+        if(null != namespaceId){
+            query.addConditions(Tables.EH_APP_VERSION.NAMESPACE_ID.eq(namespaceId));
+        }
+        return query.fetch().map(r ->{
+            resules.add(ConvertHelper.convert(r, AppVersion.class));
+            return null;
+        });
+    }
+
 }

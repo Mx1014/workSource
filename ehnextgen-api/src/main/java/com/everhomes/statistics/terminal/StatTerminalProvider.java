@@ -32,5 +32,6 @@ public interface StatTerminalProvider {
 	List<TerminalHourStatistics> listTerminalHourStatisticsByDay(String date, Integer namespaceId);
 
 	List<TerminalDayStatistics> listTerminalDayStatisticsByDate(String startDate, String endDate, Integer namespaceId);
-	
+
+	List<AppVersion> listAppVersions(Integer namespaceId);
 }

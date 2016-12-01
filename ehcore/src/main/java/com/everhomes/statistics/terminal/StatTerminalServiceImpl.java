@@ -14,9 +14,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import java.math.BigDecimal;
-import java.sql.Date;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -36,6 +36,7 @@ public class StatTerminalServiceImpl implements StatTerminalService{
 
     @Autowired
     private CoordinationProvider coordinationProvider;
+
 
     @Override
     public LineChart getTerminalHourLineChart(List<String> dates, TerminalStatisticsType type){
@@ -110,7 +111,8 @@ public class StatTerminalServiceImpl implements StatTerminalService{
     public TerminalDayStatisticsDTO qryTerminalDayStatisticsByDay(String date){
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         TerminalDayStatistics dayStatistics = statTerminalProvider.getTerminalDayStatisticsByDay(date, namespaceId);
-        return ConvertHelper.convert(dayStatistics, TerminalDayStatisticsDTO.class);
+        TerminalDayStatisticsDTO dayStatisticsDTO = ConvertHelper.convert(dayStatistics, TerminalDayStatisticsDTO.class);
+        return dayStatisticsDTO;
     }
 
     @Override
@@ -123,7 +125,7 @@ public class StatTerminalServiceImpl implements StatTerminalService{
     }
 
     @Override
-    public List<TerminalStatisticsTaskDTO> executeStatTask(Long startDate, Long endDate) {
+    public List<TerminalStatisticsTaskDTO> executeStatTask(String startDate, String endDate) {
 
         List<TerminalStatisticsTaskDTO> statTaskLogs = new ArrayList<TerminalStatisticsTaskDTO>();
 
@@ -131,27 +133,25 @@ public class StatTerminalServiceImpl implements StatTerminalService{
         calendar.add(Calendar.DAY_OF_MONTH, -1);
 
         if(null == startDate || null == endDate){
-            startDate = calendar.getTimeInMillis();
-            endDate = calendar.getTimeInMillis();
+            startDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
+            endDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
         }
 
         //如果结束时间大于昨天，结束时间就取昨天的值
-        if(DateUtil.dateToStr(new java.util.Date(endDate), DateUtil.YMR_SLASH).compareTo(DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH)) > 0){
-            endDate = calendar.getTimeInMillis();
+        if(endDate.compareTo(DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH)) > 0){
+            endDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
         }
 
         // 结束时间大于开始时间
-        if(startDate > endDate){
-            startDate = calendar.getTimeInMillis();
-            endDate = calendar.getTimeInMillis();
+        if(startDate.compareTo(endDate) > 0){
+            startDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
+            endDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
         }
 
         //获取范围内的所以日期
-        List<java.util.Date> dDates = DateUtil.getStartToEndDates(new java.util.Date(startDate), new java.util.Date(endDate));
+        List<Date> dDates = DateUtil.getStartToEndDates(new Date(startDate), new Date(endDate));
 
-
-
-        for (java.util.Date date : dDates) {
+        for (Date date : dDates) {
             String sDate = DateUtil.dateToStr(date, DateUtil.YMR_SLASH);
             //按日期结算数据
             this.coordinationProvider.getNamedLock(CoordinationLocks.STAT_TERMINAL.getCode() + "_" + sDate).enter(()-> {
@@ -223,11 +223,23 @@ public class StatTerminalServiceImpl implements StatTerminalService{
     }
 
     private void generateTerminalAppVersionStatistics(String date) {
-        List<Namespace> namespaces = namespaceProvider.listNamespaces();
+        List<AppVersion> versions = statTerminalProvider.listAppVersions(null);
+        List<String> notVersionNames = new ArrayList<>();
 
+        for (AppVersion version: versions) {
+            Long cumulativeUserNumber = statTerminalProvider.getTerminalActiveUserNumberByDate("20150101", date, version.getNamespaceId());
+            Long activeUserNumber = statTerminalProvider.getTerminalActiveUserNumberByDate(date, date, version.getNamespaceId());
+            TerminalAppVersionStatistics appVersionStatistics = statTerminalProvider.statisticalAppVersionUserActivity(notVersionNames,version.getName(), date, version.getNamespaceId());
+            appVersionStatistics.setAppVersion(version.getName());
+            appVersionStatistics.setAppVersionRealm(version.getRealm());
+            appVersionStatistics.setNamespaceId(version.getNamespaceId());
+            appVersionStatistics.setVersionCumulativeRate(new BigDecimal(appVersionStatistics.getCumulativeUserNumber()/cumulativeUserNumber));
+            appVersionStatistics.setVersionActiveRate(new BigDecimal(appVersionStatistics.getActiveUserNumber()/activeUserNumber));
+            statTerminalProvider.createTerminalAppVersionStatistics(appVersionStatistics);
+        }
     }
 
     public static void main(String[] args) {
-        System.out.println(Date.valueOf("20161128"));
+        System.out.println(Date.parse("2016-11-28"));
     }
 }

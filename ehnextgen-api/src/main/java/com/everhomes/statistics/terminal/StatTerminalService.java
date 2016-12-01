@@ -10,8 +10,6 @@ import java.util.List;
 
 public interface StatTerminalService {
 
-    List<TerminalStatisticsTaskDTO> executeStatTask(Long startDate, Long endDate);
-
     LineChart getTerminalHourLineChart(List<String> dates, TerminalStatisticsType type);
 
     LineChart getTerminalDayLineChart(String startDate, String endDate, TerminalStatisticsType type);
@@ -19,5 +17,7 @@ public interface StatTerminalService {
     TerminalDayStatisticsDTO qryTerminalDayStatisticsByDay(String date);
 
     List<TerminalDayStatisticsDTO> listTerminalDayStatisticsByDate(String startDate, String endDate);
+
+    List<TerminalStatisticsTaskDTO> executeStatTask(String startDate, String endDate);
 
 }
