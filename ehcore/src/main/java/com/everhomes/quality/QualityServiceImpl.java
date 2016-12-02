@@ -944,10 +944,10 @@ public class QualityServiceImpl implements QualityService {
 			if(group != null)
 				dto.setGroupName(group.getName());
         	
-//			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
-//        	 
-//        	dto.setGroupUsers(groupUsers);
-//        	
+			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
+
+        	dto.setGroupUsers(groupUsers);
+
 			if(r.getRecord() != null) {
 	        	QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(r.getRecord(), QualityInspectionTaskRecordsDTO.class);
 	        	if(recordDto != null) {

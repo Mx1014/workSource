@@ -213,8 +213,8 @@ CREATE TABLE `eh_quality_inspection_specification_item_results` (
 -- merge from activityentry-delta-schema.sql by xiongying 20161128
 ALTER TABLE eh_activities ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity category id';
 ALTER TABLE eh_activities ADD COLUMN `forum_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity post forum that it belongs';
-ALTER TABLE eh_activities ADD COLUMN `creator_tag` VARCHAR(128) NOT NULL DEFAULT 0 COMMENT 'activity post creator tag';
-ALTER TABLE eh_activities ADD COLUMN `target_tag` VARCHAR(128) NOT NULL DEFAULT 0 COMMENT 'activity post target tag';
+ALTER TABLE eh_activities ADD COLUMN `creator_tag` VARCHAR(128) COMMENT 'activity post creator tag';
+ALTER TABLE eh_activities ADD COLUMN `target_tag` VARCHAR(128) COMMENT 'activity post target tag';
 ALTER TABLE eh_activities ADD COLUMN `visible_region_type` TINYINT COMMENT 'define the visible region type';
 ALTER TABLE eh_activities ADD COLUMN `visible_region_id` BIGINT COMMENT 'visible region id';
 
