@@ -356,3 +356,17 @@ CREATE TABLE `eh_flow_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+DROP TABLE IF EXISTS `eh_flow_timeouts`;
+CREATE TABLE `eh_flow_timeouts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `belong_to` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other flow object id',
+    `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow, flow_node, flow_button, flow_action',
+    `timeout_type` VARCHAR(64) NOT NULL COMMENT 'flow_step_timeout',
+    `timeout_tick` DATETIME NOT NULL,
+    `json` TEXT,
+    `create_time` DATETIME NOT NULL,
+    `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
