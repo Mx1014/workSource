@@ -72,8 +72,28 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         syncFromServiceAllianceRequestsDb(pageSize);
         syncFromReservationRequestsDb(pageSize);
         syncFromSettleRequestInfoSearcherDb(pageSize);
+        syncFromServiceAllianceApartmentRequestsDb(pageSize);
 		
 	}
+
+    private void syncFromServiceAllianceApartmentRequestsDb(int pageSize) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+            List<ServiceAllianceApartmentRequests> requests = yellowPageProvider.listApartmentRequests(locator, pageSize);
+
+            if(requests.size() > 0) {
+                this.bulkUpdateServiceAllianceApartmentRequests(requests);
+            }
+
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+
+        LOGGER.info("sync for service alliance apartment request ok");
+
+    }
 
     private void syncFromServiceAllianceRequestsDb( int pageSize) {
         CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -150,6 +170,25 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         }
 		
 	}
+
+    @Override
+    public void bulkUpdateServiceAllianceApartmentRequests(List<ServiceAllianceApartmentRequests> requests) {
+        BulkRequestBuilder brb = getClient().prepareBulk();
+        for (ServiceAllianceApartmentRequests request : requests) {
+            ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+            requestInfo.setTemplateType("EhServiceAllianceApartmentRequests");
+            XContentBuilder source = createDoc(requestInfo);
+            if(null != source) {
+                LOGGER.info("service alliance apartment request id:" + request.getId() + "-EhServiceAllianceApartmentRequests");
+                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
+                        .id(request.getId().toString() + "-EhServiceAllianceApartmentRequests").source(source));
+            }
+
+        }
+        if (brb.numberOfActions() > 0) {
+            brb.execute().actionGet();
+        }
+    }
 
     @Override
     public void bulkUpdateSettleRequests(List<SettleRequests> requests) {
