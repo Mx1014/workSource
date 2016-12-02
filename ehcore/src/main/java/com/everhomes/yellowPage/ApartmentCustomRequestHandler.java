@@ -93,7 +93,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		LOGGER.info("ApartmentCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createApartmentRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
-		requestInfo.setTemplateType("EhServiceAllianceApartmentRequests");
+		requestInfo.setTemplateType(cmd.getTemplateType());
 		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());

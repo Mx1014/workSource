@@ -8,6 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -156,7 +157,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		BulkRequestBuilder brb = getClient().prepareBulk();
         for (ServiceAllianceRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
-            requestInfo.setTemplateType("EhServiceAllianceRequests");
+            requestInfo.setTemplateType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance request id:" + request.getId()+"-EhServiceAllianceRequests");
@@ -176,7 +177,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         BulkRequestBuilder brb = getClient().prepareBulk();
         for (ServiceAllianceApartmentRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
-            requestInfo.setTemplateType("EhServiceAllianceApartmentRequests");
+            requestInfo.setTemplateType(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM);
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance apartment request id:" + request.getId() + "-EhServiceAllianceApartmentRequests");
@@ -195,7 +196,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         BulkRequestBuilder brb = getClient().prepareBulk();
         for (SettleRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
-            requestInfo.setTemplateType("EhSettleRequests");
+            requestInfo.setTemplateType(CustomRequestConstants.SETTLE_REQUEST_CUSTOM);
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("settle request id:" + request.getId() + "-EhSettleRequests");
@@ -215,6 +216,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         BulkRequestBuilder brb = getClient().prepareBulk();
         for (ReservationRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+            requestInfo.setTemplateType(CustomRequestConstants.RESERVE_REQUEST_CUSTOM);
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("reserve request id:" + request.getId() + "-" + request.getTemplateType());
@@ -305,6 +307,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	private XContentBuilder createDoc(ServiceAllianceRequestInfo request){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("templateType", request.getTemplateType());
             b.field("type", request.getType());
             b.field("ownerType", request.getOwnerType());
             b.field("ownerId", request.getOwnerId());
@@ -351,7 +354,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             	String[] ids = sd.getId().split("-");
             	dto.setId(Long.parseLong(ids[0]));
             	Map<String, Object> source = sd.getSource();
-            	
+                dto.setTemplateType(String.valueOf(source.get("templateType")));
             	dto.setCreatorName(String.valueOf(source.get("creatorName")));
             	dto.setCreatorMobile(String.valueOf(source.get("creatorMobile")));
             	dto.setCreatorOrganization(String.valueOf(source.get("creatorOrganization")));
