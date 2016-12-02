@@ -26,6 +26,7 @@ import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
+import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
@@ -585,6 +586,39 @@ public class Rentalv2AdminController extends ControllerBase {
 	public RestResponse getRefundUrl(@Valid GetRefundUrlCommand cmd) {
 		String resp = rentalService.getRefundUrl(cmd);
 		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+	/**
+	 * <b>URL: /rental/admin/addCheckOperator</b>
+	 * <p>
+	 * 新增签到的管理员
+	 * </p>
+	 */
+	@RequestMapping("addCheckOperator")
+	@RestReturn(value = String.class)
+	public RestResponse addCheckOperator(@Valid AddCheckOperatorCommand cmd) {
+		rentalService.addCheckOperator(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /rental/admin/deleteCheckOperator</b>
+	 * <p>
+	 * 删除签到的管理员
+	 * </p>
+	 */
+	@RequestMapping("deleteCheckOperator")
+	@RestReturn(value = String.class)
+	public RestResponse deleteCheckOperator(@Valid AddCheckOperatorCommand cmd) {
+		rentalService.deleteCheckOperator(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

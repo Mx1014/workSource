@@ -61,6 +61,7 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.community.Community;
@@ -82,6 +83,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -163,6 +165,7 @@ import com.everhomes.rest.rentalv2.SiteRuleStatus;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
 import com.everhomes.rest.rentalv2.UpdateRentalSiteCommand;
 import com.everhomes.rest.rentalv2.VisibleFlag;
+import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
 import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
@@ -211,6 +214,7 @@ import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserPrivilegeMgr;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -263,6 +267,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return null;
 	}
 
+	@Autowired
+	private UserPrivilegeMgr userPrivilegeMgr;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
     @Autowired
     private LocaleTemplateService localeTemplateService;
     
@@ -1133,20 +1142,51 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rSiteDTO.getAttachments().add(ConvertHelper.convert(single, AttachmentConfigDTO .class));
 			}
 		}
+		//起止时间为资源允许预定的最早和最晚时间 
 		Calendar beginCalendar = Calendar.getInstance();
 		Calendar endCalendar = Calendar.getInstance();
-		endCalendar.add(Calendar.DAY_OF_MONTH, 7); 
+		//由于记录的是一个资源的最早可以预定时长和最晚可预订时长,所以现在+最晚可预订时长是最早的资源,现在+最早可预订时长 是最晚的资源
+		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
+		endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
+		
+		BigDecimal minPrice = new BigDecimal(0);
+		Double minTimeStep = 1.0;
+		BigDecimal maxPrice = new BigDecimal(0);
+		Double maxTimeStep = 1.0;
+		
 		try {
 			List<RentalCell> cells = findRentalCellBetweenDates(rSiteDTO.getRentalSiteId(), dateSF.format(beginCalendar.getTime()), 
 					dateSF.format(endCalendar.getTime()));
 			if(null == cells || cells.size() == 0)
 				rSiteDTO.setAvgPrice(new BigDecimal(0));
+			
 				
 			else {
 				BigDecimal sum = new BigDecimal(0);
-				for(RentalCell cell : cells)
-				{
+				for(RentalCell cell : cells){	
+					//对于按小时预约的,取平均值进行计算
+					if(cell.getRentalType().equals(RentalType.HOUR.getCode())){
+						if(minPrice.divide(new BigDecimal(minTimeStep), 3, RoundingMode.HALF_UP).compareTo(
+								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
+							minPrice = cell.getPrice();
+							minTimeStep = cell.getTimeStep();
+						}
+						if(maxPrice.divide(new BigDecimal( maxTimeStep), 3, RoundingMode.HALF_UP).compareTo(
+								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
+							maxPrice = cell.getPrice();
+							maxTimeStep = cell.getTimeStep();
+						}
+					}else{
+						if(minPrice.compareTo(cell.getPrice()) == -1){
+							minPrice = cell.getPrice(); 
+						}
+						if(maxPrice.compareTo(cell.getPrice()) == 1){
+							maxPrice = cell.getPrice(); 
+						}
+					}
 					sum = sum.add(cell.getPrice());
+					 
+					
 				}
 				//四舍五入保留三位
 				rSiteDTO.setAvgPrice(sum.divide(new BigDecimal(cells.size()), 3, RoundingMode.HALF_UP));
@@ -1157,13 +1197,38 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			 LOGGER.error("计算平均值-时间转换 异常");
 		}
 
+		if(minPrice.compareTo(maxPrice) == 0){
+			rSiteDTO.setAvgPriceStr(priceToString(minPrice,rentalSite.getRentalType(),minTimeStep));
+		}else{
+			rSiteDTO.setAvgPriceStr( priceToString(minPrice,rentalSite.getRentalType(),minTimeStep)+"~" +priceToString(maxPrice,rentalSite.getRentalType(),maxTimeStep));
+		}
 //		if(rentalSite.getAvgPriceStr() == null){
-			rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
-			rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
-			rentalProvider.updateRentalSite(rentalSite);	
+		//rSiteDTO.setAvgPriceStr(this.rentalProvider.getPriceStringByResourceId(rSiteDTO.getRentalSiteId()));
+		rentalSite.setAvgPriceStr(rSiteDTO.getAvgPriceStr());
+		rentalProvider.updateRentalSite(rentalSite);	
 //		}
 		return rSiteDTO;
 	}
+	
+
+	private boolean isInteger(double d){
+		double eps = 0.0001;
+		return Math.abs(d - (double)((int)d)) < eps;
+	}
+	private String priceToString(BigDecimal price, Byte rentalType, Double timeStep) {
+		if(price.compareTo(new BigDecimal(0)) == 0)
+			return "免费";
+		if(rentalType.equals(RentalType.DAY.getCode()))
+			return "￥"+price.toString()+"/天";
+		if(rentalType.equals(RentalType.HALFDAY.getCode()))
+			return "￥"+price.toString()+"/半天";
+		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
+			return "￥"+price.toString()+"/半天";
+		if(rentalType.equals(RentalType.HOUR.getCode()))
+			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
+		return "";
+	}
+ 
 	private List<RentalCell> findRentalCellBetweenDates(Long rentalSiteId, String beginTime, String endTime) throws ParseException {
 		List<RentalCell>  result = new ArrayList<RentalCell>(); 
 		for(RentalCell cell : cellList.get()){
@@ -2021,7 +2086,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		dto.setNotice(bill.getNotice());
 		dto.setIntroduction(bill.getIntroduction());
 		dto.setRentalBillId(bill.getId()); 
-		dto.setRentalCount(bill.getRentalCount());
+		RentalResource rs = this.rentalProvider.getRentalSiteById(bill.getRentalResourceId());
+		//只有非独占资源，不需要选择资源编号且允许预约多个资源才显示该字段
+		if(rs != null &&NormalFlag.NONEED.getCode() == rs.getExclusiveFlag().byteValue() 
+				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign().byteValue() )
+			dto.setRentalCount(bill.getRentalCount());
 		if (null == bill.getStartTime()) {
 
 		} else {
@@ -5103,6 +5172,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
             LOGGER.info("end Send sms message, namespaceId=" + namespaceId + ", phoneNumbers=[" + phoneNumber
                 + "], templateScope=" + templateScope + ", templateId=" + templateId + ", templateLocale=" + templateLocale);
         }
+	}
+
+	@Override
+	public void addCheckOperator(AddCheckOperatorCommand cmd) {
+		  
+		List<Long> privilegeIds = new ArrayList<>();
+		privilegeIds.add(PrivilegeConstants.RENTAL_CHECK);
+		rolePrivilegeService.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(),
+				EntityType.USER.getCode(),cmd.getUserId(),RentalServiceErrorCode.SCOPE,privilegeIds);
+		
+	}
+
+	@Override
+	public void deleteCheckOperator(AddCheckOperatorCommand cmd) {
+		 
+//		List<Long> privilegeIds = new ArrayList<>();
+//		privilegeIds.add(PrivilegeConstants.RENTAL_CHECK);
+//		rolePrivilegeService.
 	}
 	
  

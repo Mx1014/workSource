@@ -13,7 +13,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
-import com.everhomes.rentalv2.Rentalv2Service;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.rentalv2.AddRentalBillCommand;
 import com.everhomes.rest.rentalv2.AddRentalBillItemCommand;
@@ -22,6 +21,8 @@ import com.everhomes.rest.rentalv2.CancelRentalBillCommand;
 import com.everhomes.rest.rentalv2.DeleteRentalBillCommand;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusCommand;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusResponse;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusResponse;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusCommand;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusResponse;
 import com.everhomes.rest.rentalv2.FindRentalBillsCommand;
@@ -685,5 +686,22 @@ public class Rentalv2Controller extends ControllerBase {
 		return null;
 	}
 	
-	
+	/**
+	 * <b>URL: /rental/findAutoAssignRentalSiteMonthStatus</b>
+	 * <p>
+	 * 查询带场所编号的资源一月的单元格
+	 * </p>
+	 */
+
+	@RequestMapping("findAutoAssignRentalSiteMonthStatus")
+	@RestReturn(value = FindAutoAssignRentalSiteMonthStatusResponse.class)
+	public RestResponse findAutoAssignRentalSiteMonthStatus(@Valid FindAutoAssignRentalSiteMonthStatusCommand cmd) {
+		FindAutoAssignRentalSiteMonthStatusResponse resp = rentalService
+				.findAutoAssignRentalSiteMonthStatus(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	 
 }

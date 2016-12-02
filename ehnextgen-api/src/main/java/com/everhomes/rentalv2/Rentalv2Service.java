@@ -60,6 +60,7 @@ import com.everhomes.rest.rentalv2.UpdateRentalRuleCommand;
 import com.everhomes.rest.rentalv2.UpdateRentalSiteCommand;
 import com.everhomes.rest.rentalv2.VerifyRentalBillCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
+import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
 import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
@@ -226,5 +227,11 @@ public interface Rentalv2Service {
 
 	FindAutoAssignRentalSiteMonthStatusResponse findAutoAssignRentalSiteMonthStatus(
 			FindAutoAssignRentalSiteMonthStatusCommand cmd);
+
+
+	void addCheckOperator(AddCheckOperatorCommand cmd);
+
+
+	void deleteCheckOperator(AddCheckOperatorCommand cmd);
 
 }
