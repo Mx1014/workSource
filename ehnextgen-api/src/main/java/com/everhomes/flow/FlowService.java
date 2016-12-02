@@ -426,6 +426,13 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowSubjectDTO getSubectById(Long subjectId);
+
+	/**
+	 * 拿到 flow 的详细信息
+	 * @param flowId
+	 * @return
+	 */
+	FlowDTO getFlowById(Long flowId);
 	
 	//TODO 日志信息分类：
 	

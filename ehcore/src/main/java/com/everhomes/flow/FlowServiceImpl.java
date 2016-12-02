@@ -2003,4 +2003,10 @@ public class FlowServiceImpl implements FlowService {
 		return subjectDTO;
 	}
 
+	@Override
+	public FlowDTO getFlowById(Long flowId) {
+		Flow flow = flowProvider.getFlowById(flowId);
+		return ConvertHelper.convert(flow, FlowDTO.class);
+	}
+
 }

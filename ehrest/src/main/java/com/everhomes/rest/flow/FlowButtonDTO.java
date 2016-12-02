@@ -6,6 +6,11 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * needSelection + needComment 有任何一个就要跳到下个界面
+ * @author janson
+ *
+ */
 public class FlowButtonDTO {
     private Byte     status;
     private Integer     gotoLevel;
@@ -17,9 +22,31 @@ public class FlowButtonDTO {
     private Integer     flowVersion;
     private Long     id;
     private String     buttonName;
+    private Byte needSelection;//TODO
+    private Byte needComment;//TODO
 
 
-    public Byte getStatus() {
+    public Byte getNeedComment() {
+		return needComment;
+	}
+
+
+	public void setNeedComment(Byte needComment) {
+		this.needComment = needComment;
+	}
+
+
+	public Byte getNeedSelection() {
+		return needSelection;
+	}
+
+
+	public void setNeedSelection(Byte needSelection) {
+		this.needSelection = needSelection;
+	}
+
+
+	public Byte getStatus() {
 		return status;
 	}
 

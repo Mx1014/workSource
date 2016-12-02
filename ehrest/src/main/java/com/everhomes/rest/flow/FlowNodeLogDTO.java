@@ -23,6 +23,7 @@ public class FlowNodeLogDTO {
 	private String nodeName;
 	private Byte allowComment;
 	private Byte isCurrentNode;
+	private Long commentButtonId;
 
 	@ItemType(FlowEventLogDTO.class)
 	private List<FlowEventLogDTO> logs;
@@ -77,6 +78,14 @@ public class FlowNodeLogDTO {
 
 	public void setIsCurrentNode(Byte isCurrentNode) {
 		this.isCurrentNode = isCurrentNode;
+	}
+
+	public Long getCommentButtonId() {
+		return commentButtonId;
+	}
+
+	public void setCommentButtonId(Long commentButtonId) {
+		this.commentButtonId = commentButtonId;
 	}
 
 	@Override
