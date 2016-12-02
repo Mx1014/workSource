@@ -7,6 +7,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO;
+import com.everhomes.rest.rentalv2.admin.SiteNumberDTO;
 import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 import com.everhomes.util.StringHelper;
 /**
@@ -70,8 +71,8 @@ public class AddRentalSiteSingleSimpleRule {
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
 	private Double siteCounts;
-	@ItemType(String.class)
-	private List<String> siteNumbers;
+	@ItemType(SiteNumberDTO.class)
+	private List<SiteNumberDTO> siteNumbers;
 	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
@@ -333,12 +334,12 @@ public class AddRentalSiteSingleSimpleRule {
 	}
 
 
-	public List<String> getSiteNumbers() {
+	public List<SiteNumberDTO> getSiteNumbers() {
 		return siteNumbers;
 	}
 
 
-	public void setSiteNumbers(List<String> siteNumbers) {
+	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
 	}
 

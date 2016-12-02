@@ -6,12 +6,14 @@ import com.everhomes.util.StringHelper;
  * <ul> 
  * <li>siteNumber: 资源编号</li>
  * <li>siteNumberGroup: 关联性分组(同一个分组号码的会成为一组)</li> 
+ * <li>groupLockFlag: 一个资源被预约是否锁整个group,0-否,1-是</li> 
  * </ul>
  */
 public class SiteNumberDTO {
 
 	private String siteNumber ;
 	private Integer siteNumberGroup;
+    private Byte groupLockFlag;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -27,6 +29,12 @@ public class SiteNumberDTO {
 	}
 	public void setSiteNumberGroup(Integer siteNumberGroup) {
 		this.siteNumberGroup = siteNumberGroup;
+	}
+	public Byte getGroupLockFlag() {
+		return groupLockFlag;
+	}
+	public void setGroupLockFlag(Byte groupLockFlag) {
+		this.groupLockFlag = groupLockFlag;
 	}
 
 }

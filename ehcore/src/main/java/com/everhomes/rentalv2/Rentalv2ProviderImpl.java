@@ -40,6 +40,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.rentalv2.DateLength;
 import com.everhomes.rest.rentalv2.RentalSiteStatus;
 import com.everhomes.rest.rentalv2.RentalType;
+import com.everhomes.rest.rentalv2.ResourceOrderStatus;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.sequence.SequenceProvider;
@@ -1000,8 +1001,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		Condition condition = Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID
 				.equal(id);
-//		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-//				.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.STATUS
+				.ne(ResourceOrderStatus.DISPLOY.getCode()));
 		step.where(condition);
 		List<RentalResourceOrder> result  = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()

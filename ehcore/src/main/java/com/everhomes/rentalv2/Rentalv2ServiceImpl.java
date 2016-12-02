@@ -159,6 +159,7 @@ import com.everhomes.rest.rentalv2.RentalSitePicDTO;
 import com.everhomes.rest.rentalv2.RentalSiteRulesDTO;
 import com.everhomes.rest.rentalv2.RentalSiteStatus;
 import com.everhomes.rest.rentalv2.RentalType;
+import com.everhomes.rest.rentalv2.ResourceOrderStatus;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.rest.rentalv2.SiteRuleStatus;
@@ -553,6 +554,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				SiteNumberDTO dto = new SiteNumberDTO();
 				dto.setSiteNumber(number.getResourceNumber());
 				dto.setSiteNumberGroup(number.getNumberGroup());
+				dto.setGroupLockFlag(number.getGroupLockFlag());
 				response.getSiteNumbers().add(dto);
 			}
 		}
@@ -609,6 +611,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				SiteNumberDTO dto = new SiteNumberDTO();
 				dto.setSiteNumber(number.getResourceNumber());
 				dto.setSiteNumberGroup(number.getNumberGroup());
+				dto.setGroupLockFlag(number.getGroupLockFlag());
 				response.getSiteNumbers().add(dto);
 			}
 		}
@@ -685,6 +688,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					resourceNumber.setOwnerId(defaultRule.getId());
 					resourceNumber.setResourceNumber(number.getSiteNumber());
 					resourceNumber.setNumberGroup(number.getSiteNumberGroup());
+					resourceNumber.setGroupLockFlag(number.getGroupLockFlag());
 					this.rentalProvider.createRentalResourceNumber(resourceNumber);
 				}
 			//time intervals
@@ -1694,8 +1698,31 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				rsb.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 						.getTime()));
 				rsb.setCreatorUid(userId);
+				rsb.setStatus(ResourceOrderStatus.NORMAL.getCode());
 	
 				rentalProvider.createRentalSiteBill(rsb);
+				//对于锁住整个group的关联资源
+				if(rsr.getGroupLockFlag() != null && rsr.getGroupLockFlag().byteValue() == NormalFlag.NEED.getCode()){
+					List<RentalCell>  rsrs =  findGroupRentalSiteRules(rsr);
+					if(rsrs.size()>0){
+						for(RentalCell rsrCell : rsrs){
+							RentalResourceOrder rsbDisploy = ConvertHelper.convert(rsrCell, RentalResourceOrder.class);
+							rsbDisploy.setRentalOrderId(rentalBillId);
+							rsbDisploy.setAmorpm(rsr.getAmorpm()); 
+							rsbDisploy.setEndTime(rsr.getEndTime());
+							rsbDisploy.setBeginTime(rsr.getBeginTime());
+							rsbDisploy.setTotalMoney( new BigDecimal(0));
+							rsbDisploy.setRentalCount(siteRule.getRentalCount());
+							rsbDisploy.setRentalResourceRuleId(rsr.getId());
+							rsbDisploy.setResourceRentalDate(new Date(cmd.getRentalDate()));
+							rsbDisploy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+									.getTime()));
+							rsbDisploy.setCreatorUid(userId);
+							rsbDisploy.setStatus(ResourceOrderStatus.DISPLOY.getCode());
+						}
+					}
+				}
+				
 			}
 			//验证site订单是否超过了site数量，如果有，抛异常，回滚操作
 //			this.valiRentalBill(0.0, cmd.getRules());
@@ -1706,6 +1733,30 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return billDTO;
 		});
 		return billDTO;
+	}
+
+	private List<RentalCell> findGroupRentalSiteRules(RentalCell rsr) {
+		List<RentalCell> result = new ArrayList<>();
+		for( RentalCell cell : cellList.get()){
+			RentalType rentalType = RentalType.fromCode(cell.getRentalType());
+			switch(rentalType){
+				case DAY: 
+					if(cell.getRentalType().equals(rsr.getRentalType()) && cell.getResourceRentalDate().equals(rsr.getResourceRentalDate()))
+						result.add(cell);
+					break;
+				case HOUR: 
+					if(cell.getRentalType().equals(rsr.getRentalType()) && cell.getResourceRentalDate().equals(rsr.getResourceRentalDate())
+							&& cell.getBeginTime().equals(rsr.getBeginTime()))
+						result.add(cell);
+					break;
+				default:
+					if(cell.getRentalType().equals(rsr.getRentalType()) && cell.getResourceRentalDate().equals(rsr.getResourceRentalDate())
+							&& cell.getAmorpm().equals(rsr.getAmorpm()))
+						result.add(cell);
+					break; 
+			}	 
+		}
+		return result;
 	}
 
 	/**
@@ -2253,6 +2304,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							resourceNumber.setOwnerId(rs.getId());
 							resourceNumber.setResourceNumber(number.getSiteNumber());
 							resourceNumber.setNumberGroup(number.getSiteNumberGroup());
+							resourceNumber.setGroupLockFlag(number.getGroupLockFlag());
 							this.rentalProvider.createRentalResourceNumber(resourceNumber);
 						}
 				}
@@ -2512,9 +2564,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
         
 		List<RentalResourceNumber> resourceNumbers = this.rentalProvider.queryRentalResourceNumbersByOwner(EhRentalv2Resources.class.getSimpleName(),rs.getId());
 		if(null!=resourceNumbers){
-			signleCmd.setSiteNumbers (new ArrayList<String>());
+			signleCmd.setSiteNumbers (new ArrayList<SiteNumberDTO>());
 			for(RentalResourceNumber number:resourceNumbers){
-				signleCmd.getSiteNumbers().add( number.getResourceNumber());
+				SiteNumberDTO numberDTO = ConvertHelper.convert(number, SiteNumberDTO.class);
+				numberDTO.setSiteNumber(number.getResourceNumber());
+				numberDTO.setSiteNumberGroup(number.getNumberGroup());
+				numberDTO.setGroupLockFlag(number.getGroupLockFlag());
+				signleCmd.getSiteNumbers().add( numberDTO);
 			}
 		}
 		 
@@ -2726,7 +2782,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			//根据用户填写分配sitenumber
 			for(int num =0;num<cmd.getSiteCounts();num++){  
 				rsr.setCounts(1.0);
-				rsr.setResourceNumber(cmd.getSiteNumbers().get(num));
+				SiteNumberDTO dto = cmd.getSiteNumbers().get(num);
+				rsr.setResourceNumber(dto.getSiteNumber());
+				rsr.setNumberGroup(dto.getSiteNumberGroup());
+				rsr.setGroupLockFlag(dto.getGroupLockFlag());
 				//改成批量插入 2016-8-23 by wuhan
 //				rentalProvider.createRentalSiteRule(rsr);
 				rsr.setId(currentId.get()+seqNum.get());
@@ -4568,6 +4627,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 							resourceNumber.setOwnerId(siteId);
 							resourceNumber.setResourceNumber(number.getSiteNumber());
 							resourceNumber.setNumberGroup(number.getSiteNumberGroup());
+							resourceNumber.setGroupLockFlag(number.getGroupLockFlag());
 							this.rentalProvider.createRentalResourceNumber(resourceNumber);
 						}
 				}
