@@ -24,6 +24,7 @@ import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
+import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListParkingCardRequestResponse;
 import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
@@ -46,6 +47,7 @@ import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
+import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -63,7 +65,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ParkingLotDTO.class, collection=true)
     public RestResponse listParkingLots(ListParkingLotsCommand cmd) {
         List<ParkingLotDTO> parkingLotList = null;
-        
+        // TODO: 
         parkingLotList = parkingService.listParkingLots(cmd);
         RestResponse response = new RestResponse(parkingLotList);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -109,7 +111,6 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("listParkingRechargeRates")
     @RestReturn(value=ParkingRechargeRateDTO.class, collection=true)
     public RestResponse listParkingRechargeRates(ListParkingRechargeRatesCommand cmd) {
-        
         List<ParkingRechargeRateDTO> rateList = parkingService.listParkingRechargeRates(cmd);
         RestResponse response = new RestResponse(rateList);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -186,7 +187,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ListParkingRechargeOrdersResponse.class)
     public RestResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd) {
         ListParkingRechargeOrdersResponse cmdResponse = null;
-        
+        //TODO: 添加支付方式
         cmdResponse = parkingService.searchParkingRechargeOrders(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -249,7 +250,7 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=ListParkingCardRequestResponse.class)
     public RestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
         ListParkingCardRequestResponse cmdResponse = null;
-        
+        //TODO:
         cmdResponse = parkingService.searchParkingCardRequests(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -264,9 +265,39 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("requestParkingCard")
     @RestReturn(value=ParkingCardRequestDTO.class)
     public RestResponse requestParkingCard(RequestParkingCardCommand cmd) {
-        
+        //TODO: 申请月卡添加参数
     	ParkingCardRequestDTO dto = parkingService.requestParkingCard(cmd);
         RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/updateRequestParkingCardInfomation</b>
+     * <p>修改申请月卡资料</p>
+     */
+    @RequestMapping("updateRequestParkingCardInfomation")
+    @RestReturn(value=ParkingCardRequestDTO.class)
+    public RestResponse updateRequestParkingCardInfomation(RequestParkingCardCommand cmd) {
+        //TODO: 修改申请月卡资料
+    	ParkingCardRequestDTO dto = parkingService.requestParkingCard(cmd);
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/getRequestParkingCardDetail</b>
+     * <p>获取申请月卡详情</p>
+     */
+    @RequestMapping("getRequestParkingCardDetail")
+    @RestReturn(value=ParkingCardRequestDTO.class)
+    public RestResponse getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd) {
+        //TODO: 获取申请月卡详情
+    	
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -278,10 +309,53 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("setParkingLotConfig")
     @RestReturn(value=String.class)
     public RestResponse setParkingLotConfig(SetParkingLotConfigCommand cmd) {
-        
+        //TODO:参数设置
     	parkingService.setParkingLotConfig(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/setParkingRequestCardConfig</b>
+     * <p>设置申请月卡参数</p>
+     */
+    @RequestMapping("setParkingRequestCardConfig")
+    @RestReturn(value=String.class)
+    public RestResponse setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd) {
+        //TODO:设置申请月卡参数
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/listParkingWorkFlows</b>
+     * <p>设置申请月卡参数</p>
+     */
+    @RequestMapping("listParkingWorkFlows")
+    @RestReturn(value=String.class)
+    public RestResponse listParkingWorkFlows(SetParkingRequestCardConfigCommand cmd) {
+        //TODO:设置申请月卡参数
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/setParkingRequestCardConfig</b>
+     * <p>统计</p>
+     */
+    @RequestMapping("setParkingRequestCardConfig")
+    @RestReturn(value=String.class)
+    public RestResponse setParkingRequestCardConfig(SetParkingLotConfigCommand cmd) {
+        //TODO:设置申请月卡参数
+    	parkingService.setParkingLotConfig(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);     
         response.setErrorDescription("OK");
         return response;
     }
@@ -294,7 +368,23 @@ public class ParkingController extends ControllerBase {
     @RestReturn(value=String.class)
     public RestResponse issueParkingCards(IssueParkingCardsCommand cmd) {
         //发放卡，需要从eh_parking_card_requests表中取出在排队中的的申请记录（按时间从小大到排），然后把它们的状态置为“已通知”
-        
+        //TODO: 
+    	parkingService.issueParkingCards(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/issueParkingCards</b>
+     * <p>获取车品牌与车系</p>
+     */
+    @RequestMapping("issueParkingCards")
+    @RestReturn(value=String.class)
+    public RestResponse listParkingCarSeries(IssueParkingCardsCommand cmd) {
+        //发放卡，需要从eh_parking_card_requests表中取出在排队中的的申请记录（按时间从小大到排），然后把它们的状态置为“已通知”
+        //TODO: 
     	parkingService.issueParkingCards(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -388,7 +478,7 @@ public class ParkingController extends ControllerBase {
 	 */
 	@RequestMapping("exportParkingRechageOrders")
 	public  void exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,HttpServletResponse response ) {
-		HttpServletResponse commandResponse = parkingService.exportParkingRechageOrders(cmd, response );
+		parkingService.exportParkingRechageOrders(cmd, response );
 //		RestResponse response = new RestResponse(commandResponse);
 //		response.setErrorCode(ErrorCodes.SUCCESS);
 //		response.setErrorDescription("OK");

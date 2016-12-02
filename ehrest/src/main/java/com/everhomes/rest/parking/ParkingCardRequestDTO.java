@@ -2,6 +2,7 @@
 package com.everhomes.rest.parking;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.util.StringHelper;
 
@@ -42,6 +43,10 @@ public class ParkingCardRequestDTO {
     private Byte issueFlag;
     private Timestamp issueTime;
     private Timestamp createTime;
+    
+    private String carBrand;
+    private String carColor;
+    private List<AttachmentDescriptor> attachments;
     
     public ParkingCardRequestDTO() {
     }

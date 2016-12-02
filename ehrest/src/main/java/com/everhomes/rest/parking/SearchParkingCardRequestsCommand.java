@@ -29,6 +29,9 @@ public class SearchParkingCardRequestsCommand {
     private Long pageAnchor;
     private Integer pageSize;
     
+    private String carBrand;
+    private String carColor;
+    
     public SearchParkingCardRequestsCommand() {
     }
 

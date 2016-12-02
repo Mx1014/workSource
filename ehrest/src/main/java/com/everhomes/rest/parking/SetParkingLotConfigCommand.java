@@ -23,7 +23,9 @@ public class SetParkingLotConfigCommand {
 	@NotNull
     private Integer reserveDay;
 	private Integer requestNum;
-    
+	private Integer rechargeMonthCount;
+    private Byte rechargeType;
+	
     public SetParkingLotConfigCommand() {
     }
     

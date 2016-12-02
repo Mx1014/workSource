@@ -25,7 +25,7 @@ public class SearchParkingRechargeOrdersCommand {
     private String plateOwnerName;
 //    private String plateOwnerPhone;
     private String payerPhone;
-//    private String paidType;
+    private String paidType;
 //    private Byte rechargeStatus;
     private Long startDate;
     private Long endDate;

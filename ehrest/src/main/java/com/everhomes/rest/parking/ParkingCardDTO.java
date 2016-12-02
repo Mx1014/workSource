@@ -1,5 +1,7 @@
 package com.everhomes.rest.parking;
 
+import java.math.BigDecimal;
+
 import com.everhomes.util.StringHelper;
 
 /**
@@ -32,6 +34,9 @@ public class ParkingCardDTO {
 	private Long startTime;
 	private Long endTime;
 	private Boolean isValid;
+	
+    private BigDecimal freeAmount;
+    private BigDecimal isSupportOnlinePaid;
 	
 	public ParkingCardDTO() {
 	    

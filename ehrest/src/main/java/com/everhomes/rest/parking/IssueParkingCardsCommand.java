@@ -22,6 +22,8 @@ public class IssueParkingCardsCommand {
     private Long parkingLotId;
 	@NotNull
     private Integer count;
+	
+	private Long id;
     
     public IssueParkingCardsCommand() {
     }

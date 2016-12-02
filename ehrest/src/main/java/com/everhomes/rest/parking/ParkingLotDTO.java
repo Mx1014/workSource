@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -27,6 +28,14 @@ public class ParkingLotDTO {
     private Integer maxRequestNum;
     private Byte tempfeeFlag;
     private Byte rateFlag;
+    
+    private Integer monthCount;
+    private Byte rechargeType;
+    private String cardRequestTip;
+    private String cardAgreement;
+    private Integer maxIssueNum;
+    
+    private BigDecimal totalAmount;
     
     public ParkingLotDTO() {
     }

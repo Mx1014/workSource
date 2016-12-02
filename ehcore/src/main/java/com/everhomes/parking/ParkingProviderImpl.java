@@ -94,12 +94,14 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
     
     @Override
-    public List<ParkingLot> listParkingLots(String ownerType,Long ownerId) {
+    public List<ParkingLot> listParkingLots(String ownerType, Long ownerId) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingLots.class));
         
         SelectQuery<EhParkingLotsRecord> query = context.selectQuery(Tables.EH_PARKING_LOTS);
-        query.addConditions(Tables.EH_PARKING_LOTS.OWNER_TYPE.eq(ownerType));
-        query.addConditions(Tables.EH_PARKING_LOTS.OWNER_ID.eq(ownerId));
+        if(StringUtils.isNotBlank(ownerType))
+        	query.addConditions(Tables.EH_PARKING_LOTS.OWNER_TYPE.eq(ownerType));
+        if(null != ownerId)
+        	query.addConditions(Tables.EH_PARKING_LOTS.OWNER_ID.eq(ownerId));
         
         List<ParkingLot> result = query.fetch().map(r -> ConvertHelper.convert(r, ParkingLot.class));
         
@@ -537,7 +539,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	
 	 @Override
 	 public List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,
-				Timestamp startDate, Timestamp endDate,List<Byte> statuses,
+				Timestamp startDate, Timestamp endDate, List<Byte> statuses,
 				CrossShardListingLocator locator){
  		 List<ParkingRechargeOrder> results = new ArrayList<ParkingRechargeOrder>();
 		 DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class));

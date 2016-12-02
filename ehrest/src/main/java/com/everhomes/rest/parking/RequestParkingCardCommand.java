@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
@@ -30,6 +32,10 @@ public class RequestParkingCardCommand {
     private String plateOwnerEntperiseName;
     private String plateOwnerName;
     private String plateOwnerPhone;
+    
+    private String carBrand;
+    private String carColor;
+    private List<AttachmentDescriptor> attachments;
     
     public RequestParkingCardCommand() {
     }
