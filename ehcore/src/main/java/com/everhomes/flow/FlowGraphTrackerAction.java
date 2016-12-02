@@ -1,0 +1,52 @@
+package com.everhomes.flow;
+
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.flow.FlowEntityType;
+import com.everhomes.rest.flow.FlowLogType;
+import com.everhomes.rest.flow.FlowStepType;
+
+public class FlowGraphTrackerAction extends FlowGraphAction {
+	FlowStepType stepType;
+	private FlowService flowService;
+	private FlowEventLogProvider flowEventLogProvider;
+
+	FlowGraphTrackerAction() {
+		this(null);
+	}
+	
+	FlowGraphTrackerAction(FlowStepType step) {
+		flowService = PlatformContext.getComponent(FlowService.class);
+		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
+		this.stepType = step;
+	}
+	
+	public FlowStepType getStepType() {
+		return stepType;
+	}
+
+	public void setStepType(FlowStepType stepType) {
+		this.stepType = stepType;
+	}
+
+	@Override
+	public void fireAction(FlowCaseState ctx, FlowGraphEvent event)
+			throws FlowStepErrorException {
+		FlowEventLog log = new FlowEventLog();
+		log.setId(flowEventLogProvider.getNextId());
+		log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+		log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+		log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+		log.setFlowNodeId(ctx.getCurrentNode().getFlowNode().getId());
+		log.setParentId(0l);
+		log.setFlowCaseId(ctx.getFlowCase().getId());
+		log.setFlowUserId(ctx.getOperator().getId());
+		log.setFlowUserName(ctx.getOperator().getNickName());
+		log.setLogContent(flowService.parseActionTemplate(ctx, this.getFlowAction().getId(), this.getFlowAction().getRenderText()));
+		log.setStepCount(ctx.getFlowCase().getStepCount());
+		log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+		log.setTrackerApplier(this.getFlowAction().getTrackerApplier());
+		log.setTrackerProcessor(this.getFlowAction().getTrackerProcessor());
+		ctx.getLogs().add(log);
+	}
+
+}

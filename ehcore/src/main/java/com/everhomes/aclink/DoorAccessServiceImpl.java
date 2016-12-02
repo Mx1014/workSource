@@ -169,7 +169,7 @@ import org.apache.commons.httpclient.util.DateUtil;
 
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AesServerKeyProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
@@ -1487,7 +1487,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         Long lastTick = updateDoorAccessLastTick(resp.getId());
         //generate a time message
-        if( (lastTick+5*60*1000) < System.currentTimeMillis() ) {
+        if( (lastTick+10*1000) < System.currentTimeMillis() ) {
             return msgGenerator.generateTimeMessage(resp.getId());
         }
         

@@ -1,0 +1,106 @@
+package com.everhomes.rest.flow;
+
+import com.everhomes.util.StringHelper;
+import java.util.List;
+import java.sql.Timestamp;
+
+import com.everhomes.discover.ItemType;
+
+public class FlowNodeDTO {
+    private Byte     status;
+    private String     description;
+    private Integer     autoStepHour;
+    private Long     flowMainId;
+    private Timestamp     createTime;
+    private Integer     namespaceId;
+    private Integer     flowVersion;
+    private Integer     nodeLevel;
+    private Long     id;
+    private String     nodeName;
+
+    public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Integer getAutoStepHour() {
+		return autoStepHour;
+	}
+
+	public void setAutoStepHour(Integer autoStepHour) {
+		this.autoStepHour = autoStepHour;
+	}
+
+	public Long getFlowMainId() {
+		return flowMainId;
+	}
+
+	public void setFlowMainId(Long flowMainId) {
+		this.flowMainId = flowMainId;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Integer getFlowVersion() {
+		return flowVersion;
+	}
+
+	public void setFlowVersion(Integer flowVersion) {
+		this.flowVersion = flowVersion;
+	}
+
+	public Integer getNodeLevel() {
+		return nodeLevel;
+	}
+
+	public void setNodeLevel(Integer nodeLevel) {
+		this.nodeLevel = nodeLevel;
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public String getNodeName() {
+		return nodeName;
+	}
+
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}
+
