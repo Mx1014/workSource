@@ -37,6 +37,7 @@ import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
@@ -56,6 +57,8 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.base.LoginAuthTestCase;
 
 public class FlowServiceTest extends LoginAuthTestCase {
@@ -508,5 +511,19 @@ public class FlowServiceTest extends LoginAuthTestCase {
     public void testVariables() {
 //    	String renderText = "abc${pa1}.${pa2}asdf";
 //    	flowService.getAllParams(renderText);
+    }
+    
+    private void setTestContext(Long userId) {
+    	User user = userProvider.findUserById(userId);
+    	UserContext.current().setUser(user);;
+    }
+    
+    @Test
+    public void testSubject() {
+    	setTestContext(1035l);
+    	
+    	Long subjectId = 11l;
+    	FlowSubjectDTO dto = flowService.getSubectById(subjectId);
+    	Assert.assertTrue(dto != null && dto.getImages().size() > 0);
     }
 }

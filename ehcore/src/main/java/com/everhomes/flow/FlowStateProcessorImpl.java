@@ -137,9 +137,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			event.fire(ctx);
 		}
 		FlowGraphNode nextNode = ctx.getNextNode();
-		if(ctx.getStepType() != null) {
+		if(ctx.getStepType() != null && currentNode != nextNode) {
 			try {
 				if(currentNode != null) {
+					//Only leave once time
 					currentNode.stepLeave(ctx, nextNode);	
 				}
 				
@@ -148,9 +149,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				ctx.setNextNode(null);
 				
 				//create processor's
-				flowService.createSnapshotNodeProcessors(ctx, nextNode);
+				flowService.createSnapshotNodeProcessors(ctx, nextNode);	
 				
 				nextNode.stepEnter(ctx, currentNode);	
+				
 				stepOK = true;
 			} catch(FlowStepErrorException ex) {
 				stepOK = false;

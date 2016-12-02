@@ -23,6 +23,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowLogType;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.server.schema.Tables;
@@ -266,6 +267,30 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				return query;
 			}
     	});    	
+    }
+    
+    @Override
+    public FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount, FlowStepType fromStep) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowEventLog> logs = this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(flowNodeId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
+				query.addConditions(FlowEventCustomField.BUTTON_FIRED_FROM_NODE.getField().eq(fromStep));
+				
+				return query;
+			}
+    	}); 
+    	
+    	if(logs != null && logs.size() > 0) {
+    		return logs.get(0);
+    	}
+    	
+    	return null;
     }
     
     @Override

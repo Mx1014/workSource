@@ -72,14 +72,16 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		FlowStepType nextStep = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
 		ctx.setStepType(nextStep);
 		
+		FlowEventLog log = null;
+		FlowCase flowCase = ctx.getFlowCase();
+		
 		//current state change to next step
-		FlowGraphNode current = null;
+		FlowGraphNode current = ctx.getCurrentNode();
 		FlowGraphNode next = null;
 		switch(nextStep) {
 		case NO_STEP:
 			break;
 		case APPROVE_STEP:
-			current = ctx.getCurrentNode();
 			next = null;
 			if(!btn.getFlowButton().getGotoNodeId().equals(0)) {
 				next = ctx.getFlowGraph().getGraphNode(btn.getFlowButton().getGotoNodeId());
@@ -89,17 +91,15 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 				next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()+1);
 			}
 			ctx.setNextNode(next);
-			ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount() + 1l);
+			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
 		case REJECT_STEP:
-			current = ctx.getCurrentNode();
 			if(current.getFlowNode().getNodeLevel() < 1) {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "flow node step error");
 			}
 			next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()-1);
 			ctx.setNextNode(next);
 			
-			FlowCase flowCase = ctx.getFlowCase();
 			flowCase.setRejectNodeId(current.getFlowNode().getId());
 			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
@@ -108,13 +108,37 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			//TODO processor changed, add a log
 			break;
 		case COMMENT_STEP:
+			next = current;
+			ctx.setNextNode(next);
+			
+			log = new FlowEventLog();
+			log.setId(flowEventLogProvider.getNextId());
+			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			log.setFlowNodeId(ctx.getCurrentNode().getFlowNode().getId());
+			log.setParentId(0l);
+			log.setFlowCaseId(ctx.getFlowCase().getId());
+			log.setFlowUserId(ctx.getOperator().getId());
+			log.setFlowUserName(ctx.getOperator().getNickName());
+			log.setLogContent(subject.getContent());
+			log.setStepCount(ctx.getFlowCase().getStepCount());
+			log.setLogType(FlowLogType.NODE_TRACKER.getCode());
+			log.setSubjectId(subject.getId());
+			log.setButtonFiredStep(nextStep.getCode());
+			log.setTrackerApplier(1l);
+			log.setTrackerProcessor(1l);
+			ctx.getLogs().add(log);
+			
 			break;
 		case ABSORT_STEP:
 			next = ctx.getFlowGraph().getNodes().get(ctx.getFlowGraph().getNodes().size()-1);
 			ctx.setNextNode(next);
+			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
 		case REMINDER_STEP:
-			//TODO resend a message
+			next = current;
+			ctx.setNextNode(next);
 			break;
 		case EVALUATE_STEP:
 			//TODO save evaluate score
@@ -123,7 +147,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			break;
 		}
 		
-		FlowEventLog log = new FlowEventLog();
+		log = new FlowEventLog();
 		log.setId(flowEventLogProvider.getNextId());
 		log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
 		log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());

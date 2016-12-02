@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul> 工作流的详细信息
  * <li>entities: 实体的详细信息 {@link com.everhomes.rest.flow.FlowCaseEntity}</li>
+ * <li>allowApplierUpdate: 是否准许申请者修改实体详情</li>
+ * <li>isEvaluate: 是否支持评价， 1表示支持，0 表示不支持</li>
  * </ul>
  * @author janson
  *
@@ -36,6 +38,7 @@ public class FlowCaseDetailDTO {
     private Byte isEvaluate;
     private Integer evaluateScore;
     private Long lastStepTime;
+	private Byte allowApplierUpdate;
     
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> entities;
@@ -252,6 +255,14 @@ public class FlowCaseDetailDTO {
 
 	public void setNodes(List<FlowNodeLogDTO> nodes) {
 		this.nodes = nodes;
+	}
+
+	public Byte getAllowApplierUpdate() {
+		return allowApplierUpdate;
+	}
+
+	public void setAllowApplierUpdate(Byte allowApplierUpdate) {
+		this.allowApplierUpdate = allowApplierUpdate;
 	}
 
 	@Override

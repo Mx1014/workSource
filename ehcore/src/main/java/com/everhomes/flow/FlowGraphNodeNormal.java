@@ -27,6 +27,13 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 		ctx.getFlowCase().setCurrentNodeId(curr.getFlowNode().getId());
 		boolean logStep = false;
 		
+		FlowEventLog log = null;
+		log = flowEventLogProvider.getStepEvent(ctx.getFlowCase().getId(), curr.getFlowNode().getId(), ctx.getFlowCase().getStepCount(), fromStep);
+		if(log != null && fromStep != FlowStepType.COMMENT_STEP) {
+			//already enter, return
+			return;
+		}
+		
 		switch(fromStep) {
 		case NO_STEP:
 			break;
@@ -45,7 +52,6 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 			
 			break;
 		case TRANSFER_STEP:
-			logStep = true;
 			break;
 		case COMMENT_STEP:
 			break;
@@ -53,7 +59,6 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 			logStep = true;
 			break;
 		case REMINDER_STEP:
-			logStep = true;
 			break;
 		case EVALUATE_STEP:
 			break;
@@ -61,9 +66,9 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 			break;
 		}
 		
-		if(logStep) {
+		if(logStep && log == null) {
 			UserInfo firedUser = ctx.getOperator();
-			FlowEventLog log = new FlowEventLog();
+			log = new FlowEventLog();
 			log.setId(flowEventLogProvider.getNextId());
 			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
 			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());

@@ -24,6 +24,7 @@ import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
@@ -75,6 +76,7 @@ import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
@@ -97,7 +99,9 @@ import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -1602,8 +1606,10 @@ public class FlowServiceImpl implements FlowService {
 		ListingLocator locator = new ListingLocator();
 		
 		List<FlowCaseDetail> details = null;
+		boolean isApplier = false;
 		
 		if(FlowCaseSearchType.APPLIER.equals(cmd.getFlowCaseSearchType())) {
+			isApplier = true;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
 		} else {
 			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
@@ -1613,6 +1619,12 @@ public class FlowServiceImpl implements FlowService {
 		if(details != null) {
 			for(FlowCaseDetail detail : details) {
 				FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
+				if(isApplier) {
+					FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
+					if(flowNode != null) {
+						dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
+					}
+				}
 				dtos.add(dto);
 			}	
 			resp.setNextPageAnchor(locator.getAnchor());
@@ -1711,7 +1723,7 @@ public class FlowServiceImpl implements FlowService {
 						, flowCase.getId(), eventLog.getStepCount(), flowUserType);
 				if(trackerLogs != null) {
 					trackerLogs.forEach((t)-> {
-						FlowEventLogDTO eventDTO = ConvertHelper.convert(eventLog, FlowEventLogDTO.class);
+						FlowEventLogDTO eventDTO = ConvertHelper.convert(t, FlowEventLogDTO.class);
 						nodeLogDTO.getLogs().add(eventDTO);			
 					});
 				}
@@ -1739,13 +1751,40 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowPostSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
-		// TODO Auto-generated method stub AttachmentProviderImpl
+	public FlowSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
+		FlowSubject subject = new FlowSubject();
+		subject.setBelongEntity(cmd.getFlowEntityType());
+		subject.setBelongTo(cmd.getFlowEntityId());
+		subject.setContent(cmd.getContent());
+		subject.setNamespaceId(UserContext.current().getNamespaceId());
+		subject.setStatus(FlowStatusType.VALID.getCode());
+		subject.setTitle(cmd.getTitle());
+		flowSubjectProvider.createFlowSubject(subject);
+
+		FlowSubjectDTO subjectDTO = ConvertHelper.convert(subject, FlowSubjectDTO.class);
 		
-		final List<Attachment> attachments = new ArrayList<>();
-		attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+		if(null != cmd.getImages() && cmd.getImages().size() > 0) {
+			List<Attachment> attachments = new ArrayList<>();
+			for(String image : cmd.getImages()) {
+				Attachment attach = new Attachment();
+				attach.setContentType(NewsCommentContentType.IMAGE.getCode());
+				attach.setContentUri(image);
+				attach.setCreatorUid(UserContext.current().getUser().getId());
+				attach.setOwnerId(subject.getId());
+				attachments.add(attach);
+			}
+			attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
+			
+			for(Attachment at : attachments) {
+				String url = contentServerService.parserUri(at.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				if(url != null && !url.isEmpty()) {
+					subjectDTO.getImages().add(url);
+				}
+			}
+			
+		}
 		
-		return null;
+		return subjectDTO;
 	}
 
 	@Override
@@ -1947,9 +1986,21 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowPostSubjectDTO getSubectById(Long subjectId) {
-		// TODO Auto-generated method stub
-		return null;
+	public FlowSubjectDTO getSubectById(Long subjectId) {
+		FlowSubject subject = flowSubjectProvider.getFlowSubjectById(subjectId);
+		FlowSubjectDTO subjectDTO = ConvertHelper.convert(subject, FlowSubjectDTO.class);
+		
+		List<Attachment> attaches = attachmentProvider.listAttachmentByOwnerId(EhFlowAttachments.class, subjectId);
+		if(attaches != null) {
+			for(Attachment at : attaches) {
+				String url = contentServerService.parserUri(at.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				if(url != null && !url.isEmpty()) {
+					subjectDTO.getImages().add(url);
+				}
+			}
+		}
+		
+		return subjectDTO;
 	}
 
 }

@@ -26,6 +26,7 @@ import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
@@ -316,7 +317,7 @@ public interface FlowService {
 	 * @param cmd
 	 * @return
 	 */
-	FlowPostSubjectDTO postSubject(FlowPostSubjectCommand cmd);
+	FlowSubjectDTO postSubject(FlowPostSubjectCommand cmd);
 
 	/**
 	 * 触发工作流按钮事件的响应
@@ -424,7 +425,7 @@ public interface FlowService {
 	 * @param subjectId
 	 * @return
 	 */
-	FlowPostSubjectDTO getSubectById(Long subjectId);
+	FlowSubjectDTO getSubectById(Long subjectId);
 	
 	//TODO 日志信息分类：
 	
