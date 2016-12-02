@@ -1836,8 +1836,6 @@ INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10400', '', 'EhNamespaces', '999985', '2');
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10600', '', 'EhNamespaces', '999985', '2');
-INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
 	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '10700', '', 'EhNamespaces', '999985', '2');
 
 INSERT INTO `eh_service_module_scopes` (`id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `apply_policy`) 
