@@ -1,3 +1,28 @@
+-- 终端app版本累计用户
+DROP TABLE IF EXISTS `eh_terminal_app_version_cumulatives`;
+CREATE TABLE `eh_terminal_app_version_cumulatives` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `app_version_realm` varchar(128) DEFAULT NULL,
+  `app_version` varchar(128) DEFAULT NULL,
+  `imei_number` varchar(128) DEFAULT '',
+  `create_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 终端app版本活跃用户
+DROP TABLE IF EXISTS `eh_terminal_app_version_actives`;
+CREATE TABLE `eh_terminal_app_version_actives` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT '0',
+  `app_version_realm` varchar(128) DEFAULT NULL,
+  `app_version` varchar(128) DEFAULT NULL,
+  `imei_number` varchar(128) DEFAULT '',
+  `date` VARCHAR(32) DEFAULT NULL,
+  `create_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 -- 终端日统计
 DROP TABLE IF EXISTS `eh_terminal_day_statistics`;
 CREATE TABLE `eh_terminal_day_statistics` (
@@ -53,6 +78,8 @@ CREATE TABLE `eh_terminal_app_version_statistics` (
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
 
 DROP TABLE IF EXISTS `eh_app_version`;
 CREATE TABLE `eh_terminal_statistics_tasks` (
