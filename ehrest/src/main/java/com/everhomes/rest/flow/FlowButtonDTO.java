@@ -7,7 +7,11 @@ import java.sql.Timestamp;
 import com.everhomes.discover.ItemType;
 
 /**
- * needSelection + needComment 有任何一个就要跳到下个界面
+ * <ul>
+ * <li>needProcessor: 需要选人</li>
+ * <li>needProcessor: 需要评论</li>
+ * <li>needProcessor + needSubject 有任何一个就要跳到下个界面</li>
+ * </ul>
  * @author janson
  *
  */
@@ -22,27 +26,26 @@ public class FlowButtonDTO {
     private Integer     flowVersion;
     private Long     id;
     private String     buttonName;
-    private Byte needSelection;//TODO
-    private Byte needComment;//TODO
+    private Byte needProcessor;
+    private Byte needSubject;
 
-
-    public Byte getNeedComment() {
-		return needComment;
+	public Byte getNeedProcessor() {
+		return needProcessor;
 	}
 
 
-	public void setNeedComment(Byte needComment) {
-		this.needComment = needComment;
+	public void setNeedProcessor(Byte needProcessor) {
+		this.needProcessor = needProcessor;
 	}
 
 
-	public Byte getNeedSelection() {
-		return needSelection;
+	public Byte getNeedSubject() {
+		return needSubject;
 	}
 
 
-	public void setNeedSelection(Byte needSelection) {
-		this.needSelection = needSelection;
+	public void setNeedSubject(Byte needSubject) {
+		this.needSubject = needSubject;
 	}
 
 

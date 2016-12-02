@@ -1711,6 +1711,7 @@ public class FlowServiceImpl implements FlowService {
 							, currNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), flowUserType.getCode());
 					if(commentBtn != null) {
 						nodeLogDTO.setAllowComment((byte)1);
+						nodeLogDTO.setCommentButtonId(commentBtn.getId());
 					}
 					if(eventLog.getButtonFiredStep().equals(FlowStepType.ABSORT_STEP.getCode())) {
 						absorted = true;
