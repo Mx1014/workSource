@@ -52,6 +52,7 @@ import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
 import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
@@ -134,6 +135,8 @@ public interface CommunityService {
 	void communityImportOrganizationConfig(CommunityImportOrganizationConfigCommand cmd);
 
 	ListCommunityAuthPersonnelsResponse listCommunityAuthPersonnels(ListCommunityAuthPersonnelsCommand cmd);
+
+	void updateCommunityUser(UpdateCommunityUserCommand cmd);
 	
 	/*--------添加修改资源分类 ------*/
 	void createResourceCategory(CreateResourceCategoryCommand cmd);

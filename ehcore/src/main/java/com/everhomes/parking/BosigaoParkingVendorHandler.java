@@ -89,7 +89,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 //				return resultList;
 //			}
 			String validEnd = card.getValidEnd();
-			Long endTime = strToLong(validEnd);
+			Long endTime = strToLong2(validEnd+"235959");
 			long now = System.currentTimeMillis();
 			
 			if(endTime < now){
@@ -147,7 +147,7 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
         }
     	return card;
     }
-    
+
     public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
     	URL wsdlURL = Service1.WSDL_LOCATION;
@@ -305,6 +305,22 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
     private Long strToLong(String str) {
 
 		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
+		
+		Long ts = null;
+		try {
+			ts = sdf.parse(str).getTime();
+		} catch (ParseException e) {
+			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"validityPeriod data format is not yyyymmdd.");
+		}
+		
+		return ts;
+	}
+    
+    private Long strToLong2(String str) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
 		
 		Long ts = null;
 		try {

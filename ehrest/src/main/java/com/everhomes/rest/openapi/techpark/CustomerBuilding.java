@@ -1,66 +1,64 @@
 package com.everhomes.rest.openapi.techpark;
 
-import java.math.BigDecimal;
-
 import com.everhomes.util.StringHelper;
 
 public class CustomerBuilding {
-    /** 楼栋名称 */
     private String buildingName;
-    
-    /** 门牌号（房间号） */
-    private String apartmentName;
-    
-    /** 面积，单位：平方米 */
-    private BigDecimal areaSize;
-    
-    /** 联系人 */
-    private String contact;
-    
-    /** 联系电话 */
-    private String contactPhone;
+    private String buildingNumber;
+    private String productType;
+    private String completeDate;
+    private String joininDate;
+    private String floorCount;
 
     public String getBuildingName() {
-        return buildingName;
-    }
+		return buildingName;
+	}
 
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
-    }
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
 
-    public String getApartmentName() {
-        return apartmentName;
-    }
+	public String getBuildingNumber() {
+		return buildingNumber;
+	}
 
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
-    }
+	public void setBuildingNumber(String buildingNumber) {
+		this.buildingNumber = buildingNumber;
+	}
 
-    public BigDecimal getAreaSize() {
-        return areaSize;
-    }
+	public String getProductType() {
+		return productType;
+	}
 
-    public void setAreaSize(BigDecimal areaSize) {
-        this.areaSize = areaSize;
-    }
+	public void setProductType(String productType) {
+		this.productType = productType;
+	}
 
-    public String getContact() {
-        return contact;
-    }
+	public String getCompleteDate() {
+		return completeDate;
+	}
 
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
+	public void setCompleteDate(String completeDate) {
+		this.completeDate = completeDate;
+	}
 
-    public String getContactPhone() {
-        return contactPhone;
-    }
+	public String getJoininDate() {
+		return joininDate;
+	}
 
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
+	public void setJoininDate(String joininDate) {
+		this.joininDate = joininDate;
+	}
 
-    @Override
+	public String getFloorCount() {
+		return floorCount;
+	}
+
+	public void setFloorCount(String floorCount) {
+		this.floorCount = floorCount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

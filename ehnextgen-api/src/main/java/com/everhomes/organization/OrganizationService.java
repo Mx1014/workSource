@@ -1,13 +1,47 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+import javax.servlet.http.HttpServletResponse;
+
+import com.everhomes.rest.organization.*;
+
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.forum.*;
+import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.enterprise.ApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchApproveContactCommand;
+import com.everhomes.rest.enterprise.BatchRejectContactCommand;
+import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
+import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
+import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
+import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
+import com.everhomes.rest.enterprise.RejectContactCommand;
+import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
+import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListOrgMixTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicCommand;
+import com.everhomes.rest.forum.ListTopicCommentCommand;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
@@ -360,5 +394,14 @@ public interface OrganizationService {
 
 	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId);
 
-    List<CommunityOrganizationTreeDTO> listCommunityOrganizationTree(ListCommunityOrganizationTreeCommand cmd);
+    CommunityOrganizationTreeResponse listCommunityOrganizationTree(ListCommunityOrganizationTreeCommand cmd);
+	ContractDTO processContract(Contract c);
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
+			Integer namespaceId);
+	List<OrganizationContactDTO> getAdmins(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId);
+	List<String> getBusinessContactPhone(Long organizationId);
+	Set<String> getOrganizationContactPhone(Long organizationId);
+	List<String> getAdminPhone(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId);
 }

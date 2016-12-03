@@ -7,8 +7,8 @@ CREATE TABLE `eh_resource_categories` (
   `name` VARCHAR(64) NOT NULL COMMENT 'resource categry name',
   `owner_type` VARCHAR(32) NOT NULL,
   `owner_id` BIGINT NOT NULL,
-  `parent_id` BIGINT NOT NUll DEFAULT 0,
-  `path` VARCHAR(128) NOT NUll,
+  `parent_id` BIGINT NOT NULL DEFAULT 0,
+  `path` VARCHAR(128) NOT NULL,
   `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0: inactive, 2: active',
   `create_time` DATETIME DEFAULT NULL,
   `creator_uid` BIGINT DEFAULT NULL,
@@ -71,8 +71,8 @@ CREATE TABLE `eh_organization_job_position_maps` (
 CREATE TABLE `eh_service_modules` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `name` VARCHAR(64) DEFAULT NULL,
-  `parent_id` BIGINT NOT NUll,
-  `path` VARCHAR(128) NOT NUll,
+  `parent_id` BIGINT NOT NULL,
+  `path` VARCHAR(128) NOT NULL,
   `type` TINYINT NOT NULL DEFAULT '0' COMMENT '0: park, 1: organization, 2:manager',
   `level` INTEGER NOT NULL DEFAULT '0',
   `status` TINYINT NOT NULL DEFAULT '2' COMMENT '0: inactive, 2: active',
@@ -94,7 +94,7 @@ CREATE TABLE `eh_service_module_scopes` (
   `default_order` INTEGER NULL COMMENT 'order number',
   `apply_policy` TINYINT NOT NULL DEFAULT '0' COMMENT '0: delete , 1: override, 2: revert',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 -- 业务模块 by sfyan 20161029
@@ -163,7 +163,7 @@ CREATE TABLE `eh_quality_inspection_standard_specification_map` (
   `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_quality_inspection_specifications`;
 CREATE TABLE `eh_quality_inspection_specifications` (
@@ -186,7 +186,7 @@ CREATE TABLE `eh_quality_inspection_specifications` (
   `create_time` DATETIME,
   `status` TINYINT NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for approval, 2: active',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_quality_inspection_specification_item_results`;
 CREATE TABLE `eh_quality_inspection_specification_item_results` (
@@ -208,33 +208,33 @@ CREATE TABLE `eh_quality_inspection_specification_item_results` (
   `create_time` DATETIME,
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- merge from activityentry-delta-schema.sql by xiongying 20161128
 ALTER TABLE eh_activities ADD COLUMN `category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity category id';
 ALTER TABLE eh_activities ADD COLUMN `forum_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity post forum that it belongs';
-ALTER TABLE eh_activities ADD COLUMN `creator_tag` VARCHAR(128) NOT NULL DEFAULT 0 COMMENT 'activity post creator tag';
-ALTER TABLE eh_activities ADD COLUMN `target_tag` VARCHAR(128) NOT NULL DEFAULT 0 COMMENT 'activity post target tag';
+ALTER TABLE eh_activities ADD COLUMN `creator_tag` VARCHAR(128) COMMENT 'activity post creator tag';
+ALTER TABLE eh_activities ADD COLUMN `target_tag` VARCHAR(128) COMMENT 'activity post target tag';
 ALTER TABLE eh_activities ADD COLUMN `visible_region_type` TINYINT COMMENT 'define the visible region type';
 ALTER TABLE eh_activities ADD COLUMN `visible_region_id` BIGINT COMMENT 'visible region id';
 
 -- DROP TABLE IF EXISTS `eh_activity_categories`;
 CREATE TABLE `eh_activity_categories` (
-  `id` bigint(20) NOT NULL,
-  `owner_type` varchar(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
-  `owner_id` bigint(20) NOT NULL DEFAULT '0',
-  `parent_id` bigint(20) NOT NULL DEFAULT '0',
-  `name` varchar(64) NOT NULL,
-  `path` varchar(128) DEFAULT NULL,
-  `default_order` int(11) DEFAULT NULL,
-  `status` tinyint(4) NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
-  `creator_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record creator user id',
-  `create_time` datetime DEFAULT NULL,
-  `delete_uid` bigint(20) NOT NULL DEFAULT '0' COMMENT 'record deleter user id',
-  `delete_time` datetime DEFAULT NULL,
-  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `id` BIGINT(20) NOT NULL,
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `parent_id` BIGINT(20) NOT NULL DEFAULT '0',
+  `name` VARCHAR(64) NOT NULL,
+  `path` VARCHAR(128) DEFAULT NULL,
+  `default_order` INT(11) DEFAULT NULL,
+  `status` TINYINT(4) NOT NULL DEFAULT '0' COMMENT '0: disabled, 1: waiting for confirmation, 2: active',
+  `creator_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'record creator user id',
+  `create_time` DATETIME DEFAULT NULL,
+  `delete_uid` BIGINT(20) NOT NULL DEFAULT '0' COMMENT 'record deleter user id',
+  `delete_time` DATETIME DEFAULT NULL,
+  `namespace_id` INT(11) NOT NULL DEFAULT '0',
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- merge from sa1.7-delta-schema.sql by xiongying 20161128
 -- 预约看楼信息
@@ -273,9 +273,13 @@ CREATE TABLE `eh_service_alliance_skip_rule` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 物业报修2.6 merge from pmtask-delta-schema.sql by sw 20161128
+UPDATE eh_pm_task_targets SET role_id = 1 WHERE role_id = 1017;
+UPDATE eh_pm_task_targets SET role_id = 2 WHERE role_id = 1018;
+ALTER TABLE eh_pm_task_targets CHANGE role_id role_id TINYINT NOT NULL;
+
 ALTER TABLE eh_pm_tasks ADD COLUMN `operator_star` TINYINT NOT NULL DEFAULT 0 COMMENT 'task star of operator';
 ALTER TABLE eh_pm_tasks ADD COLUMN `address_type` TINYINT COMMENT '1: family , 2:organization';
-ALTER TABLE eh_pm_tasks ADD COLUMN `address_org_id` BIGINT NOT NUll DEFAULT 0 COMMENT 'organization of address';
+ALTER TABLE eh_pm_tasks ADD COLUMN `address_org_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'organization of address';
 -- DROP TABLE IF EXISTS `eh_pm_task_target_statistics`;
 CREATE TABLE `eh_pm_task_target_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -291,10 +295,101 @@ CREATE TABLE `eh_pm_task_target_statistics` (
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 为activity category增加default_flag add by xiongying20161130
+ALTER TABLE eh_activity_categories ADD COLUMN `default_flag` TINYINT  NOT NULL DEFAULT 0 COMMENT '0: no , 1: yes';
 
 
 
 
+--
+-- 用户认证记录表:记录用户加入/退出企业的log
+--
+
+CREATE TABLE `eh_organization_member_logs` (
+  `id` BIGINT(20)  COMMENT 'id of the record',
+  `namespace_id` INT(11) DEFAULT '0',
+  `organization_id` BIGINT(20) , 
+  `user_id` BIGINT(20) COMMENT 'organization member target id (type user)',
+  `contact_name` VARCHAR(64) DEFAULT NULL,
+  `contact_type` TINYINT(4) DEFAULT '0' COMMENT '0: mobile, 1: email',
+  `contact_token` VARCHAR(128) COMMENT 'phone number or email address',
+  `operation_type` TINYINT(4) DEFAULT '0' COMMENT '0-退出企业 1-加入企业',
+  `request_type` TINYINT(4) DEFAULT '0' COMMENT '0-管理员操作 1-用户操作',
+  `operate_time` DATETIME , 
+  `operator_uid` BIGINT(20) NOT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 增加字段  `eh_users`
+ALTER TABLE `eh_users` ADD COLUMN `executive_tag` TINYINT(4) DEFAULT '0' COMMENT '0-不是高管 1-是高管';
+ALTER TABLE `eh_users` ADD COLUMN `position_tag` VARCHAR(128) DEFAULT NULL COMMENT '职位';
+ALTER TABLE `eh_users` ADD COLUMN `identity_number_tag` VARCHAR(20) DEFAULT NULL COMMENT '身份证号';
 
 
+
+-- 金蝶数据同步， add by tt, 20161117
+ALTER TABLE `eh_buildings` ADD COLUMN `product_type` VARCHAR(128);
+ALTER TABLE `eh_buildings` ADD COLUMN `complete_date` DATETIME;
+ALTER TABLE `eh_buildings` ADD COLUMN `joinin_date` DATETIME;
+ALTER TABLE `eh_buildings` ADD COLUMN `floor_count` VARCHAR(64);
+ALTER TABLE `eh_buildings` ADD COLUMN `namespace_building_type` VARCHAR(128);
+ALTER TABLE `eh_buildings` ADD COLUMN `namespace_building_token` VARCHAR(128);
+
+-- 下面这种写法速度更快点， add by tt, 20161117
+ALTER TABLE `eh_addresses` ADD COLUMN `rent_area` DOUBLE,
+	ADD COLUMN `build_area` DOUBLE,
+	ADD COLUMN `inner_area` DOUBLE,
+	ADD COLUMN `layout` VARCHAR(128),
+	ADD COLUMN `living_status` TINYINT,
+	ADD COLUMN `namespace_address_type` VARCHAR(128),
+	ADD COLUMN `namespace_address_token` VARCHAR(128);
+
+ALTER TABLE `eh_organization_details` ADD COLUMN `service_user_id` BIGINT NULL COMMENT 'customer service staff';
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_type` VARCHAR(128);
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_token` VARCHAR(128);
+
+-- 合同表， add by tt, 20161117
+-- DROP TABLE IF EXISTS `eh_contracts`;
+CREATE TABLE `eh_contracts` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
+  `contract_number` VARCHAR(128) NOT NULL,
+  `contract_end_date` DATETIME NOT NULL,
+  `status` TINYINT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- 合同与楼栋门牌对应表， add by tt, 20161117
+-- DROP TABLE IF EXISTS `eh_contract_building_mappings`;
+CREATE TABLE `eh_contract_building_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
+  `contract_id` BIGINT,
+  `contract_number` VARCHAR(128),
+  `building_name` VARCHAR(128),
+  `apartment_name` VARCHAR(128),
+  `area_size` DOUBLE,
+  `status` TINYINT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- app与namespace映射关系表， add by tt, 20161117
+-- DROP TABLE IF EXISTS `eh_app_namespace_mappings`;
+CREATE TABLE `eh_app_namespace_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INT(11),
+  `app_key` VARCHAR(64),
+  `community_id` BIGINT,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

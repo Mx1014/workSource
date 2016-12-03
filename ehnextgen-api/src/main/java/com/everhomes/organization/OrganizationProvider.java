@@ -233,6 +233,10 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
  
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+ 
+	void createOrganizationMemberLog(OrganizationMemberLog orgLog);
+	List<OrganizationMemberLog> listOrganizationMemberLogs(Long id);
+ 
 
 	List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId);
 
@@ -258,4 +262,7 @@ public interface OrganizationProvider {
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
  
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
+	Organization findOrganizationByName(String name, Integer namespaceId);
+	Integer getSignupCount(Long organizationId);
+ 
 }

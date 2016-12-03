@@ -1,37 +1,46 @@
 package com.everhomes.rest.organization;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
 
 /**
  * <ul>
- *     <li>community: 小区信息</li>
- *     <li>organizationList: 企业列表 {@link OrganizationDetailDTO}</li>
+ *     <li>id: 小区id</li>
+ *     <li>name: 小区名称</li>
+ *     <li>organizations: 企业列表 {@link OrganizationDetailDTO}</li>
  * </ul>
  */
 public class CommunityOrganizationTreeDTO {
 
-    private CommunityDTO community;
+    private Long id;
+    private String name;
     @ItemType(OrganizationDetailDTO.class)
-    private List<OrganizationDetailDTO> organizationList;
+    private List<OrganizationDetailDTO> organizations;
 
-    public CommunityDTO getCommunity() {
-        return community;
+    public Long getId() {
+        return id;
     }
 
-    public void setCommunity(CommunityDTO community) {
-        this.community = community;
+    public void setId(Long id) {
+        this.id = id;
     }
 
-    public List<OrganizationDetailDTO> getOrganizationList() {
-        return organizationList;
+    public String getName() {
+        return name;
     }
 
-    public void setOrganizationList(List<OrganizationDetailDTO> organizationList) {
-        this.organizationList = organizationList;
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public List<OrganizationDetailDTO> getOrganizations() {
+        return organizations;
+    }
+
+    public void setOrganizations(List<OrganizationDetailDTO> organizations) {
+        this.organizations = organizations;
     }
 
     @Override

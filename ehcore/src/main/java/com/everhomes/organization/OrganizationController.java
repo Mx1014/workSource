@@ -1184,9 +1184,9 @@ public class OrganizationController extends ControllerBase {
      * <p>获取小区与小区下属企业的树形结构数据</p>
      */
     @RequestMapping("listCommunityOrganizationTree")
-    @RestReturn(value = CommunityOrganizationTreeDTO.class, collection = true)
+    @RestReturn(value = CommunityOrganizationTreeResponse.class)
     public RestResponse listCommunityOrganizationTree(@Valid ListCommunityOrganizationTreeCommand cmd) {
-        List<CommunityOrganizationTreeDTO> res = organizationService.listCommunityOrganizationTree(cmd);
+        CommunityOrganizationTreeResponse res = organizationService.listCommunityOrganizationTree(cmd);
         RestResponse response = new RestResponse(res);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

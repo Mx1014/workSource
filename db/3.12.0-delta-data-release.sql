@@ -6,7 +6,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES ('300', 'organization', '600001', 'zh_CN', '通用岗位已存在');
 
 -- merge from activityentry-delta-data-release.sql by xiongying20161128
-update eh_activities a set forum_id = (select forum_id from eh_forum_posts where id = a.post_id);
+update eh_activities a set forum_id = (select forum_id from eh_forum_posts where id = a.post_id) where EXISTS(select forum_id from eh_forum_posts where id = a.post_id);
 update eh_activities a set creator_tag = (select creator_tag from eh_forum_posts where id = a.post_id);
 update eh_activities a set target_tag = (select target_tag from eh_forum_posts where id = a.post_id);
 update eh_activities a set visible_region_type = (select visible_region_type from eh_forum_posts where id = a.post_id);
@@ -19,7 +19,65 @@ INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title
 INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (10, '999985', '9');
 
 
--- 组织架构 add by sw 20161128
+--
+-- 修改能耗管理的入口页面地址  add by xq.tian  2016/11/30
+--
+UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"http://core.zuolin.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_name` = 'Energy' AND `namespace_id` = '999992';
+
+-- 物业报修2.6 merge from pmtask-delta-data.sql by sw 20161128
+update eh_pm_tasks set address_type = 1 where address_type is NULL;
+SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'pmtask', '10007', 'zh_CN', '该单已被其他人处理，请返回主界面刷新任务');
+
+delete from eh_locale_templates where scope = 'pmtask.notification' and code = 7;
+
+SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'pmtask.notification', '7', 'zh_CN', '任务操作模版', '${creatorName} ${creatorPhone}已发起一个${categoryName}单，请尽快处理', '0');
+
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'sms.default.yzx', '15', 'zh_CN', '物业任务3-深业', '32949', '999992');
+
+	select * from eh_locale_templates where scope = 'pmtask.notification' and code in (5,6);
+update eh_locale_templates set namespace_id = 0 where scope = 'pmtask.notification' and code in (5,6);
+	
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('20190', '统计', '20100', NULL, null, '0', '2', '/20000/20100/20190', 'park', '245');
+INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', null, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
+INSERT INTO `eh_web_menus` VALUES ('20192', '人员评分统计', '20190', null, 'staffScore_statistics', '0', '2', '/20000/20100/20190/20192', 'park', '181');
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+
+INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '904', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '805', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+ select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '331', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '332', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+ select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '333', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '920', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 1;
+
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '805', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 2;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+select (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '332', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', concat('EhCommunities',owner_id,'.pmtask')
+ from eh_pm_task_targets where role_id = 2;
+
 
 -- 组织架构 add by sw 20161128
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10000', '信息发布', '0', '/10000', '0', '1', '2', '0', UTC_TIMESTAMP());
@@ -490,6 +548,37 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	
 DELETE FROM `eh_acls` WHERE `privilege_id` in (604, 605) AND `role_id` = 1005;
 
+-- 合同管理菜单, add by tt, 20161201
+INSERT INTO `eh_web_menus` VALUES ('32500', '合同管理', '30000', null, 'contract_management', '0', '2', '/30000/32500', 'park', '325');
+INSERT INTO `eh_web_menu_privileges` VALUES ('185', '10065', '32500', '合同管理', '1', '1', '合同管理 全部权限', '710');
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('32500', '合同管理', '30000', '/30000/32500', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('75', '32500', '1', '10065', NULL, '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10065, '0', '合同 管理员', '合同管理 业务模块权限', NULL);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10065', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10065', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+
+
+-- 短信推送菜单, add by tt, 20161201
+INSERT INTO `eh_web_menus` VALUES ('12200', '短信推送', '10000', null, 'sms_push', '0', '2', '/10000/12200', 'park', '325');
+INSERT INTO `eh_web_menu_privileges` VALUES ('195', '10075', '12200', '短信推送', '1', '1', '短信推送 全部权限', '710');
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('12200', '短信推送', '10000', '/10000/12200', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('76', '12200', '1', '10075', NULL, '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10075, '0', '短信推送 管理员', '短信推送 业务模块权限', NULL);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10075', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10075', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+
 -- 更新acl表
 UPDATE `eh_acls` SET `role_type` = 'EhAclRoles' WHERE `role_type` IS NULL AND `owner_type` = 'EhOrganizations';
 
@@ -502,3 +591,115 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
     VALUES ((@category_id := @category_id + 1), '7', '0', '给排水', '设备类型/给排水', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
     VALUES ((@category_id := @category_id + 1), '7', '0', '电梯', '设备类型/电梯', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
+
+-- Officeasy白领活动和OE大讲堂
+update eh_launch_pad_items set action_data = '{"categoryId":1000001}' where id in(112574, 112585) and namespace_id = 999985;
+
+INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000001', 'OE大讲堂', '/1000001', '0', '2', '1', UTC_TIMESTAMP(), '999985');
+INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000000', '白领活动', '/1000000', '0', '2', '1', UTC_TIMESTAMP(), '999985');
+
+
+-- 初始化数据, add by tt, 20161117
+INSERT INTO `eh_app_namespace_mappings` (`id`, `namespace_id`, `app_key`, `community_id`) VALUES (1, 1000000, '7757a75f-b79a-42fd-896e-107f4bfedd59', 240111044331048623);
+INSERT INTO `eh_apps` (`id`, `creator_uid`, `app_key`, `secret_key`, `name`, `description`, `status`, `create_time`, `update_uid`, `update_time`) VALUES (5002, 1, '7757a75f-b79a-42fd-896e-107f4bfedd59', 'nM9PpqGaV2Qe5QqmNSHfWEJyvJjyo0r0f1wJgRadN9zWqcIwdU08FZYjyRSpa2vKmC/Mblh535WMKLiG/Ymr2Q==', 'jin die', 'kingdee', 1, '2016-11-09 11:49:16', NULL, NULL);
+-- 短信模板，text后面需要改成实际的templateId, add by tt, 20161117
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 16, 'zh_CN', '发送短信给业务联系人和管理员', '18077', 1000000);
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 17, 'zh_CN', '合同到期前两个月发送短信（有客服人员）', '33376', 1000000);
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 18, 'zh_CN', '合同到期前两个月发送短信（无客服人员）', '33377', 1000000);
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 19, 'zh_CN', '合同到期前一个月发送短信（有客服人员）', '33378', 1000000);
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 20, 'zh_CN', '合同到期前一个月发送短信（无客服人员）', '33379', 1000000);
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 21, 'zh_CN', '发送短信给新企业（有客服人员）', '33380', 1000000);
+INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 22, 'zh_CN', '发送短信给新企业（无客服人员）', '33381', 1000000);
+
+-- 添加 白领活动 & OE大讲堂 菜单 add by sw 20161201
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10058, '0', '白领活动 管理员', '白领活动 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10059, '0', 'OE大讲堂 管理员', 'OE大讲堂 业务模块权限', NULL);
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
+	VALUES ('10610', '白领活动', '10000', '/10000/10610', '0', '2', '2', '0', '2016-11-28 10:21:45');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
+	VALUES ('10620', 'OE大讲堂', '10000', '/10000/10620', '0', '2', '2', '0', '2016-11-28 10:21:45');
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES ('70', '10610', '1', '10058', NULL, '0', '2016-11-28 10:21:48');
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES ('71', '10620', '1', '10059', NULL, '0', '2016-11-28 10:21:48');
+SET @eh_service_module_scopes = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '0', '10610', '', 'EhNamespaces', '999985', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '0', '10620', '', 'EhNamespaces', '999985', NULL, '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('10610', '白领活动', '10000', NULL, 'white_collar_activity', '0', '2', '/10000/10600', 'park', '161');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('10620', 'OE大讲堂', '10000', NULL, 'OE_auditorium', '0', '2', '/10000/10600', 'park', '162');
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10058', '10610', '白领活动', '1', '1', '白领活动 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10059', '10620', '白领活动', '1', '1', '白领活动 全部权限', '710');
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), '10610', '', 'EhNamespaces', '999985', '2');
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), '10620', '', 'EhNamespaces', '999985', '2');
+
+--
+-- 能耗管理菜单   add by xq.tian  2016/11/29
+--
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (49100, '能耗管理', 40000, NULL, 'energy_management', 1, 2, '/40000/49100', 'park', 390);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (49110, '表计管理', 49100, NULL, 'energy_table_management', 0, 2, '/40000/49100/49110', 'park', 391);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (49120, '抄表记录', 49100, NULL, 'energy_table_record', 0, 2, '/40000/49100/49120', 'park', 392);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (49130, '统计信息', 49100, NULL, 'energy_statistics_info', 0, 2, '/40000/49100/49130', 'park', 393);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (49140, '参数设置', 49100, NULL, 'energy_param_setting', 0, 2, '/40000/49100/49140', 'park', 394);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES (422, 0, '能耗管理', '能耗管理 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 422, 49100, '能耗管理', 1, 1, '能耗管理  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 422, 49110, '能耗管理', 1, 1, '能耗管理  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 422, 49120, '能耗管理', 1, 1, '能耗管理  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 422, 49130, '能耗管理', 1, 1, '能耗管理  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 422, 49140, '能耗管理', 1, 1, '能耗管理  全部权限', 202);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 422, 1001, 0, 1, NOW());
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 49100, '', 'EhNamespaces', 999992, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 49110, '', 'EhNamespaces', 999992, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 49120, '', 'EhNamespaces', 999992, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 49130, '', 'EhNamespaces', 999992, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 49140, '', 'EhNamespaces', 999992, 2);
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
+VALUES ('49100', '能耗管理', '40000', '/40000/49100', '0', '2', '2', '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ('68', '49100', '1', '422', NULL, '0', UTC_TIMESTAMP());
