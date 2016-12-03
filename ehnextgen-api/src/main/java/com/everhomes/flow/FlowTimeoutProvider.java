@@ -18,4 +18,8 @@ public interface FlowTimeoutProvider {
 	List<FlowTimeout> queryFlowTimeouts(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<FlowTimeout> queryValids(ListingLocator locator, int count);
+
+	boolean deleteIfValid(Long timeoutId);
+
 }

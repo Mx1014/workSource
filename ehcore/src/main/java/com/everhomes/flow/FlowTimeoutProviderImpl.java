@@ -13,20 +13,20 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowTimeoutsDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowTimeouts;
 import com.everhomes.server.schema.tables.records.EhFlowTimeoutsRecord;
-import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class FlowTimeoutProviderImpl implements FlowTimeoutProvider {
@@ -112,5 +112,33 @@ public class FlowTimeoutProviderImpl implements FlowTimeoutProvider {
     private void prepareObj(FlowTimeout obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public boolean deleteIfValid(Long timeoutId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowTimeouts.class));
+        
+        int effect = context.update(Tables.EH_FLOW_TIMEOUTS)
+        .set(Tables.EH_FLOW_TIMEOUTS.STATUS, FlowStatusType.INVALID.getCode())
+        .where(Tables.EH_FLOW_TIMEOUTS.STATUS.eq(FlowStatusType.VALID.getCode()).and(Tables.EH_FLOW_TIMEOUTS.ID.eq(timeoutId)))
+        .execute();
+        
+        if(effect > 0) {
+        	return true;
+        }
+        
+        return false;
+    }
+    
+    @Override
+    public List<FlowTimeout> queryValids(ListingLocator locator, int count) {
+    	return queryFlowTimeouts(locator, count, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_TIMEOUTS.STATUS.eq(FlowStatusType.VALID.getCode()));
+				return query;
+			}
+    	});
     }
 }
