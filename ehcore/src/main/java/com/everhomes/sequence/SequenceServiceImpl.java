@@ -1089,6 +1089,11 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhPmTaskTargetStatistics.class, Tables.EH_PM_TASK_TARGET_STATISTICS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.max()).from(Tables.EH_PM_TASK_TARGET_STATISTICS).fetchOne().value1();
         });
+        
+        syncTableSequence(null, EhFlowTimeouts.class, Tables.EH_FLOW_TIMEOUTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_TIMEOUTS.ID.max()).from(Tables.EH_FLOW_TIMEOUTS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

@@ -1715,6 +1715,7 @@ public class FlowServiceImpl implements FlowService {
 					}
 					if(eventLog.getButtonFiredStep().equals(FlowStepType.ABSORT_STEP.getCode())) {
 						absorted = true;
+						nodeLogDTO.setNodeName(buttonDefName(UserContext.getCurrentNamespaceId(), FlowStepType.ABSORT_STEP));
 					}
 				}
 				
