@@ -14,6 +14,7 @@ import com.everhomes.user.UserActivity;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.VersionRange;
 import org.jooq.Condition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -562,23 +563,31 @@ public class StatTerminalServiceImpl implements StatTerminalService{
     }
 
     public static void main(String[] args) {
-//        String androidSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'android', 'version_name','', 999988, (@order := @order + 1), now())";
-//        String iosSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'ios', 'version_name','', 999988, (@order := @order + 1), now())";
+//        String androidSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'android', 'version_name','', 999988, default_order, now())";
+//        String iosSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'ios', 'version_name','', 999988, default_order, now())";
 //        String[] androidVersions = {"3.9.2","3.10.2","3.10.4"};
 //        String[] iosVersions = {"3.9.0","3.9.2","3.10.0","3.10.3","3.10.4","3.10.6"};
-//        System.out.println("SET @order = 1;");
 //        for (String version:androidVersions) {
 //            System.out.println(androidSql.replace("version_name", version));
+//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+//            System.out.println(androidSql.replace("default_order", "" + versionRange.getUpperBound()));
 //        }
 //
 //        for (String version:iosVersions) {
 //            System.out.println(iosSql.replace("version_name", version));
+//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+//            System.out.println(androidSql.replace("default_order", "" + versionRange.getUpperBound()));
 //        }
-        Calendar calendar = Calendar.getInstance();
-        calendar.setTime(DateUtil.strToDate("2016-12-01", "yyyy-MM-dd"));
-        calendar.add(Calendar.DAY_OF_MONTH, -2);
-        System.out.println(DateUtil.dateToStr(calendar.getTime()));
-        calendar.add(Calendar.DAY_OF_MONTH, -7);
-        System.out.println(DateUtil.dateToStr(calendar.getTime()));
+
+        String updSql = "update `eh_app_version` set default_order = @default_order where name = '@version_name';";
+        String[] updVersions = {"1.0.0","1.0.10","1.0.12","1.0.13","1.0.15","1.0.2","1.0.8","1.0.9","1.1.0","1.1.2","2.0.0","2.0.2","2.0.4","2.1.0","2.2.0","2.2.2","2.3.0","2.4.0","2.4.1","2.4.2","2.5.0","2.6.0","2.7.0","2.7.2","2.8.0","2.8.2","3.0.0","3.0.2","3.0.4","3.0.6","3.1.0","3.10.0","3.10.1","3.10.2","3.10.3","3.10.4","3.10.6","3.11.0","3.11.2","3.11.3","3.2.0","3.2.2","3.2.4","3.4.0","3.6.0","3.6.1","3.6.2","3.7.0","3.7.1","3.7.4","3.8.0","3.8.1","3.8.2","3.9.0","3.9.2"};
+        for (String version:updVersions) {
+            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+            System.out.println(updSql.replace("@version_name", version).replace("@default_order", "" + versionRange.getUpperBound()));
+        }
+
+
+//        VersionRange versionRange = new VersionRange("["+"3.10.2"+","+"3.10.2"+")");
+//        System.out.println(versionRange.getUpperBound());
     }
 }

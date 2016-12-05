@@ -1008,6 +1008,30 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEnergyMeterSettingLogs.class, Tables.EH_ENERGY_METER_SETTING_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ENERGY_METER_SETTING_LOGS.ID.max()).from(Tables.EH_ENERGY_METER_SETTING_LOGS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhTerminalAppVersionCumulatives.class, Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES.ID.max()).from(Tables.EH_TERMINAL_APP_VERSION_CUMULATIVES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhTerminalAppVersionActives.class, Tables.EH_TERMINAL_APP_VERSION_ACTIVES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TERMINAL_APP_VERSION_ACTIVES.ID.max()).from(Tables.EH_TERMINAL_APP_VERSION_ACTIVES).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhTerminalAppVersionStatistics.class, Tables.EH_TERMINAL_APP_VERSION_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TERMINAL_APP_VERSION_STATISTICS.ID.max()).from(Tables.EH_TERMINAL_APP_VERSION_STATISTICS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhTerminalDayStatistics.class, Tables.EH_TERMINAL_DAY_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TERMINAL_DAY_STATISTICS.ID.max()).from(Tables.EH_TERMINAL_DAY_STATISTICS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhTerminalHourStatistics.class, Tables.EH_TERMINAL_HOUR_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TERMINAL_HOUR_STATISTICS.ID.max()).from(Tables.EH_TERMINAL_HOUR_STATISTICS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhTerminalStatisticsTasks.class, Tables.EH_TERMINAL_STATISTICS_TASKS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_TERMINAL_STATISTICS_TASKS.ID.max()).from(Tables.EH_TERMINAL_STATISTICS_TASKS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
