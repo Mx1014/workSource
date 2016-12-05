@@ -13,6 +13,16 @@ public class CustomerApartment {
 	private String layout;
 	private Byte livingStatus;
 
+	public CustomerApartment() {
+		super();
+	}
+
+	public CustomerApartment(String buildingName, String apartmentName) {
+		super();
+		this.buildingName = buildingName;
+		this.apartmentName = apartmentName;
+	}
+
 	public String getBuildingName() {
 		return buildingName;
 	}

@@ -62,6 +62,7 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAttachmentsDao;
@@ -80,6 +81,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
@@ -2088,6 +2090,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 	
 	@Override
+	public void createOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
+		
+		assert(addressMapping.getOrganizationId() != null);
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddressMappings.class));
+		addressMapping.setId(id);
+		
+		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
+		dao.insert(addressMapping);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationAddressMappings.class, null);		
+	}
+	
+	@Override
+	public void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
+		
+		assert(addressMapping.getOrganizationId() != null);
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
+		dao.update(addressMapping);
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null);		
+	}
+	
+	@Override
     public List<OrganizationAttachment> listOrganizationAttachments(long organizationId) {
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
         // DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhOrganizations.class, organizationId));
@@ -2881,6 +2911,42 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		EhOrganizationJobPositionsDao dao = new EhOrganizationJobPositionsDao(context.configuration());
 		dao.deleteById(id);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationJobPositions.class, null);
+	}
+
+	@Override
+	public OrganizationAddress findOrganizationAddress(Long organizationId, Long addressId, Long buildingId) {
+		final OrganizationAddress[] result = new OrganizationAddress[1];
+
+        this.dbProvider.mapReduce(AccessSpec.readOnly(), result, 
+            (DSLContext context, Object reducingContext) -> {
+           	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
+       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
+       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId))
+       		 .fetch().map(r ->{
+       			return result[0] = ConvertHelper.convert(r,OrganizationAddress.class);
+       		});
+           	 return true;
+       				 
+            });
+        
+        return result[0];
+	}
+
+	@Override
+	public CommunityAddressMapping findOrganizationAddressMapping(Long organizationId, Long communityId,
+			Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId)
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId)))
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+				.fetch();
+
+		if(records != null && !records.isEmpty()){
+			return ConvertHelper.convert(records.get(0), CommunityAddressMapping.class);
+		}
+		return null;
 	}
 	
 	
