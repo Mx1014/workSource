@@ -649,7 +649,7 @@ VALUES ('49100', '能耗管理', '40000', '/40000/49100', '0', '2', '2', '0', UT
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ('68', '49100', '1', '422', NULL, '0', UTC_TIMESTAMP());
 
--- 审批发送消息模板，add by wh, 20161205
+-- 自认证跳转页面，add by wh, 20161205
 SET @id := (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.success','http://core.zuolin.com/mobile/static/email_page/success.html','email auth verify success','0',NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.fail','http://core.zuolin.com/mobile/static/email_page/fail.html','email auth verify success','0',NULL);
