@@ -59,7 +59,7 @@ public interface YellowPageProvider {
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
 	void populateServiceAlliancesAttachment(ServiceAlliances sa);
 	
-	List<ServiceAllianceCategories> listChildCategories(Integer namespaceId, Long parentId, CategoryAdminStatus status);
+	List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status);
  
 	void createNotifyTarget(ServiceAllianceNotifyTargets target);
 	void updateNotifyTarget(ServiceAllianceNotifyTargets target);
@@ -80,5 +80,11 @@ public interface YellowPageProvider {
 	void createReservationRequests(ReservationRequests request);
 	ReservationRequests findReservationRequests(Long id);
 	List<ReservationRequests> listReservationRequests(CrossShardListingLocator locator, int pageSize);
+	
+	void createApartmentRequests(ServiceAllianceApartmentRequests request);
+	ServiceAllianceApartmentRequests findApartmentRequests(Long id);
+	List<ServiceAllianceApartmentRequests> listApartmentRequests(CrossShardListingLocator locator, int pageSize);
+	
+	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
 
 }

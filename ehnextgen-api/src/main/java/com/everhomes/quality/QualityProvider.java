@@ -3,10 +3,9 @@ package com.everhomes.quality;
 import java.sql.Timestamp;
 import java.util.List;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.rest.quality.QualityInspectionLogDTO;
+import com.everhomes.rest.quality.ScoreDTO;
+import com.everhomes.rest.quality.TaskCountDTO;
 
 
 public interface QualityProvider {
@@ -15,7 +14,7 @@ public interface QualityProvider {
 	void updateVerificationTasks(QualityInspectionTasks task);
 	void deleteVerificationTasks(Long taskId);
 	QualityInspectionTasks findVerificationTaskById(Long taskId);
-	List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, 
+	List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
     		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Long groupId, 
     		Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
@@ -26,7 +25,7 @@ public interface QualityProvider {
 	void updateQualityInspectionStandards(QualityInspectionStandards standard);
 	QualityInspectionStandards findStandardById(Long id);
 	List<QualityInspectionStandards> findStandardsByCategoryId(Long categoryId);
-	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType);
+	List<QualityInspectionStandards> listQualityInspectionStandards(ListingLocator locator, int count, Long ownerId, String ownerType, String targetType, Long targetId, Byte reviewResult);
 	
 	void createQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
 	void updateQualityInspectionEvaluationFactors(QualityInspectionEvaluationFactors factor);
@@ -78,4 +77,30 @@ public interface QualityProvider {
 	
 	void createQualityInspectionLogs(QualityInspectionLogs log);
 	List<QualityInspectionLogs> listQualityInspectionLogs(String ownerType, Long ownerId, String targetType, Long targetId, ListingLocator locator, int count);
+	
+	QualityInspectionStandards findStandardById(Long id, String ownerType, Long ownerId, String targetType, Long targetId);
+	void deleteQualityInspectionStandardSpecificationMapByStandardId(Long standardId);
+	void deleteQualityInspectionStandardSpecificationMap(Long standardSpecificationId);
+	QualityInspectionStandardSpecificationMap createQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
+	void updateQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
+	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId);
+	
+	void populateStandardsSpecifications(final List<QualityInspectionStandards> standards);
+	void populateStandardSpecifications(QualityInspectionStandards standard);
+	
+	void createQualitySpecification(QualityInspectionSpecifications specification);
+	void updateQualitySpecification(QualityInspectionSpecifications specification);
+	
+	void inactiveQualityInspectionStandardSpecificationMapBySpecificationId(Long specificationId);
+	
+	List<QualityInspectionSpecifications> listAllChildrenSpecifications(String superiorPath, String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Byte inspectionType);
+	List<QualityInspectionSpecifications> listChildrenSpecifications(String ownerType, Long ownerId, Byte scopeCode, Long scopeId, Long parentId, Byte inspectionType);
+
+	List<TaskCountDTO> countTasks(String ownerType, Long ownerId, String targetType, Long targetId, Long startTime, Long endTime, int offset, int count);
+	ScoreDTO countScores(String ownerType, Long ownerId, String targetType, Long targetId, String superiorPath, Long startTime, Long endTime);
+	
+	void populateRecordItemResults(final List<QualityInspectionTaskRecords> records);
+	void populateRecordItemResult(QualityInspectionTaskRecords record);
+	void createSpecificationItemResults(QualityInspectionSpecificationItemResults result);
+
 }

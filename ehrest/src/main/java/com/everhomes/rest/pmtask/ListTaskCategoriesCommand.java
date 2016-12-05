@@ -14,6 +14,7 @@ import com.everhomes.util.StringHelper;
 public class ListTaskCategoriesCommand {
 	private Integer namespaceId;
 	private Long parentId;
+	private Long taskCategoryId;
 	private String keyword;
 	private Long pageAnchor;
 	private Integer pageSize;
@@ -61,6 +62,14 @@ public class ListTaskCategoriesCommand {
 
 	public void setKeyword(String keyword) {
 		this.keyword = keyword;
+	}
+
+	public Long getTaskCategoryId() {
+		return taskCategoryId;
+	}
+
+	public void setTaskCategoryId(Long taskCategoryId) {
+		this.taskCategoryId = taskCategoryId;
 	}
 
 

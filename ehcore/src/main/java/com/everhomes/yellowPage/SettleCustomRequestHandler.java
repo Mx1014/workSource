@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +68,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private SettleRequestInfoSearcher settleRequestInfoSearcher;
+	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
 	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -90,13 +92,18 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		
 		LOGGER.info("SettleCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createSettleRequests(request);
-		settleRequestInfoSearcher.feedDoc(request);
+		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+		requestInfo.setTemplateType(cmd.getTemplateType());
+		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
 		
 		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
 		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
-		String categoryName = (category.getName() == null) ? "" : category.getName();
+		String categoryName = "";
+		if(category != null) {
+			categoryName = (category.getName() == null) ? "" : category.getName();
+		} 
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
@@ -124,7 +131,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
 			}
 			
-			sendEmail(serviceOrg.getEmail(), category.getName(), notifyTextForOrg);
+			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
 			
 		}
 		
@@ -151,7 +158,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
 				if(email.getStatus().byteValue() == 1) {
-					sendEmail(email.getContactToken(), category.getName(), notifyTextForAdmin);
+					sendEmail(email.getContactToken(), categoryName, notifyTextForAdmin);
 				}
 			}
 		}

@@ -100,7 +100,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		  
 		LOGGER.info("ServiceAllianceCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createServiceAllianceRequests(request);
-		saRequestInfoSearcher.feedDoc(request);
+		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+		requestInfo.setTemplateType(cmd.getTemplateType());
+		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		if(cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
 			List<RequestAttachments> attachments = cmd.getAttachments().stream().map(attachment -> {

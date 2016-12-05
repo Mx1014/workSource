@@ -23,4 +23,6 @@ public interface ApprovalRuleFlowMapProvider {
 
 	ApprovalRuleFlowMap findConcreteApprovalRuleFlowMap(Long ruleId, Byte approvalType);
 
+	List<ApprovalRuleFlowMap> listRuleFlowMapsByRuleId(Long ruleId);
+
 }

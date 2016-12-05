@@ -53,6 +53,7 @@ import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
 import com.everhomes.rest.community.admin.VerifyBuildingNameAdminCommand;
@@ -87,7 +88,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse listCommunitiesByStatus(@Valid ListCommunitesByStatusCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         ListCommunitesByStatusCommandResponse cmdResponse = this.communityService.listCommunitiesByStatus(cmd);
         
@@ -106,7 +107,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse approveCommunity(@Valid ApproveCommunityAdminCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.approveCommuniy(cmd);
         
@@ -125,7 +126,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse rejectCommunity(@Valid RejectCommunityAdminCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.rejectCommunity(cmd);
         
@@ -144,7 +145,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse updateCommunity(@Valid UpdateCommunityAdminCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.updateCommunity(cmd);
         
@@ -163,7 +164,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse getCommunityById(@Valid GetCommunityByIdCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         CommunityDTO community = this.communityService.getCommunityById(cmd);
         RestResponse response =  new RestResponse(community);
@@ -181,7 +182,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse getCommunityByUuid(@Valid GetCommunityByUuidCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         CommunityDTO community = this.communityService.getCommunityByUuid(cmd);
         RestResponse response =  new RestResponse(community);
@@ -199,7 +200,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse syncIndex() {
 
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.searchSyncManager.SyncDb(SearchSyncType.COMMUNITY);
         RestResponse response =  new RestResponse();
@@ -218,7 +219,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse getNearbyCommunitiesById(@Valid GetNearbyCommunitiesByIdCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         List<CommunityDTO> results = this.communityService.getNearbyCommunityById(cmd);
         RestResponse response =  new RestResponse(results);
@@ -237,7 +238,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse listCommunitiesByKeyword(@Valid ListComunitiesByKeywordAdminCommand cmd) {
     	
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         if(cmd.getKeyword() == null || cmd.getKeyword().equals("")){
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
 					"Invalid keyword parameter");
@@ -258,7 +259,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse deleteBuilding(DeleteBuildingAdminCommand cmd) {
     	
     	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         this.communityService.deleteBuilding(cmd);
 
@@ -276,7 +277,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         BuildingDTO dto = this.communityService.updateBuilding(cmd);
 
@@ -294,7 +295,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse verifyBuildingName(VerifyBuildingNameAdminCommand cmd) {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
 
         Boolean verify = this.communityService.verifyBuildingName(cmd);
 
@@ -312,7 +313,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse getCommunityManagers(ListCommunityManagersAdminCommand cmd) {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        ////resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         List<CommunityManagerDTO> manager = this.communityService.getCommunityManagers(cmd);
 		RestResponse response =  new RestResponse(manager);
@@ -329,7 +330,7 @@ public class CommunityAdminController extends ControllerBase {
 	public RestResponse getUserCommunities(ListUserCommunitiesCommand cmd) {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         List<UserCommunityDTO> communities = this.communityService.getUserCommunities(cmd);
 		RestResponse response =  new RestResponse(communities);
@@ -347,7 +348,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse listBuildingsByStatus(@Valid listBuildingsByStatusCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         ListBuildingsByStatusCommandResponse cmdResponse = this.communityService.listBuildingsByStatus(cmd);
         
@@ -366,7 +367,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse approveBuilding(@Valid VerifyBuildingAdminCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.approveBuilding(cmd);
         
@@ -385,7 +386,7 @@ public class CommunityAdminController extends ControllerBase {
     public RestResponse rejectBuilding(@Valid VerifyBuildingAdminCommand cmd) {
         
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         
         this.communityService.rejectBuilding(cmd);
         
@@ -423,8 +424,24 @@ public class CommunityAdminController extends ControllerBase {
     @RequestMapping("qryCommunityUserEnterpriseByUserId")
     @RestReturn(value=CommunityUserAddressDTO.class)
     public RestResponse qryCommunityUserEnterpriseByUserId(@Valid QryCommunityUserAddressByUserIdCommand cmd) {
-        
+
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        //resolver.checkUserPrivilege(UserContext.current().getUser().getId(), 0);
         RestResponse response =  new RestResponse(communityService.qryCommunityUserEnterpriseByUserId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/community/updateCommunityUser</b>
+     * <p>园区管理员更新用户信息</p>
+     */
+    @RequestMapping("updateCommunityUser")
+    @RestReturn(value=String.class)
+    public RestResponse updateCommunityUser(@Valid UpdateCommunityUserCommand cmd) {
+    	communityService.updateCommunityUser(cmd);
+        RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

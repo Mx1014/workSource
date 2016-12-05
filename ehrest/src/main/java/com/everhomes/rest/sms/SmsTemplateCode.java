@@ -40,4 +40,18 @@ public interface SmsTemplateCode {
     
     int PM_TASK_ASSIGN_CODE = 10; //任务分配消息
     int PM_TASK_CREATOR_CODE = 11;//任务创建消息
+    int PM_TASK_ASSIGN_TO_CREATOR_CODE = 15;//任务分配，发送给任务发起者
+
+    int RENTAL_SUCCESS_EXCLUSIVE_CODE = 12;//付费预约成功 独占资源
+    int RENTAL_SUCCESS_NOSITENUMBER_CODE = 13;//付费预约成功 非独占资源，不需要选择资源编号
+    int RENTAL_SUCCESS_SITENUMBER_CODE = 14;//付费预约成功 非独占资源，需要选择资源编号
+    
+    int PUSH_MESSAGE_TO_BUSINESS_AND_ADMIN_CODE = 16;//发送短信给业务联系人和管理员
+    
+    int PUSH_MESSAGE_BACK_TWO_MONTHS_WITH_SERVICE_USER_CODE = 17;//合同到期前两个月发送短信（有客服人员）: 尊敬的客户您好，我是您的专属客服经理${serviceUserName}，电话${serviceUserPhone}，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装。
+    int PUSH_MESSAGE_BACK_TWO_MONTHS_WITHOUT_SERVICE_USER_CODE = 18;//合同到期前两个月发送短信（无客服人员）：尊敬的客户您好，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装。
+    int PUSH_MESSAGE_BACK_ONE_MONTH_WITH_SERVICE_USER_CODE = 19;//合同到期前一个月发送短信（有客服人员）：尊敬的客户您好，我是您的专属客服经理${serviceUserName}，电话${serviceUserPhone}，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装，如果您已经与科技园联系过，请忽略该短信。
+    int PUSH_MESSAGE_BACK_ONE_MONTH_WITHOUT_SERVICE_USER_CODE = 20;//合同到期前一个月发送短信（无客服人员）：尊敬的客户您好，您的租期将在${contractEndDate}到期，请到“${appName1}app”办理续签等相关手续。 如未安装“${appName2}app”，请到应用市场下载安装，如果您已经与科技园联系过，请忽略该短信。
+    int PUSH_MESSAGE_TO_NEW_ORGANIZATION_WITH_SERVICE_USER_CODE = 21;//发送短信给新企业（有客服人员）：尊敬的客户您好，我是您的专属客服经理${serviceUserName}，电话${serviceUserPhone}，欢迎入住${communityName}，有任何问题请随时与我联系。为更好地为您做好服务，请下载安装“${appName}app”，体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。
+    int PUSH_MESSAGE_TO_NEW_ORGANIZATION_WITHOUT_SERVICE_USER_CODE = 22;//发送短信给新企业（无客服人员）：尊敬的客户您好，欢迎入住${communityName}。为更好地为您做好服务，请下载安装“${appName}app”，体会指尖上的园区给您带来的便利和高效，请到应用市场下载安装。
 }

@@ -44,8 +44,8 @@ public interface YellowPageService {
     List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd);
 
     /**
-     * 获取服务联盟父分类
-     * (用于客户端在主页签上显示服务联盟获取parentId及displayMode使用)
+     * 获取服务联盟机构的展示类型
+     * (用于客户端服务联盟类型displayType配置为list时获取displayMode使用)
      */
-    List<ServiceAllianceCategoryDTO> getParentServiceAllianceCategory(ListServiceAllianceCategoriesCommand cmd);
+    ServiceAllianceDisplayModeDTO getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd);
 }

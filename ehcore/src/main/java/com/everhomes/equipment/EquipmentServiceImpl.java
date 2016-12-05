@@ -184,7 +184,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -525,6 +527,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -606,6 +609,7 @@ import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
 import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListTasksByTokenCommand;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
@@ -1503,7 +1507,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, null, locator, pageSize);
+        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, null, locator, pageSize, null);
             
             if(tasks.size() > 0) {
                 for(EquipmentInspectionTasks task : tasks) {
@@ -1529,7 +1533,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         standardIds.add(standardId);
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, standardIds, locator, pageSize);
+        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, standardIds, locator, pageSize, null);
             
             if(tasks.size() > 0) {
                 for(EquipmentInspectionTasks task : tasks) {
@@ -2543,9 +2547,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(standard != null) {
 			response.setTaskType(standard.getStandardType());
 		} 
+		
+		EquipmentTaskDTO taskDto = convertEquipmentTaskToDTO(task);
+		
+		
         List<EquipmentTaskLogsDTO> dtos = logs.stream().map((r) -> {
         	
         	EquipmentTaskLogsDTO dto = ConvertHelper.convert(r, EquipmentTaskLogsDTO.class);
+        	dto.setTemplateId(taskDto.getTemplateId());
+        	dto.setTemplateName(taskDto.getTemplateName());
         	
         	List<EquipmentInspectionItemResults> itemResults = equipmentProvider.findEquipmentInspectionItemResultsByLogId(dto.getId());
         	
@@ -3113,7 +3123,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         	standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
         }
         
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, locator, pageSize+1);
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, locator, pageSize+1, null);
 		
 		if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
@@ -3162,7 +3172,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Category category = getEquipmentCategory(parentId);
 		path = category.getPath() + "/" + cmd.getName();
 		
-		category = categoryProvider.findCategoryByPath(namespaceId, path);
+		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, cmd.getName());
+//		category = categoryProvider.findCategoryByPath(namespaceId, path);
 		if(category != null) {
 			LOGGER.error("equipment category have been in existing");
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE, EquipmentServiceErrorCode.ERROR_CATEGORY_EXIST,
@@ -3378,6 +3389,84 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		return dtos;
+	}
+
+	@Override
+	public ListEquipmentTasksResponse listTasksByToken(
+			ListTasksByTokenCommand cmd) {
+
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentByQrCodeToken(cmd.getQrCodeToken());
+		
+		if(equipment == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST,
+ 				"设备不存在");
+		}
+		
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		
+		User user = UserContext.current().getUser();
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+        List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
+        
+        boolean isAdmin = false;
+		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), equipment.getOwnerId(), EntityType.USER.getCode(), user.getId());
+		if(null != resources && 0 != resources.size()){
+			for (RoleAssignment resource : resources) {
+				if(resource.getRoleId() == RoleConstants.ENTERPRISE_SUPER_ADMIN 
+						|| resource.getRoleId() == RoleConstants.ENTERPRISE_ORDINARY_ADMIN
+						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN 
+						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
+					isAdmin = true;
+					break;
+				}
+			}
+		}
+		 
+		if(!isAdmin) {
+			List<RoleAssignment> res = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), equipment.getTargetId(), EntityType.USER.getCode(), user.getId());
+			if(null != res && 0 != res.size()){
+				for (RoleAssignment resource : res) {
+					if(resource.getRoleId() == RoleConstants.EQUIPMENT_MANAGER) {
+						isAdmin = true;
+						break;
+					}
+				}
+			}
+		}
+		
+		
+		if(isAdmin) {
+			List<Byte> taskStatus = new ArrayList<Byte>();
+	        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+	        taskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+	        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+			tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
+			
+		} else {
+				List<Byte> taskStatus = new ArrayList<Byte>();
+		        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+		        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+				tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
+		}
+        
+		if(tasks.size() > pageSize) {
+        	tasks.remove(tasks.size() - 1);
+        	response.setNextPageAnchor(tasks.get(tasks.size() - 1).getId());
+        }
+        
+    	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+        	return dto;
+        }).filter(r->r!=null).collect(Collectors.toList());
+        
+		response.setTasks(dtos);
+				
+		return response;
 	}
 
 }
