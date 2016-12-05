@@ -108,10 +108,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('48', '38000', '1', '10048', NULL, '0', UTC_TIMESTAMP());
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('49', '10850', '1', '10049', NULL, '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('50', '41300', '1', '10050', NULL, '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('51', '41400', '1', '10051', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('52', '10200', '1', '10052', NULL, '0', UTC_TIMESTAMP());
-
 
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1008', '10002', '10100', '论坛/公告', '1', '1', '论坛/公告 全部权限', '710');
@@ -405,17 +402,6 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_service_module_privileges` WHERE module_id in (select id from eh_service_modules where type = 1);
 
 
--- 添加 业务权限下面的子菜单
-SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-	
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
-(select t.* FROM eh_web_menus m
-JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
-ON m.id = t.menu_id
-) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges where privilege_id>=10000);
-
-
 -- 新增俱乐部菜单
 INSERT INTO `eh_web_menus` VALUES ('10750', '俱乐部', '10000', null, 'groups', '0', '2', '/10000/10750', 'park', '180');
 INSERT INTO `eh_web_menus` VALUES ('10751', '俱乐部管理', '10750', null, 'groups_management', '0', '2', '/10000/10750/10751', 'park', '181');
@@ -531,3 +517,14 @@ VALUES ('49100', '能耗管理', '40000', '/40000/49100', '0', '2', '2', '0', UT
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ('68', '49100', '1', '422', NULL, '0', UTC_TIMESTAMP());
+
+
+-- 添加 业务权限下面的子菜单
+SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+	
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
+(select t.* FROM eh_web_menus m
+JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
+ON m.id = t.menu_id
+) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges where privilege_id>=10000);
