@@ -18,13 +18,16 @@ import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowTimeoutStepDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.user.User;
+import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class FlowStateProcessorImpl implements FlowStateProcessor {
@@ -50,6 +53,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	
    @Autowired
    BigCollectionProvider bigCollectionProvider;
+   
+   @Autowired
+   private UserService userService;
     
 //	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
@@ -71,6 +77,30 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		ctx.setOperator(logonUser);
 		
 		return ctx;
+	}
+	
+	@Override
+	public FlowCaseState prepareStepTimeout(FlowTimeout ft) {
+		FlowCaseState ctx = new FlowCaseState();
+		FlowTimeoutStepDTO stepDTO = (FlowTimeoutStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowTimeoutStepDTO.class);
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
+		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
+				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
+			
+			ctx.setFlowCase(flowCase);
+			ctx.setModuleName(flowCase.getModuleName());
+			
+			FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+			ctx.setFlowGraph(flowGraph);
+			
+			UserInfo user = userService.getUserInfo(User.SYSTEM_UID);
+			ctx.setOperator(user);
+			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent();
+			ctx.setCurrentEvent(event);
+			
+			return ctx;
+		}
+		return null;
 	}
 	
 	@Override

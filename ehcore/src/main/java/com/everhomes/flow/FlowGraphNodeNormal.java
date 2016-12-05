@@ -1,18 +1,27 @@
 package com.everhomes.flow;
 
+import java.sql.Timestamp;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
+import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowTimeoutStepDTO;
+import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 public class FlowGraphNodeNormal extends FlowGraphNode {
 	private FlowEventLogProvider flowEventLogProvider;
+	private FlowTimeoutService flowTimeoutService;
+	
 	public FlowGraphNodeNormal() {
-		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);	
+		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
+		flowTimeoutService = PlatformContext.getComponent(FlowTimeoutService.class);
 	}
 	
 	@Override
@@ -76,6 +85,30 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 			break;
 		default:
 			break;
+		}
+		
+		//create step timeout
+		if(!curr.getFlowNode().getAutoStepMinute().equals(0l)) {
+			FlowTimeout ft = new FlowTimeout();
+			ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+			ft.setBelongTo(curr.getFlowNode().getId());
+			ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
+			ft.setStatus(FlowStatusType.VALID.getCode());
+			curr.getFlowNode().getAutoStepType();
+			
+			FlowTimeoutStepDTO stepDTO = new FlowTimeoutStepDTO();
+			stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
+			stepDTO.setFlowMainId(ctx.getFlowCase().getFlowMainId());
+			stepDTO.setFlowVersion(ctx.getFlowCase().getFlowVersion());
+			stepDTO.setStepCount(ctx.getFlowCase().getStepCount());
+			stepDTO.setFlowNodeId(curr.getFlowNode().getId());
+			stepDTO.setAutoStepType(curr.getFlowNode().getAutoStepType());
+			ft.setJson(stepDTO.toString());
+			
+			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 60*1000;
+			ft.setTimeoutTick(new Timestamp(timeoutTick));
+			
+			flowTimeoutService.pushTimeout(ft);
 		}
 		
 		if(logStep && log == null) {

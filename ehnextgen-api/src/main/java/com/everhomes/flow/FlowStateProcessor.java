@@ -12,4 +12,6 @@ public interface FlowStateProcessor {
 
 	FlowCaseState prepareStart(UserInfo logonUser, FlowCase flowCase);
 
+	FlowCaseState prepareStepTimeout(FlowTimeout ft);
+
 }

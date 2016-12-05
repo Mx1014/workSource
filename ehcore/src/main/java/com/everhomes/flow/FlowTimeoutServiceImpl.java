@@ -26,6 +26,9 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     
 	@Autowired
 	FlowTimeoutProvider flowTimeoutProvider;
+	
+	@Autowired
+	FlowService flowService;
     
     private String queueName = "flowtimeouts";
     
@@ -52,7 +55,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     	FlowTimeoutType timeoutType = FlowTimeoutType.fromCode(ft.getTimeoutType());
     	switch(timeoutType) {
     	case STEP_TIMEOUT:
-    		
+    		flowService.processStepTimeout(ft);
     		break;
     	default:
     		break;

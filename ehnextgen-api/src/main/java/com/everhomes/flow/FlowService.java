@@ -388,7 +388,7 @@ public interface FlowService {
 	String parseActionTemplate(FlowCaseState ctx, Long actionId,
 			String renderText);
 
-	void flushState(FlowCaseState ctx);
+	void flushState(FlowCaseState ctx) throws FlowStepBusyException;
 
 	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
 
@@ -433,6 +433,12 @@ public interface FlowService {
 	 * @return
 	 */
 	FlowDTO getFlowById(Long flowId);
+
+	/**
+	 * step timeout
+	 * @param ft
+	 */
+	void processStepTimeout(FlowTimeout ft);
 	
 	//TODO 日志信息分类：
 	

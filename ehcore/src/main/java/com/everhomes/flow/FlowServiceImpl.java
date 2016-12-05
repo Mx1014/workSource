@@ -1474,6 +1474,14 @@ public class FlowServiceImpl implements FlowService {
 		FlowButton btn = flowButtonProvider.getFlowButtonById(cmd.getButtonId());
 		return ConvertHelper.convert(btn, FlowButtonDTO.class);
 	}
+	
+	@Override
+    public void processStepTimeout(FlowTimeout ft) {
+		FlowCaseState ctx = flowStateProcessor.prepareStepTimeout(ft);
+		if(ctx != null) {
+			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
+		}
+    }
 
 	@Override
 	public void disableFlow(Long flowId) {
@@ -1945,12 +1953,18 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
-	public void flushState(FlowCaseState ctx) {
+	public void flushState(FlowCaseState ctx) throws FlowStepBusyException {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		dbProvider.execute((s) -> {
-			ctx.getFlowCase().setLastStepTime(now);
-			flowCaseProvider.updateFlowCase(ctx.getFlowCase());
-			flowEventLogProvider.createFlowEventLogs(ctx.getLogs());
+			FlowCase case2 = flowCaseProvider.getFlowCaseById(ctx.getFlowCase().getId());
+			if(case2.getLastStepTime().equals(ctx.getFlowCase().getLastStepTime())) {
+				ctx.getFlowCase().setLastStepTime(now);
+				flowCaseProvider.updateFlowCase(ctx.getFlowCase());
+				flowEventLogProvider.createFlowEventLogs(ctx.getLogs());	
+			} else {
+				throw new FlowStepBusyException("already step by others");
+			}
+			
 			return true;
 		});		
 	}
