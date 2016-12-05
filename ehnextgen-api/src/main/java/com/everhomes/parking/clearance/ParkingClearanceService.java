@@ -3,8 +3,6 @@ package com.everhomes.parking.clearance;
 
 import com.everhomes.rest.parking.clearance.*;
 
-import java.util.List;
-
 /**
  * 车辆放行service
  * Created by xq.tian on 2016/12/2.

@@ -10,7 +10,6 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
-import com.everhomes.yellowPage.ServiceAllianceApartmentRequests;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1002,6 +1001,39 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhParkingCardCategories.class, Tables.EH_PARKING_CARD_CATEGORIES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PARKING_CARD_CATEGORIES.ID.max()).from(Tables.EH_PARKING_CARD_CATEGORIES).fetchOne().value1();
+        });        
+        syncTableSequence(null, EhFlows.class, Tables.EH_FLOWS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOWS.ID.max()).from(Tables.EH_FLOWS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowStats.class, Tables.EH_FLOW_STATS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_STATS.ID.max()).from(Tables.EH_FLOW_STATS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowNodes.class, Tables.EH_FLOW_NODES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_NODES.ID.max()).from(Tables.EH_FLOW_NODES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowButtons.class, Tables.EH_FLOW_BUTTONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_BUTTONS.ID.max()).from(Tables.EH_FLOW_BUTTONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowForms.class, Tables.EH_FLOW_FORMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_FORMS.ID.max()).from(Tables.EH_FLOW_FORMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowActions.class, Tables.EH_FLOW_ACTIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_ACTIONS.ID.max()).from(Tables.EH_FLOW_ACTIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowUserSelections.class, Tables.EH_FLOW_USER_SELECTIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_USER_SELECTIONS.ID.max()).from(Tables.EH_FLOW_USER_SELECTIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowCases.class, Tables.EH_FLOW_CASES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_CASES.ID.max()).from(Tables.EH_FLOW_CASES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowEventLogs.class, Tables.EH_FLOW_EVENT_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_EVENT_LOGS.ID.max()).from(Tables.EH_FLOW_EVENT_LOGS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowVariables.class, Tables.EH_FLOW_VARIABLES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_VARIABLES.ID.max()).from(Tables.EH_FLOW_VARIABLES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhFlowEvaluates.class, Tables.EH_FLOW_EVALUATES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_EVALUATES.ID.max()).from(Tables.EH_FLOW_EVALUATES).fetchOne().value1();
         });
 
         syncTableSequence(null, EhServiceAllianceApartmentRequests.class, Tables.EH_SERVICE_ALLIANCE_APARTMENT_REQUESTS.getName(), (dbContext) -> {
@@ -1041,10 +1073,22 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_ENERGY_METER_SETTING_LOGS.ID.max()).from(Tables.EH_ENERGY_METER_SETTING_LOGS).fetchOne().value1();
         });
         
+        syncTableSequence(null, EhFlowScripts.class, Tables.EH_FLOW_SCRIPTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_SCRIPTS.ID.max()).from(Tables.EH_FLOW_SCRIPTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhFlowSubjects.class, Tables.EH_FLOW_SUBJECTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_SUBJECTS.ID.max()).from(Tables.EH_FLOW_SUBJECTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhFlowAttachments.class, Tables.EH_FLOW_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_ATTACHMENTS.ID.max()).from(Tables.EH_FLOW_ATTACHMENTS).fetchOne().value1();
+        });
+
         syncTableSequence(null, EhPmTaskTargetStatistics.class, Tables.EH_PM_TASK_TARGET_STATISTICS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.max()).from(Tables.EH_PM_TASK_TARGET_STATISTICS).fetchOne().value1();
         });
-        
+
         syncTableSequence(null, EhContracts.class, Tables.EH_CONTRACTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_CONTRACTS.ID.max()).from(Tables.EH_CONTRACTS).fetchOne().value1();
         });
@@ -1056,6 +1100,17 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhAppNamespaceMappings.class, Tables.EH_APP_NAMESPACE_MAPPINGS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_APP_NAMESPACE_MAPPINGS.ID.max()).from(Tables.EH_APP_NAMESPACE_MAPPINGS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhFlowTimeouts.class, Tables.EH_FLOW_TIMEOUTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_TIMEOUTS.ID.max()).from(Tables.EH_FLOW_TIMEOUTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhParkingClearanceOperators.class, Tables.EH_PARKING_CLEARANCE_OPERATORS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_CLEARANCE_OPERATORS.ID.max()).from(Tables.EH_PARKING_CLEARANCE_OPERATORS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhParkingClearanceLogs.class, Tables.EH_PARKING_CLEARANCE_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_CLEARANCE_LOGS.ID.max()).from(Tables.EH_PARKING_CLEARANCE_LOGS).fetchOne().value1();
+        });
+
     }
 
     @SuppressWarnings("rawtypes")

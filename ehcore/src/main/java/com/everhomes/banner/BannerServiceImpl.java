@@ -790,7 +790,7 @@ public class BannerServiceImpl implements BannerService {
 		ListBannersByOwnerCommandResponse resp = new ListBannersByOwnerCommandResponse();
 		resp.setBanners(bannerList);
 		if(bannerList.size() > pageSize) {
-			resp.setNextPageAnchor(bannerList.get(bannerList.size() - 1).getId());
+			resp.setNextPageAnchor(bannerList.get(bannerList.size() - 1).getCreateTime().getTime());
 			bannerList.remove(bannerList.size() - 1);
 		}
 		return resp;

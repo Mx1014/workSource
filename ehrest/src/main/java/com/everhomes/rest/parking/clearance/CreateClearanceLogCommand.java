@@ -4,6 +4,7 @@ package com.everhomes.rest.parking.clearance;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import javax.validation.constraints.Size;
 
 /**
  * <ul>
@@ -20,7 +21,8 @@ public class CreateClearanceLogCommand {
     @NotNull private Long organizationId;
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
-    @NotNull private String plateNumber;
+    @NotNull @Size(max = 32)
+    private String plateNumber;
     @NotNull private Long clearanceTime;
     private String remarks;
 

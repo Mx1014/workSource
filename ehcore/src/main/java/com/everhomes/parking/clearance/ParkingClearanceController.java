@@ -70,16 +70,6 @@ public class ParkingClearanceController extends ControllerBase {
         return response(parkingClearanceService.searchClearanceLog(cmd));
     }
 
-    /**
-     * <p>根据申请人id列出车辆放行log</p>
-     * <b>URL: /clearance/listClearanceLogByApplicant</b>
-     */
-    /*@RequestMapping("listClearanceLogByApplicant")
-    @RestReturn(value = ParkingClearanceLogDTO.class, collection = true)
-    public RestResponse listClearanceLogByApplicant(SearchClearanceLogCommand cmd) {
-        return response(parkingClearanceService.searchClearanceLog(cmd));
-    }*/
-
     private RestResponse success() {
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");

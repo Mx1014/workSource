@@ -21,7 +21,7 @@ public class CreateClearanceOperatorCommand {
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
     @EnumType(ParkingClearanceOperatorType.class)
-    @NotNull private String operatorType;
+    private String operatorType;
     @NotNull private Long userId;
 
     public Long getParkingLotId() {

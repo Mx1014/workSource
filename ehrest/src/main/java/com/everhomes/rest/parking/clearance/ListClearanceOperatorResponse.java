@@ -4,6 +4,7 @@ package com.everhomes.rest.parking.clearance;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
+import java.util.Collections;
 import java.util.List;
 
 /**
@@ -17,6 +18,10 @@ public class ListClearanceOperatorResponse {
     private Long nextPageAnchor;
     @ItemType(ParkingClearanceOperatorDTO.class)
     private List<ParkingClearanceOperatorDTO> operators;
+
+    public ListClearanceOperatorResponse() {
+        operators = Collections.emptyList();
+    }
 
     public Long getNextPageAnchor() {
         return nextPageAnchor;

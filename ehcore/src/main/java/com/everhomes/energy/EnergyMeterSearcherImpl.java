@@ -202,7 +202,7 @@ public class EnergyMeterSearcherImpl extends AbstractElasticSearch implements En
 
     /*private EnergyMeterDTO toMeterDTO(EnergyMeter meter) {
         EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
-        String meterStatusLocale = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_STATUS,
+        String meterStatusLocale = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS,
                 String.valueOf(meter.getStatus()), UserContext.current().getUser().getLocale(), "");
         dto.setStatus(meterStatusLocale);
         return dto;

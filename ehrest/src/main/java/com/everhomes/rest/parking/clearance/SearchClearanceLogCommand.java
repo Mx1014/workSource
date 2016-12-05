@@ -9,8 +9,8 @@ import javax.validation.constraints.NotNull;
  * <ul>
  *     <li>organizationId: 公司id</li>
  *     <li>communityId: 小区id</li>
- *     <li>parkingLotId: 停车场id</li>
- *     <li>userId: 用户id</li>
+ *     <li>ownerType: 停车场id</li>
+ *     <li>applicantId: 申请人id</li>
  *     <li>applicant: 申请人</li>
  *     <li>identifierToken: 手机号</li>
  *     <li>plateNumber: 车牌号</li>
@@ -26,7 +26,7 @@ public class SearchClearanceLogCommand {
     @NotNull private Long organizationId;
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
-    private Long userId;
+    private Long applicantId;
     private String applicant;
     private String identifierToken;
     private String plateNumber;
@@ -45,6 +45,14 @@ public class SearchClearanceLogCommand {
         this.parkingLotId = parkingLotId;
     }
 
+    public Long getApplicantId() {
+        return applicantId;
+    }
+
+    public void setApplicantId(Long applicantId) {
+        this.applicantId = applicantId;
+    }
+
     public Long getCommunityId() {
         return communityId;
     }
@@ -55,14 +63,6 @@ public class SearchClearanceLogCommand {
 
     public String getApplicant() {
         return applicant;
-    }
-
-    public Long getUserId() {
-        return userId;
-    }
-
-    public void setUserId(Long userId) {
-        this.userId = userId;
     }
 
     public void setApplicant(String applicant) {

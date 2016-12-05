@@ -229,29 +229,30 @@ public class GroupIterateTest extends LoginAuthTestCase {
         System.out.println(StringHelper.toJsonString(maps));
     }
     
-//    private GroupDTO createGroup(String name, String tag) {
-//        //String name = "旅游(组名称)";
-//        String description = "找一帮趣味相投的人一起旅游";
-//        String avatar = "MTo4ZTk2OGNmMWExMjkwOWU1OGI4Nzk1YmIwZTgwOGYyNA";
-//        Byte visibilityScope = null;
-//        Long visibilityScopeId = null;
-//        Byte privateFlag = 0; // 公有
-//        //Long categoryId = categoryId; // 类型
-//        //String tag = null;
-//        String explicitRegionDescriptorsJson = null;
-//        CreateGroupCommand cmd = new CreateGroupCommand();
-//        cmd.setName(name);
-//        cmd.setDescription(description);
-//        cmd.setAvatar(avatar);
-//        cmd.setVisibilityScope(visibilityScope);
-//        cmd.setVisibilityScopeId(visibilityScopeId);
-//        cmd.setPrivateFlag(privateFlag);
-//        cmd.setCategoryId(categoryId);
-//        cmd.setTag(tag);
-//        cmd.setExplicitRegionDescriptorsJson(explicitRegionDescriptorsJson);
-//        
+    private GroupDTO createGroup(String name, String tag) {
+        //String name = "旅游(组名称)";
+        String description = "找一帮趣味相投的人一起旅游";
+        String avatar = "MTo4ZTk2OGNmMWExMjkwOWU1OGI4Nzk1YmIwZTgwOGYyNA";
+        Byte visibilityScope = null;
+        Long visibilityScopeId = null;
+        Byte privateFlag = 0; // 公有
+        //Long categoryId = categoryId; // 类型
+        //String tag = null;
+        String explicitRegionDescriptorsJson = null;
+        CreateGroupCommand cmd = new CreateGroupCommand();
+        cmd.setName(name);
+        cmd.setDescription(description);
+        cmd.setAvatar(avatar);
+        cmd.setVisibilityScope(visibilityScope);
+        cmd.setVisibilityScopeId(visibilityScopeId);
+        cmd.setPrivateFlag(privateFlag);
+        cmd.setCategoryId(categoryId);
+        cmd.setTag(tag);
+        cmd.setExplicitRegionDescriptorsJson(explicitRegionDescriptorsJson);
+        
 //        return groupService.createGroup(cmd);
-//    }
+        return null;
+    }
     
     private void cleanData() {
         // 删除用户

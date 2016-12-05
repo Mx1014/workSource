@@ -22,7 +22,7 @@ public class ListClearanceOperatorCommand {
     @NotNull private Long communityId;
     @NotNull private Long parkingLotId;
     @EnumType(ParkingClearanceOperatorType.class)
-    @NotNull private Byte operatorType;
+    @NotNull private String operatorType;
 
     private Integer pageSize;
     private Long pageAnchor;
@@ -43,11 +43,11 @@ public class ListClearanceOperatorCommand {
         this.parkingLotId = parkingLotId;
     }
 
-    public Byte getOperatorType() {
+    public String getOperatorType() {
         return operatorType;
     }
 
-    public void setOperatorType(Byte operatorType) {
+    public void setOperatorType(String operatorType) {
         this.operatorType = operatorType;
     }
 

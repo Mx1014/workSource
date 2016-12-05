@@ -2,21 +2,30 @@
 package com.everhomes.parking.clearance;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.*;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.parking.ParkingCommonStatus;
+import com.everhomes.rest.parking.ParkingLocalStringCode;
 import com.everhomes.rest.parking.clearance.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
+import com.everhomes.serviceModule.ServiceModule;
+import com.everhomes.serviceModule.ServiceModuleProvider;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.*;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -25,25 +34,28 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-import java.util.Collections;
-import java.util.List;
-import java.util.Set;
+import java.sql.Timestamp;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
-import static org.bouncycastle.asn1.x500.style.RFC4519Style.o;
 
 /**
  * Parking clearance service
  * Created by xq.tian on 2016/12/2.
  */
 @Service
-public class ParkingClearanceServiceImpl implements ParkingClearanceService {
+public class ParkingClearanceServiceImpl implements ParkingClearanceService, FlowModuleListener {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingClearanceServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
-    private static final Long APPLY_PRIVILEGE_ID = 1L;// 申请车辆放行权限id
-    private static final Long HAND_PRIVILEGE_ID = 1L;// 处理车辆放行权限id
+    private static final Long MODULE_ID = 41500L;// 模块id
+    // private static final String MODULE_NAME = "parkingClearance";// 模块名称
+
+    private static final Long APPLY_PRIVILEGE_ID = 2L;// 处理车辆放行权限id
+    private static final Long HAND_PRIVILEGE_ID = 2L;// 处理车辆放行权限id
 
     @Autowired
     private ParkingClearanceOperatorProvider clearanceOperatorProvider;
@@ -63,12 +75,31 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
 
+    @Autowired
+    private UserPrivilegeMgr userPrivilegeMgr;
+
+    @Autowired
+    private FlowService flowService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private LocaleStringService localeStringService;
+
+    @Autowired
+    private ServiceModuleProvider moduleProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+
     @Override
     public ParkingClearanceOperatorDTO createClearanceOperator(CreateClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         User user = this.findUserById(cmd.getUserId());
         ParkingClearanceOperator operator = new ParkingClearanceOperator();
+        operator.setOrganizationId(cmd.getOrganizationId());
         operator.setCommunityId(cmd.getCommunityId());
         operator.setNamespaceId(currNamespaceId());
         operator.setParkingLotId(cmd.getParkingLotId());
@@ -104,31 +135,105 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
         return dto;
     }
 
+    private ParkingClearanceLogDTO toClearanceLogDTO(ParkingClearanceLog log) {
+        return ConvertHelper.convert(log, ParkingClearanceLogDTO.class);
+    }
+
     @Override
     public void deleteClearanceOperator(DeleteClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        clearanceOperatorProvider.deleteClearanceOperatorById(currNamespaceId(), cmd.getId());
     }
 
     @Override
     public ListClearanceOperatorResponse listClearanceOperator(ListClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        return null;
+        ListClearanceOperatorResponse response = new ListClearanceOperatorResponse();
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        List<ParkingClearanceOperator> operators = clearanceOperatorProvider.listClearanceOperator(currNamespaceId(),
+                cmd.getCommunityId(), cmd.getParkingLotId(), cmd.getOperatorType(), pageSize+1, cmd.getPageAnchor());
+        if (operators != null) {
+            if (operators.size() > pageSize) {
+                response.setNextPageAnchor(operators.get(operators.size() - 1).getCreateTime().getTime());
+            }
+            response.setOperators(operators.stream().limit(pageSize).map(this::toClearanceOperatorDTO).collect(Collectors.toList()));
+        }
+        return response;
     }
 
     @Override
     public ParkingClearanceLogDTO createClearanceLog(CreateClearanceLogCommand cmd) {
-        validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        return null;
+        this.validate(cmd);
+        this.checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        this.checkApplyClearanceAuthority(cmd);
+
+        ParkingClearanceLog log = new ParkingClearanceLog();
+        log.setStatus(ParkingClearanceLogStatus.PENDING.getCode());
+        log.setParkingLotId(cmd.getParkingLotId());
+        log.setCommunityId(cmd.getCommunityId());
+        log.setApplicantId(currUserId());
+        log.setClearanceTime(new Timestamp(cmd.getClearanceTime()));
+        log.setRemarks(cmd.getRemarks());
+        log.setPlateNumber(cmd.getPlateNumber());
+        log.setApplyTime(Timestamp.from(Instant.now()));
+
+        clearanceLogProvider.createClearanceLog(log);
+
+        this.createFlowCase(log);
+        return toClearanceLogDTO(log);
+    }
+
+    private void checkApplyClearanceAuthority(CreateClearanceLogCommand cmd) {
+        // 校验当前用户是否有申请放行权限
+        userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), cmd.getParkingLotId(),
+                cmd.getOrganizationId(), APPLY_PRIVILEGE_ID);
+    }
+
+    private void createFlowCase(ParkingClearanceLog log) {
+        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, log.getParkingLotId(), EntityType.PARKING_LOT.getCode());
+        if (flow != null) {
+            CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
+            flowCaseCmd.setApplyUserId(currUserId());
+            flowCaseCmd.setFlowMainId(flow.getFlowMainId());
+            flowCaseCmd.setFlowVersion(flow.getFlowVersion());
+            flowCaseCmd.setReferId(log.getId());
+            flowCaseCmd.setReferType(EntityType.PARKING_CLEARANCE_LOG.getCode());
+            // flowCase摘要内容
+            String contentLocaleString = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE,
+                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_BRIEF_CONTENT, currLocale(), "");
+            flowCaseCmd.setContent(String.format(contentLocaleString, log.getPlateNumber(), log.getClearanceTime()));
+
+            flowService.createFlowCase(flowCaseCmd);
+        }
     }
 
     @Override
     public SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        return null;
+        SearchClearanceLogsResponse response = new SearchClearanceLogsResponse();
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        ParkingClearanceLogQueryObject qo = ConvertHelper.convert(cmd, ParkingClearanceLogQueryObject.class);
+        qo.setPageSize(pageSize + 1);
+        List<ParkingClearanceLog> logs = clearanceLogProvider.searchClearanceLog(qo);
+        if (logs != null) {
+            if (logs.size() > pageSize) {
+                response.setNextPageAnchor(logs.get(logs.size() - 1).getCreateTime().getTime());
+            }
+            response.setLogs(logs.stream().limit(pageSize).map(this::toClearanceLogDTO).collect(Collectors.toList()));
+        }
+        return response;
+    }
+
+    private Long currUserId() {
+        return UserContext.current().getUser().getId();
+    }
+
+    private String currLocale() {
+        return UserContext.current().getUser().getLocale();
     }
 
     private Integer currNamespaceId() {
@@ -159,7 +264,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid parameter organizationId [ null ]");
         }
-        Long userId = UserContext.current().getUser().getId();
+        Long userId = currUserId();
         OrganizationMember member = this.organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, orgId);
         if (member == null) {
             LOGGER.error("User is not in the organization.");
@@ -180,5 +285,73 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                 throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
             });
         }
+    }
+
+    @Override
+    public FlowModuleInfo initModule() {
+        FlowModuleInfo moduleInfo = new FlowModuleInfo();
+        ServiceModule module = moduleProvider.findServiceModuleById(MODULE_ID);
+        moduleInfo.setModuleName(module.getName());
+        moduleInfo.setModuleId(MODULE_ID);
+        return moduleInfo;
+    }
+
+    @Override
+    public void onFlowCaseStart(FlowCaseState ctx) {
+
+    }
+
+    @Override
+    public void onFlowCaseAbsorted(FlowCaseState ctx) {
+
+    }
+
+    @Override
+    public void onFlowCaseStateChanged(FlowCaseState ctx) {
+
+    }
+
+    @Override
+    public void onFlowCaseEnd(FlowCaseState ctx) {
+
+    }
+
+    @Override
+    public void onFlowCaseActionFired(FlowCaseState ctx) {
+
+    }
+
+    @Override
+    public String onFlowCaseBriefRender(FlowCase flowCase) {
+        return flowCase.getContent();
+    }
+
+    @Override
+    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase) {
+        ParkingClearanceLog log = clearanceLogProvider.findById(flowCase.getReferId());
+        User applicant = this.findUserById(log.getApplicantId());
+        UserIdentifier userIdentifier = this.findUserIdentifierByUserId(applicant.getId());
+
+        Map<String, Object> map = new HashMap<>();
+
+        map.put("", applicant.getNickName());
+        map.put("", userIdentifier.getIdentifierToken());
+        map.put("", log.getPlateNumber());
+        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd HH:mm");
+        map.put("", dateStr);
+        map.put("", log.getRemarks());
+
+
+        String detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
+                ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT, currLocale(), map, "");
+
+        // return (FlowCaseEntityList)StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
+        // return entityList;
+        return null;
+    }
+
+    @Override
+    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
+        return null;
     }
 }
