@@ -14,8 +14,8 @@ public class LineChartYData {
 
 	private String name;
 
-	@ItemType(String.class)
-	private List<String> data;
+	@ItemType(Double.class)
+	private List<Double> data;
 
 	public String getName() {
 		return name;
@@ -25,11 +25,11 @@ public class LineChartYData {
 		this.name = name;
 	}
 
-	public List<String> getData() {
+	public List<Double> getData() {
 		return data;
 	}
 
-	public void setData(List<String> data) {
+	public void setData(List<Double> data) {
 		this.data = data;
 	}
 }

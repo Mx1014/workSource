@@ -18,17 +18,19 @@ public class TerminalAppVersionStatisticsDTO {
 
 	private String appVersion;
 	
-	private Double newUserNumber;
+	private Long newUserNumber;
 	
-	private Double activeUserNumber;
+	private Long activeUserNumber;
 
-	private Double startNumber;
+	private Long startNumber;
 
-	private Double cumulativeUserNumber;
+	private Long cumulativeUserNumber;
 
 	private Double versionCumulativeRate;
 
 	private Double versionActiveRate;
+
+	private Integer order;
 
 	public String getDate() {
 		return date;
@@ -46,35 +48,35 @@ public class TerminalAppVersionStatisticsDTO {
 		this.appVersion = appVersion;
 	}
 
-	public Double getNewUserNumber() {
+	public Long getNewUserNumber() {
 		return newUserNumber;
 	}
 
-	public void setNewUserNumber(Double newUserNumber) {
+	public void setNewUserNumber(Long newUserNumber) {
 		this.newUserNumber = newUserNumber;
 	}
 
-	public Double getActiveUserNumber() {
+	public Long getActiveUserNumber() {
 		return activeUserNumber;
 	}
 
-	public void setActiveUserNumber(Double activeUserNumber) {
+	public void setActiveUserNumber(Long activeUserNumber) {
 		this.activeUserNumber = activeUserNumber;
 	}
 
-	public Double getStartNumber() {
+	public Long getStartNumber() {
 		return startNumber;
 	}
 
-	public void setStartNumber(Double startNumber) {
+	public void setStartNumber(Long startNumber) {
 		this.startNumber = startNumber;
 	}
 
-	public Double getCumulativeUserNumber() {
+	public Long getCumulativeUserNumber() {
 		return cumulativeUserNumber;
 	}
 
-	public void setCumulativeUserNumber(Double cumulativeUserNumber) {
+	public void setCumulativeUserNumber(Long cumulativeUserNumber) {
 		this.cumulativeUserNumber = cumulativeUserNumber;
 	}
 
@@ -92,5 +94,13 @@ public class TerminalAppVersionStatisticsDTO {
 
 	public void setVersionActiveRate(Double versionActiveRate) {
 		this.versionActiveRate = versionActiveRate;
+	}
+
+	public Integer getOrder() {
+		return order;
+	}
+
+	public void setOrder(Integer order) {
+		this.order = order;
 	}
 }

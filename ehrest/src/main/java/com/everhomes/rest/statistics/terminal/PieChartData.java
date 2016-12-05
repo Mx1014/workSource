@@ -15,7 +15,7 @@ public class PieChartData {
 
 	private Double rate;
 
-	private String amount;
+	private Long amount;
 
 
 	public String getName() {
@@ -34,11 +34,11 @@ public class PieChartData {
 		this.rate = rate;
 	}
 
-	public String getAmount() {
+	public Long getAmount() {
 		return amount;
 	}
 
-	public void setAmount(String amount) {
+	public void setAmount(Long amount) {
 		this.amount = amount;
 	}
 }

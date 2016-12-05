@@ -20,13 +20,13 @@ public class TerminalDayStatisticsDTO {
 	
 	private String date;
 	
-	private Double newUserNumber;
+	private Long newUserNumber;
 	
-	private Double activeUserNumber;
+	private Long activeUserNumber;
 
-	private Double startNumber;
+	private Long startNumber;
 
-	private Double cumulativeUserNumber;
+	private Long cumulativeUserNumber;
 
 	private Double startChangeRate;
 
@@ -36,9 +36,9 @@ public class TerminalDayStatisticsDTO {
 
 	private Double cumulativeChangeRate;
 
-	private Double sevenActiveUserNumber;
+	private Long sevenActiveUserNumber;
 
-	private Double thirtyActiveUserNumber;
+	private Long thirtyActiveUserNumber;
 
 	private Double activeRate;
 
@@ -50,35 +50,35 @@ public class TerminalDayStatisticsDTO {
 		this.date = date;
 	}
 
-	public Double getNewUserNumber() {
+	public Long getNewUserNumber() {
 		return newUserNumber;
 	}
 
-	public void setNewUserNumber(Double newUserNumber) {
+	public void setNewUserNumber(Long newUserNumber) {
 		this.newUserNumber = newUserNumber;
 	}
 
-	public Double getActiveUserNumber() {
+	public Long getActiveUserNumber() {
 		return activeUserNumber;
 	}
 
-	public void setActiveUserNumber(Double activeUserNumber) {
+	public void setActiveUserNumber(Long activeUserNumber) {
 		this.activeUserNumber = activeUserNumber;
 	}
 
-	public Double getStartNumber() {
+	public Long getStartNumber() {
 		return startNumber;
 	}
 
-	public void setStartNumber(Double startNumber) {
+	public void setStartNumber(Long startNumber) {
 		this.startNumber = startNumber;
 	}
 
-	public Double getCumulativeUserNumber() {
+	public Long getCumulativeUserNumber() {
 		return cumulativeUserNumber;
 	}
 
-	public void setCumulativeUserNumber(Double cumulativeUserNumber) {
+	public void setCumulativeUserNumber(Long cumulativeUserNumber) {
 		this.cumulativeUserNumber = cumulativeUserNumber;
 	}
 
@@ -114,19 +114,19 @@ public class TerminalDayStatisticsDTO {
 		this.cumulativeChangeRate = cumulativeChangeRate;
 	}
 
-	public Double getSevenActiveUserNumber() {
+	public Long getSevenActiveUserNumber() {
 		return sevenActiveUserNumber;
 	}
 
-	public void setSevenActiveUserNumber(Double sevenActiveUserNumber) {
+	public void setSevenActiveUserNumber(Long sevenActiveUserNumber) {
 		this.sevenActiveUserNumber = sevenActiveUserNumber;
 	}
 
-	public Double getThirtyActiveUserNumber() {
+	public Long getThirtyActiveUserNumber() {
 		return thirtyActiveUserNumber;
 	}
 
-	public void setThirtyActiveUserNumber(Double thirtyActiveUserNumber) {
+	public void setThirtyActiveUserNumber(Long thirtyActiveUserNumber) {
 		this.thirtyActiveUserNumber = thirtyActiveUserNumber;
 	}
 

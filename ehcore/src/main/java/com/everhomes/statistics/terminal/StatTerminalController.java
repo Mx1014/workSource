@@ -7,8 +7,6 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.statistics.terminal.*;
-import com.everhomes.rest.statistics.transaction.ExecuteTaskCommand;
-import com.everhomes.statistics.transaction.StatTransactionService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -28,8 +26,6 @@ public class StatTerminalController extends ControllerBase {
     @Autowired
     private StatTerminalService statTerminalService;
 
-
-    
     /**
      * <b>URL: /stat/terminal/executeStatTask</b>
      * <p>執行任務</p>
@@ -37,7 +33,7 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("executeStatTask")
     @RestReturn(value=String.class)
     public RestResponse executeStatTask(@Valid ExecuteTaskCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(statTerminalService.executeStatTask(cmd.getStartDate(), cmd.getEndDate()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -179,8 +175,8 @@ public class StatTerminalController extends ControllerBase {
      */
     @RequestMapping("getTerminalAppVersionCUNPieChart")
     @RestReturn(value=PieChart.class)
-    public RestResponse getTerminalAppVersionCUNPieChart(@Valid TerminalStatisticsChartCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse getTerminalAppVersionCUNPieChart(@Valid ListTerminalStatisticsByDayCommand cmd) {
+        RestResponse response = new RestResponse(statTerminalService.getTerminalAppVersionPieChart(cmd.getDate(),TerminalStatisticsType.CUMULATIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -192,8 +188,8 @@ public class StatTerminalController extends ControllerBase {
      */
     @RequestMapping("getTerminalAppVersionAUNPieChart")
     @RestReturn(value=PieChart.class)
-    public RestResponse getTerminalAppVersionAUNPieChart(@Valid TerminalStatisticsChartCommand cmd) {
-        RestResponse response = new RestResponse();
+    public RestResponse getTerminalAppVersionAUNPieChart(@Valid ListTerminalStatisticsByDayCommand cmd) {
+        RestResponse response = new RestResponse(statTerminalService.getTerminalAppVersionPieChart(cmd.getDate(),TerminalStatisticsType.ACTIVE_USER));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -206,7 +202,7 @@ public class StatTerminalController extends ControllerBase {
     @RequestMapping("listTerminalAppVersionStatisticsByDay")
     @RestReturn(value=TerminalAppVersionStatisticsDTO.class)
     public RestResponse listTerminalAppVersionStatisticsByDay(@Valid ListTerminalStatisticsByDayCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(statTerminalService.listTerminalAppVersionStatistics(cmd.getDate()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

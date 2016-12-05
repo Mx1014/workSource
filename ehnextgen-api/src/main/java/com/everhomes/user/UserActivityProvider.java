@@ -8,6 +8,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.user.UserFavoriteDTO;
+import org.jooq.Condition;
 
 public interface UserActivityProvider {
     List<User> listUsers(List<Long> uids);
@@ -37,6 +38,8 @@ public interface UserActivityProvider {
     List<UserContact> listRetainUserContactByUid(Long uid);
 
     List<UserIdentifier> listUserIdentifiers(List<String> indentifierTokens);
+
+    List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator);
 
     void addUserProfile(UserProfile userProfile);
 

@@ -1,5 +1,6 @@
 package com.everhomes.sms;
 
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
@@ -148,5 +149,22 @@ public class DateUtil {
  
         }  
         return lDate;  
+    }
+
+    /**
+     * 字符串转换成日期
+     * @param str
+     * @return date
+     */
+    public static Date strToDate(String str, String pattern) {
+
+        SimpleDateFormat format = new SimpleDateFormat(pattern);
+        Date date = null;
+        try {
+            date = format.parse(str);
+        } catch (ParseException e) {
+            e.printStackTrace();
+        }
+        return date;
     }
 }

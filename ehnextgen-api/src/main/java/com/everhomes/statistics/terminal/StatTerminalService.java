@@ -1,10 +1,7 @@
 package com.everhomes.statistics.terminal;
 
 
-import com.everhomes.rest.statistics.terminal.LineChart;
-import com.everhomes.rest.statistics.terminal.TerminalDayStatisticsDTO;
-import com.everhomes.rest.statistics.terminal.TerminalStatisticsTaskDTO;
-import com.everhomes.rest.statistics.terminal.TerminalStatisticsType;
+import com.everhomes.rest.statistics.terminal.*;
 
 import java.util.List;
 
@@ -20,4 +17,7 @@ public interface StatTerminalService {
 
     List<TerminalStatisticsTaskDTO> executeStatTask(String startDate, String endDate);
 
+    List<TerminalAppVersionStatisticsDTO> listTerminalAppVersionStatistics(String Date);
+
+    PieChart getTerminalAppVersionPieChart(String Date, TerminalStatisticsType type);
 }
