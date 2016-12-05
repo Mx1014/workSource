@@ -2067,35 +2067,39 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			return response;
 		response.setRentalBills(new ArrayList<RentalBillDTO>());
 		for (RentalOrder bill : billList) {
-			RentalResource rs = this.rentalProvider.getRentalSiteById(bill.getRentalResourceId());
-			// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
-			RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
-			mappingRentalBillDTO(dto, bill); 
-			if(dto.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
-				dto.setUnpayCancelTime(bill.getReserveTime().getTime() + cancelTime);
-			}
-			dto.setSiteItems(new ArrayList<SiteItemDTO>());
-			List<RentalItemsOrder> rentalSiteItems = rentalProvider
-					.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-			if(null!= rentalSiteItems)
-				for (RentalItemsOrder rib : rentalSiteItems) {
-					SiteItemDTO siDTO = new SiteItemDTO();
-					siDTO.setCounts(rib.getRentalCount());
-					RentalItem rsItem = rentalProvider
-							.findRentalSiteItemById(rib.getRentalResourceItemId());
-					if(rsItem != null) {
-						siDTO.setItemName(rsItem.getName());
-					}
-					siDTO.setItemPrice(rib.getTotalMoney());
-					
-					
-					dto.getSiteItems().add(siDTO);
-				}
+			RentalBillDTO dto = proccessOrderDTO(bill);
 			  
 			response.getRentalBills().add(dto);
 		}
 		return response;
 	}
+	private RentalBillDTO proccessOrderDTO(RentalOrder bill) {
+		RentalResource rs = this.rentalProvider.getRentalSiteById(bill.getRentalResourceId());
+		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
+		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
+		mappingRentalBillDTO(dto, bill); 
+		if(dto.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
+			dto.setUnpayCancelTime(bill.getReserveTime().getTime() + cancelTime);
+		}
+		dto.setSiteItems(new ArrayList<SiteItemDTO>());
+		List<RentalItemsOrder> rentalSiteItems = rentalProvider
+				.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
+		if(null!= rentalSiteItems)
+			for (RentalItemsOrder rib : rentalSiteItems) {
+				SiteItemDTO siDTO = new SiteItemDTO();
+				siDTO.setCounts(rib.getRentalCount());
+				RentalItem rsItem = rentalProvider
+						.findRentalSiteItemById(rib.getRentalResourceItemId());
+				if(rsItem != null) {
+					siDTO.setItemName(rsItem.getName());
+				}
+				siDTO.setItemPrice(rib.getTotalMoney());
+				
+				
+				dto.getSiteItems().add(siDTO);
+			}
+		return dto;
+	} 
 	@Override
 	public void mappingRentalBillDTO(RentalBillDTO dto, RentalOrder bill) {
 //		RentalResource rs = rentalProvider
@@ -5047,23 +5051,24 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter : bill id can not find bill");
 		// 在转换bill到dto的时候统一先convert一下  modify by wuhan 20160804
-		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
-		mappingRentalBillDTO(dto, bill);
-		dto.setSiteItems(new ArrayList<SiteItemDTO>());
-		List<RentalItemsOrder> rentalSiteItems = rentalProvider
-				.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
-		if(null!=rentalSiteItems)
-			for (RentalItemsOrder rib : rentalSiteItems) {
-				SiteItemDTO siDTO = new SiteItemDTO();
-				siDTO.setCounts(rib.getRentalCount());
-//				RentalItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
-				 
-				siDTO.setItemName(rib.getItemName());
-				siDTO.setItemPrice(rib.getTotalMoney());
-				dto.getSiteItems().add(siDTO);
-				 
-			}
-		return dto;
+//		RentalBillDTO dto = ConvertHelper.convert(bill, RentalBillDTO.class);
+//		mappingRentalBillDTO(dto, bill);
+//		dto.setSiteItems(new ArrayList<SiteItemDTO>());
+//		List<RentalItemsOrder> rentalSiteItems = rentalProvider
+//				.findRentalItemsBillBySiteBillId(dto.getRentalBillId());
+//		if(null!=rentalSiteItems)
+//			for (RentalItemsOrder rib : rentalSiteItems) {
+//				SiteItemDTO siDTO = new SiteItemDTO();
+//				siDTO.setCounts(rib.getRentalCount());
+////				RentalItem rsItem = rentalProvider.findRentalSiteItemById(rib.getRentalSiteItemId());
+//				 
+//				siDTO.setItemName(rib.getItemName());
+//				siDTO.setItemPrice(rib.getTotalMoney());
+//				dto.getSiteItems().add(siDTO);
+//				 
+//			}
+		
+		return proccessOrderDTO(bill);
 	}
 
 	@Override
