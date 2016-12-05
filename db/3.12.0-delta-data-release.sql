@@ -673,3 +673,16 @@ SET @id := (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.success','http://core.zuolin.com/mobile/static/email_page/success.html','email auth verify success','0',NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.fail','http://core.zuolin.com/mobile/static/email_page/fail.html','email auth verify success','0',NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.overtime','http://core.zuolin.com/mobile/static/email_page/overtime.html','email auth verify success','0',NULL);
+
+-- 海岸 物业报修升级2.6  add by sw 20131205
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ('202500', '6', '0', '家政服务', '任务/家政服务', '0', '2', '2016-12-05 10:22:23', NULL, NULL, NULL, '999993');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ('202501', '6', '0', '综合维修', '任务/综合维修', '0', '2', '2016-12-05 10:22:23', NULL, NULL, NULL, '999993');
+
+delete from eh_launch_pad_items where id in (10371, 10373, 10700,10701,10702,10703, 10704,10705,10706,10707);
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://beta.zuolin.com/property_service/index.html?taskCategoryId=202500&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10370
+
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://beta.zuolin.com/property_service/index.html?taskCategoryId=202501&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10372
