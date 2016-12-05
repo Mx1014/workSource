@@ -10,7 +10,27 @@ public class CustomerBuilding {
     private String joininDate;
     private String floorCount;
 
-    public String getBuildingName() {
+    public CustomerBuilding() {
+		super();
+	}
+
+	public CustomerBuilding(String buildingName) {
+		super();
+		this.buildingName = buildingName;
+	}
+
+	public CustomerBuilding(String buildingName, String buildingNumber, String productType, String completeDate,
+			String joininDate, String floorCount) {
+		super();
+		this.buildingName = buildingName;
+		this.buildingNumber = buildingNumber;
+		this.productType = productType;
+		this.completeDate = completeDate;
+		this.joininDate = joininDate;
+		this.floorCount = floorCount;
+	}
+
+	public String getBuildingName() {
 		return buildingName;
 	}
 
