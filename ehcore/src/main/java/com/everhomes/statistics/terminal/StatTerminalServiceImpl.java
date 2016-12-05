@@ -402,7 +402,7 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                     if(v.split("\\.").length > 3){
                         v = v.substring(0, v.lastIndexOf("."));
                     }
-                    TerminalAppVersionActives active =statTerminalProvider.getTerminalAppVersionActive(tDate, version.getName(), userActivety.getImeiNumber(), userActivety.getNamespaceId());
+                    TerminalAppVersionActives active =statTerminalProvider.getTerminalAppVersionActive(tDate, null, userActivety.getImeiNumber(), userActivety.getNamespaceId());
                     if(null == active){
                         active = new TerminalAppVersionActives();
                         active.setAppVersion(v);
