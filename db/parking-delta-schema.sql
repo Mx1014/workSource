@@ -11,7 +11,7 @@ ALTER TABLE eh_parking_lots ADD COLUMN `recharge_type` TINYINT NOT NULL DEFAULT 
 
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_brand` VARCHAR(64) COMMENT 'car brand';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_color` VARCHAR(64) COMMENT 'car color';
-ALTER TABLE eh_parking_card_requests ADD COLUMN `  ` VARCHAR(64) COMMENT 'car serie name';
+ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_name` VARCHAR(64) COMMENT 'car serie name';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_id` BIGINT COMMENT 'car serie id';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_id` BIGINT COMMENT 'flow id';
 
