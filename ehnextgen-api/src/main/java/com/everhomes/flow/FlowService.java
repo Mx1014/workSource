@@ -247,7 +247,7 @@ public interface FlowService {
 	 */
 	ListBriefFlowNodeResponse updateNodePriority(UpdateFlowNodePriorityCommand cmd);
 
-	FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd);
+	FlowNodeDTO updateFlowNode(UpdateFlowNodeCommand cmd);
 
 	/**
 	 * 创建用户选择项

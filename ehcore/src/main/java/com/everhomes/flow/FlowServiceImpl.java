@@ -796,7 +796,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd) {
+	public FlowNodeDTO updateFlowNode(UpdateFlowNodeCommand cmd) {
 		Flow flow = getFlowByEntity(cmd.getFlowNodeId(), FlowEntityType.FLOW_NODE);
 		flowMarkUpdated(flow);
 		
