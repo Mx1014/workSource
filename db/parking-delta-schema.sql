@@ -64,7 +64,7 @@ CREATE TABLE `eh_parking_car_series`(
 
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
-  PRIMARY KEY (`id`),
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
