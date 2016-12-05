@@ -679,8 +679,14 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 	VALUES ('202501', '6', '0', '综合维修', '任务/综合维修', '0', '2', '2016-12-05 10:22:23', NULL, NULL, NULL, '999993');
 
 delete from eh_launch_pad_items where id in (10371, 10373, 10700,10701,10702,10703, 10704,10705,10706,10707);
-update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://beta.zuolin.com/property_service/index.html?taskCategoryId=202500&hideNavigationBar=1#/my_service#sign_suffix"}'
-where id = 10370
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://core.zuolin.com/property_service/index.html?taskCategoryId=202500&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10370;
 
-update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://beta.zuolin.com/property_service/index.html?taskCategoryId=202501&hideNavigationBar=1#/my_service#sign_suffix"}'
-where id = 10372
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://core.zuolin.com/property_service/index.html?taskCategoryId=202501&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10372;
+
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://core.zuolin.com/property_service/index.html?taskCategoryId=202500&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10371;
+
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://core.zuolin.com/property_service/index.html?taskCategoryId=202501&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10373;
