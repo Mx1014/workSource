@@ -4630,7 +4630,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 			member.setContactName(StringUtils.isEmpty(cmd.getContactName()) ? user.getNickName() : cmd.getContactName());
 			member.setOrganizationId(cmd.getOrganizationId());
 			member.setTargetType(OrganizationMemberTargetType.USER.getCode());
-			member.setTargetId(cmd.getTargetId());
+			member.setTargetId(cmd.getTargetId()); 
 			member.setStatus(OrganizationMemberStatus.WAITING_FOR_APPROVAL.getCode());
 			
 			organizationProvider.createOrganizationMember(member);
@@ -8435,17 +8435,20 @@ System.out.println();
 	}
 
 	@Override
-	public void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) { 
-		VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(),VerifyEnterpriseContactDTO.class );
-		if(dto == null || dto.getEndTime() ==null || dto.getEnterpriseId() == null || dto.getUserId() == null ){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
-					"参数错误");
+	public String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd) { 
+		try{
+			VerifyEnterpriseContactDTO dto = WebTokenGenerator.getInstance().fromWebToken(cmd.getVerifyToken(),VerifyEnterpriseContactDTO.class );
+			if(dto == null || dto.getEndTime() ==null || dto.getEnterpriseId() == null || dto.getUserId() == null ){
+				return configProvider.getValue("auth.fail", "");
+			}
+			if(DateHelper.currentGMTTime().getTime() >dto.getEndTime())
+				return configProvider.getValue("auth.overtime", "");
+			ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
+			approveForEnterpriseContact(cmd2);
+			return configProvider.getValue("auth.success", "");
+		}catch(Exception e ){
+			return configProvider.getValue("auth.fail", "");
 		}
-		if(DateHelper.currentGMTTime().getTime() >dto.getEndTime())
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_VERIFY_OVER_TIME,
-					"over time");
-		ApproveContactCommand cmd2 = ConvertHelper.convert(dto, ApproveContactCommand.class);
-		approveForEnterpriseContact(cmd2);
 	}
 	
 	private void checkName(String name) {
