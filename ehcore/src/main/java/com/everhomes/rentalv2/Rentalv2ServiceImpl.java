@@ -3177,7 +3177,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			billmap.setCreatorUid(userId);
 			
 			rentalProvider.createRentalBillPaybillMap(billmap);
-			if(null != cmd.getRentalAttachments()){
+			//保证没有attachments,才会去存
+			List<RentalOrderAttachment>  attachments = rentalProvider.findRentalBillAttachmentByBillId(bill.getId());
+			if((attachments == null || attachments.size()==0) && null != cmd.getRentalAttachments()){
 				for(AttachmentDTO attachment : cmd.getRentalAttachments()){
 					RentalOrderAttachment rba = new RentalOrderAttachment();
 					rba.setRentalOrderId(cmd.getRentalBillId());
