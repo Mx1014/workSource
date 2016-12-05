@@ -22,7 +22,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.FLowUserSourceType;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseSearchType;
@@ -264,7 +264,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
     		singCmd.setSourceIdA(u);
     		singCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
-    		singCmd.setSourceTypeA(FLowUserSourceType.SOURCE_USER.getCode());
+    		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
     		sels.add(singCmd);
     	}
     	seleCmd.setSelections(sels);
@@ -297,7 +297,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
     		singCmd.setSourceIdA(u);
     		singCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
-    		singCmd.setSourceTypeA(FLowUserSourceType.SOURCE_USER.getCode());
+    		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
     		sels.add(singCmd);
     	}
     	seleCmd.setSelections(sels);
@@ -425,7 +425,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
     	
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+//    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = 34l;
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(dto.getButtons().size() == 4);
     	Assert.assertTrue(dto.getNodes().size() == 5);

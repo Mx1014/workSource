@@ -4,15 +4,20 @@ import javax.annotation.PostConstruct;
 
 import net.greghaines.jesque.Job;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.pushmessage.PushMessageAction;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.flow.FlowTimeoutType;
 
 @Component
 public class FlowTimeoutServiceImpl implements FlowTimeoutService {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FlowTimeoutServiceImpl.class);
+	
     @Autowired
     WorkerPoolFactory workerPoolFactory;
     
@@ -34,11 +39,23 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     	//FlowTimeoutAction
     	flowTimeoutProvider.createFlowTimeout(ft);
     	
-    	final Job job = new Job(PushMessageAction.class.getName(), new Object[]{String.valueOf(ft.getId()) });
-    	jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, ft.getTimeoutTick().getTime());
+    	if(ft.getId() > 0) {
+    		final Job job = new Job(PushMessageAction.class.getName(), new Object[]{String.valueOf(ft.getId()) });
+        	jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, ft.getTimeoutTick().getTime());	
+    	} else {
+    		LOGGER.error("create flowTimeout error! ft=" + ft.toString());
+    	}
     }
     
     @Override
     public void processTimeout(FlowTimeout ft) {
+    	FlowTimeoutType timeoutType = FlowTimeoutType.fromCode(ft.getTimeoutType());
+    	switch(timeoutType) {
+    	case STEP_TIMEOUT:
+    		
+    		break;
+    	default:
+    		break;
+    	}
     }
 }

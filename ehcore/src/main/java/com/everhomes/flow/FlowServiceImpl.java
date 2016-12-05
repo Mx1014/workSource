@@ -38,7 +38,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FLowUserSourceType;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionDTO;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStatus;
@@ -1897,7 +1897,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		for(FlowUserSelection sel : selections) {
-			if(FLowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
+			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
 			}	
 		}

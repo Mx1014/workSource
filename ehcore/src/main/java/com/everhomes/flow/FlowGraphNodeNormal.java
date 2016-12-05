@@ -28,10 +28,22 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 		boolean logStep = false;
 		
 		FlowEventLog log = null;
-		log = flowEventLogProvider.getStepEvent(ctx.getFlowCase().getId(), curr.getFlowNode().getId(), ctx.getFlowCase().getStepCount(), fromStep);
-		if(log != null && fromStep != FlowStepType.COMMENT_STEP) {
-			//already enter, return
-			return;
+//		log = flowEventLogProvider.getStepEvent(ctx.getFlowCase().getId(), curr.getFlowNode().getId(), ctx.getFlowCase().getStepCount(), fromStep);
+//		if(log != null && fromStep != FlowStepType.COMMENT_STEP) {
+//			return;
+//		}
+		
+		if(curr.getMessageAction() != null) {
+			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(curr.getSmsAction() != null) {
+			curr.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(curr.getTickMessageAction() != null) {
+			curr.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(curr.getTickSMSAction() != null) {
+			curr.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
 		}
 		
 		switch(fromStep) {
