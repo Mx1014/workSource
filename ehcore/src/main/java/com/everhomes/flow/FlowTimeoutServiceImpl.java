@@ -43,7 +43,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     	flowTimeoutProvider.createFlowTimeout(ft);
     	
     	if(ft.getId() > 0) {
-    		final Job job = new Job(PushMessageAction.class.getName(), new Object[]{String.valueOf(ft.getId()) });
+    		final Job job = new Job(FlowTimeoutAction.class.getName(), new Object[]{String.valueOf(ft.getId()) });
         	jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, ft.getTimeoutTick().getTime());	
     	} else {
     		LOGGER.error("create flowTimeout error! ft=" + ft.toString());

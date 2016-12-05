@@ -43,6 +43,7 @@ import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
@@ -176,6 +177,13 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	nodeCmd.setNodeLevel(3);
     	nodeCmd.setNodeName("test-flow-3-node-3");
     	FlowNodeDTO node3 = flowService.createFlowNode(nodeCmd);
+    	
+    	//support auto step
+    	UpdateFlowNodeCommand updateFlowCmd = new UpdateFlowNodeCommand();
+    	updateFlowCmd.setAutoStepMinute(10);
+    	updateFlowCmd.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+    	updateFlowCmd.setFlowNodeId(node1.getId());
+    	flowService.updateFlowNode(updateFlowCmd);
     	
     	addNodeProcessor(node1, orgId);
     	addNodeProcessor(node2, orgId);
@@ -402,6 +410,13 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	FlowCase flowCase = flowService.createFlowCase(cmd);
     	Assert.assertTrue(flowCase.getId() > 0);
+    	
+    	try {
+			Thread.currentThread().sleep(30 * 1000);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
     
     @Test
