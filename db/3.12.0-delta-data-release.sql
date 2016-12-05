@@ -41,15 +41,10 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 	SELECT * FROM eh_locale_templates WHERE scope = 'pmtask.notification' AND CODE IN (5,6);
 UPDATE eh_locale_templates SET namespace_id = 0 WHERE scope = 'pmtask.notification' AND CODE IN (5,6);
 	
-DELETE FROM eh_web_menus WHERE id = 20190;
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
-	VALUES ('20190', '统计', '20100', NULL, NULL, '0', '2', '/20000/20100/20190', 'park', '245');
-INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', NULL, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
-INSERT INTO `eh_web_menus` VALUES ('20192', '人员评分统计', '20190', NULL, 'staffScore_statistics', '0', '2', '/20000/20100/20190/20192', 'park', '181');
 
-SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
+-- SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+-- INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 
@@ -270,7 +265,10 @@ INSERT INTO `eh_web_menus` VALUES ('20155', '设置', '20100', NULL, NULL, '0', 
 INSERT INTO `eh_web_menus` VALUES ('20160', '执行人员设置', '20155', NULL, 'executive_setting', '0', '2', '/20000/20100/20155/20160', 'park', '230');
 INSERT INTO `eh_web_menus` VALUES ('20170', '服务类型设置', '20155', NULL, 'service_type_setting', '0', '2', '/20000/20100/20155/20170', 'park', '235');
 INSERT INTO `eh_web_menus` VALUES ('20180', '分类设置', '20155', NULL, 'classify_setting', '0', '2', '/20000/20100/20155/20180', 'park', '240');
-INSERT INTO `eh_web_menus` VALUES ('20190', '统计', '20100', NULL, 'task_statistics', '0', '2', '/20000/20100/20190', 'park', '245');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('20190', '统计', '20100', NULL, NULL, '0', '2', '/20000/20100/20190', 'park', '245');
+INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', NULL, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
+INSERT INTO `eh_web_menus` VALUES ('20192', '人员评分统计', '20190', NULL, 'staffScore_statistics', '0', '2', '/20000/20100/20190/20192', 'park', '181');
 
 INSERT INTO `eh_web_menus` VALUES ('20400', '物业缴费', '20000', NULL, NULL, '1', '2', '/20000/20400', 'park', '250');
 INSERT INTO `eh_web_menus` VALUES ('20410', '缴费记录', '20400', NULL, 'property_fee_record', '0', '2', '/20000/20400/20410', 'park', '252');
