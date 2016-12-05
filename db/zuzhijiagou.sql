@@ -228,7 +228,7 @@ INSERT INTO `eh_web_menus` VALUES ('20840', '巡检项资料库管理', '20800',
 INSERT INTO `eh_web_menus` VALUES ('20841', '巡检项设置', '20840', null, 'equipment_inspection_inspection_item_list', '0', '2', '/20000/20800/20840/20841', 'park', '290');
 
 INSERT INTO `eh_web_menus` VALUES ('30000', '项目管理', '0', 'fa fa-building', null, '1', '2', '/30000', 'park', '300');
-INSERT INTO `eh_web_menus` VALUES ('30500', '项目信息', '30000', null, 'react:/project-classification/projects', '0', '2', '/30000/30500', 'park', '305');
+INSERT INTO `eh_web_menus` VALUES ('30500', '项目列表', '30000', null, 'react:/project-classification/projects', '0', '2', '/30000/30500', 'park', '305');
 INSERT INTO `eh_web_menus` VALUES ('31000', '楼栋管理', '30000', null, 'building_management', '0', '2', '/30000/31000', 'park', '310');
 INSERT INTO `eh_web_menus` VALUES ('32000', '门牌管理', '30000', null, 'apartment_statistics', '0', '2', '/30000/32000', 'park', '320');
 INSERT INTO `eh_web_menus` VALUES ('33000', '企业管理', '30000', null, 'enterprise_management', '0', '2', '/30000/33000', 'park', '330');
@@ -505,12 +505,6 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10058', '10610', '白领活动', '1', '1', '白领活动 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
 	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10059', '10620', '白领活动', '1', '1', '白领活动 全部权限', '710');
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES ((@menu_scope_id := @menu_scope_id + 1), '10610', '', 'EhNamespaces', '999985', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES ((@menu_scope_id := @menu_scope_id + 1), '10620', '', 'EhNamespaces', '999985', '2');
-
 
 --
 -- 能耗管理菜单   add by xq.tian  2016/11/29
@@ -545,17 +539,6 @@ SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 422, 1001, 0, 1, NOW());
 
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 49100, '', 'EhNamespaces', 999992, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 49110, '', 'EhNamespaces', 999992, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 49120, '', 'EhNamespaces', 999992, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 49130, '', 'EhNamespaces', 999992, 2);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 49140, '', 'EhNamespaces', 999992, 2);
 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
 VALUES ('49100', '能耗管理', '40000', '/40000/49100', '0', '2', '2', '0', UTC_TIMESTAMP());
