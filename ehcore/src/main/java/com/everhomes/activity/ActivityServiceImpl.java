@@ -15,6 +15,7 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.rest.activity.*;
 import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
@@ -68,50 +69,6 @@ import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCategoryDTO;
-import com.everhomes.rest.activity.ActivityCheckinCommand;
-import com.everhomes.rest.activity.ActivityConfirmCommand;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListCommand;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityLocalStringCode;
-import com.everhomes.rest.activity.ActivityMemberDTO;
-import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
-import com.everhomes.rest.activity.ActivityPostCommand;
-import com.everhomes.rest.activity.ActivityRejectCommand;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.ActivityShareDetailResponse;
-import com.everhomes.rest.activity.ActivitySignupCommand;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityVideoDTO;
-import com.everhomes.rest.activity.ActivityVideoRoomType;
-import com.everhomes.rest.activity.GeoLocation;
-import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
-import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
-import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.GetVideoCapabilityCommand;
-import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
-import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
-import com.everhomes.rest.activity.ListActivitiesByTagCommand;
-import com.everhomes.rest.activity.ListActivitiesCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListActivityCategoriesCommand;
-import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
-import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
-import com.everhomes.rest.activity.GetActivityWarningCommand;
-import com.everhomes.rest.activity.ActivityWarningResponse;
-import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.SetActivityWarningCommand;
-import com.everhomes.rest.activity.VideoCapabilityResponse;
-import com.everhomes.rest.activity.VideoManufacturerType;
-import com.everhomes.rest.activity.VideoState;
-import com.everhomes.rest.activity.VideoSupportType;
-import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -2409,6 +2366,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setStopTime(activity.getEndTime().toString());
             dto.setGroupId(activity.getGroupId());
             dto.setPosterUrl(getActivityPosterUrl(activity));
+//            dto.setAchievement(activity.getAchievement());
             fixupVideoInfo(dto);
             return dto;
         }).filter(r->r!=null).collect(Collectors.toList());
@@ -2949,4 +2907,60 @@ public class ActivityServiceImpl implements ActivityService {
             return dto;
         }).collect(Collectors.toList());
 	}
+
+    @Override
+    public void setActivityAchievement(SetActivityAchievementCommand cmd) {
+
+    }
+
+    @Override
+    public GetActivityAchievementResponse getActivityAchievement(GetActivityAchievementCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void createActivityAttachment(CreateActivityAttachmentCommand cmd) {
+
+    }
+
+    @Override
+    public void deleteActivityAttachment(DeleteActivityAttachmentCommand cmd) {
+
+    }
+
+    @Override
+    public ListActivityAttachmentsResponse listActivityAttachments(ListActivityAttachmentsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void downloadActivityAttachment(DownloadActivityAttachmentCommand cmd) {
+
+    }
+
+    @Override
+    public void createActivityGoods(CreateActivityGoodsCommand cmd) {
+
+    }
+
+    @Override
+    public void updateActivityGoods(UpdateActivityGoodsCommand cmd) {
+
+    }
+
+    @Override
+    public void deleteActivityGoods(DeleteActivityGoodsCommand cmd) {
+
+    }
+
+    @Override
+    public ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd) {
+        return null;
+    }
+
 }

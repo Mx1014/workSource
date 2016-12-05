@@ -3,11 +3,16 @@ package com.everhomes.rest.activity;
 import com.everhomes.util.StringHelper;
 
 /**
- * activityId：活动id
+ * <ul>
+ *     <li>activityId: 活动id</li>
+ *     <li>goodId: 物品id</li>
+ * </ul>
  */
-public class GetActivityAchievementCommand {
+public class GetActivityGoodsCommand {
 
     private Long activityId;
+
+    private Long goodId;
 
     public Long getActivityId() {
         return activityId;
@@ -17,7 +22,14 @@ public class GetActivityAchievementCommand {
         this.activityId = activityId;
     }
 
-    @Override
+    public Long getGoodId() {
+        return goodId;
+    }
+
+    public void setGoodId(Long goodId) {
+        this.goodId = goodId;
+    }
+
     public String toString() {
         return StringHelper.toJsonString(this);
     }

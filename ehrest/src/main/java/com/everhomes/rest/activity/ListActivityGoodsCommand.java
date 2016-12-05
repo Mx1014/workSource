@@ -3,11 +3,16 @@ package com.everhomes.rest.activity;
 import com.everhomes.util.StringHelper;
 
 /**
- * activityId：活动id
+ * <ul>
+ *     <li>activityId: 活动id</li>
+ *     <li>pageAnchor: 锚点 没有则不传</li>
+ * </ul>
  */
-public class GetActivityAchievementCommand {
+public class ListActivityGoodsCommand {
 
     private Long activityId;
+
+    private Long pageAnchor;
 
     public Long getActivityId() {
         return activityId;
@@ -15,6 +20,14 @@ public class GetActivityAchievementCommand {
 
     public void setActivityId(Long activityId) {
         this.activityId = activityId;
+    }
+
+    public Long getPageAnchor() {
+        return pageAnchor;
+    }
+
+    public void setPageAnchor(Long pageAnchor) {
+        this.pageAnchor = pageAnchor;
     }
 
     @Override

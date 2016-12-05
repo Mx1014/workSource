@@ -4,10 +4,12 @@ ALTER TABLE eh_activities ADD COLUMN `achievement` text;
 DROP TABLE IF EXISTS  `eh_activity_attachments`;
 CREATE TABLE `eh_activity_attachments` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
-	`activity_id` BIGINT NOT NULL COMMENT 'owner id, e.g application_id',
+	`activity_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g application_id',
+    `name` VARCHAR(128),
 	`content_type` VARCHAR(32) COMMENT 'attachment object content type',
 	`content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
-	`creator_uid` BIGINT NOT NULL,
+    `download_count` INTEGER NOT NULL DEFAULT 0,
+	`creator_uid` BIGINT NOT NULL DEFAULT 0,
 	`create_time` DATETIME NOT NULL, 
 	
 	PRIMARY KEY (`id`)

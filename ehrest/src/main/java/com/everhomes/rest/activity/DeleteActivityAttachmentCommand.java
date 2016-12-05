@@ -3,11 +3,24 @@ package com.everhomes.rest.activity;
 import com.everhomes.util.StringHelper;
 
 /**
- * activityId：活动id
+ * <ul>
+ *     <li>attachmentId: 附件id</li>
+ *     <li>activityId: 活动id</li>
+ * </ul>
  */
-public class GetActivityAchievementCommand {
+public class DeleteActivityAttachmentCommand {
+
+    private Long attachmentId;
 
     private Long activityId;
+
+    public Long getAttachmentId() {
+        return attachmentId;
+    }
+
+    public void setAttachmentId(Long attachmentId) {
+        this.attachmentId = attachmentId;
+    }
 
     public Long getActivityId() {
         return activityId;
@@ -17,7 +30,6 @@ public class GetActivityAchievementCommand {
         this.activityId = activityId;
     }
 
-    @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

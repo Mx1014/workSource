@@ -80,6 +80,10 @@ public class ActivityDTO {
     private String content;
     private Integer maxQuantity;
     private String version;
+
+    private String achievement;
+
+//	private List<> activityAttachments;
     
     public String getVersion() {
 		return version;
