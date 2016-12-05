@@ -28,10 +28,8 @@ CREATE TABLE `eh_parking_flow` (
   `card_request_tip` TEXT,
   `card_agreement` TEXT,
   `max_issue_num` INTEGER NOT NULL DEFAULT 1 COMMENT 'the max num of the issue card',
-  `flow_id` BIGINT NOT NULL COMMENT 'flow id',
+  `flow_id` BIGINT NOT NULL COMMENT 'flow id'
 
-  `date_str` DATETIME,
-  `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
