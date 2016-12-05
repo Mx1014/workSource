@@ -558,7 +558,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	
 	
 	/**
-	 * <b>URL: /rental/admin/getRefundUrl</b>
+	 * <b>URL: /re	ntal/admin/getRefundUrl</b>
 	 * <p>
 	 * 拿到退款URL
 	 * </p>
