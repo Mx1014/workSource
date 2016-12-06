@@ -35,6 +35,8 @@ public class StatTerminalServiceImpl implements StatTerminalService{
 
     private static final Logger LOGGER = LoggerFactory.getLogger(StatTerminalServiceImpl.class);
 
+    private static final Integer versionNum = 10;
+
     @Autowired
     private StatTerminalProvider statTerminalProvider;
 
@@ -142,6 +144,10 @@ public class StatTerminalServiceImpl implements StatTerminalService{
             appVersionStatisticsMap.put(appVersionStatistic.getAppVersion(), appVersionStatistic);
         }
         List<AppVersion> appVersions = statTerminalProvider.listAppVersions(namespaceId);
+        PieChartData otherData = new PieChartData();
+        otherData.setRate(0D);
+        otherData.setAmount(0L);
+        otherData.setName("其他");
         if(TerminalStatisticsType.ACTIVE_USER == type){
             for (AppVersion appVersion:appVersions) {
                 PieChartData data = new PieChartData();
@@ -154,7 +160,14 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                     data.setRate(statistics.getVersionActiveRate().doubleValue());
                     data.setAmount(statistics.getActiveUserNumber());
                 }
+
+                if(versionNum == datas.size()){
+                    otherData.setRate(otherData.getRate() + data.getRate());
+                    otherData.setAmount(otherData.getAmount() + data.getAmount());
+                    continue;
+                }
                 datas.add(data);
+
             }
         }else if(TerminalStatisticsType.CUMULATIVE_USER == type){
             for (AppVersion appVersion:appVersions) {
@@ -168,8 +181,17 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                     data.setRate(statistics.getVersionCumulativeRate().doubleValue());
                     data.setAmount(statistics.getCumulativeUserNumber());
                 }
+
+                if(versionNum == datas.size()){
+                    otherData.setRate(otherData.getRate() + data.getRate());
+                    otherData.setAmount(otherData.getAmount() + data.getAmount());
+                    continue;
+                }
                 datas.add(data);
             }
+        }
+        if(versionNum == datas.size()){
+            datas.add(otherData);
         }
         pieChart.setData(datas);
         return pieChart;
