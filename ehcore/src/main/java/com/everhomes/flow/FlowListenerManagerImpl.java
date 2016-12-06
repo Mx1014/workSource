@@ -12,6 +12,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowUserType;
 
 @Component
 public class FlowListenerManagerImpl implements FlowListenerManager {
@@ -118,11 +119,11 @@ public class FlowListenerManagerImpl implements FlowListenerManager {
 	}
 
 	@Override
-	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase) {
+	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		  FlowModuleInst inst = moduleMap.get(flowCase.getModuleName());
 		  if(inst != null) {
 			  FlowModuleListener listener = inst.getListener();
-			  return listener.onFlowCaseDetailRender(flowCase);  
+			  return listener.onFlowCaseDetailRender(flowCase, flowUserType);  
 		  }		
 		  return null;
 	}
