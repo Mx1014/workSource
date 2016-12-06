@@ -209,6 +209,10 @@ public class ParkingServiceImpl implements ParkingService {
     	Timestamp endDate = getEndOfDay(now);
     	
 		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_STATISTICS.getCode()).enter(()-> {
+			
+			List<ParkingStatistic> list = parkingProvider.listParkingStatistics(null, null, null, startDate);
+			if(list.size() != 0)
+				return null;
 	    	List<ParkingLot> lots = parkingProvider.listParkingLots(null, null);
 	    	
 	    	lots.forEach(l -> {

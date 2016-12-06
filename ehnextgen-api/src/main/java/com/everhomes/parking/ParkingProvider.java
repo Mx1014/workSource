@@ -79,5 +79,5 @@ public interface ParkingProvider {
     
     void createParkingStatistic(ParkingStatistic parkingStatistic);
     
-    List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId);
+    List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp dateStr);
 }

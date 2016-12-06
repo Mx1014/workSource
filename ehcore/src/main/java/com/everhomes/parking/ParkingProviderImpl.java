@@ -604,11 +604,11 @@ public class ParkingProviderImpl implements ParkingProvider {
 		if(StringUtils.isNotBlank(ownerType))
 			query.addConditions(Tables.EH_PARKING_FLOW.OWNER_TYPE.eq(ownerType));
 	    if(null != ownerId)
-	    	query.addConditions(Tables.EH_PARKING_FLOW.OWNER_ID.gt(ownerId));
+	    	query.addConditions(Tables.EH_PARKING_FLOW.OWNER_ID.eq(ownerId));
 	    if(null != parkingLotId)
-	    	query.addConditions(Tables.EH_PARKING_FLOW.PARKING_LOT_ID.gt(parkingLotId));
+	    	query.addConditions(Tables.EH_PARKING_FLOW.PARKING_LOT_ID.eq(parkingLotId));
 	    if(null != parkingLotId)
-	    	query.addConditions(Tables.EH_PARKING_FLOW.FLOW_ID.gt(flowId));
+	    	query.addConditions(Tables.EH_PARKING_FLOW.FLOW_ID.eq(flowId));
 	     
 	    return ConvertHelper.convert(query.fetchAny(), ParkingFlow.class);
 	}
@@ -651,7 +651,7 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
 	
 	@Override
-    public List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId) {
+    public List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp dateStr) {
 		 
 	    DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingFlow.class));
 		SelectQuery<EhParkingStatisticsRecord> query = context.selectQuery(Tables.EH_PARKING_STATISTICS);
@@ -659,10 +659,12 @@ public class ParkingProviderImpl implements ParkingProvider {
 		if(StringUtils.isNotBlank(ownerType))
 			query.addConditions(Tables.EH_PARKING_STATISTICS.OWNER_TYPE.eq(ownerType));
 	    if(null != ownerId)
-	    	query.addConditions(Tables.EH_PARKING_STATISTICS.OWNER_ID.gt(ownerId));
+	    	query.addConditions(Tables.EH_PARKING_STATISTICS.OWNER_ID.eq(ownerId));
 	    if(null != parkingLotId)
-	    	query.addConditions(Tables.EH_PARKING_STATISTICS.PARKING_LOT_ID.gt(parkingLotId));
-	     
+	    	query.addConditions(Tables.EH_PARKING_STATISTICS.PARKING_LOT_ID.eq(parkingLotId));
+	    if(null != dateStr)
+	    	query.addConditions(Tables.EH_PARKING_STATISTICS.DATE_STR.eq(dateStr));
+
 	    return query.fetch().map(r -> ConvertHelper.convert(r, ParkingStatistic.class));
 	}
 }
