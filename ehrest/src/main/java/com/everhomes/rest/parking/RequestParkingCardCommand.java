@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -38,6 +39,7 @@ public class RequestParkingCardCommand {
     private String carSerieName;
     private Long carSerieId;
 
+    @ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
     
     public RequestParkingCardCommand() {
