@@ -24,6 +24,10 @@ import com.everhomes.util.StringHelper;
  * <li>issueFlag: 充值状态， {@link com.everhomes.rest.parking.ParkingCardIssueFlag}</li>
  * <li>issueTime: 领卡时间</li>
  * <li>createTime: 订单创建时间</li>
+ * <li>carBrand: 车品牌</li>
+ * <li>carSerieName: 车系列</li>
+ * <li>carColor: 车颜色</li>
+ * <li>attachments: 申请资料</li>
  * </ul>
  */
 public class ParkingCardRequestDTO {
@@ -45,6 +49,7 @@ public class ParkingCardRequestDTO {
     private Timestamp createTime;
     
     private String carBrand;
+    private String carSerieName;
     private String carColor;
     private List<AttachmentDescriptor> attachments;
     
@@ -179,7 +184,39 @@ public class ParkingCardRequestDTO {
         this.createTime = createTime;
     }
 
-    @Override
+    public String getCarBrand() {
+		return carBrand;
+	}
+
+	public void setCarBrand(String carBrand) {
+		this.carBrand = carBrand;
+	}
+
+	public String getCarSerieName() {
+		return carSerieName;
+	}
+
+	public void setCarSerieName(String carSerieName) {
+		this.carSerieName = carSerieName;
+	}
+
+	public String getCarColor() {
+		return carColor;
+	}
+
+	public void setCarColor(String carColor) {
+		this.carColor = carColor;
+	}
+
+	public List<AttachmentDescriptor> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
+		this.attachments = attachments;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

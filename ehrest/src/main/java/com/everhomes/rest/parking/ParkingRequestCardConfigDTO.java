@@ -1,23 +1,31 @@
 package com.everhomes.rest.parking;
 
-import javax.validation.constraints.NotNull;
-
 import com.everhomes.util.StringHelper;
 
-public class SetParkingRequestCardConfigCommand {
-	@NotNull
+/**
+ * <ul>
+ * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
+ * <li>ownerId: 归属的ID，如小区ID</li>
+ * <li>parkingLotId: 停车场ID</li>
+ * <li>requestMonthCount: 申请月卡，智能模式 开通月卡时 所需缴费月数</li>
+ * <li>requestRechargeType: 申请月卡，智能模式 开通月卡时 缴费类型， 1: 整月，2:实际天数   com.everhomes.rest.parking.ParkingLotRechargeType</li>
+ * <li>cardRequestTip: app月卡申请页面提示文案</li>
+ * <li>cardAgreement: 停车月卡协议</li>
+ * <li>maxIssueNum: 可发放的月卡总数</li>
+ * <li>flowId: 工作流模式id</li>
+ * </ul>
+ */
+public class ParkingRequestCardConfigDTO {
+	
     private String ownerType;
-	@NotNull
     private Long ownerId;
-	@NotNull
     private Long parkingLotId;
-	@NotNull
-	private Long flowId;
-    private Integer requestMonthCount;
+	private Integer requestMonthCount;
     private Byte requestRechargeType;
     private String cardRequestTip;
     private String cardAgreement;
     private Integer maxIssueNum;
+    private Long flowId;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -36,12 +44,6 @@ public class SetParkingRequestCardConfigCommand {
 	}
 	public void setParkingLotId(Long parkingLotId) {
 		this.parkingLotId = parkingLotId;
-	}
-	public Long getFlowId() {
-		return flowId;
-	}
-	public void setFlowId(Long flowId) {
-		this.flowId = flowId;
 	}
 	public Integer getRequestMonthCount() {
 		return requestMonthCount;
@@ -73,9 +75,14 @@ public class SetParkingRequestCardConfigCommand {
 	public void setMaxIssueNum(Integer maxIssueNum) {
 		this.maxIssueNum = maxIssueNum;
 	}
+	public Long getFlowId() {
+		return flowId;
+	}
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-    
 }

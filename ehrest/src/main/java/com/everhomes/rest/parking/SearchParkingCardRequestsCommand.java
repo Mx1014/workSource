@@ -30,7 +30,7 @@ public class SearchParkingCardRequestsCommand {
     private Integer pageSize;
     
     private String carBrand;
-    private String carColor;
+    private String carSerieName;
     
     public SearchParkingCardRequestsCommand() {
     }

@@ -23,8 +23,6 @@ public class IssueParkingCardsCommand {
 	@NotNull
     private Integer count;
 	
-	private Long id;
-    
     public IssueParkingCardsCommand() {
     }
     

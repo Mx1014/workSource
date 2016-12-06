@@ -129,4 +129,12 @@ public class SearchParkingRechargeOrdersCommand {
 		this.rechargeType = rechargeType;
 	}
 
+	public String getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
+	}
+
 }

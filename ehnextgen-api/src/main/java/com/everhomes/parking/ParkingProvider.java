@@ -14,11 +14,11 @@ public interface ParkingProvider {
     
     List<ParkingLot> listParkingLots(String ownerType,Long ownerId);
     
-    List<ParkingRechargeRate> listParkingRechargeRates(String ownerType,Long ownerId,Long parkingLotId,String cardType);
+    List<ParkingRechargeRate> listParkingRechargeRates(String ownerType,Long ownerId, Long parkingLotId, String cardType);
     
     void createParkingRechargeRate(ParkingRechargeRate parkingRechargeRate);
     
-    boolean isApplied(String plateNumber,Long parkingLotId);
+    boolean isApplied(String plateNumber, Long parkingLotId);
     
     void requestParkingCard(ParkingCardRequest parkingCardRequest);
     
@@ -33,7 +33,7 @@ public interface ParkingProvider {
     
     List<ParkingRechargeOrder> searchParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
-    		Byte rechargeType, Long pageAnchor, Integer pageSize);
+    		Byte rechargeType, String paidType, Long pageAnchor, Integer pageSize);
     
     void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
     
@@ -51,10 +51,9 @@ public interface ParkingProvider {
     
     void updateParkingCardRequest(List<ParkingCardRequest> list);
     
-    void updateInvalidAppliers(Timestamp time,Long parkingLotId);
+    void updateInvalidAppliers(Timestamp time, Long parkingLotId);
     
-    Integer waitingCardCount(String ownerType,Long ownerId
-    		,Long parkingLotId,Timestamp createTime);
+    Integer waitingCardCount(String ownerType, Long ownerId, Long parkingLotId, Timestamp createTime);
     
     ParkingRechargeOrder findParkingRechargeOrderById(Long id);
     
@@ -69,4 +68,16 @@ public interface ParkingProvider {
     List<ParkingRechargeOrder> listParkingRechargeOrders(Integer pageSize,
 			Timestamp startDate, Timestamp endDate,List<Byte> statuses,
 			CrossShardListingLocator locator);
+    
+    List<ParkingCarSerie> listParkingCarSeries(Long parentId, Long pageAnchor, Integer pageSize);
+    
+    ParkingFlow getParkingRequestCardConfig(String ownerType, Long ownerId, Long parkingLotId, Long flowId);
+    
+    void updatetParkingRequestCardConfig(ParkingFlow parkingFlow);
+    
+    void createParkingRequestCardConfig(ParkingFlow parkingFlow);
+    
+    void createParkingStatistic(ParkingStatistic parkingStatistic);
+    
+    List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId);
 }

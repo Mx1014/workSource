@@ -35,6 +35,9 @@ public class RequestParkingCardCommand {
     
     private String carBrand;
     private String carColor;
+    private String carSerieName;
+    private Long carSerieId;
+
     private List<AttachmentDescriptor> attachments;
     
     public RequestParkingCardCommand() {
@@ -104,7 +107,47 @@ public class RequestParkingCardCommand {
         this.plateOwnerPhone = plateOwnerPhone;
     }
 
-    @Override
+    public String getCarBrand() {
+		return carBrand;
+	}
+
+	public void setCarBrand(String carBrand) {
+		this.carBrand = carBrand;
+	}
+
+	public String getCarColor() {
+		return carColor;
+	}
+
+	public void setCarColor(String carColor) {
+		this.carColor = carColor;
+	}
+
+	public String getCarSerieName() {
+		return carSerieName;
+	}
+
+	public void setCarSerieName(String carSerieName) {
+		this.carSerieName = carSerieName;
+	}
+
+	public Long getCarSerieId() {
+		return carSerieId;
+	}
+
+	public void setCarSerieId(Long carSerieId) {
+		this.carSerieId = carSerieId;
+	}
+
+	public List<AttachmentDescriptor> getAttachments() {
+		return attachments;
+	}
+
+	public void setAttachments(List<AttachmentDescriptor> attachments) {
+		this.attachments = attachments;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

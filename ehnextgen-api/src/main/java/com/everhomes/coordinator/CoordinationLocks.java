@@ -39,7 +39,9 @@ public enum CoordinationLocks {
     WARNING_ACTIVITY_SCHEDULE("warning.activity.schedule"),
 
     PMTASK_STATISTICS("pmtask.statistics"),
-    PMTASK_TARGET_STATISTICS("pmtask.target.statistics");
+    PMTASK_TARGET_STATISTICS("pmtask.target.statistics"),
+    
+    PARKING_STATISTICS("parking.statistics");
 
     private String code;
     private CoordinationLocks(String code) {

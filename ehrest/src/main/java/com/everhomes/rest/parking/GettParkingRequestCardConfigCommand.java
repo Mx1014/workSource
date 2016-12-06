@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
-public class GetRequestParkingCardDetailCommand {
+public class GettParkingRequestCardConfigCommand {
 	@NotNull
     private String ownerType;
 	@NotNull
@@ -12,30 +12,38 @@ public class GetRequestParkingCardDetailCommand {
 	@NotNull
     private Long parkingLotId;
 	@NotNull
-	private Long id;
+	private Long flowId;
+
 	public String getOwnerType() {
 		return ownerType;
 	}
+
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
 	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
+
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
+
 	public Long getParkingLotId() {
 		return parkingLotId;
 	}
+
 	public void setParkingLotId(Long parkingLotId) {
 		this.parkingLotId = parkingLotId;
 	}
-	public Long getId() {
-		return id;
+
+	public Long getFlowId() {
+		return flowId;
 	}
-	public void setId(Long id) {
-		this.id = id;
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
 	}
 	
 	@Override

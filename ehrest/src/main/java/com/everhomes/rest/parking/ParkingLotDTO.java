@@ -29,11 +29,8 @@ public class ParkingLotDTO {
     private Byte tempfeeFlag;
     private Byte rateFlag;
     
-    private Integer monthCount;
+    private Integer rechargeMonthCount;
     private Byte rechargeType;
-    private String cardRequestTip;
-    private String cardAgreement;
-    private Integer maxIssueNum;
     
     private BigDecimal totalAmount;
     
@@ -96,11 +93,6 @@ public class ParkingLotDTO {
         this.createTime = createTime;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
 	public Integer getMaxRequestNum() {
 		return maxRequestNum;
 	}
@@ -124,4 +116,33 @@ public class ParkingLotDTO {
 	public void setRateFlag(Byte rateFlag) {
 		this.rateFlag = rateFlag;
 	}
+	
+	public Integer getRechargeMonthCount() {
+		return rechargeMonthCount;
+	}
+
+	public void setRechargeMonthCount(Integer rechargeMonthCount) {
+		this.rechargeMonthCount = rechargeMonthCount;
+	}
+
+	public Byte getRechargeType() {
+		return rechargeType;
+	}
+
+	public void setRechargeType(Byte rechargeType) {
+		this.rechargeType = rechargeType;
+	}
+
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
