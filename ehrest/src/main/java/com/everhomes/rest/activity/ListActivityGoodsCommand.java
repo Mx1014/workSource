@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  *     <li>activityId: 活动id</li>
  *     <li>pageAnchor: 锚点 没有则不传</li>
+ *     <li>pageSize: 页面大小</li>
  * </ul>
  */
 public class ListActivityGoodsCommand {
@@ -13,6 +14,8 @@ public class ListActivityGoodsCommand {
     private Long activityId;
 
     private Long pageAnchor;
+
+    private Integer pageSize;
 
     public Long getActivityId() {
         return activityId;
@@ -28,6 +31,14 @@ public class ListActivityGoodsCommand {
 
     public void setPageAnchor(Long pageAnchor) {
         this.pageAnchor = pageAnchor;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
     }
 
     @Override

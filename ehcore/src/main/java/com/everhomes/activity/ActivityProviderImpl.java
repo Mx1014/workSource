@@ -539,5 +539,55 @@ public class ActivityProviderImpl implements ActivityProivider {
         return ConvertHelper.convert(result, ActivityCategories.class);
     }
 
+    @Override
+    public void createActivityAttachment(ActivityAttachment attachment) {
+        
+    }
+
+    @Override
+    public void updateActivityAttachment(ActivityAttachment attachment) {
+
+    }
+
+    @Override
+    public ActivityAttachment findByActivityAttachmentId(Long id) {
+        return null;
+    }
+
+    @Override
+    public void deleteActivityAttachment(Long id) {
+
+    }
+
+    @Override
+    public List<ActivityAttachment> listActivityAttachments(CrossShardListingLocator locator, int count, Long activityId) {
+        return null;
+    }
+
+    @Override
+    public void createActivityGoods(ActivityGoods goods) {
+
+    }
+
+    @Override
+    public void updateActivityGoods(ActivityGoods goods) {
+
+    }
+
+    @Override
+    public void deleteActivityGoods(Long id) {
+
+    }
+
+    @Override
+    public ActivityGoods findActivityGoodsById(Long id) {
+        return null;
+    }
+
+    @Override
+    public List<ActivityGoods> listActivityGoods(CrossShardListingLocator locator, int count, Long activityId) {
+        return null;
+    }
+
 
 }

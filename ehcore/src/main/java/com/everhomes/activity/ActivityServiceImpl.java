@@ -4,13 +4,7 @@ package com.everhomes.activity;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -2911,56 +2905,153 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public void setActivityAchievement(SetActivityAchievementCommand cmd) {
 
+        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+        }
+
+        activity.setAchievement(cmd.getAchievement());
+        activityProvider.updateActivity(activity);
     }
 
     @Override
     public GetActivityAchievementResponse getActivityAchievement(GetActivityAchievementCommand cmd) {
-        return null;
+        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+        }
+
+        String achievement = activity.getAchievement();
+
+        GetActivityAchievementResponse response = new GetActivityAchievementResponse();
+        response.setAchievement(achievement);
+        return response;
     }
 
     @Override
     public void createActivityAttachment(CreateActivityAttachmentCommand cmd) {
-
+        ActivityAttachment attachment = ConvertHelper.convert(cmd, ActivityAttachment.class);
+        activityProvider.createActivityAttachment(attachment);
     }
 
     @Override
     public void deleteActivityAttachment(DeleteActivityAttachmentCommand cmd) {
-
+        activityProvider.deleteActivityAttachment(cmd.getAttachmentId());
     }
 
     @Override
     public ListActivityAttachmentsResponse listActivityAttachments(ListActivityAttachmentsCommand cmd) {
-        return null;
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
+        if(cmd.getPageSize()==null){
+            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+            cmd.setPageSize(value);
+        }
+
+        ListActivityAttachmentsResponse response = new ListActivityAttachmentsResponse();
+        List<ActivityAttachment> attachments = activityProvider.listActivityAttachments(locator, cmd.getPageSize() + 1, cmd.getActivityId());
+        if(attachments != null && attachments.size() > 0) {
+            if(attachments.size() > cmd.getPageSize()) {
+                attachments.remove(attachments.size() - 1);
+                response.setNextPageAnchor(attachments.get(attachments.size() - 1).getId());
+            }
+
+            List<ActivityAttachmentDTO> dtos = attachments.stream().map((r) -> {
+                ActivityAttachmentDTO dto = ConvertHelper.convert(r, ActivityAttachmentDTO.class);
+
+//                String contentUrl =
+                return dto;
+            }).collect(Collectors.toList());
+            response.setAttachments(dtos);
+        }
+
+        return response;
     }
 
     @Override
     public void downloadActivityAttachment(DownloadActivityAttachmentCommand cmd) {
 
+        ActivityAttachment attachment = activityProvider.findByActivityAttachmentId(cmd.getAttachmentId());
+        if(attachment == null) {
+            LOGGER.error("handle activity attachment error ,the activity attachment does not exsit.cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ATTACHMENT_ID, "invalid activity attachment id " + cmd.getAttachmentId());
+        }
+
+        attachment.setDownloadCount(attachment.getDownloadCount() + 1);
+        activityProvider.updateActivityAttachment(attachment);
     }
 
     @Override
     public void createActivityGoods(CreateActivityGoodsCommand cmd) {
-
+        ActivityGoods goods = ConvertHelper.convert(cmd, ActivityGoods.class);
+        goods.setCreatorUid(UserContext.current().getUser().getId());
+        activityProvider.createActivityGoods(goods);
     }
 
     @Override
     public void updateActivityGoods(UpdateActivityGoodsCommand cmd) {
+        ActivityGoods goods = activityProvider.findActivityGoodsById(cmd.getId());
+        if(goods == null) {
+            LOGGER.error("handle activity goods error ,the activity goods does not exsit.cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_GOODS_ID, "invalid activity goods id " + cmd.getId());
+        }
 
+        goods.setName(cmd.getName());
+//        goods.setPrice(cmd.getPrice());
+//        goods.setQuantity(cmd.getQuantity());
+//        goods.setTotalPrice(cmd.getTotalPrice());
+        goods.setHandlers(cmd.getHandlers());
+
+        activityProvider.updateActivityGoods(goods);
     }
 
     @Override
     public void deleteActivityGoods(DeleteActivityGoodsCommand cmd) {
-
+        activityProvider.deleteActivityGoods(cmd.getGoodId());
     }
 
     @Override
     public ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd) {
-        return null;
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
+        if(cmd.getPageSize()==null){
+            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+            cmd.setPageSize(value);
+        }
+
+        ListActivityGoodsResponse response = new ListActivityGoodsResponse();
+        List<ActivityGoods> goods = activityProvider.listActivityGoods(locator, cmd.getPageSize() + 1, cmd.getActivityId());
+        if(goods != null && goods.size() > 0) {
+            if(goods.size() > cmd.getPageSize()) {
+                goods.remove(goods.size() - 1);
+                response.setNextPageAnchor(goods.get(goods.size() - 1).getId());
+            }
+
+            List<ActivityGoodsDTO> dtos = goods.stream().map((r) -> {
+                ActivityGoodsDTO dto = ConvertHelper.convert(r, ActivityGoodsDTO.class);
+                return dto;
+            }).collect(Collectors.toList());
+            response.setGoods(dtos);
+        }
+
+        return response;
     }
 
     @Override
     public ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd) {
-        return null;
+        ActivityGoods goods = activityProvider.findActivityGoodsById(cmd.getGoodId());
+        if(goods == null) {
+            return null;
+        } else {
+            ActivityGoodsDTO dto = ConvertHelper.convert(goods, ActivityGoodsDTO.class);
+            return dto;
+        }
     }
 
 }
