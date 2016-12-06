@@ -23,4 +23,9 @@ public interface ParkingClearanceLogProvider {
      * 根据id查找
      */
     ParkingClearanceLog findById(Long id);
+
+    /**
+     * 更新log
+     */
+    void updateClearanceLog(ParkingClearanceLog log);
 }

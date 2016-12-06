@@ -1653,15 +1653,13 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-		List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase);
+		List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserType);
 		
 		FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
 		dto.setEntities(entities);
 		if(dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
 			return dto;
 		}
-		
-		flowListenerManager.onFlowCaseDetailRender(flowCase);
 		
 		List<FlowButtonDTO> btnDTOS = new ArrayList<>();
 		if(flowUserType == FlowUserType.PROCESSOR) {

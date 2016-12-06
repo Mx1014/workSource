@@ -11,6 +11,7 @@ public interface ParkingLocalStringCode {
     //------------------- template --------------------
     String SCOPE_TEMPLATE = "parking.clearance";
 
-    int CLEARANCE_FLOW_CASE_DETAIL_CONTENT = 10002;
+    int CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT = 10001;
+    int CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR = 10002;
 
 }

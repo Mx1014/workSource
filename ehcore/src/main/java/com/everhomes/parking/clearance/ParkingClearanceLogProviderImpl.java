@@ -22,6 +22,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Repository;
 
 import java.sql.Timestamp;
+import java.time.Instant;
 import java.time.LocalDateTime;
 import java.util.List;
 
@@ -99,6 +100,13 @@ public class ParkingClearanceLogProviderImpl implements ParkingClearanceLogProvi
     @Override
     public ParkingClearanceLog findById(Long id) {
         return ConvertHelper.convert(dao().findById(id), ParkingClearanceLog.class);
+    }
+
+    @Override
+    public void updateClearanceLog(ParkingClearanceLog log) {
+        log.setUpdateTime(Timestamp.from(Instant.now()));
+        log.setUpdateUid(UserContext.current().getUser().getId());
+        rwDao().update(log);
     }
 
     private EhParkingClearanceLogsDao rwDao(){

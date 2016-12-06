@@ -4,6 +4,8 @@ package com.everhomes.parking.clearance;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
@@ -11,8 +13,11 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.parking.ParkingLot;
+import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.parking.ParkingCommonStatus;
@@ -26,6 +31,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -92,6 +98,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private ParkingProvider parkingProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Override
     public ParkingClearanceOperatorDTO createClearanceOperator(CreateClearanceOperatorCommand cmd) {
@@ -303,7 +315,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Override
     public void onFlowCaseAbsorted(FlowCaseState ctx) {
-
+        Long logId = ctx.getFlowCase().getReferId();
+        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
+                log.setStatus(ParkingClearanceLogStatus.CANCELLED.getCode());
+                clearanceLogProvider.updateClearanceLog(log);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -313,7 +333,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-
+        Long logId = ctx.getFlowCase().getReferId();
+        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PROCESSING) {
+                log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
+                clearanceLogProvider.updateClearanceLog(log);
+            }
+            return null;
+        });
     }
 
     @Override
@@ -327,27 +355,46 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     }
 
     @Override
-    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase) {
+    public void onFlowButtonFired(FlowCaseState ctx) {
+        Long logId = ctx.getFlowCase().getReferId();
+        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
+                log.setStatus(ParkingClearanceLogStatus.CANCELLED.getCode());
+                clearanceLogProvider.updateClearanceLog(log);
+            }
+            return null;
+        });
+    }
+
+    @Override
+    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         ParkingClearanceLog log = clearanceLogProvider.findById(flowCase.getReferId());
+
         User applicant = this.findUserById(log.getApplicantId());
         UserIdentifier userIdentifier = this.findUserIdentifierByUserId(applicant.getId());
+        ParkingLot parkingLot = parkingProvider.findParkingLotById(log.getParkingLotId());
 
         Map<String, Object> map = new HashMap<>();
+        String detailJson;
 
-        map.put("", applicant.getNickName());
-        map.put("", userIdentifier.getIdentifierToken());
-        map.put("", log.getPlateNumber());
-        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd HH:mm");
-        map.put("", dateStr);
-        map.put("", log.getRemarks());
+        // 处理人员可以看到申请人的信息
+        if (flowUserType == FlowUserType.PROCESSOR) {
+            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
+                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR, currLocale(), map, "");
+            map.put("applicant", applicant.getNickName());
+            map.put("identifierToken", userIdentifier.getIdentifierToken());
+        } else {
+            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
+                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT, currLocale(), map, "");
+        }
+        map.put("parkingLotName", parkingLot != null ? parkingLot.getName() : "");
+        map.put("plateNumber", log.getPlateNumber());
+        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
+        map.put("clearanceTime", dateStr);
+        map.put("remarks", log.getRemarks());
 
-
-        String detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
-                ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT, currLocale(), map, "");
-
-        // return (FlowCaseEntityList)StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
-        // return entityList;
-        return null;
+        return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
     }
 
     @Override

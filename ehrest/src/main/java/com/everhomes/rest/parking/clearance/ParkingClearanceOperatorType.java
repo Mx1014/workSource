@@ -4,12 +4,12 @@ package com.everhomes.rest.parking.clearance;
 /**
  * <ul>
  *     <li>APPLICANT("APPLICANT"): 申请人</li>
- *     <li>HANDLER("HANDLER")：处理人</li>
+ *     <li>PROCESSOR("PROCESSOR")：处理人</li>
  * </ul>
  */
 public enum ParkingClearanceOperatorType {
 
-    APPLICANT("APPLICANT"), HANDLER("HANDLER");
+    APPLICANT("APPLICANT"), PROCESSOR("PROCESSOR");
 
     private String code;
 
