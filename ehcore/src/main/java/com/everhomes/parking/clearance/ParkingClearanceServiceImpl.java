@@ -17,6 +17,7 @@ import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -58,10 +59,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
 
     private static final Long MODULE_ID = 41500L;// 模块id
-    // private static final String MODULE_NAME = "parkingClearance";// 模块名称
 
-    private static final Long APPLY_PRIVILEGE_ID = 2L;// 处理车辆放行权限id
-    private static final Long HAND_PRIVILEGE_ID = 2L;// 处理车辆放行权限id
+    private static final Long APPLY_PRIVILEGE_ID = 10056L;// 处理车辆放行权限id
+    private static final Long PROCESS_PRIVILEGE_ID = 10057L;// 处理车辆放行权限id
 
     @Autowired
     private ParkingClearanceOperatorProvider clearanceOperatorProvider;
@@ -129,7 +129,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     // 申请放行权限或者处理权限
     private void assignmentPrivileges(CreateClearanceOperatorCommand cmd) {
         ParkingClearanceOperatorType operatorType = ParkingClearanceOperatorType.fromCode(cmd.getOperatorType());
-        long privilegeId = (operatorType == ParkingClearanceOperatorType.APPLICANT) ? APPLY_PRIVILEGE_ID : HAND_PRIVILEGE_ID;
+        long privilegeId = (operatorType == ParkingClearanceOperatorType.APPLICANT) ? APPLY_PRIVILEGE_ID : PROCESS_PRIVILEGE_ID;
         rolePrivilegeService.assignmentPrivileges(EntityType.PARKING_LOT.getCode(), cmd.getParkingLotId(),
                 EntityType.USER.getCode(), cmd.getUserId(), cmd.getOperatorType(), Collections.singletonList(privilegeId));
     }
@@ -214,12 +214,19 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             flowCaseCmd.setReferId(log.getId());
             flowCaseCmd.setReferType(EntityType.PARKING_CLEARANCE_LOG.getCode());
             // flowCase摘要内容
-            String contentLocaleString = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE,
-                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_BRIEF_CONTENT, currLocale(), "");
-            flowCaseCmd.setContent(String.format(contentLocaleString, log.getPlateNumber(), log.getClearanceTime()));
+            flowCaseCmd.setContent(this.getBriefContent(log));
 
             flowService.createFlowCase(flowCaseCmd);
         }
+    }
+
+    private String getBriefContent(ParkingClearanceLog log) {
+        Map<String, String> map = new HashMap<>();
+        map.put("plateNumber", log.getPlateNumber());
+        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
+        map.put("clearanceTime", dateStr);
+        return localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
+                ParkingLocalStringCode.CLEARANCE_FLOW_CASE_BRIEF_CONTENT, currLocale(), map, "");
     }
 
     @Override
@@ -356,15 +363,21 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Override
     public void onFlowButtonFired(FlowCaseState ctx) {
-        Long logId = ctx.getFlowCase().getReferId();
-        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
-                log.setStatus(ParkingClearanceLogStatus.CANCELLED.getCode());
-                clearanceLogProvider.updateClearanceLog(log);
-            }
-            return null;
-        });
+        String params = ctx.getCurrentNode().getFlowNode().getParams();
+        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
+        ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(((String) map.get("status")));
+
+        if (status == ParkingClearanceLogStatus.PROCESSING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
+            Long logId = ctx.getFlowCase().getReferId();
+            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
+                    log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
+                    clearanceLogProvider.updateClearanceLog(log);
+                }
+                return null;
+            });
+        }
     }
 
     @Override

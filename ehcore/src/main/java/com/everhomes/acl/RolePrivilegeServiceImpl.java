@@ -1287,8 +1287,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 	@Override
-	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd){
-
+	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId){
 		Organization org = organizationProvider.findOrganizationById(cmd.getOrganizationId());
 		Long roleId = RoleConstants.ENTERPRISE_SUPER_ADMIN;
 
@@ -1296,7 +1295,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		command.setOrganizationId(org.getId());
 		command.setAccountName(cmd.getContactName());
 		command.setAccountPhone(cmd.getContactToken());
-		OrganizationMember member = organizationService.createOrganizationAccount(command, roleId);
+		OrganizationMember member = organizationService.createOrganizationAccount(command, roleId, namespaceId);
 
 		List<Long> privilegeIds = new ArrayList<>();
 		privilegeIds.add(PrivilegeConstants.ORGANIZATION_ADMIN);
@@ -1304,6 +1303,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		 * 分配权限
 		 */
 		this.assignmentPrivileges(EntityType.ORGANIZATIONS.getCode(),org.getId(),EntityType.USER.getCode(),member.getTargetId(),"admin",privilegeIds);
+	}
+	
+	@Override
+	public void createOrganizationAdmin(CreateOrganizationAdminCommand cmd){
+		createOrganizationAdmin(cmd, null);
 	}
 
 	@Override

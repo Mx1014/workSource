@@ -90,7 +90,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			long expireTime = strToLong2(expireDate+"235959");
 			long now = System.currentTimeMillis();
 			
-			if(expireTime < now){
+			if(expireTime <= now){
 				return resultList;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
@@ -127,7 +127,7 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		
 		return ts;
 	}
-	
+
     @SuppressWarnings("unchecked")
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();

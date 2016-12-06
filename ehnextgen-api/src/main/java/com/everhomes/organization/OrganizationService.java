@@ -393,7 +393,7 @@ public interface OrganizationService {
 	ContractDTO processContract(Contract c);
 	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
 			Integer namespaceId);
-	List<OrganizationMemberDTO> getAdmins(Long organizationId);
+	List<OrganizationContactDTO> getAdmins(Long organizationId);
 	OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId);
 	List<String> getBusinessContactPhone(Long organizationId);
 	Set<String> getOrganizationContactPhone(Long organizationId);

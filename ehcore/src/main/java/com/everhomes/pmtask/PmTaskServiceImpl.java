@@ -883,14 +883,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 			
 			pmTaskSearch.feedDoc(task);
 			
-	    	Long organizationId = cmd.getOrganizationId();
-	    	if(null == organizationId) {
-	            List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(ownerId);
-	            if(null != orgs && orgs.size() != 0) {
-	            	organizationId = orgs.get(0).getOrganizationId();
-	            }
-			}
-	    	
 	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(), 
 	    			PmTaskOperateType.EXECUTOR.getCode(), null, null);
 	    	int size = targets.size();
@@ -2408,25 +2400,26 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		int size = list.size();
 		if(size > 0){
-    		response.setRequests(list.stream().map(r -> {
-    			TaskOperatorStatisticsDTO dto = new TaskOperatorStatisticsDTO();
-    			List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(r.getOwnerId());
-	            if(null != orgs && orgs.size() != 0) {
-	            	Long organizationId = orgs.get(0).getOrganizationId();
-	            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getTargetId(), organizationId);
+			List<TaskOperatorStatisticsDTO> results = new ArrayList<TaskOperatorStatisticsDTO>();
+			for(PmTaskTargetStatistic pts: list) {
+				TaskOperatorStatisticsDTO dto = new TaskOperatorStatisticsDTO();
+//    			
+	            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(pts.getTargetId(), cmd.getOrganizationId());
 	            	if(null != member) {
 	            		dto.setOperatorName(member.getContactName());
 	            	}else {
-	            		LOGGER.error("OrganizationMember not found, orgId={}, targetId={}, ownerId={}", organizationId, r.getTargetId(), r.getOwnerId());
+	            		
+	            		LOGGER.error("OrganizationMember not found, orgId={}, targetId={}, ownerId={}", cmd.getOrganizationId(), pts.getTargetId(), pts.getOwnerId());
+	            		continue;
 	            	}
 	            	
-	            }
-    			dto.setTaskCategoryId(r.getTaskCategoryId());
-    			Category taskCategory = checkCategory(r.getTaskCategoryId());
+    			dto.setTaskCategoryId(pts.getTaskCategoryId());
+    			Category taskCategory = checkCategory(pts.getTaskCategoryId());
     			dto.setTaskCategoryName(taskCategory.getName());
-    			dto.setAvgStar(r.getAvgStar());
-    			return dto;
-    		}).collect(Collectors.toList()));
+    			dto.setAvgStar(pts.getAvgStar());
+    			results.add(dto);
+			}
+    		response.setRequests(results);
     		if(size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
@@ -2493,8 +2486,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Integer namespaceId = cmd.getNamespaceId();
 		checkNamespaceId(namespaceId);
 		
-		List<PmTaskTargetStatistic> list = pmTaskProvider.searchTaskTargetStatistics(namespaceId, cmd.getOwnerId(), cmd.getTaskCategoryId(), 
-				null, new Timestamp(cmd.getDateStr()), cmd.getPageAnchor(), cmd.getPageSize());
+		List<TaskOperatorStatisticsDTO> list = searchTaskOperatorStatistics(cmd).getRequests();
 		
 		XSSFWorkbook wb = new XSSFWorkbook();
 		
@@ -2508,27 +2500,17 @@ public class PmTaskServiceImpl implements PmTaskService {
 		sheet.setDefaultColumnWidth(20);  
 		sheet.setDefaultRowHeightInPoints(20); 
 		Row row = sheet.createRow(0);
-		row.createCell(0).setCellValue("项目名称");
-		row.createCell(1).setCellValue("服务类别");
-		row.createCell(2).setCellValue("人员名称");
-		row.createCell(3).setCellValue("平均得分");
+		row.createCell(0).setCellValue("服务类别");
+		row.createCell(1).setCellValue("人员名称");
+		row.createCell(2).setCellValue("平均得分");
 		for(int i=0;i<list.size();i++){
 			Row tempRow = sheet.createRow(i + 1);
-			PmTaskTargetStatistic pts = list.get(i);
-			Category taskCategory = checkCategory(pts.getTaskCategoryId());
-			Community community = communityProvider.findCommunityById(pts.getOwnerId());
-			tempRow.createCell(0).setCellValue(community.getName());
-			tempRow.createCell(1).setCellValue(taskCategory.getName());
+			TaskOperatorStatisticsDTO pts = list.get(i);
+			tempRow.createCell(0).setCellValue(pts.getTaskCategoryName());
+            
+            tempRow.createCell(1).setCellValue(pts.getOperatorName());
 			
-			List<OrganizationCommunity> orgs = organizationProvider.listOrganizationByCommunityId(pts.getOwnerId());
-            if(null != orgs && orgs.size() != 0) {
-            	Long organizationId = orgs.get(0).getOrganizationId();
-            	OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(pts.getTargetId(), organizationId);
-            	if(null != member)
-            		tempRow.createCell(2).setCellValue(member.getContactName());
-            }
-			
-			tempRow.createCell(3).setCellValue(pts.getAvgStar().doubleValue());
+			tempRow.createCell(2).setCellValue(pts.getAvgStar().doubleValue());
 			
 		}
 		ByteArrayOutputStream out = null;

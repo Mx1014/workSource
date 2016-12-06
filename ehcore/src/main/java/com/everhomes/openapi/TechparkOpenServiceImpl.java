@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.building.Building;
@@ -28,6 +29,7 @@ import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.RoleConstants;
+import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.address.NamespaceBuildingType;
 import com.everhomes.rest.approval.CommonStatus;
@@ -81,6 +83,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	
 	@Autowired
 	private DbProvider dbProvider;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
@@ -465,11 +470,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			
 			for(int i=0; i<length; i++) {
 				if (StringUtils.isNotBlank(contactArray[i]) && StringUtils.isNotBlank(contactPhoneArray[i])) {
-					CreateOrganizationAccountCommand cmd = new CreateOrganizationAccountCommand();
-					cmd.setAccountName(contactArray[i]);
-					cmd.setAccountPhone(contactPhoneArray[i]);
+					CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
+					cmd.setContactName(contactArray[i]);
+					cmd.setContactToken(contactPhoneArray[i]);
 					cmd.setOrganizationId(organization.getId());
-					organizationService.createOrganizationAccount(cmd, RoleConstants.ENTERPRISE_SUPER_ADMIN, namespaceId);
+					rolePrivilegeService.createOrganizationAdmin(cmd, namespaceId);
 				}
 			}
 		} catch (Exception e) {
