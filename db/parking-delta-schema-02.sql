@@ -383,7 +383,7 @@ CREATE TABLE `eh_flow_attachments` (
 
 -- merge from organization-delta-schema.sql by lqs 20161128
 -- 资源分类定义 by sfyan 20161025
--- DROP TABLE IF EXISTS `eh_resource_categories`;
+ DROP TABLE IF EXISTS `eh_resource_categories`;
 CREATE TABLE `eh_resource_categories` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -400,7 +400,7 @@ CREATE TABLE `eh_resource_categories` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 资源分配类型 by sfyan 20161029
--- DROP TABLE IF EXISTS `eh_resource_category_assignments`;
+ DROP TABLE IF EXISTS `eh_resource_category_assignments`;
 CREATE TABLE `eh_resource_category_assignments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -415,7 +415,7 @@ CREATE TABLE `eh_resource_category_assignments` (
 
 
 -- 机构通用岗位 by sfyan 20161029
--- DROP TABLE IF EXISTS `eh_organization_job_positions`;
+ DROP TABLE IF EXISTS `eh_organization_job_positions`;
 CREATE TABLE `eh_organization_job_positions` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -437,7 +437,7 @@ ALTER TABLE `eh_organizations` MODIFY `group_type` VARCHAR(64) DEFAULT NULL COMM
 ALTER TABLE `eh_organizations` ADD `size` INTEGER COMMENT 'job level size';
 
 -- 机构岗位所属的通用岗位 by sfyan 20161029
--- DROP TABLE IF EXISTS `eh_organization_job_position_maps`;
+ DROP TABLE IF EXISTS `eh_organization_job_position_maps`;
 CREATE TABLE `eh_organization_job_position_maps` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -450,7 +450,7 @@ CREATE TABLE `eh_organization_job_position_maps` (
 
 
 -- 业务模块 by sfyan 20161029
--- DROP TABLE IF EXISTS `eh_service_modules`;
+ DROP TABLE IF EXISTS `eh_service_modules`;
 CREATE TABLE `eh_service_modules` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `name` VARCHAR(64) DEFAULT NULL,
@@ -466,7 +466,7 @@ CREATE TABLE `eh_service_modules` (
 
 
 -- 业务模块范围配置 by sfyan 20161029
--- DROP TABLE IF EXISTS `eh_service_module_scopes`;
+ DROP TABLE IF EXISTS `eh_service_module_scopes`;
 CREATE TABLE `eh_service_module_scopes` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -481,7 +481,7 @@ CREATE TABLE `eh_service_module_scopes` (
 
 
 -- 业务模块 by sfyan 20161029
--- DROP TABLE IF EXISTS `eh_service_module_privileges`;
+ DROP TABLE IF EXISTS `eh_service_module_privileges`;
 CREATE TABLE `eh_service_module_privileges` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `module_id` BIGINT NOT NULL COMMENT 'service module id',
@@ -498,7 +498,7 @@ CREATE TABLE `eh_service_module_privileges` (
 -- 超级管理员 定义一个超管权限
 -- 公司管理员 定义一个公司管理员的权限 
 -- 每个模块都定义自己独有的超管权限
--- DROP TABLE IF EXISTS `eh_service_module_assignments`;
+ DROP TABLE IF EXISTS `eh_service_module_assignments`;
 CREATE TABLE `eh_service_module_assignments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -534,7 +534,7 @@ ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `target_id` BIGINT NOT NULL D
 ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '';
 ALTER TABLE eh_quality_inspection_tasks ADD COLUMN `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id';
 
--- DROP TABLE IF EXISTS `eh_quality_inspection_standard_specification_map`;
+ DROP TABLE IF EXISTS `eh_quality_inspection_standard_specification_map`;
 CREATE TABLE `eh_quality_inspection_standard_specification_map` (
   `id` BIGINT NOT NULL COMMENT 'id', 
   `standard_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'reference to the id of eh_equipment_inspection_standards',
@@ -548,7 +548,7 @@ CREATE TABLE `eh_quality_inspection_standard_specification_map` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_quality_inspection_specifications`;
+ DROP TABLE IF EXISTS `eh_quality_inspection_specifications`;
 CREATE TABLE `eh_quality_inspection_specifications` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, enterprise, etc',
@@ -571,7 +571,7 @@ CREATE TABLE `eh_quality_inspection_specifications` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_quality_inspection_specification_item_results`;
+ DROP TABLE IF EXISTS `eh_quality_inspection_specification_item_results`;
 CREATE TABLE `eh_quality_inspection_specification_item_results` (
   `id` BIGINT NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the item, enterprise, etc',
@@ -601,7 +601,7 @@ ALTER TABLE eh_activities ADD COLUMN `target_tag` VARCHAR(128) COMMENT 'activity
 ALTER TABLE eh_activities ADD COLUMN `visible_region_type` TINYINT COMMENT 'define the visible region type';
 ALTER TABLE eh_activities ADD COLUMN `visible_region_id` BIGINT COMMENT 'visible region id';
 
--- DROP TABLE IF EXISTS `eh_activity_categories`;
+ DROP TABLE IF EXISTS `eh_activity_categories`;
 CREATE TABLE `eh_activity_categories` (
   `id` BIGINT(20) NOT NULL,
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
@@ -621,7 +621,7 @@ CREATE TABLE `eh_activity_categories` (
 
 -- merge from sa1.7-delta-schema.sql by xiongying 20161128
 -- 预约看楼信息
--- DROP TABLE IF EXISTS `eh_service_alliance_apartment_requests`;
+ DROP TABLE IF EXISTS `eh_service_alliance_apartment_requests`;
 CREATE TABLE `eh_service_alliance_apartment_requests` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -646,7 +646,7 @@ CREATE TABLE `eh_service_alliance_apartment_requests` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
--- DROP TABLE IF EXISTS `eh_service_alliance_skip_rule`;
+ DROP TABLE IF EXISTS `eh_service_alliance_skip_rule`;
 CREATE TABLE `eh_service_alliance_skip_rule` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -663,7 +663,7 @@ ALTER TABLE eh_pm_task_targets CHANGE role_id role_id TINYINT NOT NULL;
 ALTER TABLE eh_pm_tasks ADD COLUMN `operator_star` TINYINT NOT NULL DEFAULT 0 COMMENT 'task star of operator';
 ALTER TABLE eh_pm_tasks ADD COLUMN `address_type` TINYINT COMMENT '1: family , 2:organization';
 ALTER TABLE eh_pm_tasks ADD COLUMN `address_org_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'organization of address';
--- DROP TABLE IF EXISTS `eh_pm_task_target_statistics`;
+ DROP TABLE IF EXISTS `eh_pm_task_target_statistics`;
 CREATE TABLE `eh_pm_task_target_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -734,7 +734,7 @@ ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_type` V
 ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_token` VARCHAR(128);
 
 -- 合同表， add by tt, 20161117
--- DROP TABLE IF EXISTS `eh_contracts`;
+ DROP TABLE IF EXISTS `eh_contracts`;
 CREATE TABLE `eh_contracts` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -749,7 +749,7 @@ CREATE TABLE `eh_contracts` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 合同与楼栋门牌对应表， add by tt, 20161117
--- DROP TABLE IF EXISTS `eh_contract_building_mappings`;
+ DROP TABLE IF EXISTS `eh_contract_building_mappings`;
 CREATE TABLE `eh_contract_building_mappings` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -767,7 +767,7 @@ CREATE TABLE `eh_contract_building_mappings` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- app与namespace映射关系表， add by tt, 20161117
--- DROP TABLE IF EXISTS `eh_app_namespace_mappings`;
+ DROP TABLE IF EXISTS `eh_app_namespace_mappings`;
 CREATE TABLE `eh_app_namespace_mappings` (
   `id` BIGINT NOT NULL,
   `namespace_id` INT(11),
