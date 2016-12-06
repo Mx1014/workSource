@@ -480,16 +480,6 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,NOW() FROM `eh_service_module_privileges` WHERE module_id IN (SELECT id FROM eh_service_modules WHERE TYPE = 1);
 
 
--- 添加 业务权限下面的子菜单
-SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-	
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
-(SELECT t.* FROM eh_web_menus m
-JOIN (SELECT * FROM eh_web_menu_privileges WHERE privilege_id >= 10001 AND privilege_id <= 10052 AND privilege_id NOT IN (10001, 10007, 10012, 10019, 10033, 10042)) t
-ON m.id = t.menu_id
-) tm JOIN eh_web_menus mm ON tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) WHERE mm.id NOT IN (SELECT menu_id FROM eh_web_menu_privileges WHERE privilege_id>=10000);
-
 
 -- 新增俱乐部菜单
 INSERT INTO `eh_web_menus` VALUES ('10750', '俱乐部', '10000', NULL, 'groups', '0', '2', '/10000/10750', 'park', '180');
@@ -687,3 +677,15 @@ where id = 10372 and namespace_id = 999993;
 
 update eh_launch_pad_items set action_type = 51, action_data = '', icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU1UTmlOMlU0WkRjd05tRXhZVEZtWm1Jd016ZzJPVGt5WWpneU1UUXlZZw', item_label = '任务管理',item_name = 'PM_TASK'
 where id = 10371 and namespace_id = 999993;
+
+
+-- 添加 业务权限下面的子菜单 add by sw 20161206
+SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+	
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
+(SELECT t.* FROM eh_web_menus m
+JOIN (SELECT * FROM eh_web_menu_privileges WHERE privilege_id >= 10001 AND privilege_id <= 10052 AND privilege_id NOT IN (10001, 10007, 10012, 10019, 10033, 10042)) t
+ON m.id = t.menu_id
+) tm JOIN eh_web_menus mm ON tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) WHERE mm.id NOT IN (SELECT menu_id FROM eh_web_menu_privileges WHERE privilege_id>=10000);
+
