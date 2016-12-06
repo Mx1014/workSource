@@ -703,3 +703,6 @@ VALUES ('49100', '能耗管理', '40000', '/40000/49100', '0', '2', '2', '0', UT
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ('68', '49100', '1', '422', NULL, '0', UTC_TIMESTAMP());
+
+-- 华润oe只有一个企业时跳过列表页
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ('1', '999985', '0');
