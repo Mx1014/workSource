@@ -4,6 +4,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.ConcurrentHashMap;
 
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.user.UserInfo;
@@ -23,7 +24,7 @@ public class FlowCaseState {
 	private List<FlowEventLog> logs;
 	
 	public FlowCaseState() {
-		extra = new HashMap<String, Object>();
+		extra = new ConcurrentHashMap<String, Object>();
 		logs = new ArrayList<FlowEventLog>();
 	}
 
@@ -77,9 +78,6 @@ public class FlowCaseState {
 	}
 	public Map<String, Object> getExtra() {
 		return extra;
-	}
-	public void setExtra(Map<String, Object> extra) {
-		this.extra = extra;
 	}
 	public FlowStepType getStepType() {
 		return stepType;

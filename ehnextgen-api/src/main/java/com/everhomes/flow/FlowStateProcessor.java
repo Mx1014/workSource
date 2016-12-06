@@ -22,4 +22,8 @@ public interface FlowStateProcessor {
 
 	void endStepEnter(FlowCaseState ctx, FlowGraphNode from);
 
+	UserInfo getApplier(FlowCaseState ctx, String variable);
+
+	UserInfo getCurrProcessor(FlowCaseState ctx, String variable);
+
 }

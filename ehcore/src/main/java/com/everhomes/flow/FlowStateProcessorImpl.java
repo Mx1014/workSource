@@ -245,6 +245,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		flowListenerManager.onFlowCaseStateChanged(ctx);
 		
+		//TODO do action in a delay thread
 		if(curr.getMessageAction() != null) {
 			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
 		}
@@ -411,5 +412,32 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			log.setStepCount(ctx.getFlowCase().getStepCount());
 			ctx.getLogs().add(log);	//added but not save to database now.
 		}
+	}
+	
+	//variable support
+	@Override
+	public UserInfo getApplier(FlowCaseState ctx, String variable) {
+		String key = "applier-caseid:" + ctx.getFlowCase().getId().toString();
+		UserInfo userInfo = (UserInfo)ctx.getExtra().get(key);
+		if(userInfo == null) {
+			userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
+			if(userInfo != null) {
+				ctx.getExtra().put(key, userInfo);
+			}
+		}
+		return userInfo;
+	}
+	
+	@Override
+	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
+		String key = "curr-processor-userid:" + ctx.getFlowCase().getId().toString();
+		UserInfo userInfo = (UserInfo)ctx.getExtra().get(key);
+		if(userInfo == null) {
+			userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
+			if(userInfo != null) {
+				ctx.getExtra().put(key, userInfo);
+			}
+		}
+		return userInfo;
 	}
 }
