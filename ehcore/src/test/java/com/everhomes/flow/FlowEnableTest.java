@@ -411,12 +411,11 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	FlowCase flowCase = flowService.createFlowCase(cmd);
     	Assert.assertTrue(flowCase.getId() > 0);
     	
-    	try {
-			Thread.currentThread().sleep(30 * 1000);
-		} catch (InterruptedException e) {
-			// TODO Auto-generated catch block
-			e.printStackTrace();
-		}
+//    	try {
+//			Thread.currentThread().sleep(15 * 1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
     }
     
     @Test
@@ -440,8 +439,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
     	
-//    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
-    	Long flowCaseId = 34l;
+    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+//    	Long flowCaseId = 34l;
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(dto.getButtons().size() == 4);
     	Assert.assertTrue(dto.getNodes().size() == 5);

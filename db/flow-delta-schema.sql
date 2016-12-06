@@ -282,7 +282,8 @@ CREATE TABLE `eh_flow_variables` (
     `module_type` VARCHAR(64) NOT NULL,
 
     `name` VARCHAR(64),
-    `script_type` VARCHAR(64) NOT NULL COMMENT 'flow_inner, java_prototype',
+    `label` VARCHAR(64),
+    `script_type` VARCHAR(64) NOT NULL COMMENT 'bean_id, prototype',
     `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
 
     PRIMARY KEY (`id`)
@@ -321,7 +322,7 @@ CREATE TABLE `eh_flow_scripts` (
     `module_type` VARCHAR(64) NOT NULL,
 
     `name` VARCHAR(64) NOT NULL,
-    `script_type` VARCHAR(64) NOT NULL COMMENT 'java_prototype',
+    `script_type` VARCHAR(64) NOT NULL COMMENT 'bean_id, prototype',
     `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
     `flow_step_type` VARCHAR(64) COMMENT 'no_step, start_step, approve_step, reject_step, transfer_step, comment_step, end_step, notify_step',
     `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
