@@ -12,4 +12,14 @@ public interface FlowStateProcessor {
 
 	FlowCaseState prepareStart(UserInfo logonUser, FlowCase flowCase);
 
+	FlowCaseState prepareStepTimeout(FlowTimeout ft);
+
+	void normalStepLeave(FlowCaseState ctx, FlowGraphNode to)
+			throws FlowStepErrorException;
+
+	void normalStepEnter(FlowCaseState ctx, FlowGraphNode from)
+			throws FlowStepErrorException;
+
+	void endStepEnter(FlowCaseState ctx, FlowGraphNode from);
+
 }

@@ -67,4 +67,10 @@ public interface FlowModuleListener {
 	 * @return
 	 */
 	String onFlowVariableRender(FlowCaseState ctx, String variable);
+
+	/**
+	 * 当事件触发的时候
+	 * @param ctx
+	 */
+	void onFlowButtonFired(FlowCaseState ctx);
 }

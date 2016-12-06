@@ -21,7 +21,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.FLowUserSourceType;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStepType;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;

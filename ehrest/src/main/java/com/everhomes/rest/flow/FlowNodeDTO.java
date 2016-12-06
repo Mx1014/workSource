@@ -17,6 +17,7 @@ public class FlowNodeDTO {
     private Integer     nodeLevel;
     private Long     id;
     private String     nodeName;
+    private String params;
 
     public Byte getStatus() {
 		return status;
@@ -96,6 +97,14 @@ public class FlowNodeDTO {
 
 	public void setNodeName(String nodeName) {
 		this.nodeName = nodeName;
+	}
+
+	public String getParams() {
+		return params;
+	}
+
+	public void setParams(String params) {
+		this.params = params;
 	}
 
 	@Override

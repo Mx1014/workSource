@@ -216,8 +216,8 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("updateFlowNode")
     @RestReturn(value=FlowNodeDTO.class)
-    public RestResponse updateFlowNodeName(@Valid UpdateFlowNodeCommand cmd) {
-        RestResponse response = new RestResponse(flowService.updateFlowNodeName(cmd));
+    public RestResponse updateFlowNode(@Valid UpdateFlowNodeCommand cmd) {
+        RestResponse response = new RestResponse(flowService.updateFlowNode(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

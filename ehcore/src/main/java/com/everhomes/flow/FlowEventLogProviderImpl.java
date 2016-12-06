@@ -158,6 +158,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     		locator.setAnchor(cmd.getAnchor());
     	}
     	
+    	cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(FlowCaseStatus.INITIAL.getCode()).or(Tables.EH_FLOW_CASES.STATUS.eq(FlowCaseStatus.PROCESS.getCode())));
+    	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))

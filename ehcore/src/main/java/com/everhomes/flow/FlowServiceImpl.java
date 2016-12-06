@@ -38,7 +38,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FLowUserSourceType;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionDTO;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStatus;
@@ -796,7 +796,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd) {
+	public FlowNodeDTO updateFlowNode(UpdateFlowNodeCommand cmd) {
 		Flow flow = getFlowByEntity(cmd.getFlowNodeId(), FlowEntityType.FLOW_NODE);
 		flowMarkUpdated(flow);
 		
@@ -806,6 +806,7 @@ public class FlowServiceImpl implements FlowService {
 		flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
 		flowNode.setAutoStepType(cmd.getAutoStepType());
 		flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+		flowNode.setParams(cmd.getParams());
 		flowNodeProvider.updateFlowNode(flowNode);
 		
 		return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
@@ -1474,6 +1475,14 @@ public class FlowServiceImpl implements FlowService {
 		FlowButton btn = flowButtonProvider.getFlowButtonById(cmd.getButtonId());
 		return ConvertHelper.convert(btn, FlowButtonDTO.class);
 	}
+	
+	@Override
+    public void processStepTimeout(FlowTimeout ft) {
+		FlowCaseState ctx = flowStateProcessor.prepareStepTimeout(ft);
+		if(ctx != null) {
+			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
+		}
+    }
 
 	@Override
 	public void disableFlow(Long flowId) {
@@ -1897,7 +1906,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		for(FlowUserSelection sel : selections) {
-			if(FLowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
+			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
 			}	
 		}
@@ -1945,12 +1954,18 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
-	public void flushState(FlowCaseState ctx) {
+	public void flushState(FlowCaseState ctx) throws FlowStepBusyException {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		dbProvider.execute((s) -> {
-			ctx.getFlowCase().setLastStepTime(now);
-			flowCaseProvider.updateFlowCase(ctx.getFlowCase());
-			flowEventLogProvider.createFlowEventLogs(ctx.getLogs());
+			FlowCase case2 = flowCaseProvider.getFlowCaseById(ctx.getFlowCase().getId());
+			if(case2.getLastStepTime().equals(ctx.getFlowCase().getLastStepTime())) {
+				ctx.getFlowCase().setLastStepTime(now);
+				flowCaseProvider.updateFlowCase(ctx.getFlowCase());
+				flowEventLogProvider.createFlowEventLogs(ctx.getLogs());	
+			} else {
+				throw new FlowStepBusyException("already step by others");
+			}
+			
 			return true;
 		});		
 	}

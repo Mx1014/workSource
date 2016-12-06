@@ -22,7 +22,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.FLowUserSourceType;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseSearchType;
@@ -43,6 +43,7 @@ import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.rest.organization.ListOrganizationContactCommand;
@@ -177,6 +178,13 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	nodeCmd.setNodeName("test-flow-3-node-3");
     	FlowNodeDTO node3 = flowService.createFlowNode(nodeCmd);
     	
+    	//support auto step
+    	UpdateFlowNodeCommand updateFlowCmd = new UpdateFlowNodeCommand();
+    	updateFlowCmd.setAutoStepMinute(10);
+    	updateFlowCmd.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+    	updateFlowCmd.setFlowNodeId(node1.getId());
+    	flowService.updateFlowNode(updateFlowCmd);
+    	
     	addNodeProcessor(node1, orgId);
     	addNodeProcessor(node2, orgId);
     	addNodeProcessor(node3, orgId);
@@ -264,7 +272,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
     		singCmd.setSourceIdA(u);
     		singCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
-    		singCmd.setSourceTypeA(FLowUserSourceType.SOURCE_USER.getCode());
+    		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
     		sels.add(singCmd);
     	}
     	seleCmd.setSelections(sels);
@@ -297,7 +305,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
     		singCmd.setSourceIdA(u);
     		singCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
-    		singCmd.setSourceTypeA(FLowUserSourceType.SOURCE_USER.getCode());
+    		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
     		sels.add(singCmd);
     	}
     	seleCmd.setSelections(sels);
@@ -386,7 +394,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	setTestContext(applyUserId);
     	
     	String moduleType = FlowModuleType.NO_MODULE.getCode();
-		Long ownerId = 1001027l;
+		Long ownerId = orgId;
 		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
     	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
     	
@@ -402,6 +410,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	FlowCase flowCase = flowService.createFlowCase(cmd);
     	Assert.assertTrue(flowCase.getId() > 0);
+    	
+//    	try {
+//			Thread.currentThread().sleep(15 * 1000);
+//		} catch (InterruptedException e) {
+//			e.printStackTrace();
+//		}
     }
     
     @Test
@@ -426,6 +440,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
     	
     	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+//    	Long flowCaseId = 34l;
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(dto.getButtons().size() == 4);
     	Assert.assertTrue(dto.getNodes().size() == 5);

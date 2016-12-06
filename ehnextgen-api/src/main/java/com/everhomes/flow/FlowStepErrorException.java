@@ -5,7 +5,7 @@ package com.everhomes.flow;
  * @author janson
  *
  */
-public class FlowStepErrorException extends Exception {
+public class FlowStepErrorException extends RuntimeException {
     /**
 	 * 
 	 */
