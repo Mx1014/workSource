@@ -394,7 +394,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	setTestContext(applyUserId);
     	
     	String moduleType = FlowModuleType.NO_MODULE.getCode();
-		Long ownerId = 1001027l;
+		Long ownerId = orgId;
 		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
     	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
     	

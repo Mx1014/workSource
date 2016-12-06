@@ -88,7 +88,7 @@ public class FlowGraphNodeNormal extends FlowGraphNode {
 		}
 		
 		//create step timeout
-		if(!curr.getFlowNode().getAutoStepMinute().equals(0l)) {
+		if(!curr.getFlowNode().getAutoStepMinute().equals(0)) {
 			FlowTimeout ft = new FlowTimeout();
 			ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
 			ft.setBelongTo(curr.getFlowNode().getId());

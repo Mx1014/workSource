@@ -101,9 +101,15 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 			ctx.setFlowGraph(flowGraph);
 			
+			FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+			if(node == null) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
+			}
+			ctx.setCurrentNode(node);
+			
 			UserInfo userInfo = userService.getUserInfo(User.SYSTEM_UID);
 			ctx.setOperator(userInfo);
-			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent();
+			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent(stepDTO);
 			ctx.setCurrentEvent(event);
 			
 			return ctx;

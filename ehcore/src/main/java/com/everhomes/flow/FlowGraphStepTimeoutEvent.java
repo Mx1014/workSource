@@ -65,7 +65,7 @@ public class FlowGraphStepTimeoutEvent implements FlowGraphEvent {
 	    	FlowButton flowBtn = flowButtonProvider.findFlowButtonByStepType(stepDTO.getFlowNodeId()
 	    			, stepDTO.getFlowVersion(), nextStep.getCode(), FlowUserType.PROCESSOR.getCode());
 			
-			if(!flowBtn.getGotoNodeId().equals(0)) {
+			if(!flowBtn.getGotoNodeId().equals(0l)) {
 				next = ctx.getFlowGraph().getGraphNode(flowBtn.getGotoNodeId());
 			}
 			if(next == null) {

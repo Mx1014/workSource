@@ -7,12 +7,15 @@ import net.greghaines.jesque.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Lazy;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.pushmessage.PushMessageAction;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.flow.FlowTimeoutType;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class FlowTimeoutServiceImpl implements FlowTimeoutService {
@@ -44,7 +47,12 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     	
     	if(ft.getId() > 0) {
     		final Job job = new Job(FlowTimeoutAction.class.getName(), new Object[]{String.valueOf(ft.getId()) });
-        	jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, ft.getTimeoutTick().getTime());	
+    		if(ft.getTimeoutTick().getTime() > (DateHelper.currentGMTTime().getTime()+10l) ) {
+    			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, ft.getTimeoutTick().getTime());	
+    		} else {
+    			jesqueClientFactory.getClientPool().enqueue(queueName, job);
+    		}
+        		
     	} else {
     		LOGGER.error("create flowTimeout error! ft=" + ft.toString());
     	}
