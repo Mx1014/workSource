@@ -1026,60 +1026,6 @@ public class FlowServiceImpl implements FlowService {
 		
 		return dto;
 	}
-	
-	@Override
-	public Long createNodeEnterAction(FlowNode flowNode, FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeWatchdogAction(FlowNode flowNode,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeTrackAction(FlowNode flowNode, FlowStepType stepType,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeScriptAction(FlowNode flowNode,
-			FlowStepType stepType, ActionStepType step, FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createButtonFireAction(FlowButton flowButton,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createButtonProcessorForm(FlowButton flowButton) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createFlowNode(Flow flow, FlowStepType stepType,
-			FlowNode flowNode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createFlow(Long moduleId, FlowModuleType moduleType,
-			Long ownerId, Long ownerType, String flowName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public Boolean enableFlow(Long flowId) {
