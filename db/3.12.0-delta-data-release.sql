@@ -691,5 +691,5 @@ update eh_launch_pad_items set action_type = 51, action_data = '', icon_uri = 'c
 where id = 10371 and namespace_id = 999993;
 
 
--- 华润oe只有一个企业时跳过列表页 by xiongying 20161206
+-- 华润oe只有一个企业时跳过列表页 by xiongying20161206
 INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ('1', '999985', '0');
