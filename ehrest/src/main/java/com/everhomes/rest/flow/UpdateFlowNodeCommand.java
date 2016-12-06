@@ -8,6 +8,7 @@ public class UpdateFlowNodeCommand {
 	private Integer autoStepMinute;
 	private Byte allowApplierUpdate;
 	private String autoStepType;
+	private String params;
 
 	public String getAutoStepType() {
 		return autoStepType;
@@ -39,7 +40,13 @@ public class UpdateFlowNodeCommand {
 	public void setFlowNodeName(String flowNodeName) {
 		this.flowNodeName = flowNodeName;
 	}
-	
+
+	public String getParams() {
+		return params;
+	}
+	public void setParams(String params) {
+		this.params = params;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

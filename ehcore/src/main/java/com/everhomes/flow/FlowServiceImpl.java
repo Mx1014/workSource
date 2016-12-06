@@ -806,6 +806,7 @@ public class FlowServiceImpl implements FlowService {
 		flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
 		flowNode.setAutoStepType(cmd.getAutoStepType());
 		flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+		flowNode.setParams(cmd.getParams());
 		flowNodeProvider.updateFlowNode(flowNode);
 		
 		return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
