@@ -1,9 +1,15 @@
 package com.everhomes.rest.organization;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 
+import java.util.List;
+
+/**
+ * <ul>
+ *     <li>dtos: 企业列表 {@link com.everhomes.rest.organization.OrganizationDetailDTO}</li>
+ *     <li>nextPageAnchor: 下一页锚点</li>
+ * </ul>
+ */
 public class ListEnterprisesCommandResponse {
     private Long nextPageAnchor;
     

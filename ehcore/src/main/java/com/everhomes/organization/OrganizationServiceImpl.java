@@ -1,62 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
-import java.io.ByteArrayOutputStream;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.io.UnsupportedEncodingException;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Collections;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
-import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletResponse;
-
-import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.*;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.xssf.usermodel.XSSFCellStyle;
-import org.apache.poi.xssf.usermodel.XSSFRow;
-import org.apache.poi.xssf.usermodel.XSSFSheet;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.jooq.Condition;
-import org.simplejavamail.email.Email;
-import org.simplejavamail.email.EmailBuilder;
-import org.simplejavamail.mailer.Mailer;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.ResourceUserRoleResolver;
-import com.everhomes.acl.Role;
-import com.everhomes.acl.RoleAssignment;
-import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.*;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -73,7 +18,6 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.family.FamilyService;
@@ -110,54 +54,22 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
-import com.everhomes.rest.enterprise.ApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchApproveContactCommand;
-import com.everhomes.rest.enterprise.BatchRejectContactCommand;
-import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
-import com.everhomes.rest.enterprise.EnterpriseNotifyTemplateCode;
-import com.everhomes.rest.enterprise.EnterpriseServiceErrorCode;
-import com.everhomes.rest.enterprise.ImportEnterpriseDataCommand;
-import com.everhomes.rest.enterprise.LeaveEnterpriseCommand;
-import com.everhomes.rest.enterprise.ListUserRelatedEnterprisesCommand;
-import com.everhomes.rest.enterprise.RejectContactCommand;
-import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactCommand;
-import com.everhomes.rest.enterprise.VerifyEnterpriseContactDTO;
 import com.everhomes.rest.contract.ContractDTO;
-import com.everhomes.rest.enterprise.*;import com.everhomes.rest.family.LeaveFamilyCommand;
+import com.everhomes.rest.enterprise.*;
+import com.everhomes.rest.family.LeaveFamilyCommand;
 import com.everhomes.rest.family.ParamType;
-import com.everhomes.rest.forum.AttachmentDescriptor;
-import com.everhomes.rest.forum.CancelLikeTopicCommand;
-import com.everhomes.rest.forum.ForumConstants;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.LikeTopicCommand;
-import com.everhomes.rest.forum.ListOrgMixTopicCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.ListTopicByForumCommand;
-import com.everhomes.rest.forum.ListTopicCommand;
-import com.everhomes.rest.forum.ListTopicCommentCommand;
-import com.everhomes.rest.forum.NewCommentCommand;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.OrganizationTopicMixType;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PostEntityTag;
-import com.everhomes.rest.forum.PostPrivacy;
-import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupJoinPolicy;
 import com.everhomes.rest.group.GroupMemberStatus;
 import com.everhomes.rest.group.GroupPrivacy;
 import com.everhomes.rest.launchpad.ItemKind;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.messaging.QuestionMetaObject;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
+import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
+import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.region.RegionScope;
 import com.everhomes.rest.search.GroupQueryResult;
 import com.everhomes.rest.search.OrganizationQueryResult;
@@ -167,16 +79,7 @@ import com.everhomes.rest.ui.privilege.EntrancePrivilege;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeCommand;
 import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.UserTokenCommand;
-import com.everhomes.rest.user.UserTokenCommandResponse;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.OrganizationSearcher;
@@ -186,54 +89,31 @@ import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.EncryptionUtils;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.PinYinHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.user.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
-
-
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
+import org.simplejavamail.email.Email;
+import org.simplejavamail.email.EmailBuilder;
+import org.simplejavamail.mailer.Mailer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
 import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
-
-
-
-
 import javax.servlet.http.HttpServletResponse;
-
-
-
-
-
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -5992,8 +5872,34 @@ System.out.println();
 		return new ArrayList<>();
 	}
 
+    @Override
+    public CommunityOrganizationTreeResponse listCommunityOrganizationTree(ListCommunityOrganizationTreeCommand cmd) {
+        CommunityOrganizationTreeResponse response = new CommunityOrganizationTreeResponse();
 
-	@Override
+        List<CommunityDTO> communityDTOs = this.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+
+        List<CommunityOrganizationTreeDTO> treeDTOs = new ArrayList<>();
+        if (communityDTOs != null && communityDTOs.size() > 0) {
+            for (CommunityDTO communityDTO : communityDTOs) {
+                CommunityOrganizationTreeDTO treeDTO = new CommunityOrganizationTreeDTO();
+                treeDTO.setId(communityDTO.getId());
+                treeDTO.setName(communityDTO.getName());
+                ListEnterprisesCommand listEnterprisesCmd = new ListEnterprisesCommand();
+                listEnterprisesCmd.setQryAdminRoleFlag(false);
+                listEnterprisesCmd.setCommunityId(communityDTO.getId());
+                ListEnterprisesCommandResponse enterprisesResponse = this.listEnterprises(listEnterprisesCmd);
+                if (enterprisesResponse != null && enterprisesResponse.getDtos() != null) {
+                    treeDTO.setOrganizations(enterprisesResponse.getDtos());
+                }
+                treeDTOs.add(treeDTO);
+            }
+        }
+        response.setCommunities(treeDTOs);
+        return response;
+    }
+
+
+    @Override
 	public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
 			List<String> groupTypes,Byte naviFlag) {
 		
