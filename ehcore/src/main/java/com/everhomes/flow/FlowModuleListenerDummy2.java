@@ -98,4 +98,10 @@ public class FlowModuleListenerDummy2 implements FlowModuleListener {
 		return null;
 	}
 
+	@Override
+	public void onFlowButtonFired(FlowCaseState ctx) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

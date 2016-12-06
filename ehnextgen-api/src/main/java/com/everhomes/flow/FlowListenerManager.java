@@ -59,4 +59,10 @@ public interface FlowListenerManager {
 	 * @return
 	 */
 	String onFlowVariableRender(FlowCaseState ctx, String variable);
+
+	/**
+	 * 当时间触发的时候
+	 * @param ctx
+	 */
+	void onFlowButtonFired(FlowCaseState ctx);
 }
