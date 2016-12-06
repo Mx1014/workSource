@@ -3,7 +3,7 @@
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'get.businesses.info.api', 'zl-ec/rest/openapi/shop/listByCondition', '获取店铺信息');
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-VALUES ('300', 'organization', '600001', 'zh_CN', '通用岗位已存在');
+VALUES ('300', 'organization', '600005', 'zh_CN', '通用岗位已存在');
 
 -- merge from activityentry-delta-data-release.sql by xiongying20161128
 UPDATE eh_activities a SET forum_id = (SELECT forum_id FROM eh_forum_posts WHERE id = a.post_id) WHERE EXISTS(SELECT forum_id FROM eh_forum_posts WHERE id = a.post_id);
