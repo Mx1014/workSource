@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -109,5 +110,33 @@ public class FlowVariableProviderImpl implements FlowVariableProvider {
     }
 
     private void prepareObj(FlowVariable obj) {
+    }
+    
+    @Override
+    public List<FlowVariable> findVariables(Integer namespaceId, Long ownerId
+    		, String ownerType, Long moduleId
+    		, String moduleType, String name) {
+    	return queryFlowVariables(new ListingLocator(), 50, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_VARIABLES.NAMESPACE_ID.eq(namespaceId));
+				query.addConditions(Tables.EH_FLOW_VARIABLES.OWNER_ID.eq(ownerId));
+				if(ownerType != null) {
+					query.addConditions(Tables.EH_FLOW_VARIABLES.OWNER_TYPE.eq(ownerType));	
+				}
+				
+				query.addConditions(Tables.EH_FLOW_VARIABLES.MODULE_ID.eq(moduleId));
+				
+				if(moduleType != null) {
+					query.addConditions(Tables.EH_FLOW_VARIABLES.MODULE_TYPE.eq(moduleType));	
+				}
+				
+				query.addConditions(Tables.EH_FLOW_VARIABLES.NAME.eq(name));
+				
+				return query;
+			}
+    		
+    	});
     }
 }

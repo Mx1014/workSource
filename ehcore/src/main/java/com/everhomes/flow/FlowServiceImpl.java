@@ -22,6 +22,7 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.everhomes.aclink.AclinkConstant;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -170,6 +171,9 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Autowired
 	private FlowListenerManager flowListenerManager;
+	
+	@Autowired
+	private FlowVariableProvider flowVariableProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -1925,15 +1929,67 @@ public class FlowServiceImpl implements FlowService {
         return null;
 	}
 	
+	private String resolveVariable(FlowCaseState ctx, String para) {
+		FlowCase fc = ctx.getFlowCase();
+        List<FlowVariable> vars = new ArrayList<>();
+        List<FlowVariable> vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, fc.getOwnerId(), fc.getOwnerType(), fc.getModuleId(), fc.getModuleType(), para);
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para);
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para);
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, 0l, null, para);
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        for(FlowVariable fv : vars) {
+//			try {
+//				Class clz = Class.forName(flowScript.getScriptCls());
+//				runnableScript = (FlowScriptFire)PlatformContext.getComponent(clz);
+//			} catch (ClassNotFoundException e) {
+//				LOGGER.error("flow script class not found", e);
+//			}	
+        	FlowVariableTextResolver ftr = PlatformContext.getComponent(fv.getScriptCls());
+        	if(ftr != null) {
+        		String val = ftr.variableTextRender(ctx, para);
+        		if(null != val) {
+        			return val;
+        		}
+        	}
+        	
+        }
+        
+        return "error";
+	}
+	
 	@Override
 	public String parseActionTemplate(FlowCaseState ctx, Long actionId, String renderText) {
         String templateKey = String.format("action:%d", actionId);
-        Map<String, String> model = null;
+        Map<String, String> model = new HashMap<String, String>();
         List<String> params = getAllParams(renderText);
         if(params == null) {
         	return renderText;
         }
-        //TODO render model.
+        
+        for(String para : params) {
+        	String fv = resolveVariable(ctx, para);
+        	if(fv != null) {
+        		model.put(para, fv);	
+        	}
+        }
         
         try {
         		templateLoader.putTemplate(templateKey, renderText);
