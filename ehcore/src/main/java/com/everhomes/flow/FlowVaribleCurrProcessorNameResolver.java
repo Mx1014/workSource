@@ -5,13 +5,13 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.user.UserInfo;
 
-@Component(FlowVariableResolver.CURR_PROCESSOR_NAME)
-public class FlowVaribleCurrProcessorNameResolver implements FlowVariableResolver {
+@Component(FlowVariableTextResolver.CURR_PROCESSOR_NAME)
+public class FlowVaribleCurrProcessorNameResolver implements FlowVariableTextResolver {
 	@Autowired
 	private FlowStateProcessor flowStateProcessor;
 	
 	@Override
-	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
+	public String variableTextRender(FlowCaseState ctx, String variable) {
 		UserInfo userInfo = flowStateProcessor.getApplier(ctx, variable);
 		if(userInfo == null) {
 			return "error";//TODO use error ?
