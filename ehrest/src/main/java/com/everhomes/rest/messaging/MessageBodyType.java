@@ -1,5 +1,16 @@
 package com.everhomes.rest.messaging;
 
+/**
+ * <ul>
+ *     <li>TEXT: 文本</li>
+ *     <li>IMAGE: 图片</li>
+ *     <li>AUDIO: 语音</li>
+ *     <li>VIDEO: 视频</li>
+ *     <li>LINK</li>
+ *     <li>NOTIFY</li>
+ *     <li>RICH_LINK</li>
+ * </ul>
+ */
 public enum MessageBodyType {
     TEXT("TEXT"), IMAGE("IMAGE"), AUDIO("AUDIO"), VIDEO("VIDEO"), LINK("LINK"), NOTIFY("NOTIFY"), RICH_LINK("RICH_LINK");
     

@@ -18,7 +18,6 @@ import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.user.SetCurrentCommunityCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
-import com.everhomes.search.PMOwnerSearcher;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
@@ -49,8 +48,8 @@ public class PropertyMgrController extends ControllerBase {
 	@Autowired
 	OrganizationService organizationService;
 	
-	@Autowired
-	private PMOwnerSearcher pmOwnerSearcher;
+	// @Autowired
+	// private PMOwnerSearcher pmOwnerSearcher;
 
 	/**
 	 * <b>URL: /pm/findPropertyOrganization</b>
@@ -380,6 +379,20 @@ public class PropertyMgrController extends ControllerBase {
 	@RestReturn(value= java.lang.String.class)
 	public RestResponse sendNoticeToFamily(PropCommunityBuildAddessCommand cmd) {
 		propertyMgrService.sendNoticeToFamily(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /pm/sendNoticeToPmAdmin</b>
+	 * <p>一键推送消息给管理员, 按小区，公司，用户</p>
+	 */
+	@RequestMapping("sendNoticeToPmAdmin")
+	@RestReturn(value= java.lang.String.class)
+	public RestResponse sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd) {
+		propertyMgrService.sendNoticeToPmAdmin(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
