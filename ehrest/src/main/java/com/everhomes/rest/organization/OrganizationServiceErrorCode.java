@@ -41,7 +41,7 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_ASSIGNMENT_EXISTS=400004; //人员角色已存在
     static final int ERROR_MOBILE_NUM = 500003; //手机号错误
 
-    int ERROR_ORG_JOB_POSITION_EXISTS = 600001; //通用岗位已存在
+    
     
     static final int ERROR_VERIFY_OVER_TIME= 600002; //认证超时
 
@@ -50,4 +50,5 @@ public interface OrganizationServiceErrorCode {
 	static final int ERROR_EMAIL_REPEAT = 600003; //email 已占用
 	static final int ERROR_SEND_EMAIL = 600004; //email 发邮件错误
 
+	static final int ERROR_ORG_JOB_POSITION_EXISTS = 600005; //通用岗位已存在
 }
