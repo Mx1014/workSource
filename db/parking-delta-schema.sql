@@ -17,7 +17,7 @@ ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_name` VARCHAR(64) COM
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_id` BIGINT COMMENT 'car serie id';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_id` BIGINT COMMENT 'flow id';
 
--- DROP TABLE IF EXISTS `eh_parking_statistics`;
+ DROP TABLE IF EXISTS `eh_parking_statistics`;
 CREATE TABLE `eh_parking_flow` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -30,7 +30,7 @@ CREATE TABLE `eh_parking_flow` (
   `card_request_tip` TEXT,
   `card_agreement` TEXT,
   `max_issue_num` INTEGER NOT NULL DEFAULT 1 COMMENT 'the max num of the issue card',
-  `flow_id` BIGINT NOT NULL COMMENT 'flow id'
+  `flow_id` BIGINT NOT NULL COMMENT 'flow id',
 
 
   PRIMARY KEY (`id`)
