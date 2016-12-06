@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -38,6 +39,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionDTO;
 import com.everhomes.rest.flow.FlowActionInfo;
@@ -2024,4 +2026,27 @@ public class FlowServiceImpl implements FlowService {
 		return ConvertHelper.convert(flow, FlowDTO.class);
 	}
 
+	@Override
+	public void testFlowCase() {
+	    Long moduleId = 111l;
+	    Long orgId = 1001027l;
+	    
+    	Long applyUserId = UserContext.current().getUser().getId();
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = this.getEnabledFlow(UserContext.getCurrentNamespaceId(), moduleId, moduleType, ownerId, ownerType);
+    	
+    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+    	cmd.setApplyUserId(applyUserId);
+    	cmd.setFlowMainId(flow.getFlowMainId());
+    	cmd.setFlowVersion(flow.getFlowVersion());
+    	cmd.setReferId(0l);
+    	cmd.setReferType("test-type");
+    	
+    	Random r = new Random();
+    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
+    	this.createFlowCase(cmd);
+	}
 }

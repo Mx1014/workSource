@@ -152,7 +152,18 @@ public class FlowController extends ControllerBase {
     }
     
     /**
-     * TODO 1. post subject 2. event logs. {title, logo, date, message, processor, applier}
-     * 
+     * <b>URL: /flow/testCase</b>
+     * <p> 仅仅用于测试 </p>
+     * @return 
      */
+    @RequestMapping("testCase")
+    @RestReturn(value=String.class)
+    public RestResponse listModules() {
+    	flowService.testFlowCase();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

@@ -26,7 +26,6 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
-import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -119,7 +118,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			}
 			ctx.setCurrentNode(node);
 			
-			UserInfo userInfo = userService.getUserInfo(User.SYSTEM_UID);
+			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
 			ctx.setOperator(userInfo);
 			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent(stepDTO);
 			ctx.setCurrentEvent(event);
@@ -430,14 +429,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	
 	@Override
 	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
-		String key = "curr-processor-userid:" + ctx.getFlowCase().getId().toString();
-		UserInfo userInfo = (UserInfo)ctx.getExtra().get(key);
-		if(userInfo == null) {
-			userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
-			if(userInfo != null) {
-				ctx.getExtra().put(key, userInfo);
-			}
-		}
-		return userInfo;
+		return ctx.getOperator();
 	}
 }

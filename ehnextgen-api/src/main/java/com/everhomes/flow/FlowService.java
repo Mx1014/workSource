@@ -439,6 +439,11 @@ public interface FlowService {
 	 * @param ft
 	 */
 	void processStepTimeout(FlowTimeout ft);
+
+	/**
+	 * Only for test
+	 */
+	void testFlowCase();
 	
 	//TODO 日志信息分类：
 	
