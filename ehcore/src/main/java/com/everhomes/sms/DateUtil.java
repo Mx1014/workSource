@@ -147,7 +147,10 @@ public class DateUtil {
         	lDate.add(calBegin.getTime());  
             calBegin.add(Calendar.DAY_OF_MONTH, 1);  
  
-        }  
+        }
+        if(0 == lDate.size()){
+            lDate.add(calBegin.getTime());
+        }
         return lDate;  
     }
 

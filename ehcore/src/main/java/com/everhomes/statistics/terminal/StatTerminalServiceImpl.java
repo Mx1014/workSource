@@ -197,6 +197,7 @@ public class StatTerminalServiceImpl implements StatTerminalService{
 
         List<TerminalAppVersionStatisticsDTO> statisticsDTOs = new ArrayList<>();
         for (AppVersion appVersion:appVersions) {
+            TerminalAppVersionStatistics statistics = appVersionAUNStatisticsMap.get(appVersion.getName());
             TerminalAppVersionStatisticsDTO statisticsDTO = ConvertHelper.convert(appVersionAUNStatisticsMap.get(appVersion.getName()), TerminalAppVersionStatisticsDTO.class);
             TerminalAppVersionStatistics todayStatistics = appVersionCUMStatisticsMap.get(appVersion.getName());
             if(null == statisticsDTO){
@@ -208,6 +209,8 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                 statisticsDTO.setCumulativeUserNumber(0L);
                 statisticsDTO.setStartNumber(0L);
                 statisticsDTO.setNewUserNumber(0L);
+            }else{
+                statisticsDTO.setVersionActiveRate(statistics.getVersionActiveRate().doubleValue());
             }
 
             if(null == todayStatistics){
@@ -233,6 +236,7 @@ public class StatTerminalServiceImpl implements StatTerminalService{
         day.setCumulativeChangeRate(dayStatistics.getCumulativeChangeRate().doubleValue());
         day.setNewChangeRate(dayStatistics.getNewChangeRate().doubleValue());
         day.setStartChangeRate(dayStatistics.getStartChangeRate().doubleValue());
+        day.setActiveRate(dayStatistics.getActiveRate().doubleValue());
         return day;
     }
 
@@ -246,6 +250,7 @@ public class StatTerminalServiceImpl implements StatTerminalService{
             day.setCumulativeChangeRate(r.getCumulativeChangeRate().doubleValue());
             day.setNewChangeRate(r.getNewChangeRate().doubleValue());
             day.setStartChangeRate(r.getStartChangeRate().doubleValue());
+            day.setActiveRate(r.getActiveRate().doubleValue());
             return day;
         }).collect(Collectors.toList());
     }
@@ -431,13 +436,13 @@ public class StatTerminalServiceImpl implements StatTerminalService{
         Long tDate = Long.valueOf(date.replaceAll("-",""));
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(DateUtil.strToDate(date, "yyyy-MM-dd"));
-        calendar.add(Calendar.DAY_OF_MONTH, -2);
-        String yDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        String yDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.NO_SLASH);
         calendar.setTime(DateUtil.strToDate(date, "yyyy-MM-dd"));
-        calendar.add(Calendar.DAY_OF_MONTH, -7);
+        calendar.add(Calendar.DAY_OF_MONTH, -6);
         String sevenDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
         calendar.setTime(DateUtil.strToDate(date, "yyyy-MM-dd"));
-        calendar.add(Calendar.DAY_OF_MONTH, -30);
+        calendar.add(Calendar.DAY_OF_MONTH, -29);
         String thirtyDate = DateUtil.dateToStr(calendar.getTime(), DateUtil.YMR_SLASH);
         namespaces.add(new Namespace()); // 0域
         statTerminalProvider.deleteTerminalDayStatistics(tDate.toString());
