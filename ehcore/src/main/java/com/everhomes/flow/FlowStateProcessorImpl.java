@@ -25,6 +25,8 @@ import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
@@ -56,6 +58,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
    
    @Autowired
    private UserService userService;
+   
+   @Autowired
+   private UserProvider userProvider;
     
 //	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
@@ -87,14 +92,17 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
 				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
 			
+	    	User user = userProvider.findUserById(User.SYSTEM_UID);
+	    	UserContext.current().setUser(user);
+			
 			ctx.setFlowCase(flowCase);
 			ctx.setModuleName(flowCase.getModuleName());
 			
 			FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 			ctx.setFlowGraph(flowGraph);
 			
-			UserInfo user = userService.getUserInfo(User.SYSTEM_UID);
-			ctx.setOperator(user);
+			UserInfo userInfo = userService.getUserInfo(User.SYSTEM_UID);
+			ctx.setOperator(userInfo);
 			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent();
 			ctx.setCurrentEvent(event);
 			

@@ -68,6 +68,7 @@ CREATE TABLE `eh_flow_nodes` (
     `auto_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, EndStep',
     `allow_applier_update` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow applier update content',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
+    `params` VARCHAR(64) COMMENT 'the params from other module',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
 
     PRIMARY KEY (`id`)
