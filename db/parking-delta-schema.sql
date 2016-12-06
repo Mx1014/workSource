@@ -1,6 +1,8 @@
 
 ALTER TABLE eh_parking_lots ADD COLUMN `recharge_month_count` INT NOT NUll DEFAULT 0 COMMENT 'organization of address';
 ALTER TABLE eh_parking_lots ADD COLUMN `recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: all month, 2: number of days';
+ALTER TABLE eh_parking_lots ADD COLUMN `recharge_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'out date card recharge flag , 1: support recharge , 0: not ';
+
 
 -- ALTER TABLE eh_parking_lots ADD COLUMN `request_month_count` INT NOT NUll DEFAULT 0 COMMENT 'organization of address';
 -- ALTER TABLE eh_parking_lots ADD COLUMN `request_recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: all month, 2: number of days';
