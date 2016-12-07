@@ -20,11 +20,13 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowCasesDao;
 import com.everhomes.server.schema.tables.pojos.EhFlowCases;
+import com.everhomes.server.schema.tables.pojos.EhFlowTimeouts;
 import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -170,5 +172,21 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	} else {
     		return null;
     	}   	
+    }
+    
+    @Override
+    public boolean updateIfValid(Long flowCaseId, Timestamp last, Timestamp now) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
+        
+        int effect = context.update(Tables.EH_FLOW_CASES)
+        .set(Tables.EH_FLOW_CASES.LAST_STEP_TIME, now)
+        .where(Tables.EH_FLOW_CASES.LAST_STEP_TIME.eq(last).and(Tables.EH_FLOW_CASES.ID.eq(flowCaseId)))
+        .execute();
+        
+        if(effect > 0) {
+        	return true;
+        }
+        
+        return false;
     }
 }
