@@ -17,6 +17,7 @@ ALTER TABLE eh_parking_card_requests ADD COLUMN `car_color` VARCHAR(64) COMMENT 
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_name` VARCHAR(64) COMMENT 'car serie name';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_id` BIGINT COMMENT 'car serie id';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_id` BIGINT COMMENT 'flow id';
+ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'current flow version';
 
  DROP TABLE IF EXISTS `eh_parking_flow`;
 CREATE TABLE `eh_parking_flow` (
