@@ -40,9 +40,12 @@ import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.FlowVariableType;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
@@ -511,6 +514,12 @@ public class FlowServiceTest extends LoginAuthTestCase {
     public void testVariables() {
 //    	String renderText = "abc${pa1}.${pa2}asdf";
 //    	flowService.getAllParams(renderText);
+    	setTestContext(1035l);
+    	
+    	ListFlowVariablesCommand cmd = new ListFlowVariablesCommand();
+    	cmd.setFlowVariableType(FlowVariableType.TEXT.getCode());
+    	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
+    	Assert.assertTrue(resp.getDtos().size() == 4);
     }
     
     private void setTestContext(Long userId) {

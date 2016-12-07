@@ -169,7 +169,7 @@ public class ParkingClearanceFlowEnableTest extends LoginAuthTestCase {
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	
     	UpdateFlowButtonCommand buttonCmd = new UpdateFlowButtonCommand();
-    	buttonCmd.setButtonName("new-next-step-name");
+    	buttonCmd.setButtonName("受理");
     	buttonCmd.setDescription("test-description");
     	buttonCmd.setFlowButtonId(flowButton1.getId());
     	buttonCmd.setNeedProcessor((byte)1);
@@ -183,12 +183,12 @@ public class ParkingClearanceFlowEnableTest extends LoginAuthTestCase {
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	
     	buttonCmd = new UpdateFlowButtonCommand();
-    	buttonCmd.setButtonName("new-next-step-name");
+    	buttonCmd.setButtonName("完成");
     	buttonCmd.setDescription("test-description");
     	buttonCmd.setFlowButtonId(flowButton2.getId());
     	buttonCmd.setNeedProcessor((byte)1);
     	buttonCmd.setNeedSubject((byte)1);
-    	
+
     	buttonAction = createActionInfo("test-button2-info", orgId);
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);

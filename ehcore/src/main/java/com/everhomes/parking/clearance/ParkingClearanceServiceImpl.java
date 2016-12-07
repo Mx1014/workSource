@@ -8,17 +8,13 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.parking.ParkingCommonStatus;
@@ -46,6 +42,7 @@ import java.time.Instant;
 import java.util.*;
 import java.util.stream.Collectors;
 
+import static com.everhomes.rest.parking.clearance.ParkingClearanceConst.*;
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
@@ -57,11 +54,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingClearanceServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-
-    private static final Long MODULE_ID = 41500L;// 模块id
-
-    private static final Long APPLY_PRIVILEGE_ID = 10056L;// 处理车辆放行权限id
-    private static final Long PROCESS_PRIVILEGE_ID = 10057L;// 处理车辆放行权限id
 
     @Autowired
     private ParkingClearanceOperatorProvider clearanceOperatorProvider;
@@ -90,8 +82,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     @Autowired
     private ConfigurationProvider configurationProvider;
 
-    @Autowired
-    private LocaleStringService localeStringService;
+    // @Autowired
+    // private LocaleStringService localeStringService;
 
     @Autowired
     private ServiceModuleProvider moduleProvider;
@@ -106,32 +98,33 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private CoordinationProvider coordinationProvider;
 
     @Override
-    public ParkingClearanceOperatorDTO createClearanceOperator(CreateClearanceOperatorCommand cmd) {
+    public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        User user = this.findUserById(cmd.getUserId());
-        ParkingClearanceOperator operator = new ParkingClearanceOperator();
-        operator.setOrganizationId(cmd.getOrganizationId());
-        operator.setCommunityId(cmd.getCommunityId());
-        operator.setNamespaceId(currNamespaceId());
-        operator.setParkingLotId(cmd.getParkingLotId());
-        operator.setOperatorType(cmd.getOperatorType());
-        operator.setOperatorId(user.getId());
-        operator.setStatus(ParkingCommonStatus.ACTIVE.getCode());
-        clearanceOperatorProvider.createClearanceOperator(operator);
-
-        this.assignmentPrivileges(cmd);
-
-        return toClearanceOperatorDTO(operator);
+        if (cmd.getUserIds() != null) {
+            for (Long userId : cmd.getUserIds()) {
+                User user = this.findUserById(userId);
+                ParkingClearanceOperator operator = new ParkingClearanceOperator();
+                operator.setOrganizationId(cmd.getOrganizationId());
+                operator.setCommunityId(cmd.getCommunityId());
+                operator.setNamespaceId(currNamespaceId());
+                operator.setParkingLotId(cmd.getParkingLotId());
+                operator.setOperatorType(cmd.getOperatorType());
+                operator.setOperatorId(user.getId());
+                operator.setStatus(ParkingCommonStatus.ACTIVE.getCode());
+                clearanceOperatorProvider.createClearanceOperator(operator);
+                this.assignmentPrivileges(cmd.getOperatorType(), cmd.getParkingLotId(), userId);
+            }
+        }
     }
 
     // 给用户添加权限
     // 申请放行权限或者处理权限
-    private void assignmentPrivileges(CreateClearanceOperatorCommand cmd) {
-        ParkingClearanceOperatorType operatorType = ParkingClearanceOperatorType.fromCode(cmd.getOperatorType());
+    private void assignmentPrivileges(String opType,Long parkingLotId, Long userId) {
+        ParkingClearanceOperatorType operatorType = ParkingClearanceOperatorType.fromCode(opType);
         long privilegeId = (operatorType == ParkingClearanceOperatorType.APPLICANT) ? APPLY_PRIVILEGE_ID : PROCESS_PRIVILEGE_ID;
-        rolePrivilegeService.assignmentPrivileges(EntityType.PARKING_LOT.getCode(), cmd.getParkingLotId(),
-                EntityType.USER.getCode(), cmd.getUserId(), cmd.getOperatorType(), Collections.singletonList(privilegeId));
+        rolePrivilegeService.assignmentPrivileges(EntityType.PARKING_LOT.getCode(), parkingLotId,
+                EntityType.USER.getCode(), userId, opType, Collections.singletonList(privilegeId));
     }
 
     private ParkingClearanceOperatorDTO toClearanceOperatorDTO(ParkingClearanceOperator operator) {
@@ -183,6 +176,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         this.checkApplyClearanceAuthority(cmd);
 
         ParkingClearanceLog log = new ParkingClearanceLog();
+        log.setNamespaceId(currNamespaceId());
         log.setStatus(ParkingClearanceLogStatus.PENDING.getCode());
         log.setParkingLotId(cmd.getParkingLotId());
         log.setCommunityId(cmd.getCommunityId());
@@ -205,7 +199,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     }
 
     private void createFlowCase(ParkingClearanceLog log) {
-        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, log.getParkingLotId(), EntityType.PARKING_LOT.getCode());
+        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, log.getParkingLotId(), FlowOwnerType.PARKING.getCode());
         if (flow != null) {
             CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
             flowCaseCmd.setApplyUserId(currUserId());
@@ -391,6 +385,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         Map<String, Object> map = new HashMap<>();
         String detailJson;
 
+        map.put("parkingLotName", parkingLot != null ? parkingLot.getName() : "");
+        map.put("plateNumber", log.getPlateNumber());
+        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
+        map.put("clearanceTime", dateStr);
+        map.put("remarks", log.getRemarks());
+
         // 处理人员可以看到申请人的信息
         if (flowUserType == FlowUserType.PROCESSOR) {
             detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
@@ -401,12 +401,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
                     ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT, currLocale(), map, "");
         }
-        map.put("parkingLotName", parkingLot != null ? parkingLot.getName() : "");
-        map.put("plateNumber", log.getPlateNumber());
-        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
-        map.put("clearanceTime", dateStr);
-        map.put("remarks", log.getRemarks());
-
         return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
     }
 

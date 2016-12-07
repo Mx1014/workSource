@@ -1,10 +1,12 @@
 // @formatter:off
 package com.everhomes.rest.parking.clearance;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.energy.EnumType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -12,7 +14,7 @@ import javax.validation.constraints.NotNull;
  *     <li>communityId: 小区id</li>
  *     <li>parkingLotId: 停车场id</li>
  *     <li>operatorType: 添加的用户类型 {@link com.everhomes.rest.parking.clearance.ParkingClearanceOperatorType}</li>
- *     <li>userId: 添加的用户id</li>
+ *     <li>userIds: 添加的用户id列表</li>
  * </ul>
  */
 public class CreateClearanceOperatorCommand {
@@ -22,7 +24,8 @@ public class CreateClearanceOperatorCommand {
     @NotNull private Long parkingLotId;
     @EnumType(ParkingClearanceOperatorType.class)
     private String operatorType;
-    @NotNull private Long userId;
+    @ItemType(Long.class)
+    private List<Long> userIds;
 
     public Long getParkingLotId() {
         return parkingLotId;
@@ -56,12 +59,12 @@ public class CreateClearanceOperatorCommand {
         this.organizationId = organizationId;
     }
 
-    public Long getUserId() {
-        return userId;
+    public List<Long> getUserIds() {
+        return userIds;
     }
 
-    public void setUserId(Long userId) {
-        this.userId = userId;
+    public void setUserIds(List<Long> userIds) {
+        this.userIds = userIds;
     }
 
     @Override

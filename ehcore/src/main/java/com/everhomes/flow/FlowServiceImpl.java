@@ -1,17 +1,27 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.concurrent.ConcurrentHashMap;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import org.apache.poi.hslf.record.CurrentUserAtom;
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.news.Attachment;
+import com.everhomes.news.AttachmentProvider;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.news.NewsCommentContentType;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,101 +30,11 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
-import com.everhomes.aclink.AclinkConstant;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.news.Attachment;
-import com.everhomes.news.AttachmentProvider;
-import com.everhomes.pusher.PusherServiceImpl;
-import com.everhomes.rest.aclink.AclinkServiceErrorCode;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.flow.ActionStepType;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FlowUserSourceType;
-import com.everhomes.rest.flow.FlowActionDTO;
-import com.everhomes.rest.flow.FlowActionInfo;
-import com.everhomes.rest.flow.FlowActionStatus;
-import com.everhomes.rest.flow.FlowActionStepType;
-import com.everhomes.rest.flow.FlowActionType;
-import com.everhomes.rest.flow.FlowButtonDTO;
-import com.everhomes.rest.flow.FlowButtonDetailDTO;
-import com.everhomes.rest.flow.FlowButtonStatus;
-import com.everhomes.rest.flow.FlowCaseDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowCaseType;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowEvaluateDTO;
-import com.everhomes.rest.flow.FlowEventLogDTO;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowNodeDetailDTO;
-import com.everhomes.rest.flow.FlowNodeLogDTO;
-import com.everhomes.rest.flow.FlowNodePriority;
-import com.everhomes.rest.flow.FlowNodeReminderDTO;
-import com.everhomes.rest.flow.FlowNodeStatus;
-import com.everhomes.rest.flow.FlowNodeTrackerDTO;
-import com.everhomes.rest.flow.FlowPostEvaluateCommand;
-import com.everhomes.rest.flow.FlowPostSubjectCommand;
-import com.everhomes.rest.flow.FlowPostSubjectDTO;
-import com.everhomes.rest.flow.FlowServiceErrorCode;
-import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowSubjectDTO;
-import com.everhomes.rest.flow.FlowUserSelectionDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.FlowVariableResponse;
-import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
-import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
-import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
-import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowButtonResponse;
-import com.everhomes.rest.flow.ListFlowModulesCommand;
-import com.everhomes.rest.flow.ListFlowModulesResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowNameCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
-import com.everhomes.rest.news.NewsCommentContentType;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
-import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-
-import freemarker.cache.StringTemplateLoader;
-import freemarker.template.Configuration;
-import freemarker.template.Template;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.concurrent.ConcurrentHashMap;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 @Component
 public class FlowServiceImpl implements FlowService {
@@ -168,6 +88,9 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Autowired
 	private FlowListenerManager flowListenerManager;
+	
+	@Autowired
+	private FlowVariableProvider flowVariableProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -1024,60 +947,6 @@ public class FlowServiceImpl implements FlowService {
 		
 		return dto;
 	}
-	
-	@Override
-	public Long createNodeEnterAction(FlowNode flowNode, FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeWatchdogAction(FlowNode flowNode,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeTrackAction(FlowNode flowNode, FlowStepType stepType,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeScriptAction(FlowNode flowNode,
-			FlowStepType stepType, ActionStepType step, FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createButtonFireAction(FlowButton flowButton,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createButtonProcessorForm(FlowButton flowButton) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createFlowNode(Flow flow, FlowStepType stepType,
-			FlowNode flowNode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createFlow(Long moduleId, FlowModuleType moduleType,
-			Long ownerId, Long ownerType, String flowName) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public Boolean enableFlow(Long flowId) {
@@ -1596,8 +1465,68 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.current().getNamespaceId());
+		}
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(0);
+		}
+		if(cmd.getModuleType() == null) {
+			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		}
+		if(cmd.getOwnerId() == null) {
+			cmd.setOwnerId(0l);
+		}
+		if(cmd.getModuleId() == null) {
+			cmd.setModuleId(0l);
+		}
+		
+		FlowVariableResponse resp = new FlowVariableResponse();
+		List<FlowVariableDTO> dtos = new ArrayList<>();
+		resp.setDtos(dtos);
+		
+        List<FlowVariable> vars = new ArrayList<>();
+        String para = null;
+        List<FlowVariable> vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, cmd.getOwnerId(), cmd.getOwnerType(), cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        if(!cmd.getNamespaceId().equals(0)) {
+        	vars2 = flowVariableProvider.findVariables(0
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        	if(vars2 != null) {
+        		vars.addAll(vars2);
+        	} 	
+        }
+        
+        Map<String, Long> map = new HashMap<String, Long>();
+        for(FlowVariable var : vars) {
+        	if(!map.containsKey(var.getName())) {
+        		dtos.add(ConvertHelper.convert(var, FlowVariableDTO.class));
+        		map.put(var.getName(), 1l);
+        	}
+        }
+        
+        return resp;
 	}
 
 	@Override
@@ -1617,7 +1546,7 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowCaseDetail> details = null;
 		boolean isApplier = false;
 		
-		if(FlowCaseSearchType.APPLIER.equals(cmd.getFlowCaseSearchType())) {
+		if(FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType()) == FlowCaseSearchType.APPLIER) {
 			isApplier = true;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
 		} else {
@@ -1647,6 +1576,11 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId, FlowUserType flowUserType) {
+		return getFlowCaseDetail(flowCaseId, inUserId, flowUserType, false);
+	}
+	
+	@Override
+	public FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId, FlowUserType flowUserType, boolean checkProcessor) {
 		Long userId = inUserId;
 		if(userId == null) {
 			userId = UserContext.current().getUser().getId();
@@ -1663,14 +1597,18 @@ public class FlowServiceImpl implements FlowService {
 		
 		List<FlowButtonDTO> btnDTOS = new ArrayList<>();
 		if(flowUserType == FlowUserType.PROCESSOR) {
-			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
-			buttons.stream().forEach((b)->{
-				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode()) 
-						&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode())) {
-					FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
-					btnDTOS.add(btnDTO);
-				}
-			});
+			
+			if(!checkProcessor || (null != flowEventLogProvider.isProcessor(userId, flowCase))) {
+				List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
+					buttons.stream().forEach((b)->{
+						if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode()) 
+								&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode())) {
+							FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
+							btnDTOS.add(btnDTO);
+						}
+					});
+			}
+			
 		} else if(flowUserType == FlowUserType.APPLIER) {
 			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
 			buttons.stream().forEach((b)->{
@@ -1801,6 +1739,17 @@ public class FlowServiceImpl implements FlowService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	private void updateFlowUserName(FlowUserSelectionDTO dto) {
+		if(dto.getSelectionName() == null) {
+			FlowUserSelectionType selType = FlowUserSelectionType.fromCode(dto.getSelectType());
+			if(selType == FlowUserSelectionType.DEPARTMENT) {
+				//Users selection
+				UserInfo userInfo = userService.getUserSnapshotInfo(dto.getSourceIdA());
+				dto.setSelectionName(userInfo.getNickName());
+			}
+		}
+	}
 
 	@Override
 	public ListFlowUserSelectionResponse listButtonProcessorSelections(
@@ -1820,7 +1769,9 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowNode.getId(), FlowEntityType.FLOW_NODE.getCode(), cmd.getFlowUserType());
 		if(seles != null) {
 			seles.forEach((s) -> {
-				resp.getSelections().add(ConvertHelper.convert(s, FlowUserSelectionDTO.class));
+				FlowUserSelectionDTO dto = ConvertHelper.convert(s, FlowUserSelectionDTO.class);
+				updateFlowUserName(dto);
+				resp.getSelections().add(dto);
 			});
 		}
 		
@@ -1860,7 +1811,14 @@ public class FlowServiceImpl implements FlowService {
 			dto.setDisplayName("交流大厅");
 			return dto;
 		}
-		
+		if(moduleId.equals(41500L)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(41500L);
+			dto.setModuleName("车辆放行");
+			dto.setDisplayName("车辆放行");
+			return dto;
+		}
+
 		return null;
 	}
 
@@ -1893,7 +1851,13 @@ public class FlowServiceImpl implements FlowService {
 		dto.setModuleName("jiaoliu");
 		dto.setDisplayName("交流大厅");
 		modules.add(dto);
-		
+
+		dto = new FlowModuleDTO();
+		dto.setModuleId(41500L);
+		dto.setModuleName("车辆放行");
+		dto.setDisplayName("车辆放行");
+		modules.add(dto);
+
 		return resp;
 	}
 	
@@ -1955,8 +1919,7 @@ public class FlowServiceImpl implements FlowService {
 	public void flushState(FlowCaseState ctx) throws FlowStepBusyException {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		dbProvider.execute((s) -> {
-			FlowCase case2 = flowCaseProvider.getFlowCaseById(ctx.getFlowCase().getId());
-			if(case2.getLastStepTime().equals(ctx.getFlowCase().getLastStepTime())) {
+			if(flowCaseProvider.updateIfValid(ctx.getFlowCase().getId(), ctx.getFlowCase().getLastStepTime(), now)) {
 				ctx.getFlowCase().setLastStepTime(now);
 				flowCaseProvider.updateFlowCase(ctx.getFlowCase());
 				flowEventLogProvider.createFlowEventLogs(ctx.getLogs());	
@@ -1969,23 +1932,88 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	private List<String> getAllParams(String renderText) {
+		List<String> params = new ArrayList<>();
         Matcher m = pParam.matcher(renderText);
         while(m.find()) {
-        	LOGGER.info("param=" + m.group(1));
+//        	LOGGER.info("param=" + m.group(1));
+        	if(m.groupCount() > 0) {
+        		params.add(m.group(1));
+        	}
         }
         
-        return null;
+        return params;
+	}
+	
+	private String resolveTextVariable(FlowCaseState ctx, String para) {
+		FlowCase fc = ctx.getFlowCase();
+        List<FlowVariable> vars = new ArrayList<>();
+        List<FlowVariable> vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, fc.getOwnerId(), fc.getOwnerType(), fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        if(!fc.getNamespaceId().equals(0)) {
+        	vars2 = flowVariableProvider.findVariables(0
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        	if(vars2 != null) {
+        		vars.addAll(vars2);
+        		} 	
+        }
+
+        
+        for(FlowVariable fv : vars) {
+//			try {
+//				Class clz = Class.forName(flowScript.getScriptCls());
+//				runnableScript = (FlowScriptFire)PlatformContext.getComponent(clz);
+//			} catch (ClassNotFoundException e) {
+//				LOGGER.error("flow script class not found", e);
+//			}	
+        	FlowVariableTextResolver ftr = PlatformContext.getComponent(fv.getScriptCls());
+        	if(ftr != null) {
+        		String val = ftr.variableTextRender(ctx, para);
+        		if(null != val) {
+        			return val;
+        		}
+        	}
+        	
+        }
+        
+        return "error";
 	}
 	
 	@Override
 	public String parseActionTemplate(FlowCaseState ctx, Long actionId, String renderText) {
         String templateKey = String.format("action:%d", actionId);
-        Map<String, String> model = null;
+        Map<String, String> model = new HashMap<String, String>();
         List<String> params = getAllParams(renderText);
-        if(params == null) {
+        if(params == null || params.size() == 0) {
         	return renderText;
         }
-        //TODO render model.
+        
+        for(String para : params) {
+        	String fv = resolveTextVariable(ctx, para);
+        	if(fv != null) {
+        		model.put(para, fv);	
+        	}
+        }
         
         try {
         		templateLoader.putTemplate(templateKey, renderText);
@@ -2024,4 +2052,27 @@ public class FlowServiceImpl implements FlowService {
 		return ConvertHelper.convert(flow, FlowDTO.class);
 	}
 
+	@Override
+	public void testFlowCase() {
+	    Long moduleId = 111l;
+	    Long orgId = 1001027l;
+	    
+    	Long applyUserId = UserContext.current().getUser().getId();
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = this.getEnabledFlow(UserContext.getCurrentNamespaceId(), moduleId, moduleType, ownerId, ownerType);
+    	
+    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+    	cmd.setApplyUserId(applyUserId);
+    	cmd.setFlowMainId(flow.getFlowMainId());
+    	cmd.setFlowVersion(flow.getFlowVersion());
+    	cmd.setReferId(0l);
+    	cmd.setReferType("test-type");
+    	
+    	Random r = new Random();
+    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
+    	this.createFlowCase(cmd);
+	}
 }

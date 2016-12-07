@@ -26,7 +26,6 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
-import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -119,7 +118,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			}
 			ctx.setCurrentNode(node);
 			
-			UserInfo userInfo = userService.getUserInfo(User.SYSTEM_UID);
+			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
 			ctx.setOperator(userInfo);
 			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent(stepDTO);
 			ctx.setCurrentEvent(event);
@@ -245,6 +244,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		flowListenerManager.onFlowCaseStateChanged(ctx);
 		
+		//TODO do action in a delay thread
 		if(curr.getMessageAction() != null) {
 			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
 		}
@@ -411,5 +411,24 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			log.setStepCount(ctx.getFlowCase().getStepCount());
 			ctx.getLogs().add(log);	//added but not save to database now.
 		}
+	}
+	
+	//variable support
+	@Override
+	public UserInfo getApplier(FlowCaseState ctx, String variable) {
+		String key = "applier-caseid:" + ctx.getFlowCase().getId().toString();
+		UserInfo userInfo = (UserInfo)ctx.getExtra().get(key);
+		if(userInfo == null) {
+			userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
+			if(userInfo != null) {
+				ctx.getExtra().put(key, userInfo);
+			}
+		}
+		return userInfo;
+	}
+	
+	@Override
+	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
+		return ctx.getOperator();
 	}
 }

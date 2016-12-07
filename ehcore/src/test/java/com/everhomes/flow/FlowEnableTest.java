@@ -318,7 +318,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
     	cmd.setFlowNodeId(dto.getId());
     	
-    	FlowActionInfo action = createActionInfo("test-track-enter-action-" + dto.getId(), orgId);
+    	FlowActionInfo action = createActionInfo(
+    			"applierName: ${applierName} applierPhone: ${applierPhone} currProcessorName:${currProcessorName} currProcessorPhone: ${currProcessorPhone}"
+    			+ " test-track-enter-action-" + dto.getId(), orgId);
     	action.setTrackerApplier(1l);
     	action.setTrackerProcessor(1l);
     	cmd.setEnterTracker(action);
@@ -793,5 +795,13 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(dto.getButtons().size() == 4);
     	Assert.assertTrue(dto.getNodes().size() == 4);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
+    }
+    
+    @Test
+    public void testCase() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+    	flowService.testFlowCase();
     }
 }

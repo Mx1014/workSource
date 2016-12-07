@@ -24,9 +24,10 @@ public class ParkingClearanceController extends ControllerBase {
      * <b>URL: /clearance/createClearanceOperator</b>
      */
     @RequestMapping("createClearanceOperator")
-    @RestReturn(ParkingClearanceOperatorDTO.class)
+    @RestReturn(String.class)
     public RestResponse createClearanceOperator(CreateClearanceOperatorCommand cmd) {
-        return response(parkingClearanceService.createClearanceOperator(cmd));
+        parkingClearanceService.createClearanceOperator(cmd);
+        return success();
     }
 
     /**

@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
@@ -21,5 +22,7 @@ public interface FlowCaseProvider {
 
 	List<FlowCaseDetail> findApplierFlowCases(ListingLocator locator,
 			int count, SearchFlowCaseCommand cmd);
+
+	boolean updateIfValid(Long flowCaseId, Timestamp last, Timestamp now);
 
 }

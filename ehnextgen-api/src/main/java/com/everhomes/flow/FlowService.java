@@ -52,75 +52,6 @@ import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 
 public interface FlowService {
-	/**
-	 * 进入节点的消息提醒
-	 * @param flowNode
-	 * @param flowAction
-	 * @return
-	 */
-	Long createNodeEnterAction(FlowNode flowNode, FlowAction flowAction);
-	
-	/**
-	 * 进入节点，未处理则消息提醒
-	 * @param flowNode
-	 * @param flowAction
-	 * @return
-	 */
-	Long createNodeWatchdogAction(FlowNode flowNode, FlowAction flowAction);
-	
-	/**
-	 * 任务跟踪消息提醒，比如正常进入节点消息提醒，驳回进入消息提醒，转交是消息提醒
-	 * @param flowNode
-	 * @param stepType
-	 * @param flowAction
-	 * @return
-	 */
-	Long createNodeTrackAction(FlowNode flowNode, FlowStepType stepType, FlowAction flowAction);
-	
-	/**
-	 * 创建脚本定义。可以是前置脚本，后置脚本，等等。同时脚本可以阻止状态的跳转。
-	 * @param flowNode
-	 * @param stepType
-	 * @param step
-	 * @param flowAction
-	 * @return
-	 */
-	Long createNodeScriptAction(FlowNode flowNode, FlowStepType stepType, ActionStepType step, FlowAction flowAction);
-	
-	/**
-	 * 按钮点击消息提醒。消息提醒包括手机消息与短信消息
-	 * @param flowButton
-	 * @param flowAction
-	 * @return
-	 */
-	Long createButtonFireAction(FlowButton flowButton, FlowAction flowAction);
-	
-	/**
-	 * 下个节点处理人表单
-	 * @param flowButton
-	 * @return
-	 */
-	Long createButtonProcessorForm(FlowButton flowButton);
-	
-	/**
-	 * 为某一个 flowId 创建相应的节点。
-	 * @param flow
-	 * @param stepType
-	 * @param flowNode
-	 * @return
-	 */
-	Long createFlowNode(Flow flow, FlowStepType stepType, FlowNode flowNode);
-	
-	/**
-	 * 创建某一个 flow 下全新的 flow。flowName 是独一的。
-	 * @param moduleId
-	 * @param moduleType
-	 * @param ownerId
-	 * @param ownerType
-	 * @param flowName
-	 * @return
-	 */
-	Long createFlow(Long moduleId, FlowModuleType moduleType, Long ownerId, Long ownerType, String flowName);
 	
 	/**
 	 * 启用某一个业务模块下的工作流
@@ -420,6 +351,9 @@ public interface FlowService {
 	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long userId,
 			FlowUserType flowUserType);
 
+	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId,
+			FlowUserType flowUserType, boolean checkProcessor);
+	
 	/**
 	 * Subject 的详细信息
 	 * @param subjectId
@@ -439,6 +373,11 @@ public interface FlowService {
 	 * @param ft
 	 */
 	void processStepTimeout(FlowTimeout ft);
+
+	/**
+	 * Only for test
+	 */
+	void testFlowCase();
 	
 	//TODO 日志信息分类：
 	

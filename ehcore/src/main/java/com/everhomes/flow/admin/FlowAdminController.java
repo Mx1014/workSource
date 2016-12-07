@@ -364,11 +364,11 @@ public class FlowAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/flow/listFlowVariables</b>
-     * <p> 禁用节点中的某一个按钮应用 </p>
+     * <b>URL: /admin/flow/listVariables</b>
+     * <p> 显示某个位置的变量 </p>
      * @return
      */
-    @RequestMapping("listFlowVariables")
+    @RequestMapping("listVariables")
     @RestReturn(value=FlowVariableResponse.class)
     public RestResponse listFlowVariables(@Valid ListFlowVariablesCommand cmd) {
         RestResponse response = new RestResponse(flowService.listFlowVariables(cmd));

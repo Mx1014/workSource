@@ -12,7 +12,7 @@ public interface ParkingClearanceService {
     /**
      * 新增车辆放行的处理人员或申请人员
      */
-    ParkingClearanceOperatorDTO createClearanceOperator(CreateClearanceOperatorCommand cmd);
+    void createClearanceOperator(CreateClearanceOperatorCommand cmd);
 
     /**
      * 删除车辆放行的申请人员或处理人员
