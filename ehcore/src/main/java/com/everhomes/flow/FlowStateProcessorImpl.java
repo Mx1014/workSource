@@ -89,6 +89,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		FlowGraphStartEvent event = new FlowGraphStartEvent();
 		ctx.setCurrentEvent(event);
 		ctx.setOperator(logonUser);
+		flowService.createSnapshotSupervisors(ctx);
 		
 		flowListenerManager.onFlowCaseStart(ctx);
 		

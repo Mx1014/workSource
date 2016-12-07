@@ -105,7 +105,26 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
 		case TRANSFER_STEP:
-			//TODO processor changed, add a log
+			next = current;
+			ctx.setNextNode(next);
+			
+			log = new FlowEventLog();
+			log.setId(flowEventLogProvider.getNextId());
+			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());//get real version
+			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			if(ctx.getCurrentEvent() != null) {
+				log.setFlowButtonId(ctx.getCurrentEvent().getFiredButtonId());	
+			}
+			log.setFlowNodeId(next.getFlowNode().getId());
+			log.setParentId(0l);
+			log.setFlowCaseId(ctx.getFlowCase().getId());
+			log.setFlowUserId(cmd.getEntityId());
+			log.setStepCount(ctx.getFlowCase().getStepCount());
+			log.setLogType(FlowLogType.NODE_ENTER.getCode());
+			log.setLogTitle("");
+			ctx.getLogs().add(log);
+			
 			break;
 		case COMMENT_STEP:
 			next = current;
