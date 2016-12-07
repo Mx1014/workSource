@@ -1553,6 +1553,9 @@ public class FlowServiceImpl implements FlowService {
 		if(cmd.getNamespaceId() == null) {
 			cmd.setNamespaceId(UserContext.current().getNamespaceId());
 		}
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(0);
+		}
 		if(cmd.getModuleType() == null) {
 			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
 		}

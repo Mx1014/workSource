@@ -283,7 +283,7 @@ CREATE TABLE `eh_flow_variables` (
 
     `name` VARCHAR(64),
     `label` VARCHAR(64),
-    `var_type` VARCHAR(64) NOT NULL COMMENT 'text',
+    `var_type` VARCHAR(64) NOT NULL COMMENT 'text, node_user',
     `script_type` VARCHAR(64) NOT NULL COMMENT 'bean_id, prototype',
     `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
