@@ -41,6 +41,7 @@ import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionDTO;
 import com.everhomes.rest.flow.FlowActionInfo;
@@ -1661,6 +1662,11 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId, FlowUserType flowUserType) {
+		return getFlowCaseDetail(flowCaseId, inUserId, flowUserType, false);
+	}
+	
+	@Override
+	public FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId, FlowUserType flowUserType, boolean checkProcessor) {
 		Long userId = inUserId;
 		if(userId == null) {
 			userId = UserContext.current().getUser().getId();
@@ -1677,14 +1683,18 @@ public class FlowServiceImpl implements FlowService {
 		
 		List<FlowButtonDTO> btnDTOS = new ArrayList<>();
 		if(flowUserType == FlowUserType.PROCESSOR) {
-			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
-			buttons.stream().forEach((b)->{
-				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode()) 
-						&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode())) {
-					FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
-					btnDTOS.add(btnDTO);
-				}
-			});
+			
+			if(!checkProcessor || (null != flowEventLogProvider.isProcessor(userId, flowCase))) {
+				List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
+					buttons.stream().forEach((b)->{
+						if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode()) 
+								&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode())) {
+							FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
+							btnDTOS.add(btnDTO);
+						}
+					});
+			}
+			
 		} else if(flowUserType == FlowUserType.APPLIER) {
 			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
 			buttons.stream().forEach((b)->{
@@ -1815,6 +1825,17 @@ public class FlowServiceImpl implements FlowService {
 		// TODO Auto-generated method stub
 		return null;
 	}
+	
+	private void updateFlowUserName(FlowUserSelectionDTO dto) {
+		if(dto.getSelectionName() == null) {
+			FlowUserSelectionType selType = FlowUserSelectionType.fromCode(dto.getSelectType());
+			if(selType == FlowUserSelectionType.DEPARTMENT) {
+				//Users selection
+				UserInfo userInfo = userService.getUserSnapshotInfo(dto.getSourceIdA());
+				dto.setSelectionName(userInfo.getNickName());
+			}
+		}
+	}
 
 	@Override
 	public ListFlowUserSelectionResponse listButtonProcessorSelections(
@@ -1834,7 +1855,9 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowNode.getId(), FlowEntityType.FLOW_NODE.getCode(), cmd.getFlowUserType());
 		if(seles != null) {
 			seles.forEach((s) -> {
-				resp.getSelections().add(ConvertHelper.convert(s, FlowUserSelectionDTO.class));
+				FlowUserSelectionDTO dto = ConvertHelper.convert(s, FlowUserSelectionDTO.class);
+				updateFlowUserName(dto);
+				resp.getSelections().add(dto);
 			});
 		}
 		

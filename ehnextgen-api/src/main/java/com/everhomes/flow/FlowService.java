@@ -351,6 +351,9 @@ public interface FlowService {
 	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long userId,
 			FlowUserType flowUserType);
 
+	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId,
+			FlowUserType flowUserType, boolean checkProcessor);
+	
 	/**
 	 * Subject 的详细信息
 	 * @param subjectId

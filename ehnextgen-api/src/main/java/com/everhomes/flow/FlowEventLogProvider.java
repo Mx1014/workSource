@@ -35,4 +35,6 @@ public interface FlowEventLogProvider {
 
 	FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount, FlowStepType fromStep);
 
+	FlowEventLog isProcessor(Long userId, FlowCase flowCase);
+
 }
