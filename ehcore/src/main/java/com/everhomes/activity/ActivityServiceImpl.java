@@ -2265,24 +2265,38 @@ public class ActivityServiceImpl implements ActivityService {
         
         List<Long> communityIdList = new ArrayList<Long>();
         // 获取所管理的所有小区对应的社区论坛
-        if(organizationId != null) {
-            ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
-            command.setOrganizationId(organizationId);
-            List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
-            if(communities != null){
+//        if(organizationId != null) {
+//            ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
+//            command.setOrganizationId(organizationId);
+//            List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+//            if(communities != null){
+//                for (CommunityDTO communityDTO : communities) {
+//                    communityIdList.add(communityDTO.getId());
+//                    forumIds.add(communityDTO.getDefaultForumId());
+//                }
+//            }
+//        }
+//        // 办公地点所在园区对应的社区论坛
+//        if(communityId != null) {
+//            Community community = communityProvider.findCommunityById(communityId);
+//            communityIdList.add(community.getId());
+//            forumIds.add(community.getDefaultForumId());
+//        }
+
+        if(null == communityId){
+            List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
+            if(null != communities){
                 for (CommunityDTO communityDTO : communities) {
                     communityIdList.add(communityDTO.getId());
                     forumIds.add(communityDTO.getDefaultForumId());
                 }
             }
-        }
-        // 办公地点所在园区对应的社区论坛
-        if(communityId != null) {
+        }else{
             Community community = communityProvider.findCommunityById(communityId);
             communityIdList.add(community.getId());
             forumIds.add(community.getDefaultForumId());
         }
-        
+
         // 当论坛list为空时，JOOQ的IN语句会变成1=0，导致条件永远不成立，也就查不到东西
         if(forumIds.size() == 0) {
             LOGGER.error("Forum not found for offical activities, cmd={}", cmd);
@@ -2304,9 +2318,9 @@ public class ActivityServiceImpl implements ActivityService {
         
         // 可见性条件：如果有当前小区/园区，则加上小区条件；如果有对应的管理机构，则加上机构条件；这两个条件为或的关系；
         Condition communityCondition = null;
-        if(communityId != null) {
+        if(communityIdList != null) {
             communityCondition = Tables.EH_ACTIVITIES.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
-            communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.eq(communityId));
+            communityCondition = communityCondition.and(Tables.EH_ACTIVITIES.VISIBLE_REGION_ID.in(communityIdList));
         }
         Condition orgCondition = null;
         if(organizationId != null) {

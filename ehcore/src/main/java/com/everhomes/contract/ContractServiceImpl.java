@@ -25,6 +25,9 @@ import com.everhomes.appurl.AppUrlService;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.coordinator.NamedLock;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
@@ -74,6 +77,9 @@ public class ContractServiceImpl implements ContractService {
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 	
 	@Override
 	public ListContractsResponse listContracts(ListContractsCommand cmd) {
@@ -132,9 +138,13 @@ public class ContractServiceImpl implements ContractService {
     @Scheduled(cron="0 0 10 * * ?")
     @Override
     public void contractSchedule(){
-    	sendMessageToBackTwoMonthsOrganizations();
-    	sendMessageToBackOneMonthOrganizations();
-    	sendMessageToNewOrganizations();
+    	//使用tryEnter()防止分布式部署重复执行
+    	coordinationProvider.getNamedLock(CoordinationLocks.CONTRACT_SCHEDULE.getCode()).tryEnter(()->{
+    		sendMessageToBackTwoMonthsOrganizations();
+        	sendMessageToBackOneMonthOrganizations();
+        	sendMessageToNewOrganizations();
+    	});
+    	
     }
 
 	private void sendMessageToBackTwoMonthsOrganizations() {

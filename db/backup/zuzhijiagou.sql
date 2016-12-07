@@ -40,9 +40,6 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41100', 'Wifi热点', '40000', '/40000/41100', '0', '2', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41200', '一卡通', '40000', '/40000/43500', '0', '2', '2', '0', UTC_TIMESTAMP());
 
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41300', '场所预订', '40000', '/40000/41300', '0', '2', '2', '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41400', '服务预约', '40000', '/40000/41400', '0', '2', '2', '0', UTC_TIMESTAMP());
-
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('50000', '内部管理', '0', '/50000', '1', '1', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('50100', '组织架构', '50000', '/50000/50100', '1', '2', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('50200', '岗位管理', '50000', '/50000/50200', '1', '2', '2', '0', UTC_TIMESTAMP());
@@ -111,10 +108,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('48', '38000', '1', '10048', NULL, '0', UTC_TIMESTAMP());
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('49', '10850', '1', '10049', NULL, '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('50', '41300', '1', '10050', NULL, '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('51', '41400', '1', '10051', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('52', '10200', '1', '10052', NULL, '0', UTC_TIMESTAMP());
-
 
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1008', '10002', '10100', '论坛/公告', '1', '1', '论坛/公告 全部权限', '710');
@@ -153,8 +147,6 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1068', '10029', '40900', '车辆�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1069', '10030', '41000', '大堂门禁', '1', '1', '大堂门禁 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1070', '10031', '41100', 'Wifi热点', '1', '1', 'Wifi热点 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1071', '10032', '41200', '一卡通', '1', '1', '一卡通 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1072', '10050', '41300', '场所预订', '1', '1', '场所预订 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1073', '10051', '41400', '服务预约', '1', '1', '服务预约 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1074', '10052', '10200', '园区简介', '1', '1', '园区简介 全部权限', '710');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1084', '10034', '50100', '组织架构', '1', '1', '组织架构 全部权限', '710');
@@ -193,10 +185,14 @@ INSERT INTO `eh_web_menus` VALUES ('20120', '我的任务', '20100', null, 'my_t
 INSERT INTO `eh_web_menus` VALUES ('20130', '统计', '20100', null, 'statistics', '0', '2', '/20000/20100/20130', 'park', '215');
 INSERT INTO `eh_web_menus` VALUES ('20140', '任务列表', '20100', null, 'task_management_list', '0', '2', '/20000/20100/20140', 'park', '220');
 INSERT INTO `eh_web_menus` VALUES ('20150', '服务录入', '20100', null, 'task_management_service_entry', '0', '2', '/20000/20100/20150', 'park', '225');
-INSERT INTO `eh_web_menus` VALUES ('20160', '执行人员设置', '20100', null, 'executive_setting', '0', '2', '/20000/20100/20160', 'park', '230');
-INSERT INTO `eh_web_menus` VALUES ('20170', '服务类型设置', '20100', null, 'service_type_setting', '0', '2', '/20000/20100/20170', 'park', '235');
-INSERT INTO `eh_web_menus` VALUES ('20180', '分类设置', '20100', null, 'classify_setting', '0', '2', '/20000/20100/20180', 'park', '240');
-INSERT INTO `eh_web_menus` VALUES ('20190', '统计', '20100', null, 'task_statistics', '0', '2', '/20000/20100/20190', 'park', '245');
+INSERT INTO `eh_web_menus` VALUES ('20155', '设置', '20100', null, null, '0', '2', '/20000/20100/20155', 'park', '228');
+INSERT INTO `eh_web_menus` VALUES ('20160', '执行人员设置', '20155', null, 'executive_setting', '0', '2', '/20000/20100/20155/20160', 'park', '230');
+INSERT INTO `eh_web_menus` VALUES ('20170', '服务类型设置', '20155', null, 'service_type_setting', '0', '2', '/20000/20100/20155/20170', 'park', '235');
+INSERT INTO `eh_web_menus` VALUES ('20180', '分类设置', '20155', null, 'classify_setting', '0', '2', '/20000/20100/20155/20180', 'park', '240');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('20190', '统计', '20100', NULL, null, '0', '2', '/20000/20100/20190', 'park', '245');
+INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', null, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
+INSERT INTO `eh_web_menus` VALUES ('20192', '人员评分统计', '20190', null, 'staffScore_statistics', '0', '2', '/20000/20100/20190/20192', 'park', '181');
 
 INSERT INTO `eh_web_menus` VALUES ('20400', '物业缴费', '20000', null, null, '1', '2', '/20000/20400', 'park', '250');
 INSERT INTO `eh_web_menus` VALUES ('20410', '缴费记录', '20400', null, 'property_fee_record', '0', '2', '/20000/20400/20410', 'park', '252');
@@ -228,7 +224,7 @@ INSERT INTO `eh_web_menus` VALUES ('20840', '巡检项资料库管理', '20800',
 INSERT INTO `eh_web_menus` VALUES ('20841', '巡检项设置', '20840', null, 'equipment_inspection_inspection_item_list', '0', '2', '/20000/20800/20840/20841', 'park', '290');
 
 INSERT INTO `eh_web_menus` VALUES ('30000', '项目管理', '0', 'fa fa-building', null, '1', '2', '/30000', 'park', '300');
-INSERT INTO `eh_web_menus` VALUES ('30500', '项目信息', '30000', null, 'react:/project-classification/projects', '0', '2', '/30000/30500', 'park', '305');
+INSERT INTO `eh_web_menus` VALUES ('30500', '项目列表', '30000', null, 'react:/project-classification/projects', '0', '2', '/30000/30500', 'park', '305');
 INSERT INTO `eh_web_menus` VALUES ('31000', '楼栋管理', '30000', null, 'building_management', '0', '2', '/30000/31000', 'park', '310');
 INSERT INTO `eh_web_menus` VALUES ('32000', '门牌管理', '30000', null, 'apartment_statistics', '0', '2', '/30000/32000', 'park', '320');
 INSERT INTO `eh_web_menus` VALUES ('33000', '企业管理', '30000', null, 'enterprise_management', '0', '2', '/30000/33000', 'park', '330');
@@ -289,17 +285,6 @@ INSERT INTO `eh_web_menus` VALUES ('41200', '一卡通', '40000', null, null, '1
 INSERT INTO `eh_web_menus` VALUES ('41210', '开卡用户', '41200', null, 'card_user', '0', '2', '/40000/41200/41210', 'park', '487');
 INSERT INTO `eh_web_menus` VALUES ('41220', '充值记录', '41200', null, 'card_recharge_record', '0', '2', '/40000/41200/41220', 'park', '488');
 INSERT INTO `eh_web_menus` VALUES ('41230', '消费记录', '41200', null, 'card_purchase_record', '0', '2', '/40000/41200/41230', 'park', '489');
-
-INSERT INTO `eh_web_menus` VALUES ('41300', '场所预订', '40000', null, null, '1', '2', '/40000/41300', 'park', '490');
-INSERT INTO `eh_web_menus` VALUES ('41310', '通用设置', '41300', null, 'rental_setting', '0', '2', '/40000/41300/41310', 'park', '491');
-INSERT INTO `eh_web_menus` VALUES ('41320', '场所发布', '41300', null, 'rental_publish', '0', '2', '/40000/41300/41320', 'park', '492');
-INSERT INTO `eh_web_menus` VALUES ('41330', '预订详情', '41300', null, 'rental_detail', '0', '2', '/40000/41300/41330', 'park', '493');
-
-INSERT INTO `eh_web_menus` VALUES ('41400', '服务预约', '40000', null, null, '1', '2', '/40000/41400', 'park', '494');
-INSERT INTO `eh_web_menus` VALUES ('41410', '通用设置', '41400', null, 'service_setting', '0', '2', '/40000/41400/41410', 'park', '495');
-INSERT INTO `eh_web_menus` VALUES ('41420', '服务类型', '41400', null, 'service_type', '0', '2', '/40000/41400/41420', 'park', '496');
-INSERT INTO `eh_web_menus` VALUES ('41430', '预约详情', '41400', null, 'service_detail', '0', '2', '/40000/41400/41430', 'park', '497');
-INSERT INTO `eh_web_menus` VALUES ('41440', '数据统计', '41400', null, 'service_statistics', '0', '2', '/40000/41400/41440', 'park', '498');
 
 INSERT INTO `eh_web_menus` VALUES ('50000', '内部管理', '0', 'fa fa-group', null, '1', '2', '/50000', 'park', '505');
 
@@ -400,8 +385,6 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10048, '0', '业主管理 管理员', '业主管理 业务模块权限', NULL);
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10049, '0', '园区报 管理员', '园区报 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10050, '0', '场所预订 管理员', '场所预订 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10051, '0', '服务预约 管理员', '服务预约 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10052, '0', '园区简介 管理员', '园区简介 业务模块权限', NULL);
 
 delete from eh_web_menu_privileges;
@@ -417,17 +400,6 @@ SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM
 
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,now() FROM `eh_service_module_privileges` WHERE module_id in (select id from eh_service_modules where type = 1);
-
-
--- 添加 业务权限下面的子菜单
-SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-	
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
-(select t.* FROM eh_web_menus m
-JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
-ON m.id = t.menu_id
-) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges where privilege_id>=10000);
 
 
 -- 新增俱乐部菜单
@@ -505,12 +477,6 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10058', '10610', '白领活动', '1', '1', '白领活动 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
 	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10059', '10620', '白领活动', '1', '1', '白领活动 全部权限', '710');
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES ((@menu_scope_id := @menu_scope_id + 1), '10610', '', 'EhNamespaces', '999985', '2');
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-	VALUES ((@menu_scope_id := @menu_scope_id + 1), '10620', '', 'EhNamespaces', '999985', '2');
-
 
 --
 -- 能耗管理菜单   add by xq.tian  2016/11/29
@@ -562,3 +528,14 @@ VALUES ('49100', '能耗管理', '40000', '/40000/49100', '0', '2', '2', '0', UT
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ('68', '49100', '1', '422', NULL, '0', UTC_TIMESTAMP());
+
+
+-- 添加 业务权限下面的子菜单
+SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+	
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
+(select t.* FROM eh_web_menus m
+JOIN (SELECT * from eh_web_menu_privileges where privilege_id >= 10001 and privilege_id <= 10052 and privilege_id not in (10001, 10007, 10012, 10019, 10033, 10042)) t
+ON m.id = t.menu_id
+) tm join eh_web_menus mm on tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) where mm.id not in (SELECT menu_id from eh_web_menu_privileges where privilege_id>=10000);

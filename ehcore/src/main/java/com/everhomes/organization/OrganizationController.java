@@ -1,6 +1,20 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.IOException;
+import java.util.List;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+
+import com.everhomes.user.UserContext;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -16,16 +30,7 @@ import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
 import com.everhomes.util.RequireAuthentication;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
-import javax.validation.Valid;
-import java.util.List;
 
 @RestController
 @RequestMapping("/org")
@@ -795,17 +800,14 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/verifyEnterpriseContact</b>
      * <p>通过点击邮箱认证通过认证申请</p>
      * @return {@link String}
+     * @throws IOException 
      */
     @RequestMapping("verifyEnterpriseContact")
     @RestReturn(value=String.class)
     @RequireAuthentication(false)
-    public RestResponse verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd) {
-    	this.organizationService.verifyEnterpriseContact(cmd);
-    	 RestResponse res = new RestResponse();
-         res.setErrorCode(ErrorCodes.SUCCESS);
-         res.setErrorDescription("OK");
-         
-         return res;
+    public void verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd,HttpServletRequest request, HttpServletResponse response) throws IOException {
+    	String redirectUrl = this.organizationService.verifyEnterpriseContact(cmd);
+    	response.sendRedirect(redirectUrl);  
     }
     /**
      * <b>URL: /org/leaveForEnterpriseContact</b>

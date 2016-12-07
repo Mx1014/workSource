@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.entity.EntityType;
 import com.everhomes.rest.acl.ListServiceModulesCommand;
 import com.everhomes.rest.acl.ServiceModuleDTO;
 import com.everhomes.rest.serviceModule.ServiceModuleScopeApplyPolicy;
@@ -31,8 +32,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), 
-				cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
+		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, EntityType.NAMESPACE.getCode(), 
+				Long.valueOf(namespaceId), ServiceModuleScopeApplyPolicy.REVERT.getCode());
 		
 		List<ServiceModule> list = serviceModuleProvider.listServiceModule(cmd.getLevel(), ServiceModuleType.PARK.getCode());
 		if(scopes.size() != 0)
@@ -59,8 +60,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), 
-				cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
+		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, EntityType.NAMESPACE.getCode(), 
+				Long.valueOf(namespaceId), ServiceModuleScopeApplyPolicy.REVERT.getCode());
 		
 		List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
 		if(scopes.size() != 0)

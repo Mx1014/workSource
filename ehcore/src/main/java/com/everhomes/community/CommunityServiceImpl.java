@@ -1553,6 +1553,7 @@ public class CommunityServiceImpl implements CommunityService {
 		if(null != memberLogs){
 			for(OrganizationMemberLog log : memberLogs){
 				OrganizationMemberLogDTO logDTO = ConvertHelper.convert(log, OrganizationMemberLogDTO.class);
+				logDTO.setOperateTime(log.getOperateTime().getTime());
 				Organization org = this.organizationProvider.findOrganizationById(log.getOrganizationId());
 				if(null != org)
 					logDTO.setOrganizationName(org.getName());
