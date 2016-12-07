@@ -8036,6 +8036,10 @@ CREATE TABLE `eh_users` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `namespace_user_token` VARCHAR(2048) NOT NULL DEFAULT '',
   `namespace_user_type` VARCHAR(128) COMMENT 'the type of user',
+  `executive_tag` TINYINT DEFAULT 0 COMMENT '0-不是高管 1-是高管',
+  `position_tag` VARCHAR(128) COMMENT '职位',
+  `identity_number_tag` VARCHAR(20) COMMENT '身份证号',
+  
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid`(`uuid`),
   UNIQUE KEY `u_eh_user_account_name`(`account_name`),
