@@ -1955,6 +1955,15 @@ public class FlowServiceImpl implements FlowService {
         	vars.addAll(vars2);
         }
         
+        if(!fc.getNamespaceId().equals(0)) {
+        	vars2 = flowVariableProvider.findVariables(0
+        		, 0l, null, 0l, null, para);
+        	if(vars2 != null) {
+        		vars.addAll(vars2);
+        		} 	
+        }
+
+        
         for(FlowVariable fv : vars) {
 //			try {
 //				Class clz = Class.forName(flowScript.getScriptCls());
