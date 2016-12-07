@@ -14,6 +14,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowUserType;
 
 @Component
 public class ParkingFlowModuleListener implements FlowModuleListener {
@@ -68,7 +69,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase) {
+	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
@@ -101,6 +102,12 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void onFlowButtonFired(FlowCaseState ctx) {
+		// TODO Auto-generated method stub
+		
 	}
 
 }

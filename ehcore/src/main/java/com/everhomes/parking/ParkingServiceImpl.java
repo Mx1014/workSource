@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
 import org.apache.poi.ss.usermodel.Font;
@@ -29,16 +30,21 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.pmtask.PmTaskAttachment;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -49,6 +55,7 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.organization.VendorType;
+import com.everhomes.rest.parking.AttachmentDescriptor;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
@@ -56,6 +63,7 @@ import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
+import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
 import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
@@ -72,6 +80,8 @@ import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
 import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
 import com.everhomes.rest.parking.ListParkingWorkFlowsCommand;
 import com.everhomes.rest.parking.ParkingActivityDTO;
+import com.everhomes.rest.parking.ParkingAttachmentDTO;
+import com.everhomes.rest.parking.ParkingAttachmentType;
 import com.everhomes.rest.parking.ParkingCarSerieDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
@@ -96,6 +106,8 @@ import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
+import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
+import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -126,6 +138,10 @@ public class ParkingServiceImpl implements ParkingService {
 	private LocaleTemplateService localeTemplateService;
     @Autowired
     private CoordinationProvider coordinationProvider;
+    @Autowired
+    private DbProvider dbProvider;
+    @Autowired
+    private ContentServerService contentServerService;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -306,27 +322,45 @@ public class ParkingServiceImpl implements ParkingService {
     					"plateNumber is already applied.");
         	}
         }
-		
-		ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
-		
-		ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
-		parkingCardRequest.setOwnerId(cmd.getOwnerId());
-		parkingCardRequest.setOwnerType(cmd.getOwnerType());
-		parkingCardRequest.setParkingLotId(cmd.getParkingLotId());
-		parkingCardRequest.setRequestorEnterpriseId(cmd.getRequestorEnterpriseId());
-		parkingCardRequest.setPlateNumber(cmd.getPlateNumber());
-		parkingCardRequest.setPlateOwnerEntperiseName(cmd.getPlateOwnerEntperiseName());
-		parkingCardRequest.setPlateOwnerName(cmd.getPlateOwnerName());
-		parkingCardRequest.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
-		parkingCardRequest.setRequestorUid(user.getId());
-		//设置一些初始状态
-		parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
-		parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
-		parkingCardRequest.setCreatorUid(user.getId());
-		parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
-		
-		parkingProvider.requestParkingCard(parkingCardRequest);
-		
+        ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
+        ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
+        dbProvider.execute((TransactionStatus status) -> {
+    		
+    		parkingCardRequest.setOwnerId(cmd.getOwnerId());
+    		parkingCardRequest.setOwnerType(cmd.getOwnerType());
+    		parkingCardRequest.setParkingLotId(cmd.getParkingLotId());
+    		parkingCardRequest.setRequestorEnterpriseId(cmd.getRequestorEnterpriseId());
+    		parkingCardRequest.setPlateNumber(cmd.getPlateNumber());
+    		parkingCardRequest.setPlateOwnerEntperiseName(cmd.getPlateOwnerEntperiseName());
+    		parkingCardRequest.setPlateOwnerName(cmd.getPlateOwnerName());
+    		parkingCardRequest.setPlateOwnerPhone(cmd.getPlateOwnerPhone());
+    		parkingCardRequest.setRequestorUid(user.getId());
+    		//设置一些初始状态
+    		parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
+    		parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+    		parkingCardRequest.setCreatorUid(user.getId());
+    		parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
+    		
+    		parkingCardRequest.setCarBrand(cmd.getCarBrand());
+    		parkingCardRequest.setCarColor(cmd.getCarColor());
+    		parkingCardRequest.setCarSerieName(cmd.getCarSerieName());
+    		parkingCardRequest.setCarSerieId(cmd.getCarSerieId());
+    		if(null != cmd.getCarSerieId()) {
+    			ParkingCarSerie carSerie = parkingProvider.findParkingCarSerie(cmd.getCarSerieId());
+    			if(null != carSerie) {
+    				ParkingCarSerie carBrand = parkingProvider.findParkingCarSerie(carSerie.getParentId());
+    				parkingCardRequest.setCarSerieName(carSerie.getName());
+    				if(null != carBrand)
+    					parkingCardRequest.setCarBrand(carBrand.getName());
+    			}
+    		}
+    		
+    		parkingProvider.requestParkingCard(parkingCardRequest);
+    		
+    		addAttachments(cmd.getAttachments(), user.getId(), parkingCardRequest.getId(), ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
+
+    		return null;
+		});
 		parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
 		
 		Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(),
@@ -335,6 +369,60 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		return parkingCardRequestDTO;
     	
+	}
+    
+    public ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd) {
+    	
+    	ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
+    	
+    	ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
+    	
+    	List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(), 
+    			ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
+    	
+		List<ParkingAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
+			ParkingAttachmentDTO attachmentDto = ConvertHelper.convert(r, ParkingAttachmentDTO.class);
+			
+			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
+	                EntityType.USER.getCode(), r.getCreatorUid());
+			attachmentDto.setContentUrl(contentUrl);
+			attachmentDto.setInformationType(r.getDataType());
+			return attachmentDto;
+		}).collect(Collectors.toList());
+    	
+		dto.setAttachments(attachmentDtos);
+    	return dto;
+    }
+    
+    private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+    
+    private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String ownerType){
+		if(!CollectionUtils.isEmpty(list)){
+			for(AttachmentDescriptor ad: list){
+				if(null != ad){
+					ParkingAttachment attachment = new ParkingAttachment();
+					attachment.setContentType(ad.getContentType());
+					attachment.setContentUri(ad.getContentUri());
+					attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					attachment.setCreatorUid(userId);
+					attachment.setOwnerId(ownerId);
+					attachment.setOwnerType(ownerType);
+					attachment.setDataType(ad.getInformationType());
+					parkingProvider.createParkingAttachment(attachment);
+				}
+			}
+		}
 	}
     
 	@Override

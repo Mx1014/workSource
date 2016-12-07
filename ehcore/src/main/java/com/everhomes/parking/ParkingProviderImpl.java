@@ -24,6 +24,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.pmtask.PmTaskAttachment;
 import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingLotVendor;
@@ -32,6 +33,7 @@ import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhParkingActivitiesDao;
+import com.everhomes.server.schema.tables.daos.EhParkingAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhParkingCardRequestsDao;
 import com.everhomes.server.schema.tables.daos.EhParkingFlowDao;
 import com.everhomes.server.schema.tables.daos.EhParkingLotsDao;
@@ -39,7 +41,9 @@ import com.everhomes.server.schema.tables.daos.EhParkingRechargeOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhParkingRechargeRatesDao;
 import com.everhomes.server.schema.tables.daos.EhParkingStatisticsDao;
 import com.everhomes.server.schema.tables.daos.EhParkingVendorsDao;
+import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhParkingActivities;
+import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
 import com.everhomes.server.schema.tables.pojos.EhParkingCardRequests;
 import com.everhomes.server.schema.tables.pojos.EhParkingFlow;
@@ -48,8 +52,9 @@ import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
-import com.everhomes.server.schema.tables.pojos.EhPmTasks;
+import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
 import com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord;
+import com.everhomes.server.schema.tables.records.EhParkingAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCarSeriesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingFlowRecord;
@@ -57,6 +62,7 @@ import com.everhomes.server.schema.tables.records.EhParkingLotsRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhParkingRechargeRatesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingStatisticsRecord;
+import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
@@ -471,8 +477,10 @@ public class ParkingProviderImpl implements ParkingProvider {
 	
 	@Override
     public ParkingCardRequest findParkingCardRequestById(Long id) {
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
         EhParkingCardRequestsDao dao = new EhParkingCardRequestsDao(context.configuration());
+        
         return ConvertHelper.convert(dao.fetchOneById(id), ParkingCardRequest.class);
     }
 	
@@ -691,5 +699,40 @@ public class ParkingProviderImpl implements ParkingProvider {
                     return true;
                 });
 		return count[0];
+	}
+	
+	@Override
+    public ParkingCarSerie findParkingCarSerie(Long id) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarSeries.class));
+		 
+		EhParkingStatisticsDao dao = new EhParkingStatisticsDao(context.configuration());
+		
+		return ConvertHelper.convert(dao.findById(id), ParkingCarSerie.class);
+    }
+	
+	@Override
+	public void createParkingAttachment(ParkingAttachment parkingAttachment){
+    	long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhParkingAttachments.class));
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+    	EhParkingAttachmentsDao dao = new EhParkingAttachmentsDao(context.configuration());
+    	parkingAttachment.setId(id);
+    	dao.insert(parkingAttachment);
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhParkingAttachments.class, null);
+    }
+	
+	@Override
+	public List<ParkingAttachment> listParkingAttachments(Long ownerId, String ownerType){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingAttachments.class));
+        
+        SelectQuery<EhParkingAttachmentsRecord> query = context.selectQuery(Tables.EH_PARKING_ATTACHMENTS);
+        
+        query.addConditions(Tables.EH_PARKING_ATTACHMENTS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_PARKING_ATTACHMENTS.OWNER_TYPE.eq(ownerType));
+        
+        List<ParkingAttachment> result = query.fetch().map(r -> ConvertHelper.convert(r, ParkingAttachment.class));
+        
+        return result;
 	}
 }

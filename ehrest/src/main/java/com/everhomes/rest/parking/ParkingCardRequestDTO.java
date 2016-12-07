@@ -52,8 +52,8 @@ public class ParkingCardRequestDTO {
     private String carBrand;
     private String carSerieName;
     private String carColor;
-    @ItemType(AttachmentDescriptor.class)
-    private List<AttachmentDescriptor> attachments;
+    @ItemType(ParkingAttachmentDTO.class)
+    private List<ParkingAttachmentDTO> attachments;
     
     public ParkingCardRequestDTO() {
     }
@@ -210,11 +210,11 @@ public class ParkingCardRequestDTO {
 		this.carColor = carColor;
 	}
 
-	public List<AttachmentDescriptor> getAttachments() {
+	public List<ParkingAttachmentDTO> getAttachments() {
 		return attachments;
 	}
 
-	public void setAttachments(List<AttachmentDescriptor> attachments) {
+	public void setAttachments(List<ParkingAttachmentDTO> attachments) {
 		this.attachments = attachments;
 	}
 

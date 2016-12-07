@@ -83,4 +83,11 @@ public interface ParkingProvider {
     List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp dateStr);
     
     BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId);
+    
+    ParkingCarSerie findParkingCarSerie(Long id);
+    
+    void createParkingAttachment(ParkingAttachment parkingAttachment);
+    
+    List<ParkingAttachment> listParkingAttachments(Long ownerId, String ownerType);
+    
 }

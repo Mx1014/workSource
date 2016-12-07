@@ -14,6 +14,7 @@ import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
+import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
 import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -98,4 +99,6 @@ public interface ParkingService {
     void listParkingWorkFlows(ListParkingWorkFlowsCommand cmd);
     
     void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd);
+    
+    ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd);
 }
