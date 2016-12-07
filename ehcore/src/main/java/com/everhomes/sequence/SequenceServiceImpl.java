@@ -1090,7 +1090,6 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.max()).from(Tables.EH_PM_TASK_TARGET_STATISTICS).fetchOne().value1();
         });
         
-<<<<<<< HEAD
         syncTableSequence(null, EhContracts.class, Tables.EH_CONTRACTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_CONTRACTS.ID.max()).from(Tables.EH_CONTRACTS).fetchOne().value1();
         });
