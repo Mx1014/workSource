@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -43,7 +44,7 @@ public interface ParkingProvider {
     
     List<ParkingCardRequest> searchParkingCardRequests(String ownerType,Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
-    		Timestamp endDate, Byte status, Long pageAnchor, Integer pageSize);
+    		Timestamp endDate, Byte status, String carBrand, String carSerieName, Long pageAnchor, Integer pageSize);
     
     void setParkingLotConfig(ParkingLot parkingLot);
     
@@ -80,4 +81,6 @@ public interface ParkingProvider {
     void createParkingStatistic(ParkingStatistic parkingStatistic);
     
     List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp dateStr);
+    
+    BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId);
 }

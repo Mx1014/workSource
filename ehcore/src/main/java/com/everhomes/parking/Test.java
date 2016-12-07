@@ -35,8 +35,8 @@ public class Test {
 	
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
-		param.put("carType", "2");
-		String json = Test.post(param, GET_CARd_RULE);
+		param.put("plateNo", "AJQ001");
+		String json = Test.post(param, GET_CARD);
         System.out.println(json);
 		
 	}
@@ -50,7 +50,7 @@ public class Test {
 		StringBuilder result = new StringBuilder();
 		
         String key = "F7A0B971B199FD2A1017CEC5";
-        String iv = "20161013";
+        String iv = "20161207";
         String user = "ktapi";
         String pwd = "0306A9";
         String data = null;

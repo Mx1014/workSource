@@ -10,7 +10,7 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingCardRequestStatus {
-    INACTIVE((byte)0), QUEUEING((byte)1), NOTIFIED((byte)2), ISSUED((byte)3);
+	INACTIVE((byte)0), QUEUEING((byte)1), NOTIFIED((byte)2), ISSUED((byte)3);
     
     private byte code;
     

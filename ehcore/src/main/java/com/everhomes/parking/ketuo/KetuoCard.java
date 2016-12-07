@@ -6,6 +6,8 @@ public class KetuoCard {
 	private String carType;
 	private String validFrom;
 	private String validTo;
+	private Integer freeMoney;
+	private Integer isAllow;
 	
 	public Integer getCardId() {
 		return cardId;
@@ -36,6 +38,18 @@ public class KetuoCard {
 	}
 	public void setValidTo(String validTo) {
 		this.validTo = validTo;
+	}
+	public Integer getFreeMoney() {
+		return freeMoney;
+	}
+	public void setFreeMoney(Integer freeMoney) {
+		this.freeMoney = freeMoney;
+	}
+	public Integer getIsAllow() {
+		return isAllow;
+	}
+	public void setIsAllow(Integer isAllow) {
+		this.isAllow = isAllow;
 	}
 	
 	

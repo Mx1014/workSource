@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.parking;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -47,6 +48,7 @@ import com.everhomes.server.schema.tables.pojos.EhParkingRechargeOrders;
 import com.everhomes.server.schema.tables.pojos.EhParkingRechargeRates;
 import com.everhomes.server.schema.tables.pojos.EhParkingStatistics;
 import com.everhomes.server.schema.tables.pojos.EhParkingVendors;
+import com.everhomes.server.schema.tables.pojos.EhPmTasks;
 import com.everhomes.server.schema.tables.records.EhParkingActivitiesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCarSeriesRecord;
 import com.everhomes.server.schema.tables.records.EhParkingCardRequestsRecord;
@@ -419,18 +421,18 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte status, Long pageAnchor, Integer pageSize){
+    		Byte status, String carBrand, String carSerieName, Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
-        if (pageAnchor != null && pageAnchor != 0)
+        if (null != pageAnchor && pageAnchor != 0)
 			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
-        if(ownerId != null)
+        if(null != ownerId)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
-        if(parkingLotId != null)
+        if(null != parkingLotId)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
         if(StringUtils.isNotBlank(plateNumber))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
@@ -438,16 +440,19 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_NAME.eq(plateOwnerName));
         if(StringUtils.isNotBlank(plateOwnerPhone))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
-        if(status != null)
+        if(StringUtils.isNotBlank(carBrand))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CAR_BRAND.eq(carBrand));
+        if(StringUtils.isNotBlank(carSerieName))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CAR_SERIE_NAME.eq(carSerieName));
+        if(null != status)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status));
-        if(startDate != null){
+        if(null != startDate)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.ge(startDate));
-        }
-        if(endDate != null)
+        if(null != endDate)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
 
         query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.desc());
-        if(pageSize != null)
+        if(null != pageSize)
         	query.addLimit(pageSize);
         
         List<ParkingCardRequest> resultList = query.fetch().map(r -> ConvertHelper.convert(r, ParkingCardRequest.class));
@@ -666,5 +671,25 @@ public class ParkingProviderImpl implements ParkingProvider {
 	    	query.addConditions(Tables.EH_PARKING_STATISTICS.DATE_STR.eq(dateStr));
 
 	    return query.fetch().map(r -> ConvertHelper.convert(r, ParkingStatistic.class));
+	}
+	
+	@Override
+	public BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId) {
+        //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        final BigDecimal[] count = new BigDecimal[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingStatistics.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                	
+                	SelectJoinStep<Record1<BigDecimal>> query = context.select(Tables.EH_PARKING_STATISTICS.AMOUNT.sum()).from(Tables.EH_PARKING_STATISTICS);
+                	
+                	Condition condition = Tables.EH_PARKING_STATISTICS.OWNER_TYPE.equal(ownerType);
+                	condition = Tables.EH_PARKING_STATISTICS.OWNER_ID.equal(ownerId);
+                	if(null != parkingLotId)
+                    	condition = condition.and(Tables.EH_PARKING_STATISTICS.PARKING_LOT_ID.eq(parkingLotId));
+
+                    count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
+                    return true;
+                });
+		return count[0];
 	}
 }

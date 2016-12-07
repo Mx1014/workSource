@@ -195,6 +195,10 @@ public class ParkingServiceImpl implements ParkingService {
     	
     	List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
     		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
+    		
+    		BigDecimal amount = parkingProvider.countParkingStatistics(r.getOwnerType(), r.getOwnerId(), r.getId());
+    		
+    		dto.setTotalAmount(amount);
     		return dto;
     	}).collect(Collectors.toList());
     	
@@ -467,14 +471,15 @@ public class ParkingServiceImpl implements ParkingService {
 
 		List<ParkingRechargeOrder> list = parkingProvider.listParkingRechargeOrders(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), cmd.getPlateNumber(), user.getId(), cmd.getPageAnchor(), cmd.getPageSize());
-    					
-    	if(list.size() > 0){
+
+		int size = list.size();
+    	if(size > 0){
     		response.setOrders(list.stream().map(r -> ConvertHelper.convert(r, ParkingRechargeOrderDTO.class))
     				.collect(Collectors.toList()));
-    		if(list.size() != cmd.getPageSize()){
+    		if(size != cmd.getPageSize()){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getRechargeTime().getTime());
+        		response.setNextPageAnchor(list.get(size-1).getRechargeTime().getTime());
         	}
     	}
     	
@@ -535,25 +540,27 @@ public class ParkingServiceImpl implements ParkingService {
 		ListParkingCardRequestResponse response = new ListParkingCardRequestResponse();
 		Timestamp startDate = null;
 		Timestamp endDate = null;
-		if(cmd.getStartDate() != null)
+		if(null != cmd.getStartDate())
 			startDate = new Timestamp(cmd.getStartDate());
-		if(cmd.getEndDate() != null)
+		if(null != cmd.getEndDate())
 			endDate = new Timestamp(cmd.getEndDate());
 		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		
     	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
-    			cmd.getPlateOwnerPhone(), startDate, endDate, 
-    			cmd.getStatus(),cmd.getPageAnchor(), pageSize);
-    	if(list.size() > 0){
+    			cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(), 
+    			cmd.getCarSerieName(), cmd.getPageAnchor(), pageSize);
+    	
+    	int size = list.size();
+    	if(size > 0){
     		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
     				.collect(Collectors.toList()));
-    		if( pageSize != null && list.size() != pageSize){
+    		if(size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
-        		response.setNextPageAnchor(list.get(list.size()-1).getCreateTime().getTime());
+        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
         	}
     	}
-    	
     	return response;
 	}
 

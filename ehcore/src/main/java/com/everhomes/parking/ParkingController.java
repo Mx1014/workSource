@@ -249,9 +249,8 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("searchParkingCardRequests")
     @RestReturn(value=ListParkingCardRequestResponse.class)
     public RestResponse searchParkingCardRequests(SearchParkingCardRequestsCommand cmd) {
-        ListParkingCardRequestResponse cmdResponse = null;
-        //TODO:
-        cmdResponse = parkingService.searchParkingCardRequests(cmd);
+        
+        ListParkingCardRequestResponse cmdResponse = parkingService.searchParkingCardRequests(cmd);
         RestResponse response = new RestResponse(cmdResponse);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

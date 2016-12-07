@@ -5,12 +5,16 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>informationType: 资料类型 {@link com.everhomes.rest.parking.ParkingCardRequestStatus}</li>
  * <li>contentType: 附件类型，{@link com.everhomes.rest.parking.ParkingContentType}</li>
  * <li>contentUri: 附件访问URI</li>
  * <li>contentUrl: 附件访问URL</li>
  * </ul>
  */
 public class AttachmentDescriptor {
+	
+	private Byte informationType;
+	
     private String contentType;
     
     private String contentUri;
@@ -35,8 +39,6 @@ public class AttachmentDescriptor {
     public void setContentUri(String contentUri) {
         this.contentUri = contentUri;
     }
-    
-    
 
     public String getContentUrl() {
 		return contentUrl;
@@ -44,6 +46,14 @@ public class AttachmentDescriptor {
 
 	public void setContentUrl(String contentUrl) {
 		this.contentUrl = contentUrl;
+	}
+
+	public Byte getInformationType() {
+		return informationType;
+	}
+
+	public void setInformationType(Byte informationType) {
+		this.informationType = informationType;
 	}
 
 	@Override

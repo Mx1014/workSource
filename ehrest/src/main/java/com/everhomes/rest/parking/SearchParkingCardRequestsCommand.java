@@ -12,6 +12,10 @@ import com.everhomes.util.StringHelper;
  * <li>plateOwnerName: 车主名称</li>
  * <li>plateOwnerPhone: 车主手机号</li>
  * <li>status: 申请状态，{@link com.everhomes.rest.parking.ParkingCardRequestStatus}</li>
+ * <li>startDate: 开始时间</li>
+ * <li>endDate: 结束时间</li>
+ * <li>carBrand: 车品牌</li>
+ * <li>carSerieName: 车系</li>
  * <li>pageAnchor: 本页开始的锚点</li>
  * <li>pageSize: 每页的数量</li>
  * </ul>
@@ -123,7 +127,23 @@ public class SearchParkingCardRequestsCommand {
         this.pageSize = pageSize;
     }
 
-    @Override
+    public String getCarBrand() {
+		return carBrand;
+	}
+
+	public void setCarBrand(String carBrand) {
+		this.carBrand = carBrand;
+	}
+
+	public String getCarSerieName() {
+		return carSerieName;
+	}
+
+	public void setCarSerieName(String carSerieName) {
+		this.carSerieName = carSerieName;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

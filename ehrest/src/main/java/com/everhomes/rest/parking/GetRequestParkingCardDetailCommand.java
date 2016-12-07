@@ -13,6 +13,7 @@ public class GetRequestParkingCardDetailCommand {
     private Long parkingLotId;
 	@NotNull
 	private Long id;
+	
 	public String getOwnerType() {
 		return ownerType;
 	}

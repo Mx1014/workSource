@@ -1,7 +1,5 @@
 package com.everhomes.rest.parking;
 
-import java.math.BigDecimal;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -17,6 +15,8 @@ import com.everhomes.util.StringHelper;
  * <li>cardNumber: 卡号</li>
  * <li>startTime: 开始时间</li>
  * <li>endTime: 到期时间</li>
+ * <li>freeAmount: 免费金额</li>
+ * <li>isSupportOnlinePaid: 是否支持线上支付</li>
  * </ul>
  */
 public class ParkingCardDTO {
@@ -35,8 +35,8 @@ public class ParkingCardDTO {
 	private Long endTime;
 	private Boolean isValid;
 	
-    private BigDecimal freeAmount;
-    private BigDecimal isSupportOnlinePaid;
+    private String freeAmount;
+    private Boolean isSupportOnlinePaid;
 	
 	public ParkingCardDTO() {
 	    
@@ -158,4 +158,21 @@ public class ParkingCardDTO {
 	public void setCardTypeId(String cardTypeId) {
 		this.cardTypeId = cardTypeId;
 	}
+
+	public String getFreeAmount() {
+		return freeAmount;
+	}
+
+	public void setFreeAmount(String freeAmount) {
+		this.freeAmount = freeAmount;
+	}
+
+	public Boolean getIsSupportOnlinePaid() {
+		return isSupportOnlinePaid;
+	}
+
+	public void setIsSupportOnlinePaid(Boolean isSupportOnlinePaid) {
+		this.isSupportOnlinePaid = isSupportOnlinePaid;
+	}
+
 }
