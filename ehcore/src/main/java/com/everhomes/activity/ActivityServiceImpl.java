@@ -2935,6 +2935,7 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public void createActivityAttachment(CreateActivityAttachmentCommand cmd) {
         ActivityAttachment attachment = ConvertHelper.convert(cmd, ActivityAttachment.class);
+        attachment.setCreatorUid(UserContext.current().getUser().getId());
         activityProvider.createActivityAttachment(attachment);
     }
 
@@ -2962,8 +2963,8 @@ public class ActivityServiceImpl implements ActivityService {
 
             List<ActivityAttachmentDTO> dtos = attachments.stream().map((r) -> {
                 ActivityAttachmentDTO dto = ConvertHelper.convert(r, ActivityAttachmentDTO.class);
-
-//                String contentUrl =
+                String contentUrl = contentServerService.parserUri(dto.getContentUri(), EntityType.ACTIVITY.getCode(), dto.getActivityId());
+                dto.setContentUrl(contentUrl);
                 return dto;
             }).collect(Collectors.toList());
             response.setAttachments(dtos);
@@ -3003,9 +3004,9 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         goods.setName(cmd.getName());
-//        goods.setPrice(cmd.getPrice());
-//        goods.setQuantity(cmd.getQuantity());
-//        goods.setTotalPrice(cmd.getTotalPrice());
+        goods.setPrice(cmd.getPrice());
+        goods.setQuantity(cmd.getQuantity());
+        goods.setTotalPrice(cmd.getTotalPrice());
         goods.setHandlers(cmd.getHandlers());
 
         activityProvider.updateActivityGoods(goods);

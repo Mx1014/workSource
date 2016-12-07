@@ -1,4 +1,5 @@
 ALTER TABLE eh_activities ADD COLUMN `achievement` text;
+ALTER TABLE eh_activities ADD COLUMN `achievement_type` VARCHAR(32) COMMENT 'richtext, link';
 
 -- 活动附件表
 DROP TABLE IF EXISTS  `eh_activity_attachments`;
