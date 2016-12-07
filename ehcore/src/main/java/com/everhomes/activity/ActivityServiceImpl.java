@@ -2913,6 +2913,7 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         activity.setAchievement(cmd.getAchievement());
+        activity.setAchievementType(cmd.getAchievementType());
         activityProvider.updateActivity(activity);
     }
 
@@ -2926,9 +2927,11 @@ public class ActivityServiceImpl implements ActivityService {
         }
 
         String achievement = activity.getAchievement();
+        String achievementType = activity.getAchievementType();
 
         GetActivityAchievementResponse response = new GetActivityAchievementResponse();
         response.setAchievement(achievement);
+        response.setAchievementType(achievementType);
         return response;
     }
 

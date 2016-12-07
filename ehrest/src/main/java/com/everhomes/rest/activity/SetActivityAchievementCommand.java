@@ -6,7 +6,8 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *     <li>activityId: 活动id</li>
- *     <li>achievement: 活动成果富文本</li>
+ *     <li>achievement: 活动成果内容</li>
+ *     <li>achievementType: 活动成果文本类型 richtext：富文本, link：第三方链接</li>
  * </ul>
  */
 public class SetActivityAchievementCommand {
@@ -14,6 +15,8 @@ public class SetActivityAchievementCommand {
     private Long activityId;
 
     private String achievement;
+
+    private String achievementType;
 
     public Long getActivityId() {
         return activityId;
@@ -29,6 +32,14 @@ public class SetActivityAchievementCommand {
 
     public void setAchievement(String achievement) {
         this.achievement = achievement;
+    }
+
+    public String getAchievementType() {
+        return achievementType;
+    }
+
+    public void setAchievementType(String achievementType) {
+        this.achievementType = achievementType;
     }
 
     @Override
