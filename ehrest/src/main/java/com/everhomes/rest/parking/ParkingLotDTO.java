@@ -34,6 +34,8 @@ public class ParkingLotDTO {
     
     private BigDecimal totalAmount;
     
+    private Integer flowId;
+    
     public ParkingLotDTO() {
     }
 
@@ -145,4 +147,12 @@ public class ParkingLotDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Integer flowId) {
+		this.flowId = flowId;
+	}
 }
