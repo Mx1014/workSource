@@ -1,10 +1,10 @@
 package com.everhomes.rest.flow;
 
-public enum FLowUserSourceType {
-	SOURCE_USER("source_user"), SOURCE_DEPARTMENT("source_department"), SOURCE_POSITION("source_position");
+public enum FlowVariableType {
+	TEXT("text"), NODE_USER("node_user");
 	
 	private String code;
-    private FLowUserSourceType(String code) {
+    private FlowVariableType(String code) {
         this.code = code;
     }
     
@@ -12,12 +12,12 @@ public enum FLowUserSourceType {
         return this.code;
     }
     
-    public static FLowUserSourceType fromCode(String code) {
+    public static FlowVariableType fromCode(String code) {
     	if(code == null) {
     		return null;
     	}
     	
-    	for(FLowUserSourceType t : FLowUserSourceType.values()) {
+    	for(FlowVariableType t : FlowVariableType.values()) {
     		if(code.equalsIgnoreCase(t.getCode())) {
     			return t;
     		}

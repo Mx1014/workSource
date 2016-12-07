@@ -1,6 +1,7 @@
 package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
+
 import java.util.List;
 import java.sql.Timestamp;
 
@@ -19,6 +20,7 @@ import com.everhomes.discover.ItemType;
  * <li>status: @{link com.everhomes.rest.flow.FlowCaseStatus} </li>
  * <li>isEvaluate: 0: 不需要评价， 1:待评价，2: 已评价</li>
  * <li>evaluate_score: 评价分数</li>
+ * <li>allowApplierUpdate: 是否可以编辑</li>
  * </ul>
  * @author janson
  *
@@ -47,6 +49,7 @@ public class FlowCaseDTO {
     private Byte isEvaluate;
     private Integer evaluateScore;
     private Long lastStepTime;
+    private Byte allowApplierUpdate;
     
     public Long getApplyUserId() {
 		return applyUserId;
@@ -272,6 +275,16 @@ public class FlowCaseDTO {
 
 	public void setLastStepTime(Long lastStepTime) {
 		this.lastStepTime = lastStepTime;
+	}
+
+
+	public Byte getAllowApplierUpdate() {
+		return allowApplierUpdate;
+	}
+
+
+	public void setAllowApplierUpdate(Byte allowApplierUpdate) {
+		this.allowApplierUpdate = allowApplierUpdate;
 	}
 
 

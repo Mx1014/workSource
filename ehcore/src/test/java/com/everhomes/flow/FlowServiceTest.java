@@ -21,7 +21,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.FLowUserSourceType;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStepType;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
@@ -37,11 +37,15 @@ import com.everhomes.rest.flow.FlowScriptType;
 import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.FlowVariableType;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
@@ -56,6 +60,8 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.base.LoginAuthTestCase;
 
 public class FlowServiceTest extends LoginAuthTestCase {
@@ -508,5 +514,25 @@ public class FlowServiceTest extends LoginAuthTestCase {
     public void testVariables() {
 //    	String renderText = "abc${pa1}.${pa2}asdf";
 //    	flowService.getAllParams(renderText);
+    	setTestContext(1035l);
+    	
+    	ListFlowVariablesCommand cmd = new ListFlowVariablesCommand();
+    	cmd.setFlowVariableType(FlowVariableType.TEXT.getCode());
+    	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
+    	Assert.assertTrue(resp.getDtos().size() == 4);
+    }
+    
+    private void setTestContext(Long userId) {
+    	User user = userProvider.findUserById(userId);
+    	UserContext.current().setUser(user);;
+    }
+    
+    @Test
+    public void testSubject() {
+    	setTestContext(1035l);
+    	
+    	Long subjectId = 11l;
+    	FlowSubjectDTO dto = flowService.getSubectById(subjectId);
+    	Assert.assertTrue(dto != null && dto.getImages().size() > 0);
     }
 }

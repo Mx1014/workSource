@@ -43,7 +43,7 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
                 "You have a message"));
                 
         deviceMessage.setAlertType(DeviceMessageType.SIMPLE.getCode());
-        deviceMessage.setTitle("左邻App");
+        deviceMessage.setTitle("左邻App");//TODO
         
         deviceMessage.setBadge(new Integer((int)messagingService.getMessageCountInLoginMessageBox(destLogin)));
         

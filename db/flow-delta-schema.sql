@@ -68,6 +68,7 @@ CREATE TABLE `eh_flow_nodes` (
     `auto_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, EndStep',
     `allow_applier_update` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow applier update content',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
+    `params` VARCHAR(64) COMMENT 'the params from other module',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
 
     PRIMARY KEY (`id`)
@@ -281,8 +282,11 @@ CREATE TABLE `eh_flow_variables` (
     `module_type` VARCHAR(64) NOT NULL,
 
     `name` VARCHAR(64),
-    `script_type` VARCHAR(64) NOT NULL COMMENT 'flow_inner, java_prototype',
+    `label` VARCHAR(64),
+    `var_type` VARCHAR(64) NOT NULL COMMENT 'text, node_user',
+    `script_type` VARCHAR(64) NOT NULL COMMENT 'bean_id, prototype',
     `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
+    `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -320,7 +324,7 @@ CREATE TABLE `eh_flow_scripts` (
     `module_type` VARCHAR(64) NOT NULL,
 
     `name` VARCHAR(64) NOT NULL,
-    `script_type` VARCHAR(64) NOT NULL COMMENT 'java_prototype',
+    `script_type` VARCHAR(64) NOT NULL COMMENT 'bean_id, prototype',
     `script_cls` VARCHAR(1024) NOT NULL COMMENT 'the class prototype in java',
     `flow_step_type` VARCHAR(64) COMMENT 'no_step, start_step, approve_step, reject_step, transfer_step, comment_step, end_step, notify_step',
     `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
@@ -352,6 +356,20 @@ CREATE TABLE `eh_flow_attachments` (
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT NOT NULL,
   `create_time` DATETIME NOT NULL,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_flow_timeouts`;
+CREATE TABLE `eh_flow_timeouts` (
+    `id` BIGINT NOT NULL COMMENT 'id of the record',
+    `belong_to` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other flow object id',
+    `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow, flow_node, flow_button, flow_action',
+    `timeout_type` VARCHAR(64) NOT NULL COMMENT 'flow_step_timeout',
+    `timeout_tick` DATETIME NOT NULL,
+    `json` TEXT,
+    `create_time` DATETIME NOT NULL,
+    `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

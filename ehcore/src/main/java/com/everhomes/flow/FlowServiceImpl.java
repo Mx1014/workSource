@@ -6,6 +6,7 @@ import java.util.Arrays;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -21,9 +22,11 @@ import org.springframework.transaction.support.TransactionCallback;
 import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 
 import com.everhomes.aclink.AclinkConstant;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
@@ -37,7 +40,8 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FLowUserSourceType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionDTO;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStatus;
@@ -75,9 +79,12 @@ import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.FlowVariableDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.FlowVariableType;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
@@ -97,7 +104,9 @@ import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -164,6 +173,9 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Autowired
 	private FlowListenerManager flowListenerManager;
+	
+	@Autowired
+	private FlowVariableProvider flowVariableProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -792,7 +804,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowNodeDTO updateFlowNodeName(UpdateFlowNodeCommand cmd) {
+	public FlowNodeDTO updateFlowNode(UpdateFlowNodeCommand cmd) {
 		Flow flow = getFlowByEntity(cmd.getFlowNodeId(), FlowEntityType.FLOW_NODE);
 		flowMarkUpdated(flow);
 		
@@ -802,6 +814,7 @@ public class FlowServiceImpl implements FlowService {
 		flowNode.setAutoStepMinute(cmd.getAutoStepMinute());
 		flowNode.setAutoStepType(cmd.getAutoStepType());
 		flowNode.setAllowApplierUpdate(cmd.getAllowApplierUpdate());
+		flowNode.setParams(cmd.getParams());
 		flowNodeProvider.updateFlowNode(flowNode);
 		
 		return ConvertHelper.convert(flowNode, FlowNodeDTO.class);
@@ -1018,60 +1031,6 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return dto;
-	}
-	
-	@Override
-	public Long createNodeEnterAction(FlowNode flowNode, FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeWatchdogAction(FlowNode flowNode,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeTrackAction(FlowNode flowNode, FlowStepType stepType,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createNodeScriptAction(FlowNode flowNode,
-			FlowStepType stepType, ActionStepType step, FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createButtonFireAction(FlowButton flowButton,
-			FlowAction flowAction) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createButtonProcessorForm(FlowButton flowButton) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createFlowNode(Flow flow, FlowStepType stepType,
-			FlowNode flowNode) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Long createFlow(Long moduleId, FlowModuleType moduleType,
-			Long ownerId, Long ownerType, String flowName) {
-		// TODO Auto-generated method stub
-		return null;
 	}
 
 	@Override
@@ -1470,6 +1429,14 @@ public class FlowServiceImpl implements FlowService {
 		FlowButton btn = flowButtonProvider.getFlowButtonById(cmd.getButtonId());
 		return ConvertHelper.convert(btn, FlowButtonDTO.class);
 	}
+	
+	@Override
+    public void processStepTimeout(FlowTimeout ft) {
+		FlowCaseState ctx = flowStateProcessor.prepareStepTimeout(ft);
+		if(ctx != null) {
+			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
+		}
+    }
 
 	@Override
 	public void disableFlow(Long flowId) {
@@ -1583,8 +1550,68 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.current().getNamespaceId());
+		}
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(0);
+		}
+		if(cmd.getModuleType() == null) {
+			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		}
+		if(cmd.getOwnerId() == null) {
+			cmd.setOwnerId(0l);
+		}
+		if(cmd.getModuleId() == null) {
+			cmd.setModuleId(0l);
+		}
+		
+		FlowVariableResponse resp = new FlowVariableResponse();
+		List<FlowVariableDTO> dtos = new ArrayList<>();
+		resp.setDtos(dtos);
+		
+        List<FlowVariable> vars = new ArrayList<>();
+        String para = null;
+        List<FlowVariable> vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, cmd.getOwnerId(), cmd.getOwnerType(), cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        if(!cmd.getNamespaceId().equals(0)) {
+        	vars2 = flowVariableProvider.findVariables(0
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        	if(vars2 != null) {
+        		vars.addAll(vars2);
+        	} 	
+        }
+        
+        Map<String, Long> map = new HashMap<String, Long>();
+        for(FlowVariable var : vars) {
+        	if(!map.containsKey(var.getName())) {
+        		dtos.add(ConvertHelper.convert(var, FlowVariableDTO.class));
+        		map.put(var.getName(), 1l);
+        	}
+        }
+        
+        return resp;
 	}
 
 	@Override
@@ -1602,8 +1629,10 @@ public class FlowServiceImpl implements FlowService {
 		ListingLocator locator = new ListingLocator();
 		
 		List<FlowCaseDetail> details = null;
+		boolean isApplier = false;
 		
 		if(FlowCaseSearchType.APPLIER.equals(cmd.getFlowCaseSearchType())) {
+			isApplier = true;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
 		} else {
 			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
@@ -1613,6 +1642,12 @@ public class FlowServiceImpl implements FlowService {
 		if(details != null) {
 			for(FlowCaseDetail detail : details) {
 				FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
+				if(isApplier) {
+					FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
+					if(flowNode != null) {
+						dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
+					}
+				}
 				dtos.add(dto);
 			}	
 			resp.setNextPageAnchor(locator.getAnchor());
@@ -1632,15 +1667,13 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
-		List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase);
+		List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserType);
 		
 		FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
 		dto.setEntities(entities);
 		if(dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
 			return dto;
 		}
-		
-		flowListenerManager.onFlowCaseDetailRender(flowCase);
 		
 		List<FlowButtonDTO> btnDTOS = new ArrayList<>();
 		if(flowUserType == FlowUserType.PROCESSOR) {
@@ -1699,9 +1732,11 @@ public class FlowServiceImpl implements FlowService {
 							, currNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), flowUserType.getCode());
 					if(commentBtn != null) {
 						nodeLogDTO.setAllowComment((byte)1);
+						nodeLogDTO.setCommentButtonId(commentBtn.getId());
 					}
 					if(eventLog.getButtonFiredStep().equals(FlowStepType.ABSORT_STEP.getCode())) {
 						absorted = true;
+						nodeLogDTO.setNodeName(buttonDefName(UserContext.getCurrentNamespaceId(), FlowStepType.ABSORT_STEP));
 					}
 				}
 				
@@ -1711,7 +1746,7 @@ public class FlowServiceImpl implements FlowService {
 						, flowCase.getId(), eventLog.getStepCount(), flowUserType);
 				if(trackerLogs != null) {
 					trackerLogs.forEach((t)-> {
-						FlowEventLogDTO eventDTO = ConvertHelper.convert(eventLog, FlowEventLogDTO.class);
+						FlowEventLogDTO eventDTO = ConvertHelper.convert(t, FlowEventLogDTO.class);
 						nodeLogDTO.getLogs().add(eventDTO);			
 					});
 				}
@@ -1739,13 +1774,40 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowPostSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
-		// TODO Auto-generated method stub AttachmentProviderImpl
+	public FlowSubjectDTO postSubject(FlowPostSubjectCommand cmd) {
+		FlowSubject subject = new FlowSubject();
+		subject.setBelongEntity(cmd.getFlowEntityType());
+		subject.setBelongTo(cmd.getFlowEntityId());
+		subject.setContent(cmd.getContent());
+		subject.setNamespaceId(UserContext.current().getNamespaceId());
+		subject.setStatus(FlowStatusType.VALID.getCode());
+		subject.setTitle(cmd.getTitle());
+		flowSubjectProvider.createFlowSubject(subject);
+
+		FlowSubjectDTO subjectDTO = ConvertHelper.convert(subject, FlowSubjectDTO.class);
 		
-		final List<Attachment> attachments = new ArrayList<>();
-		attachmentProvider.createAttachments(EhNewsAttachments.class, attachments);
+		if(null != cmd.getImages() && cmd.getImages().size() > 0) {
+			List<Attachment> attachments = new ArrayList<>();
+			for(String image : cmd.getImages()) {
+				Attachment attach = new Attachment();
+				attach.setContentType(NewsCommentContentType.IMAGE.getCode());
+				attach.setContentUri(image);
+				attach.setCreatorUid(UserContext.current().getUser().getId());
+				attach.setOwnerId(subject.getId());
+				attachments.add(attach);
+			}
+			attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
+			
+			for(Attachment at : attachments) {
+				String url = contentServerService.parserUri(at.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				if(url != null && !url.isEmpty()) {
+					subjectDTO.getImages().add(url);
+				}
+			}
+			
+		}
 		
-		return null;
+		return subjectDTO;
 	}
 
 	@Override
@@ -1856,7 +1918,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		for(FlowUserSelection sel : selections) {
-			if(FLowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
+			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
 			}	
 		}
@@ -1904,12 +1966,18 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
-	public void flushState(FlowCaseState ctx) {
+	public void flushState(FlowCaseState ctx) throws FlowStepBusyException {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		dbProvider.execute((s) -> {
-			ctx.getFlowCase().setLastStepTime(now);
-			flowCaseProvider.updateFlowCase(ctx.getFlowCase());
-			flowEventLogProvider.createFlowEventLogs(ctx.getLogs());
+			FlowCase case2 = flowCaseProvider.getFlowCaseById(ctx.getFlowCase().getId());
+			if(case2.getLastStepTime().equals(ctx.getFlowCase().getLastStepTime())) {
+				ctx.getFlowCase().setLastStepTime(now);
+				flowCaseProvider.updateFlowCase(ctx.getFlowCase());
+				flowEventLogProvider.createFlowEventLogs(ctx.getLogs());	
+			} else {
+				throw new FlowStepBusyException("already step by others");
+			}
+			
 			return true;
 		});		
 	}
@@ -1923,15 +1991,76 @@ public class FlowServiceImpl implements FlowService {
         return null;
 	}
 	
+	private String resolveTextVariable(FlowCaseState ctx, String para) {
+		FlowCase fc = ctx.getFlowCase();
+        List<FlowVariable> vars = new ArrayList<>();
+        List<FlowVariable> vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, fc.getOwnerId(), fc.getOwnerType(), fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        if(!fc.getNamespaceId().equals(0)) {
+        	vars2 = flowVariableProvider.findVariables(0
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        	if(vars2 != null) {
+        		vars.addAll(vars2);
+        		} 	
+        }
+
+        
+        for(FlowVariable fv : vars) {
+//			try {
+//				Class clz = Class.forName(flowScript.getScriptCls());
+//				runnableScript = (FlowScriptFire)PlatformContext.getComponent(clz);
+//			} catch (ClassNotFoundException e) {
+//				LOGGER.error("flow script class not found", e);
+//			}	
+        	FlowVariableTextResolver ftr = PlatformContext.getComponent(fv.getScriptCls());
+        	if(ftr != null) {
+        		String val = ftr.variableTextRender(ctx, para);
+        		if(null != val) {
+        			return val;
+        		}
+        	}
+        	
+        }
+        
+        return "error";
+	}
+	
 	@Override
 	public String parseActionTemplate(FlowCaseState ctx, Long actionId, String renderText) {
         String templateKey = String.format("action:%d", actionId);
-        Map<String, String> model = null;
+        Map<String, String> model = new HashMap<String, String>();
         List<String> params = getAllParams(renderText);
         if(params == null) {
         	return renderText;
         }
-        //TODO render model.
+        
+        for(String para : params) {
+        	String fv = resolveTextVariable(ctx, para);
+        	if(fv != null) {
+        		model.put(para, fv);	
+        	}
+        }
         
         try {
         		templateLoader.putTemplate(templateKey, renderText);
@@ -1947,9 +2076,50 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowPostSubjectDTO getSubectById(Long subjectId) {
-		// TODO Auto-generated method stub
-		return null;
+	public FlowSubjectDTO getSubectById(Long subjectId) {
+		FlowSubject subject = flowSubjectProvider.getFlowSubjectById(subjectId);
+		FlowSubjectDTO subjectDTO = ConvertHelper.convert(subject, FlowSubjectDTO.class);
+		
+		List<Attachment> attaches = attachmentProvider.listAttachmentByOwnerId(EhFlowAttachments.class, subjectId);
+		if(attaches != null) {
+			for(Attachment at : attaches) {
+				String url = contentServerService.parserUri(at.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+				if(url != null && !url.isEmpty()) {
+					subjectDTO.getImages().add(url);
+				}
+			}
+		}
+		
+		return subjectDTO;
 	}
 
+	@Override
+	public FlowDTO getFlowById(Long flowId) {
+		Flow flow = flowProvider.getFlowById(flowId);
+		return ConvertHelper.convert(flow, FlowDTO.class);
+	}
+
+	@Override
+	public void testFlowCase() {
+	    Long moduleId = 111l;
+	    Long orgId = 1001027l;
+	    
+    	Long applyUserId = UserContext.current().getUser().getId();
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = this.getEnabledFlow(UserContext.getCurrentNamespaceId(), moduleId, moduleType, ownerId, ownerType);
+    	
+    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+    	cmd.setApplyUserId(applyUserId);
+    	cmd.setFlowMainId(flow.getFlowMainId());
+    	cmd.setFlowVersion(flow.getFlowVersion());
+    	cmd.setReferId(0l);
+    	cmd.setReferType("test-type");
+    	
+    	Random r = new Random();
+    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
+    	this.createFlowCase(cmd);
+	}
 }

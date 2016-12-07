@@ -67,6 +67,20 @@ public class FlowAdminController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /admin/flow/getFlowById</b>
+     * <p> 创建一个新 Flow，一个业务模块，名字不能重复 </p>
+     * @return Flow 的详细信息
+     */
+    @RequestMapping("getFlowById")
+    @RestReturn(value=FlowDTO.class)
+    public RestResponse getFlowById(@Valid FlowIdCommand cmd) {
+        RestResponse response = new RestResponse(flowService.getFlowById(cmd.getFlowId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /admin/flow/listFlows</b>
      * <p> 显示业务模块下的所有 Flow </p>
      * @return Flow 的列表
@@ -202,8 +216,8 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("updateFlowNode")
     @RestReturn(value=FlowNodeDTO.class)
-    public RestResponse updateFlowNodeName(@Valid UpdateFlowNodeCommand cmd) {
-        RestResponse response = new RestResponse(flowService.updateFlowNodeName(cmd));
+    public RestResponse updateFlowNode(@Valid UpdateFlowNodeCommand cmd) {
+        RestResponse response = new RestResponse(flowService.updateFlowNode(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -350,11 +364,11 @@ public class FlowAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /admin/flow/listFlowVariables</b>
-     * <p> 禁用节点中的某一个按钮应用 </p>
+     * <b>URL: /admin/flow/listVariables</b>
+     * <p> 显示某个位置的变量 </p>
      * @return
      */
-    @RequestMapping("listFlowVariables")
+    @RequestMapping("listVariables")
     @RestReturn(value=FlowVariableResponse.class)
     public RestResponse listFlowVariables(@Valid ListFlowVariablesCommand cmd) {
         RestResponse response = new RestResponse(flowService.listFlowVariables(cmd));

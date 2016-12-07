@@ -1,7 +1,15 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>NODE_TRACKER: 节点的日志信息，包括评论</li>
+ * <li>STEP_TRACKER: 节点的跳转信息</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum FlowLogType {
-	BUTTON_FIRED("button_fired"), NODE_ENTER("node enter"), STEP_TRACKER("step_tracker"), NODE_TRACKER("node_tracker"), FLOW_SUPERVISOR("flow_supervisor");
+	BUTTON_FIRED("button_fired"), AUTO_STEP("auto_step"), NODE_ENTER("node enter"), STEP_TRACKER("step_tracker"), NODE_TRACKER("node_tracker"), FLOW_SUPERVISOR("flow_supervisor");
 	
 	private String code;
     private FlowLogType(String code) {

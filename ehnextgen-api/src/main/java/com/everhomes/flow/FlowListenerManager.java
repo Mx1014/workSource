@@ -3,6 +3,7 @@ package com.everhomes.flow;
 import java.util.List;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowUserType;
 
 public interface FlowListenerManager {
 
@@ -48,9 +49,10 @@ public interface FlowListenerManager {
 	/**
 	 * FlowCase 的详细信息列表
 	 * @param flowCase
+	 * @param flowUserType 
 	 * @return
 	 */
-	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase);
+	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
 	
 	/**
 	 * FlowCase 的变量渲染
@@ -59,4 +61,10 @@ public interface FlowListenerManager {
 	 * @return
 	 */
 	String onFlowVariableRender(FlowCaseState ctx, String variable);
+
+	/**
+	 * 当时间触发的时候
+	 * @param ctx
+	 */
+	void onFlowButtonFired(FlowCaseState ctx);
 }

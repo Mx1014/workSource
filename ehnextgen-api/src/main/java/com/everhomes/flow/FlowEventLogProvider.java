@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 
@@ -31,5 +32,7 @@ public interface FlowEventLogProvider {
 			Long stepCount, FlowUserType flowUserType);
 
 	List<FlowEventLog> findStepEventLogs(Long caseId);
+
+	FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount, FlowStepType fromStep);
 
 }

@@ -19,6 +19,7 @@ import com.everhomes.rest.flow.FlowGetSubjectDetailById;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
+import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
@@ -82,11 +83,11 @@ public class FlowController extends ControllerBase {
     
     /**
      * <b>URL: /flow/getSubjectById</b>
-     * <p> 显示用户所有的 FlowCase </p>
+     * <p> 显示某一个附言对应的详细信息 </p>
      * @return FlowCase 的列表信息
      */
     @RequestMapping("getSubjectById")
-    @RestReturn(value=FlowPostSubjectDTO.class)
+    @RestReturn(value=FlowSubjectDTO.class)
     public RestResponse postSubject(@Valid FlowGetSubjectDetailById cmd) {
         RestResponse response = new RestResponse(flowService.getSubectById(cmd.getSubjectId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -151,7 +152,18 @@ public class FlowController extends ControllerBase {
     }
     
     /**
-     * TODO 1. post subject 2. event logs. {title, logo, date, message, processor, applier}
-     * 
+     * <b>URL: /flow/testCase</b>
+     * <p> 仅仅用于测试 </p>
+     * @return 
      */
+    @RequestMapping("testCase")
+    @RestReturn(value=String.class)
+    public RestResponse testCase() {
+    	flowService.testFlowCase();
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
 }

@@ -6,6 +6,15 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ * <li>needProcessor: 需要选人</li>
+ * <li>needProcessor: 需要评论</li>
+ * <li>needProcessor + needSubject 有任何一个就要跳到下个界面</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class FlowButtonDTO {
     private Byte     status;
     private Integer     gotoLevel;
@@ -17,9 +26,30 @@ public class FlowButtonDTO {
     private Integer     flowVersion;
     private Long     id;
     private String     buttonName;
+    private Byte needProcessor;
+    private Byte needSubject;
+
+	public Byte getNeedProcessor() {
+		return needProcessor;
+	}
 
 
-    public Byte getStatus() {
+	public void setNeedProcessor(Byte needProcessor) {
+		this.needProcessor = needProcessor;
+	}
+
+
+	public Byte getNeedSubject() {
+		return needSubject;
+	}
+
+
+	public void setNeedSubject(Byte needSubject) {
+		this.needSubject = needSubject;
+	}
+
+
+	public Byte getStatus() {
 		return status;
 	}
 

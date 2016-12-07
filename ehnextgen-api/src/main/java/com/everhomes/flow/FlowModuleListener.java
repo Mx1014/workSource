@@ -3,6 +3,7 @@ package com.everhomes.flow;
 import java.util.List;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowUserType;
 
 /**
  * 业务模块必须实现的接口
@@ -58,7 +59,7 @@ public interface FlowModuleListener {
 	 * @param flowCase
 	 * @return
 	 */
-	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase);
+	List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType);
 	
 	/**
 	 * FlowCase 的变量渲染
@@ -67,4 +68,10 @@ public interface FlowModuleListener {
 	 * @return
 	 */
 	String onFlowVariableRender(FlowCaseState ctx, String variable);
+
+	/**
+	 * 当事件触发的时候
+	 * @param ctx
+	 */
+	void onFlowButtonFired(FlowCaseState ctx);
 }
