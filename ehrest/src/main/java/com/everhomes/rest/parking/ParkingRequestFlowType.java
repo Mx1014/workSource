@@ -4,7 +4,7 @@ package com.everhomes.rest.parking;
  * <li>FORBIDDEN(0): 禁用</li>
  * <li>QUEQUE(1): 排队模式</li>
  * <li>SEMI_AUTOMATIC(2): 半自动化模式</li>
- * <li>INTELLIGENT(2): 只能模式</li>
+ * <li>INTELLIGENT(3): 智能模式</li>
  * </ul>
  */
 public enum ParkingRequestFlowType {

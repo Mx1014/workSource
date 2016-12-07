@@ -5,7 +5,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>informationType: 资料类型 {@link com.everhomes.rest.parking.ParkingCardRequestStatus}</li>
+ * <li>informationType: 资料类型 {@link com.everhomes.rest.parking.ParkingRequestContentType}</li>
  * <li>contentType: 附件类型，{@link com.everhomes.rest.parking.ParkingContentType}</li>
  * <li>contentUri: 附件访问URI</li>
  * <li>contentUrl: 附件访问URL</li>
