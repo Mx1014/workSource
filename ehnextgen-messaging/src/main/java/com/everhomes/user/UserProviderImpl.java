@@ -17,6 +17,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOffsetStep;
@@ -1348,6 +1349,27 @@ public class UserProviderImpl implements UserProvider {
         
         return list;
     }
+
+    /**
+     * 金地取数据使用
+     */
+	@Override
+	public List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize) {
+		//暂不考虑分库分表的问题，因为是按更新时间来取，比较麻烦
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		Result<Record> result = context.select().from(Tables.EH_USERS)
+			.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_USERS.ID.gt(pageAnchor))
+			
+			.orderBy(Tables.EH_USERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, User.class));
+		}
+		return new ArrayList<User>();
+	}
 
 	
 }

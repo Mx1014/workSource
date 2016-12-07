@@ -1,0 +1,1 @@
+update eh_users set update_time = now();

@@ -1,0 +1,1 @@
+ALTER TABLE `eh_users` ADD COLUMN `update_time` DATETIME;
