@@ -1969,8 +1969,7 @@ public class FlowServiceImpl implements FlowService {
 	public void flushState(FlowCaseState ctx) throws FlowStepBusyException {
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 		dbProvider.execute((s) -> {
-			FlowCase case2 = flowCaseProvider.getFlowCaseById(ctx.getFlowCase().getId());
-			if(case2.getLastStepTime().equals(ctx.getFlowCase().getLastStepTime())) {
+			if(flowCaseProvider.updateIfValid(ctx.getFlowCase().getId(), ctx.getFlowCase().getLastStepTime(), now)) {
 				ctx.getFlowCase().setLastStepTime(now);
 				flowCaseProvider.updateFlowCase(ctx.getFlowCase());
 				flowEventLogProvider.createFlowEventLogs(ctx.getLogs());	
@@ -1983,12 +1982,16 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	private List<String> getAllParams(String renderText) {
+		List<String> params = new ArrayList<>();
         Matcher m = pParam.matcher(renderText);
         while(m.find()) {
-        	LOGGER.info("param=" + m.group(1));
+//        	LOGGER.info("param=" + m.group(1));
+        	if(m.groupCount() > 0) {
+        		params.add(m.group(1));
+        	}
         }
         
-        return null;
+        return params;
 	}
 	
 	private String resolveTextVariable(FlowCaseState ctx, String para) {
@@ -2051,7 +2054,7 @@ public class FlowServiceImpl implements FlowService {
         String templateKey = String.format("action:%d", actionId);
         Map<String, String> model = new HashMap<String, String>();
         List<String> params = getAllParams(renderText);
-        if(params == null) {
+        if(params == null || params.size() == 0) {
         	return renderText;
         }
         

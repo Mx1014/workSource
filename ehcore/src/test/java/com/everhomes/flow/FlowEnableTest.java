@@ -318,7 +318,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
     	cmd.setFlowNodeId(dto.getId());
     	
-    	FlowActionInfo action = createActionInfo("test-track-enter-action-" + dto.getId(), orgId);
+    	FlowActionInfo action = createActionInfo(
+    			"applierName: ${applierName} applierPhone: ${applierPhone} currProcessorName:${currProcessorName} currProcessorPhone: ${currProcessorPhone}"
+    			+ " test-track-enter-action-" + dto.getId(), orgId);
     	action.setTrackerApplier(1l);
     	action.setTrackerProcessor(1l);
     	cmd.setEnterTracker(action);
