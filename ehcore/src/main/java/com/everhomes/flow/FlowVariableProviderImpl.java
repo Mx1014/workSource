@@ -18,6 +18,7 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowVariablesDao;
@@ -115,7 +116,7 @@ public class FlowVariableProviderImpl implements FlowVariableProvider {
     @Override
     public List<FlowVariable> findVariables(Integer namespaceId, Long ownerId
     		, String ownerType, Long moduleId
-    		, String moduleType, String name) {
+    		, String moduleType, String name, String varType) {
     	return queryFlowVariables(new ListingLocator(), 50, new ListingQueryBuilderCallback() {
 			@Override
 			public SelectQuery<? extends Record> buildCondition(
@@ -132,7 +133,13 @@ public class FlowVariableProviderImpl implements FlowVariableProvider {
 					query.addConditions(Tables.EH_FLOW_VARIABLES.MODULE_TYPE.eq(moduleType));	
 				}
 				
-				query.addConditions(Tables.EH_FLOW_VARIABLES.NAME.eq(name));
+				query.addConditions(Tables.EH_FLOW_VARIABLES.VAR_TYPE.eq(varType));
+				
+				if(name != null) {
+					query.addConditions(Tables.EH_FLOW_VARIABLES.NAME.eq(name));	
+				}
+				
+				query.addConditions(Tables.EH_FLOW_VARIABLES.STATUS.eq(FlowStatusType.VALID.getCode()));
 				
 				return query;
 			}

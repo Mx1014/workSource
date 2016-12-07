@@ -2,12 +2,21 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * 获取变量列表
+ * <ul>
+ * <li>flowVariableType {@link com.everhomes.rest.flow.FlowVariableType}</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class ListFlowVariablesCommand {
     private Integer     namespaceId;
     private Long     ownerId;
     private String     ownerType;
     private String     moduleType;
     private Long     moduleId;
+    private String flowVariableType;
     
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -38,6 +47,13 @@ public class ListFlowVariablesCommand {
 	}
 	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
+	}
+
+	public String getFlowVariableType() {
+		return flowVariableType;
+	}
+	public void setFlowVariableType(String flowVariableType) {
+		this.flowVariableType = flowVariableType;
 	}
 	@Override
     public String toString() {

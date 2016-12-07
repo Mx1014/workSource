@@ -158,7 +158,7 @@ public class FlowController extends ControllerBase {
      */
     @RequestMapping("testCase")
     @RestReturn(value=String.class)
-    public RestResponse listModules() {
+    public RestResponse testCase() {
     	flowService.testFlowCase();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

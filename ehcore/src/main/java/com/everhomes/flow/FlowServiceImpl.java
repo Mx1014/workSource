@@ -82,7 +82,9 @@ import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.FlowVariableDTO;
 import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.FlowVariableType;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
@@ -1548,8 +1550,65 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.current().getNamespaceId());
+		}
+		if(cmd.getModuleType() == null) {
+			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		}
+		if(cmd.getOwnerId() == null) {
+			cmd.setOwnerId(0l);
+		}
+		if(cmd.getModuleId() == null) {
+			cmd.setModuleId(0l);
+		}
+		
+		FlowVariableResponse resp = new FlowVariableResponse();
+		List<FlowVariableDTO> dtos = new ArrayList<>();
+		resp.setDtos(dtos);
+		
+        List<FlowVariable> vars = new ArrayList<>();
+        String para = null;
+        List<FlowVariable> vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, cmd.getOwnerId(), cmd.getOwnerType(), cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        if(!cmd.getNamespaceId().equals(0)) {
+        	vars2 = flowVariableProvider.findVariables(0
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
+        	if(vars2 != null) {
+        		vars.addAll(vars2);
+        	} 	
+        }
+        
+        Map<String, Long> map = new HashMap<String, Long>();
+        for(FlowVariable var : vars) {
+        	if(!map.containsKey(var.getName())) {
+        		dtos.add(ConvertHelper.convert(var, FlowVariableDTO.class));
+        		map.put(var.getName(), 1l);
+        	}
+        }
+        
+        return resp;
 	}
 
 	@Override
@@ -1929,35 +1988,35 @@ public class FlowServiceImpl implements FlowService {
         return null;
 	}
 	
-	private String resolveVariable(FlowCaseState ctx, String para) {
+	private String resolveTextVariable(FlowCaseState ctx, String para) {
 		FlowCase fc = ctx.getFlowCase();
         List<FlowVariable> vars = new ArrayList<>();
         List<FlowVariable> vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
-        		, fc.getOwnerId(), fc.getOwnerType(), fc.getModuleId(), fc.getModuleType(), para);
+        		, fc.getOwnerId(), fc.getOwnerType(), fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
-        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para);
-        if(vars2 != null) {
-        	vars.addAll(vars2);
-        }
-        
-        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
-        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para);
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         
         vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
-        		, 0l, null, 0l, null, para);
+        		, 0l, null, fc.getModuleId(), fc.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        if(vars2 != null) {
+        	vars.addAll(vars2);
+        }
+        
+        vars2 = flowVariableProvider.findVariables(fc.getNamespaceId()
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         
         if(!fc.getNamespaceId().equals(0)) {
         	vars2 = flowVariableProvider.findVariables(0
-        		, 0l, null, 0l, null, para);
+        		, 0l, null, 0l, null, para, FlowVariableType.TEXT.getCode());
         	if(vars2 != null) {
         		vars.addAll(vars2);
         		} 	
@@ -1994,7 +2053,7 @@ public class FlowServiceImpl implements FlowService {
         }
         
         for(String para : params) {
-        	String fv = resolveVariable(ctx, para);
+        	String fv = resolveTextVariable(ctx, para);
         	if(fv != null) {
         		model.put(para, fv);	
         	}

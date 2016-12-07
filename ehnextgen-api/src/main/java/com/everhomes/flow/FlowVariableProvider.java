@@ -19,6 +19,6 @@ public interface FlowVariableProvider {
 			ListingQueryBuilderCallback queryBuilderCallback);
 
 	List<FlowVariable> findVariables(Integer namespaceId, Long ownerId,
-			String ownerType, Long moduleId, String moduleType, String name);
+			String ownerType, Long moduleId, String moduleType, String name, String varType);
 
 }
