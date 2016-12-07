@@ -7,7 +7,9 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间 ID </li>
  * <li>userId: 用户ID，为空则为当前用户 </li>
- * <li>moduleId: 业务模块ID，选择了 moduleId 则不需要 keyword </li>
+ * <li>moduleId: 业务模块ID，选择了 moduleId 则不需要 keyword，可为空 </li>
+ * <li>ownerId: 业务实体的 ID，可为空 </li>
+ * <li>ownerId: 业务实体的类型，可为空 </li>
  * <li>keyword: 搜索关键字 </li>
  * <li>flowCaseStatus: 状态 {@link com.everhomes.rest.flow.FlowCaseStatus }</li>
  * <li>flowSearchType: 0 我的申请， 1: 待办任务， 2: 已办任务， 3: 我的督办 {@link com.everhomes.rest.flow.FlowCaseSearchType } </li>
@@ -20,6 +22,8 @@ public class SearchFlowCaseCommand {
 	private Long userId;
 	private Byte flowCaseStatus;
 	private Long moduleId;
+	private Long ownerId;
+	private String ownerType;
 	private String keyword;
 	private Integer pageSize;
 	private Long anchor;
@@ -87,6 +91,22 @@ public class SearchFlowCaseCommand {
 
 	public void setFlowCaseSearchType(Byte flowCaseSearchType) {
 		this.flowCaseSearchType = flowCaseSearchType;
+	}
+
+	public Long getOwnerId() {
+		return ownerId;
+	}
+
+	public void setOwnerId(Long ownerId) {
+		this.ownerId = ownerId;
+	}
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
 	}
 
 	@Override
