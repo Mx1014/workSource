@@ -61,6 +61,8 @@ public interface ActivityProivider {
 
     List<ActivityAttachment> listActivityAttachments(CrossShardListingLocator locator, int count, Long activityId);
 
+    boolean existActivityAttachments(Long activityId);
+
     void createActivityGoods(ActivityGoods goods);
 
     void updateActivityGoods(ActivityGoods goods);

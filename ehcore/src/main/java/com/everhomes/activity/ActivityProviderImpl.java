@@ -596,7 +596,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 
             query.addConditions(Tables.EH_ACTIVITY_ATTACHMENTS.ACTIVITY_ID.eq(activityId));
 
-            query.addOrderBy(Tables.EH_ACTIVITY_ROSTER.ID.asc());
+            query.addOrderBy(Tables.EH_ACTIVITY_ATTACHMENTS.ID.asc());
             query.addLimit(count - attachments.size());
 
             query.fetch().map((r) -> {
@@ -608,6 +608,27 @@ public class ActivityProviderImpl implements ActivityProivider {
         });
 
         return attachments;
+    }
+
+    @Override
+    public boolean existActivityAttachments(Long activityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityAttachments.class));
+        List<ActivityAttachment> attachments = new ArrayList<ActivityAttachment>();
+
+        SelectQuery<EhActivityAttachmentsRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ATTACHMENTS);
+
+        query.addConditions(Tables.EH_ACTIVITY_ATTACHMENTS.ACTIVITY_ID.eq(activityId));
+
+        query.fetch().map((r) -> {
+            attachments.add(ConvertHelper.convert(r, ActivityAttachment.class));
+            return null;
+        });
+
+        if(attachments.size() > 0) {
+            return true;
+        }
+
+        return false;
     }
 
     @Override
