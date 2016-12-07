@@ -487,31 +487,31 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                 if(0L == yesterdayStatistics.getActiveUserNumber()){
                     toDayStatistics.setActiveChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setActiveChangeRate(new BigDecimal((yesterdayStatistics.getActiveUserNumber().doubleValue() - toDayStatistics.getActiveUserNumber().doubleValue()) / yesterdayStatistics.getActiveUserNumber().doubleValue()));
+                    toDayStatistics.setActiveChangeRate(new BigDecimal((yesterdayStatistics.getActiveUserNumber().doubleValue() - toDayStatistics.getActiveUserNumber().doubleValue()) / yesterdayStatistics.getActiveUserNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getCumulativeUserNumber()){
                     toDayStatistics.setCumulativeChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setCumulativeChangeRate(new BigDecimal((yesterdayStatistics.getCumulativeUserNumber().doubleValue() - toDayStatistics.getCumulativeUserNumber().doubleValue()) / yesterdayStatistics.getCumulativeUserNumber().doubleValue()));
+                    toDayStatistics.setCumulativeChangeRate(new BigDecimal((yesterdayStatistics.getCumulativeUserNumber().doubleValue() - toDayStatistics.getCumulativeUserNumber().doubleValue()) / yesterdayStatistics.getCumulativeUserNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getStartNumber()){
                     toDayStatistics.setStartChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setStartChangeRate(new BigDecimal((yesterdayStatistics.getStartNumber().doubleValue() - toDayStatistics.getStartNumber().doubleValue()) / yesterdayStatistics.getStartNumber().doubleValue()));
+                    toDayStatistics.setStartChangeRate(new BigDecimal((yesterdayStatistics.getStartNumber().doubleValue() - toDayStatistics.getStartNumber().doubleValue()) / yesterdayStatistics.getStartNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getNewUserNumber()){
                     toDayStatistics.setNewChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setNewChangeRate(new BigDecimal((yesterdayStatistics.getNewUserNumber().doubleValue() - toDayStatistics.getNewUserNumber().doubleValue()) / yesterdayStatistics.getNewUserNumber().doubleValue()));
+                    toDayStatistics.setNewChangeRate(new BigDecimal((yesterdayStatistics.getNewUserNumber().doubleValue() - toDayStatistics.getNewUserNumber().doubleValue()) / yesterdayStatistics.getNewUserNumber().doubleValue()*100));
                 }
             }
             if(0L == toDayStatistics.getCumulativeUserNumber()){
                 toDayStatistics.setActiveRate(new BigDecimal(0));
             }else{
-                toDayStatistics.setActiveRate(new BigDecimal(toDayStatistics.getActiveUserNumber().doubleValue() / toDayStatistics.getCumulativeUserNumber().doubleValue()));
+                toDayStatistics.setActiveRate(new BigDecimal(toDayStatistics.getActiveUserNumber().doubleValue() / toDayStatistics.getCumulativeUserNumber().doubleValue()*100));
             }
 
             toDayStatistics.setSevenActiveUserNumber(statTerminalProvider.getTerminalActiveUserNumberByDate(sevenDate, date, namespaceId));
@@ -546,7 +546,7 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                 if(0L == toDayHourStatistics.getCumulativeUserNumber()){
                     toDayHourStatistics.setActiveRate(new BigDecimal(0));
                 }else{
-                    toDayHourStatistics.setActiveRate(new BigDecimal(toDayHourStatistics.getActiveUserNumber().doubleValue() / toDayHourStatistics.getCumulativeUserNumber().doubleValue()));
+                    toDayHourStatistics.setActiveRate(new BigDecimal(toDayHourStatistics.getActiveUserNumber().doubleValue() / toDayHourStatistics.getCumulativeUserNumber().doubleValue()*100));
                 }
                 toDayHourStatistics.setChangeRate(new BigDecimal(0));
                 statTerminalProvider.createTerminalHourStatistics(toDayHourStatistics);
