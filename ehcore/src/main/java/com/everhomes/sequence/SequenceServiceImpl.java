@@ -1104,7 +1104,18 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhFlowTimeouts.class, Tables.EH_FLOW_TIMEOUTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FLOW_TIMEOUTS.ID.max()).from(Tables.EH_FLOW_TIMEOUTS).fetchOne().value1();
         });
-
+        syncTableSequence(null, EhParkingCarSeries.class, Tables.EH_PARKING_CAR_SERIES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_CAR_SERIES.ID.max()).from(Tables.EH_PARKING_CAR_SERIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhParkingAttachments.class, Tables.EH_PARKING_ATTACHMENTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_ATTACHMENTS.ID.max()).from(Tables.EH_PARKING_ATTACHMENTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhParkingStatistics.class, Tables.EH_PARKING_STATISTICS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_STATISTICS.ID.max()).from(Tables.EH_PARKING_STATISTICS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhParkingFlow.class, Tables.EH_PARKING_FLOW.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_PARKING_FLOW.ID.max()).from(Tables.EH_PARKING_FLOW).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

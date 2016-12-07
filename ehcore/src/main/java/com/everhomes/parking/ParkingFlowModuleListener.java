@@ -8,6 +8,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowService;
@@ -106,7 +107,9 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowButtonFired(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		
 		
 	}
 
