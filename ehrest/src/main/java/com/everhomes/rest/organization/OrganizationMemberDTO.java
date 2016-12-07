@@ -3,11 +3,9 @@ package com.everhomes.rest.organization;
 
 import java.util.List;
 
-import javax.management.relation.Role;
 import javax.validation.constraints.NotNull;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.util.StringHelper;
 
@@ -28,6 +26,7 @@ import com.everhomes.util.StringHelper;
  * <li>groups：群组列表</li>
  * <li>employeeNo：工号</li>
  * <li>initial：首字母</li>
+ * <li>proccesingTaskCount：执行任务数量</li>
  * <li>executiveFlag：是否高管 1-是 0-否</li>
  * <li>position：职位</li>
  * <li>idNumber：身份证号码</li>
@@ -80,7 +79,14 @@ public class OrganizationMemberDTO {
     private String position;
     private String idNumber;
     
-    
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobPositions;
+
+    @ItemType(OrganizationDTO.class)
+    private List<OrganizationDTO> jobLevels;
+	
+	private Integer proccesingTaskCount;
+	
 	public OrganizationMemberDTO() {
     }
 
@@ -314,8 +320,33 @@ public class OrganizationMemberDTO {
         this.visibleFlag = visibleFlag;
     }
 
+    public List<OrganizationDTO> getJobPositions() {
+        return jobPositions;
+    }
+
+    public void setJobPositions(List<OrganizationDTO> jobPositions) {
+        this.jobPositions = jobPositions;
+    }
+
+
+    public List<OrganizationDTO> getJobLevels() {
+        return jobLevels;
+    }
+
+    public void setJobLevels(List<OrganizationDTO> jobLevels) {
+        this.jobLevels = jobLevels;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Integer getProccesingTaskCount() {
+		return proccesingTaskCount;
+	}
+
+	public void setProccesingTaskCount(Integer proccesingTaskCount) {
+		this.proccesingTaskCount = proccesingTaskCount;
+	}
 }

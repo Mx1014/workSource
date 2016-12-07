@@ -6,10 +6,13 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
+import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
+import com.everhomes.server.schema.tables.daos.EhActivityCategoriesDao;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
 import org.jooq.SelectQuery;
+import org.jooq.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -28,6 +31,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
@@ -36,7 +40,9 @@ import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
 import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
 import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
+import com.everhomes.server.schema.tables.records.EhActivityCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
+import com.everhomes.server.schema.tables.records.EhServiceAllianceCategoriesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
@@ -47,6 +53,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.mysql.jdbc.StringUtils;
 
 @Component
 public class ActivityProviderImpl implements ActivityProivider {
@@ -479,6 +487,57 @@ public class ActivityProviderImpl implements ActivityProivider {
 			.fetch()
 			.map(r->ConvertHelper.convert(r, Activity.class));
 	}
-	
-	
+
+	@Override
+	public List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, 
+			Long parentId, CategoryAdminStatus status) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        List<ActivityCategories> result = new ArrayList<ActivityCategories>();
+        
+        SelectQuery<EhActivityCategoriesRecord> query = context.selectQuery(Tables.EH_ACTIVITY_CATEGORIES);
+        Condition condition = null;
+        
+        if(parentId != null)
+            condition = Tables.EH_ACTIVITY_CATEGORIES.PARENT_ID.eq(parentId);
+        else
+            condition = Tables.EH_ACTIVITY_CATEGORIES.PARENT_ID.isNull().or(Tables.EH_ACTIVITY_CATEGORIES.PARENT_ID.eq(0L));
+            
+        if(status != null)
+            condition = condition.and(Tables.EH_ACTIVITY_CATEGORIES.STATUS.eq(status.getCode()));
+        
+        if(!StringUtils.isNullOrEmpty(ownerType))
+        	condition = condition.and(Tables.EH_ACTIVITY_CATEGORIES.OWNER_TYPE.eq(ownerType));
+        
+        if(ownerId != null)
+        	condition = condition.and(Tables.EH_ACTIVITY_CATEGORIES.OWNER_ID.eq(ownerId));
+
+        condition = condition.and(Tables.EH_ACTIVITY_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+        if(condition != null) {
+        	query.addConditions(condition);
+        }
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listActivityEntryCategories, namespaceId=" + namespaceId + ", ownerType=" + ownerType + ", ownerId=" + ownerId + ", parentId=" + parentId + ", status=" + status);
+        }
+
+        query.fetch().map((EhActivityCategoriesRecord record) -> {
+        	result.add(ConvertHelper.convert(record, ActivityCategories.class));
+            return null;
+        });
+        
+        return result;
+	}
+
+    @Override
+    public ActivityCategories findActivityCategoriesById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class, id));
+        EhActivityCategoriesDao dao = new EhActivityCategoriesDao(context.configuration());
+        com.everhomes.server.schema.tables.pojos.EhActivityCategories result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, ActivityCategories.class);
+    }
+
+
 }

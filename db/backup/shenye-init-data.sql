@@ -4159,6 +4159,14 @@ INSERT INTO `eh_organization_address_mappings` (`id`, `organization_id`, `commun
 
 
 
+-- 林龙要求加场地预约类型 by xujuan 20161129
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
+	VALUES('13','场地预约','0',NULL,'0','999992');
+	
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+	VALUES ('112713', '999992', '0', '0', '0', '/home', 'Bizs', '场地预约', '场地预约', 'cs://1/image/aW1hZ2UvTVRwbE9HSXpZelUzWlRaak9XTTVOekkyTVdRME1XWmhZalJrWXpFd01tRm1aUQ', '1', '1', '49', '{\"resourceTypeId\":13,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+	VALUES ('112714', '999992', '0', '0', '0', '/home', 'Bizs', '场地预约', '场地预约', 'cs://1/image/aW1hZ2UvTVRwbE9HSXpZelUzWlRaak9XTTVOekkyTVdRME1XWmhZalJrWXpFd01tRm1aUQ', '1', '1', '49', '{\"resourceTypeId\":13,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'default', '0', NULL);
 
 
 

@@ -1971,7 +1971,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 	
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112907, 999984, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvMk1HUTVNamt3TldKak1tSTRNemxoTjJZMVl6azBOVEl5WmpRMU1tUXlZZw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
+    VALUES (112907, 999984, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvMk1HUTVNamt3TldKak1tSTRNemxoTjJZMVl6azBOVEl5WmpRMU1tUXlZZw', '1', '1', '53', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 
 
 -- 园区游客场景    
@@ -2011,7 +2011,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	VALUES (112920, 999984, '0', '0', '0', '/home', 'Bizs', '钥匙圈', '钥匙圈', 'cs://1/image/aW1hZ2UvTVRvMk5UTmpOalprWldSak1EZzVaVEkzTmpCbE1URXdNRFUwT1RCaVlXSTROUQ', '1', '1', '40', '{"isSupportQR":1,"isSupportSmart":1}', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112921, 999984, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvMk1HUTVNamt3TldKak1tSTRNemxoTjJZMVl6azBOVEl5WmpRMU1tUXlZZw', '1', '1', '1', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+    VALUES (112921, 999984, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvMk1HUTVNamt3TldKak1tSTRNemxoTjJZMVl6azBOVEl5WmpRMU1tUXlZZw', '1', '1', '53', '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', '30', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist');
 
 SET @search_type_id = (SELECT MAX(id) FROM `eh_search_types`);
 INSERT INTO `eh_search_types` (`id`, `namespace_id`, `owner_type`, `owner_id`, `name`, `content_type`, `status`, `create_time`, `delete_time`) 
@@ -2127,4 +2127,17 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
     VALUES(203153, 2008, 0, '旅游', '兴趣/旅游摄影/旅游', 0, 2, UTC_TIMESTAMP(), 999984);
 INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
     VALUES(203154, 2008, 0, '摄影', '兴趣/旅游摄影/摄影', 0, 2, UTC_TIMESTAMP(), 999984);
-	
+
+SET @eh_categories = (SELECT max(id) FROM `eh_categories`);   
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '科技园大讲堂', '活动/科技园大讲堂', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '项目对接会', '活动/项目对接会', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '总裁沙龙', '活动/总裁沙龙', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '创客', '活动/创客', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '联谊', '活动/联谊', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ((@eh_categories := @eh_categories + 1), '4', '0', '其他', '活动/其他', '1', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '999984');

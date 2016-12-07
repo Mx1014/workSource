@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>officialFlag:是否是官方活动</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
+ * <li>categoryId: 活动类型id</li>
  * </ul>
  */
 public class ListActivitiesByLocationCommand {
@@ -32,8 +33,18 @@ public class ListActivitiesByLocationCommand {
     private Long pageAnchor;
     
     private Integer pageSize;
+    
+    private Long categoryId;
 
-    public Integer getNamespaceId() {
+    public Long getCategoryId() {
+		return categoryId;
+	}
+
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
+	}
+
+	public Integer getNamespaceId() {
         return namespaceId;
     }
 

@@ -839,7 +839,13 @@ public class UserProviderImpl implements UserProvider {
 	@Override
 	public List<User> listUserByKeyword(String keyword, Integer namespaceId,
 			CrossShardListingLocator locator, int pageSize) {
-		
+		return listUserByKeyword(keyword, null, namespaceId, locator, pageSize);
+	}
+	
+	@Override
+	public List<User> listUserByKeyword(String keyword, Byte executiveFlag,
+			Integer namespaceId, CrossShardListingLocator locator, int pageSize) {
+
 		List<User> list = new ArrayList<User>();
 		
 		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
@@ -848,6 +854,9 @@ public class UserProviderImpl implements UserProvider {
 				 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
 				 cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like("%"+keyword+"%"));
 				 cond = cond.and(cond1);
+			}
+			if(executiveFlag != null){ 
+				cond = cond.and(Tables.EH_USERS.EXECUTIVE_TAG.eq(executiveFlag));
 			}
 			 
 			if(locator.getAnchor() != null ) {
@@ -866,6 +875,9 @@ public class UserProviderImpl implements UserProvider {
             	user.setCreateTime(r.getValue(Tables.EH_USERS.CREATE_TIME));
             	user.setStatus(r.getValue(Tables.EH_USERS.STATUS));
             	user.setGender(r.getValue(Tables.EH_USERS.GENDER));
+            	user.setExecutiveTag(r.getValue(Tables.EH_USERS.EXECUTIVE_TAG));
+            	user.setPositionTag(r.getValue(Tables.EH_USERS.POSITION_TAG));
+            	user.setIdentityNumberTag(r.getValue(Tables.EH_USERS.IDENTITY_NUMBER_TAG));
             	list.add(user);
             	return null;
             });
@@ -880,6 +892,7 @@ public class UserProviderImpl implements UserProvider {
 		
 		return list;
 	}
+	
 	
 	   @Override
 	    public List<User> listUserByNamespace(String keyword, Integer namespaceId,
@@ -1335,4 +1348,6 @@ public class UserProviderImpl implements UserProvider {
         
         return list;
     }
+
+	
 }

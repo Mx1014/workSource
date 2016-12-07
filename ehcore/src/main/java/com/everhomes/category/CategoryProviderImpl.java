@@ -388,18 +388,6 @@ public class CategoryProviderImpl implements CategoryProvider {
         return result;
 	}
     
-    @Override
-	public Category findCategoryByPath(Integer namespaceId, String path){
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));
-        SelectQuery<EhCategoriesRecord> query = context.selectQuery(Tables.EH_CATEGORIES);
-        if(null != namespaceId) 
-        	query.addConditions(Tables.EH_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
-        if(null != path)
-        	query.addConditions(Tables.EH_CATEGORIES.PATH.eq(path));
-        query.addConditions(Tables.EH_CATEGORIES.STATUS.eq(CategoryAdminStatus.ACTIVE.getCode()));
-        return ConvertHelper.convert(query.fetchOne(), Category.class);
-	}
-
 	@Override
 	public Category findCategoryByNamespaceAndName(Long parentId, Integer namespaceId, String categoryName) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCategories.class));

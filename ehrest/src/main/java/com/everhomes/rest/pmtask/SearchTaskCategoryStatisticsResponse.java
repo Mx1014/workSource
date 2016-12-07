@@ -6,9 +6,12 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 public class SearchTaskCategoryStatisticsResponse {
+	
 	private Long nextPageAnchor;
+	
 	@ItemType(TaskCategoryStatisticsDTO.class)
 	private List<TaskCategoryStatisticsDTO> requests;
+	
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}

@@ -3,6 +3,7 @@ package com.everhomes.organization;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,8 +16,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchRejectContactCommand;
@@ -156,9 +159,11 @@ public interface OrganizationService {
 	
 	ListOrganizationsCommandResponse listAllChildrenOrganizations(Long id,
 			List<String> groupTypes);
-	
+
+	ListOrganizationsCommandResponse listChildrenOrganizations(Long id, List<String> groupTypes);
+
 	ListOrganizationsCommandResponse listChildrenOrganizations(Long id,
-			List<String> groupTypes);
+			List<String> groupTypes, String keywords);
 	
 	
 	ListEnterprisesCommandResponse listEnterprises(ListEnterprisesCommand cmd);
@@ -186,7 +191,7 @@ public interface OrganizationService {
 	ListEnterprisesCommandResponse searchEnterprise(SearchOrganizationCommand cmd);
 	SearchOrganizationCommandResponse searchOrganization(SearchOrganizationCommand cmd);
 	ListCommunityByNamespaceCommandResponse listCommunityByOrganizationId(ListCommunitiesByOrganizationIdCommand cmd);
-	void createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId);
 	OrganizationMemberDTO processUserForMember(UserIdentifier identifier);
 	List<OrganizationDetailDTO> listUserRelateEnterprises(ListUserRelatedEnterprisesCommand cmd);
 	List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType);
@@ -194,7 +199,7 @@ public interface OrganizationService {
 	List<AclRoleAssignmentsDTO> listAclRoleByUserId(ListAclRoleByUserIdCommand cmd);
 	ImportDataResponse importEnterpriseData(MultipartFile mfile,
 			Long userId, ImportEnterpriseDataCommand cmd);
-	ImportDataResponse importOrganizationPersonnelData(MultipartFile mfile,
+	ImportOrganizationPersonnelDataResponse importOrganizationPersonnelData(MultipartFile mfile,
 			Long userId, ImportOrganizationPersonnelDataCommand cmd);
 	
 	ListPostCommandResponse listTaskTopicsByType(ListTopicsByTypeCommand cmd);
@@ -353,14 +358,45 @@ public interface OrganizationService {
  
 	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
 	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd); 
-	void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
+	String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
   
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
 
+	void createChildrenOrganizationJobPosition(CreateOrganizationCommand cmd);
+	
+	void createOrganizationJobPosition(CreateOrganizationJobPositionCommand cmd);
+	
+	void updateOrganizationJobPosition(UpdateOrganizationJobPositionCommand cmd);
+	
+	void deleteOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	
+	ListOrganizationJobPositionResponse listOrganizationJobPositions(ListOrganizationJobPositionCommand cmd);
+	
+	void updateChildrenOrganizationJobPosition(UpdateOrganizationsCommand cmd);
+	
+	void deleteChildrenOrganizationJobPosition(DeleteOrganizationIdCommand cmd);
+	
+	void createChildrenOrganizationJobLevel(CreateOrganizationCommand cmd);
+	
+	void updateChildrenOrganizationJobLevel(UpdateOrganizationsCommand cmd);
+
+	void deleteChildrenOrganizationJobLevel(DeleteOrganizationIdCommand cmd);
+	
+	ListChildrenOrganizationJobLevelResponse listChildrenOrganizationJobLevels(ListAllChildrenOrganizationsCommand cmd);
+	
+	ListChildrenOrganizationJobPositionResponse listChildrenOrganizationJobPositions(ListAllChildrenOrganizationsCommand cmd);
 	List<OrganizationMemberDTO> listOrganizationMemberDTOs(Long orgId,
 			List<Long> memberUids);
 
- 
-
+	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId);
+	ContractDTO processContract(Contract c);
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
+			Integer namespaceId);
+	List<OrganizationContactDTO> getAdmins(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId);
+	List<String> getBusinessContactPhone(Long organizationId);
+	Set<String> getOrganizationContactPhone(Long organizationId);
+	List<String> getAdminPhone(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId);
 }
