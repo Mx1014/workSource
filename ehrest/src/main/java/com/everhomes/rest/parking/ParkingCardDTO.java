@@ -36,7 +36,7 @@ public class ParkingCardDTO {
 	private Boolean isValid;
 	
     private String freeAmount;
-    private Boolean isSupportOnlinePaid;
+    private Byte isSupportOnlinePaid;
 	
 	public ParkingCardDTO() {
 	    
@@ -167,11 +167,11 @@ public class ParkingCardDTO {
 		this.freeAmount = freeAmount;
 	}
 
-	public Boolean getIsSupportOnlinePaid() {
+	public Byte getIsSupportOnlinePaid() {
 		return isSupportOnlinePaid;
 	}
 
-	public void setIsSupportOnlinePaid(Boolean isSupportOnlinePaid) {
+	public void setIsSupportOnlinePaid(Byte isSupportOnlinePaid) {
 		this.isSupportOnlinePaid = isSupportOnlinePaid;
 	}
 

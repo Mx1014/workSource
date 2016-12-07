@@ -75,6 +75,8 @@ CREATE TABLE `eh_parking_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'attachment object owner type',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g comment_id',
+  `data_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: 身份证, 2: 行驶证 3:驾驶证',
+
   `content_type` VARCHAR(32) COMMENT 'attachment object content type',
   `content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
   `creator_uid` BIGINT NOT NULL DEFAULT 0,
