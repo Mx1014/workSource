@@ -11,6 +11,7 @@ import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
@@ -109,7 +110,8 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	public void onFlowButtonFired(FlowCaseState ctx) {
 		
 		FlowGraphNode currentNode = ctx.getCurrentNode();
-		
+		FlowNode flowNode = currentNode.getFlowNode();
+		String nodeName = flowNode.getNodeName();
 		
 	}
 
