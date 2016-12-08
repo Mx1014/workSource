@@ -770,5 +770,13 @@ update eh_parking_recharge_orders set plate_owner_name = '叶芳' where plate_nu
 update eh_parking_recharge_orders set plate_owner_name = '林先生' where plate_number = '粤BH79B5' and create_time > '2016-11-01 00:00:00'; 
 update eh_parking_recharge_orders set plate_owner_name = '周健' where plate_number = '粤B4271Q' and create_time > '2016-11-01 00:00:00'; 
 update eh_parking_recharge_orders set plate_owner_name = '熊锋' where plate_number = '粤B8726J' and create_time > '2016-11-01 00:00:00'; 
-update eh_parking_recharge_orders set plate_owner_name = '陶耀军' where plate_number = '粤BM22N8' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '陶耀军' where plate_number = '粤BM22N8' and create_time > '2016-11-01 00:00:00';
 
+--
+-- 能耗管理菜单调整  add by xq.tian  2016/12/08
+--
+UPDATE `eh_web_menus` SET `sort_num` = '490' WHERE `id` = '49100';
+UPDATE `eh_web_menus` SET `sort_num` = '491' WHERE `id` = '49110';
+UPDATE `eh_web_menus` SET `sort_num` = '492' WHERE `id` = '49120';
+UPDATE `eh_web_menus` SET `sort_num` = '493' WHERE `id` = '49130';
+UPDATE `eh_web_menus` SET `sort_num` = '494' WHERE `id` = '49140';
