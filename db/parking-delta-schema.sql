@@ -18,6 +18,8 @@ ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_name` VARCHAR(64) COM
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_id` BIGINT COMMENT 'car serie id';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_id` BIGINT COMMENT 'flow id';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'current flow version';
+ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_case_id` BIGINT NOT NULL COMMENT 'flow case id';
+
 
  DROP TABLE IF EXISTS `eh_parking_flow`;
 CREATE TABLE `eh_parking_flow` (
