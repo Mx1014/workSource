@@ -14,14 +14,19 @@ public interface ParkingClearanceOperatorProvider {
     long createClearanceOperator(ParkingClearanceOperator operator);
 
     /**
-     * 根据id删除operator
+     * 删除operator
      * 直接删除记录
      */
-    void deleteClearanceOperatorById(Integer namespaceId, Long id);
+    void deleteClearanceOperator(ParkingClearanceOperator operator);
 
     /**
      * 分页获取operator
      */
     List<ParkingClearanceOperator> listClearanceOperator(Integer namespaceId, Long communityId, Long parkingLotId,
                                                          String operatorType, int pageSize, Long pageAnchor);
+
+    /**
+     * 根据id查询
+     */
+    ParkingClearanceOperator findById(Long id);
 }

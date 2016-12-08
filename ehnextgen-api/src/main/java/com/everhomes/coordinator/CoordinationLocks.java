@@ -42,7 +42,8 @@ public enum CoordinationLocks {
     PMTASK_STATISTICS("pmtask.statistics"),
     PMTASK_TARGET_STATISTICS("pmtask.target.statistics"),
 
-    PARKING_CLEARANCE_LOG("parking.clearance.log");
+    PARKING_CLEARANCE_LOG("parking.clearance.log"),
+    PARKING_CLEARANCE_OPERATOR("parking.clearance.operator");
 
     private String code;
     private CoordinationLocks(String code) {

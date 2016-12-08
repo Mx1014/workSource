@@ -71,6 +71,16 @@ public class ParkingClearanceController extends ControllerBase {
         return response(parkingClearanceService.searchClearanceLog(cmd));
     }
 
+    /**
+     * <p>验证当前用户是否有当前操作的权限</p>
+     * <b>URL: /clearance/checkAuthority</b>
+     */
+    @RequestMapping("checkAuthority")
+    @RestReturn(CheckAuthorityResponse.class)
+    public RestResponse checkAuthority(CheckAuthorityCommand cmd) {
+        return response(parkingClearanceService.checkAuthority(cmd));
+    }
+
     private RestResponse success() {
         RestResponse response = new RestResponse();
         response.setErrorDescription("OK");

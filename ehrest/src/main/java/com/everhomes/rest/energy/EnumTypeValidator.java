@@ -25,12 +25,12 @@ public class EnumTypeValidator implements ConstraintValidator<EnumType, Object> 
 
     @Override
     public boolean isValid(Object value, ConstraintValidatorContext context) {
-        if (enumType.nullValue() && value == null) {
-            return true;
+        if (value == null) {
+            return enumType.nullValue();
         }
         try {
             Class<?> enumClass = enumType.value();
-            Method fromCodeMethod = enumClass.getMethod("fromCode", Byte.class);
+            Method fromCodeMethod = enumClass.getMethod("fromCode", value.getClass());
             Object retVal = fromCodeMethod.invoke(enumClass, value);
             return retVal != null;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {

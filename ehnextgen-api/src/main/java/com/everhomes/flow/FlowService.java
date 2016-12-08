@@ -323,6 +323,8 @@ public interface FlowService {
 
 	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
 
+	void createSnapshotSupervisors(FlowCaseState ctx);
+	
 	/**
 	 * 获取当前业务模块下启用的工作流
 	 * @param moduleId

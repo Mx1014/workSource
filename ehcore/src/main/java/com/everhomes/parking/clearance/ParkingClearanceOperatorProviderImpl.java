@@ -10,6 +10,7 @@ import com.everhomes.server.schema.tables.daos.EhParkingClearanceOperatorsDao;
 import com.everhomes.server.schema.tables.pojos.EhParkingClearanceOperators;
 import com.everhomes.server.schema.tables.records.EhParkingClearanceOperatorsRecord;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import org.jooq.DSLContext;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,12 +44,8 @@ public class ParkingClearanceOperatorProviderImpl implements ParkingClearanceOpe
     }
 
     @Override
-    public void deleteClearanceOperatorById(Integer namespaceId, Long id) {
-        rwContext()
-                .delete(Tables.EH_PARKING_CLEARANCE_OPERATORS)
-                .where(Tables.EH_PARKING_CLEARANCE_OPERATORS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_PARKING_CLEARANCE_OPERATORS.ID.eq(id))
-                .execute();
+    public void deleteClearanceOperator(ParkingClearanceOperator operator) {
+        rwDao().delete(operator);
     }
 
     @Override
@@ -75,8 +72,18 @@ public class ParkingClearanceOperatorProviderImpl implements ParkingClearanceOpe
         return query.fetchInto(ParkingClearanceOperator.class);
     }
 
+    @Override
+    public ParkingClearanceOperator findById(Long id) {
+        return ConvertHelper.convert(dao().findById(id), ParkingClearanceOperator.class);
+    }
+
     private EhParkingClearanceOperatorsDao rwDao(){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+        return new EhParkingClearanceOperatorsDao(context.configuration());
+    }
+
+    private EhParkingClearanceOperatorsDao dao(){
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return new EhParkingClearanceOperatorsDao(context.configuration());
     }
 

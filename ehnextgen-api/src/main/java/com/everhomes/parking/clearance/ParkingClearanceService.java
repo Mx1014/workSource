@@ -33,4 +33,9 @@ public interface ParkingClearanceService {
      * 搜索车辆放行申请记录
      */
     SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd);
+
+    /**
+     * 检查用户的权限
+     */
+    CheckAuthorityResponse checkAuthority(CheckAuthorityCommand cmd);
 }

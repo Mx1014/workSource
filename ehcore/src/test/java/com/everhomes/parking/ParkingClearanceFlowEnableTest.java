@@ -122,7 +122,7 @@ public class ParkingClearanceFlowEnableTest extends LoginAuthTestCase {
     	flowCmd.setNamespaceId(namespaceId);
     	flowCmd.setOrgId(orgId);
         flowCmd.setOwnerId(parkingLotId);
-        flowCmd.setOwnerType(EntityType.PARKING_LOT.getCode());
+        flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
     	FlowDTO flowDTO = flowService.createFlow(flowCmd);
     	
     	CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
@@ -300,8 +300,8 @@ public class ParkingClearanceFlowEnableTest extends LoginAuthTestCase {
     }
     
     private List<Long> getOrgUsers(Long id) {
-    	List<String> groupTypes = new ArrayList<String>();
-    	groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+    	// List<String> groupTypes = new ArrayList<String>();
+    	// groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
     	// ListOrganizationsCommandResponse orgResps = organizationService.listAllChildrenOrganizations(id, groupTypes);
     	// List<OrganizationDTO> orgs = orgResps.getDtos();
     	// Assert.assertTrue(orgs.size() > 0);

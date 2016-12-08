@@ -118,6 +118,11 @@ public class FlowUserSelectionProviderImpl implements FlowUserSelectionProvider 
     
     @Override
     public List<FlowUserSelection> findSelectionByBelong(Long belongId, String belongEntity, String flowUserBelongType) {
+    	return findSelectionByBelong(belongId, belongEntity, flowUserBelongType, null);
+    }
+    
+    @Override
+    public List<FlowUserSelection> findSelectionByBelong(Long belongId, String belongEntity, String flowUserBelongType, Integer ver) {
     	ListingLocator locator = new ListingLocator();
     	return queryFlowUserSelections(locator, 100, new ListingQueryBuilderCallback() {
 			@Override
@@ -127,6 +132,9 @@ public class FlowUserSelectionProviderImpl implements FlowUserSelectionProvider 
 				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_ENTITY.eq(belongEntity));
 				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_TYPE.eq(flowUserBelongType));
 				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				if(ver != null) {
+					query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.FLOW_VERSION.eq(ver));
+				}
 				return query;
 			}
     		
