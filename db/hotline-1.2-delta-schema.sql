@@ -4,7 +4,7 @@
 -- DROP TABLE IF EXISTS `eh_service_configurations`;
 
 CREATE TABLE `eh_service_configurations` (
-  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `owner_type` VARCHAR(64) COMMENT 'community;group,organaization,exhibition,',
   `owner_id` BIGINT(20) DEFAULT '0',
   `name` VARCHAR(64) NOT NULL,
