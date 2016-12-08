@@ -522,14 +522,15 @@ public class ForumServiceImpl implements ForumService {
                 //活动添加活动成果和是否有活动附件标识 add by xiongying 20161207
                 GetActivityAchievementCommand command = new GetActivityAchievementCommand();
                 command.setActivityId(postDto.getEmbeddedId());
+                ActivityDTO activityDTO = ConvertHelper.convert(postDto.getEmbeddedJson(), ActivityDTO.class);
                 GetActivityAchievementResponse achievementResponse = activityService.getActivityAchievement(command);
                 if(achievementResponse != null) {
-                    postDto.setAchievementType(achievementResponse.getAchievementType());
-                    postDto.setAchievement(achievementResponse.getAchievement());
+                    activityDTO.setAchievementType(achievementResponse.getAchievementType());
+                    activityDTO.setAchievement(achievementResponse.getAchievement());
                 }
 
                 boolean existAttachments = activityProivider.existActivityAttachments(postDto.getEmbeddedId());
-                postDto.setActivityAttachmentFlag(existAttachments);
+                activityDTO.setActivityAttachmentFlag(existAttachments);
 
 			}
             

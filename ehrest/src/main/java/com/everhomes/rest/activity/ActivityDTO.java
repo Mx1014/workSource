@@ -32,6 +32,9 @@ import com.everhomes.util.StringHelper;
  *<li>uuid:活动唯一的标识</li>
  *<li>mediaUrl:活动url</li>
  *<li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
+ * <li>achievement: 活动成果</li>
+ * <li>achievementType: 活动成果文本类型 richtext：富文本, link：第三方链接 </li>
+ * <li>activityAttachmentFlag: 是否有活动附件 true: 有 false: 无</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -81,10 +84,36 @@ public class ActivityDTO {
     private Integer maxQuantity;
     private String version;
 
+    private String achievementType;
+
     private String achievement;
 
-//	private List<> activityAttachments;
-    
+    private boolean activityAttachmentFlag;
+
+    public String getAchievementType() {
+        return achievementType;
+    }
+
+    public void setAchievementType(String achievementType) {
+        this.achievementType = achievementType;
+    }
+
+    public String getAchievement() {
+        return achievement;
+    }
+
+    public void setAchievement(String achievement) {
+        this.achievement = achievement;
+    }
+
+    public boolean isActivityAttachmentFlag() {
+        return activityAttachmentFlag;
+    }
+
+    public void setActivityAttachmentFlag(boolean activityAttachmentFlag) {
+        this.activityAttachmentFlag = activityAttachmentFlag;
+    }
+
     public String getVersion() {
 		return version;
 	}

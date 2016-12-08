@@ -57,9 +57,6 @@ import com.everhomes.util.StringHelper;
  * <li>contentUrl: 内容链接</li>
  * <li>groupId: 俱乐部id</li>
  * <li>groupName: 俱乐部名称</li>
- * <li>achievement: 活动成果</li>
- * <li>•achievementType: 活动成果文本类型 richtext：富文本, link：第三方链接 </li>
- * <li>activityAttachmentFlag: 是否有活动附件 true: 有 false: 无</li>
  * </ul>
  */
 public class PostDTO {
@@ -160,36 +157,6 @@ public class PostDTO {
     private Long groupId;
     
     private String groupName;
-
-    private String achievementType;
-
-    private String achievement;
-
-    private boolean activityAttachmentFlag;
-
-    public String getAchievementType() {
-        return achievementType;
-    }
-
-    public void setAchievementType(String achievementType) {
-        this.achievementType = achievementType;
-    }
-
-    public String getAchievement() {
-        return achievement;
-    }
-
-    public void setAchievement(String achievement) {
-        this.achievement = achievement;
-    }
-
-    public boolean getActivityAttachmentFlag() {
-        return activityAttachmentFlag;
-    }
-
-    public void setActivityAttachmentFlag(boolean activityAttachmentFlag) {
-        this.activityAttachmentFlag = activityAttachmentFlag;
-    }
 
     public Long getGroupId() {
 		return groupId;
