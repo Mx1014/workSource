@@ -1,5 +1,7 @@
 package com.everhomes.servicehotline;
 
+import org.springframework.stereotype.Component;
+
 import com.everhomes.rest.servicehotline.AddHotlineListCommand;
 import com.everhomes.rest.servicehotline.DeleteHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
@@ -10,7 +12,7 @@ import com.everhomes.rest.servicehotline.SetHotlineSubjectCommand;
 import com.everhomes.rest.servicehotline.UpdateHotlineCommand;
 import com.everhomes.rest.servicehotline.UpdateHotlinesCommand;
 import com.everhomes.techpark.servicehotline.HotlineService;
-
+@Component
 public class HotlineServiceImpl implements HotlineService {
 
 	@Override
