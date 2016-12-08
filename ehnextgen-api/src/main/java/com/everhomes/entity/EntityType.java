@@ -46,7 +46,9 @@ public enum EntityType {
     IMPERSONATION(EhUserImpersonations.class.getSimpleName()),
     SACATEGORY(EhServiceAllianceCategories.class.getSimpleName()),
     ROLE(EhAclRoles.class.getSimpleName()),
-    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName());
+    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName()),
+    PARKING_CARD_REQUEST(EhParkingCardRequests.class.getSimpleName());
+
     private String code;
     
     private EntityType(String code) {

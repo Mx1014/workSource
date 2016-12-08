@@ -24,6 +24,7 @@ import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
@@ -39,6 +40,7 @@ import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
 import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
 import com.everhomes.rest.parking.ListParkingWorkFlowsCommand;
+import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingActivityDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
@@ -96,16 +98,16 @@ public class ParkingController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /parking/listParkingCards</b>
-     * <p>查询指定园区/小区、停车场、车牌号对应的月卡列表</p>
+     * <b>URL: /parking/getOpenCardInfo</b>
+     * <p>查询开通月卡信息</p>
      */
-    @RequestMapping("listParkingCards")
-    @RestReturn(value=ParkingCardDTO.class, collection=true)
-    public RestResponse getOpenCardInfo(@Valid ListParkingCardsCommand cmd) {
-        List<ParkingCardDTO> parkingCardList = null;
-        
-        parkingCardList = parkingService.listParkingCards(cmd);
-        RestResponse response = new RestResponse(parkingCardList);
+    @RequestMapping("getOpenCardInfo")
+    @RestReturn(value=OpenCardInfoDTO.class)
+    public RestResponse getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+    	
+    	OpenCardInfoDTO dto = parkingService.getOpenCardInfo(cmd);
+    	
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

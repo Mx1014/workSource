@@ -13,7 +13,6 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -26,7 +25,6 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,30 +41,18 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowButton;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.pmtask.PmTaskAttachment;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.FlowActionInfo;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -82,6 +68,7 @@ import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.CreateParkingTempOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
@@ -100,6 +87,7 @@ import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
 import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
 import com.everhomes.rest.parking.ListParkingWorkFlowsCommand;
+import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingActivityDTO;
 import com.everhomes.rest.parking.ParkingAttachmentDTO;
 import com.everhomes.rest.parking.ParkingAttachmentType;
@@ -118,6 +106,7 @@ import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
+import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
@@ -228,15 +217,25 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"OwnerId or ownertype cannot be null.");
     	}
-    	
+    	User user = UserContext.current().getUser();
     	List<ParkingLot> list = parkingProvider.listParkingLots(cmd.getOwnerType(), cmd.getOwnerId());
     	
     	List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
     		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
     		
     		BigDecimal amount = parkingProvider.countParkingStatistics(r.getOwnerType(), r.getOwnerId(), r.getId());
-    		
     		dto.setTotalAmount(amount);
+    		
+        	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), moduleId, FlowModuleType.NO_MODULE.getCode(), 
+        			r.getId(), FlowOwnerType.PARKING.getCode());
+        	if(null == flow)
+        		dto.setFlowId(ParkingRequestFlowType.FORBIDDEN.getCode());
+        	else if(flow.getId() == 7L)
+        		dto.setFlowId(ParkingRequestFlowType.INTELLIGENT.getCode());
+        	else if(flow.getId() == 9L)
+        		dto.setFlowId(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode());
+        	else if(flow.getId() == 11L)
+            		dto.setFlowId(ParkingRequestFlowType.QUEQUE.getCode());
     		return dto;
     	}).collect(Collectors.toList());
     	
@@ -381,9 +380,15 @@ public class ParkingServiceImpl implements ParkingService {
     		
     		addAttachments(cmd.getAttachments(), user.getId(), parkingCardRequest.getId(), ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
 
-    		//TODO: 新建flow
-    		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
-    		createFlowCase(user.getNamespaceId(), moduleId, null, parkingLot.getId(), ownerType, user.getId());
+    		//TODO: 新建flowcase
+    		String ownerType = FlowOwnerType.PARKING.getCode();
+    		FlowCase flowCase = createFlowCase(user.getNamespaceId(), moduleId, FlowModuleType.NO_MODULE.getCode(), 
+    				parkingLot.getId(), ownerType, user.getId(), parkingCardRequest.getId());
+    		
+    		parkingCardRequest.setFlowId(flowCase.getFlowMainId());
+    		parkingCardRequest.setFlowVersion(flowCase.getFlowVersion());
+    		parkingCardRequest.setFlowCaseId(flowCase.getId());
+    		parkingProvider.updateParkingCardRequest(parkingCardRequest);
     		return null;
 		});
 		parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
@@ -396,7 +401,8 @@ public class ParkingServiceImpl implements ParkingService {
     	
 	}
     
-    private void createFlowCase(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, Long applyUserId) {
+    private FlowCase createFlowCase(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, 
+    		String ownerType, Long applyUserId, Long referId) {
     	
     	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
     	
@@ -404,13 +410,14 @@ public class ParkingServiceImpl implements ParkingService {
     	cmd.setApplyUserId(applyUserId);
     	cmd.setFlowMainId(flow.getFlowMainId());
     	cmd.setFlowVersion(flow.getFlowVersion());
-    	cmd.setReferId(0l);
-    	cmd.setReferType("test-type");
+    	cmd.setReferId(referId);
+    	cmd.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
     	
-    	Random r = new Random();
-    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
+    	cmd.setContent("parking card request");
     	
     	FlowCase flowCase = flowService.createFlowCase(cmd);
+    	
+    	return flowCase;
     }
     
     public ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd) {
@@ -1129,6 +1136,7 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingFlow.setRequestMonthCount(cmd.getRequestMonthCount());
 			parkingFlow.setRequestRechargeType(cmd.getRequestRechargeType());
 			parkingFlow.setFlowId(cmd.getFlowId());
+			parkingFlow.setMaxRequestNum(cmd.getMaxRequestNum());
 			parkingProvider.createParkingRequestCardConfig(parkingFlow);
 		}else {
 			parkingFlow.setCardAgreement(cmd.getCardAgreement());
@@ -1136,9 +1144,16 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingFlow.setMaxIssueNum(cmd.getMaxIssueNum());
 			parkingFlow.setRequestMonthCount(cmd.getRequestMonthCount());
 			parkingFlow.setRequestRechargeType(cmd.getRequestRechargeType());
+			parkingFlow.setMaxRequestNum(cmd.getMaxRequestNum());
 			parkingProvider.updatetParkingRequestCardConfig(parkingFlow);
 
 		}
+	}
+
+	@Override
+	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 	
 }

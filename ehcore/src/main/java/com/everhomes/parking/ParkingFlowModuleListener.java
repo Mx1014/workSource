@@ -136,7 +136,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				flowNode.getFlowVersion());
 		
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if("issueParkingCard".equals(param)) {
+			if("QUEUEING".equals(param)) {
 				if(flowId == 1) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
@@ -144,25 +144,27 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
-			}else if("reject".equals(param)) {
-				parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-				parkingProvider.updateParkingCardRequest(parkingCardRequest);
-			}else if("processed".equals(param)) {
+			}else if("PROCESSING".equals(param)) {
 				if(flowId == 1) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
-			}else if("canceled".equals(param)) {
-				parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-				parkingProvider.updateParkingCardRequest(parkingCardRequest);
-			}else if("agreement".equals(param)) {
-				parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
-				parkingProvider.updateParkingCardRequest(parkingCardRequest);
-			}else if("openCard".equals(param)) {
-				parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+			}
+//			else if("canceled".equals(param)) {
+//				parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+//				parkingProvider.updateParkingCardRequest(parkingCardRequest);
+//			}else if("agreement".equals(param)) {
+//				parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+//				parkingProvider.updateParkingCardRequest(parkingCardRequest);
+//			}
+			else if("SUCCEED".equals(param)) {
+				parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
 				parkingProvider.updateParkingCardRequest(parkingCardRequest);
 			}
-		} 
+		}else if(FlowStepType.REJECT_STEP.getCode().equals(stepType)) {
+			parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+			parkingProvider.updateParkingCardRequest(parkingCardRequest);
+		}
 		
 		
 		

@@ -18,6 +18,7 @@ public class SetParkingRequestCardConfigCommand {
     private String cardRequestTip;
     private String cardAgreement;
     private Integer maxIssueNum;
+    private Integer maxRequestNum;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -77,5 +78,11 @@ public class SetParkingRequestCardConfigCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Integer getMaxRequestNum() {
+		return maxRequestNum;
+	}
+	public void setMaxRequestNum(Integer maxRequestNum) {
+		this.maxRequestNum = maxRequestNum;
+	}
     
 }

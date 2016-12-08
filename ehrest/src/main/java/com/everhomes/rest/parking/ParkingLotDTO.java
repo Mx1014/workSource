@@ -25,7 +25,7 @@ public class ParkingLotDTO {
     private String vendorName;
     private Integer cardReserveDays;
     private Timestamp createTime;
-    private Integer maxRequestNum;
+    
     private Byte tempfeeFlag;
     private Byte rateFlag;
     
@@ -94,14 +94,6 @@ public class ParkingLotDTO {
     public void setCreateTime(Timestamp createTime) {
         this.createTime = createTime;
     }
-
-	public Integer getMaxRequestNum() {
-		return maxRequestNum;
-	}
-
-	public void setMaxRequestNum(Integer maxRequestNum) {
-		this.maxRequestNum = maxRequestNum;
-	}
 
 	public Byte getTempfeeFlag() {
 		return tempfeeFlag;

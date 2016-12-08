@@ -49,6 +49,10 @@ public class ParkingCardRequestDTO {
     private Timestamp issueTime;
     private Timestamp createTime;
     
+    private Long flowId;
+	private Integer flowVersion;
+	private Long flowCaseId;
+    
     private String carBrand;
     private String carSerieName;
     private String carColor;
@@ -216,6 +220,30 @@ public class ParkingCardRequestDTO {
 
 	public void setAttachments(List<ParkingAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+	public Long getFlowId() {
+		return flowId;
+	}
+
+	public void setFlowId(Long flowId) {
+		this.flowId = flowId;
+	}
+
+	public Integer getFlowVersion() {
+		return flowVersion;
+	}
+
+	public void setFlowVersion(Integer flowVersion) {
+		this.flowVersion = flowVersion;
+	}
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
 	}
 
 	@Override

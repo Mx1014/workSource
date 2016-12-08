@@ -1,4 +1,4 @@
-package com.everhomes.flow;
+package com.everhomes.parking;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -18,8 +18,22 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
 
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.discover.RestReturn;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowButton;
+import com.everhomes.flow.FlowButtonProvider;
+import com.everhomes.flow.FlowListenerManager;
+import com.everhomes.flow.FlowNode;
+import com.everhomes.flow.FlowNodeProvider;
+import com.everhomes.flow.FlowProvider;
+import com.everhomes.flow.FlowScriptProvider;
+import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowServiceTest;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
@@ -61,6 +75,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -69,71 +84,44 @@ import com.everhomes.user.base.LoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
-public class CreateParkingFlowTest  extends LoginAuthTestCase {
-	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
-	
-    @Configuration
-    @ComponentScan(basePackages = {
-        "com.everhomes"
-    })
-    @EnableAutoConfiguration(exclude={
-            DataSourceAutoConfiguration.class, 
-            HibernateJpaAutoConfiguration.class,
-        })
-    static class ContextConfiguration {
-    }
-    
+@RestController
+@RequestMapping("/parking2")
+public class CreateParkingFlowTest{
     @Autowired
     public FlowProvider flowProvider;
-    
     @Autowired
     private FlowService flowService;
-    
     @Autowired
     private FlowNodeProvider flowNodeProvider;
-    
     @Autowired
     private FlowButtonProvider flowButtonProvider;
-    
     @Autowired
     private OrganizationService organizationService;
-    
     @Autowired
     private FlowListenerManager flowListenerManager;
-    
     @Autowired
     private FlowScriptProvider flowScriptProvider;
-    
     @Autowired
     private UserService userService;
-    
     @Autowired
     private UserProvider userProvider;
     @Autowired
     private ConfigurationProvider configProvider;
+    @Autowired
+    private DbProvider dbProvider;
     
     private User testUser1;
     private User testUser2;
     private Integer namespaceId =1000000;
-    private Long moduleId = 111l;
+    private Long moduleId = 40800l;
     private Long orgId = 1000001L;
-    
-    
-    @Before
-    public void setUp() throws Exception {
-        super.setUp();
-        
-    }
-    
-    @After
-    public void tearDown() {
-    }
-    
-    @Test
+
+    @RequestMapping("createFlow")
     public void testFlowEnable() {
     	//step1 create flow
     	CreateFlowCommand flowCmd = new CreateFlowCommand();
-    	flowCmd.setFlowName("智能模式");
+//    	flowCmd.setFlowName("智能模式");
+    	flowCmd.setFlowName("半自动化模式");
     	flowCmd.setModuleId(moduleId);
     	flowCmd.setNamespaceId(namespaceId);
     	flowCmd.setOrgId(orgId);
@@ -188,7 +176,7 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	flowService.updateFlowNode(updateFlowCmd2);
     	
     	UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
-    	updateFlowCmd3.setFlowNodeId(node2.getId());
+    	updateFlowCmd3.setFlowNodeId(node3.getId());
     	updateFlowCmd3.setParams("SUCCEED");
     	flowService.updateFlowNode(updateFlowCmd3);
     	
@@ -276,22 +264,22 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	
-    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node3.getId(), FlowConstants.FLOW_CONFIG_VER
-    			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
-    	flowButton3.setStatus(FlowButtonStatus.ENABLED.getCode());
-    	flowButtonProvider.updateFlowButton(flowButton3);
-    	
-    	buttonCmd = new UpdateFlowButtonCommand();
-    	buttonCmd.setButtonName("开通月卡");
-    	buttonCmd.setDescription("开通月卡");
-    	buttonCmd.setFlowButtonId(flowButton3.getId());
-    	buttonCmd.setNeedProcessor((byte)1);
-    	buttonCmd.setNeedSubject((byte)1);
-    	
-    	flowService.updateFlowButton(buttonCmd);
+//    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node3.getId(), FlowConstants.FLOW_CONFIG_VER
+//    			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
+//    	flowButton3.setStatus(FlowButtonStatus.ENABLED.getCode());
+//    	flowButtonProvider.updateFlowButton(flowButton3);
+//    	
+//    	buttonCmd = new UpdateFlowButtonCommand();
+//    	buttonCmd.setButtonName("开通月卡");
+//    	buttonCmd.setDescription("开通月卡");
+//    	buttonCmd.setFlowButtonId(flowButton3.getId());
+//    	buttonCmd.setNeedProcessor((byte)1);
+//    	buttonCmd.setNeedSubject((byte)1);
+//    	
+//    	flowService.updateFlowButton(buttonCmd);
     	
     	Boolean ok = flowService.enableFlow(flowDTO.getId());
-    	Assert.assertTrue(ok);
+   
     }
     
     public FlowNodeDTO createFlowNode(CreateFlowNodeCommand cmd) {
@@ -487,5 +475,142 @@ public class CreateParkingFlowTest  extends LoginAuthTestCase {
     	return users;
     }
     
-
+    @RequestMapping("createFlow2")
+    public void testFlowEnable1() {
+    	//step1 create flow
+    	CreateFlowCommand flowCmd = new CreateFlowCommand();
+//    	flowCmd.setFlowName("智能模式");
+    	flowCmd.setFlowName("申请排队模式");
+    	flowCmd.setModuleId(moduleId);
+    	flowCmd.setNamespaceId(namespaceId);
+    	flowCmd.setOrgId(orgId);
+    	flowCmd.setOwnerId(10004L);
+    	flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
+    	FlowDTO flowDTO = flowService.createFlow(flowCmd);
+    	
+    	CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
+    	nodeCmd.setFlowMainId(flowDTO.getId());
+    	nodeCmd.setNamespaceId(namespaceId);
+    	nodeCmd.setNodeLevel(1);
+    	nodeCmd.setNodeName("排队中");
+    	FlowNodeDTO node1 = createFlowNode(nodeCmd);
+    	
+    	nodeCmd = new CreateFlowNodeCommand();
+    	nodeCmd.setFlowMainId(flowDTO.getId());
+    	nodeCmd.setNamespaceId(namespaceId);
+    	nodeCmd.setNodeLevel(2);
+    	nodeCmd.setNodeName("待办理");
+    	FlowNodeDTO node2 = createFlowNode(nodeCmd);
+    	
+    	nodeCmd = new CreateFlowNodeCommand();
+    	nodeCmd.setFlowMainId(flowDTO.getId());
+    	nodeCmd.setNamespaceId(namespaceId);
+    	nodeCmd.setNodeLevel(3);
+    	nodeCmd.setNodeName("办理成功");
+    	FlowNodeDTO node3 = createFlowNode(nodeCmd);
+    	
+    	//support auto step
+    	UpdateFlowNodeCommand updateFlowCmd = new UpdateFlowNodeCommand();
+    	updateFlowCmd.setFlowNodeId(node1.getId());
+    	updateFlowCmd.setParams("AUDITING");
+    	flowService.updateFlowNode(updateFlowCmd);
+    	
+    	UpdateFlowNodeCommand updateFlowCmd2 = new UpdateFlowNodeCommand();
+    	updateFlowCmd2.setFlowNodeId(node2.getId());
+    	updateFlowCmd2.setParams("QUEUEING");
+    	flowService.updateFlowNode(updateFlowCmd2);
+    	
+    	UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
+    	updateFlowCmd3.setFlowNodeId(node3.getId());
+    	updateFlowCmd3.setParams("SUCCEED");
+    	flowService.updateFlowNode(updateFlowCmd3);
+    	
+    	addNodeProcessor(node1, orgId);
+    	addNodeProcessor(node2, orgId);
+    	addNodeProcessor(node3, orgId);
+    
+    	updateNodeReminder(node1, orgId);
+    	updateNodeReminder(node2, orgId);
+    	updateNodeReminder(node3, orgId);
+    	
+    	updateNodeTracker(node1, orgId);
+    	updateNodeTracker(node2, orgId);
+    	updateNodeTracker(node3, orgId);
+    	//发放资格按钮
+    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	flowButton1.setStatus(FlowButtonStatus.ENABLED.getCode());
+    	flowButtonProvider.updateFlowButton(flowButton1);
+    	
+    	UpdateFlowButtonCommand buttonCmd = new UpdateFlowButtonCommand();
+    	buttonCmd.setButtonName("发放资格");
+    	buttonCmd.setDescription("发放资格");
+    	buttonCmd.setFlowButtonId(flowButton1.getId());
+    	buttonCmd.setNeedProcessor((byte)1);
+    	buttonCmd.setNeedSubject((byte)1);    	
+    	flowService.updateFlowButton(buttonCmd);
+    	//驳回按钮
+    	FlowButton flowButton11 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	flowButton11.setStatus(FlowButtonStatus.ENABLED.getCode());
+    	flowButtonProvider.updateFlowButton(flowButton11);
+    	
+    	UpdateFlowButtonCommand buttonCmd11 = new UpdateFlowButtonCommand();
+    	buttonCmd11.setButtonName("驳回");
+    	buttonCmd11.setDescription("驳回");
+    	buttonCmd11.setFlowButtonId(flowButton11.getId());
+    	buttonCmd11.setNeedProcessor((byte)1);
+    	buttonCmd11.setNeedSubject((byte)1);    	
+    	flowService.updateFlowButton(buttonCmd11);
+    	
+    	//办理月卡
+    	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	flowButton2.setStatus(FlowButtonStatus.ENABLED.getCode());
+    	flowButtonProvider.updateFlowButton(flowButton2);
+    	
+    	buttonCmd = new UpdateFlowButtonCommand();
+    	buttonCmd.setButtonName("办理");
+    	buttonCmd.setDescription("办理");
+    	buttonCmd.setFlowButtonId(flowButton2.getId());
+    	buttonCmd.setNeedProcessor((byte)1);
+    	buttonCmd.setNeedSubject((byte)1);
+    	
+    	FlowActionInfo buttonAction = createActionInfo("test-button2-info", orgId);
+    	buttonCmd.setMessageAction(buttonAction);
+    	flowService.updateFlowButton(buttonCmd);
+    	//取消资格
+    	FlowButton flowButton21 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	flowButton21.setStatus(FlowButtonStatus.ENABLED.getCode());
+    	flowButtonProvider.updateFlowButton(flowButton21);
+    	
+    	buttonCmd = new UpdateFlowButtonCommand();
+    	buttonCmd.setButtonName("取消资格");
+    	buttonCmd.setDescription("取消资格");
+    	buttonCmd.setFlowButtonId(flowButton21.getId());
+    	buttonCmd.setNeedProcessor((byte)1);
+    	buttonCmd.setNeedSubject((byte)1);
+    	
+    	buttonAction = createActionInfo("取消资格", orgId);
+    	buttonCmd.setMessageAction(buttonAction);
+    	flowService.updateFlowButton(buttonCmd);
+    	
+//    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node3.getId(), FlowConstants.FLOW_CONFIG_VER
+//    			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
+//    	flowButton3.setStatus(FlowButtonStatus.ENABLED.getCode());
+//    	flowButtonProvider.updateFlowButton(flowButton3);
+//    	
+//    	buttonCmd = new UpdateFlowButtonCommand();
+//    	buttonCmd.setButtonName("开通月卡");
+//    	buttonCmd.setDescription("开通月卡");
+//    	buttonCmd.setFlowButtonId(flowButton3.getId());
+//    	buttonCmd.setNeedProcessor((byte)1);
+//    	buttonCmd.setNeedSubject((byte)1);
+//    	
+//    	flowService.updateFlowButton(buttonCmd);
+    	
+    	Boolean ok = flowService.enableFlow(flowDTO.getId());
+   
+    }
 }
