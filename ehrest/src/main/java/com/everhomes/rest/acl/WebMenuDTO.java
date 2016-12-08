@@ -24,6 +24,7 @@ public class WebMenuDTO {
 	private String  dataType;
 	private Byte    leafFlag;
 	private Long    parentId;
+	private Long moduleId;
 	
 	@ItemType(WebMenuDTO.class)
 	private List<WebMenuDTO> dtos;
@@ -65,6 +66,15 @@ public class WebMenuDTO {
 	public void setParentId(Long parentId) {
 		this.parentId = parentId;
 	}
+
+	public Long getModuleId() {
+		return moduleId;
+	}
+
+	public void setModuleId(Long moduleId) {
+		this.moduleId = moduleId;
+	}
+
 	public List<WebMenuDTO> getDtos() {
 		return dtos;
 	}

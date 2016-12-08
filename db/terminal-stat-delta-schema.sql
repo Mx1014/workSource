@@ -107,3 +107,5 @@ CREATE TABLE `eh_app_version` (
 
 ALTER TABLE `eh_user_activities` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 ALTER TABLE `eh_user_activities` ADD COLUMN `version_realm` varchar(128) DEFAULT NULL;
+
+ALTER TABLE `eh_web_menus` ADD COLUMN `module_id` BIGINT DEFAULT NULL;

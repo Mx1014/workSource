@@ -1257,4 +1257,44 @@ public class OrganizationController extends ControllerBase {
 		return res;
 	}
 
+	/**
+	 * <b>URL: /org/listOrganizationsByModuleId</b>
+	 * <p>获取获取业务部门的机构</p>
+	 */
+	@RequestMapping("listOrganizationsByModuleId")
+	@RestReturn(value=OrganizationDTO.class, collection = true)
+	public RestResponse listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationsByModuleId(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationContactByJobPositionId</b>
+	 * <p>根据通用岗位获取人员</p>
+	 */
+	@RequestMapping("listOrganizationContactByJobPositionId")
+	@RestReturn(value=OrganizationContactDTO.class, collection = true)
+	public RestResponse listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd){
+
+		RestResponse res = new RestResponse(organizationService.listOrganizationContactByJobPositionId(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationManagers</b>
+	 * <p>获取机构经理人员</p>
+	 */
+	@RequestMapping("listOrganizationManagers")
+	@RestReturn(value=OrganizationManagerDTO.class, collection = true)
+	public RestResponse listOrganizationManagers(ListOrganizationManagersCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationManagers(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
 }

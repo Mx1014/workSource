@@ -227,6 +227,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		
 		List<WebMenuDTO> menuDtos =  menus.stream().map(r->{
+
 			return ConvertHelper.convert(r, WebMenuDTO.class);
 		}).collect(Collectors.toList());
 		

@@ -268,5 +268,9 @@ public interface OrganizationProvider {
 	void createOrganizationAddressMapping(CommunityAddressMapping addressMapping);
 	void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping);
 	CommunityAddressMapping findOrganizationAddressMapping(Long organizationId, Long communityId, Long addressId);
- 
+	List<OrganizationJobPositionMap> listOrganizationJobPositionMapsByJobPositionId(Long jobPositionId);
+
+	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, ListingQueryBuilderCallback queryBuilderCallback);
+
+	OrganizationJobPositionMap getOrganizationJobPositionMapByOrgIdAndJobPostionId(Long organizationId, Long jobPostionId);
 }
