@@ -13,7 +13,7 @@ CREATE TABLE `eh_service_configurations` (
   `namespace_id` INT(11) NOT NULL DEFAULT '0',
   `display_name` VARCHAR(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 -- 
