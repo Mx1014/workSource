@@ -1,19 +1,20 @@
 -- 
 -- 服务热线配置表
 -- 
--- DROP TABLE IF EXISTS `eh_service_hotline_configs`;
-CREATE TABLE `eh_service_hotline_configs` (
-  `id` BIGINT COMMENT 'id of the record',
-  `namespace_id` INTEGER DEFAULT '0',
+-- DROP TABLE IF EXISTS `eh_service_configurations`;
+
+CREATE TABLE `eh_service_configurations` (
+  `id` INT(11) NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `owner_type` VARCHAR(64) COMMENT 'community;group,organaization,exhibition,',
   `owner_id` BIGINT(20) DEFAULT '0',
-  `name` VARCHAR(64) COMMENT '不会用到的字段', 
-  `service_type` INT COMMENT'2-专属客服', 
-  `create_time` DATETIME DEFAULT NULL,
-  `creator_uid` BIGINT DEFAULT NULL,
-  `update_time` DATETIME DEFAULT NULL,
+  `name` VARCHAR(64) NOT NULL,
+  `value` VARCHAR(256) NOT NULL,
+  `description` VARCHAR(256) DEFAULT NULL,
+  `namespace_id` INT(11) NOT NULL DEFAULT '0',
+  `display_name` VARCHAR(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4
+
 
 -- 
 -- 服务热线表
