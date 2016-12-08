@@ -99,6 +99,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
@@ -118,6 +119,7 @@ import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.TargetType;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -167,6 +169,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
+		department.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(department);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
@@ -2947,6 +2950,46 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(records.get(0), CommunityAddressMapping.class);
 		}
 		return null;
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+				.and(Tables.EH_ORGANIZATIONS.ID.gt(pageAnchor))
+				.orderBy(Tables.EH_ORGANIZATIONS.ID.asc())
+				.limit(pageSize)
+				.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Organization.class));
+		}
+		return new ArrayList<Organization>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS)
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATIONS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ORGANIZATIONS.UPDATE_TIME.asc(), Tables.EH_ORGANIZATIONS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Organization.class));
+		}
+		return new ArrayList<Organization>();
 	}
 	
 	

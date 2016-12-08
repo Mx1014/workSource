@@ -268,5 +268,8 @@ public interface OrganizationProvider {
 	void createOrganizationAddressMapping(CommunityAddressMapping addressMapping);
 	void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping);
 	CommunityAddressMapping findOrganizationAddressMapping(Long organizationId, Long communityId, Long addressId);
+	List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize);
+	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
  
 }

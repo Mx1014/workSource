@@ -4,19 +4,18 @@ package com.everhomes.rest.openapi.jindi;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.util.StringHelper;
 
 /**
  * 
  * <ul>
- * <li>userList: 用户列表</li>
+ * <li>organizationList: 组织列表</li>
  * <li>nextPageAnchor: 下页锚点</li>
  * <li>hasMore: 是否有更多记录，1有</li>
  * </ul>
  */
-public class JindiUserResponse {
-	@ItemType(JindiUserDTO.class)
-	private List<JindiUserDTO> userList;
+public class JindiOrganizationResponse {
+	@ItemType(JindiOrganizationDTO.class)
+	private List<JindiOrganizationDTO> organizationList;
 	private Long nextPageAnchor;
 	private Byte hasMore;
 
@@ -28,12 +27,12 @@ public class JindiUserResponse {
 		this.hasMore = hasMore;
 	}
 
-	public List<JindiUserDTO> getUserList() {
-		return userList;
+	public List<JindiOrganizationDTO> getOrganizationList() {
+		return organizationList;
 	}
 
-	public void setUserList(List<JindiUserDTO> userList) {
-		this.userList = userList;
+	public void setOrganizationList(List<JindiOrganizationDTO> organizationList) {
+		this.organizationList = organizationList;
 	}
 
 	public Long getNextPageAnchor() {
@@ -42,10 +41,5 @@ public class JindiUserResponse {
 
 	public void setNextPageAnchor(Long nextPageAnchor) {
 		this.nextPageAnchor = nextPageAnchor;
-	}
-
-	@Override
-	public String toString() {
-		return StringHelper.toJsonString(this);
 	}
 }

@@ -163,6 +163,7 @@ public class UserProviderImpl implements UserProvider {
         if(user.getUuid() == null)
             user.setUuid(UUID.randomUUID().toString());
         user.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        user.setUpdateTime(user.getCreateTime());
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
         EhUsersDao dao = new EhUsersDao(context.configuration());
@@ -179,6 +180,7 @@ public class UserProviderImpl implements UserProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
         EhUsersDao dao = new EhUsersDao(context.configuration());
+        user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
