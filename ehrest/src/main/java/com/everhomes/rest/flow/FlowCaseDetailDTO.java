@@ -1,5 +1,6 @@
 package com.everhomes.rest.flow;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -29,7 +30,8 @@ public class FlowCaseDetailDTO {
     private String     content;
     private Byte     status;
     private Integer     flowVersion;
-    private Long     createTime;
+	private Timestamp lastStepTime;
+	private Timestamp createTime;
     private Long     moduleId;
     private String moduleName;
     private Long     currentNodeId;
@@ -37,7 +39,6 @@ public class FlowCaseDetailDTO {
     private String moduleLink;
     private Byte isEvaluate;
     private Integer evaluateScore;
-    private Long lastStepTime;
 	private Byte allowApplierUpdate;
     
     @ItemType(FlowCaseEntity.class)
@@ -160,15 +161,6 @@ public class FlowCaseDetailDTO {
 	public void setFlowVersion(Integer flowVersion) {
 		this.flowVersion = flowVersion;
 	}
-
-	public Long getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Long createTime) {
-		this.createTime = createTime;
-	}
-
 	public Long getModuleId() {
 		return moduleId;
 	}
@@ -225,12 +217,20 @@ public class FlowCaseDetailDTO {
 		this.evaluateScore = evaluateScore;
 	}
 
-	public Long getLastStepTime() {
+	public Timestamp getLastStepTime() {
 		return lastStepTime;
 	}
 
-	public void setLastStepTime(Long lastStepTime) {
+	public void setLastStepTime(Timestamp lastStepTime) {
 		this.lastStepTime = lastStepTime;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 	public List<FlowButtonDTO> getButtons() {

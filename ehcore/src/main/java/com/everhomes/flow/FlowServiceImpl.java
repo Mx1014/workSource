@@ -28,11 +28,13 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.pusher.PusherServiceImpl;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.ActionStepType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
@@ -41,6 +43,8 @@ import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
+import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.rest.flow.FlowUserSelectionType;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionDTO;
@@ -105,7 +109,12 @@ import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.news.NewsCommentContentType;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
@@ -117,6 +126,7 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -177,6 +187,12 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Autowired
 	private FlowVariableProvider flowVariableProvider;
+	
+	@Autowired
+	private FlowTimeoutService flowTimeoutService;
+	
+    @Autowired
+    MessagingService messagingService;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -1176,7 +1192,7 @@ public class FlowServiceImpl implements FlowService {
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.TICK_MESSAGE.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
 		if(action != null) {
-			graphAction = new FlowGraphMessageAction();
+			graphAction = new FlowGraphMessageAction(action.getReminderAfterMinute(), action.getReminderTickMinute(), 50l);
 			graphAction.setFlowAction(action);
 			graphNode.setTickMessageAction(graphAction);	
 		}
@@ -1184,7 +1200,7 @@ public class FlowServiceImpl implements FlowService {
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.TICK_SMS.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
 		if(action != null) {
-			graphAction = new FlowGraphSMSAction();
+			graphAction = new FlowGraphSMSAction();//TODO action.getReminderAfterMinute(), action.getReminderTickMinute(), 50l
 			graphAction.setFlowAction(action);
 			graphNode.setTickMessageAction(graphAction);	
 		}
@@ -1438,6 +1454,56 @@ public class FlowServiceImpl implements FlowService {
 			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
 		}
     }
+	
+	@Override
+	public void processMessageTimeout(FlowTimeout ft) {
+		FlowTimeoutMessageDTO dto = (FlowTimeoutMessageDTO)StringHelper.fromJsonString(ft.getJson(), FlowTimeoutMessageDTO.class);
+		FlowCaseState ctx = new FlowCaseState();
+		if(dto == null) {
+			LOGGER.error("flowtimeout error ft=" + ft.getId());
+		}
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(dto.getFlowCaseId());
+		FlowAction flowAction = flowActionProvider.getFlowActionById(ft.getBelongTo());
+		ctx.setFlowCase(flowCase);
+		if(FlowActionType.TICK_MESSAGE.getCode().equals(flowAction.getActionType())
+				|| FlowActionType.TICK_SMS.getCode().equals(flowAction.getActionType())) {
+			//check if the step is processed
+			if(!flowCase.getStepCount().equals(dto.getStepCount()) || !flowCase.getCurrentNodeId().equals(dto.getFlowNodeId())) {
+				//NOT OK
+				LOGGER.info("ft timeout occur but step is processed! ft=" + ft.getId());
+				return;
+			}
+		}
+
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ft.getBelongTo()
+				, ft.getBelongEntity(), FlowUserType.PROCESSOR.getCode());
+		List<Long> users = resolvUserSelections(selections);
+		String dataStr = parseActionTemplate(ctx, ft.getBelongTo(), flowAction.getRenderText());
+		for(Long userId : users) {
+			MessageDTO messageDto = new MessageDTO();
+			messageDto.setAppId(AppConstants.APPID_MESSAGING);
+			messageDto.setSenderUid(User.SYSTEM_UID);
+			messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()), 
+	                new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.BIZ_USER_LOGIN.getUserId())));
+	        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+	        messageDto.setBody(dataStr);
+	        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+	        
+	        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+	                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		}
+		
+		if(dto.getRemindTick() != null && dto.getRemindTick() > 0
+				&& dto.getRemindCount() != null && dto.getRemindCount() > 0) {
+			dto.setRemindCount(dto.getRemindCount()-1);
+			dto.setTimeoutAtTick(dto.getRemindTick());
+			ft.setId(null);
+			ft.setJson(dto.toString());
+			Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60*1000l;
+			ft.setTimeoutTick(new Timestamp(timeoutTick));
+			flowTimeoutService.pushTimeout(ft);
+		}
+	}
 
 	@Override
 	public void disableFlow(Long flowId) {
@@ -2046,6 +2112,11 @@ public class FlowServiceImpl implements FlowService {
 			
 			return true;
 		});		
+		
+		//flush timeouts
+		for(FlowTimeout ft : ctx.getTimeouts()) {
+			flowTimeoutService.pushTimeout(ft);
+		}
 	}
 	
 	private List<String> getAllParams(String renderText) {

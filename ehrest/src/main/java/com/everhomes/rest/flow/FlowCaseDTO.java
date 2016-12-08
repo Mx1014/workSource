@@ -40,7 +40,6 @@ public class FlowCaseDTO {
     private String     content;
     private Byte     status;
     private Integer     flowVersion;
-    private Long     createTime;
     private Long     moduleId;
     private String moduleName;
     private Long     currentNodeId;
@@ -48,7 +47,8 @@ public class FlowCaseDTO {
     private String moduleLink;
     private Byte isEvaluate;
     private Integer evaluateScore;
-    private Long lastStepTime;
+	private Timestamp lastStepTime;
+	private Timestamp createTime;
     private Byte allowApplierUpdate;
     
     public Long getApplyUserId() {
@@ -237,17 +237,6 @@ public class FlowCaseDTO {
 		this.processUserName = processUserName;
 	}
 
-
-	public Long getCreateTime() {
-		return createTime;
-	}
-
-
-	public void setCreateTime(Long createTime) {
-		this.createTime = createTime;
-	}
-
-
 	public Byte getIsEvaluate() {
 		return isEvaluate;
 	}
@@ -267,14 +256,23 @@ public class FlowCaseDTO {
 		this.evaluateScore = evaluateScore;
 	}
 
-
-	public Long getLastStepTime() {
+	public Timestamp getLastStepTime() {
 		return lastStepTime;
 	}
 
 
-	public void setLastStepTime(Long lastStepTime) {
+	public void setLastStepTime(Timestamp lastStepTime) {
 		this.lastStepTime = lastStepTime;
+	}
+
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 

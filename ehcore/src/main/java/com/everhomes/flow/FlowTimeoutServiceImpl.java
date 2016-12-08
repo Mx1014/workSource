@@ -33,7 +33,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
 	@Autowired
 	FlowService flowService;
     
-    private String queueName = "flowtimeouts";
+    private String queueName = "flowtimeoutstest";
     
     @PostConstruct
     public void setup() {
@@ -65,6 +65,8 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     	case STEP_TIMEOUT:
     		flowService.processStepTimeout(ft);
     		break;
+    	case MESSAGE_TIMEOUT:
+    		flowService.processMessageTimeout(ft);
     	default:
     		break;
     	}
