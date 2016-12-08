@@ -24,4 +24,7 @@ public interface FlowUserSelectionProvider {
 	List<FlowUserSelection> deleteSelectionByBelong(Long belongId, String belongEntity,
 			String flowUserBelongType);
 
+	List<FlowUserSelection> findSelectionByBelong(Long belongId,
+			String belongEntity, String flowUserBelongType, Integer ver);
+
 }

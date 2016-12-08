@@ -11,4 +11,5 @@ public interface FlowServiceErrorCode {
     static final int ERROR_FLOW_CASE_NOEXISTS = 10006;
     static final int ERROR_FLOW_NODE_NOEXISTS = 10007;
     static final int ERROR_FLOW_STEP_ERROR = 10008;
+    static final int ERROR_FLOW_PARAM_ERROR = 10009;
 }

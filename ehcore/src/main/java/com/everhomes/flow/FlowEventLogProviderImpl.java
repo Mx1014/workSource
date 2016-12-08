@@ -148,6 +148,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         dao.insert(objs.toArray(new FlowEventLog[objs.size()]));
     }
     
+    /**
+     * 获取 待处理/处理中/督办 的 FlowCase
+     */
     @Override
     public List<FlowCaseDetail> findProcessorFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd) {
     	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
@@ -181,6 +184,12 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	if(cmd.getFlowCaseStatus() != null) {
     		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
     	}
+    	if(cmd.getOwnerId() != null) {
+    		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
+    	}
+    	if(cmd.getOwnerType() != null) {
+    		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_TYPE.eq(cmd.getOwnerType()));
+    	}
     	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
     		cond = cond.and(
     				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
@@ -210,6 +219,30 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
         }
 		
 		return objs;
+    }
+    
+    @Override
+    public FlowEventLog isProcessor(Long userId, FlowCase flowCase) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowEventLog> objs = this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCase.getId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(userId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(flowCase.getStepCount()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(flowCase.getFlowVersion()));
+				
+				return query;
+			}
+    	});  
+    	
+    	if(objs != null && objs.size() > 0) {
+    		return objs.get(0);
+    	}
+    	
+    	return null;
     }
     
     private FlowCaseDetail convertRecordTODetail(Record r) {
@@ -256,6 +289,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	return o;
     }
     
+    /**
+     * 获取一个 FlowCase 的跳转日志列表
+     */
     @Override
     public List<FlowEventLog> findStepEventLogs(Long caseId) {
     	ListingLocator locator = new ListingLocator();
@@ -271,6 +307,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	});    	
     }
     
+    /**
+     * 获取具体一个 FlowCase 是否经过某个节点
+     */
     @Override
     public FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount, FlowStepType fromStep) {
     	ListingLocator locator = new ListingLocator();
@@ -295,6 +334,9 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	return null;
     }
     
+    /**
+     *  节点的具体日志跟踪信息
+     */
     @Override
     public List<FlowEventLog> findEventLogsByNodeId(Long nodeId, Long caseId, Long stepCount, FlowUserType flowUserType) {
     	ListingLocator locator = new ListingLocator();

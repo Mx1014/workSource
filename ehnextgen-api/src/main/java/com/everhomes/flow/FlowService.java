@@ -323,6 +323,8 @@ public interface FlowService {
 
 	void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode);
 
+	void createSnapshotSupervisors(FlowCaseState ctx);
+	
 	/**
 	 * 获取当前业务模块下启用的工作流
 	 * @param moduleId
@@ -351,6 +353,9 @@ public interface FlowService {
 	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long userId,
 			FlowUserType flowUserType);
 
+	FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId,
+			FlowUserType flowUserType, boolean checkProcessor);
+	
 	/**
 	 * Subject 的详细信息
 	 * @param subjectId
