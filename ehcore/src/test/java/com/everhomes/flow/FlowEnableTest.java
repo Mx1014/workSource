@@ -223,7 +223,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	buttonCmd.setNeedProcessor((byte)1);
     	buttonCmd.setNeedSubject((byte)1);
     	
-    	FlowActionInfo buttonAction = createActionInfo("test-button1-info", orgId);
+    	FlowActionInfo buttonAction = createActionInfo("test-button1-info testApplier:${applierName} ", orgId);
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	

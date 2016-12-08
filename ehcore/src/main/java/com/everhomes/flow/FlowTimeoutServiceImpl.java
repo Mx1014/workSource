@@ -33,7 +33,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
 	@Autowired
 	FlowService flowService;
     
-    private String queueName = "flowtimeoutstest";
+    private String queueName = "flowtimeouts";
     
     @PostConstruct
     public void setup() {
