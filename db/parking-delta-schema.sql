@@ -20,6 +20,12 @@ ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_id` BIGINT COMMENT 'flow i
 ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'current flow version';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `flow_case_id` BIGINT NOT NULL COMMENT 'flow case id';
 
+ALTER TABLE eh_parking_card_requests ADD COLUMN `audit_succeed_time` DATETIME;
+ALTER TABLE eh_parking_card_requests ADD COLUMN `process_succeed_time` DATETIME;
+ALTER TABLE eh_parking_card_requests ADD COLUMN `open_card_time` DATETIME;
+ALTER TABLE eh_parking_card_requests ADD COLUMN `cancel_time` DATETIME;
+
+
 
  DROP TABLE IF EXISTS `eh_parking_flow`;
 CREATE TABLE `eh_parking_flow` (
@@ -31,6 +37,10 @@ CREATE TABLE `eh_parking_flow` (
 
   `request_month_count` INT NOT NUll DEFAULT 0 COMMENT 'organization of address',
   `request_recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: all month, 2: number of days',
+  `card_request_tip_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '1: support , 0: not ',
+  `card_agreement_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '1: support , 0: not ',
+  `max_request_num_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '1: support , 0: not ',
+  `max_issue_num_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '1: support , 0: not ',
   `card_request_tip` TEXT,
   `card_agreement` TEXT,
   `max_issue_num` INTEGER NOT NULL DEFAULT 1 COMMENT 'the max num of the issue card',
