@@ -1,97 +1,46 @@
 // @formatter:off
 package com.everhomes.rest.openapi.jindi;
 
-import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
  * 
- * <ul>金地同步数据的用户数据
- * <li>: </li>
+ * <ul>
+ * <li>userList: 用户列表</li>
+ * <li>nextPageAnchor: 下页锚点</li>
  * </ul>
  */
 public class JindiUserResponse {
-	private Long id;
-	private String nickName;
-	private String gender;
-	private String birthday;
-	private String phone;
-	private String organizationId;
-	private String address;
-	private Timestamp createTime;
-	private Timestamp updateTime;
+	@ItemType(JindiUserDTO.class)
+	private List<JindiUserDTO> userList;
+	private Long nextPageAnchor;
+	private Byte hasMore;
 
-	public Timestamp getCreateTime() {
-		return createTime;
+	public Byte getHasMore() {
+		return hasMore;
 	}
 
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
+	public void setHasMore(Byte hasMore) {
+		this.hasMore = hasMore;
 	}
 
-	public Timestamp getUpdateTime() {
-		return updateTime;
+	public List<JindiUserDTO> getUserList() {
+		return userList;
 	}
 
-	public void setUpdateTime(Timestamp updateTime) {
-		this.updateTime = updateTime;
+	public void setUserList(List<JindiUserDTO> userList) {
+		this.userList = userList;
 	}
 
-	public Long getId() {
-		return id;
+	public Long getNextPageAnchor() {
+		return nextPageAnchor;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
-	}
-
-	public String getNickName() {
-		return nickName;
-	}
-
-	public void setNickName(String nickName) {
-		this.nickName = nickName;
-	}
-
-	public String getGender() {
-		return gender;
-	}
-
-	public void setGender(String gender) {
-		this.gender = gender;
-	}
-
-	public String getBirthday() {
-		return birthday;
-	}
-
-	public void setBirthday(String birthday) {
-		this.birthday = birthday;
-	}
-
-	public String getPhone() {
-		return phone;
-	}
-
-	public void setPhone(String phone) {
-		this.phone = phone;
-	}
-
-	public String getOrganizationId() {
-		return organizationId;
-	}
-
-	public void setOrganizationId(String organizationId) {
-		this.organizationId = organizationId;
-	}
-
-	public String getAddress() {
-		return address;
-	}
-
-	public void setAddress(String address) {
-		this.address = address;
+	public void setNextPageAnchor(Long nextPageAnchor) {
+		this.nextPageAnchor = nextPageAnchor;
 	}
 
 	@Override
