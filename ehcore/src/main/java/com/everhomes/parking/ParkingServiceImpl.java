@@ -132,6 +132,9 @@ public class ParkingServiceImpl implements ParkingService {
 
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Long moduleId = 40800L;
+    private static final Long INTELLIGENT = 7L;
+    private static final Long SEMI_AUTOMATIC = 9L;
+    private static final Long QUEQUE = 11L;
     
     @Autowired
     private ParkingProvider parkingProvider;
@@ -230,11 +233,11 @@ public class ParkingServiceImpl implements ParkingService {
         			r.getId(), FlowOwnerType.PARKING.getCode());
         	if(null == flow)
         		dto.setFlowId(ParkingRequestFlowType.FORBIDDEN.getCode());
-        	else if(flow.getId() == 7L)
+        	else if(flow.getId() == INTELLIGENT)
         		dto.setFlowId(ParkingRequestFlowType.INTELLIGENT.getCode());
-        	else if(flow.getId() == 9L)
+        	else if(flow.getId() == SEMI_AUTOMATIC)
         		dto.setFlowId(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode());
-        	else if(flow.getId() == 11L)
+        	else if(flow.getId() == QUEQUE)
             		dto.setFlowId(ParkingRequestFlowType.QUEQUE.getCode());
     		return dto;
     	}).collect(Collectors.toList());
@@ -1116,14 +1119,24 @@ public class ParkingServiceImpl implements ParkingService {
 	public void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd) {
 		
     	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-    	
-    	if(null == cmd.getFlowId()) {
+    	Integer flowId = cmd.getFlowId();
+    	if(null == flowId) {
         	LOGGER.error("FlowId cannot be null.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"FlowId cannot be null.");
         }
+    	Long newFlowId = 0L;
+    	if(ParkingRequestFlowType.FORBIDDEN.getCode() == flowId)
+    		newFlowId = 0L;
+    	else if(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode() == flowId)
+    		newFlowId = SEMI_AUTOMATIC;
+    	else if(ParkingRequestFlowType.QUEQUE.getCode() == flowId)
+    		newFlowId = QUEQUE;
+    	else if(ParkingRequestFlowType.INTELLIGENT.getCode() == flowId)
+    		newFlowId = INTELLIGENT;
+    	
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getFlowId());
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), newFlowId);
 		if(null == parkingFlow) {
 			parkingFlow = new ParkingFlow();
 			parkingFlow.setNamespaceId(namespaceId);
@@ -1135,7 +1148,7 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingFlow.setMaxIssueNum(cmd.getMaxIssueNum());
 			parkingFlow.setRequestMonthCount(cmd.getRequestMonthCount());
 			parkingFlow.setRequestRechargeType(cmd.getRequestRechargeType());
-			parkingFlow.setFlowId(cmd.getFlowId());
+			parkingFlow.setFlowId(newFlowId);
 			parkingFlow.setMaxRequestNum(cmd.getMaxRequestNum());
 			parkingProvider.createParkingRequestCardConfig(parkingFlow);
 		}else {
