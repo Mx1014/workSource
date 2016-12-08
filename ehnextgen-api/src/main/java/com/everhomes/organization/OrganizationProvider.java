@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
+import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
 import com.everhomes.rest.organization.*;
 
 import org.jooq.Condition;
@@ -271,5 +272,6 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize);
 	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+	List<JindiCsthomerelDTO> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
  
 }

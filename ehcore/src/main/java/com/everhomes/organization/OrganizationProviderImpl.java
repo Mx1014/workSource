@@ -42,6 +42,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
+import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -2085,7 +2086,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddresses.class));
         address.setId(id);
-        
+        address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setUpdateTime(address.getCreateTime());
         EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
         dao.insert(address);
         
@@ -2283,7 +2285,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
 		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, oa.getCommunityId()));
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		oa.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		oa.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
 		oa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(oa);
@@ -2990,6 +2992,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return result.map(r->ConvertHelper.convert(r, Organization.class));
 		}
 		return new ArrayList<Organization>();
+	}
+
+	/**
+	 * 金地抓取客房数据
+	 */
+	@Override
+	public List<JindiCsthomerelDTO> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		return null;
 	}
 	
 	

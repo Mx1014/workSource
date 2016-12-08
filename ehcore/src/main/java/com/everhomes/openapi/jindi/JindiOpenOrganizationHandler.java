@@ -16,6 +16,12 @@ import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
 import com.everhomes.rest.openapi.jindi.JindiOrganizationDTO;
 import com.everhomes.rest.openapi.jindi.JindiOrganizationResponse;
 
+/**
+ * 
+ * <ul>
+ * 抓取组织数据
+ * </ul>
+ */
 @Component(JindiOpenHandler.JINDI_OPEN_HANDLER+JindiDataType.JindiDataTypeCode.ORGANIZATION_CODE)
 public class JindiOpenOrganizationHandler implements JindiOpenHandler {
 	@Autowired
