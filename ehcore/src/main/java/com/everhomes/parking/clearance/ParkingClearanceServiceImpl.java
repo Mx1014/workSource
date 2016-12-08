@@ -303,6 +303,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     @Override
     public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
+        LOGGER.debug("Autowired ServiceModuleProvider instance is {}", moduleProvider);
         ServiceModule module = moduleProvider.findServiceModuleById(MODULE_ID);
         moduleInfo.setModuleName(module.getName());
         moduleInfo.setModuleId(MODULE_ID);

@@ -1,21 +1,20 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowUserType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.InitializingBean;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import javax.annotation.PostConstruct;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.PostConstruct;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowUserType;
-
 @Component
-public class FlowListenerManagerImpl implements FlowListenerManager {
+public class FlowListenerManagerImpl implements FlowListenerManager, InitializingBean {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowListenerManagerImpl.class);
 	
 	  @Autowired
@@ -25,7 +24,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager {
 	  
 	  @PostConstruct
 	  void setup() {
-		  for(FlowModuleListener listener : allListeners) {
+		  /*for(FlowModuleListener listener : allListeners) {
 			  try {
 				  FlowModuleInfo info = listener.initModule();
 				  FlowModuleInst inst = new FlowModuleInst();
@@ -36,7 +35,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager {
 				  LOGGER.error("module init error cls=" + listener.getClass(), ex);
 			  }
 			  
-		  }
+		  }*/
 	  }
 	  
 	  public FlowListenerManagerImpl() {
@@ -137,4 +136,20 @@ public class FlowListenerManagerImpl implements FlowListenerManager {
 		  }		
 		  return null;
 	}
+
+    @Override
+    public void afterPropertiesSet() throws Exception {
+        for(FlowModuleListener listener : allListeners) {
+            try {
+                FlowModuleInfo info = listener.initModule();
+                FlowModuleInst inst = new FlowModuleInst();
+                inst.setInfo(info);
+                inst.setListener(listener);
+                moduleMap.put(info.getModuleName(), inst);//TODO support TreeSet for listeners ?
+            } catch(Exception ex) {
+                LOGGER.error("module init error cls=" + listener.getClass(), ex);
+            }
+
+        }
+    }
 }
