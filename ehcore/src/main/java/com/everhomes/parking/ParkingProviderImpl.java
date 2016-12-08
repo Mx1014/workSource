@@ -485,6 +485,17 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
 	
 	@Override
+    public ParkingCardRequest findParkingCardRequestByFlowId(Long flowId, Integer flowVersion) {
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
+        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+        
+		query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID.eq(flowId));
+		query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.FLOW_VERSION.eq(flowVersion));
+        return ConvertHelper.convert(query.fetchAny(), ParkingCardRequest.class);
+    }
+	
+	@Override
     public void updateParkingCardRequest(List<ParkingCardRequest> list) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhParkingCardRequestsDao dao = new EhParkingCardRequestsDao(context.configuration());
@@ -493,23 +504,33 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
 	
 	@Override
-    public void updateInvalidAppliers(Timestamp time,Long parkingLotId) {
-		
-        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+    public void updateParkingCardRequest(ParkingCardRequest parkingCardRequest) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhParkingCardRequestsDao dao = new EhParkingCardRequestsDao(context.configuration());
         
-        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(ParkingCardRequestStatus.NOTIFIED.getCode()));
-        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
-        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.gt(time));
+        dao.update(parkingCardRequest);
         
-        query.fetch().map((r) -> {
-        	ParkingCardRequest parkingCardRequest = ConvertHelper.convert(r, ParkingCardRequest.class);
-        	EhParkingCardRequestsDao dao = new EhParkingCardRequestsDao(context.configuration());
-	        dao.update(parkingCardRequest);
-	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingCardRequests.class, parkingCardRequest.getId());
-			return null;
-		});
-	}
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingCardRequests.class, parkingCardRequest.getId());
+    }
+	
+//	@Override
+//    public void updateInvalidAppliers(Timestamp time,Long parkingLotId) {
+//		
+//        DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
+//        
+//        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(ParkingCardRequestStatus.NOTIFIED.getCode()));
+//        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
+//        query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.gt(time));
+//        
+//        query.fetch().map((r) -> {
+//        	ParkingCardRequest parkingCardRequest = ConvertHelper.convert(r, ParkingCardRequest.class);
+//        	EhParkingCardRequestsDao dao = new EhParkingCardRequestsDao(context.configuration());
+//	        dao.update(parkingCardRequest);
+//	        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhParkingCardRequests.class, parkingCardRequest.getId());
+//			return null;
+//		});
+//	}
 	
 	@Override
     public void updateParkingRechargeOrder(ParkingRechargeOrder order) {

@@ -11,6 +11,7 @@ public class ListParkingWorkFlowsCommand {
     private Long ownerId;
 	@NotNull
     private Long parkingLotId;
+	
 	public String getOwnerType() {
 		return ownerType;
 	}

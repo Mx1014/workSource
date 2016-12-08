@@ -52,7 +52,7 @@ public interface ParkingProvider {
     
     void updateParkingCardRequest(List<ParkingCardRequest> list);
     
-    void updateInvalidAppliers(Timestamp time, Long parkingLotId);
+//    void updateInvalidAppliers(Timestamp time, Long parkingLotId);
     
     Integer waitingCardCount(String ownerType, Long ownerId, Long parkingLotId, Timestamp createTime);
     
@@ -90,4 +90,7 @@ public interface ParkingProvider {
     
     List<ParkingAttachment> listParkingAttachments(Long ownerId, String ownerType);
     
+    ParkingCardRequest findParkingCardRequestByFlowId(Long flowId, Integer flowVersion);
+    
+    void updateParkingCardRequest(ParkingCardRequest parkingCardRequest);
 }

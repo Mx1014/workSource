@@ -35,10 +35,21 @@ public class Test {
 	
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
-		param.put("plateNo", "AJQ001");
+		param.put("plateNo", "B5720Z");
 		String json = Test.post(param, GET_CARD);
         System.out.println(json);
-		
+        
+//        JSONObject param2 = new JSONObject();
+//        param2.put("cardId", "528");
+//        param2.put("ruleType", "1");
+//        param2.put("ruleAmount", "1");
+//        param2.put("payMoney", "50000");
+//        param2.put("startTime", "2016-10-01 00:00:00");
+//        param2.put("endTime", "2017-01-31 23:59:59");
+//        param2.put("freeMoney", "20000");
+//        
+//        String json2 = Test.post(param2, RECHARGE);
+//        System.out.println(json2);
 	}
 	
 	
@@ -46,7 +57,7 @@ public class Test {
 	
 	
 	public static String post(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://220.160.111.114:9099" + type);
+		HttpPost httpPost = new HttpPost("http://220.160.111.114:9090" + type);
 		StringBuilder result = new StringBuilder();
 		
         String key = "F7A0B971B199FD2A1017CEC5";

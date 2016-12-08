@@ -13,6 +13,7 @@ import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Random;
 import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
@@ -25,6 +26,7 @@ import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.junit.Assert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,12 +42,31 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowButton;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.pmtask.PmTaskAttachment;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.CreateFlowCommand;
+import com.everhomes.rest.flow.CreateFlowNodeCommand;
+import com.everhomes.rest.flow.FlowActionInfo;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowNodeDTO;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -121,6 +142,7 @@ public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private static final Long moduleId = 40800L;
     
     @Autowired
     private ParkingProvider parkingProvider;
@@ -140,6 +162,8 @@ public class ParkingServiceImpl implements ParkingService {
     private DbProvider dbProvider;
     @Autowired
     private ContentServerService contentServerService;
+    @Autowired
+	private FlowService flowService;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -326,7 +350,7 @@ public class ParkingServiceImpl implements ParkingService {
     		
     		parkingCardRequest.setOwnerId(cmd.getOwnerId());
     		parkingCardRequest.setOwnerType(cmd.getOwnerType());
-    		parkingCardRequest.setParkingLotId(cmd.getParkingLotId());
+    		parkingCardRequest.setParkingLotId(parkingLot.getId());
     		parkingCardRequest.setRequestorEnterpriseId(cmd.getRequestorEnterpriseId());
     		parkingCardRequest.setPlateNumber(cmd.getPlateNumber());
     		parkingCardRequest.setPlateOwnerEntperiseName(cmd.getPlateOwnerEntperiseName());
@@ -357,6 +381,9 @@ public class ParkingServiceImpl implements ParkingService {
     		
     		addAttachments(cmd.getAttachments(), user.getId(), parkingCardRequest.getId(), ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
 
+    		//TODO: 新建flow
+    		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    		createFlowCase(user.getNamespaceId(), moduleId, null, parkingLot.getId(), ownerType, user.getId());
     		return null;
 		});
 		parkingCardRequestDTO = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
@@ -368,6 +395,23 @@ public class ParkingServiceImpl implements ParkingService {
 		return parkingCardRequestDTO;
     	
 	}
+    
+    private void createFlowCase(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType, Long applyUserId) {
+    	
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+    	cmd.setApplyUserId(applyUserId);
+    	cmd.setFlowMainId(flow.getFlowMainId());
+    	cmd.setFlowVersion(flow.getFlowVersion());
+    	cmd.setReferId(0l);
+    	cmd.setReferType("test-type");
+    	
+    	Random r = new Random();
+    	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
+    	
+    	FlowCase flowCase = flowService.createFlowCase(cmd);
+    }
     
     public ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd) {
     	
@@ -686,13 +730,13 @@ public class ParkingServiceImpl implements ParkingService {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 				"ParkingCardRequest not found");
         }
-        if(parkingCardRequest.getStatus() != ParkingCardRequestStatus.NOTIFIED.getCode()){
-        	LOGGER.error("ParkingCardRequest status is not notified, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				"ParkingCardRequest status is not notified.");
-        }
+//        if(parkingCardRequest.getStatus() != ParkingCardRequestStatus.NOTIFIED.getCode()){
+//        	LOGGER.error("ParkingCardRequest status is not notified, cmd={}", cmd);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+//				"ParkingCardRequest status is not notified.");
+//        }
         //设置已领取状态和 领取时间
-        parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
+//        parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
         parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.ISSUED.getCode());
         parkingCardRequest.setIssueTime(new Timestamp(System.currentTimeMillis()));
         parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
@@ -714,7 +758,7 @@ public class ParkingServiceImpl implements ParkingService {
     			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
     			null, null, cmd.getCount())
     			.stream().map(r -> {
-    				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
+//    				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
     				if(strBuilder.length() > 0) {
     				    strBuilder.append(", ");
     				}
@@ -867,18 +911,18 @@ public class ParkingServiceImpl implements ParkingService {
         }
     }
     
-    @Scheduled(cron="0 0 2 * * ? ")
-   	@Override
-   	public void invalidApplier() {
-   		LOGGER.info("update invalid appliers.");
-   		List<ParkingLot> list = parkingProvider.listParkingLots(null, null);
-   		for(ParkingLot parkingLot:list){
-   			Integer days = parkingLot.getCardReserveDays();
-   			long time = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000;
-   			parkingProvider.updateInvalidAppliers(new Timestamp(time),parkingLot.getId());
-   		}
-   		
-   	}
+//    @Scheduled(cron="0 0 2 * * ? ")
+//   	@Override
+//   	public void invalidApplier() {
+//   		LOGGER.info("update invalid appliers.");
+//   		List<ParkingLot> list = parkingProvider.listParkingLots(null, null);
+//   		for(ParkingLot parkingLot:list){
+//   			Integer days = parkingLot.getCardReserveDays();
+//   			long time = System.currentTimeMillis() - days * 24 * 60 * 60 * 1000;
+//   			parkingProvider.updateInvalidAppliers(new Timestamp(time),parkingLot.getId());
+//   		}
+//   		
+//   	}
     
 	private OrderEmbeddedHandler getOrderHandler(String orderType) {
 		return PlatformContext.getComponent(OrderEmbeddedHandler.ORDER_EMBEDED_OBJ_RESOLVER_PREFIX+this.getOrderTypeCode(orderType));
@@ -1047,9 +1091,18 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public void listParkingWorkFlows(ListParkingWorkFlowsCommand cmd) {
+	public ListFlowBriefResponse listParkingWorkFlows(ListParkingWorkFlowsCommand cmd) {
+		ListFlowCommand listFlowCommand = new ListFlowCommand();
+		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
+		//TODO:
+		listFlowCommand.setNamespaceId(namespaceId);
+		listFlowCommand.setOwnerType(cmd.getOwnerType());
+		listFlowCommand.setOwnerId(cmd.getParkingLotId());
+		listFlowCommand.setModuleId(moduleId);
 		
+		ListFlowBriefResponse response = flowService.listBriefFlows(listFlowCommand);
 		
+		return response;
 	}
 
 	@Override
@@ -1087,4 +1140,5 @@ public class ParkingServiceImpl implements ParkingService {
 
 		}
 	}
+	
 }

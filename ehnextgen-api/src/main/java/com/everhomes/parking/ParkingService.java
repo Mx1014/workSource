@@ -5,6 +5,7 @@ import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
@@ -69,13 +70,7 @@ public interface ParkingService {
     
     void setParkingLotConfig(SetParkingLotConfigCommand cmd);
     
-    void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd);
-    
-    void issueParkingCards(IssueParkingCardsCommand cmd);
-    
     void notifyParkingRechargeOrderPayment(PayCallbackCommand cmd);
-    
-    void invalidApplier();
     
     ParkingActivityDTO setParkingActivity(SetParkingActivityCommand cmd);
     
@@ -96,9 +91,13 @@ public interface ParkingService {
     
     ParkingRequestCardConfigDTO gettParkingRequestCardConfig(GettParkingRequestCardConfigCommand cmd);
     
-    void listParkingWorkFlows(ListParkingWorkFlowsCommand cmd);
+    ListFlowBriefResponse listParkingWorkFlows(ListParkingWorkFlowsCommand cmd);
     
     void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd);
     
     ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd);
+    
+    void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd);
+    
+    void issueParkingCards(IssueParkingCardsCommand cmd);
 }

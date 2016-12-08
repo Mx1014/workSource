@@ -14,7 +14,9 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.flow.FlowService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.PayCallbackCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
@@ -61,7 +63,7 @@ public class ParkingController extends ControllerBase {
     
     @Autowired
     private ParkingService parkingService;
-    
+
     /**
      * <b>URL: /parking/listParkingLots</b>
      * <p>查询指定园区/小区的停车场列表</p>
@@ -84,6 +86,22 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("listParkingCards")
     @RestReturn(value=ParkingCardDTO.class, collection=true)
     public RestResponse listParkingCards(@Valid ListParkingCardsCommand cmd) {
+        List<ParkingCardDTO> parkingCardList = null;
+        
+        parkingCardList = parkingService.listParkingCards(cmd);
+        RestResponse response = new RestResponse(parkingCardList);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/listParkingCards</b>
+     * <p>查询指定园区/小区、停车场、车牌号对应的月卡列表</p>
+     */
+    @RequestMapping("listParkingCards")
+    @RestReturn(value=ParkingCardDTO.class, collection=true)
+    public RestResponse getOpenCardInfo(@Valid ListParkingCardsCommand cmd) {
         List<ParkingCardDTO> parkingCardList = null;
         
         parkingCardList = parkingService.listParkingCards(cmd);
@@ -337,10 +355,12 @@ public class ParkingController extends ControllerBase {
      * <p>获取停车工作流列表</p>
      */
     @RequestMapping("listParkingWorkFlows")
-    @RestReturn(value=String.class)
+    @RestReturn(value=ListFlowBriefResponse.class)
     public RestResponse listParkingWorkFlows(ListParkingWorkFlowsCommand cmd) {
-        //TODO:获取停车工作流列表
-        RestResponse response = new RestResponse();
+       
+    	ListFlowBriefResponse resp = parkingService.listParkingWorkFlows(cmd);
+    	
+        RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -348,12 +368,12 @@ public class ParkingController extends ControllerBase {
     
     /**
      * <b>URL: /parking/issueParkingCards</b>
-     * <p>发放月卡</p>
+     * <p>批量发放月卡</p>
      */
     @RequestMapping("issueParkingCards")
     @RestReturn(value=String.class)
     public RestResponse issueParkingCards(IssueParkingCardsCommand cmd) {
-        //发放卡，需要从eh_parking_card_requests表中取出在排队中的的申请记录（按时间从小大到排），然后把它们的状态置为“已通知”
+     
     	parkingService.issueParkingCards(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -376,21 +396,21 @@ public class ParkingController extends ControllerBase {
         return response;
     }
        
-    /**
-     * <b>URL: /parking/setParkingCardIssueFlag</b>
-     * <p>在线下发卡后，在后台管理中更新月卡领取状态</p>
-     */
-    @RequestMapping("setParkingCardIssueFlag")
-    @RestReturn(value=String.class)
-    public RestResponse setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd) {
-        //设置eh_parking_card_requests表的issue_flag字段
-        
-    	parkingService.setParkingCardIssueFlag(cmd);
-        RestResponse response = new RestResponse();
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
+//    /**
+//     * <b>URL: /parking/setParkingCardIssueFlag</b>
+//     * <p>在线下发卡后，在后台管理中更新月卡领取状态</p>
+//     */
+//    @RequestMapping("setParkingCardIssueFlag")
+//    @RestReturn(value=String.class)
+//    public RestResponse setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd) {
+//        //设置eh_parking_card_requests表的issue_flag字段
+//        
+//    	parkingService.setParkingCardIssueFlag(cmd);
+//        RestResponse response = new RestResponse();
+//        response.setErrorCode(ErrorCodes.SUCCESS);
+//        response.setErrorDescription("OK");
+//        return response;
+//    }
     
     /**
      * <b>URL: /parking/setParkingActivity</b>
