@@ -1170,13 +1170,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				for(RentalCell cell : cells){	
 					//对于按小时预约的,取平均值进行计算
 					if(cell.getRentalType().equals(RentalType.HOUR.getCode())){
+						//最小值超过了cell值,则cell值代替最小值
 						if(minPrice.divide(new BigDecimal(minTimeStep), 3, RoundingMode.HALF_UP).compareTo(
-								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
+								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
 							minPrice = cell.getPrice();
 							minTimeStep = cell.getTimeStep();
 						}
 						if(maxPrice.divide(new BigDecimal( maxTimeStep), 3, RoundingMode.HALF_UP).compareTo(
-								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
+								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
 							maxPrice = cell.getPrice();
 							maxTimeStep = cell.getTimeStep();
 						}
