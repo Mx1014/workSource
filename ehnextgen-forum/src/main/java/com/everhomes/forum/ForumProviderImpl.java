@@ -13,6 +13,8 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -38,6 +40,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.forum.ForumLocalStringCode;
 import com.everhomes.rest.forum.PostStatus;
 import com.everhomes.rest.organization.OfficialFlag;
@@ -66,6 +70,7 @@ import com.everhomes.user.UserProfileContstant;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -313,6 +318,7 @@ public class ForumProviderImpl implements ForumProvider {
         }
         
         EhForumPostsDao dao = new EhForumPostsDao(context.configuration());
+        post.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(post);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhForumPosts.class, post.getId());
@@ -933,4 +939,52 @@ public class ForumProviderImpl implements ForumProvider {
 			}
 		}
 	}
+
+	/**
+	 * 金地抓取数据使用
+	 */
+	@Override
+	public List<Post> listForumPostByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_FORUM_POSTS.fields()).from(Tables.EH_FORUM_POSTS)
+			.join(Tables.EH_USERS).on(Tables.EH_FORUM_POSTS.CREATOR_UID.eq(Tables.EH_USERS.ID)).and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()))
+			.and(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L))
+			.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.and(Tables.EH_FORUM_POSTS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_FORUM_POSTS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_FORUM_POSTS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
+
+	/**
+	 * 金地抓取数据使用
+	 */
+	@Override
+	public List<Post> listForumPostByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_FORUM_POSTS.fields()).from(Tables.EH_FORUM_POSTS)
+			.join(Tables.EH_USERS).on(Tables.EH_FORUM_POSTS.CREATOR_UID.eq(Tables.EH_USERS.ID)).and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()))
+			.and(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L))
+			.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.and(Tables.EH_FORUM_POSTS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_FORUM_POSTS.UPDATE_TIME.asc(), Tables.EH_FORUM_POSTS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
+	
+	
  }

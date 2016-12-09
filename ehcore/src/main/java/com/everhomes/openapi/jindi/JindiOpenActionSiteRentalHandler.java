@@ -17,7 +17,7 @@ import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
 /**
  * 
  * <ul>
- * 抓取电商数据
+ * 抓取场所预订数据
  * </ul>
  */
 @Component(JindiOpenHandler.JINDI_OPEN_HANDLER+JindiDataType.JindiDataTypeCode.ACTION_CODE+JindiActionType.JindiActionTypeCode.ACTION_TYPE_SITE_RENTAL_CODE)
@@ -47,14 +47,9 @@ public class JindiOpenActionSiteRentalHandler implements JindiOpenHandler {
 
 			@Override
 			public Object complementInfo(JindiFetchDataCommand cmd, RentalOrder src) {
-				Long communityId = src.getCommunityId();
-				if (communityId != null && communityId.longValue() == 0L) {
-					communityId = null;
-				}
 				JindiActionSiteRentalDTO data = new JindiActionSiteRentalDTO();
 				data.setId(src.getId());
 				data.setUserId(src.getRentalUid());
-				data.setCommunityId(src.getCommunityId());
 				data.setPhone(src.getContactPhonenum());
 				data.setStartTime(src.getStartTime());
 				data.setEndTime(src.getEndTime());
@@ -65,9 +60,12 @@ public class JindiOpenActionSiteRentalHandler implements JindiOpenHandler {
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getOperateTime());
 				
-				if (communityId != null) {
+				if (src.getCommunityId() != null) {
 					Community community = communityProvider.findCommunityById(src.getCommunityId());
-					data.setCommunityName(community.getName());
+					if (community != null) {
+						data.setCommunityId(community.getId());
+						data.setCommunityName(community.getName());
+					}
 				}
 				
 				return data;

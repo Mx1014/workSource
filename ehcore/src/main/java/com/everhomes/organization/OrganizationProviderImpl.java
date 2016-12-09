@@ -2963,12 +2963,12 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			Long pageAnchor, int pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS)
-				.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
-				.and(Tables.EH_ORGANIZATIONS.UPDATE_TIME.eq(new Timestamp(timestamp)))
-				.and(Tables.EH_ORGANIZATIONS.ID.gt(pageAnchor))
-				.orderBy(Tables.EH_ORGANIZATIONS.ID.asc())
-				.limit(pageSize)
-				.fetch();
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATIONS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ORGANIZATIONS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ORGANIZATIONS.ID.asc())
+			.limit(pageSize)
+			.fetch();
 		
 		if (result != null && result.isNotEmpty()) {
 			return result.map(r->ConvertHelper.convert(r, Organization.class));
@@ -3018,6 +3018,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return new ArrayList<CommunityAddressMapping>();
 	}
 
+	/**
+	 * 金地抓取客房数据
+	 */
 	@Override
 	public List<CommunityAddressMapping> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
