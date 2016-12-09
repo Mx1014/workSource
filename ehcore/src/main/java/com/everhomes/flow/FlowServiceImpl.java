@@ -1,8 +1,10 @@
 package com.everhomes.flow;
 
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -32,6 +34,7 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.pusher.PusherServiceImpl;
+import com.everhomes.rest.aclink.AclinkNotificationTemplateCode;
 import com.everhomes.rest.aclink.AclinkServiceErrorCode;
 import com.everhomes.rest.aclink.DoorAccessDriverType;
 import com.everhomes.rest.app.AppConstants;
@@ -585,6 +588,9 @@ public class FlowServiceImpl implements FlowService {
 		buttons.stream().forEach((fb) ->{
 			dtos2.add(ConvertHelper.convert(fb, FlowButtonDTO.class));
 		});
+		
+		resp.setApplierButtons(dtos1);
+		resp.setProcessorButtons(dtos2);
 		
 		return resp;
 	}
@@ -1867,12 +1873,17 @@ public class FlowServiceImpl implements FlowService {
 				}
 				
 				nodeDTOS.add(nodeLogDTO);
-				
+
+				SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd HH:mm");
 				List<FlowEventLog> trackerLogs = flowEventLogProvider.findEventLogsByNodeId(currNode.getId()
 						, flowCase.getId(), eventLog.getStepCount(), flowUserType);
 				if(trackerLogs != null) {
 					trackerLogs.forEach((t)-> {
 						FlowEventLogDTO eventDTO = ConvertHelper.convert(t, FlowEventLogDTO.class);
+						if(eventDTO.getLogContent() != null) {
+							String dateStr = sdf1.format(new Date(eventDTO.getCreateTime().getTime()));
+							eventDTO.setLogContent(dateStr + " " + eventDTO.getLogContent());
+						}
 						nodeLogDTO.getLogs().add(eventDTO);			
 					});
 				}
@@ -2283,6 +2294,22 @@ public class FlowServiceImpl implements FlowService {
 	public FlowDTO getFlowById(Long flowId) {
 		Flow flow = flowProvider.getFlowById(flowId);
 		return ConvertHelper.convert(flow, FlowDTO.class);
+	}
+	
+	private String getTemplate() {
+//        Map<String, Object> map = new HashMap<String, Object>();
+//        String userName = user.getNickName();
+//        if(userName == null || userName.isEmpty()) {
+//            userName = user.getAccountName();
+//        }
+//        map.put("userName", userName);
+//        map.put("doorName", doorAcc.getName());
+//        
+//        String scope = AclinkNotificationTemplateCode.SCOPE;
+//        int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;
+//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		
+		return "";
 	}
 
 	@Override

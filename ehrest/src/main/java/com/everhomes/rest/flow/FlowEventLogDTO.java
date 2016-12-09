@@ -22,6 +22,7 @@ public class FlowEventLogDTO {
     private Integer     namespaceId;
     private Long     flowCaseId;
     private Long     flowButtonId;
+    private Timestamp createTime;
 
     public Long getId() {
 		return id;
@@ -141,6 +142,14 @@ public class FlowEventLogDTO {
 
 	public void setFlowButtonId(Long flowButtonId) {
 		this.flowButtonId = flowButtonId;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
 	}
 
 	@Override
