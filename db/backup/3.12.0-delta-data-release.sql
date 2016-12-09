@@ -3,10 +3,10 @@
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'get.businesses.info.api', 'zl-ec/rest/openapi/shop/listByCondition', '获取店铺信息');
 
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) 
-VALUES ('300', 'organization', '600001', 'zh_CN', '通用岗位已存在');
+VALUES ('448', 'organization', '600005', 'zh_CN', '通用岗位已存在');
 
 -- merge from activityentry-delta-data-release.sql by xiongying20161128
-UPDATE eh_activities a SET forum_id = (SELECT forum_id FROM eh_forum_posts WHERE id = a.post_id);
+UPDATE eh_activities a SET forum_id = (SELECT forum_id FROM eh_forum_posts WHERE id = a.post_id) WHERE EXISTS(SELECT forum_id FROM eh_forum_posts WHERE id = a.post_id);
 UPDATE eh_activities a SET creator_tag = (SELECT creator_tag FROM eh_forum_posts WHERE id = a.post_id);
 UPDATE eh_activities a SET target_tag = (SELECT target_tag FROM eh_forum_posts WHERE id = a.post_id);
 UPDATE eh_activities a SET visible_region_type = (SELECT visible_region_type FROM eh_forum_posts WHERE id = a.post_id);
@@ -17,6 +17,12 @@ UPDATE eh_activities a SET visible_region_id = (SELECT visible_region_id FROM eh
 INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`)
     VALUES ('9', 'Apartment', '预约看楼', '预约看楼', '1', '1', ' {"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"userName","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"mobile","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"organizationName","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"areaSize","fieldDisplayName":"面积需求","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入面积需求","requiredFlag":"1","dynamicFlag":"0"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0","dynamicFlag":"0"}]}                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                                             ', '1', '1', UTC_TIMESTAMP());
 INSERT INTO `eh_request_templates_namespace_mapping` (`id`, `namespace_id`, `template_id`) VALUES (10, '999985', '9');
+
+
+--
+-- 修改能耗管理的入口页面地址  add by xq.tian  2016/11/30
+--
+UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"http://core.zuolin.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_name` = 'Energy' AND `namespace_id` = '999992';
 
 -- 物业报修2.6 merge from pmtask-delta-data.sql by sw 20161128
 UPDATE eh_pm_tasks SET address_type = 1 WHERE address_type IS NULL;
@@ -32,18 +38,43 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
 	VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'sms.default.yzx', '15', 'zh_CN', '物业任务3-深业', '32949', '999992');
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
-	VALUES ('20190', '统计', '20100', NULL, NULL, '0', '2', '/20000/20100/20190', 'park', '245');
-INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', NULL, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
-INSERT INTO `eh_web_menus` VALUES ('20192', '人员评分统计', '20190', NULL, 'staffScore_statistics', '0', '2', '/20000/20100/20190/20192', 'park', '181');
+	SELECT * FROM eh_locale_templates WHERE scope = 'pmtask.notification' AND CODE IN (5,6);
+UPDATE eh_locale_templates SET namespace_id = 0 WHERE scope = 'pmtask.notification' AND CODE IN (5,6);
+	
 
-SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
+-- SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+-- INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
+-- INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10008', '20192', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
 
-SET @eh_launch_pad_items = (SELECT MAX(id) FROM `eh_launch_pad_items`);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
-	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999992', '0', '0', '0', '/home', 'Bizs', '物业测试', '物业测试', 'cs://1/image/aW1hZ2UvTVRwaVpqazBOVEE1T1dRNE5XSTRNekF6WW1Fek5qZ3lPREExT1dWak1qWmtPUQ', '1', '1', '14', '{\"url\":\"http://alpha.lab.everhomes.com/property_service/index.html?taskCategoryId=200903&hideNavigationBar=1#/my_service#sign_suffix\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'default', '0', NULL);
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+
+-- 华润oe 原活动默认为白领活动 by xiongying20161209
+update eh_activity_categories set default_flag = 1 where id = 1000000 and namespace_id = 999985;
+INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '904', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '805', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+ SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '331', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '332', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+ SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '333', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 1;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '920', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 1;
+
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '805', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 2;
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
+SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '332', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
+ FROM eh_pm_task_targets WHERE role_id = 2;
 
 
 -- 组织架构 add by sw 20161128
@@ -88,9 +119,6 @@ INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `le
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41000', '大堂门禁', '40000', '/40000/41000', '0', '2', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41100', 'Wifi热点', '40000', '/40000/41100', '0', '2', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41200', '一卡通', '40000', '/40000/43500', '0', '2', '2', '0', UTC_TIMESTAMP());
-
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41300', '场所预订', '40000', '/40000/41300', '0', '2', '2', '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41400', '服务预约', '40000', '/40000/41400', '0', '2', '2', '0', UTC_TIMESTAMP());
 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('50000', '内部管理', '0', '/50000', '1', '1', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('50100', '组织架构', '50000', '/50000/50100', '1', '2', '2', '0', UTC_TIMESTAMP());
@@ -160,11 +188,7 @@ INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`,
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('48', '38000', '1', '10048', NULL, '0', UTC_TIMESTAMP());
 
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('49', '10850', '1', '10049', NULL, '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('50', '41300', '1', '10050', NULL, '0', UTC_TIMESTAMP());
-INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('51', '41400', '1', '10051', NULL, '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ('52', '10200', '1', '10052', NULL, '0', UTC_TIMESTAMP());
-
-
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1008', '10002', '10100', '论坛/公告', '1', '1', '论坛/公告 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1009', '10003', '10400', '广告管理', '1', '1', '广告管理 全部权限', '710');
@@ -202,8 +226,6 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1068', '10029', '40900', '车辆�
 INSERT INTO `eh_web_menu_privileges` VALUES ('1069', '10030', '41000', '大堂门禁', '1', '1', '大堂门禁 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1070', '10031', '41100', 'Wifi热点', '1', '1', 'Wifi热点 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1071', '10032', '41200', '一卡通', '1', '1', '一卡通 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1072', '10050', '41300', '场所预订', '1', '1', '场所预订 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('1073', '10051', '41400', '服务预约', '1', '1', '服务预约 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1074', '10052', '10200', '园区简介', '1', '1', '园区简介 全部权限', '710');
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1084', '10034', '50100', '组织架构', '1', '1', '组织架构 全部权限', '710');
@@ -217,7 +239,6 @@ INSERT INTO `eh_web_menu_privileges` VALUES ('1091', '10041', '50800', '公司�
 
 INSERT INTO `eh_web_menu_privileges` VALUES ('1094', '10043', '60100', '管理员管理', '1', '1', '管理员管理 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ('1095', '10044', '60200', '业务授权', '1', '1', '业务授权 全部权限', '710');
-
 
 DELETE FROM eh_web_menus;
 INSERT INTO `eh_web_menus` VALUES ('10000', '信息发布', '0', 'fa fa-volume-up', NULL, '1', '2', '/10000', 'park', '100');
@@ -242,10 +263,14 @@ INSERT INTO `eh_web_menus` VALUES ('20120', '我的任务', '20100', NULL, 'my_t
 INSERT INTO `eh_web_menus` VALUES ('20130', '统计', '20100', NULL, 'statistics', '0', '2', '/20000/20100/20130', 'park', '215');
 INSERT INTO `eh_web_menus` VALUES ('20140', '任务列表', '20100', NULL, 'task_management_list', '0', '2', '/20000/20100/20140', 'park', '220');
 INSERT INTO `eh_web_menus` VALUES ('20150', '服务录入', '20100', NULL, 'task_management_service_entry', '0', '2', '/20000/20100/20150', 'park', '225');
-INSERT INTO `eh_web_menus` VALUES ('20160', '执行人员设置', '20100', NULL, 'executive_setting', '0', '2', '/20000/20100/20160', 'park', '230');
-INSERT INTO `eh_web_menus` VALUES ('20170', '服务类型设置', '20100', NULL, 'service_type_setting', '0', '2', '/20000/20100/20170', 'park', '235');
-INSERT INTO `eh_web_menus` VALUES ('20180', '分类设置', '20100', NULL, 'classify_setting', '0', '2', '/20000/20100/20180', 'park', '240');
-INSERT INTO `eh_web_menus` VALUES ('20190', '统计', '20100', NULL, 'task_statistics', '0', '2', '/20000/20100/20190', 'park', '245');
+INSERT INTO `eh_web_menus` VALUES ('20155', '设置', '20100', NULL, NULL, '0', '2', '/20000/20100/20155', 'park', '228');
+INSERT INTO `eh_web_menus` VALUES ('20160', '执行人员设置', '20155', NULL, 'executive_setting', '0', '2', '/20000/20100/20155/20160', 'park', '230');
+INSERT INTO `eh_web_menus` VALUES ('20170', '服务类型设置', '20155', NULL, 'service_type_setting', '0', '2', '/20000/20100/20155/20170', 'park', '235');
+INSERT INTO `eh_web_menus` VALUES ('20180', '分类设置', '20155', NULL, 'classify_setting', '0', '2', '/20000/20100/20155/20180', 'park', '240');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('20190', '统计', '20100', NULL, NULL, '0', '2', '/20000/20100/20190', 'park', '245');
+INSERT INTO `eh_web_menus` VALUES ('20191', '服务统计', '20190', NULL, 'task_statistics', '0', '2', '/20000/20100/20190/20191', 'park', '180');
+INSERT INTO `eh_web_menus` VALUES ('20192', '人员评分统计', '20190', NULL, 'staffScore_statistics', '0', '2', '/20000/20100/20190/20192', 'park', '181');
 
 INSERT INTO `eh_web_menus` VALUES ('20400', '物业缴费', '20000', NULL, NULL, '1', '2', '/20000/20400', 'park', '250');
 INSERT INTO `eh_web_menus` VALUES ('20410', '缴费记录', '20400', NULL, 'property_fee_record', '0', '2', '/20000/20400/20410', 'park', '252');
@@ -338,17 +363,6 @@ INSERT INTO `eh_web_menus` VALUES ('41200', '一卡通', '40000', NULL, NULL, '1
 INSERT INTO `eh_web_menus` VALUES ('41210', '开卡用户', '41200', NULL, 'card_user', '0', '2', '/40000/41200/41210', 'park', '487');
 INSERT INTO `eh_web_menus` VALUES ('41220', '充值记录', '41200', NULL, 'card_recharge_record', '0', '2', '/40000/41200/41220', 'park', '488');
 INSERT INTO `eh_web_menus` VALUES ('41230', '消费记录', '41200', NULL, 'card_purchase_record', '0', '2', '/40000/41200/41230', 'park', '489');
-
-INSERT INTO `eh_web_menus` VALUES ('41300', '场所预订', '40000', NULL, NULL, '1', '2', '/40000/41300', 'park', '490');
-INSERT INTO `eh_web_menus` VALUES ('41310', '通用设置', '41300', NULL, 'rental_setting', '0', '2', '/40000/41300/41310', 'park', '491');
-INSERT INTO `eh_web_menus` VALUES ('41320', '场所发布', '41300', NULL, 'rental_publish', '0', '2', '/40000/41300/41320', 'park', '492');
-INSERT INTO `eh_web_menus` VALUES ('41330', '预订详情', '41300', NULL, 'rental_detail', '0', '2', '/40000/41300/41330', 'park', '493');
-
-INSERT INTO `eh_web_menus` VALUES ('41400', '服务预约', '40000', NULL, NULL, '1', '2', '/40000/41400', 'park', '494');
-INSERT INTO `eh_web_menus` VALUES ('41410', '通用设置', '41400', NULL, 'service_setting', '0', '2', '/40000/41400/41410', 'park', '495');
-INSERT INTO `eh_web_menus` VALUES ('41420', '服务类型', '41400', NULL, 'service_type', '0', '2', '/40000/41400/41420', 'park', '496');
-INSERT INTO `eh_web_menus` VALUES ('41430', '预约详情', '41400', NULL, 'service_detail', '0', '2', '/40000/41400/41430', 'park', '497');
-INSERT INTO `eh_web_menus` VALUES ('41440', '数据统计', '41400', NULL, 'service_statistics', '0', '2', '/40000/41400/41440', 'park', '498');
 
 INSERT INTO `eh_web_menus` VALUES ('50000', '内部管理', '0', 'fa fa-group', NULL, '1', '2', '/50000', 'park', '505');
 
@@ -468,16 +482,6 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `privilege_id`, 1005,0,1,NOW() FROM `eh_service_module_privileges` WHERE module_id IN (SELECT id FROM eh_service_modules WHERE TYPE = 1);
 
 
--- 添加 业务权限下面的子菜单
-SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-	
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
-(SELECT t.* FROM eh_web_menus m
-JOIN (SELECT * FROM eh_web_menu_privileges WHERE privilege_id >= 10001 AND privilege_id <= 10052 AND privilege_id NOT IN (10001, 10007, 10012, 10019, 10033, 10042)) t
-ON m.id = t.menu_id
-) tm JOIN eh_web_menus mm ON tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) WHERE mm.id NOT IN (SELECT menu_id FROM eh_web_menu_privileges WHERE privilege_id>=10000);
-
 
 -- 新增俱乐部菜单
 INSERT INTO `eh_web_menus` VALUES ('10750', '俱乐部', '10000', NULL, 'groups', '0', '2', '/10000/10750', 'park', '180');
@@ -515,7 +519,6 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	
 DELETE FROM `eh_acls` WHERE `privilege_id` IN (604, 605) AND `role_id` = 1005;
 
-
 -- 合同管理菜单, add by tt, 20161201
 INSERT INTO `eh_web_menus` VALUES ('32500', '合同管理', '30000', NULL, 'contract_management', '0', '2', '/30000/32500', 'park', '325');
 INSERT INTO `eh_web_menu_privileges` VALUES ('185', '10065', '32500', '合同管理', '1', '1', '合同管理 全部权限', '710');
@@ -547,18 +550,9 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10075', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
 
-
 -- 更新acl表
 UPDATE `eh_acls` SET `role_type` = 'EhAclRoles' WHERE `role_type` IS NULL AND `owner_type` = 'EhOrganizations';
 
-
-INSERT INTO `eh_web_menu_privileges` VALUES ('300', '907', '20191', '服务统计', '1', '1', '服务统计 全部权限', '710');
-INSERT INTO `eh_web_menu_privileges` VALUES ('301', '907', '20191', '人员评分统计', '1', '1', '人员评分统计 全部权限', '710');
-
---
--- 修改能耗管理的入口页面地址  add by xq.tian  2016/11/30
---
-UPDATE `eh_launch_pad_items` SET `action_data`='{"url":"http://alpha.lab.everhomes.com/energy-management/index.html?hideNavigationBar=1#/address_choose#sign_suffix"}' WHERE `item_name` = 'Energy' AND `namespace_id` = '999992';
 
 -- 设备巡检增加设备类型 add by xiongying20161129
 SET @category_id = (SELECT MAX(id) FROM `eh_categories`);
@@ -568,6 +562,12 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
     VALUES ((@category_id := @category_id + 1), '7', '0', '给排水', '设备类型/给排水', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
     VALUES ((@category_id := @category_id + 1), '7', '0', '电梯', '设备类型/电梯', '0', '2', UTC_TIMESTAMP(), NULL, NULL, NULL, '0');
+
+-- Officeasy白领活动和OE大讲堂
+UPDATE eh_launch_pad_items SET action_data = '{"categoryId":1000001}' WHERE id IN(112574, 112585) AND namespace_id = 999985;
+
+INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000001', 'OE大讲堂', '/1000001', '0', '2', '1', UTC_TIMESTAMP(), '999985');
+INSERT INTO `eh_activity_categories` (`id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `namespace_id`) VALUES ('1000000', '白领活动', '/1000000', '0', '2', '1', UTC_TIMESTAMP(), '999985');
 
 
 -- 初始化数据, add by tt, 20161117
@@ -582,21 +582,42 @@ INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `t
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 21, 'zh_CN', '发送短信给新企业（有客服人员）', '33380', 1000000);
 INSERT INTO `eh_locale_templates` ( `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES ( 'sms.default.yzx', 22, 'zh_CN', '发送短信给新企业（无客服人员）', '33381', 1000000);
 
--- 测试服务联盟广场展现形式 add by xiongying 20161201
-SET @eh_launch_pad_items_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
-    VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '999985', '0', '0', '0', '/home', 'Bizs', '服务联盟tab', '服务联盟tab', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', '1', '1', '33', '{\"type\":150,\"parentId\":150,\"displayType\": \"tab\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
-    VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '999985', '0', '0', '0', '/home', 'Bizs', '服务联盟tab', '服务联盟tab', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', '1', '1', '33', '{\"type\":150,\"parentId\":150,\"displayType\": \"tab\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
-    VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '999985', '0', '0', '0', '/home', 'Bizs', '服务联盟list', '服务联盟list', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', '1', '1', '33', '{\"type\":150,\"parentId\":150,\"displayType\": \"list\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
-    VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '999985', '0', '0', '0', '/home', 'Bizs', '服务联盟list', '服务联盟list', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', '1', '1', '33', '{\"type\":150,\"parentId\":150,\"displayType\": \"list\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
-    VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '999985', '0', '0', '0', '/home', 'Bizs', '服务联盟typelist', '服务联盟typelist', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', '1', '1', '33', '{\"type\":150,\"parentId\":150,\"displayType\": \"typelist\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
-    VALUES ((@eh_launch_pad_items_id := @eh_launch_pad_items_id + 1), '999985', '0', '0', '0', '/home', 'Bizs', '服务联盟typelist', '服务联盟typelist', 'cs://1/image/aW1hZ2UvTVRvMVkyVm1Oak5oWlRoaE56UTNNV1EwWVRKaU4yRmtNalptT1RZNFpEazFPQQ', '1', '1', '33', '{\"type\":150,\"parentId\":150,\"displayType\": \"typelist\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL);
+-- 添加 白领活动 & OE大讲堂 菜单 add by sw 20161201
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10058, '0', '白领活动 管理员', '白领活动 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10059, '0', 'OE大讲堂 管理员', 'OE大讲堂 业务模块权限', NULL);
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10058', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1001', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10059', '1005', '0', '1', UTC_TIMESTAMP(), 'EhAclRoles');
 
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
+	VALUES ('10610', '白领活动', '10000', '/10000/10610', '0', '2', '2', '0', '2016-11-28 10:21:45');
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
+	VALUES ('10620', 'OE大讲堂', '10000', '/10000/10620', '0', '2', '2', '0', '2016-11-28 10:21:45');
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES ('70', '10610', '1', '10058', NULL, '0', '2016-11-28 10:21:48');
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES ('71', '10620', '1', '10059', NULL, '0', '2016-11-28 10:21:48');
+SET @eh_service_module_scopes = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '0', '10610', '', 'EhNamespaces', '999985', NULL, '2');
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '0', '10620', '', 'EhNamespaces', '999985', NULL, '2');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('10610', '白领活动', '10000', NULL, 'white_collar_activity', '0', '2', '/10000/10600', 'park', '161');
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`) 
+	VALUES ('10620', 'OE大讲堂', '10000', NULL, 'OE_auditorium', '0', '2', '/10000/10600', 'park', '162');
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10058', '10610', '白领活动', '1', '1', '白领活动 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+	VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10059', '10620', '白领活动', '1', '1', '白领活动 全部权限', '710');
 
 --
 -- 能耗管理菜单   add by xq.tian  2016/11/29
@@ -649,9 +670,120 @@ VALUES ('49100', '能耗管理', '40000', '/40000/49100', '0', '2', '2', '0', UT
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ('68', '49100', '1', '422', NULL, '0', UTC_TIMESTAMP());
 
+
+
 -- 自认证跳转页面，add by wh, 20161205
 SET @id := (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.success','http://core.zuolin.com/mobile/static/email_page/success.html','email auth verify success','0',NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.fail','http://core.zuolin.com/mobile/static/email_page/fail.html','email auth verify success','0',NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.overtime','http://core.zuolin.com/mobile/static/email_page/overtime.html','email auth verify success','0',NULL);
 
+-- 海岸 物业报修升级2.6  add by sw 20131205
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ('202500', '6', '0', '家政服务', '任务/家政服务', '0', '2', '2016-12-05 10:22:23', NULL, NULL, NULL, '999993');
+INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) 
+	VALUES ('202501', '6', '0', '综合维修', '任务/综合维修', '0', '2', '2016-12-05 10:22:23', NULL, NULL, NULL, '999993');
+
+delete from eh_launch_pad_items where id in (10373, 10700,10701,10702,10703, 10704,10705,10706,10707) and namespace_id = 999993;
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://core.zuolin.com/property_service/index.html?taskCategoryId=202500&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10370 and namespace_id = 999993;
+
+update eh_launch_pad_items set action_type = 14, action_data = '{"url":"http://core.zuolin.com/property_service/index.html?taskCategoryId=202501&hideNavigationBar=1#/my_service#sign_suffix"}'
+where id = 10372 and namespace_id = 999993;
+
+update eh_launch_pad_items set action_type = 51, action_data = '', icon_uri = 'cs://1/image/aW1hZ2UvTVRvNU1UTmlOMlU0WkRjd05tRXhZVEZtWm1Jd016ZzJPVGt5WWpneU1UUXlZZw', item_label = '任务管理',item_name = 'PM_TASK'
+where id = 10371 and namespace_id = 999993;
+
+
+-- 华润oe只有一个企业时跳过列表页 by xiongying20161206
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ('1', '999985', '0');
+
+-- 添加 业务权限下面的子菜单 add by sw 20161206
+SET @web_menu_privilegel_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+	
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+SELECT (@web_menu_privilegel_id := @web_menu_privilegel_id + 1), privilege_id, mm.id , tm.name, '1', '1', tm.discription, tm.sort_num FROM
+(SELECT t.* FROM eh_web_menus m
+JOIN (SELECT * FROM eh_web_menu_privileges WHERE privilege_id >= 10001 AND privilege_id <= 10052 AND privilege_id NOT IN (10001, 10007, 10012, 10019, 10033, 10042)) t
+ON m.id = t.menu_id
+) tm JOIN eh_web_menus mm ON tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) WHERE mm.id NOT IN (SELECT menu_id FROM eh_web_menu_privileges WHERE privilege_id>=10000);
+
+
+<<<<<<< HEAD:db/3.12.0-delta-data-release.sql
+-- 华润oe 原活动默认为白领活动 by xiongying20161209
+update eh_activity_categories set default_flag = 1 where id = 1000000 and namespace_id = 999985;
+=======
+-- 更新科技园 停车车主昵称 add by sw 20101206
+update eh_parking_recharge_orders set recharge_type =1 where recharge_type = 0;
+update eh_parking_recharge_orders set plate_owner_name = '陈程伟' where plate_number = '粤BD225W' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '李义鸿' where plate_number = '粤B1H0V6' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '胡益群' where plate_number = '粤BMP272' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '欧阳莉文' where plate_number = '粤B726ZF' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '杨川' where plate_number = '粤BG7Y32' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '武文彬' where plate_number = '粤BJ659P' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '周先生' where plate_number = '粤B182VN' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '张先生' where plate_number = '粤BVN732' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '张浩' where plate_number = '粤B217EL' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '谢科军' where plate_number = '粤B590VB' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '樊春来' where plate_number = '粤BT65Y0' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '王新涛' where plate_number = '粤B20P15' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '陈进光' where plate_number = '粤BV51E8' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '林庞慧' where plate_number = '粤BM05P5' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '凌杰' where plate_number = '粤BJ270M' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '罗勇峰' where plate_number = '粤B105CU' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '张哲楷' where plate_number = '粤B8Y1T1' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '杨先生' where plate_number = '粤BQ5G52' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '袁新旋' where plate_number = '粤BD898K' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '华先生' where plate_number = '粤BK256P' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '张学斌' where plate_number = '粤B36P88' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '李莎' where plate_number = '粤B2UC59' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '安先生' where plate_number = '粤B898LG' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '周先生' where plate_number = '粤B45G62' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '柯先生' where plate_number = '粤BK122T' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '胡浩' where plate_number = '粤B482E6' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '赵赛军' where plate_number = '粤B692BW' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '公车' where plate_number = '粤B3AM70' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '李小姐' where plate_number = '粤BKP750' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '万先生' where plate_number = '粤B636SZ' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '刘超成' where plate_number = '粤BP3N50' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '万先生' where plate_number = '粤B07W05' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '熊军' where plate_number = '粤BRZ660' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '曾恋帜' where plate_number = '粤B0C15W' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '胡鹏杰' where plate_number = '粤BP2218' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '陶祥' where plate_number = '粤BE83S8' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '徐申翔' where plate_number = '粤BN97R9' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '王旭' where plate_number = '粤B0640P' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '陈彬彬' where plate_number = '粤B6RL21' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '李新文' where plate_number = '粤B8X9K6' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '吴廷禹' where plate_number = '粤B9WW21' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '张立军' where plate_number = '粤B7JM09' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '王宇晨' where plate_number = '粤B850CY' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '吉高建' where plate_number = '粤A985S5' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '赖国俊' where plate_number = '粤BH77Z1' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '丁学刚' where plate_number = '粤A3910Y' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '周延斌' where plate_number = '粤BN377Y' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '王希' where plate_number = '粤BG539K' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '雷浩' where plate_number = '粤B251NP' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '程志兵' where plate_number = '粤B852TV' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '陈泽龙' where plate_number = '粤B618KX' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '郑强' where plate_number = '粤B739YU' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '川先生' where plate_number = '粤BV220M' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '刘江宾' where plate_number = '粤B4Z332' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '刘森华' where plate_number = '粤BE06K6' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '刘森华' where plate_number = '粤BE06K6' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '公车' where plate_number = '粤B700NB' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '叶芳' where plate_number = '粤B967NN' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '林先生' where plate_number = '粤BH79B5' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '周健' where plate_number = '粤B4271Q' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '熊锋' where plate_number = '粤B8726J' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '陶耀军' where plate_number = '粤BM22N8' and create_time > '2016-11-01 00:00:00';
+
+--
+-- 能耗管理菜单调整  add by xq.tian  2016/12/08
+--
+UPDATE `eh_web_menus` SET `sort_num` = '490' WHERE `id` = '49100';
+UPDATE `eh_web_menus` SET `sort_num` = '491' WHERE `id` = '49110';
+UPDATE `eh_web_menus` SET `sort_num` = '492' WHERE `id` = '49120';
+UPDATE `eh_web_menus` SET `sort_num` = '493' WHERE `id` = '49130';
+UPDATE `eh_web_menus` SET `sort_num` = '494' WHERE `id` = '49140';
+>>>>>>> 8cc7df3542d01e20fa667f3c723ea5eef50d4542:db/backup/3.12.0-delta-data-release.sql
