@@ -151,6 +151,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Test
     public void testFlowEnable() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
     	//step1 create flow
     	CreateFlowCommand flowCmd = new CreateFlowCommand();
     	flowCmd.setFlowName("test-flow-1");

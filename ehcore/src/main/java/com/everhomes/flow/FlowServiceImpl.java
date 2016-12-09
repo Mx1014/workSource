@@ -786,6 +786,8 @@ public class FlowServiceImpl implements FlowService {
 		userSel.setSourceTypeA(selCmd.getSourceTypeA());
 		userSel.setSourceTypeB(selCmd.getSourceTypeB());
 		userSel.setStatus(FlowStatusType.VALID.getCode());
+		
+		updateFlowUserName(userSel);
 		flowUserSelectionProvider.createFlowUserSelection(userSel);		
 	}
 
@@ -858,6 +860,7 @@ public class FlowServiceImpl implements FlowService {
 				sel.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
 				sel.setSelectType(sCmd.getFlowUserSelectionType());
 				sel.setStatus(FlowStatusType.VALID.getCode());
+				updateFlowUserName(sel);
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
 		}
@@ -1683,6 +1686,25 @@ public class FlowServiceImpl implements FlowService {
         
         return resp;
 	}
+	
+	private void updateCaseDTO(FlowCaseDTO dto) {
+		FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
+		if(flowNode != null) {
+			dto.setFlowNodeName(flowNode.getNodeName());
+			List<FlowUserSelection> sels = flowUserSelectionProvider.findSelectionByBelong(flowNode.getId()
+					, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+			
+			String name;
+			if(sels != null && sels.size() > 0) {
+				name = sels.get(0).getSelectionName();
+				for(int i = 1; i < sels.size() && i < 3; i++) {
+					name = name + "," + sels.get(i).getSelectionName();
+				}
+				dto.setProcessUserName(name);
+			}
+		}
+		
+	}
 
 	@Override
 	public SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd) {
@@ -1703,14 +1725,16 @@ public class FlowServiceImpl implements FlowService {
 		ListingLocator locator = new ListingLocator();
 		
 		List<FlowCaseDetail> details = null;
-		boolean isApplier = false;
+		int type = 0;
 		
 		if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
-			isApplier = true;
+			type = 1;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
 		} else if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
+			type = 2;
 			details = flowCaseProvider.findAdminFlowCases(locator, count, cmd);
 		} else {
+			type = 3;
 			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
 			
 		}
@@ -1719,11 +1743,14 @@ public class FlowServiceImpl implements FlowService {
 		if(details != null) {
 			for(FlowCaseDetail detail : details) {
 				FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
-				if(isApplier) {
+				if(1 == type) {
 					FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
 					if(flowNode != null) {
 						dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
 					}
+				}
+				if(2 == type) {
+					updateCaseDTO(dto);
 				}
 				dtos.add(dto);
 			}	
@@ -1916,6 +1943,17 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	private void updateFlowUserName(FlowUserSelectionDTO dto) {
+		if(dto.getSelectionName() == null) {
+			FlowUserSelectionType selType = FlowUserSelectionType.fromCode(dto.getSelectType());
+			if(selType == FlowUserSelectionType.DEPARTMENT) {
+				//Users selection
+				UserInfo userInfo = userService.getUserSnapshotInfo(dto.getSourceIdA());
+				dto.setSelectionName(userInfo.getNickName());
+			}
+		}
+	}
+	
+	private void updateFlowUserName(FlowUserSelection dto) {
 		if(dto.getSelectionName() == null) {
 			FlowUserSelectionType selType = FlowUserSelectionType.fromCode(dto.getSelectType());
 			if(selType == FlowUserSelectionType.DEPARTMENT) {
