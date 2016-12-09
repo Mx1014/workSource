@@ -125,6 +125,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.util.RecordHelper;
  
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
@@ -2998,9 +2999,41 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	 * 金地抓取客房数据
 	 */
 	@Override
-	public List<JindiCsthomerelDTO> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+	public List<CommunityAddressMapping> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 			Long pageAnchor, int pageSize) {
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.fields()).from(Tables.EH_ORGANIZATIONS)
+			.join(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+			.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID))
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, CommunityAddressMapping.class));
+		}
+		return new ArrayList<CommunityAddressMapping>();
+	}
+
+	@Override
+	public List<CommunityAddressMapping> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.fields()).from(Tables.EH_ORGANIZATIONS)
+			.join(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+			.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID))
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME.asc(), Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, CommunityAddressMapping.class));
+		}
+		return new ArrayList<CommunityAddressMapping>();
 	}
 	
 	
