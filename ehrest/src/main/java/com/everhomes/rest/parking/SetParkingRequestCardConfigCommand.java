@@ -15,10 +15,16 @@ public class SetParkingRequestCardConfigCommand {
 	private Integer flowId;
     private Integer requestMonthCount;
     private Byte requestRechargeType;
+    
     private String cardRequestTip;
     private String cardAgreement;
     private Integer maxIssueNum;
     private Integer maxRequestNum;
+    
+    private Byte cardRequestTipFlag;
+	private Byte cardAgreementFlag;
+	private Byte maxRequestNumFlag;
+	private Byte maxIssueNumFlag;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -73,6 +79,31 @@ public class SetParkingRequestCardConfigCommand {
 	}
 	public void setMaxIssueNum(Integer maxIssueNum) {
 		this.maxIssueNum = maxIssueNum;
+	}
+	
+	public Byte getCardRequestTipFlag() {
+		return cardRequestTipFlag;
+	}
+	public void setCardRequestTipFlag(Byte cardRequestTipFlag) {
+		this.cardRequestTipFlag = cardRequestTipFlag;
+	}
+	public Byte getCardAgreementFlag() {
+		return cardAgreementFlag;
+	}
+	public void setCardAgreementFlag(Byte cardAgreementFlag) {
+		this.cardAgreementFlag = cardAgreementFlag;
+	}
+	public Byte getMaxRequestNumFlag() {
+		return maxRequestNumFlag;
+	}
+	public void setMaxRequestNumFlag(Byte maxRequestNumFlag) {
+		this.maxRequestNumFlag = maxRequestNumFlag;
+	}
+	public Byte getMaxIssueNumFlag() {
+		return maxIssueNumFlag;
+	}
+	public void setMaxIssueNumFlag(Byte maxIssueNumFlag) {
+		this.maxIssueNumFlag = maxIssueNumFlag;
 	}
 	@Override
     public String toString() {

@@ -29,6 +29,7 @@ public class ParkingLotDTO {
     private Byte tempfeeFlag;
     private Byte rateFlag;
     
+    private Byte isSupportRecharge;
     private Integer rechargeMonthCount;
     private Byte rechargeType;
     
@@ -139,6 +140,14 @@ public class ParkingLotDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getIsSupportRecharge() {
+		return isSupportRecharge;
+	}
+
+	public void setIsSupportRecharge(Byte isSupportRecharge) {
+		this.isSupportRecharge = isSupportRecharge;
+	}
 
 	public Integer getFlowId() {
 		return flowId;

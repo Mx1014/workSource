@@ -22,8 +22,14 @@ public class ParkingRequestCardConfigDTO {
     private Long parkingLotId;
 	private Integer requestMonthCount;
     private Byte requestRechargeType;
+    
+    private Byte cardRequestTipFlag;
+	private Byte cardAgreementFlag;
+	private Byte maxRequestNumFlag;
+	private Byte maxIssueNumFlag;
     private String cardRequestTip;
     private String cardAgreement;
+    private Integer maxRequestNum;
     private Integer maxIssueNum;
     private Long flowId;
     
@@ -80,6 +86,37 @@ public class ParkingRequestCardConfigDTO {
 	}
 	public void setFlowId(Long flowId) {
 		this.flowId = flowId;
+	}
+	
+	public Byte getCardRequestTipFlag() {
+		return cardRequestTipFlag;
+	}
+	public void setCardRequestTipFlag(Byte cardRequestTipFlag) {
+		this.cardRequestTipFlag = cardRequestTipFlag;
+	}
+	public Byte getCardAgreementFlag() {
+		return cardAgreementFlag;
+	}
+	public void setCardAgreementFlag(Byte cardAgreementFlag) {
+		this.cardAgreementFlag = cardAgreementFlag;
+	}
+	public Byte getMaxRequestNumFlag() {
+		return maxRequestNumFlag;
+	}
+	public void setMaxRequestNumFlag(Byte maxRequestNumFlag) {
+		this.maxRequestNumFlag = maxRequestNumFlag;
+	}
+	public Byte getMaxIssueNumFlag() {
+		return maxIssueNumFlag;
+	}
+	public void setMaxIssueNumFlag(Byte maxIssueNumFlag) {
+		this.maxIssueNumFlag = maxIssueNumFlag;
+	}
+	public Integer getMaxRequestNum() {
+		return maxRequestNum;
+	}
+	public void setMaxRequestNum(Integer maxRequestNum) {
+		this.maxRequestNum = maxRequestNum;
 	}
 	@Override
     public String toString() {

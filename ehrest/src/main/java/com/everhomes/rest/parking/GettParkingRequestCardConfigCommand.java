@@ -12,7 +12,7 @@ public class GettParkingRequestCardConfigCommand {
 	@NotNull
     private Long parkingLotId;
 	@NotNull
-	private Long flowId;
+	private Integer flowId;
 
 	public String getOwnerType() {
 		return ownerType;
@@ -38,11 +38,11 @@ public class GettParkingRequestCardConfigCommand {
 		this.parkingLotId = parkingLotId;
 	}
 
-	public Long getFlowId() {
+	public Integer getFlowId() {
 		return flowId;
 	}
 
-	public void setFlowId(Long flowId) {
+	public void setFlowId(Integer flowId) {
 		this.flowId = flowId;
 	}
 	

@@ -49,8 +49,10 @@ import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -691,10 +693,21 @@ public class ParkingServiceImpl implements ParkingService {
     			cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(), 
     			cmd.getCarSerieName(), cmd.getPageAnchor(), pageSize);
     	
+    	Long userId = UserContext.current().getUser().getId();
     	int size = list.size();
     	if(size > 0){
-    		response.setRequests(list.stream().map(r -> ConvertHelper.convert(r, ParkingCardRequestDTO.class))
-    				.collect(Collectors.toList()));
+    		response.setRequests(list.stream().map(r -> {
+    			ParkingCardRequestDTO dto = ConvertHelper.convert(r, ParkingCardRequestDTO.class);
+    			
+    			FlowCaseDetailDTO flowCaseDetailDTO = flowService.getFlowCaseDetail(r.getFlowCaseId()
+                		, userId
+                		, FlowUserType.PROCESSOR
+                		, true);
+    			
+    			dto.setButtons(flowCaseDetailDTO.getButtons());
+    			return dto;
+    		}).collect(Collectors.toList()));
+    		
     		if(size != pageSize){
         		response.setNextPageAnchor(null);
         	}else{
@@ -1095,7 +1108,8 @@ public class ParkingServiceImpl implements ParkingService {
     				"FlowId cannot be null.");
         }
 		
-		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), cmd.getFlowId());
+    	Long newFlowId = covertFlowId(cmd.getFlowId());
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), newFlowId);
 		
 		return ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
 	}
@@ -1115,6 +1129,20 @@ public class ParkingServiceImpl implements ParkingService {
 		return response;
 	}
 
+	private Long covertFlowId(Integer flowId) {
+		Long newFlowId = 0L;
+    	if(ParkingRequestFlowType.FORBIDDEN.getCode() == flowId)
+    		newFlowId = 0L;
+    	else if(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode() == flowId)
+    		newFlowId = SEMI_AUTOMATIC;
+    	else if(ParkingRequestFlowType.QUEQUE.getCode() == flowId)
+    		newFlowId = QUEQUE;
+    	else if(ParkingRequestFlowType.INTELLIGENT.getCode() == flowId)
+    		newFlowId = INTELLIGENT;
+    	
+    	return newFlowId;
+	}
+	
 	@Override
 	public void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd) {
 		
@@ -1125,15 +1153,7 @@ public class ParkingServiceImpl implements ParkingService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"FlowId cannot be null.");
         }
-    	Long newFlowId = 0L;
-    	if(ParkingRequestFlowType.FORBIDDEN.getCode() == flowId)
-    		newFlowId = 0L;
-    	else if(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode() == flowId)
-    		newFlowId = SEMI_AUTOMATIC;
-    	else if(ParkingRequestFlowType.QUEQUE.getCode() == flowId)
-    		newFlowId = QUEQUE;
-    	else if(ParkingRequestFlowType.INTELLIGENT.getCode() == flowId)
-    		newFlowId = INTELLIGENT;
+    	Long newFlowId = covertFlowId(flowId);
     	
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), newFlowId);
@@ -1150,6 +1170,10 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingFlow.setRequestRechargeType(cmd.getRequestRechargeType());
 			parkingFlow.setFlowId(newFlowId);
 			parkingFlow.setMaxRequestNum(cmd.getMaxRequestNum());
+			parkingFlow.setCardAgreementFlag(cmd.getCardAgreementFlag());
+			parkingFlow.setCardRequestTipFlag(cmd.getCardRequestTipFlag());
+			parkingFlow.setMaxIssueNumFlag(cmd.getMaxIssueNumFlag());
+			parkingFlow.setMaxRequestNumFlag(cmd.getMaxRequestNumFlag());
 			parkingProvider.createParkingRequestCardConfig(parkingFlow);
 		}else {
 			parkingFlow.setCardAgreement(cmd.getCardAgreement());
@@ -1158,6 +1182,10 @@ public class ParkingServiceImpl implements ParkingService {
 			parkingFlow.setRequestMonthCount(cmd.getRequestMonthCount());
 			parkingFlow.setRequestRechargeType(cmd.getRequestRechargeType());
 			parkingFlow.setMaxRequestNum(cmd.getMaxRequestNum());
+			parkingFlow.setCardAgreementFlag(cmd.getCardAgreementFlag());
+			parkingFlow.setCardRequestTipFlag(cmd.getCardRequestTipFlag());
+			parkingFlow.setMaxIssueNumFlag(cmd.getMaxIssueNumFlag());
+			parkingFlow.setMaxRequestNumFlag(cmd.getMaxRequestNumFlag());
 			parkingProvider.updatetParkingRequestCardConfig(parkingFlow);
 
 		}

@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
+import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowNodeLogDTO;
 import com.everhomes.util.StringHelper;
 
 /**
@@ -59,6 +62,11 @@ public class ParkingCardRequestDTO {
     @ItemType(ParkingAttachmentDTO.class)
     private List<ParkingAttachmentDTO> attachments;
     
+    //工作流
+	@ItemType(FlowButtonDTO.class)
+	private List<FlowButtonDTO> buttons;
+	
+	
     public ParkingCardRequestDTO() {
     }
 
@@ -244,6 +252,14 @@ public class ParkingCardRequestDTO {
 
 	public void setFlowCaseId(Long flowCaseId) {
 		this.flowCaseId = flowCaseId;
+	}
+
+	public List<FlowButtonDTO> getButtons() {
+		return buttons;
+	}
+
+	public void setButtons(List<FlowButtonDTO> buttons) {
+		this.buttons = buttons;
 	}
 
 	@Override
