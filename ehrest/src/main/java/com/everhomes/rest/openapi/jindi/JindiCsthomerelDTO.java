@@ -1,15 +1,13 @@
 // @formatter:off
 package com.everhomes.rest.openapi.jindi;
 
-import java.sql.Timestamp;
-
 /**
  * 
  * <ul>金地同步数据的客房数据
  * <li>: </li>
  * </ul>
  */
-public class JindiCsthomerelDTO {
+public class JindiCsthomerelDTO extends JindiDataDTO {
 	private Long organizationId;
 	private Long communityId;
 	private String communityName;
@@ -17,8 +15,6 @@ public class JindiCsthomerelDTO {
 	private String buildingName;
 	private Long addressId;
 	private String apartmentName;
-	private Timestamp createTime;
-	private Timestamp updateTime;
 
 	public Long getOrganizationId() {
 		return organizationId;
@@ -75,21 +71,4 @@ public class JindiCsthomerelDTO {
 	public void setApartmentName(String apartmentName) {
 		this.apartmentName = apartmentName;
 	}
-
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
-	public Timestamp getUpdateTime() {
-		return updateTime;
-	}
-
-	public void setUpdateTime(Timestamp updateTime) {
-		this.updateTime = updateTime;
-	}
-
 }

@@ -12,16 +12,22 @@ public class JindiOpenServiceImpl implements JindiOpenService {
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
 		if (JindiDataType.fromCode(cmd.getDataType()) != null) {
-			JindiOpenHandler handler = getHandler(cmd.getDataType());
+			JindiOpenHandler handler = getHandler(cmd.getDataType(), cmd.getActionType(), cmd.getSubActionType());
 			return handler.fetchData(cmd);
 		}
 		return null;
 	}
 	
-	private JindiOpenHandler getHandler(String dataType) {
+	private JindiOpenHandler getHandler(String dataType, String actionType, String subActionType) {
 		if (dataType != null) {
+			if (actionType == null) {
+				actionType = "";
+			}
+			if (subActionType == null) {
+				subActionType = "";
+			}
 			JindiOpenHandler handler = PlatformContext.getComponent(JindiOpenHandler.JINDI_OPEN_HANDLER
-					+ dataType);
+					+ dataType + actionType + subActionType);
 			if (handler != null) {
 				return handler;
 			}

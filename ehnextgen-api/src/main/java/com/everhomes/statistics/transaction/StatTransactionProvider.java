@@ -93,4 +93,9 @@ public interface StatTransactionProvider {
 	
 	
 	List<StatRefund> listStatRefunds(CrossShardListingLocator locator, Integer pageSize, String startDate,String endDate, String resourceId, String resourceType, Integer namespaceId, Long communityId, String serviceType);
+
+	List<StatTransaction> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize);
+
+	List<StatTransaction> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 }

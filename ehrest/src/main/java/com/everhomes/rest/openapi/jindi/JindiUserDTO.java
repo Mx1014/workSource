@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.openapi.jindi;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -11,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>: </li>
  * </ul>
  */
-public class JindiUserDTO {
+public class JindiUserDTO extends JindiDataDTO {
 	private Long id;
 	private String nickName;
 	private String gender;
@@ -19,24 +17,6 @@ public class JindiUserDTO {
 	private String phone;
 	private String organizationId;
 	private String organizationName;
-	private Timestamp createTime;
-	private Timestamp updateTime;
-
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
-	public Timestamp getUpdateTime() {
-		return updateTime;
-	}
-
-	public void setUpdateTime(Timestamp updateTime) {
-		this.updateTime = updateTime;
-	}
 
 	public Long getId() {
 		return id;
