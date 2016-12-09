@@ -533,7 +533,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowService.fireButton(fireButton);
     	
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
-    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
