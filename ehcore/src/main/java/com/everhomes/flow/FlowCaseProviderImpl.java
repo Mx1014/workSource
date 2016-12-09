@@ -132,8 +132,83 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	}
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
-    	if(FlowCaseSearchType.APPLIER.equals(searchType)) {
+    	if(searchType.equals(FlowCaseSearchType.APPLIER)) {
     		cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
+    		
+    	    if(locator.getAnchor() != null) {
+    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));
+    	        }
+    	    
+        	if(cmd.getModuleId() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.MODULE_ID.eq(cmd.getModuleId()));
+        	}
+        	if(cmd.getOwnerId() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_ID.eq(cmd.getOwnerId()));
+        	}
+        	if(cmd.getOwnerType() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.OWNER_TYPE.eq(cmd.getOwnerType()));
+        	}
+        	if(cmd.getFlowCaseStatus() != null) {
+        		cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(cmd.getFlowCaseStatus()));
+        	}
+        	if(cmd.getKeyword() != null && !cmd.getKeyword().isEmpty()) {
+        		cond = cond.and(
+        				Tables.EH_FLOW_CASES.MODULE_NAME.like(cmd.getKeyword() + "%")
+        				.or(Tables.EH_FLOW_CASES.APPLIER_NAME.like(cmd.getKeyword() + "%"))
+        				.or(Tables.EH_FLOW_CASES.APPLIER_PHONE.like(cmd.getKeyword() + "%"))
+        				);
+        	}
+    		
+    		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
+    		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
+    		    	.where(cond).limit(count).fetch().map(new FlowCaseRecordMapper());
+    		
+    		List<FlowCaseDetail> objs = records.stream().map((r) -> {
+    			return ConvertHelper.convert(r, FlowCaseDetail.class);
+    		}).collect(Collectors.toList());
+    		
+            if(objs.size() >= count) {
+                locator.setAnchor(objs.get(objs.size() - 1).getId());
+            } else {
+                locator.setAnchor(null);
+            }
+            
+            return objs;
+    		
+    	} else {
+    		return null;
+    	}   	
+    }
+    
+    @Override
+    public List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count, SearchFlowCaseCommand cmd) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhFlowCases.class));
+    	Condition cond = Tables.EH_FLOW_CASES.STATUS.ne(FlowCaseStatus.INVALID.getCode())
+    			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+    	
+    	if(locator.getAnchor() == null) {
+    		locator.setAnchor(cmd.getAnchor());
+    	}
+    	
+    	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+    	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
+    		if(cmd.getUserId() != null) {
+    			cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));	
+    		}
+    		
+    		if(cmd.getProjectId() != null) {
+    			cond = cond.and(Tables.EH_FLOW_CASES.PROJECT_ID.eq(cmd.getProjectId()));
+    		}
+    		if(cmd.getProjectType() != null) {
+    			cond = cond.and(Tables.EH_FLOW_CASES.PROJECT_TYPE.eq(cmd.getProjectType()));
+    		}
+    		if(cmd.getStartTime() != null && cmd.getEndTime() == null) {
+    			cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.ge(new Timestamp(cmd.getStartTime())));
+    		} else if(cmd.getEndTime() != null && cmd.getStartTime() == null) {
+    			cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.le(new Timestamp(cmd.getEndTime())));
+    		} else if(cmd.getEndTime() != null && cmd.getStartTime() != null) {
+    			cond = cond.and(Tables.EH_FLOW_CASES.CREATE_TIME.between(new Timestamp(cmd.getStartTime()), new Timestamp(cmd.getEndTime())));
+    		}
     		
     	    if(locator.getAnchor() != null) {
     	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));

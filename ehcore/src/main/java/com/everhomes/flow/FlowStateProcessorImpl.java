@@ -8,6 +8,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.bigcollection.BigCollectionProvider;
@@ -66,10 +67,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
    private UserProvider userProvider;
    
    @Autowired
-   private FlowTimeoutService flowTimeoutService;
-   
-   @Autowired
    private FlowEventLogProvider flowEventLogProvider;
+   
+   ThreadPoolTaskScheduler scheduler;
+   
+   public FlowStateProcessorImpl() {
+	   scheduler = new ThreadPoolTaskScheduler();
+	   scheduler.setPoolSize(3);
+   }
     
 //	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 	
@@ -182,6 +187,22 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		event.setFiredUser(ctx.getOperator());
 		ctx.setCurrentEvent(event);
 		
+		//fire button actions
+		FlowGraphButton btn = flowGraph.getGraphButton(cmd.getButtonId());
+		if(btn != null) {
+			if(null != btn.getMessage()) {
+				btn.getMessage().fireAction(ctx, event);
+			}
+			if(null != btn.getSms()) {
+				btn.getSms().fireAction(ctx, event);
+			}
+			if(null != btn.getScripts()) {
+				for(FlowGraphAction action : btn.getScripts()) {
+					action.fireAction(ctx, event);
+				}
+			}
+		}
+		
 		flowListenerManager.onFlowButtonFired(ctx);
 		
 		return ctx;
@@ -245,6 +266,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		flowListenerManager.onFlowCaseStateChanged(ctx);
 		
+		//TODO use schedule ? scheduler.execute();
+		
 		//TODO do action in a delay thread
 		if(curr.getMessageAction() != null) {
 			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
@@ -299,7 +322,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ft.setBelongTo(curr.getFlowNode().getId());
 			ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
 			ft.setStatus(FlowStatusType.VALID.getCode());
-			curr.getFlowNode().getAutoStepType();
 			
 			FlowTimeoutStepDTO stepDTO = new FlowTimeoutStepDTO();
 			stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
@@ -310,11 +332,12 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			stepDTO.setAutoStepType(curr.getFlowNode().getAutoStepType());
 			ft.setJson(stepDTO.toString());
 			
-			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 60*1000;
+			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 60*1000l;
 //			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 1000;
 			ft.setTimeoutTick(new Timestamp(timeoutTick));
 			
-			flowTimeoutService.pushTimeout(ft);
+//			flowTimeoutService.pushTimeout(ft);
+			ctx.getTimeouts().add(ft);
 		}
 		
 		if(logStep && log == null) {

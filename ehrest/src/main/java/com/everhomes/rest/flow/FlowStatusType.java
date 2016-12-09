@@ -1,5 +1,18 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>INVALID: 无效</li>
+ * <li>VALID: 有效</li>
+ * <li>CONFIG: 配置中</li>
+ * <li>SNAPSHOT: 生成 Snapshot 中</li>
+ * <li>RUNNING: 运行中</li>
+ * <li>STOP: 停止中</li>
+ * 
+ * </ul>
+ * @author janson
+ *
+ */
 public enum FlowStatusType {
 	INVALID((byte)0), VALID((byte)1), CONFIG((byte)2), SNAPSHOT((byte)3), RUNNING((byte)4), STOP((byte)5);
 	private byte code;

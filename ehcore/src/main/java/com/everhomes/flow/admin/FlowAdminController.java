@@ -22,13 +22,17 @@ import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
+import com.everhomes.rest.flow.FlowCaseDetailDTO;
+import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
+import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
 import com.everhomes.rest.flow.GetFlowNodeDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -37,12 +41,15 @@ import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.user.UserContext;
 
 @RestDoc(value="Flow Admin controller", site="core")
 @RestController
@@ -52,6 +59,44 @@ public class FlowAdminController extends ControllerBase {
 	@Autowired
 	private FlowService flowService;
 	
+    /**
+     * <b>URL: /flow/admin/searchFlowCases</b>
+     * <p> 管理员 FlowCase </p>
+     * @return FlowCase 的列表信息
+     */
+    @RequestMapping("searchFlowCases")
+    @RestReturn(value=SearchFlowCaseResponse.class)
+    public RestResponse searchFlowCases(@Valid SearchFlowCaseCommand cmd) {
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	
+    	Byte admin = FlowCaseSearchType.ADMIN.getCode();
+    	cmd.setFlowCaseSearchType(admin);
+    	
+    	response.setResponseObject(flowService.searchFlowCases(cmd));
+    	
+    	return response;
+    }
+    
+    /**
+     * <b>URL: /flow/admin/getFlowCaseDetailById</b>
+     * <p> 显示用户所有的 FlowCase </p>
+     * @return FlowCase 的列表信息
+     */
+    @RequestMapping("getFlowCaseDetailById")
+    @RestReturn(value=FlowCaseDetailDTO.class)
+    public RestResponse getFlowCaseDetailById(@Valid GetFlowCaseDetailByIdCommand cmd) {
+    	Long userId = UserContext.current().getUser().getId();
+        RestResponse response = new RestResponse(flowService.getFlowCaseDetail(cmd.getFlowCaseId()
+        		, userId
+        		, FlowUserType.fromCode(cmd.getFlowUserType())
+        		, false));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
     /**
      * <b>URL: /admin/flow/createFlow</b>
      * <p> 创建一个新 Flow，一个业务模块，名字不能重复 </p>

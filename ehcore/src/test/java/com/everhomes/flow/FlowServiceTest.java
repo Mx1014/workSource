@@ -44,6 +44,7 @@ import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.FlowVariableType;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
@@ -62,6 +63,7 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
 
 public class FlowServiceTest extends LoginAuthTestCase {
@@ -98,6 +100,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     
     @Autowired
     private FlowScriptProvider flowScriptProvider;
+    
+    @Autowired
+    private UserService userService;
     
     @Before
     public void setUp() throws Exception {
@@ -534,5 +539,20 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Long subjectId = 11l;
     	FlowSubjectDTO dto = flowService.getSubectById(subjectId);
     	Assert.assertTrue(dto != null && dto.getImages().size() > 0);
+    }
+    
+    @Test
+    public void testUserId() {
+    	Integer namespaceId = 0;
+    	String u1 = "17788754324";
+    	User testUser1 = userService.findUserByIndentifier(namespaceId, u1);
+    	LOGGER.info("userId:" + testUser1.getId());
+    }
+    
+    @Test
+    public void testFlowNodes() {
+    	Long flowNodeId = 311l;
+    	ListFlowButtonResponse resp = flowService.listFlowNodeButtons(flowNodeId);
+    	Assert.assertTrue(resp.getProcessorButtons().size() > 0);
     }
 }

@@ -33,11 +33,13 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
 	@Autowired
 	FlowService flowService;
     
-    private String queueName = "flowtimeouts";
+    private String queueDelay = "flowdelays";
+    private String queueNoDelay = "flownodelays";
     
     @PostConstruct
     public void setup() {
-        workerPoolFactory.getWorkerPool().addQueue(queueName);
+        workerPoolFactory.getWorkerPool().addQueue(queueDelay);
+        workerPoolFactory.getWorkerPool().addQueue(queueNoDelay);
     }
     
     @Override
@@ -48,9 +50,9 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     	if(ft.getId() > 0) {
     		final Job job = new Job(FlowTimeoutAction.class.getName(), new Object[]{String.valueOf(ft.getId()) });
     		if(ft.getTimeoutTick().getTime() > (DateHelper.currentGMTTime().getTime()+10l) ) {
-    			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job, ft.getTimeoutTick().getTime());	
+    			jesqueClientFactory.getClientPool().delayedEnqueue(queueDelay, job, ft.getTimeoutTick().getTime());	
     		} else {
-    			jesqueClientFactory.getClientPool().enqueue(queueName, job);
+    			jesqueClientFactory.getClientPool().enqueue(queueNoDelay, job);
     		}
         		
     	} else {
@@ -65,6 +67,8 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
     	case STEP_TIMEOUT:
     		flowService.processStepTimeout(ft);
     		break;
+    	case MESSAGE_TIMEOUT:
+    		flowService.processMessageTimeout(ft);
     	default:
     		break;
     	}

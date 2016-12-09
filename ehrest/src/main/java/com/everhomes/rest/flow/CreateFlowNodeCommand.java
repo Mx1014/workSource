@@ -7,6 +7,7 @@ public class CreateFlowNodeCommand {
 	private String     nodeName;
 	private Long     flowMainId;
 	private Integer nodeLevel;
+	private String params;
 	
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -32,6 +33,13 @@ public class CreateFlowNodeCommand {
 	}
 	public void setNodeLevel(Integer nodeLevel) {
 		this.nodeLevel = nodeLevel;
+	}
+
+	public String getParams() {
+		return params;
+	}
+	public void setParams(String params) {
+		this.params = params;
 	}
 	@Override
     public String toString() {

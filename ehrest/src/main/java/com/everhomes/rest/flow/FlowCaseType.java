@@ -1,5 +1,12 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>inner: 工作流内部的 Case</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum FlowCaseType {
 	INNER("inner");
 	

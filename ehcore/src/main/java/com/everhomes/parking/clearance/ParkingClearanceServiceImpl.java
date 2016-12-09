@@ -2,6 +2,7 @@
 package com.everhomes.parking.clearance;
 
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -375,8 +376,17 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Override
     public FlowModuleInfo initModule() {
+        ServiceModuleProvider temp = PlatformContext.getComponent(ServiceModuleProvider.class);
+        if(temp == null) {
+            throw new IllegalArgumentException("The service module is null");
+        } else {
+            ServiceModule module = temp.findServiceModuleById(MODULE_ID);
+            LOGGER.debug("Init module, module={}", module);
+        }
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
-        LOGGER.debug("Autowired ServiceModuleProvider instance is {}", serviceModuleProvider);
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Autowired ServiceModuleProvider instance is {}", serviceModuleProvider);
+        }
         ServiceModule module = serviceModuleProvider.findServiceModuleById(MODULE_ID);
         moduleInfo.setModuleName(module.getName());
         moduleInfo.setModuleId(MODULE_ID);
