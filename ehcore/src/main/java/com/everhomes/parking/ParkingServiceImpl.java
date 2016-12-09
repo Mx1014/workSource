@@ -132,9 +132,9 @@ public class ParkingServiceImpl implements ParkingService {
 
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Long moduleId = 40800L;
-    private static final Long INTELLIGENT = 7L;
-    private static final Long SEMI_AUTOMATIC = 9L;
-    private static final Long QUEQUE = 11L;
+    private static final Long INTELLIGENT = 8L;
+    private static final Long SEMI_AUTOMATIC = 10L;
+    private static final Long QUEQUE = 12L;
     
     @Autowired
     private ParkingProvider parkingProvider;
