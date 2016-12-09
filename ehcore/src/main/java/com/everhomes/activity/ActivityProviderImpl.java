@@ -374,7 +374,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition) {
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime) {
     	
     	//按时间排序 用offset方式替代原有anchor modified by xiongying 20160707
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -400,7 +400,13 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         Integer offset =  (int) ((pageOffset - 1 ) * count);
         query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
-        query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
+
+        if(orderByCreateTime) {
+            query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
+        } else {
+            query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
+        }
+
 //            query.addLimit(count - activities.size());
         query.addLimit(offset, count);
         

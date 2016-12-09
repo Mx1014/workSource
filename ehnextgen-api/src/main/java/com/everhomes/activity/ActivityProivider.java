@@ -37,7 +37,7 @@ public interface ActivityProivider {
 
     void deleteRoster(ActivityRoster createRoster);
 
-    List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition);
+    List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime);
     
     Activity findActivityByUuid(String uuid);
     
