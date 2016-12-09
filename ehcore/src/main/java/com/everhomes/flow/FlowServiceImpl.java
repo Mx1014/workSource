@@ -1709,9 +1709,10 @@ public class FlowServiceImpl implements FlowService {
 			isApplier = true;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
 		} else if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
-			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
-		} else {
 			details = flowCaseProvider.findAdminFlowCases(locator, count, cmd);
+		} else {
+			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
+			
 		}
 		
 		List<FlowCaseDTO> dtos = new ArrayList<FlowCaseDTO>();
