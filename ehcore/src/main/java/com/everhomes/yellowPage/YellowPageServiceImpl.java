@@ -13,12 +13,17 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.servicehotline.GetHotlineListCommand;
+import com.everhomes.rest.servicehotline.GetHotlineListResponse;
+import com.everhomes.rest.servicehotline.ServiceType;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.yellowPage.*;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
@@ -38,6 +43,9 @@ import java.util.stream.Collectors;
 public class YellowPageServiceImpl implements YellowPageService {
 	private static final Logger LOGGER = LoggerFactory.getLogger(YellowPageServiceImpl.class);
 
+	@Autowired
+	private HotlineService hotlineService;
+	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
 	
@@ -176,7 +184,17 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 			}
 			
-		} else {
+		}else if(cmd.getServiceType().equals(YellowPageType.PARKENTSERVICEHOTLINE.getCode())){
+			GetHotlineListCommand cmd2 = ConvertHelper.convert(cmd, GetHotlineListCommand.class);
+			cmd2.setServiceType(ServiceType.SERVICE_HOTLINE.getCode());
+			GetHotlineListResponse resp2 = this.hotlineService.getHotlineList(cmd2);
+			if(resp2.getHotlines()!=null)
+				resp2.getHotlines().forEach(r->{
+					YellowPageDTO dto = ConvertHelper.convert(r, YellowPageDTO.class);
+					response.getYellowPages().add(dto);
+				});
+		}
+		else {
 			//做兼容
 			if(null != cmd.getCommunityId()){
 				cmd.setOwnerId(cmd.getCommunityId());
