@@ -13,6 +13,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
+import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowGetSubjectDetailById;
@@ -46,10 +47,19 @@ public class FlowController extends ControllerBase {
     @RequestMapping("searchFlowCases")
     @RestReturn(value=SearchFlowCaseResponse.class)
     public RestResponse searchFlowCases(@Valid SearchFlowCaseCommand cmd) {
-        RestResponse response = new RestResponse(flowService.searchFlowCases(cmd));
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	
+    	Byte admin = FlowCaseSearchType.ADMIN.getCode();
+    	if(admin.equals(cmd.getFlowCaseSearchType())) {
+    		//never admin here
+    		return response;
+    	}
+    	
+    	response.setResponseObject(flowService.searchFlowCases(cmd));
+    	
+    	return response;
     }
 
     /**

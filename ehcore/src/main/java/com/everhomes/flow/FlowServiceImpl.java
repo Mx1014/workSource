@@ -1684,14 +1684,15 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public SearchFlowCaseResponse searchFlowCases(SearchFlowCaseCommand cmd) {
 		SearchFlowCaseResponse resp = new SearchFlowCaseResponse();
-		if(cmd.getUserId() == null) {
-			cmd.setUserId(UserContext.current().getUser().getId());
-		}
 		if(cmd.getNamespaceId() == null) {
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		}
 		if(cmd.getFlowCaseSearchType() == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow param error");	
+		}
+		
+		if(!cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode()) && cmd.getUserId() == null) {
+			cmd.setUserId(UserContext.current().getUser().getId());
 		}
 		
 		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
@@ -1704,8 +1705,10 @@ public class FlowServiceImpl implements FlowService {
 		if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
 			isApplier = true;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
-		} else {
+		} else if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
 			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
+		} else {
+			details = flowCaseProvider.findAdminFlowCases(locator, count, cmd);
 		}
 		
 		List<FlowCaseDTO> dtos = new ArrayList<FlowCaseDTO>();

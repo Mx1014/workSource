@@ -9,7 +9,7 @@ CREATE TABLE `eh_flows` (
   `organization_id` BIGINT NOT NULL DEFAULT 0,
   `module_id` BIGINT NOT NULL COMMENT 'the module id',
   `module_type` VARCHAR(64) NOT NULL,
-  `project_id` BIGINT NOT NULL,
+  `project_id` BIGINT NOT NULL DEFAULT 0,
   `project_type` VARCHAR(64),
 
   `flow_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the real flow id for all copy, the first flow_main_id=0',
@@ -202,7 +202,7 @@ CREATE TABLE `eh_flow_cases` (
     `owner_type` VARCHAR(64) NOT NULL,
     `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
-    `project_id` BIGINT NOT NULL,
+    `project_id` BIGINT NOT NULL DEFAULT 0,
     `project_type` VARCHAR(64),
     `module_name` VARCHAR(64),
     `applier_name` VARCHAR(64),

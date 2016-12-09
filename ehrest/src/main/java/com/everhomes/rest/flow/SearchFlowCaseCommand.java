@@ -28,6 +28,10 @@ public class SearchFlowCaseCommand {
 	private Integer pageSize;
 	private Long anchor;
 	private Byte flowCaseSearchType;
+	private Long projectId;
+	private String projectType;
+	private Long startTime;
+	private Long endTime;
 
 	public Byte getFlowCaseStatus() {
 		return flowCaseStatus;
@@ -107,6 +111,38 @@ public class SearchFlowCaseCommand {
 
 	public void setOwnerType(String ownerType) {
 		this.ownerType = ownerType;
+	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getProjectType() {
+		return projectType;
+	}
+
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
 	}
 
 	@Override

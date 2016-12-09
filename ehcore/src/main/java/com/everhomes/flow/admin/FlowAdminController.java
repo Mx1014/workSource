@@ -22,6 +22,7 @@ import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
+import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowNodeDTO;
@@ -37,6 +38,8 @@ import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
@@ -52,6 +55,26 @@ public class FlowAdminController extends ControllerBase {
 	@Autowired
 	private FlowService flowService;
 	
+    /**
+     * <b>URL: /flow/admin/searchFlowCases</b>
+     * <p> 管理员 FlowCase </p>
+     * @return FlowCase 的列表信息
+     */
+    @RequestMapping("searchFlowCases")
+    @RestReturn(value=SearchFlowCaseResponse.class)
+    public RestResponse searchFlowCases(@Valid SearchFlowCaseCommand cmd) {
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	
+    	Byte admin = FlowCaseSearchType.ADMIN.getCode();
+    	cmd.setFlowCaseSearchType(admin);
+    	
+    	response.setResponseObject(flowService.searchFlowCases(cmd));
+    	
+    	return response;
+    }
+    
     /**
      * <b>URL: /admin/flow/createFlow</b>
      * <p> 创建一个新 Flow，一个业务模块，名字不能重复 </p>
