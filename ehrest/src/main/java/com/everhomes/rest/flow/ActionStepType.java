@@ -1,5 +1,11 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul> 暂时用不到
+ * </ul>
+ * @author janson
+ *
+ */
 public enum ActionStepType {
 	NO_STEP("no_step"), ENTER("enter"), RUN("run"), LEAVE("leave");
 	

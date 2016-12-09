@@ -1,5 +1,14 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>node_applier: 申请者</li>
+ * <li>processor: 处理者</li>
+ * <li>supervisor: 督办者</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum FlowUserType {
 	NO_USER("no_user"), APPLIER("node_applier"), PROCESSOR("processor"), SUPERVISOR("supervisor");
 	

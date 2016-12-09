@@ -1,7 +1,16 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>enterprise: 属于一家企业</li>
+ * <li>enterprise: 属于一个部门</li>
+ * <li>community: 属于一个园区</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum FlowOwnerType {
-	ENTERPRISE("enterprise"), USER("user"), GROUP("group"), PM("pm"), DEPARTMENT("department");
+	ENTERPRISE("enterprise"), DEPARTMENT("department"), COMMUNITY("community");
 	
 	private String code;
     private FlowOwnerType(String code) {
@@ -16,26 +25,12 @@ public enum FlowOwnerType {
     	if(code == null) {
     		return null;
     	}
-        
-        if(code.equalsIgnoreCase(ENTERPRISE.getCode())) {
-        	return ENTERPRISE;
-        }
-
-        if(code.equalsIgnoreCase(USER.getCode())) {
-        	return USER;
-        }
-        
-        if(code.equalsIgnoreCase(GROUP.getCode())) {
-        	return GROUP;
-        }
-        
-        if(code.equalsIgnoreCase(PM.getCode())) {
-        	return PM;
-        }
-        
-        if(code.equalsIgnoreCase(DEPARTMENT.getCode())) {
-        	return DEPARTMENT;
-        }
+    	
+    	for(FlowOwnerType t : FlowOwnerType.values()) {
+    		if(code.equalsIgnoreCase(t.getCode())) {
+    			return t;
+    		}
+    	}
 
         return null;
     }

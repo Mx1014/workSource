@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>keyword: 搜索关键字 </li>
  * <li>flowCaseStatus: 状态 {@link com.everhomes.rest.flow.FlowCaseStatus }</li>
  * <li>flowSearchType: 0 我的申请， 1: 待办任务， 2: 已办任务， 3: 我的督办 {@link com.everhomes.rest.flow.FlowCaseSearchType } </li>
+ * <li>projectId: 项目ID</li>
+ * <li>projectType: 项目类型</li>
  * </ul>
  * @author janson
  *
