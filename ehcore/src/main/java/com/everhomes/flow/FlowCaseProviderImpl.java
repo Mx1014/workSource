@@ -132,7 +132,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	}
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
-    	if(FlowCaseSearchType.APPLIER.equals(searchType)) {
+    	if(searchType.equals(FlowCaseSearchType.APPLIER)) {
     		cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
     		
     	    if(locator.getAnchor() != null) {
@@ -191,7 +191,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     	}
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
-    	if(FlowCaseSearchType.ADMIN.equals(searchType)) {
+    	if(searchType.equals(FlowCaseSearchType.ADMIN)) { //enum equal
     		if(cmd.getUserId() != null) {
     			cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));	
     		}

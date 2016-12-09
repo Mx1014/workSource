@@ -22,6 +22,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -410,6 +411,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd2.setUserId(testUser3.getId());
     	SearchFlowCaseResponse resp2 = flowService.searchFlowCases(cmd2);
     	Assert.assertTrue(resp2.getFlowCases().size() > 0);
+    	
+    	SearchFlowCaseCommand cmd3 = new SearchFlowCaseCommand();
+    	cmd3.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+    	cmd3.setFlowCaseStatus(FlowCaseStatus.PROCESS.getCode());
+    	SearchFlowCaseResponse resp3 = flowService.searchFlowCases(cmd3);
+    	Assert.assertTrue(resp3.getFlowCases().size() > 0);
     }
     
     @Test

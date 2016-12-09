@@ -27,16 +27,11 @@ public enum FlowCaseSearchType {
         if(code == null)
             return null;
         
-        switch(code.byteValue()) {
-        case 0 :
-            return APPLIER;
-        case 1 :
-        		return TODO_LIST;
-        case 2 :
-            return DONE_LIST;
-        case 3 :
-            return SUPERVISOR;
-        }
+    	for(FlowCaseSearchType t : FlowCaseSearchType.values()) {
+    		if(code.equals(t.getCode())) {
+    			return t;
+    		}
+    	}
         
         return null;
     }
