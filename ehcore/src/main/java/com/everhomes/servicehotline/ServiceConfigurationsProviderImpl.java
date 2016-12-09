@@ -59,6 +59,12 @@ public class ServiceConfigurationsProviderImpl implements ServiceConfigurationsP
 	    }
 
 	    @Override
+	    public void deleteServiceConfiguration(Long id) {
+	        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+	        EhServiceConfigurationsDao dao = new EhServiceConfigurationsDao(context.configuration());
+	        dao.deleteById(id);
+	    }
+	    @Override
 	    public ServiceConfiguration getServiceConfigurationById(Long id) {
 	        try {
 	        ServiceConfiguration[] result = new ServiceConfiguration[1];

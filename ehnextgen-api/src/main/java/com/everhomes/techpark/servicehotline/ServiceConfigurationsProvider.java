@@ -19,4 +19,6 @@ public interface ServiceConfigurationsProvider {
 			ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	void deleteServiceConfiguration(Long id);
+
 }

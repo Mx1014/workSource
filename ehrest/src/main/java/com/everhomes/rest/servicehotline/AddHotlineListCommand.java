@@ -4,8 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul> 
- * 
- * <li>id: id</li>  
+ *  
  * <li>namespaceId: 域空间</li>  
  * <li>ownerType: community </li>  
  * <li>ownerId: ownerId </li>  
@@ -18,8 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>avatar: 头像</li>   
  * </ul>
  */
-public class AddHotlineListCommand {
-	private Long id; 
+public class AddHotlineListCommand { 
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
@@ -34,13 +32,7 @@ public class AddHotlineListCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     } 
-	
-	public Long getId() {
-		return id;
-	}
-	public void setId(Long id) {
-		this.id = id;
-	}
+	 
 	public Integer getNamespaceId() {
 		return namespaceId;
 	}
