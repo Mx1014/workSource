@@ -7,6 +7,7 @@ import java.util.Arrays;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Random;
 import java.util.concurrent.ConcurrentHashMap;
@@ -30,6 +31,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
@@ -46,6 +48,7 @@ import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowTemplateCode;
 import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
 import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.rest.flow.FlowUserSelectionType;
@@ -196,6 +199,9 @@ public class FlowServiceImpl implements FlowService {
 	
     @Autowired
     MessagingService messagingService;
+    
+    @Autowired
+    LocaleTemplateService localeTemplateService;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -2296,20 +2302,39 @@ public class FlowServiceImpl implements FlowService {
 		return ConvertHelper.convert(flow, FlowDTO.class);
 	}
 	
-	private String getTemplate() {
-//        Map<String, Object> map = new HashMap<String, Object>();
-//        String userName = user.getNickName();
-//        if(userName == null || userName.isEmpty()) {
-//            userName = user.getAccountName();
-//        }
-//        map.put("userName", userName);
-//        map.put("doorName", doorAcc.getName());
-//        
-//        String scope = AclinkNotificationTemplateCode.SCOPE;
-//        int code = AclinkNotificationTemplateCode.ACLINK_NEW_AUTH;
-//        String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-		
-		return "";
+	@Override
+	public String getFireButtonTemplate(FlowStepType step, Map<String, Object> map) {
+        String scope = FlowTemplateCode.SCOPE;
+        int code = 0;
+        switch(step) {
+        case APPROVE_STEP:
+        	code = FlowTemplateCode.APPROVE_STEP;
+        	break;
+        case REJECT_STEP:
+        	code = FlowTemplateCode.REJECT_STEP;
+        	break;
+        case ABSORT_STEP:
+        	code = FlowTemplateCode.ABSORT_STEP;
+        	break;
+        case TRANSFER_STEP:
+        	code = FlowTemplateCode.TRANSFER_STEP;
+        	break;
+        default:
+        	break;
+        }
+        
+        if(code == 0) {
+        	return "";
+        }
+        
+        User user = UserContext.current().getUser();
+        String locale = Locale.SIMPLIFIED_CHINESE.toString();
+        if(user != null) {
+        	locale = user.getLocale();
+        }
+        
+        String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+        return text;
 	}
 
 	@Override

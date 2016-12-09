@@ -386,6 +386,8 @@ public interface FlowService {
 	 * Only for test
 	 */
 	void testFlowCase();
+
+	String getFireButtonTemplate(FlowStepType step, Map<String, Object> map);
 	
 	//TODO 日志信息分类：
 	

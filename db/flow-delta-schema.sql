@@ -69,6 +69,7 @@ CREATE TABLE `eh_flow_nodes` (
     `auto_step_minute` INTEGER NOT NULL DEFAULT 0 COMMENT 'after hour, step next',
     `auto_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, EndStep',
     `allow_applier_update` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow applier update content',
+    `allow_timeout_action` TINYINT NOT NULL DEFAULT 0 COMMENT '1: allow timeout action',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `params` VARCHAR(64) COMMENT 'the params from other module',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
