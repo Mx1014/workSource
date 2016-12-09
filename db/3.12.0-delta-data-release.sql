@@ -694,3 +694,6 @@ JOIN (SELECT * FROM eh_web_menu_privileges WHERE privilege_id >= 10001 AND privi
 ON m.id = t.menu_id
 ) tm JOIN eh_web_menus mm ON tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) WHERE mm.id NOT IN (SELECT menu_id FROM eh_web_menu_privileges WHERE privilege_id>=10000);
 
+
+-- 华润oe 原活动默认为白领活动 by xiongying20161209
+update eh_activity_categories set default_flag = 1 where id = 1000000 and namespace_id = 999985;
