@@ -1027,6 +1027,11 @@ public class ActivityServiceImpl implements ActivityService {
                 .current().getUser().getId());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+
+        //活动添加是否有活动附件标识 add by xiongying 20161207
+        boolean existAttachments = activityProvider.existActivityAttachments(activity.getId());
+        dto.setActivityAttachmentFlag(existAttachments);
+
         dto.setActivityId(activity.getId());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
@@ -1603,43 +1608,44 @@ public class ActivityServiceImpl implements ActivityService {
         List<Activity> activities=new ArrayList<Activity>();
         
         //查第一页时，一部分为上次查询过后新发的贴 modified by xiongying 20160707
-        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
-        	Timestamp lastViewedTime = null;
-        	String counts = configurationProvider.getValue(ConfigConstants.ACTIVITY_LIST_NUM, "3");
-        	UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), 
-        								UserProfileContstant.VIEWED_ACTIVITY_NEW);
-	    	
-        	if(profile != null) {
-        		lastViewedTime = new Timestamp(Long.valueOf(profile.getItemValue()));
-        	}
-        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime, condition);
-	    	if(newActivities != null && newActivities.size() > 0) {
-	    		activities.addAll(newActivities);
-	    	}
-        }
-    	
-		List<Long> ids = getViewedActivityIds();
+        //产品1.6需求：去掉查一部分新发的贴的功能 modified by xiongying 20161208
+//        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
+//        	Timestamp lastViewedTime = null;
+//        	String counts = configurationProvider.getValue(ConfigConstants.ACTIVITY_LIST_NUM, "3");
+//        	UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(),
+//        								UserProfileContstant.VIEWED_ACTIVITY_NEW);
+//
+//        	if(profile != null) {
+//        		lastViewedTime = new Timestamp(Long.valueOf(profile.getItemValue()));
+//        	}
+//        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime, condition);
+//	    	if(newActivities != null && newActivities.size() > 0) {
+//	    		activities.addAll(newActivities);
+//	    	}
+//        }
+//
+//		List<Long> ids = getViewedActivityIds();
 		
         List<Activity> ret = activityProvider.listActivities(locator, ipageSize - activities.size() + 1, condition);
         
-        if(ret != null && ret.size() > 0) {
-        	for(Activity act : ret) {
-        		if(!ids.contains(act.getId())) {
-        			activities.add(act);
-            	}
-        	}
-        }
-        
-        
+//        if(ret != null && ret.size() > 0) {
+//        	for(Activity act : ret) {
+//        		if(!ids.contains(act.getId())) {
+//        			activities.add(act);
+//            	}
+//        	}
+//        }
+
+
+        activities.addAll(ret);
         List<ActivityDTO> activityDtos = activities.stream().map(activity->{
-        	
             Post post = forumProvider.findPostById(activity.getPostId());
-            if(activity.getPosterUri() == null && post != null){
+            if (activity.getPosterUri() == null && post != null) {
                 this.forumProvider.populatePostAttachments(post);
                 List<Attachment> attachmentList = post.getAttachments();
-                if(attachmentList != null && attachmentList.size() != 0){
-                    for(Attachment attachment : attachmentList){
-                        if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+                if (attachmentList != null && attachmentList.size() != 0) {
+                    for (Attachment attachment : attachmentList) {
+                        if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
                             activity.setPosterUri(attachment.getContentUri());
                         break;
                     }
@@ -1649,8 +1655,8 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
             dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+            dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
+            dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
             dto.setProcessStatus(getStatus(activity).getCode());
             dto.setFamilyId(activity.getCreatorFamilyId());
             dto.setStartTime(activity.getStartTime().toString());
@@ -1659,24 +1665,26 @@ public class ActivityServiceImpl implements ActivityService {
 //            dto.setPosterUrl(getActivityPosterUrl(activity));
             String posterUrl = getActivityPosterUrl(activity);
             dto.setPosterUrl(posterUrl);
-            if(post != null) {
+            if (post != null) {
                 dto.setForumId(post.getForumId());
             }
             List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
-            if(favorite == null || favorite.size() == 0) {
-            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            if (favorite == null || favorite.size() == 0) {
+                dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
             } else {
-            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+                dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
             }
             //add UserActivityStatus by xiongying 20160628
             ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
             dto.setUserActivityStatus(getActivityStatus(roster).getCode());
             fixupVideoInfo(dto);//added by janson
+
             return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
-        
+            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+        }).filter(r->r!=null).sorted((p1, p2) -> p1.getStartTime().compareTo(p2.getStartTime())).collect(Collectors.toList());
+
         Long nextPageAnchor = locator.getAnchor();
-        
+
         response = new ListActivitiesReponse(nextPageAnchor, activityDtos);
         return response;
 	}

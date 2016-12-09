@@ -518,20 +518,6 @@ public class ForumServiceImpl implements ForumService {
             // 如果是活动，返回活动内容的链接，add by tt, 20161013
             if (postDto.getEmbeddedAppId() != null && postDto.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY) {
 				postDto.setContentUrl(getActivityContentUrl(postDto.getId()));
-
-                //活动添加活动成果和是否有活动附件标识 add by xiongying 20161207
-                GetActivityAchievementCommand command = new GetActivityAchievementCommand();
-                command.setActivityId(postDto.getEmbeddedId());
-                ActivityDTO activityDTO = ConvertHelper.convert(postDto.getEmbeddedJson(), ActivityDTO.class);
-                GetActivityAchievementResponse achievementResponse = activityService.getActivityAchievement(command);
-                if(achievementResponse != null) {
-                    activityDTO.setAchievementType(achievementResponse.getAchievementType());
-                    activityDTO.setAchievement(achievementResponse.getAchievement());
-                }
-
-                boolean existAttachments = activityProivider.existActivityAttachments(postDto.getEmbeddedId());
-                activityDTO.setActivityAttachmentFlag(existAttachments);
-
 			}
             
             return postDto;

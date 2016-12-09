@@ -400,7 +400,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         Integer offset =  (int) ((pageOffset - 1 ) * count);
         query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
-        query.addOrderBy(Tables.EH_ACTIVITIES.START_TIME.desc());
+        query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
 //            query.addLimit(count - activities.size());
         query.addLimit(offset, count);
         
