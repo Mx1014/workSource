@@ -473,6 +473,9 @@ public class FlowServiceImpl implements FlowService {
 		button.setNeedSubject((byte)1);
 		button.setFlowUserType(userType.getCode());
 		button.setButtonName(buttonDefName(flow.getNamespaceId(), stepType));
+		if(stepType == FlowStepType.TRANSFER_STEP) {
+			button.setNeedProcessor((byte)1);
+		}
 		flowButtonProvider.createFlowButton(button);
 	}
 	
@@ -1715,6 +1718,9 @@ public class FlowServiceImpl implements FlowService {
 				dto.setProcessUserName(name);
 			}
 		}
+		
+		//TODO for evaluate
+		dto.setIsEvaluate((byte)0);
 		
 	}
 

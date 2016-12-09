@@ -22,6 +22,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
@@ -235,7 +236,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	
     	buttonCmd = new UpdateFlowButtonCommand();
-    	buttonCmd.setButtonName("new-next-step-name");
+    	buttonCmd.setButtonName("test-text2");
     	buttonCmd.setDescription("test-description");
     	buttonCmd.setFlowButtonId(flowButton2.getId());
     	buttonCmd.setNeedProcessor((byte)1);
@@ -244,6 +245,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	buttonAction = createActionInfo("test-button2-info", orgId);
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
+    	
+    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.TRANSFER_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	DisableFlowButtonCommand disCmd = new DisableFlowButtonCommand();
+    	disCmd.setFlowButtonId(flowButton3.getId());
+    	flowService.disableFlowButton(disCmd);
     	
     	Boolean ok = flowService.enableFlow(flowDTO.getId());
     	Assert.assertTrue(ok);
