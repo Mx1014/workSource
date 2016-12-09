@@ -1,5 +1,12 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>ERROR_FLOW_REMIND_ERROR: 催办错误</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public interface FlowServiceErrorCode {
     static final String SCOPE = "flow";
     
