@@ -655,7 +655,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 	 * 金地取数据使用
 	 */
 	@Override
-	public List<StatTransaction> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+	public List<StatTransaction> listBusinessByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 			Long pageAnchor, int pageSize) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> result = context.select().from(Tables.EH_STAT_TRANSACTIONS)
@@ -677,7 +677,7 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 	 * 金地取数据使用
 	 */
 	@Override
-	public List<StatTransaction> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+	public List<StatTransaction> listBusinessByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> result = context.select().from(Tables.EH_STAT_TRANSACTIONS)
 			.where(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId))

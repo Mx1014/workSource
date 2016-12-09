@@ -36,13 +36,13 @@ public class JindiOpenActionBusinessHandler implements JindiOpenHandler {
 			@Override
 			public List<StatTransaction> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return statTransactionProvider.listCsthomerelByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return statTransactionProvider.listBusinessByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<StatTransaction> fetchDataByUpdateTime(Integer namespaceId, Long timestamp,
 					int pageSize) {
-				return statTransactionProvider.listCsthomerelByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return statTransactionProvider.listBusinessByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
 			}
 
 			@Override
@@ -53,6 +53,7 @@ public class JindiOpenActionBusinessHandler implements JindiOpenHandler {
 				}
 				JindiActionBusinessDTO data = new JindiActionBusinessDTO();
 				data.setId(src.getId());
+				data.setUserId(src.getPayerUid());
 				data.setCommunityId(src.getCommunityId());
 				data.setTransactionNo(src.getTransactionNo());
 				data.setPaidTime(src.getPaidTime());
