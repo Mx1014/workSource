@@ -898,6 +898,10 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
         LOGGER.info("find roster {}",roster);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        //活动添加是否有活动附件标识 add by xiongying 20161207
+        boolean existAttachments = activityProvider.existActivityAttachments(activity.getId());
+        dto.setActivityAttachmentFlag(existAttachments);
+        
         dto.setActivityId(activity.getId());
         dto.setForumId(post.getForumId());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
