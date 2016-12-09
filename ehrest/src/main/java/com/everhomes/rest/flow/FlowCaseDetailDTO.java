@@ -40,6 +40,7 @@ public class FlowCaseDetailDTO {
     private Byte isEvaluate;
     private Integer evaluateScore;
 	private Byte allowApplierUpdate;
+	private String customObject;
     
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> entities;
@@ -263,6 +264,14 @@ public class FlowCaseDetailDTO {
 
 	public void setAllowApplierUpdate(Byte allowApplierUpdate) {
 		this.allowApplierUpdate = allowApplierUpdate;
+	}
+
+	public String getCustomObject() {
+		return customObject;
+	}
+
+	public void setCustomObject(String customObject) {
+		this.customObject = customObject;
 	}
 
 	@Override
