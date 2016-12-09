@@ -331,20 +331,20 @@ public class ParkingServiceImpl implements ParkingService {
         			cmd.getOwnerId(), cmd.getParkingLotId(), null, null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
         	int requestlistSize = requestlist.size();
-        	if(requestlistSize >= parkingLot.getMaxRequestNum()){
-        		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
-    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
-    					"The card request is rather than max request num.");
-        	}
+//        	if(requestlistSize >= parkingLot.getMaxRequestNum()){
+//        		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
+//    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
+//    					"The card request is rather than max request num.");
+//        	}
         	requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), null, null);
         	requestlistSize = requestlist.size();
-        	if(requestlistSize > 0){
-        		LOGGER.error("PlateNumber is already applied, cmd={}", cmd);
-    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
-    					"plateNumber is already applied.");
-        	}
+//        	if(requestlistSize > 0){
+//        		LOGGER.error("PlateNumber is already applied, cmd={}", cmd);
+//    			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
+//    					"plateNumber is already applied.");
+//        	}
         }
         ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
         ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
