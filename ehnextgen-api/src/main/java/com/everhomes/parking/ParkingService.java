@@ -93,8 +93,6 @@ public interface ParkingService {
     
     ParkingRequestCardConfigDTO gettParkingRequestCardConfig(GettParkingRequestCardConfigCommand cmd);
     
-    ListFlowBriefResponse listParkingWorkFlows(ListParkingWorkFlowsCommand cmd);
-    
     void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd);
     
     ParkingCardRequestDTO getRequestParkingCardDetail(GetRequestParkingCardDetailCommand cmd);

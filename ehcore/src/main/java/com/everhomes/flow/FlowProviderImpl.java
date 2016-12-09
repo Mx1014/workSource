@@ -245,7 +245,7 @@ public class FlowProviderImpl implements FlowProvider {
 				}
 				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));	
 				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
-				query.addConditions(Tables.EH_FLOWS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
 				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.ne(0l)); // Got a main flow, not snapshot flow.	
 				
 				return query;

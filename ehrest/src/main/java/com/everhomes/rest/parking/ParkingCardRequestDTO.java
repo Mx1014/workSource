@@ -48,7 +48,7 @@ public class ParkingCardRequestDTO {
     private String plateOwnerPhone;
     private Integer ranking;
     private Byte status;
-    private Byte issueFlag;
+
     private Timestamp issueTime;
     private Timestamp createTime;
     
@@ -62,10 +62,14 @@ public class ParkingCardRequestDTO {
     @ItemType(ParkingAttachmentDTO.class)
     private List<ParkingAttachmentDTO> attachments;
     
+    private Timestamp auditSucceedTime;
+	private Timestamp processSucceedTime;
+	private Timestamp openCardTime;
+	private Timestamp cancelTime;
+    
     //工作流
 	@ItemType(FlowButtonDTO.class)
 	private List<FlowButtonDTO> buttons;
-	
 	
     public ParkingCardRequestDTO() {
     }
@@ -174,14 +178,6 @@ public class ParkingCardRequestDTO {
         this.status = status;
     }
 
-    public Byte getIssueFlag() {
-        return issueFlag;
-    }
-
-    public void setIssueFlag(Byte issueFlag) {
-        this.issueFlag = issueFlag;
-    }
-
     public Timestamp getIssueTime() {
         return issueTime;
     }
@@ -260,6 +256,38 @@ public class ParkingCardRequestDTO {
 
 	public void setButtons(List<FlowButtonDTO> buttons) {
 		this.buttons = buttons;
+	}
+
+	public Timestamp getAuditSucceedTime() {
+		return auditSucceedTime;
+	}
+
+	public void setAuditSucceedTime(Timestamp auditSucceedTime) {
+		this.auditSucceedTime = auditSucceedTime;
+	}
+
+	public Timestamp getProcessSucceedTime() {
+		return processSucceedTime;
+	}
+
+	public void setProcessSucceedTime(Timestamp processSucceedTime) {
+		this.processSucceedTime = processSucceedTime;
+	}
+
+	public Timestamp getOpenCardTime() {
+		return openCardTime;
+	}
+
+	public void setOpenCardTime(Timestamp openCardTime) {
+		this.openCardTime = openCardTime;
+	}
+
+	public Timestamp getCancelTime() {
+		return cancelTime;
+	}
+
+	public void setCancelTime(Timestamp cancelTime) {
+		this.cancelTime = cancelTime;
 	}
 
 	@Override

@@ -27,6 +27,7 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.user.UserContext;
@@ -39,7 +40,11 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Autowired
     private ParkingProvider parkingProvider;
 	
-	private Long moduleId = 111l;
+	private Long moduleId = ParkingFlowConstant.PARKING_RECHARGE_MODULE;
+	
+	private static final Long INTELLIGENT = 8L;
+    private static final Long SEMI_AUTOMATIC = 10L;
+    private static final Long QUEQUE = 12L;
 	
 	@Override
 	public FlowModuleInfo initModule() {
@@ -135,38 +140,34 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestByFlowId(flowId, 
 				flowNode.getFlowVersion());
 		
+		long now = System.currentTimeMillis();
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if("QUEUEING".equals(param)) {
-				if(flowId == 1) {
+				if(flowId == QUEQUE) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
+					parkingCardRequest.setIssueTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}else {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
+					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
 			}else if("PROCESSING".equals(param)) {
-				if(flowId == 1) {
+				if(flowId == QUEQUE) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
+					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
-			}
-//			else if("canceled".equals(param)) {
-//				parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-//				parkingProvider.updateParkingCardRequest(parkingCardRequest);
-//			}else if("agreement".equals(param)) {
-//				parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
-//				parkingProvider.updateParkingCardRequest(parkingCardRequest);
-//			}
-			else if("SUCCEED".equals(param)) {
+			}else if("SUCCEED".equals(param)) {
 				parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
+				parkingCardRequest.setOpenCardTime(new Timestamp(now));
 				parkingProvider.updateParkingCardRequest(parkingCardRequest);
 			}
-		}else if(FlowStepType.REJECT_STEP.getCode().equals(stepType)) {
+		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 			parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+			parkingCardRequest.setCancelTime(new Timestamp(now));
 			parkingProvider.updateParkingCardRequest(parkingCardRequest);
 		}
-		
-		
 		
 	}
 

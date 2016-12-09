@@ -351,22 +351,6 @@ public class ParkingController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /parking/listParkingWorkFlows</b>
-     * <p>获取停车工作流列表</p>
-     */
-    @RequestMapping("listParkingWorkFlows")
-    @RestReturn(value=ListFlowBriefResponse.class)
-    public RestResponse listParkingWorkFlows(ListParkingWorkFlowsCommand cmd) {
-       
-    	ListFlowBriefResponse resp = parkingService.listParkingWorkFlows(cmd);
-    	
-        RestResponse response = new RestResponse(resp);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-    
-    /**
      * <b>URL: /parking/issueParkingCards</b>
      * <p>批量发放月卡</p>
      */

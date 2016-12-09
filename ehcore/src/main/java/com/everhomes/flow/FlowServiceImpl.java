@@ -106,6 +106,7 @@ import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.rest.news.NewsCommentContentType;
+import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
@@ -1914,9 +1915,9 @@ public class FlowServiceImpl implements FlowService {
 			return dto;
 		}
 		
-		if(moduleId.equals(40800l)) {
+		if(moduleId.equals(ParkingFlowConstant.PARKING_RECHARGE_MODULE)) {
 			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(40800l);
+			dto.setModuleId(ParkingFlowConstant.PARKING_RECHARGE_MODULE);
 			dto.setModuleName("jiaoliu");
 			dto.setDisplayName("停车缴费");
 			return dto;

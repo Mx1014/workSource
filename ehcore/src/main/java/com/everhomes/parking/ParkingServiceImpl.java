@@ -53,8 +53,6 @@ import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -99,6 +97,7 @@ import com.everhomes.rest.parking.ParkingCardIssueFlag;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingErrorCode;
+import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
@@ -133,7 +132,7 @@ public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    private static final Long moduleId = 40800L;
+    private static final Long moduleId = ParkingFlowConstant.PARKING_RECHARGE_MODULE;
     private static final Long INTELLIGENT = 8L;
     private static final Long SEMI_AUTOMATIC = 10L;
     private static final Long QUEQUE = 12L;
@@ -445,6 +444,10 @@ public class ParkingServiceImpl implements ParkingService {
 		}).collect(Collectors.toList());
     	
 		dto.setAttachments(attachmentDtos);
+		
+		Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(),
+				cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
+		dto.setRanking(count);
     	return dto;
     }
     
@@ -781,6 +784,7 @@ public class ParkingServiceImpl implements ParkingService {
     			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
     			null, null, cmd.getCount())
     			.stream().map(r -> {
+    				
 //    				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
     				if(strBuilder.length() > 0) {
     				    strBuilder.append(", ");
@@ -1112,21 +1116,6 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), newFlowId);
 		
 		return ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
-	}
-
-	@Override
-	public ListFlowBriefResponse listParkingWorkFlows(ListParkingWorkFlowsCommand cmd) {
-		ListFlowCommand listFlowCommand = new ListFlowCommand();
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		//TODO:
-		listFlowCommand.setNamespaceId(namespaceId);
-		listFlowCommand.setOwnerType(cmd.getOwnerType());
-		listFlowCommand.setOwnerId(cmd.getParkingLotId());
-		listFlowCommand.setModuleId(moduleId);
-		
-		ListFlowBriefResponse response = flowService.listBriefFlows(listFlowCommand);
-		
-		return response;
 	}
 
 	private Long covertFlowId(Integer flowId) {
