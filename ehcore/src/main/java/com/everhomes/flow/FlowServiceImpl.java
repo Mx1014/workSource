@@ -1720,7 +1720,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		//TODO for evaluate
-		dto.setIsEvaluate((byte)0);
+		dto.setNeedEvaluate((byte)0);
 		
 	}
 
