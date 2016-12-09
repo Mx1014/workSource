@@ -33,8 +33,8 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
 	@Autowired
 	FlowService flowService;
     
-    private String queueDelay = "flowdelays2";
-    private String queueNoDelay = "flownodelays2";
+    private String queueDelay = "flowdelays";
+    private String queueNoDelay = "flownodelays";
     
     @PostConstruct
     public void setup() {
