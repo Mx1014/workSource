@@ -22,8 +22,6 @@ ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_ctag2`(`comment_tag2`);
 ALTER TABLE `eh_acl_role_assignments` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries';
 ALTER TABLE `eh_acl_role_assignments` ADD INDEX `i_eh_acl_role_asgn_namespace_id`(`namespace_id`);
 
-
--- eh_flows
 -- eh_flows
 DROP TABLE IF EXISTS `eh_flows`;
 CREATE TABLE `eh_flows` (
@@ -35,6 +33,8 @@ CREATE TABLE `eh_flows` (
   `organization_id` BIGINT NOT NULL DEFAULT 0,
   `module_id` BIGINT NOT NULL COMMENT 'the module id',
   `module_type` VARCHAR(64) NOT NULL,
+  `project_id` BIGINT NOT NULL DEFAULT 0,
+  `project_type` VARCHAR(64),
 
   `flow_main_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'the real flow id for all copy, the first flow_main_id=0',
   `flow_version` INTEGER NOT NULL DEFAULT 0 COMMENT 'current flow version',
@@ -93,6 +93,7 @@ CREATE TABLE `eh_flow_nodes` (
     `auto_step_minute` INTEGER NOT NULL DEFAULT 0 COMMENT 'after hour, step next',
     `auto_step_type` VARCHAR(64) COMMENT 'ApproveStep, RejectStep, EndStep',
     `allow_applier_update` TINYINT NOT NULL DEFAULT 0 COMMENT 'allow applier update content',
+    `allow_timeout_action` TINYINT NOT NULL DEFAULT 0 COMMENT '1: allow timeout action',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `params` VARCHAR(64) COMMENT 'the params from other module',
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
@@ -210,6 +211,7 @@ CREATE TABLE `eh_flow_user_selections` (
     `belong_to` BIGINT NOT NULL DEFAULT 0 COMMENT 'refer to other flow object id',
     `belong_entity` VARCHAR(64) NOT NULL COMMENT 'flow, flow_node, flow_button, flow_action',
     `belong_type` VARCHAR(64) NOT NULL COMMENT 'flow_superviser, flow_node_processor, flow_node_applier, flow_button_clicker, flow_action_processor',
+    `selection_name` VARCHAR(64),
     `status` TINYINT NOT NULL COMMENT 'invalid, valid',
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
@@ -225,6 +227,8 @@ CREATE TABLE `eh_flow_cases` (
     `owner_type` VARCHAR(64) NOT NULL,
     `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
+    `project_id` BIGINT NOT NULL DEFAULT 0,
+    `project_type` VARCHAR(64),
     `module_name` VARCHAR(64),
     `applier_name` VARCHAR(64),
     `applier_phone` VARCHAR(64),
@@ -399,6 +403,8 @@ CREATE TABLE `eh_flow_timeouts` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
 
 
 

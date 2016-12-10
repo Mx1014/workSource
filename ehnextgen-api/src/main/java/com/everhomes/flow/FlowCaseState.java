@@ -22,10 +22,12 @@ public class FlowCaseState {
 	private FlowGraphEvent currentEvent;
 	private Map<String, Object> extra;
 	private List<FlowEventLog> logs;
+	private List<FlowTimeout> timeouts;
 	
 	public FlowCaseState() {
 		extra = new ConcurrentHashMap<String, Object>();
 		logs = new ArrayList<FlowEventLog>();
+		timeouts = new ArrayList<FlowTimeout>();
 	}
 
 	public String getModuleName() {
@@ -89,9 +91,9 @@ public class FlowCaseState {
 	public List<FlowEventLog> getLogs() {
 		return logs;
 	}
-
-	public void setLogs(List<FlowEventLog> logs) {
-		this.logs = logs;
+	
+	public List<FlowTimeout> getTimeouts() {
+		return timeouts;
 	}
 
 	public UserInfo getOperator() {

@@ -1,5 +1,12 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>ERROR_FLOW_REMIND_ERROR: 催办错误</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public interface FlowServiceErrorCode {
     static final String SCOPE = "flow";
     
@@ -12,4 +19,5 @@ public interface FlowServiceErrorCode {
     static final int ERROR_FLOW_NODE_NOEXISTS = 10007;
     static final int ERROR_FLOW_STEP_ERROR = 10008;
     static final int ERROR_FLOW_PARAM_ERROR = 10009;
+    static final int ERROR_FLOW_REMIND_ERROR = 10010;
 }

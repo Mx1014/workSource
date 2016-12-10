@@ -232,7 +232,7 @@ public class FlowProviderImpl implements FlowProvider {
 	}
 	
 	@Override
-	public Flow findEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+	public Flow getEnabledSnapshotFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
 		List<Flow> flows = this.queryFlows(new ListingLocator(), 1, new ListingQueryBuilderCallback() {
 
 			@Override
@@ -247,6 +247,7 @@ public class FlowProviderImpl implements FlowProvider {
 				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
 				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
 				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.ne(0l)); // Got a main flow, not snapshot flow.	
+				query.addOrderBy(Tables.EH_FLOWS.FLOW_VERSION.desc());
 				
 				return query;
 			}

@@ -8,6 +8,8 @@ public class CreateFlowCaseCommand {
 	private Long     applyUserId;
 	private Long     referId;
 	private String     referType;
+	private Long projectId;
+	private String projectType;
 	private String content;
 	public Long getFlowMainId() {
 		return flowMainId;
@@ -45,6 +47,19 @@ public class CreateFlowCaseCommand {
 	}
 	public void setContent(String content) {
 		this.content = content;
+	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+	public String getProjectType() {
+		return projectType;
+	}
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
 	}
 	@Override
     public String toString() {

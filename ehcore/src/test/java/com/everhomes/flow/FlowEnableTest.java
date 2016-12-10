@@ -22,6 +22,8 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -150,6 +152,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Test
     public void testFlowEnable() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
     	//step1 create flow
     	CreateFlowCommand flowCmd = new CreateFlowCommand();
     	flowCmd.setFlowName("test-flow-1");
@@ -223,7 +228,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	buttonCmd.setNeedProcessor((byte)1);
     	buttonCmd.setNeedSubject((byte)1);
     	
-    	FlowActionInfo buttonAction = createActionInfo("test-button1-info", orgId);
+    	FlowActionInfo buttonAction = createActionInfo("test-button1-info testApplier:${applierName} ", orgId);
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	
@@ -231,7 +236,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	
     	buttonCmd = new UpdateFlowButtonCommand();
-    	buttonCmd.setButtonName("new-next-step-name");
+    	buttonCmd.setButtonName("test-text2");
     	buttonCmd.setDescription("test-description");
     	buttonCmd.setFlowButtonId(flowButton2.getId());
     	buttonCmd.setNeedProcessor((byte)1);
@@ -240,6 +245,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	buttonAction = createActionInfo("test-button2-info", orgId);
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
+    	
+    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.TRANSFER_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	DisableFlowButtonCommand disCmd = new DisableFlowButtonCommand();
+    	disCmd.setFlowButtonId(flowButton3.getId());
+    	flowService.disableFlowButton(disCmd);
     	
     	Boolean ok = flowService.enableFlow(flowDTO.getId());
     	Assert.assertTrue(ok);
@@ -410,6 +421,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd2.setUserId(testUser3.getId());
     	SearchFlowCaseResponse resp2 = flowService.searchFlowCases(cmd2);
     	Assert.assertTrue(resp2.getFlowCases().size() > 0);
+    	
+    	SearchFlowCaseCommand cmd3 = new SearchFlowCaseCommand();
+    	cmd3.setFlowCaseSearchType(FlowCaseSearchType.ADMIN.getCode());
+    	cmd3.setFlowCaseStatus(FlowCaseStatus.PROCESS.getCode());
+    	SearchFlowCaseResponse resp3 = flowService.searchFlowCases(cmd3);
+    	Assert.assertTrue(resp3.getFlowCases().size() > 0);
     }
     
     @Test
@@ -516,7 +533,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowService.fireButton(fireButton);
     	
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
-    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));

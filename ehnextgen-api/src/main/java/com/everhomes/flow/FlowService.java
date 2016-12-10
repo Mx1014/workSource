@@ -377,9 +377,17 @@ public interface FlowService {
 	void processStepTimeout(FlowTimeout ft);
 
 	/**
+	 * message timeout
+	 * @param ft
+	 */
+	void processMessageTimeout(FlowTimeout ft);
+	
+	/**
 	 * Only for test
 	 */
 	void testFlowCase();
+
+	String getFireButtonTemplate(FlowStepType step, Map<String, Object> map);
 	
 	//TODO 日志信息分类：
 	

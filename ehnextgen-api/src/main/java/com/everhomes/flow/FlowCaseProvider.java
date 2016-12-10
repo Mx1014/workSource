@@ -25,4 +25,7 @@ public interface FlowCaseProvider {
 
 	boolean updateIfValid(Long flowCaseId, Timestamp last, Timestamp now);
 
+	List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count,
+			SearchFlowCaseCommand cmd);
+
 }

@@ -1,5 +1,16 @@
 package com.everhomes.rest.flow;
 
+/**
+ * <ul>
+ * <li>list: 列表类型</li>
+ * <li>multi_line: 多行类型</li>
+ * <li>text: 大段文字类型</li>
+ * <li>image: 图片类型</li>
+ * 
+ * </ul>
+ * @author janson
+ *
+ */
 public enum FlowCaseEntityType {
 	LIST("list"), MULTI_LINE("multi_line"), TEXT("text"), IMAGE("image");
 	
