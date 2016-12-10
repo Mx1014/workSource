@@ -132,9 +132,9 @@ public class ParkingServiceImpl implements ParkingService {
 
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     private static final Long moduleId = ParkingFlowConstant.PARKING_RECHARGE_MODULE;
-    private static final Long INTELLIGENT = 8L;
-    private static final Long SEMI_AUTOMATIC = 10L;
-    private static final Long QUEQUE = 12L;
+    private static final Long INTELLIGENT = 21L;
+    private static final Long SEMI_AUTOMATIC = 19L;
+    private static final Long QUEQUE = 17L;
     
     @Autowired
     private ParkingProvider parkingProvider;
@@ -233,11 +233,11 @@ public class ParkingServiceImpl implements ParkingService {
         			r.getId(), FlowOwnerType.PARKING.getCode());
         	if(null == flow)
         		dto.setFlowId(ParkingRequestFlowType.FORBIDDEN.getCode());
-        	else if(flow.getId() == INTELLIGENT)
+        	else if(flow.getFlowMainId() == INTELLIGENT)
         		dto.setFlowId(ParkingRequestFlowType.INTELLIGENT.getCode());
-        	else if(flow.getId() == SEMI_AUTOMATIC)
+        	else if(flow.getFlowMainId() == SEMI_AUTOMATIC)
         		dto.setFlowId(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode());
-        	else if(flow.getId() == QUEQUE)
+        	else if(flow.getFlowMainId() == QUEQUE)
             		dto.setFlowId(ParkingRequestFlowType.QUEQUE.getCode());
     		return dto;
     	}).collect(Collectors.toList());

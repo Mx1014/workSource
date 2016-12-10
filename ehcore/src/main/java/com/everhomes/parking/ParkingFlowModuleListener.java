@@ -44,9 +44,9 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Autowired
     private ContentServerService contentServerService;
 	
-	private static final Long INTELLIGENT = 8L;
-    private static final Long SEMI_AUTOMATIC = 10L;
-    private static final Long QUEQUE = 12L;
+	private static final Long INTELLIGENT = 21L;
+    private static final Long SEMI_AUTOMATIC = 19L;
+    private static final Long QUEQUE = 17L;
 	
 	@Override
 	public FlowModuleInfo initModule() {
