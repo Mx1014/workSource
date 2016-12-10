@@ -13,8 +13,9 @@ public class OpenCardInfoDTO {
     
     private Long openDate;
     private Long expireDate;
-    private String payMoney;
+    private BigDecimal payMoney;
     
+    private String cardNumber;
     private String rateToken;
     private String rateName;
     private BigDecimal monthCount;
@@ -57,10 +58,10 @@ public class OpenCardInfoDTO {
 	public void setExpireDate(Long expireDate) {
 		this.expireDate = expireDate;
 	}
-	public String getPayMoney() {
+	public BigDecimal getPayMoney() {
 		return payMoney;
 	}
-	public void setPayMoney(String payMoney) {
+	public void setPayMoney(BigDecimal payMoney) {
 		this.payMoney = payMoney;
 	}
 	public String getRateToken() {
@@ -98,4 +99,10 @@ public class OpenCardInfoDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getCardNumber() {
+		return cardNumber;
+	}
+	public void setCardNumber(String cardNumber) {
+		this.cardNumber = cardNumber;
+	}
 }

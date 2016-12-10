@@ -50,10 +50,13 @@ import com.everhomes.parking.ketuo.KetuoTemoFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
+import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardType;
+import com.everhomes.rest.parking.ParkingLotRechargeType;
 import com.everhomes.rest.parking.ParkingLotVendor;
 import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
@@ -66,6 +69,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "KETUO2")
@@ -150,7 +154,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
     }
 
     @Override
-    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId, 
+    		String plateNumber, String cardNo) {
     	List<ParkingRechargeRateDTO> result = null;
     	List<KetuoCardRate> list = new ArrayList<>();
 		List<KetuoCardType> types = getCardType();
@@ -592,5 +597,68 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 				LOGGER.error("Close httpclient error.");
 			}
 		}
+	}
+
+	@Override
+	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+		//TODO:
+		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getParkingRequestId());
+
+		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
+				cmd.getParkingLotId(), parkingCardRequest.getFlowId());
+
+		Integer requestMonthCount = 2;
+		Byte requestRechargeType = ParkingLotRechargeType.ACTUAL.getCode();
+		
+		if(null != parkingFlow) {
+			requestMonthCount = parkingFlow.getRequestMonthCount();
+			requestRechargeType = parkingFlow.getRequestRechargeType();
+		}
+		
+		OpenCardInfoDTO dto = new OpenCardInfoDTO();
+		
+		List<ParkingRechargeRateDTO> rates = getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), 
+				cmd.getParkingLotId(), "B5720Z", null);
+		if(rates.size() !=0) {
+			dto = ConvertHelper.convert(rates.get(0), OpenCardInfoDTO.class);
+		}
+		dto.setCardNumber("123");
+		dto.setPlateNumber(cmd.getPlateNumber());
+		Long now = System.currentTimeMillis();
+		dto.setOpenDate(now);
+		dto.setExpireDate(addMonth2(now, requestMonthCount));
+		if(requestRechargeType == ParkingLotRechargeType.ALL.getCode())
+			dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount)));
+		else {
+			Calendar calendar = Calendar.getInstance();
+			calendar.setTimeInMillis(now);
+			int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+			int today = calendar.get(Calendar.DAY_OF_MONTH);
+			dto.setPayMoney(dto.getPrice().multiply(new BigDecimal(requestMonthCount-1))
+					.add(dto.getPrice().divide(new BigDecimal(maxDay), RoundingMode.HALF_DOWN).multiply(new BigDecimal(today))) );
+
+		}
+
+		return dto;
+	}
+	
+	private Long addMonth2(Long oldPeriod, int month) {
+		
+		Calendar calendar = Calendar.getInstance();
+		calendar.setTimeInMillis(oldPeriod);
+		
+		int day = calendar.get(Calendar.DAY_OF_MONTH); 
+		if(day == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
+			calendar.add(Calendar.MONTH, month);
+			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+			calendar.set(Calendar.DAY_OF_MONTH, d);
+		}else{
+			calendar.add(Calendar.MONTH, month-1);
+			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+			calendar.set(Calendar.DAY_OF_MONTH, d);
+		}
+		
+		
+		return calendar.getTimeInMillis();
 	}
 }

@@ -336,4 +336,10 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }

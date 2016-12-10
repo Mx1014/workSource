@@ -86,7 +86,6 @@ import com.everhomes.rest.parking.ListParkingLotsCommand;
 import com.everhomes.rest.parking.ListParkingRechargeOrdersCommand;
 import com.everhomes.rest.parking.ListParkingRechargeOrdersResponse;
 import com.everhomes.rest.parking.ListParkingRechargeRatesCommand;
-import com.everhomes.rest.parking.ListParkingWorkFlowsCommand;
 import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingActivityDTO;
 import com.everhomes.rest.parking.ParkingAttachmentDTO;
@@ -1182,8 +1181,16 @@ public class ParkingServiceImpl implements ParkingService {
 
 	@Override
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		
+		checkPlateNumber(cmd.getPlateNumber());
+    	ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+		
+    	String vendor = parkingLot.getVendorName();
+    	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
+    	
+    	OpenCardInfoDTO dto = handler.getOpenCardInfo(cmd);		
+		
+		return dto;
 	}
 	
 }

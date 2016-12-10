@@ -90,7 +90,5 @@ public interface ParkingProvider {
     
     List<ParkingAttachment> listParkingAttachments(Long ownerId, String ownerType);
     
-    ParkingCardRequest findParkingCardRequestByFlowId(Long flowId, Integer flowVersion);
-    
     void updateParkingCardRequest(ParkingCardRequest parkingCardRequest);
 }

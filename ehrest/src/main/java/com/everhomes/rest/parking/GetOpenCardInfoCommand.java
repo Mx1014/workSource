@@ -8,6 +8,7 @@ public class GetOpenCardInfoCommand {
     private Long ownerId;
     private Long parkingLotId;
     private String plateNumber;
+    private Long parkingRequestId;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -38,4 +39,10 @@ public class GetOpenCardInfoCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public Long getParkingRequestId() {
+		return parkingRequestId;
+	}
+	public void setParkingRequestId(Long parkingRequestId) {
+		this.parkingRequestId = parkingRequestId;
+	}
 }

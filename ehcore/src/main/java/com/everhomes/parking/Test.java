@@ -4,6 +4,8 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -33,9 +35,19 @@ public class Test {
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 	private static final String RULE_TYPE = "1"; //只显示ruleType = 1时的充值项
 	
+	private static final String TTT = "/api/card/AddCarCardNo";
+
+	
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
-		param.put("plateNo", "B5720Z");
+		param.put("appId", "100");
+		
+		param.put("parkId", "1");
+		param.put("plateNo", "B12345");
+		param.put("money", "500");
+		
+		String key = stringMD5("1001B12345500");
+			param.put("key", key);
 		String json = Test.post(param, GET_CARD);
         System.out.println(json);
         
@@ -105,5 +117,44 @@ public class Test {
 		String json = result.toString();
 		
 		return json;
+	}
+	
+	/**
+	 * 获取加密后的字符串
+	 * @param input
+	 * @return
+	 */
+	private static String stringMD5(String pw) {
+		try {  
+			// 拿到一个MD5转换器（如果想要SHA1参数换成”SHA1”）  
+			MessageDigest messageDigest =MessageDigest.getInstance("MD5");  
+			// 输入的字符串转换成字节数组  
+			byte[] inputByteArray = pw.getBytes();  
+			// inputByteArray是输入字符串转换得到的字节数组  
+			messageDigest.update(inputByteArray);  
+			// 转换并返回结果，也是字节数组，包含16个元素  
+			byte[] resultByteArray = messageDigest.digest();  
+			// 字符数组转换成字符串返回  
+			return byteArrayToHex(resultByteArray);  
+		} catch (NoSuchAlgorithmException e) {  
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Xianluobo encrypt error");
+		}  
+	}
+
+	private static String byteArrayToHex(byte[] byteArray) {  
+       
+		// 首先初始化一个字符数组，用来存放每个16进制字符  
+		char[] hexDigits = {'0','1','2','3','4','5','6','7','8','9', 'A','B','C','D','E','F' };  
+		// new一个字符数组，这个就是用来组成结果字符串的（解释一下：一个byte是八位二进制，也就是2位十六进制字符（2的8次方等于16的2次方））  
+		char[] resultCharArray =new char[byteArray.length * 2];  
+		// 遍历字节数组，通过位运算（位运算效率高），转换成字符放到字符数组中去  
+		int index = 0; 
+		for (byte b : byteArray) {  
+			resultCharArray[index++] = hexDigits[b>>> 4 & 0xf];  
+			resultCharArray[index++] = hexDigits[b& 0xf];  
+		}
+		// 字符数组组合成字符串返回  
+		return new String(resultCharArray);  
 	}
 }

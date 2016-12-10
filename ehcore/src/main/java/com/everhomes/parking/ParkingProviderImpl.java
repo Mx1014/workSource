@@ -488,17 +488,6 @@ public class ParkingProviderImpl implements ParkingProvider {
     }
 	
 	@Override
-    public ParkingCardRequest findParkingCardRequestByFlowId(Long flowId, Integer flowVersion) {
-		
-        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
-        SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
-        
-		query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID.eq(flowId));
-		query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.FLOW_VERSION.eq(flowVersion));
-        return ConvertHelper.convert(query.fetchAny(), ParkingCardRequest.class);
-    }
-	
-	@Override
     public void updateParkingCardRequest(List<ParkingCardRequest> list) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhParkingCardRequestsDao dao = new EhParkingCardRequestsDao(context.configuration());

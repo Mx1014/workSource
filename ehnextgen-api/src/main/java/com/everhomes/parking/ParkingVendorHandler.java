@@ -7,8 +7,10 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
+import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
@@ -33,4 +35,6 @@ public interface ParkingVendorHandler {
     void updateParkingRechargeOrderRate(ParkingRechargeOrder order);
     
     ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber);
+    
+    OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
 }

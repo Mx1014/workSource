@@ -2,16 +2,17 @@ package com.everhomes.parking;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
-import java.util.Collections;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.constants.ErrorCodes;
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowGraphNode;
@@ -20,27 +21,28 @@ import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.parking.IssueParkingCardsCommand;
-import com.everhomes.rest.parking.ParkingCardIssueFlag;
+import com.everhomes.rest.parking.ParkingAttachmentDTO;
+import com.everhomes.rest.parking.ParkingAttachmentType;
+import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingFlowConstant;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
-import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.ConvertHelper;
 
 @Component
 public class ParkingFlowModuleListener implements FlowModuleListener {
+	
+    private static final Logger LOGGER = LoggerFactory.getLogger(ParkingFlowModuleListener.class);
 	@Autowired
 	private FlowService flowService;
 	@Autowired
     private ParkingProvider parkingProvider;
 	
 	private Long moduleId = ParkingFlowConstant.PARKING_RECHARGE_MODULE;
+	@Autowired
+    private ContentServerService contentServerService;
 	
 	private static final Long INTELLIGENT = 8L;
     private static final Long SEMI_AUTOMATIC = 10L;
@@ -94,33 +96,69 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		List<FlowCaseEntity> entities = new ArrayList<>();
-		FlowCaseEntity e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("test-list-key");
-		e.setValue("test-list-value");
-		entities.add(e);
+//		FlowCaseEntity e = new FlowCaseEntity();
+//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+//		e.setKey("test-list-key");
+//		e.setValue("test-list-value");
+//		entities.add(e);
+//		
+//		e = new FlowCaseEntity();
+//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+//		e.setKey("test-list-key2");
+//		e.setValue("test-list-value2");
+//		entities.add(e);
+//		
+//		e = new FlowCaseEntity();
+//		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+//		e.setKey("test-multi-key3");
+//		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
+//		entities.add(e);
+//		
+//		e = new FlowCaseEntity();
+//		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+//		e.setKey("test-text-key2");
+//		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
+//		entities.add(e);
+		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("test-list-key2");
-		e.setValue("test-list-value2");
-		entities.add(e);
+		ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
+    	
+    	List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(), 
+    			ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
+    	
+		List<ParkingAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
+			ParkingAttachmentDTO attachmentDto = ConvertHelper.convert(r, ParkingAttachmentDTO.class);
+			
+			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
+	                EntityType.USER.getCode(), r.getCreatorUid());
+			attachmentDto.setContentUrl(contentUrl);
+			attachmentDto.setInformationType(r.getDataType());
+			return attachmentDto;
+		}).collect(Collectors.toList());
+    	
+		dto.setAttachments(attachmentDtos);
 		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-		e.setKey("test-multi-key3");
-		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-		entities.add(e);
+		Integer count = parkingProvider.waitingCardCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
+				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
+		dto.setRanking(count);
 		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-		e.setKey("test-text-key2");
-		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-		entities.add(e);		
-		
+		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		return entities;
 	}
 
+	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+	
 	@Override
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
 		// TODO Auto-generated method stub
@@ -132,13 +170,13 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		
 		FlowGraphNode currentNode = ctx.getCurrentNode();
 		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
 
 		String stepType = flowNode.getAutoStepType();
 		String param = flowNode.getParams();
 		
 		Long flowId = flowNode.getFlowMainId();
-		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestByFlowId(flowId, 
-				flowNode.getFlowVersion());
+		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 		
 		long now = System.currentTimeMillis();
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
