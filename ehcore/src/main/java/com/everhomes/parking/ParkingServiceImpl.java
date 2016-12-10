@@ -232,13 +232,13 @@ public class ParkingServiceImpl implements ParkingService {
         	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), moduleId, FlowModuleType.NO_MODULE.getCode(), 
         			r.getId(), FlowOwnerType.PARKING.getCode());
         	if(null == flow)
-        		dto.setFlowId(ParkingRequestFlowType.FORBIDDEN.getCode());
+        		dto.setFlowMode(ParkingRequestFlowType.FORBIDDEN.getCode());
         	else if(flow.getFlowMainId() == INTELLIGENT)
-        		dto.setFlowId(ParkingRequestFlowType.INTELLIGENT.getCode());
+        		dto.setFlowMode(ParkingRequestFlowType.INTELLIGENT.getCode());
         	else if(flow.getFlowMainId() == SEMI_AUTOMATIC)
-        		dto.setFlowId(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode());
+        		dto.setFlowMode(ParkingRequestFlowType.SEMI_AUTOMATIC.getCode());
         	else if(flow.getFlowMainId() == QUEQUE)
-            		dto.setFlowId(ParkingRequestFlowType.QUEQUE.getCode());
+            		dto.setFlowMode(ParkingRequestFlowType.QUEQUE.getCode());
     		return dto;
     	}).collect(Collectors.toList());
     	

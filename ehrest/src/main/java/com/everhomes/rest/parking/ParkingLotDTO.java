@@ -35,7 +35,7 @@ public class ParkingLotDTO {
     
     private BigDecimal totalAmount;
     
-    private Integer flowId;
+    private Integer flowMode;
     
     public ParkingLotDTO() {
     }
@@ -149,11 +149,12 @@ public class ParkingLotDTO {
 		this.isSupportRecharge = isSupportRecharge;
 	}
 
-	public Integer getFlowId() {
-		return flowId;
+	public Integer getFlowMode() {
+		return flowMode;
 	}
 
-	public void setFlowId(Integer flowId) {
-		this.flowId = flowId;
+	public void setFlowMode(Integer flowMode) {
+		this.flowMode = flowMode;
 	}
+
 }
