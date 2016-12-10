@@ -20,6 +20,7 @@ public class OpenCardInfoDTO {
     private BigDecimal monthCount;
     private BigDecimal price;
     private String cardType;
+    
 	public String getOwnerType() {
 		return ownerType;
 	}
