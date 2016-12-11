@@ -29,6 +29,9 @@ public class FlowNodeDetailDTO {
 	FlowNodeReminderDTO reminder;
 	
 	FlowNodeTrackerDTO tracker;
+	
+	@ItemType(FlowButtonDetailDTO.class)
+	List<FlowButtonDetailDTO> processButtons;
 
 	public Long getId() {
 		return id;
@@ -132,6 +135,14 @@ public class FlowNodeDetailDTO {
 
 	public void setTracker(FlowNodeTrackerDTO tracker) {
 		this.tracker = tracker;
+	}
+
+	public List<FlowButtonDetailDTO> getProcessButtons() {
+		return processButtons;
+	}
+
+	public void setProcessButtons(List<FlowButtonDetailDTO> processButtons) {
+		this.processButtons = processButtons;
 	}
 
 	@Override

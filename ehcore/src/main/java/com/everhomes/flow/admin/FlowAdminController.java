@@ -25,6 +25,7 @@ import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
@@ -33,6 +34,7 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.GetFlowCaseDetailByIdCommand;
+import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
 import com.everhomes.rest.flow.GetFlowNodeDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -417,6 +419,20 @@ public class FlowAdminController extends ControllerBase {
     @RestReturn(value=FlowVariableResponse.class)
     public RestResponse listFlowVariables(@Valid ListFlowVariablesCommand cmd) {
         RestResponse response = new RestResponse(flowService.listFlowVariables(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/flow/getFlowGraphDetail</b>
+     * <p> 创建一个新 Flow，一个业务模块，名字不能重复 </p>
+     * @return Flow 的详细信息
+     */
+    @RequestMapping("getFlowGraphDetail")
+    @RestReturn(value=FlowGraphDetailDTO.class)
+    public RestResponse getFlowGraphDetail(@Valid GetFlowGraphDetailCommand cmd) {
+        RestResponse response = new RestResponse(flowService.getFlowGraphDetail(cmd.getFlowId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -24,6 +24,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -929,5 +930,24 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	setTestContext(userId);
     	
     	flowService.testFlowCase();
+    }
+    
+    @Test
+    public void testFlowGraph0() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), 0);
+    	Assert.assertTrue(flowGraph.getNodes().size() == 3);
+    	Assert.assertTrue(flowGraph.getNodes().get(0).getApplierButtons().size() == 4);
+    	Assert.assertTrue(flowGraph.getNodes().get(0).getProcessorButtons().size() == 5);
+    	
+    	FlowGraphDetailDTO detailDTO = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	Assert.assertTrue(detailDTO.getNodes().size() == 3);
     }
 }

@@ -18,6 +18,7 @@ import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
@@ -31,6 +32,7 @@ import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
+import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -388,6 +390,8 @@ public interface FlowService {
 	void testFlowCase();
 
 	String getFireButtonTemplate(FlowStepType step, Map<String, Object> map);
+
+	FlowGraphDetailDTO getFlowGraphDetail(Long flowId);
 	
 	//TODO 日志信息分类：
 	

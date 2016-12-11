@@ -47,6 +47,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowTemplateCode;
 import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
@@ -1406,6 +1407,10 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowGraph getFlowGraph(Long flowId, Integer flowVer) {
+		if(flowVer.equals(0)) {
+			return getConfigGraph(flowId);
+		}
+		
 		String fmt = String.format("%d:%d", flowId, flowVer);
 		FlowGraph flowGraph = graphMap.get(fmt);
 		if(flowGraph == null) {
@@ -1447,6 +1452,34 @@ public class FlowServiceImpl implements FlowService {
 				flowGraph.getNodes().add(getFlowGraphNode(fn, flowVer));	
 			}
 			
+			i++;
+		}
+		
+		flowGraph.saveIds();
+		
+		return flowGraph;
+	}
+	
+	private FlowGraph getConfigGraph(Long flowId) {
+		FlowGraph flowGraph = new FlowGraph();
+		Flow flow = flowProvider.getFlowById(flowId);
+		if(flow == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");
+		}
+		flowGraph.setFlow(flow);
+		
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, 0);
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		int i = 1;
+		for(FlowNode fn : flowNodes) {
+			if(!fn.getNodeLevel().equals(i)) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error");	
+			}
+			
+			flowGraph.getNodes().add(getFlowGraphNode(fn, 0));	
 			i++;
 		}
 		
@@ -2370,5 +2403,35 @@ public class FlowServiceImpl implements FlowService {
     	Random r = new Random();
     	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
     	this.createFlowCase(cmd);
+	}
+
+	@Override
+	public FlowGraphDetailDTO getFlowGraphDetail(Long flowId) {
+		FlowGraphDetailDTO graphDetail = new FlowGraphDetailDTO();
+		
+		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+		graphDetail.setSupervisors(selections);
+		
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowId
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+		if(seles != null && seles.size() > 0) {
+			seles.stream().forEach((sel) -> {
+				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
+			});
+		}
+		
+		List<FlowNodeDetailDTO> nodes = new ArrayList<>();
+		graphDetail.setNodes(nodes);
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		for(FlowNode fn: flowNodes) {
+			FlowNodeDetailDTO nodeDetail = this.getFlowNodeDetail(fn.getId());
+			nodes.add(nodeDetail);
+		}
+		
+		return graphDetail;
 	}
 }
