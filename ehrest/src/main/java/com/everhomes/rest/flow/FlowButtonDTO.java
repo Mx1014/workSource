@@ -28,6 +28,7 @@ public class FlowButtonDTO {
     private String     buttonName;
     private Byte needProcessor;
     private Byte needSubject;
+    private String description;
 
 	public Byte getNeedProcessor() {
 		return needProcessor;
@@ -146,6 +147,16 @@ public class FlowButtonDTO {
 
 	public void setButtonName(String buttonName) {
 		this.buttonName = buttonName;
+	}
+
+
+	public String getDescription() {
+		return description;
+	}
+
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 

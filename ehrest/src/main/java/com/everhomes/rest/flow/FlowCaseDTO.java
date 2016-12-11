@@ -47,7 +47,7 @@ public class FlowCaseDTO {
     private Long     currentNodeId;
     private Long     ownerId;
     private String moduleLink;
-    private Byte isEvaluate;
+    private Byte needEvaluate;
     private Integer evaluateScore;
 	private Timestamp lastStepTime;
 	private Timestamp createTime;
@@ -206,12 +206,12 @@ public class FlowCaseDTO {
 		this.moduleLink = moduleLink;
 	}
 
-	public Byte getIsEvaluate() {
-		return isEvaluate;
+	public Byte getNeedEvaluate() {
+		return needEvaluate;
 	}
 
-	public void setIsEvaluate(Byte isEvaluate) {
-		this.isEvaluate = isEvaluate;
+	public void setNeedEvaluate(Byte needEvaluate) {
+		this.needEvaluate = needEvaluate;
 	}
 
 	public Integer getEvaluateScore() {

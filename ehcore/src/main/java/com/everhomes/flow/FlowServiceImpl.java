@@ -473,6 +473,9 @@ public class FlowServiceImpl implements FlowService {
 		button.setNeedSubject((byte)1);
 		button.setFlowUserType(userType.getCode());
 		button.setButtonName(buttonDefName(flow.getNamespaceId(), stepType));
+		if(stepType == FlowStepType.TRANSFER_STEP) {
+			button.setNeedProcessor((byte)1);
+		}
 		flowButtonProvider.createFlowButton(button);
 	}
 	
@@ -1523,7 +1526,7 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public void disableFlow(Long flowId) {
 		Flow flow = flowProvider.getFlowById(flowId);
-		if(flow == null || !flow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER)) {
+		if(flow == null /* || !flow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER) */ ) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow not exists");	
 		}
 		
@@ -1715,6 +1718,9 @@ public class FlowServiceImpl implements FlowService {
 				dto.setProcessUserName(name);
 			}
 		}
+		
+		//TODO for evaluate
+		dto.setNeedEvaluate((byte)0);
 		
 	}
 
@@ -2318,6 +2324,9 @@ public class FlowServiceImpl implements FlowService {
         	break;
         case TRANSFER_STEP:
         	code = FlowTemplateCode.TRANSFER_STEP;
+        	break;
+        case COMMENT_STEP:
+        	code = FlowTemplateCode.COMMENT_STEP;
         	break;
         default:
         	break;

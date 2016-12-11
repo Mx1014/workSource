@@ -1,5 +1,8 @@
 package com.everhomes.flow;
 
+import java.util.HashMap;
+import java.util.Map;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEventType;
@@ -9,6 +12,7 @@ import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 
 public class FlowGraphButtonEvent implements FlowGraphEvent {
@@ -18,9 +22,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowSubject subject;
 	
 	private FlowEventLogProvider flowEventLogProvider;
+	private UserService userService;
+	private FlowService flowService;
 	
 	public FlowGraphButtonEvent() {
 		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
+		userService = PlatformContext.getComponent(UserService.class);
+		flowService = PlatformContext.getComponent(FlowService.class);
 	}
 	
 	@Override
@@ -73,11 +81,18 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		ctx.setStepType(nextStep);
 		
 		FlowEventLog log = null;
+		FlowEventLog tracker = null;
 		FlowCase flowCase = ctx.getFlowCase();
 		
 		//current state change to next step
 		FlowGraphNode current = ctx.getCurrentNode();
 		FlowGraphNode next = null;
+		
+		UserInfo applier = userService.getUserSnapshotInfo(flowCase.getApplyUserId());
+		Map<String, Object> templateMap = new HashMap<String, Object>();
+		templateMap.put("nodeName", current.getFlowNode().getNodeName());
+		templateMap.put("applierName", applier.getNickName());
+		
 		switch(nextStep) {
 		case NO_STEP:
 			break;
@@ -90,23 +105,39 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 				//get next level
 				next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()+1);
 			}
+			
+			tracker = new FlowEventLog();
+			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			
 			ctx.setNextNode(next);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
+			
 			break;
 		case REJECT_STEP:
 			if(current.getFlowNode().getNodeLevel() < 1) {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "flow node step error");
 			}
+			
+			tracker = new FlowEventLog();
+			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			
 			next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()-1);
 			ctx.setNextNode(next);
 			
 			flowCase.setRejectNodeId(current.getFlowNode().getId());
 			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
+			
 			break;
 		case TRANSFER_STEP:
 			next = current;
 			ctx.setNextNode(next);
+			
+			tracker = new FlowEventLog();
+			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
 			
 			log = new FlowEventLog();
 			log.setId(flowEventLogProvider.getNextId());
@@ -130,30 +161,29 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			next = current;
 			ctx.setNextNode(next);
 			
-			log = new FlowEventLog();
-			log.setId(flowEventLogProvider.getNextId());
-			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
-			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
-			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
-			log.setFlowNodeId(ctx.getCurrentNode().getFlowNode().getId());
-			log.setParentId(0l);
-			log.setFlowCaseId(ctx.getFlowCase().getId());
-			log.setFlowUserId(ctx.getOperator().getId());
-			log.setFlowUserName(ctx.getOperator().getNickName());
-			log.setLogContent(subject.getContent());
-			log.setStepCount(ctx.getFlowCase().getStepCount());
-			log.setLogType(FlowLogType.NODE_TRACKER.getCode());
-			log.setSubjectId(subject.getId());
-			log.setButtonFiredStep(nextStep.getCode());
-			log.setTrackerApplier(1l);
-			log.setTrackerProcessor(1l);
-			ctx.getLogs().add(log);
+			if(subject == null) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow node step param error");
+			}
+			
+			tracker = new FlowEventLog();
+			if(subject != null) {
+				tracker.setLogContent(subject.getContent());	
+			} else {
+				templateMap.put("imageCount", String.valueOf(cmd.getImages().size()));
+				tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+			}
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
 			
 			break;
 		case ABSORT_STEP:
+			tracker = new FlowEventLog();
+			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			
 			next = ctx.getFlowGraph().getNodes().get(ctx.getFlowGraph().getNodes().size()-1);
 			ctx.setNextNode(next);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
+			
 			break;
 		case REMINDER_STEP:
 			next = current;
@@ -164,6 +194,25 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			break;
 		default:
 			break;
+		}
+		
+		if(tracker != null && subject != null) {
+			tracker.setId(flowEventLogProvider.getNextId());
+			tracker.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			tracker.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+			tracker.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			tracker.setFlowNodeId(ctx.getCurrentNode().getFlowNode().getId());
+			tracker.setParentId(0l);
+			tracker.setFlowCaseId(ctx.getFlowCase().getId());
+			tracker.setFlowUserId(ctx.getOperator().getId());
+			tracker.setFlowUserName(ctx.getOperator().getNickName());
+			tracker.setSubjectId(subject.getId());
+			tracker.setLogType(FlowLogType.NODE_TRACKER.getCode());
+			
+			tracker.setButtonFiredStep(nextStep.getCode());
+			tracker.setTrackerApplier(1l);
+			tracker.setTrackerProcessor(1l);	
+			ctx.getLogs().add(tracker);
 		}
 		
 		log = new FlowEventLog();
