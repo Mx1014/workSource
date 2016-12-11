@@ -35,7 +35,7 @@ public class QueryOrganizationTopicCommand {
     private Byte officialFlag;
     private Byte privateFlag;
     private Long categoryId;
-    private Boolean orderByCreateTime;
+    private Byte orderByCreateTime;
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
@@ -43,11 +43,11 @@ public class QueryOrganizationTopicCommand {
     public QueryOrganizationTopicCommand() {
     }
 
-    public Boolean getOrderByCreateTime() {
+    public Byte getOrderByCreateTime() {
         return orderByCreateTime;
     }
 
-    public void setOrderByCreateTime(Boolean orderByCreateTime) {
+    public void setOrderByCreateTime(Byte orderByCreateTime) {
         this.orderByCreateTime = orderByCreateTime;
     }
 

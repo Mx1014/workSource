@@ -2313,8 +2313,12 @@ public class ActivityServiceImpl implements ActivityService {
         // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
-        
-        List<ActivityDTO> dtos = this.getOrgActivities(locator, pageSize, condition, cmd.getPublishStatus(), cmd.getOrderByCreateTime());
+
+        Boolean orderByCreateTime = false;
+        if(cmd.getOrderByCreateTime() != null && cmd.getOrderByCreateTime() == 1) {
+            orderByCreateTime = true;
+        }
+        List<ActivityDTO> dtos = this.getOrgActivities(locator, pageSize, condition, cmd.getPublishStatus(), orderByCreateTime);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activities, userId=" + operatorId + ", size=" + dtos.size() 
