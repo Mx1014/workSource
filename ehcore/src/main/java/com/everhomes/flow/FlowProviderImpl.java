@@ -134,7 +134,9 @@ public class FlowProviderImpl implements FlowProvider {
 					ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
 				query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(moduleId));
-				query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));
+				if(moduleType != null) {
+					query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));
+				}
 				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));
 				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));
 				query.addConditions(Tables.EH_FLOWS.FLOW_NAME.eq(name));

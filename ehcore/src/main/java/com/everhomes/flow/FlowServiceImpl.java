@@ -1526,7 +1526,7 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public void disableFlow(Long flowId) {
 		Flow flow = flowProvider.getFlowById(flowId);
-		if(flow == null || !flow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER)) {
+		if(flow == null /* || !flow.getFlowVersion().equals(FlowConstants.FLOW_CONFIG_VER) */ ) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow not exists");	
 		}
 		
@@ -2324,6 +2324,9 @@ public class FlowServiceImpl implements FlowService {
         	break;
         case TRANSFER_STEP:
         	code = FlowTemplateCode.TRANSFER_STEP;
+        	break;
+        case COMMENT_STEP:
+        	code = FlowTemplateCode.COMMENT_STEP;
         	break;
         default:
         	break;

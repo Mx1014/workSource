@@ -158,32 +158,38 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		ctx.setCurrentNode(node);
 		
 		FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
-		FlowSubject subject = new FlowSubject();
-		subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
-		subject.setBelongTo(cmd.getButtonId());
-		subject.setContent(cmd.getContent());
-		subject.setNamespaceId(button.getFlowButton().getNamespaceId());
-		subject.setStatus(FlowStatusType.VALID.getCode());
-		subject.setTitle(cmd.getTitle());
-		flowSubjectProvider.createFlowSubject(subject);
-		
-		if(null != cmd.getImages() && cmd.getImages().size() > 0) {
-			List<Attachment> attachments = new ArrayList<>();
-			for(String image : cmd.getImages()) {
-				Attachment attach = new Attachment();
-				attach.setContentType(NewsCommentContentType.IMAGE.getCode());
-				attach.setContentUri(image);
-				attach.setCreatorUid(logonUser.getId());
-				attach.setOwnerId(subject.getId());
-				attachments.add(attach);
-			}
-			attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
-		}
-		
 		FlowGraphButtonEvent event = new FlowGraphButtonEvent();
+		
+		if(cmd.getContent() != null 
+				|| (null != cmd.getImages() && cmd.getImages().size() > 0) ) {
+			FlowSubject subject = new FlowSubject();
+			subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
+			subject.setBelongTo(cmd.getButtonId());
+			subject.setContent(cmd.getContent());
+			subject.setNamespaceId(button.getFlowButton().getNamespaceId());
+			subject.setStatus(FlowStatusType.VALID.getCode());
+			subject.setTitle(cmd.getTitle());
+			flowSubjectProvider.createFlowSubject(subject);
+			
+			if(null != cmd.getImages() && cmd.getImages().size() > 0) {
+				List<Attachment> attachments = new ArrayList<>();
+				for(String image : cmd.getImages()) {
+					Attachment attach = new Attachment();
+					attach.setContentType(NewsCommentContentType.IMAGE.getCode());
+					attach.setContentUri(image);
+					attach.setCreatorUid(logonUser.getId());
+					attach.setOwnerId(subject.getId());
+					attachments.add(attach);
+				}
+				attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
+			}			
+			
+			event.setSubject(subject);
+		}
+
+		
 		event.setUserType(FlowUserType.fromCode(button.getFlowButton().getFlowUserType()));
 		event.setCmd(cmd);
-		event.setSubject(subject);
 		event.setFiredUser(ctx.getOperator());
 		ctx.setCurrentEvent(event);
 		

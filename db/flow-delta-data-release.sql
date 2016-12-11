@@ -16,6 +16,8 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 ( 'flow', 10003, 'zh_CN', '${applierName} 已取消任务', '${applierName} 已取消任务');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
 ( 'flow', 10004, 'zh_CN', '${nodeName} 已转交', '${nodeName} 已转交');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10005, 'zh_CN', '${nodeName} 上传了 ${imageCount}张图片', '${nodeName} 上传了 ${imageCount}张图片');
 
 INSERT INTO `ehcore_aclink`.`eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)

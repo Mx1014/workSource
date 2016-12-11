@@ -155,9 +155,17 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Long userId = testUser2.getId();
     	setTestContext(userId);
     	
+    	String flowName = "test-flow-1";
+    	Flow flow = flowProvider.findFlowByName(namespaceId, moduleId
+    			, null, orgId, FlowOwnerType.ENTERPRISE.getCode(), flowName);
+    	if(flow != null) {
+    		flowService.disableFlow(flow.getId());
+    		flowService.deleteFlow(flow.getId());
+    	}
+    	
     	//step1 create flow
     	CreateFlowCommand flowCmd = new CreateFlowCommand();
-    	flowCmd.setFlowName("test-flow-1");
+    	flowCmd.setFlowName(flowName);
     	flowCmd.setModuleId(moduleId);
     	flowCmd.setNamespaceId(namespaceId);
     	flowCmd.setOrgId(orgId);
@@ -535,6 +543,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex).getLogs().size() == 2);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getAllowComment().equals((byte)1));
