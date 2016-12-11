@@ -29,4 +29,12 @@ public interface ParkingClearanceOperatorProvider {
      * 根据id查询
      */
     ParkingClearanceOperator findById(Long id);
+
+    /**
+     * 根据停车场和用户查询记录
+     * @param parkingLotId
+     * @param userId
+     * @return
+     */
+    ParkingClearanceOperator findByParkingLotIdAndUid(Long parkingLotId, Long userId, String operatorType);
 }

@@ -18,4 +18,5 @@ public interface ParkingErrorCode {
     String SCOPE_CLEARANCE = "parking.clearance";
 
     int ERROR_DELETE_PARKING_CLEARANCE_OPERATOR = 10001;  //删除用户失败
+    int ERROR_NO_WORK_FLOW_ENABLED = 10002;  //没有启用的工作流
 }

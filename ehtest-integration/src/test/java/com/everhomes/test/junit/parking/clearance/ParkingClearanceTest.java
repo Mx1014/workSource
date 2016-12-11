@@ -1,5 +1,6 @@
 package com.everhomes.test.junit.parking.clearance;
 
+import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.parking.clearance.*;
 import com.everhomes.server.schema.Tables;
@@ -13,6 +14,8 @@ import org.jooq.Result;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.util.Collections;
 
 /**
  * Created by xq.tian on 2016/12/5.
@@ -44,9 +47,9 @@ public class ParkingClearanceTest extends BaseLoginAuthTestCase {
         cmd.setCommunityId(communityId);
         cmd.setParkingLotId(parkingLotId);
         cmd.setOperatorType("APPLICANT");
-        cmd.setUserId(1001L);
+        cmd.setUserIds(Collections.singletonList(1001L));
 
-        CreateClearanceOperatorRestResponse response = httpClientService.restPost(CREATE_CLEARANCE_OPERATOR_URL, cmd, CreateClearanceOperatorRestResponse.class);
+        RestResponse response = httpClientService.restPost(CREATE_CLEARANCE_OPERATOR_URL, cmd, RestResponse.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 

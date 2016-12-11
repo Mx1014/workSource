@@ -77,6 +77,16 @@ public class ParkingClearanceOperatorProviderImpl implements ParkingClearanceOpe
         return ConvertHelper.convert(dao().findById(id), ParkingClearanceOperator.class);
     }
 
+    @Override
+    public ParkingClearanceOperator findByParkingLotIdAndUid(Long parkingLotId, Long userId, String operatorType) {
+        return context().selectFrom(Tables.EH_PARKING_CLEARANCE_OPERATORS)
+                .where(Tables.EH_PARKING_CLEARANCE_OPERATORS.PARKING_LOT_ID.eq(parkingLotId))
+                .and(Tables.EH_PARKING_CLEARANCE_OPERATORS.OPERATOR_TYPE.eq(operatorType))
+                .and(Tables.EH_PARKING_CLEARANCE_OPERATORS.OPERATOR_ID.eq(userId))
+                .fetchAnyInto(ParkingClearanceOperator.class)
+                ;
+    }
+
     private EhParkingClearanceOperatorsDao rwDao(){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         return new EhParkingClearanceOperatorsDao(context.configuration());

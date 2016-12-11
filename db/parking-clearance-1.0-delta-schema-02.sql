@@ -394,7 +394,6 @@ CREATE TABLE `eh_app_namespace_mappings` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-
 -- eh_flows
 DROP TABLE IF EXISTS `eh_flows`;
 CREATE TABLE `eh_flows` (

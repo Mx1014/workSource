@@ -3,6 +3,8 @@ package com.everhomes.rest.parking.clearance;
 
 import com.everhomes.util.StringHelper;
 
+import java.sql.Timestamp;
+
 /**
  * <ul>
  *     <li>id: id</li>
@@ -21,8 +23,8 @@ public class ParkingClearanceLogDTO {
     private String applicant;
     private String identifierToken;
     private String plateNumber;
-    private Long applyTime;
-    private Long clearanceTime;
+    private Timestamp applyTime;
+    private Timestamp clearanceTime;
     private String remarks;
     private String status;
 
@@ -58,19 +60,19 @@ public class ParkingClearanceLogDTO {
         this.plateNumber = plateNumber;
     }
 
-    public Long getApplyTime() {
+    public Timestamp getApplyTime() {
         return applyTime;
     }
 
-    public void setApplyTime(Long applyTime) {
+    public void setApplyTime(Timestamp applyTime) {
         this.applyTime = applyTime;
     }
 
-    public Long getClearanceTime() {
+    public Timestamp getClearanceTime() {
         return clearanceTime;
     }
 
-    public void setClearanceTime(Long clearanceTime) {
+    public void setClearanceTime(Timestamp clearanceTime) {
         this.clearanceTime = clearanceTime;
     }
 
