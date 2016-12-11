@@ -9,6 +9,7 @@ import java.sql.Timestamp;
  *     <li>id: 活动附件id</li>
  *     <li>activityId: 活动id</li>
  *     <li>name: 附件名</li>
+ *     <li>fileSize: 附件大小</li>
  *     <li>contentType: 内容类型，参考{@link com.everhomes.rest.forum.PostContentType}</li>
  *     <li>contentUri: 内容uri</li>
  *     <li>contentUrl: 内容url</li>
@@ -25,6 +26,8 @@ public class ActivityAttachmentDTO {
     private Long activityId;
 
     private String name;
+
+    private String fileSize;
 
     private String contentType;
 
