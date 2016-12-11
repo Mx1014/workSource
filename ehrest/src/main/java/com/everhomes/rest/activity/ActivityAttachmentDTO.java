@@ -67,6 +67,14 @@ public class ActivityAttachmentDTO {
         this.name = name;
     }
 
+    public String getFileSize() {
+        return fileSize;
+    }
+
+    public void setFileSize(String fileSize) {
+        this.fileSize = fileSize;
+    }
+
     public String getContentType() {
         return contentType;
     }
