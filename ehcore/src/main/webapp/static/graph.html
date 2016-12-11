@@ -1,0 +1,56 @@
+<html>
+<head>
+<meta charset="utf-8" />
+<title>
+    FlowGraph
+</title>
+<script src="/evh/static/jquery-2.1.3.min.js"></script>
+<script src="/evh/static/jquery.cookie.js"></script>
+<style  type="text/css">
+table {
+    border-collapse: collapse;
+}
+
+table, th, td {
+    border: 1px solid black;
+}
+</style>
+</head>
+
+<body>
+<form>
+<input type="button" name="show" id="btnShow" value="Show"/>
+<div id="content"></div>
+</form>
+
+<script>
+
+function renderTable(graph, pdom) {
+	if(graph) {
+		if(typeof graph === 'string') {
+			$(pdom).html(graph);
+		} else {
+			var dom = $('<table></table>').addClass('table0');
+			for(var i = 0; i < graph.childs.length; i++) {
+				var col = $('<td></td>');
+				var row = $('<tr></tr>');
+				renderTable(graph.childs[i], col);
+				row.append(col);
+				dom.append(row);
+			}
+			pdom.append(dom);
+		}
+	}
+}
+
+function showGraph(){
+	var graph = {"childs": ["<h1>test1</h1>", "test2", "test3"]};
+	renderTable(graph, $('#content'));
+}
+
+$("#btnShow").click(showGraph);
+$(document).ready(showGraph);
+
+</script>
+</body>
+</html>
