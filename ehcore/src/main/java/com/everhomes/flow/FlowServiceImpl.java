@@ -2459,6 +2459,14 @@ public class FlowServiceImpl implements FlowService {
 		
 		for(FlowNode fn: flowNodes) {
 			FlowNodeDetailDTO nodeDetail = this.getFlowNodeDetail(fn.getId());
+			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(fn.getId()
+					, FlowConstants.FLOW_CONFIG_VER, FlowUserType.PROCESSOR.getCode());
+			List<FlowButtonDetailDTO> btnDetails = new ArrayList<>();
+			for(FlowButton btn : buttons) {
+				btnDetails.add(this.getFlowButtonDetail(btn.getId()));	
+			}
+			
+			nodeDetail.setProcessButtons(btnDetails);
 			nodes.add(nodeDetail);
 		}
 		
