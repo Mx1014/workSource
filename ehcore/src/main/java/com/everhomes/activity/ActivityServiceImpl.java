@@ -3002,7 +3002,7 @@ public class ActivityServiceImpl implements ActivityService {
         attachment.setCreatorUid(UserContext.current().getUser().getId());
         ContentServerResource resource = contentServerService.findResourceByUri(cmd.getContentUri());
         Integer size = resource.getResourceSize();
-//        attachment.setFileSize(size);
+        attachment.setFileSize(size);
         activityProvider.createActivityAttachment(attachment);
     }
 
