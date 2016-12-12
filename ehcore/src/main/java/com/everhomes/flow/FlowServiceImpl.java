@@ -245,6 +245,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setFlowVersion(FlowConstants.FLOW_CONFIG_START);
     	obj.setStatus(FlowStatusType.CONFIG.getCode());
     	obj.setOrganizationId(cmd.getOrgId());
+    	obj.setNamespaceId(cmd.getNamespaceId());
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
 
@@ -2407,7 +2408,8 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowGraphDetailDTO getFlowGraphDetail(Long flowId) {
-		FlowGraphDetailDTO graphDetail = new FlowGraphDetailDTO();
+		Flow flow = flowProvider.getFlowById(flowId);
+		FlowGraphDetailDTO graphDetail = ConvertHelper.convert(flow, FlowGraphDetailDTO.class);
 		
 		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
 		graphDetail.setSupervisors(selections);

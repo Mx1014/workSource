@@ -1,4 +1,5 @@
 <html>
+
 <head>
 <meta charset="utf-8" />
 <title>
@@ -19,13 +20,34 @@ table, th, td {
 
 <body>
 <form>
+
+<table>
+<tr>
+<th>Column 1</th>
+<th>Column 2</th>
+<th>Column 3</th>
+</tr>
+<tr><td rowspan="2">Row 1 CCCCCCCCCCCCCCCCCCCCCCCCCell 1</td><td>Row 1 Cell 2</td><td>Row 1 Cell 322222<br/><br/><br/><br/>22222222222222222</td></tr>
+<tr><td>Row 2 Cell 2</td><td>Row 2 Cell 3</td></tr>
+<tr><td colspan="3">Row 3 Cell 1</td></tr>
+</table>
+
 <input type="button" name="show" id="btnShow" value="Show"/>
 <div id="content"></div>
 </form>
+<script type="application/javascript">
+if(!String.prototype.format) {
+	String.prototype.format = function() {
+		var str = this;
+		for (var i = 0; i < arguments.length; i++) {
+			var reg = new RegExp("\\{" + i + "\\}", "gm");
+			str = str.replace(reg, arguments[i]);
+		}
+		return str;
+	}
+}
 
-<script>
-
-function renderTable(graph, pdom) {
+function renderTable2(graph, pdom) {
 	if(graph) {
 		if(typeof graph === 'string') {
 			$(pdom).html(graph);
@@ -43,13 +65,155 @@ function renderTable(graph, pdom) {
 	}
 }
 
-function showGraph(){
-	var graph = {"childs": ["<h1>test1</h1>", "test2", "test3"]};
-	renderTable(graph, $('#content'));
+function painMatrix(matrix) {
+	var pained = {};
+	var table = $('<table></table>');
+	for(var i = 0; i < matrix.rows; i++) {
+		row = $("<tr></tr>");
+		for(var j = 0; j < matrix.cols; j++) {
+			var key = "{0}:{1}".format(i, j);
+			if(!pained[key]) {
+				var o = matrix.get(i, j);
+				pained[key] = o;
+
+				var col;
+				if(typeof o === 'string') {
+					col = $("<td></td>").html(o);
+				} else if(o["rowSpan"] && o.rowSpan > 1) {
+					col = $("<td></td>").attr("rowSpan", o.rowSpan).html(o.html);
+					for(var n = 1; n < o.rowSpan; n++) {
+						key = "{0}:{1}".format((i+n), j);
+						pained[key] = o;
+					}
+				} else if(o.colSpan && o.colSpan > 1) {
+					col = $("<td></td>").attr("colSpan", o.colSpan).html(o.html);
+					for(var n = 1; n < o.colSpan; n++) {
+						key = "{0}:{1}".format(i, (j+n));
+						pained[key] = o;
+					}
+				} else {
+					col = $("<td></td>").html(o.html);
+				}
+				row.append(col);
+			}
+		}
+
+		table.append(row);
+	}
+
+	return table;
 }
 
-$("#btnShow").click(showGraph);
-$(document).ready(showGraph);
+function Matrix(cols) {
+	this.rows = 0;
+	this.cols = cols;
+	this.matrix = [];
+}
+Matrix.prototype.newRow = function() {
+	var self = this;
+	var matrix = [];
+	for(var j = 0; j < self.cols; j++) {
+		matrix[j] = undefined;
+	}
+	self.matrix[self.rows] = matrix;
+	++self.rows;
+}
+Matrix.prototype.get = function(i, j) {
+	return this.matrix[i][j];
+}
+Matrix.prototype.set = function(i, j, o) {
+	var self = this;
+	if(i >= self.rows) {
+		for(var n = self.rows; n <= i; n++) {
+			self.newRow();
+		}
+	}
+
+	this.matrix[i][j] = o;
+}
+Matrix.prototype.append = function(matrix) {
+	var self = this;
+	var row = self.rows;
+	var oldRow = matrix.rows;
+	for(var n = 0; n < oldRow; n++) {
+		self.newRow();
+	}
+	for(var i = 0; i < oldRow; i++) {
+		for(var j = 0; j < self.cols; j++) {
+			this.matrix[row + i][j] = matrix.get(i,j);
+		}
+	}
+}
+
+function showGraph2(){
+//	var graph = {"childs": ["<h1>test1</h1>", "test2", "test3"]};
+	var matrix = new Matrix(3,3);
+	matrix.set(0, 0, {'html':'abc', 'rowSpan': 2});
+	matrix.set(0, 1, 'testa');
+	matrix.set(1, 1, 'testb');
+	matrix.set(0, 2, 'testc');
+	matrix.set(1, 2, 'testd');
+	matrix.set(2, 0, {'html':'teste', 'colSpan': 3});
+	matrix.append(matrix);
+	$("#content").append(painMatrix(matrix));
+}
+
+function showGraph(json) {
+	var table = $("<table></table>");
+	var thead = $("<thead></thead>");
+	var tbody = $("<tbody></tbody>");
+
+	var tr0 = $("<tr></tr>");
+	tr0.append($("<th></th>"));
+    var th = $("<th></th>");
+    th.html("督办");
+	tr0.append(th);
+	for(var i = 0; i < json.nodes.length; i++) {
+        th = $("<th></th>");
+        th.html(json.nodes[i].nodeName);
+		tr0.append(th);
+	}
+	thead.append(tr0);
+	table.append(thead);
+
+    var tr1 = $("<tr></tr>");
+    tr1.append($("<td></td>").html(json.flowName));
+    tr1.append($("<td></td>"));
+	for(var i = 0; i < json.nodes.length; i++) {
+		tr1.append($("<td></td>"));
+	}
+    tbody.append(tr1);
+	table.append(tbody);
+    $("#content").append(table);
+}
+
+function graphRequest() {
+    $.ajax({
+        dataType: "json",
+        url: "/evh/admin/flow/getFlowGraphDetail",
+        data: {"flowId": 112},
+        success: function(json) {
+            showGraph(json.response);
+        }
+    });
+}
+
+function logon() {
+	var url = "/evh/user/logon";
+
+	$.ajax({
+		type: "POST",
+		url: url,
+		data: {"userIdentifier":"root", "password":"8d969eef6ecad3c29a3a629280e686cf0c3f5d5a86aff3ca12020c923adc6c92"},
+		success: function(data)
+		{
+			alert(data); // show response from the php script.
+		}
+	});
+}
+
+//$("#btnShow").click(logon());
+$(document).ready(graphRequest());
 
 </script>
 </body>

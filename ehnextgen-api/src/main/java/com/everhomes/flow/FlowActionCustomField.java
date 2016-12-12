@@ -17,6 +17,8 @@ public enum FlowActionCustomField {
     
     SCRIPT_ID("integral_tag1", "integralTag1", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG1),
     
+    REMIND_COUNT("integral_tag1", "integralTag1", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG1),
+    
     TRACKER_PROCESSOR("integral_tag1", "integralTag1", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG1),
     TRACKER_APLIER("integral_tag2", "integralTag2", Tables.EH_FLOW_ACTIONS.INTEGRAL_TAG2);
     
