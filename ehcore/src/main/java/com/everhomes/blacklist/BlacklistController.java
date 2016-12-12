@@ -7,6 +7,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.blacklist.*;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -17,7 +18,10 @@ import javax.validation.Valid;
 @RestController
 @RequestMapping("/blacklist")
 public class BlacklistController extends ControllerBase {
-    
+
+    @Autowired
+    private BlacklistService blacklistService;
+
     /**
      * <b>URL: /blacklist/listUserBlacklists</b>
      * <p>黑名单列表</p>
@@ -25,7 +29,7 @@ public class BlacklistController extends ControllerBase {
     @RequestMapping("listUserBlacklists")
     @RestReturn(value=ListUserBlacklistsResponse.class)
     public RestResponse listUserBlacklists(@Valid ListUserBlacklistsCommand cmd) {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(blacklistService.listUserBlacklists(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -38,7 +42,7 @@ public class BlacklistController extends ControllerBase {
     @RequestMapping("checkUserBlacklist")
     @RestReturn(value=UserBlacklistDTO.class)
     public RestResponse checkUserBlacklist(@Valid CheckUserBlacklistCommand cmd) {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(blacklistService.checkUserBlacklist(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -51,6 +55,7 @@ public class BlacklistController extends ControllerBase {
     @RequestMapping("addUserBlacklist")
     @RestReturn(value=String.class)
     public RestResponse addUserBlacklist(@Valid AddUserBlacklistCommand cmd) {
+        blacklistService.addUserBlacklist(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -64,6 +69,7 @@ public class BlacklistController extends ControllerBase {
     @RequestMapping("batchDeleteUserBlacklist")
     @RestReturn(value=String.class)
     public RestResponse batchDeleteUserBlacklist(@Valid BatchDeleteUserBlacklistCommand cmd) {
+        blacklistService.batchDeleteUserBlacklist(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -77,7 +83,7 @@ public class BlacklistController extends ControllerBase {
     @RequestMapping("listBlacklistPrivileges")
     @RestReturn(value=BlacklistPrivilegeDTO.class, collection = true)
     public RestResponse listBlacklistPrivileges() {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(blacklistService.listBlacklistPrivileges());
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -90,9 +96,11 @@ public class BlacklistController extends ControllerBase {
     @RequestMapping("listUserBlacklistPrivileges")
     @RestReturn(value=BlacklistPrivilegeDTO.class, collection = true)
     public RestResponse listUserBlacklistPrivileges(@Valid ListUserBlacklistPrivilegesCommand cmd) {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(blacklistService.listUserBlacklistPrivileges(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
+
+
 }

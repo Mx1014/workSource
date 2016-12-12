@@ -9,6 +9,8 @@ import com.everhomes.util.StringHelper;
  * <li>startTime: 开始时间</li>
  * <li>endTime: 结束时间</li>
  * <li>keywords: 关键字</li>
+ * <li>pageSize: 页数</li>
+ * <li>anchor: 瞄点</li>
  * </ul>
  */
 public class ListUserBlacklistsCommand {
@@ -22,6 +24,10 @@ public class ListUserBlacklistsCommand {
     private Long endTime;
 
     private String keywords;
+
+    private Integer pageSize;
+
+    private Long anchor;
 
     public String getOwnerType() {
         return ownerType;
@@ -61,6 +67,22 @@ public class ListUserBlacklistsCommand {
 
     public void setEndTime(Long endTime) {
         this.endTime = endTime;
+    }
+
+    public Integer getPageSize() {
+        return pageSize;
+    }
+
+    public void setPageSize(Integer pageSize) {
+        this.pageSize = pageSize;
+    }
+
+    public Long getAnchor() {
+        return anchor;
+    }
+
+    public void setAnchor(Long anchor) {
+        this.anchor = anchor;
     }
 
     @Override

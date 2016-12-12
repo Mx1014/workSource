@@ -1356,6 +1356,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				acl.setPrivilegeId(privilegeId);
 				acl.setRoleType(targetType);
 				acl.setScope(ownerType + ownerId + "." + scope);
+				acl.setNamespaceId(UserContext.getCurrentNamespaceId());
 				aclProvider.createAcl(acl);
 			}
 		}else{
@@ -1904,6 +1905,28 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 
 	}
+
+	@Override
+	public List<Privilege> listPrivilegesByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String scope){
+		List<Privilege> privileges = new ArrayList<>();
+		AclRoleDescriptor descriptor = new AclRoleDescriptor(targetType, targetId);
+		List<Acl> acls = aclProvider.getResourceAclByRole(ownerType,ownerId, descriptor);
+		for (Acl acl: acls) {
+			if(!StringUtils.isEmpty(scope)){
+				String s = ownerType + ownerId + "." + scope;
+				if(acl.getScope().equals(s)){
+					Privilege privilege = aclProvider.getPrivilegeById(acl.getPrivilegeId());
+					privileges.add(privilege);
+				}
+			}else{
+				Privilege privilege = aclProvider.getPrivilegeById(acl.getPrivilegeId());
+				privileges.add(privilege);
+			}
+
+		}
+		return privileges;
+	}
+
 
 	/**
 	 * 删除权限
