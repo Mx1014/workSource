@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.rest.openapi.jindi;
 
+import java.sql.Timestamp;
+
 /**
  * 
  * <ul>金地同步数据的活动数据
@@ -9,18 +11,17 @@ package com.everhomes.rest.openapi.jindi;
  */
 public class JindiActionActivityDTO extends JindiDataDTO {
 	private Long id;
-	private Long parentId;
 	private Long userId;
-	private Long communityId;
-	private String communityName;
-	private String content;
+	private String subject;
+	private Timestamp startTime;
+	private Byte status;
 
-	public Long getParentId() {
-		return parentId;
+	public Byte getStatus() {
+		return status;
 	}
 
-	public void setParentId(Long parentId) {
-		this.parentId = parentId;
+	public void setStatus(Byte status) {
+		this.status = status;
 	}
 
 	public Long getId() {
@@ -39,28 +40,20 @@ public class JindiActionActivityDTO extends JindiDataDTO {
 		this.userId = userId;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getSubject() {
+		return subject;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setSubject(String subject) {
+		this.subject = subject;
 	}
 
-	public String getCommunityName() {
-		return communityName;
+	public Timestamp getStartTime() {
+		return startTime;
 	}
 
-	public void setCommunityName(String communityName) {
-		this.communityName = communityName;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
+	public void setStartTime(Timestamp startTime) {
+		this.startTime = startTime;
 	}
 
 }

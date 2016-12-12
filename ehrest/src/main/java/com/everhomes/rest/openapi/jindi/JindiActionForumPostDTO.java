@@ -13,6 +13,15 @@ public class JindiActionForumPostDTO extends JindiDataDTO {
 	private Long communityId;
 	private String communityName;
 	private String subject;
+	private Byte status;
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
 
 	public Long getId() {
 		return id;

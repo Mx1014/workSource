@@ -54,6 +54,7 @@ public class JindiOpenActionForumCommentHandler implements JindiOpenHandler {
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getUpdateTime());
 				data.setContent(src.getContent());
+				data.setStatus(src.getStatus());
 				
 				if (src.getVisibleRegionId() != null) {
 					Community community = communityProvider.findCommunityById(src.getVisibleRegionId());

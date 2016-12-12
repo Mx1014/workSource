@@ -949,7 +949,6 @@ public class ForumProviderImpl implements ForumProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> result = context.select(Tables.EH_FORUM_POSTS.fields()).from(Tables.EH_FORUM_POSTS)
 			.join(Tables.EH_USERS).on(Tables.EH_FORUM_POSTS.CREATOR_UID.eq(Tables.EH_USERS.ID)).and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
-			.where(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()))
 			.and(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L))
 			.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
 			.and(Tables.EH_FORUM_POSTS.UPDATE_TIME.eq(new Timestamp(timestamp)))
@@ -972,7 +971,6 @@ public class ForumProviderImpl implements ForumProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> result = context.select(Tables.EH_FORUM_POSTS.fields()).from(Tables.EH_FORUM_POSTS)
 			.join(Tables.EH_USERS).on(Tables.EH_FORUM_POSTS.CREATOR_UID.eq(Tables.EH_USERS.ID)).and(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
-			.where(Tables.EH_FORUM_POSTS.STATUS.eq(PostStatus.ACTIVE.getCode()))
 			.and(Tables.EH_FORUM_POSTS.PARENT_POST_ID.eq(0L))
 			.and(Tables.EH_FORUM_POSTS.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
 			.and(Tables.EH_FORUM_POSTS.UPDATE_TIME.gt(new Timestamp(timestamp)))
@@ -996,7 +994,6 @@ public class ForumProviderImpl implements ForumProvider {
 		Result<Record> result = context.select(t1.fields()).from(t1)
 			.join(t2).on(t1.CREATOR_UID.eq(t2.ID)).and(t2.NAMESPACE_ID.eq(namespaceId))
 			.join(t3).on(t1.PARENT_POST_ID.eq(t3.ID)).and(t3.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
-			.where(t1.STATUS.eq(PostStatus.ACTIVE.getCode()))
 			.and(t1.PARENT_POST_ID.ne(0L))
 			.and(t1.UPDATE_TIME.eq(new Timestamp(timestamp)))
 			.and(t1.ID.gt(pageAnchor))
@@ -1019,7 +1016,6 @@ public class ForumProviderImpl implements ForumProvider {
 		Result<Record> result = context.select(t1.fields()).from(t1)
 			.join(t2).on(t1.CREATOR_UID.eq(t2.ID)).and(t2.NAMESPACE_ID.eq(namespaceId))
 			.join(t3).on(t1.PARENT_POST_ID.eq(t3.ID)).and(t3.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
-			.where(t1.STATUS.eq(PostStatus.ACTIVE.getCode()))
 			.and(t1.PARENT_POST_ID.ne(0L))
 			.and(t1.UPDATE_TIME.gt(new Timestamp(timestamp)))
 			.orderBy(t1.UPDATE_TIME.asc(), t1.ID.asc())

@@ -152,6 +152,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     public void updateActivity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, activity.getId()));
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
+        activity.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(activity);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
     }
@@ -571,7 +572,18 @@ public class ActivityProviderImpl implements ActivityProivider {
 	 */
 	@Override
 	public List<Activity> listActivityByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITIES)
+			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITIES.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ACTIVITIES.UPDATE_TIME.asc(), Tables.EH_ACTIVITIES.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Activity.class));
+		}
+		return new ArrayList<Activity>();
 	}
 
 
