@@ -17,7 +17,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.servicehotline.AddHotlineCommand;
-import com.everhomes.rest.servicehotline.DeleteHotlineListCommand;
+import com.everhomes.rest.servicehotline.DeleteHotlineCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.GetHotlineSubjectCommand;
@@ -112,16 +112,14 @@ public class HotlineServiceImpl implements HotlineService {
 					public SelectQuery<? extends Record> buildCondition(
 							ListingLocator locator,
 							SelectQuery<? extends Record> query) {
-						query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_TYPE
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_TYPE
 								.eq(cmd.getOwnerType()));
-						query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.OWNER_ID
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.OWNER_ID
 								.eq(cmd.getOwnerId()));
-						query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAMESPACE_ID
-								.eq(UserContext.getCurrentNamespaceId()));
-						query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.NAME
-								.eq(HOTLINE_SCOPE));
-						query.addConditions(Tables.EH_SERVICE_CONFIGURATIONS.VALUE
-								.eq(cmd.getServiceType() + ""));
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.NAMESPACE_ID
+								.eq(UserContext.getCurrentNamespaceId())); 
+						query.addConditions(Tables.EH_SERVICE_HOTLINES.SERVICE_TYPE
+								.eq(cmd.getServiceType().intValue()));
 						return query;
 					}
 				}).forEach(r -> {
@@ -143,7 +141,7 @@ public class HotlineServiceImpl implements HotlineService {
 	}
 
 	@Override
-	public void deleteHotline(DeleteHotlineListCommand cmd) {
+	public void deleteHotline(DeleteHotlineCommand cmd) {
 
 		if (null == cmd
 				|| null == this.serviceHotlinesProvider

@@ -1,7 +1,7 @@
 package com.everhomes.techpark.servicehotline;
 
 import com.everhomes.rest.servicehotline.AddHotlineCommand;
-import com.everhomes.rest.servicehotline.DeleteHotlineListCommand;
+import com.everhomes.rest.servicehotline.DeleteHotlineCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.GetHotlineSubjectCommand;
@@ -18,7 +18,7 @@ public interface HotlineService {
 
 	void addHotline(AddHotlineCommand cmd);
 
-	void deleteHotline(DeleteHotlineListCommand cmd);
+	void deleteHotline(DeleteHotlineCommand cmd);
 
 	void updateHotline(UpdateHotlineCommand cmd);
 	

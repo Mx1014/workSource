@@ -13,7 +13,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.servicehotline.AddHotlineCommand;
-import com.everhomes.rest.servicehotline.DeleteHotlineListCommand;
+import com.everhomes.rest.servicehotline.DeleteHotlineCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.GetHotlineSubjectCommand;
@@ -94,7 +94,7 @@ public class ServiceHotlineController extends ControllerBase {
 	 */
 	@RequestMapping("deleteHotline")
 	@RestReturn(value = String.class)
-	public RestResponse deleteHotline(@Valid DeleteHotlineListCommand cmd) {
+	public RestResponse deleteHotline(@Valid DeleteHotlineCommand cmd) {
 		this.hotlineService.deleteHotline(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>   
  * </ul>
  */
-public class DeleteHotlineListCommand {
+public class DeleteHotlineCommand {
 	private Long id;  
 
 	@Override
