@@ -50,6 +50,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -84,6 +85,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         if (activity.getOfficialFlag() == null) {
 			activity.setOfficialFlag(OfficialFlag.NO.getCode());
 		}
+        activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
     }
@@ -538,6 +540,17 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         return ConvertHelper.convert(result, ActivityCategories.class);
     }
+
+	@Override
+	public List<Activity> listActivityByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		return null;
+	}
+
+	@Override
+	public List<Activity> listActivityByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		return null;
+	}
 
 
 }

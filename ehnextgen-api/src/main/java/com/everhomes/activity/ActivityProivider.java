@@ -49,4 +49,8 @@ public interface ActivityProivider {
 	List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId, CategoryAdminStatus status);
 
     ActivityCategories findActivityCategoriesById(Long id);
+
+	List<Activity> listActivityByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+	List<Activity> listActivityByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 }

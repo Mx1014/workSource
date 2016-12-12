@@ -3,11 +3,11 @@ package com.everhomes.rest.openapi.jindi;
 
 /**
  * 
- * <ul>金地同步数据的论坛评论数据
+ * <ul>金地同步数据的活动数据
  * <li>: </li>
  * </ul>
  */
-public class JindiActionForumCommentDTO extends JindiDataDTO {
+public class JindiActionActivityDTO extends JindiDataDTO {
 	private Long id;
 	private Long parentId;
 	private Long userId;
