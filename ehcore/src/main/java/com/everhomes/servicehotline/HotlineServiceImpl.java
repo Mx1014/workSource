@@ -98,7 +98,7 @@ public class HotlineServiceImpl implements HotlineService {
 			}
 			// 新增的类型在后面加,仿照专属客服
 		}
-		return null;
+		return response;
 	}
 
 	@Override
@@ -191,6 +191,7 @@ public class HotlineServiceImpl implements HotlineService {
 			obj.setNamespaceId(UserContext.getCurrentNamespaceId());
 			obj.setName(HOTLINE_SCOPE);
 			obj.setValue(cmd.getServiceType() + "");
+			obj.setDisplayName(cmd.getDisplayName());
 			serviceConfigurationsProvider.createServiceConfiguration(obj);
 			break;
 		case NONEED:

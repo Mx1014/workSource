@@ -25,6 +25,8 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class HotlineTest extends BaseLoginAuthTestCase {
+
+	private static final Integer NAMESPACEID = 0; 
 	
 	private static final String SET_HOTLINE_SUBJECT = "/hotline/setHotlineSubject";
 	private static final String DELETE_SA_CATEGORY_URI = "/yellowPage/deleteServiceAllianceCategory";
@@ -67,8 +69,8 @@ public class HotlineTest extends BaseLoginAuthTestCase {
 		cmd.setDefaultOrder(21);
 		cmd.setDescription("descdsfa");
 		cmd.setNamespaceId(0);
-		cmd.setOwnerId(321L);
-		cmd.setOwnerType("community");
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
 		cmd.setServiceType(2);
 		
 		addHotline(cmd);
@@ -128,10 +130,11 @@ public class HotlineTest extends BaseLoginAuthTestCase {
 		logon(null, userIdentifier, plainTexPassword);
 		SetHotlineSubjectCommand cmd1 = new SetHotlineSubjectCommand();
 		cmd1.setDisplayName("显示为1吧");
-		cmd1.setOwnerId(240111044331052507L);
-		cmd1.setOwnerType("community");
+		cmd1.setOwnerId(ownerId);
+		cmd1.setOwnerType(ownerType);
 		cmd1.setServiceType(ServiceType.ZHUANSHU_SERVICE.getCode().intValue());
 		cmd1.setSwitchFlag(NormalFlag.NEED.getCode());
+
 
 		RestResponseBase response = httpClientService.restPost(SET_HOTLINE_SUBJECT,
 				cmd1, RestResponseBase.class, context);
@@ -142,9 +145,8 @@ public class HotlineTest extends BaseLoginAuthTestCase {
 		
 		GetHotlineSubjectCommand cmd2 = new GetHotlineSubjectCommand();
 
-		cmd2.setOwnerType("community");
-		cmd2.setOwnerId(240111044331052507L);
-		
+		cmd2.setOwnerType(ownerType);
+		cmd2.setOwnerId(ownerId); 
 		GetHotlineSubjectRestResponse   response2 = httpClientService.restPost(GET_HOTLINE_SUBJECT,
 				cmd2, GetHotlineSubjectRestResponse.class, context);
 		assertNotNull("The reponse of may not be null", response2);
@@ -176,16 +178,15 @@ public class HotlineTest extends BaseLoginAuthTestCase {
 		
 		
 	}
-	 
 	public void addHotlineList(){
 		AddHotlineCommand cmd = new AddHotlineCommand();
 		cmd.setName("热线1");
 		cmd.setContact("110");
 		cmd.setDefaultOrder(21);
 		cmd.setDescription("备注");
-		cmd.setNamespaceId(999989);
-		cmd.setOwnerId(240111044331052507L);
-		cmd.setOwnerType("community");
+		cmd.setNamespaceId(NAMESPACEID);
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
 		cmd.setServiceType(ServiceType.SERVICE_HOTLINE.getCode().intValue());
 		addHotline(cmd);
 
@@ -211,8 +212,7 @@ public class HotlineTest extends BaseLoginAuthTestCase {
 	}
 	@Test
 	public void testHotlineList(){
-
-		Integer namespaceId = 0;
+ 
 		String userIdentifier = "root";
 		String plainTexPassword = "123456";
 		// 登录时不传namepsace，默认为左邻域空间
@@ -220,9 +220,8 @@ public class HotlineTest extends BaseLoginAuthTestCase {
 		
 		addHotlineList();
 		GetHotlineListCommand cmd = new GetHotlineListCommand();
-
-		cmd.setOwnerId(240111044331052507L);
-		cmd.setOwnerType("community");
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
 		cmd.setServiceType(ServiceType.ZHUANSHU_SERVICE.getCode());
 		GetHotlineListRestResponse   response2 = httpClientService.restPost(GET_HOTLINE_LIST,
 				cmd, GetHotlineListRestResponse.class, context);
