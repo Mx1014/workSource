@@ -9,6 +9,8 @@ public interface BlacklistErrorCode {
 
     int ERROR_USERBLACKLIST_EXISTS = 600010;
 
-    int ERROR_NOT_EXISTS = 600020;
+    int ERROR_USER_NOT_EXISTS = 600020;
+
+    int ERROR_FORBIDDEN_PERMISSIONS = 600000;
 
 }

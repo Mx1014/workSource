@@ -1060,6 +1060,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOrganizationAddressMappings.class, Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.max()).from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhUserBlacklists.class, Tables.EH_USER_BLACKLISTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_USER_BLACKLISTS.ID.max()).from(Tables.EH_USER_BLACKLISTS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

@@ -116,7 +116,7 @@ public class BlacklistServiceImpl implements BlacklistService{
 
 		if(null == userIdentifier){
 			LOGGER.error("user does not exist, contactToken ={},", cmd.getContactToken());
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_NOT_EXISTS,
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USER_NOT_EXISTS,
 					"user does not exist");
 		}
 
@@ -135,14 +135,14 @@ public class BlacklistServiceImpl implements BlacklistService{
 
 		if(null == user){
 			LOGGER.error("user does not exist, userId ={},", cmd.getUserId());
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_NOT_EXISTS,
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USER_NOT_EXISTS,
 					"user does not exist");
 		}
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
 		if(null == userIdentifier){
 			LOGGER.error("user does not exist, userId ={},", cmd.getUserId());
-			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_NOT_EXISTS,
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USER_NOT_EXISTS,
 					"user does not exist");
 		}
 

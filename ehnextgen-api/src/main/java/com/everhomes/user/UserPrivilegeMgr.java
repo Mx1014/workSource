@@ -56,4 +56,13 @@ public interface UserPrivilegeMgr {
      * @return
      */
     boolean checkRoleAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId);
+
+    /**
+     * 校验权限是否被禁止
+     * @param userId
+     * @param ownerType
+     * @param ownerId
+     * @param privilegeId
+     */
+    void checkUserBlacklistAuthority(Long userId, String ownerType, Long ownerId, Long privilegeId);
 }
