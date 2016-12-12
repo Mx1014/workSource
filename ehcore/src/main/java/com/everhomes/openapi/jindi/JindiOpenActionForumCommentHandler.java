@@ -9,7 +9,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.Post;
-import com.everhomes.rest.openapi.jindi.JindiActionForumPostDTO;
+import com.everhomes.rest.openapi.jindi.JindiActionForumCommentDTO;
 import com.everhomes.rest.openapi.jindi.JindiActionType;
 import com.everhomes.rest.openapi.jindi.JindiDataType;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
@@ -47,12 +47,13 @@ public class JindiOpenActionForumCommentHandler implements JindiOpenHandler {
 
 			@Override
 			public Object complementInfo(JindiFetchDataCommand cmd, Post src) {
-				JindiActionForumPostDTO data = new JindiActionForumPostDTO();
+				JindiActionForumCommentDTO data = new JindiActionForumCommentDTO();
 				data.setId(src.getId());
+				data.setParentId(src.getParentPostId());
 				data.setUserId(src.getCreatorUid());
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getUpdateTime());
-				data.setSubject(src.getSubject());
+				data.setContent(src.getContent());
 				
 				if (src.getVisibleRegionId() != null) {
 					Community community = communityProvider.findCommunityById(src.getVisibleRegionId());

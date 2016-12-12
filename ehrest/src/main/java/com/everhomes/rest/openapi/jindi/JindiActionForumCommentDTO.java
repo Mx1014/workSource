@@ -9,10 +9,19 @@ package com.everhomes.rest.openapi.jindi;
  */
 public class JindiActionForumCommentDTO extends JindiDataDTO {
 	private Long id;
+	private Long parentId;
 	private Long userId;
 	private Long communityId;
 	private String communityName;
-	private String subject;
+	private String content;
+
+	public Long getParentId() {
+		return parentId;
+	}
+
+	public void setParentId(Long parentId) {
+		this.parentId = parentId;
+	}
 
 	public Long getId() {
 		return id;
@@ -46,12 +55,12 @@ public class JindiActionForumCommentDTO extends JindiDataDTO {
 		this.communityName = communityName;
 	}
 
-	public String getSubject() {
-		return subject;
+	public String getContent() {
+		return content;
 	}
 
-	public void setSubject(String subject) {
-		this.subject = subject;
+	public void setContent(String content) {
+		this.content = content;
 	}
 
 }

@@ -985,6 +985,52 @@ public class ForumProviderImpl implements ForumProvider {
 		}
 		return new ArrayList<Post>();
 	}
+
+	@Override
+	public List<Post> listForumCommentByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhForumPosts t1 = Tables.EH_FORUM_POSTS.as("t1");
+		com.everhomes.server.schema.tables.EhUsers t2 = Tables.EH_USERS.as("t2");
+		com.everhomes.server.schema.tables.EhForumPosts t3 = Tables.EH_FORUM_POSTS.as("t3");
+		Result<Record> result = context.select(t1.fields()).from(t1)
+			.join(t2).on(t1.CREATOR_UID.eq(t2.ID)).and(t2.NAMESPACE_ID.eq(namespaceId))
+			.join(t3).on(t1.PARENT_POST_ID.eq(t3.ID)).and(t3.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.where(t1.STATUS.eq(PostStatus.ACTIVE.getCode()))
+			.and(t1.PARENT_POST_ID.ne(0L))
+			.and(t1.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(t1.ID.gt(pageAnchor))
+			.orderBy(t1.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
+
+	@Override
+	public List<Post> listForumCommentByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		com.everhomes.server.schema.tables.EhForumPosts t1 = Tables.EH_FORUM_POSTS.as("t1");
+		com.everhomes.server.schema.tables.EhUsers t2 = Tables.EH_USERS.as("t2");
+		com.everhomes.server.schema.tables.EhForumPosts t3 = Tables.EH_FORUM_POSTS.as("t3");
+		Result<Record> result = context.select(t1.fields()).from(t1)
+			.join(t2).on(t1.CREATOR_UID.eq(t2.ID)).and(t2.NAMESPACE_ID.eq(namespaceId))
+			.join(t3).on(t1.PARENT_POST_ID.eq(t3.ID)).and(t3.EMBEDDED_APP_ID.eq(AppConstants.APPID_DEFAULT))
+			.where(t1.STATUS.eq(PostStatus.ACTIVE.getCode()))
+			.and(t1.PARENT_POST_ID.ne(0L))
+			.and(t1.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(t1.UPDATE_TIME.asc(), t1.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, Post.class));
+		}
+		return new ArrayList<Post>();
+	}
 	
 	
  }

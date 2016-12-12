@@ -278,4 +278,8 @@ public interface ForumProvider {
 	List<Post> listForumPostByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 
 	List<Post> listForumPostByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+	List<Post> listForumCommentByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+	List<Post> listForumCommentByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 }
