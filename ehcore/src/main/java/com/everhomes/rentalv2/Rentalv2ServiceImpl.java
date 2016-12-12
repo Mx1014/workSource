@@ -1215,22 +1215,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return rSiteDTO;
 	}
 	
-
+	private boolean isInteger(BigDecimal b){
+		if(new BigDecimal(b.intValue()).compareTo(b)==0){
+			return true;
+		}else{
+			return false;
+		}
+	}
 	private boolean isInteger(double d){
 		double eps = 0.0001;
 		return Math.abs(d - (double)((int)d)) < eps;
 	}
 	private String priceToString(BigDecimal price, Byte rentalType, Double timeStep) {
+		String priceString = isInteger(price)? String.valueOf(price.intValue()): price.toString() ;
 		if(price.compareTo(new BigDecimal(0)) == 0)
 			return "免费";
 		if(rentalType.equals(RentalType.DAY.getCode()))
-			return "￥"+price.toString()+"/天";
+			return "￥"+ priceString +"/天";
 		if(rentalType.equals(RentalType.HALFDAY.getCode()))
-			return "￥"+price.toString()+"/半天";
+			return "￥"+ priceString +"/半天";
 		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
-			return "￥"+price.toString()+"/半天";
+			return "￥"+ priceString +"/半天";
 		if(rentalType.equals(RentalType.HOUR.getCode()))
-			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
+			return "￥"+ priceString +"/"+(isInteger(timeStep.doubleValue())?String.valueOf(timeStep.intValue()):timeStep)+"小时";
 		return "";
 	}
  
