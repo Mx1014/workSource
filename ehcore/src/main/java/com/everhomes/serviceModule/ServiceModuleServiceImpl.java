@@ -32,8 +32,8 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), 
-				cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
+		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, EntityType.NAMESPACE.getCode(), 
+				Long.valueOf(namespaceId), ServiceModuleScopeApplyPolicy.REVERT.getCode());
 		
 		List<ServiceModule> list = serviceModuleProvider.listServiceModule(cmd.getLevel(), ServiceModuleType.PARK.getCode());
 		if(scopes.size() != 0)
