@@ -1237,7 +1237,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(rentalType.equals(RentalType.THREETIMEADAY.getCode()))
 			return "￥"+ priceString +"/半天";
 		if(rentalType.equals(RentalType.HOUR.getCode()))
-			return "￥"+ priceString +"/"+(isInteger(timeStep.doubleValue())?String.valueOf(timeStep.intValue()):timeStep)+"小时";
+			return "￥"+ priceString +"/"+(isInteger(timeStep.doubleValue())?String.valueOf(timeStep.intValue()).equals("1")?"":String.valueOf(timeStep.intValue()):timeStep)+"小时";
 		return "";
 	}
  
