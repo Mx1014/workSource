@@ -53,6 +53,7 @@ import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
+import com.everhomes.rest.parking.SurplusCardCountDTO;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -341,6 +342,22 @@ public class ParkingController extends ControllerBase {
     public RestResponse gettParkingRequestCardConfig(GettParkingRequestCardConfigCommand cmd) {
 
     	ParkingRequestCardConfigDTO dto = parkingService.gettParkingRequestCardConfig(cmd);
+
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/gettSurplusCardCount</b>
+     * <p>获取剩余月考数</p>
+     */
+    @RequestMapping("gettSurplusCardCount")
+    @RestReturn(value=SurplusCardCountDTO.class)
+    public RestResponse gettSurplusCardCount(GettParkingRequestCardConfigCommand cmd) {
+
+    	SurplusCardCountDTO dto = parkingService.gettSurplusCardCount(cmd);
 
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -269,30 +269,33 @@ public class ParkingProviderImpl implements ParkingProvider {
     
     @Override
     public List<ParkingCardRequest> listParkingCardRequests(Long userId, String ownerType, Long ownerId,
-    		Long parkingLotId, String plateNumber, Byte requestStatus, Byte unRequestStatus, Long pageAnchor, Integer pageSize){
+    		Long parkingLotId, String plateNumber, Byte requestStatus, Byte unRequestStatus, Long flowId, 
+    		Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCardRequests.class));
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
-        if(userId != null)
+        if(null != userId)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.REQUESTOR_UID.eq(userId));
-        if (pageAnchor != null && pageAnchor != 0)
+        if(null != pageAnchor && pageAnchor != 0)
 			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
-        if(ownerId != null)
+        if(null != ownerId)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.eq(ownerId));
-        if(parkingLotId != null)
+        if(null != parkingLotId)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
         if(StringUtils.isNotBlank(plateNumber))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
-        if(requestStatus != null)
+        if(null != requestStatus)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(requestStatus));
-        if(unRequestStatus != null)
-        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.notEqual(unRequestStatus));
+        if(null != unRequestStatus)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.STATUS.ne(unRequestStatus));
+        if(null != flowId)
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID.eq(flowId));
 
         query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc());
-        if(pageSize != null)
+        if(null != pageSize)
         	query.addLimit(pageSize);
         
         List<ParkingCardRequest> resultList = query.fetch().map(r -> ConvertHelper.convert(r, ParkingCardRequest.class));
@@ -747,5 +750,32 @@ public class ParkingProviderImpl implements ParkingProvider {
         List<ParkingAttachment> result = query.fetch().map(r -> ConvertHelper.convert(r, ParkingAttachment.class));
         
         return result;
+	}
+	
+	@Override
+	public Integer countParkingCardRequest(String ownerType, Long ownerId, Long parkingLotId, Long flowId, Byte geStatus, Byte status) {
+        //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
+        final Integer[] count = new Integer[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingCardRequests.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                	
+                	SelectJoinStep<Record1<Integer>> query = context.selectCount()
+                			.from(Tables.EH_PARKING_CARD_REQUESTS);
+                	
+                	Condition condition = Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.equal(ownerType);
+                	condition = Tables.EH_PARKING_CARD_REQUESTS.OWNER_ID.equal(ownerId);
+                	if(null != geStatus)
+                		condition = Tables.EH_PARKING_CARD_REQUESTS.STATUS.ge(geStatus);
+                	if(null != status)
+                		condition = Tables.EH_PARKING_CARD_REQUESTS.STATUS.eq(status);
+                	if(null != parkingLotId)
+                    	condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.PARKING_LOT_ID.eq(parkingLotId));
+                	if(null != flowId)
+                    	condition = condition.and(Tables.EH_PARKING_CARD_REQUESTS.FLOW_ID.eq(flowId));
+
+                    count[0] = query.where(condition).fetchOneInto(Integer.class);
+                    return true;
+                });
+		return count[0];
 	}
 }

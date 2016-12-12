@@ -14,4 +14,11 @@ public interface ParkingErrorCode {
     static final int ERROR_TEMP_FEE = 10010;  //费用已过期
     
     static final int ERROR_MAX_REQUEST_NUM = 10011;  //抱歉，你申请的月卡数量已到上限
+    
+    static final int ERROR_ISSUE_CARD_SURPLUS_NUM = 10012;  //发放月卡资格数量不可大于当前剩余月卡数
+
+    static final int ERROR_ISSUE_CARD_QUEQUE_NUM = 10013;  //发放月卡资格数量不可大于当前排队数
+
+    static final int ERROR_ISSUE_CARD = 10014;  //操作失败，当前无剩余月卡
+    
 }

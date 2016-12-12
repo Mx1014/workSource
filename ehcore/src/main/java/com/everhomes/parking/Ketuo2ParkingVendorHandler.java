@@ -529,12 +529,13 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
+		String cardType = "2";
 		if(null != cardInfo) {
-			String cardType = cardInfo.getCarType();
-			for(KetuoCardRate rate: getCardRule(cardType)) {
-				if(rate.getRuleId().equals(order.getRateToken())) {
-					ketuoCardRate = rate;
-				}
+			cardType = cardInfo.getCarType();
+		}
+		for(KetuoCardRate rate: getCardRule(cardType)) {
+			if(rate.getRuleId().equals(order.getRateToken())) {
+				ketuoCardRate = rate;
 			}
 		}
 		if(null == ketuoCardRate) {
@@ -617,12 +618,32 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		
 		OpenCardInfoDTO dto = new OpenCardInfoDTO();
 		
-		List<ParkingRechargeRateDTO> rates = getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), 
-				cmd.getParkingLotId(), "B5720Z", null);
+//		List<ParkingRechargeRateDTO> rates = getParkingRechargeRates(cmd.getOwnerType(), cmd.getOwnerId(), 
+//				cmd.getParkingLotId(), "B5720Z", null);
+		List<KetuoCardRate> rates = getCardRule("2");
 		if(rates.size() !=0) {
-			dto = ConvertHelper.convert(rates.get(0), OpenCardInfoDTO.class);
+			KetuoCardRate rate = rates.get(0);
+			
+			dto.setOwnerId(cmd.getOwnerId());
+			dto.setOwnerType(cmd.getOwnerType());
+			dto.setParkingLotId(cmd.getParkingLotId());
+			dto.setRateToken(rate.getRuleId());
+			Map<String, Object> map = new HashMap<String, Object>();
+		    map.put("count", rate.getRuleAmount());
+			String scope = ParkingNotificationTemplateCode.SCOPE;
+			int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
+			String locale = "zh_CN";
+			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+//			dto.setRateName(r.getRuleName());
+			dto.setRateName(rateName);
+//			dto.setCardType(r.getRuleType());
+			dto.setCardType(rate.getTypeName());
+			dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
+			dto.setPrice(new BigDecimal(Integer.parseInt(rate.getRuleMoney()) / 100));
+
 		}
-		dto.setCardNumber("123");
+		
+//		dto.setCardNumber("123");
 		dto.setPlateNumber(cmd.getPlateNumber());
 		Long now = System.currentTimeMillis();
 		dto.setOpenDate(now);

@@ -13,12 +13,14 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowNode;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
@@ -28,8 +30,11 @@ import com.everhomes.rest.parking.ParkingAttachmentDTO;
 import com.everhomes.rest.parking.ParkingAttachmentType;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingFlowConstant;
+import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class ParkingFlowModuleListener implements FlowModuleListener {
@@ -38,15 +43,13 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private FlowService flowService;
 	@Autowired
+	private FlowProvider flowProvider;
+	@Autowired
     private ParkingProvider parkingProvider;
 	
 	private Long moduleId = ParkingFlowConstant.PARKING_RECHARGE_MODULE;
 	@Autowired
     private ContentServerService contentServerService;
-	
-	private static final Long INTELLIGENT = 21L;
-    private static final Long SEMI_AUTOMATIC = 19L;
-    private static final Long QUEQUE = 17L;
 	
 	@Override
 	public FlowModuleInfo initModule() {
@@ -123,6 +126,19 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		
 		ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
     	
+		if(null != parkingCardRequest.getCarSerieId()) {
+			ParkingCarSerie carSerie = parkingProvider.findParkingCarSerie(parkingCardRequest.getCarSerieId());
+			if(null != carSerie) {
+    			ParkingCarSerie secondCarSerie = parkingProvider.findParkingCarSerie(carSerie.getParentId());
+    			if(null != secondCarSerie) {
+    				ParkingCarSerie carBrand = parkingProvider.findParkingCarSerie(secondCarSerie.getParentId());
+    				dto.setCarSerieName(carSerie.getName());
+    				if(null != carBrand)
+    					dto.setCarBrand(carBrand.getName());
+    			}
+			}
+		}
+		
     	List<ParkingAttachment> attachments = parkingProvider.listParkingAttachments(parkingCardRequest.getId(), 
     			ParkingAttachmentType.PARKING_CARD_REQUEST.getCode());
     	
@@ -177,11 +193,27 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		
 		Long flowId = flowNode.getFlowMainId();
 		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		String tag1 = flow.getStringTag1();
 		
 		long now = System.currentTimeMillis();
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if("QUEUEING".equals(param)) {
-				if(flowId == QUEQUE) {
+				
+				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
+						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
+				Integer requestedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(), 
+						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
+						ParkingCardRequestStatus.SUCCEED.getCode(), null);
+				
+				Integer totalCount = parkingFlow.getMaxRequestNum();
+				Integer surplusCount = totalCount - requestedCount;
+				if(surplusCount <= 0) {
+					LOGGER.error("surplusCount is 0.");
+		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
+		    				"surplusCount is 0.");
+				}
+				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
 					parkingCardRequest.setIssueTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
@@ -191,7 +223,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
 			}else if("PROCESSING".equals(param)) {
-				if(flowId == QUEQUE) {
+				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);

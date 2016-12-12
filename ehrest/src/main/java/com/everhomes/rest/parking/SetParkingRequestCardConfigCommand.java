@@ -12,7 +12,7 @@ public class SetParkingRequestCardConfigCommand {
 	@NotNull
     private Long parkingLotId;
 	@NotNull
-	private Integer flowId;
+	private Long flowId;
     private Integer requestMonthCount;
     private Byte requestRechargeType;
     
@@ -44,10 +44,10 @@ public class SetParkingRequestCardConfigCommand {
 	public void setParkingLotId(Long parkingLotId) {
 		this.parkingLotId = parkingLotId;
 	}
-	public Integer getFlowId() {
+	public Long getFlowId() {
 		return flowId;
 	}
-	public void setFlowId(Integer flowId) {
+	public void setFlowId(Long flowId) {
 		this.flowId = flowId;
 	}
 	public Integer getRequestMonthCount() {

@@ -35,20 +35,15 @@ public class Test {
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
 	private static final String RULE_TYPE = "1"; //只显示ruleType = 1时的充值项
 	
-	private static final String TTT = "/api/card/AddCarCardNo";
 
 	
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
-		param.put("appId", "100");
 		
-		param.put("parkId", "1");
-		param.put("plateNo", "B12345");
-		param.put("money", "500");
-		
-		String key = stringMD5("1001B12345500");
-			param.put("key", key);
-		String json = Test.post(param, GET_CARD);
+//		param.put("plateNo", "B12345");
+//		param.put("money", "500");
+		param.put("carType", "2");
+		String json = Test.post(param, GET_CARd_RULE);
         System.out.println(json);
         
 //        JSONObject param2 = new JSONObject();
@@ -73,7 +68,7 @@ public class Test {
 		StringBuilder result = new StringBuilder();
 		
         String key = "F7A0B971B199FD2A1017CEC5";
-        String iv = "20161207";
+        String iv = "20161212";
         String user = "ktapi";
         String pwd = "0306A9";
         String data = null;

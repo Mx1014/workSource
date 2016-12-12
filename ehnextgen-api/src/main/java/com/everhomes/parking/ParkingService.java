@@ -45,6 +45,7 @@ import com.everhomes.rest.parking.SetParkingActivityCommand;
 import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
+import com.everhomes.rest.parking.SurplusCardCountDTO;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
@@ -101,4 +102,6 @@ public interface ParkingService {
     void issueParkingCards(IssueParkingCardsCommand cmd);
     
     OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
+    
+    SurplusCardCountDTO gettSurplusCardCount(GettParkingRequestCardConfigCommand cmd);
 }

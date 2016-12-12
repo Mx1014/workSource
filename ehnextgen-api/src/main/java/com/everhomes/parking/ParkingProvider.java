@@ -24,7 +24,7 @@ public interface ParkingProvider {
     void requestParkingCard(ParkingCardRequest parkingCardRequest);
     
     List<ParkingCardRequest> listParkingCardRequests(Long userId, String ownerType, Long ownerId, Long parkingLotId,
-    		String plateNumber, Byte requestStatus, Byte unRequestStatus, Long pageAnchor, Integer pageSize);
+    		String plateNumber, Byte requestStatus, Byte unRequestStatus, Long flowId, Long pageAnchor, Integer pageSize);
     
     List<ParkingCardRequest> listParkingCardRequests(Long userId, String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String order, Long pageAnchor, Integer pageSize);
@@ -91,4 +91,6 @@ public interface ParkingProvider {
     List<ParkingAttachment> listParkingAttachments(Long ownerId, String ownerType);
     
     void updateParkingCardRequest(ParkingCardRequest parkingCardRequest);
+    
+    Integer countParkingCardRequest(String ownerType, Long ownerId, Long parkingLotId, Long flowId, Byte geStatus, Byte status);
 }
