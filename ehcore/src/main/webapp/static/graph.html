@@ -64,14 +64,20 @@ function renderTable2(graph, pdom) {
 	}
 }
 
-function painMatrix(matrix, cls) {
+function painMatrix(matrix, tbTxt, cls) {
 	var pained = {};
-    var table;
-    if(cls) {
-        table = $('<table></table>').addClass(cls);
+   var table;
+   var tableTxt = "<table></table>";
+   if(tbTxt) {
+   	tableTxt = tbTxt;
+   }
+   
+   if(cls) {
+        table = $(tableTxt).addClass(cls);
     } else {
-        table = $('<table></table>');
+        table = $(tableTxt);
     }
+    
 	for(var i = 0; i < matrix.rows; i++) {
 		row = $("<tr></tr>");
 		for(var j = 0; j < matrix.cols; j++) {
@@ -285,10 +291,27 @@ function renderNode(node) {
     return painMatrix(matrix, "tbinner");
 }
 
+function nodeMatrix(node) {
+    var matrix = new Matrix(4);
+
+    matrix.set(0, 0, "处理人员");
+    matrix.set(0, 1, {"html": selectionsToText(node.processors), "colSpan": 3});
+
+    matrix.set(1, 0, {"html": "消息提醒", "rowSpan": 8});
+    matrix.append(actionMatrix(node.reminder), 1, 1);
+
+    var start = matrix.rows;
+    for(var i = 0; i < node.processButtons.length; i++) {
+        matrix.append(btnMatrix(node.processButtons[i]), start, 0);
+        start += 2;
+    }
+
+    return matrix;
+}
+
 function showGraph(json) {
 	var table = $("<table></table>").addClass("tbouter");
 	var thead = $("<thead></thead>");
-	var tbody = $("<tbody></tbody>");
 
 	var tr0 = $("<tr></tr>");
 	tr0.append($("<th></th>"));
@@ -296,22 +319,39 @@ function showGraph(json) {
     th.html("督办");
 	tr0.append(th);
 	for(var i = 0; i < json.nodes.length; i++) {
-        th = $("<th></th>");
+        th = $("<th></th>").attr("colSpan", 4);
         th.html(json.nodes[i].nodeName);
 		tr0.append(th);
 	}
 	thead.append(tr0);
 	table.append(thead);
 
-    var tr1 = $("<tr></tr>");
-    tr1.append($("<td></td>").html(json.flowName));
-    tr1.append($("<td></td>").html(selectionsToText(json.supervisors)));
+    var nodesMatrix = [];
+    var mRow = 0;
 	for(var i = 0; i < json.nodes.length; i++) {
-        var nodeTable = renderNode(json.nodes[i]);
-		tr1.append($("<td></td>").append(nodeTable));
+        var nodem = nodeMatrix(json.nodes[i]);
+        nodesMatrix.push(nodem);
+        if(mRow < nodem.rows) {
+        	mRow = nodem.rows;
+        }
 	}
-    tbody.append(tr1);
-	table.append(tbody);
+	
+	var graphMatrix = new Matrix(2+nodesMatrix.length*4);
+	graphMatrix.set(0, 0, {"html":json.flowName, "rowSpan": mRow});
+	graphMatrix.set(0, 1, {"html":selectionsToText(json.supervisors), "rowSpan": mRow});
+	var start = 2;
+	for(var i = 0; i < nodesMatrix.length; i++) {
+		graphMatrix.append(nodesMatrix[i], 0, start);
+		if(mRow > nodesMatrix[i].rows) {
+			for(var j = 0; j < 4; j++) {
+				graphMatrix.set(j, start + j, {"html":"", "rowSpan": (mRow - nodesMatrix[i].rows)});
+			}
+		}
+		
+		start += 4; 
+	}
+	
+    table.append(painMatrix(graphMatrix, "<tbody></tbody>"));
     $("#content").append(table);
 }
 
@@ -341,7 +381,7 @@ function logon() {
 }
 
 $("#btnShow").click(function () {
-    showGraph2();
+    logon();
 });
 $(document).ready(function() {
     graphRequest();
