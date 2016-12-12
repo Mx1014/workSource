@@ -131,7 +131,7 @@ CREATE TABLE `eh_service_module_assignments` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_launch_pad_items` CHANGE `target_id` `target_id` VARCHAR(64);
+ALTER TABLE `eh_launch_pad_items` CHANGE `target_id` `target_id` VARCHAR(64) COMMENT 'the entity id linked back to the orginal resource';
 
 
 
