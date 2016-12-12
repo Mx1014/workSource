@@ -11,6 +11,8 @@ import com.everhomes.server.schema.tables.daos.EhActivityCategoriesDao;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
 import org.slf4j.Logger;
@@ -30,6 +32,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
@@ -86,6 +89,7 @@ public class ActivityProviderImpl implements ActivityProivider {
 			activity.setOfficialFlag(OfficialFlag.NO.getCode());
 		}
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
     }
@@ -541,12 +545,30 @@ public class ActivityProviderImpl implements ActivityProivider {
         return ConvertHelper.convert(result, ActivityCategories.class);
     }
 
+	/**
+	 * 金地取数据使用
+	 */
 	@Override
 	public List<Activity> listActivityByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 			int pageSize) {
-		return null;
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITIES)
+			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITIES.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ACTIVITIES.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ACTIVITIES.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Activity.class));
+		}
+		return new ArrayList<Activity>();
 	}
 
+	/**
+	 * 金地取数据使用
+	 */
 	@Override
 	public List<Activity> listActivityByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
 		return null;
