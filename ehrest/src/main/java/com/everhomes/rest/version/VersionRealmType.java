@@ -87,7 +87,9 @@ public enum VersionRealmType {
     WEB_ZUOLIN("Web_Zuolin"),
     WEB_PARK("Web_Park"),
     ANDROID_QINGHUA("Android_Qinghua"),
-    IOS_QINGHUA("iOS_Qinghua");
+    IOS_QINGHUA("iOS_Qinghua"),
+    ANDROID_TSPACE("Android_Tspace"),
+    IOS_TSPACE("iOS_Tspace");
     
     private String code;
     private VersionRealmType(String code) {
