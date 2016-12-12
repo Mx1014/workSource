@@ -1,10 +1,16 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -33,6 +39,7 @@ import com.everhomes.rest.forum.NewTopicCommand;
 import com.everhomes.rest.forum.PostDTO;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.namespace.ListCommunityByNamespaceCommandResponse;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.ApplyForEnterpriseContactByEmailCommand;
 import com.everhomes.rest.organization.ApplyOrganizationMemberCommand;
 import com.everhomes.rest.organization.AssginOrgTopicCommand;
@@ -66,6 +73,7 @@ import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.ListUserTaskCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.organization.OrganizationTreeDTO;
@@ -85,6 +93,19 @@ import com.everhomes.rest.organization.UserJoinOrganizationCommand;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
+
+import java.util.List;
+
 import com.everhomes.util.RequireAuthentication;
 
 @RestController
@@ -283,7 +304,8 @@ public class OrganizationController extends ControllerBase {
 			/**
 			 * 校验权限
 			 */
-			rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
+//			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+//			resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.COMMUNITY.getCode(), cmd.getCommunityId(), cmd.getOrganizationId(), PrivilegeConstants.NoticeManagementPost);
 		}
 		ListPostCommandResponse  cmdResponse = organizationService.queryTopicsByCategory(cmd);
 		RestResponse response = new RestResponse(cmdResponse);
@@ -854,17 +876,14 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/verifyEnterpriseContact</b>
      * <p>通过点击邮箱认证通过认证申请</p>
      * @return {@link String}
+     * @throws IOException 
      */
     @RequestMapping("verifyEnterpriseContact")
     @RestReturn(value=String.class)
     @RequireAuthentication(false)
-    public RestResponse verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd) {
-    	this.organizationService.verifyEnterpriseContact(cmd);
-    	 RestResponse res = new RestResponse();
-         res.setErrorCode(ErrorCodes.SUCCESS);
-         res.setErrorDescription("OK");
-         
-         return res;
+    public void verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd,HttpServletRequest request, HttpServletResponse response) throws IOException {
+    	String redirectUrl = this.organizationService.verifyEnterpriseContact(cmd);
+    	response.sendRedirect(redirectUrl);  
     }
     /**
      * <b>URL: /org/leaveForEnterpriseContact</b>
@@ -1050,5 +1069,192 @@ public class OrganizationController extends ControllerBase {
 		return res;
 	}
 
+	/**
+	 * <b>URL: /org/createChildrenOrganizationJobPosition</b>
+	 * <p>创建子机构岗位</p>
+	 */
+	@RequestMapping("createChildrenOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse createChildrenOrganizationJobPosition(@Valid CreateOrganizationCommand cmd) {
+		organizationService.createChildrenOrganizationJobPosition(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateChildrenOrganizationJobPosition</b>
+	 * <p>修改子机构岗位</p>
+	 */
+	@RequestMapping("updateChildrenOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse updateChildrenOrganizationJobPosition(@Valid UpdateOrganizationsCommand cmd) {
+		organizationService.updateChildrenOrganizationJobPosition(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/deleteChildrenOrganizationJobPosition</b>
+	 * <p>删除子机构岗位</p>
+	 */
+	@RequestMapping("deleteChildrenOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse deleteChildrenOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
+		organizationService.deleteChildrenOrganizationJobPosition(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listChildrenOrganizationJobPositions</b>
+	 * <p>子机构岗位列表</p>
+	 */
+	@RequestMapping("listChildrenOrganizationJobPositions")
+	@RestReturn(value=ListChildrenOrganizationJobPositionResponse.class)
+	public RestResponse listChildrenOrganizationJobPositions(@Valid ListAllChildrenOrganizationsCommand cmd) {
+		ListChildrenOrganizationJobPositionResponse resp = organizationService.listChildrenOrganizationJobPositions(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/createOrganizationJobPosition</b>
+	 * <p>创建通用岗位</p>
+	 */
+	@RequestMapping("createOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse createOrganizationJobPosition(@Valid CreateOrganizationJobPositionCommand cmd) {
+		organizationService.createOrganizationJobPosition(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateOrganizationJobPosition</b>
+	 * <p>修改通用岗位</p>
+	 */
+	@RequestMapping("updateOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse updateOrganizationJobPosition(@Valid UpdateOrganizationJobPositionCommand cmd) {
+		organizationService.updateOrganizationJobPosition(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/deleteOrganizationJobPosition</b>
+	 * <p>删除通用岗位</p>
+	 */
+	@RequestMapping("deleteOrganizationJobPosition")
+	@RestReturn(value=String.class)
+	public RestResponse deleteOrganizationJobPosition(@Valid DeleteOrganizationIdCommand cmd) {
+		organizationService.deleteOrganizationJobPosition(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationJobPositions</b>
+	 * <p>通用岗位列表</p>
+	 */
+	@RequestMapping("listOrganizationJobPositions")
+	@RestReturn(value=ListOrganizationJobPositionResponse.class)
+	public RestResponse listOrganizationJobPositions(@Valid ListOrganizationJobPositionCommand cmd) {
+		ListOrganizationJobPositionResponse resp = organizationService.listOrganizationJobPositions(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
+	/**
+	 * <b>URL: /org/createChildrenOrganizationJobLevel</b>
+	 * <p>创建子机构职级</p>
+	 */
+	@RequestMapping("createChildrenOrganizationJobLevel")
+	@RestReturn(value=String.class)
+	public RestResponse createChildrenOrganizationJobLevel(@Valid CreateOrganizationCommand cmd) {
+		organizationService.createChildrenOrganizationJobLevel(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/updateChildrenOrganizationJobLevel</b>
+	 * <p>修改子机构职级</p>
+	 */
+	@RequestMapping("updateChildrenOrganizationJobLevel")
+	@RestReturn(value=String.class)
+	public RestResponse updateChildrenOrganizationJobLevel(@Valid UpdateOrganizationsCommand cmd) {
+		organizationService.updateChildrenOrganizationJobLevel(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/deleteChildrenOrganizationJobLevel</b>
+	 * <p>删除子机构职级</p>
+	 */
+	@RequestMapping("deleteChildrenOrganizationJobLevel")
+	@RestReturn(value=String.class)
+	public RestResponse deleteChildrenOrganizationJobLevel(@Valid DeleteOrganizationIdCommand cmd) {
+		organizationService.deleteChildrenOrganizationJobLevel(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/listChildrenOrganizationJobLevels</b>
+	 * <p>子机构职级列表</p>
+	 */
+	@RequestMapping("listChildrenOrganizationJobLevels")
+	@RestReturn(value=ListChildrenOrganizationJobLevelResponse.class)
+	public RestResponse listChildrenOrganizationJobLevels(@Valid ListAllChildrenOrganizationsCommand cmd) {
+		ListChildrenOrganizationJobLevelResponse resp = organizationService.listChildrenOrganizationJobLevels(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /org/getUserRelatedEnterprises</b>
+	 * <p>获取用户所属公司</p>
+	 */
+	@RequestMapping("getUserRelatedEnterprises")
+	@RestReturn(value=OrganizationDTO.class, collection = true)
+	public RestResponse getUserRelatedEnterprises(){
+		
+		User user = UserContext.current().getUser();
+		Integer namespaceId = UserContext.getCurrentNamespaceId(); 
+		
+		List<OrganizationDTO> enterpriseDtos = organizationService.listUserRelateOrganizations(namespaceId, user.getId(), OrganizationGroupType.ENTERPRISE);
+		
+		RestResponse res = new RestResponse(enterpriseDtos);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
 
 }

@@ -3801,6 +3801,7 @@ public class PunchServiceImpl implements PunchService {
 			
 			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypeList);
 			List<Long> orgIds = new ArrayList<Long>();
+			orgIds.add(org.getId());
 			for (Organization o : orgs){
 				orgIds.add(o.getId());
 			}
@@ -4201,12 +4202,15 @@ public class PunchServiceImpl implements PunchService {
 					organizationId,startDay,endDay , 
 					cmd.getArriveTimeCompareFlag(),convertTime(cmd.getArriveTime()), cmd.getLeaveTimeCompareFlag(),
 					convertTime(cmd.getLeaveTime()), cmd.getWorkTimeCompareFlag(),
-					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize );
+					convertTime(cmd.getWorkTime()),cmd.getExceptionStatus(), pageOffset, pageSize+1 );
 			
 			if (null == results)
 				return response;
-			Long nextPageAnchor = Long.valueOf(pageOffset+pageSize);
-			response.setNextPageAnchor(nextPageAnchor);
+			if(results.size() == pageSize+1){
+				results.remove(pageSize);
+				Long nextPageAnchor = Long.valueOf(pageOffset+pageSize);
+				response.setNextPageAnchor(nextPageAnchor);
+			}
 			
 			response.setPunchDayDetails(new ArrayList<PunchDayDetailDTO>());
 			for(PunchDayLog r : results){

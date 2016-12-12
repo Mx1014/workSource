@@ -37,8 +37,10 @@ public enum CoordinationLocks {
     UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update"),
     
     WARNING_ACTIVITY_SCHEDULE("warning.activity.schedule"),
+    CONTRACT_SCHEDULE("contract.schedule"),
 
-    PMTASK_STATISTICS("pmtask.statistics");
+    PMTASK_STATISTICS("pmtask.statistics"),
+    PMTASK_TARGET_STATISTICS("pmtask.target.statistics");
 
     private String code;
     private CoordinationLocks(String code) {

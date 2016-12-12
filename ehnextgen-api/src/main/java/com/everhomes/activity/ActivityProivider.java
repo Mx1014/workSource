@@ -7,6 +7,7 @@ import org.jooq.Condition;
 import org.jooq.Operator;
 
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.rest.category.CategoryAdminStatus;
 
 public interface ActivityProivider {
     Activity findActivityById(Long id);
@@ -44,5 +45,8 @@ public interface ActivityProivider {
     List<Activity> listNewActivities(CrossShardListingLocator locator, int count, Timestamp lastViewedTime, Condition condition);
 
 	List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime);
+	
+	List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId, CategoryAdminStatus status);
 
+    ActivityCategories findActivityCategoriesById(Long id);
 }

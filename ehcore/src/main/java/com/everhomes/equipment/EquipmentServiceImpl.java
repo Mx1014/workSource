@@ -3172,7 +3172,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Category category = getEquipmentCategory(parentId);
 		path = category.getPath() + "/" + cmd.getName();
 		
-		category = categoryProvider.findCategoryByPath(namespaceId, path);
+		category = categoryProvider.findCategoryByNamespaceAndName(parentId, namespaceId, cmd.getName());
+//		category = categoryProvider.findCategoryByPath(namespaceId, path);
 		if(category != null) {
 			LOGGER.error("equipment category have been in existing");
 			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE, EquipmentServiceErrorCode.ERROR_CATEGORY_EXIST,

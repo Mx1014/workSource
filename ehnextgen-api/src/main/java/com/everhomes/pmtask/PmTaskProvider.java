@@ -25,7 +25,7 @@ public interface PmTaskProvider {
 	
 	void createTaskLog(PmTaskLog pmTaskLog);
 	
-	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status,
+	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Byte status, Long taskCategoryId,
 			Long pageAnchor, Integer pageSize);
 	
 	List<PmTask> listPmTask(String ownerType, Long ownerId, Long userId, Long pageAnchor, Integer pageSize);
@@ -43,7 +43,18 @@ public interface PmTaskProvider {
 	
 	Integer countTaskStatistics(Long ownerId, Long taskCategoryId, Timestamp dateStr);
 	
-	List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize);
+	List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Byte roleId, Long pageAnchor, Integer pageSize);
 	
-	PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId);
+	PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Byte roleId, String targetType, Long targetId);
+	
+	Integer countUserProccsingPmTask(String ownerType, Long ownerId, Long userId);
+	
+	List<PmTask> listPmTask(String ownerType, Long ownerId, Long taskCategoryId, Byte status);
+	
+	List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId, Long userId, Timestamp startDate, Timestamp endDate);
+	
+	void createTaskTargetStatistic(PmTaskTargetStatistic pmTaskTargetStatistic);
+	
+	List<PmTaskTargetStatistic> searchTaskTargetStatistics(Integer namespaceId, Long ownerId, Long taskCategoryId, Long userId, Timestamp dateStr,
+			Long pageAnchor, Integer pageSize);
 }

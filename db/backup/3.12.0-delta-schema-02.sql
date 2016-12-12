@@ -1,0 +1,22 @@
+ALTER TABLE `eh_acls` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_acls` ADD COLUMN `role_type` VARCHAR(32) COMMENT 'NULL: EhAclRole';
+ALTER TABLE `eh_acls` ADD COLUMN `scope` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag1` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag2` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag3` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag4` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag5` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag1` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag2` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag3` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag4` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag5` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_namespace_id`(`namespace_id`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_scope`(`scope`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_itag1`(`integral_tag1`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_itag2`(`integral_tag2`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_ctag1`(`comment_tag1`);
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_ctag2`(`comment_tag2`);
+
+ALTER TABLE `eh_acl_role_assignments` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries';
+ALTER TABLE `eh_acl_role_assignments` ADD INDEX `i_eh_acl_role_asgn_namespace_id`(`namespace_id`);

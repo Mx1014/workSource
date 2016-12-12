@@ -197,6 +197,13 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
 		}
         
         cmd.setVideoState(VideoState.UN_READY.getCode());
+        
+        cmd.setForumId(post.getForumId());
+        cmd.setCreatorTag(post.getCreatorTag());
+        cmd.setTargetTag(post.getTargetTag());
+        cmd.setVisibleRegionType(post.getVisibleRegionType());
+        cmd.setVisibleRegionId(post.getVisibleRegionId());
+        
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         
         return post;
@@ -209,6 +216,10 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
+            if(cmd.getCategoryId() == null) {
+            	cmd.setCategoryId(0L);
+            }
+            
             if(activityService.isPostIdExist(post.getId())){
             	activityService.updatePost(cmd, post.getId());
             }

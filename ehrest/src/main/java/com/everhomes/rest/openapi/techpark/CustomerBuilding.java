@@ -1,66 +1,84 @@
 package com.everhomes.rest.openapi.techpark;
 
-import java.math.BigDecimal;
-
 import com.everhomes.util.StringHelper;
 
 public class CustomerBuilding {
-    /** 楼栋名称 */
     private String buildingName;
-    
-    /** 门牌号（房间号） */
-    private String apartmentName;
-    
-    /** 面积，单位：平方米 */
-    private BigDecimal areaSize;
-    
-    /** 联系人 */
-    private String contact;
-    
-    /** 联系电话 */
-    private String contactPhone;
+    private String buildingNumber;
+    private String productType;
+    private String completeDate;
+    private String joininDate;
+    private String floorCount;
 
-    public String getBuildingName() {
-        return buildingName;
-    }
+    public CustomerBuilding() {
+		super();
+	}
 
-    public void setBuildingName(String buildingName) {
-        this.buildingName = buildingName;
-    }
+	public CustomerBuilding(String buildingName) {
+		super();
+		this.buildingName = buildingName;
+	}
 
-    public String getApartmentName() {
-        return apartmentName;
-    }
+	public CustomerBuilding(String buildingName, String buildingNumber, String productType, String completeDate,
+			String joininDate, String floorCount) {
+		super();
+		this.buildingName = buildingName;
+		this.buildingNumber = buildingNumber;
+		this.productType = productType;
+		this.completeDate = completeDate;
+		this.joininDate = joininDate;
+		this.floorCount = floorCount;
+	}
 
-    public void setApartmentName(String apartmentName) {
-        this.apartmentName = apartmentName;
-    }
+	public String getBuildingName() {
+		return buildingName;
+	}
 
-    public BigDecimal getAreaSize() {
-        return areaSize;
-    }
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
 
-    public void setAreaSize(BigDecimal areaSize) {
-        this.areaSize = areaSize;
-    }
+	public String getBuildingNumber() {
+		return buildingNumber;
+	}
 
-    public String getContact() {
-        return contact;
-    }
+	public void setBuildingNumber(String buildingNumber) {
+		this.buildingNumber = buildingNumber;
+	}
 
-    public void setContact(String contact) {
-        this.contact = contact;
-    }
+	public String getProductType() {
+		return productType;
+	}
 
-    public String getContactPhone() {
-        return contactPhone;
-    }
+	public void setProductType(String productType) {
+		this.productType = productType;
+	}
 
-    public void setContactPhone(String contactPhone) {
-        this.contactPhone = contactPhone;
-    }
+	public String getCompleteDate() {
+		return completeDate;
+	}
 
-    @Override
+	public void setCompleteDate(String completeDate) {
+		this.completeDate = completeDate;
+	}
+
+	public String getJoininDate() {
+		return joininDate;
+	}
+
+	public void setJoininDate(String joininDate) {
+		this.joininDate = joininDate;
+	}
+
+	public String getFloorCount() {
+		return floorCount;
+	}
+
+	public void setFloorCount(String floorCount) {
+		this.floorCount = floorCount;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }

@@ -1,7 +1,12 @@
 package com.everhomes.rest.enterprise;
 
 import com.everhomes.util.StringHelper;
-
+/**
+* <ul>  
+* <li>enterpriseId：企业Id</li>
+* <li>userId: 用户id </li> 
+* </ul>
+*/
 public class ApproveContactCommand {
     private Long enterpriseId;
     
