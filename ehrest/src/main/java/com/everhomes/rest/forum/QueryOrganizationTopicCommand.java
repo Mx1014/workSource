@@ -43,14 +43,6 @@ public class QueryOrganizationTopicCommand {
     public QueryOrganizationTopicCommand() {
     }
 
-    public Byte getOrderByCreateTime() {
-        return orderByCreateTime;
-    }
-
-    public void setOrderByCreateTime(Byte orderByCreateTime) {
-        this.orderByCreateTime = orderByCreateTime;
-    }
-
     public Long getCategoryId() {
 		return categoryId;
 	}
@@ -80,9 +72,15 @@ public class QueryOrganizationTopicCommand {
 		this.communityId = communityId;
 	}
 
+    public Byte getOrderByCreateTime() {
+        return orderByCreateTime;
+    }
 
+    public void setOrderByCreateTime(Byte orderByCreateTime) {
+        this.orderByCreateTime = orderByCreateTime;
+    }
 
-	public Long getOrganizationId() {
+    public Long getOrganizationId() {
         return organizationId;
     }
 
