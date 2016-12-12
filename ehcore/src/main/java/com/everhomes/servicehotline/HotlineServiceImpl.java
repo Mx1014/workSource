@@ -16,7 +16,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.rentalv2.NormalFlag;
-import com.everhomes.rest.servicehotline.AddHotlineListCommand;
+import com.everhomes.rest.servicehotline.AddHotlineCommand;
 import com.everhomes.rest.servicehotline.DeleteHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
@@ -135,7 +135,7 @@ public class HotlineServiceImpl implements HotlineService {
 	}
 
 	@Override
-	public void addHotlineList(AddHotlineListCommand cmd) {
+	public void addHotline(AddHotlineCommand cmd) {
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
 		this.serviceHotlinesProvider.createServiceHotline(hotline);

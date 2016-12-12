@@ -12,7 +12,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.servicehotline.AddHotlineListCommand;
+import com.everhomes.rest.servicehotline.AddHotlineCommand;
 import com.everhomes.rest.servicehotline.DeleteHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListCommand;
 import com.everhomes.rest.servicehotline.GetHotlineListResponse;
@@ -71,15 +71,15 @@ public class ServiceHotlineController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /hotline/addHotlineList</b>
+	 * <b>URL: /hotline/addHotline</b>
 	 * <p>
 	 * 添加热线
 	 * </p>
 	 */
-	@RequestMapping("addHotlineList")
+	@RequestMapping("addHotline")
 	@RestReturn(value = String.class)
-	public RestResponse addHotlineList(@Valid AddHotlineListCommand cmd) {
-		this.hotlineService.addHotlineList(cmd);
+	public RestResponse addHotline(@Valid AddHotlineCommand cmd) {
+		this.hotlineService.addHotline(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

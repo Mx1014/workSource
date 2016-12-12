@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  * <li>avatar: 头像</li>   
  * </ul>
  */
-public class AddHotlineListCommand { 
+public class AddHotlineCommand { 
     private Integer namespaceId;
     private String ownerType;
     private Long ownerId;
