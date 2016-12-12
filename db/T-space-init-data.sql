@@ -15,15 +15,15 @@ insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 	values(171,76,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999982, 'sms.default.yzx', 1, 'zh_CN', '验证码-清华信息港', '33739');
+	VALUES(999982, 'sms.default.yzx', 1, 'zh_CN', '验证码-清华天安', '33739');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999982, 'sms.default.yzx', 4, 'zh_CN', '派单-清华信息港', '33740');
+	VALUES(999982, 'sms.default.yzx', 4, 'zh_CN', '派单-清华天安', '33740');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999982, 'sms.default.yzx', 6, 'zh_CN', '任务2-清华信息港', '33742');
+	VALUES(999982, 'sms.default.yzx', 6, 'zh_CN', '任务2-清华天安', '33742');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('sms.default.yzx', '11', 'zh_CN', '物业任务-清华信息港', '33746', '999982');
+	VALUES ('sms.default.yzx', '11', 'zh_CN', '物业任务-清华天安', '33746', '999982');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('sms.default.yzx', '10', 'zh_CN', '物业任务2-清华信息港', '30897', '999982');
+	VALUES ('sms.default.yzx', '10', 'zh_CN', '物业任务2-清华天安', '30897', '999982');
 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (242845  , UUID(), '9203218', '张盛', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999982);
@@ -212,7 +212,7 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES (112821, 999982, '0', '0', '0', '/home', 'Bizs', 'CONTACTS', '通讯录', 'cs://1/image/aW1hZ2UvTVRveFpqQmlNVFF4WmpFNU5qUTNZalV5TVdRMU9UZ3pOakpsWlRSaE5qazFZUQ', '1', '1', '46', '', '0', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
-    VALUES (112822, 999982, '0', '0', '0', '/home', 'Gallery', 'OFFICIAL_ACTIVITY', '活动', 'cs://1/image/aW1hZ2UvTVRvd1lqWTRNbUUxTW1FeE4yVmxZMlJrT0RnMllUQmxOekpqT0dZM1lUSmlZUQ', '1', '1', '50', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
+    VALUES (112822, 999982, '0', '0', '0', '/home', 'Gallery', 'OFFICIAL_ACTIVITY', '活动', 'cs://1/image/aW1hZ2UvTVRvd1lqWTRNbUUxTW1FeE4yVmxZMlJrT0RnMllUQmxOekpqT0dZM1lUSmlZUQ', '1', '1', '50', NULL, '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (112823, 999982, '0', '0', '0', '/home', 'Gallery', 'CLUB', '俱乐部', 'cs://1/image/aW1hZ2UvTVRvd1pUUXlNVFF6TVRoaU1UazVOVEJoTlRsa016QTVPVEZqT1RZNFlUVXlZZw', '1', '1', '36', '{"privateFlag": 0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin');
 	
@@ -287,6 +287,7 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),11000,'', 'EhNamespaces', 999982,2);
 
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40000,'', 'EhNamespaces', 999982,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40200,'', 'EhNamespaces', 999982,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40210,'', 'EhNamespaces', 999982,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),40220,'', 'EhNamespaces', 999982,2);
