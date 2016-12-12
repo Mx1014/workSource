@@ -9,6 +9,8 @@ import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.contentserver.ContentServerProvider;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import org.elasticsearch.common.geo.GeoHashUtils;
@@ -2998,6 +3000,9 @@ public class ActivityServiceImpl implements ActivityService {
     public void createActivityAttachment(CreateActivityAttachmentCommand cmd) {
         ActivityAttachment attachment = ConvertHelper.convert(cmd, ActivityAttachment.class);
         attachment.setCreatorUid(UserContext.current().getUser().getId());
+        ContentServerResource resource = contentServerService.findResourceByUri(cmd.getContentUri());
+        Integer size = resource.getResourceSize();
+//        attachment.setFileSize(size);
         activityProvider.createActivityAttachment(attachment);
     }
 

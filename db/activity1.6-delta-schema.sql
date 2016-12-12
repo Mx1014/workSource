@@ -7,7 +7,7 @@ CREATE TABLE `eh_activity_attachments` (
 	`id` BIGINT NOT NULL COMMENT 'id of the record',
 	`activity_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id, e.g application_id',
     `name` VARCHAR(128),
-    `file_size` VARCHAR(128),
+    `file_size` INTEGER NOT NULL DEFAULT 0,
 	`content_type` VARCHAR(32) COMMENT 'attachment object content type',
 	`content_uri` VARCHAR(1024) COMMENT 'attachment object link info on storage',
     `download_count` INTEGER NOT NULL DEFAULT 0,

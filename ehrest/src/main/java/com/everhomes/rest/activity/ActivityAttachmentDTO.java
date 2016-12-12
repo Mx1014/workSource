@@ -1,6 +1,7 @@
 package com.everhomes.rest.activity;
 
 import com.everhomes.util.StringHelper;
+import com.sun.org.apache.xml.internal.security.algorithms.implementations.IntegrityHmac;
 
 import java.sql.Timestamp;
 
@@ -9,7 +10,7 @@ import java.sql.Timestamp;
  *     <li>id: 活动附件id</li>
  *     <li>activityId: 活动id</li>
  *     <li>name: 附件名</li>
- *     <li>fileSize: 附件大小</li>
+ *     <li>fileSize: 附件大小(单位为byte)</li>
  *     <li>contentType: 内容类型，参考{@link com.everhomes.rest.forum.PostContentType}</li>
  *     <li>contentUri: 内容uri</li>
  *     <li>contentUrl: 内容url</li>
@@ -27,7 +28,7 @@ public class ActivityAttachmentDTO {
 
     private String name;
 
-    private String fileSize;
+    private Integer fileSize;
 
     private String contentType;
 
@@ -67,11 +68,11 @@ public class ActivityAttachmentDTO {
         this.name = name;
     }
 
-    public String getFileSize() {
+    public Integer getFileSize() {
         return fileSize;
     }
 
-    public void setFileSize(String fileSize) {
+    public void setFileSize(Integer fileSize) {
         this.fileSize = fileSize;
     }
 
