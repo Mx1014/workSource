@@ -30,7 +30,8 @@ import com.everhomes.discover.ItemType;
 public class FlowCaseDTO {
     private Long     id;
     private Long     applyUserId;
-    private String applyUserName;
+    private String applierName;
+    private String applierPhone;
     private Long     flowMainId;
     private String     ownerType;
     private Long     referId;
@@ -70,12 +71,20 @@ public class FlowCaseDTO {
 		this.applyUserId = applyUserId;
 	}
 
-	public String getApplyUserName() {
-		return applyUserName;
+	public String getApplierName() {
+		return applierName;
 	}
 
-	public void setApplyUserName(String applyUserName) {
-		this.applyUserName = applyUserName;
+	public void setApplierName(String applierName) {
+		this.applierName = applierName;
+	}
+
+	public String getApplierPhone() {
+		return applierPhone;
+	}
+
+	public void setApplierPhone(String applierPhone) {
+		this.applierPhone = applierPhone;
 	}
 
 	public Long getFlowMainId() {

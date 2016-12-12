@@ -217,6 +217,8 @@ public interface FlowService {
 	 */
 	FlowButtonDTO disableFlowButton(DisableFlowButtonCommand cmd);
 
+	FlowButtonDTO enableFlowButton(Long buttonId);
+	
 	/**
 	 * 修改任务节点的消息提醒
 	 * @param cmd

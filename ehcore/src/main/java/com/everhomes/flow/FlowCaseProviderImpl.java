@@ -98,10 +98,11 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
             queryBuilderCallback.buildCondition(locator, query);
 
         if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));
+            query.addConditions(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
             }
 
         query.addLimit(count);
+        query.addOrderBy(Tables.EH_FLOW_CASES.ID.desc());
         List<FlowCase> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, FlowCase.class);
         });

@@ -131,16 +131,26 @@ Matrix.prototype.set = function(i, j, o) {
 
 	this.matrix[i][j] = o;
 }
-Matrix.prototype.append = function(matrix) {
+Matrix.prototype.append = function(matrix, posx, posy) {
 	var self = this;
 	var row = self.rows;
+    var col = self.cols;
 	var oldRow = matrix.rows;
-	for(var n = 0; n < oldRow; n++) {
+    var oldCol = matrix.cols;
+    if(!posx) {
+        posx = 0;
+    }
+    if(!posy) {
+        posy = 0;
+    }
+
+	for(var n = 0; n < (posx + oldRow-row); n++) {
 		self.newRow();
 	}
+
 	for(var i = 0; i < oldRow; i++) {
-		for(var j = 0; j < self.cols; j++) {
-			this.matrix[row + i][j] = matrix.get(i,j);
+		for(var j = 0; j < oldCol; j++) {
+			this.matrix[posx + i][posy + j] = matrix.get(i,j);
 		}
 	}
 }
@@ -154,8 +164,53 @@ function showGraph2(){
 	matrix.set(0, 2, 'testc');
 	matrix.set(1, 2, 'testd');
 	matrix.set(2, 0, {'html':'teste', 'colSpan': 3});
-	matrix.append(matrix);
-	$("#content").append(painMatrix(matrix));
+//	matrix.append(matrix);
+//	$("#content").append(painMatrix(matrix));
+
+//  $("#content").append(painMatrix(msgMatrix("")));
+//  $("#content").append(painMatrix(actionMatrix("")));
+//    $("#content").append(renderNode({"processors":[{"selectionName":"aaa"}]}));
+}
+
+function msgMatrix(msg) {
+    var matrix = new Matrix(2);
+    matrix.set(0, 0, {"html": "消息推送", "rowSpan": 2});
+    matrix.set(0, 1, "发送时机：超过8小时未处理时间隔：4小时");
+    matrix.set(1, 1, "发送给：用户A 内容：你有一条客户入驻流程待处理");
+    return matrix;
+}
+
+function actionMatrix(action) {
+    var matrix = new Matrix(3);
+    matrix.set(0, 0, {"html": "进入节点时", "rowSpan": 4});
+    matrix.append(msgMatrix(""), 0, 1);
+    matrix.append(msgMatrix(""), 2, 1);
+
+    matrix.set(4, 0, {"html": "间隔提醒", "rowSpan": 4});
+    matrix.append(msgMatrix(""), 4, 1);
+    matrix.append(msgMatrix(""), 6, 1);
+
+    return matrix;
+}
+
+function renderNode(node) {
+    var matrix = new Matrix(4);
+    var processor = "";
+    if(node.processors && node.processors.length > 0) {
+        processor = node.processors[0].selectionName;
+        for(var i = 1; i < node.processors.length; i++) {
+            processor = "," + node.processors[i].selectionName;
+        }
+    }
+
+    matrix.set(0, 0, "处理人员");
+    matrix.set(0, 1, {"html": processor, "colSpan": 3});
+
+    matrix.set(1, 0, {"html": "消息提醒", "rowSpan": 8});
+    matrix.append(actionMatrix(""), 1, 1);
+//    matrix.append(actionMatrix(""), 5, 1);
+
+    return painMatrix(matrix);
 }
 
 function showGraph(json) {
@@ -180,7 +235,8 @@ function showGraph(json) {
     tr1.append($("<td></td>").html(json.flowName));
     tr1.append($("<td></td>"));
 	for(var i = 0; i < json.nodes.length; i++) {
-		tr1.append($("<td></td>"));
+        var nodeTable = renderNode(json.nodes[i]);
+		tr1.append($("<td></td>").append(nodeTable));
 	}
     tbody.append(tr1);
 	table.append(tbody);
@@ -212,8 +268,12 @@ function logon() {
 	});
 }
 
-//$("#btnShow").click(logon());
-$(document).ready(graphRequest());
+$("#btnShow").click(function () {
+    showGraph2();
+});
+$(document).ready(function() {
+    graphRequest();
+});
 
 </script>
 </body>

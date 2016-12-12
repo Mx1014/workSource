@@ -199,7 +199,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	}
     	
     if(locator.getAnchor() != null) {
-    	cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.ID.gt(locator.getAnchor()));
+    	cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.ID.lt(locator.getAnchor()));
         }
     	
     	final List<FlowCaseDetail> objs = new ArrayList<FlowCaseDetail>();
@@ -207,7 +207,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 		.on(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(Tables.EH_FLOW_CASES.ID))
 		.join(Tables.EH_FLOWS)
     	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-    	.where(cond).limit(count).fetch().map((r)-> {
+    	.where(cond).orderBy(Tables.EH_FLOW_EVENT_LOGS.ID.desc()).limit(count).fetch().map((r)-> {
     		objs.add(convertRecordTODetail(r));
     		return null;
     	});

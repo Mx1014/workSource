@@ -62,7 +62,7 @@ public class FlowAdminController extends ControllerBase {
 	private FlowService flowService;
 	
     /**
-     * <b>URL: /flow/admin/searchFlowCases</b>
+     * <b>URL: /admin/flow/searchFlowCases</b>
      * <p> 管理员 FlowCase </p>
      * @return FlowCase 的列表信息
      */
@@ -82,7 +82,7 @@ public class FlowAdminController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /flow/admin/getFlowCaseDetailById</b>
+     * <b>URL: /admin/flow/getFlowCaseDetailById</b>
      * <p> 显示用户所有的 FlowCase </p>
      * @return FlowCase 的列表信息
      */
@@ -391,6 +391,20 @@ public class FlowAdminController extends ControllerBase {
     @RestReturn(value=FlowButtonDetailDTO.class)
     public RestResponse updateFlowButton(@Valid UpdateFlowButtonCommand cmd) {
         RestResponse response = new RestResponse(flowService.updateFlowButton(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/flow/disableFlowButton</b>
+     * <p> 禁用节点中的某一个按钮应用 </p>
+     * @return
+     */
+    @RequestMapping("enableFlowButton")
+    @RestReturn(value=FlowButtonDTO.class)
+    public RestResponse enableFlowButton(@Valid DisableFlowButtonCommand cmd) {
+        RestResponse response = new RestResponse(flowService.enableFlowButton(cmd.getFlowButtonId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

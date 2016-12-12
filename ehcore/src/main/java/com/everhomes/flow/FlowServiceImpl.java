@@ -922,11 +922,22 @@ public class FlowServiceImpl implements FlowService {
 		flowMarkUpdated(flow);
 		
 		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
-		flowButton.setButtonName(cmd.getButtonName());
-		flowButton.setDescription(cmd.getDescription());
-		flowButton.setGotoNodeId(cmd.getGotoNodeId());
-		flowButton.setNeedSubject(cmd.getNeedSubject());
-		flowButton.setNeedProcessor(cmd.getNeedProcessor());
+		if(cmd.getButtonName() != null) {
+			flowButton.setButtonName(cmd.getButtonName());	
+		}
+		if(cmd.getDescription() != null) {
+			flowButton.setDescription(cmd.getDescription());	
+		}
+		if(cmd.getGotoNodeId() != null) {
+			flowButton.setGotoNodeId(cmd.getGotoNodeId());	
+		}
+		if(cmd.getNeedSubject() != null) {
+			flowButton.setNeedSubject(cmd.getNeedSubject());	
+		}
+		if(cmd.getNeedProcessor() != null) {
+			flowButton.setNeedProcessor(cmd.getNeedProcessor());	
+		}
+		
 		flowButtonProvider.updateFlowButton(flowButton);
 		
 		if(null != cmd.getMessageAction()) {
@@ -976,6 +987,21 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public FlowButtonDTO enableFlowButton(Long buttonId) {
+		Flow flow = getFlowByEntity(buttonId, FlowEntityType.FLOW_BUTTON);
+		flowMarkUpdated(flow);
+		
+		FlowButton flowButton = flowButtonProvider.getFlowButtonById(buttonId);
+		if(flowButton != null) {
+			flowButton.setStatus(FlowButtonStatus.ENABLED.getCode());
+			flowButtonProvider.updateFlowButton(flowButton);
+			return ConvertHelper.convert(flowButton, FlowButtonDTO.class);
+		}
+		
+		return null;		
 	}
 	
 	private FlowAction createButtonAction(FlowButton flowButton, FlowActionInfo actionInfo
@@ -1745,8 +1771,10 @@ public class FlowServiceImpl implements FlowService {
 			
 			String name;
 			if(sels != null && sels.size() > 0) {
+				updateFlowUserName(sels.get(0));
 				name = sels.get(0).getSelectionName();
 				for(int i = 1; i < sels.size() && i < 3; i++) {
+					updateFlowUserName(sels.get(i));
 					name = name + "," + sels.get(i).getSelectionName();
 				}
 				dto.setProcessUserName(name);
