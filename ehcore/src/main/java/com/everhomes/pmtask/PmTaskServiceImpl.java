@@ -777,10 +777,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    dto.setOperatorName(user.getNickName());
 	    dto.setOperatorPhone(userIdentifier.getIdentifierToken());
 	}
-	
+
+	private void checkBlacklist(String ownerType, Long ownerId){
+		ownerType = org.springframework.util.StringUtils.isEmpty(ownerType) ? "" : ownerType;
+		ownerId = null == ownerId ? 0L : ownerId;
+		Long userId = UserContext.current().getUser().getId();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_PROPERTY_POST);
+	}
+
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
-		
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());

@@ -17,6 +17,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.PrivilegeConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
@@ -543,6 +544,8 @@ public class UserController extends ControllerBase {
 	    return new RestResponse(community);
 	}
 
+
+
 	/**
 	 * <b>URL: /user/sendMessage</b>
 	 * <p>发送消息</p>
@@ -553,6 +556,9 @@ public class UserController extends ControllerBase {
 		if(cmd.getChannels() == null || cmd.getChannels().size() == 0) {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_MISSING_MESSAGE_CHANNEL, "Missing message target channel");
 		}
+
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(cmd.getSenderUid(), "", 0L, PrivilegeConstants.BLACKLIST_SEND_MESSAGE);
 
 		MessageChannel mainChannel = cmd.getChannels().get(0);
 		MessageDTO message = new MessageDTO();

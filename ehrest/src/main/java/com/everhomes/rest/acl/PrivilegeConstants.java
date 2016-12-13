@@ -73,4 +73,25 @@ public interface PrivilegeConstants {
     //业务授权
     public static final long SERVICE_AUTHORIZATION = 10044L;
 
+    //黑名单话题投票发帖、评论、回复评论
+    public static final long BLACKLIST_COMMON_POLLING_POST = 1001L;
+
+    //黑名单活动发帖、评论、回复评论
+    public static final long BLACKLIST_ACTIVITY_POST = 1002L;
+
+    //黑名单公告发帖、评论、回复评论
+    public static final long BLACKLIST_NOTICE_POST = 1003L;
+
+    //黑名单园区快讯发帖、评论、回复评论
+    public static final long BLACKLIST_NEWS = 1004L;
+
+    //黑名单创建俱乐部
+    public static final long BLACKLIST_CLUP = 1005L;
+
+    //黑名单物业发帖、评论、回复评论
+    public static final long BLACKLIST_PROPERTY_POST = 1006L;
+
+    //黑名发消息
+    public static final long BLACKLIST_SEND_MESSAGE = 1007L;
+
 }

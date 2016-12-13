@@ -85,6 +85,7 @@ import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
 import org.elasticsearch.action.search.SearchResponse;
@@ -1686,7 +1687,11 @@ public class ForumServiceImpl implements ForumService {
         Long userId = user.getId();
                 
         Post post = processCommentCommand(userId, cmd);
-        
+
+        //黑名单权限校验 by sfyan20161213
+        checkBlacklist(null, null, post.getContentCategory());
+        post.setContentCategory(null);
+
         Long embededAppId = cmd.getEmbeddedAppId();
         ForumEmbeddedHandler handler = getForumEmbeddedHandler(embededAppId);
         if(handler != null) {
@@ -2604,6 +2609,7 @@ public class ForumServiceImpl implements ForumService {
         commentPost.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
         commentPost.setAssignedFlag(PostAssignedFlag.NONE.getCode());
         commentPost.setStatus(PostStatus.ACTIVE.getCode());
+        commentPost.setContentCategory(topic.getContentCategory());
         
         return commentPost;
     }
@@ -3788,9 +3794,31 @@ public class ForumServiceImpl implements ForumService {
 //	    
 //	    return this.createTopic(topicCmd);
 //	}
-	
+
+    private void checkBlacklist(String ownerType, Long ownerId, Long categoryId){
+        ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
+        ownerId = null == ownerId ? 0L : ownerId;
+        Long userId = UserContext.current().getUser().getId();
+        Long privilegeId = null;
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        if(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY == categoryId){
+            privilegeId = PrivilegeConstants.BLACKLIST_ACTIVITY_POST;
+        }else if(CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
+            privilegeId = PrivilegeConstants.BLACKLIST_NOTICE_POST;
+        }else if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(categoryId)){
+            privilegeId = PrivilegeConstants.BLACKLIST_PROPERTY_POST;
+        }else if(CategoryConstants.CATEGORY_ID_TOPIC_COMMON == -1|| CategoryConstants.CATEGORY_ID_TOPIC_COMMON == categoryId|| CategoryConstants.CATEGORY_ID_TOPIC_POLLING == categoryId){
+            privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
+        }
+        if(null != privilegeId){
+            resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_ACTIVITY_POST);
+        }
+    }
+
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
+        //黑名单权限校验 by sfyan20161213
+        checkBlacklist(null, null, cmd.getContentCategory());
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
