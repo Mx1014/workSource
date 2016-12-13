@@ -124,8 +124,11 @@ public class HotlineServiceImpl implements HotlineService {
 					}
 				}).forEach(r -> {
 			HotlineDTO dto = ConvertHelper.convert(r, HotlineDTO.class);
-			User user = this.userProvider.findUserById(r.getUserId());
-			dto.setAvatar(user.getAvatar());
+			if(null != r.getUserId()){
+				User user = this.userProvider.findUserById(r.getUserId());
+				if (null != user)
+					dto.setAvatar(user.getAvatar());
+			}
 			hotlines.add(dto);
 		});
 		resp.setHotlines(hotlines);
