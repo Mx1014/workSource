@@ -67,4 +67,6 @@ public interface FlowListenerManager {
 	 * @param ctx
 	 */
 	void onFlowButtonFired(FlowCaseState ctx);
+
+	FlowModuleInfo getModule(String module);
 }
