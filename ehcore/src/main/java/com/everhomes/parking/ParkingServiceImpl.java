@@ -340,7 +340,7 @@ public class ParkingServiceImpl implements ParkingService {
         			cmd.getOwnerId(), cmd.getParkingLotId(), null, null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
         	int requestlistSize = requestlist.size();
-        	if(requestlistSize >= parkingFlow.getMaxRequestNum()){
+        	if(null != parkingFlow && requestlistSize >= parkingFlow.getMaxRequestNum()){
         		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
     					"The card request is rather than max request num.");
