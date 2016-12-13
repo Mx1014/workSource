@@ -14,7 +14,6 @@ import java.util.List;
 import java.util.Map;
 
 @Component
-//public class FlowListenerManagerImpl implements FlowListenerManager {
 public class FlowListenerManagerImpl implements FlowListenerManager, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowListenerManagerImpl.class);
 	
@@ -22,28 +21,22 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 	  List<FlowModuleListener> allListeners;
 	  
 	  private Map<String, FlowModuleInst> moduleMap = new HashMap<String, FlowModuleInst>();
-	  
-	  // @PostConstruct
-	  // void setup() {
-		//   for(FlowModuleListener listener : allListeners) {
-		// 	  try {
-		// 		  FlowModuleInfo info = listener.initModule();
-		// 		  FlowModuleInst inst = new FlowModuleInst();
-		// 		  inst.setInfo(info);
-		// 		  inst.setListener(listener);
-		// 		  moduleMap.put(info.getModuleName(), inst);//TODO support TreeSet for listeners ?
-		// 	  } catch(Exception ex) {
-		// 		  LOGGER.error("module init error cls=" + listener.getClass(), ex);
-		// 	  }
-		//
-		//   }
-	  // }
-	  
+
 	  public FlowListenerManagerImpl() {
 		  
 	  }
 	  
 	  @Override
+	  public FlowModuleInfo getModule(String module) {
+		  FlowModuleInst inst = moduleMap.get(module);
+		  if(inst != null) {
+			  return inst.getInfo();
+		  }
+		  
+		  return null;
+	  }
+	  
+	  @Override 
 	  public void onFlowCaseStart(FlowCaseState ctx) {
 		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
 		  if(inst != null) {
@@ -138,21 +131,19 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 		  return null;
 	}
 
-    @Override
-    public void onApplicationEvent(ContextRefreshedEvent event) {
-        if(event.getApplicationContext().getParent() == null){
-            for(FlowModuleListener listener : allListeners) {
-                try {
-                    FlowModuleInfo info = listener.initModule();
-                    FlowModuleInst inst = new FlowModuleInst();
-                    inst.setInfo(info);
-                    inst.setListener(listener);
-                    moduleMap.put(info.getModuleName(), inst);//TODO support TreeSet for listeners ?
-                } catch(Exception ex) {
-                    LOGGER.error("module init error cls=" + listener.getClass(), ex);
-                }
-
-            }
-        }
-    }
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent arg0) {
+		  for(FlowModuleListener listener : allListeners) {
+			  try {
+				  FlowModuleInfo info = listener.initModule();
+				  FlowModuleInst inst = new FlowModuleInst();
+				  inst.setInfo(info);
+				  inst.setListener(listener);
+				  moduleMap.put(info.getModuleName(), inst);//TODO support TreeSet for listeners ?
+			  } catch(Exception ex) {
+				  LOGGER.error("module init error cls=" + listener.getClass(), ex);
+			  }
+			  
+		  }
+	}
 }

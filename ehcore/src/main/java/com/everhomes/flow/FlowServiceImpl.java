@@ -12,6 +12,83 @@ import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.*;
+import com.everhomes.rest.flow.ActionStepType;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.CreateFlowCommand;
+import com.everhomes.rest.flow.CreateFlowNodeCommand;
+import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.rest.flow.FlowGraphDetailDTO;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowTemplateCode;
+import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
+import com.everhomes.rest.flow.FlowTimeoutType;
+import com.everhomes.rest.flow.FlowUserSelectionType;
+import com.everhomes.rest.flow.FlowUserSourceType;
+import com.everhomes.rest.flow.FlowActionDTO;
+import com.everhomes.rest.flow.FlowActionInfo;
+import com.everhomes.rest.flow.FlowActionStatus;
+import com.everhomes.rest.flow.FlowActionStepType;
+import com.everhomes.rest.flow.FlowActionType;
+import com.everhomes.rest.flow.FlowButtonDTO;
+import com.everhomes.rest.flow.FlowButtonDetailDTO;
+import com.everhomes.rest.flow.FlowButtonStatus;
+import com.everhomes.rest.flow.FlowCaseDTO;
+import com.everhomes.rest.flow.FlowCaseDetailDTO;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseSearchType;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowCaseType;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEntityType;
+import com.everhomes.rest.flow.FlowEvaluateDTO;
+import com.everhomes.rest.flow.FlowEventLogDTO;
+import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowLogType;
+import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowNodeDTO;
+import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowNodeLogDTO;
+import com.everhomes.rest.flow.FlowNodePriority;
+import com.everhomes.rest.flow.FlowNodeReminderDTO;
+import com.everhomes.rest.flow.FlowNodeStatus;
+import com.everhomes.rest.flow.FlowNodeTrackerDTO;
+import com.everhomes.rest.flow.FlowPostEvaluateCommand;
+import com.everhomes.rest.flow.FlowPostSubjectCommand;
+import com.everhomes.rest.flow.FlowPostSubjectDTO;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
+import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
+import com.everhomes.rest.flow.FlowStatusType;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowSubjectDTO;
+import com.everhomes.rest.flow.FlowUserSelectionDTO;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.FlowVariableDTO;
+import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.FlowVariableType;
+import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
+import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
+import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
+import com.everhomes.rest.flow.ListFlowBriefResponse;
+import com.everhomes.rest.flow.ListFlowButtonResponse;
+import com.everhomes.rest.flow.ListFlowModulesCommand;
+import com.everhomes.rest.flow.ListFlowModulesResponse;
+import com.everhomes.rest.flow.SearchFlowCaseCommand;
+import com.everhomes.rest.flow.SearchFlowCaseResponse;
+import com.everhomes.rest.flow.ListFlowCommand;
+import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
+import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
+import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowNameCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeCommand;
+import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
+import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -153,6 +230,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setFlowVersion(FlowConstants.FLOW_CONFIG_START);
     	obj.setStatus(FlowStatusType.CONFIG.getCode());
     	obj.setOrganizationId(cmd.getOrgId());
+    	obj.setNamespaceId(cmd.getNamespaceId());
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
 
@@ -829,11 +907,22 @@ public class FlowServiceImpl implements FlowService {
 		flowMarkUpdated(flow);
 		
 		FlowButton flowButton = flowButtonProvider.getFlowButtonById(cmd.getFlowButtonId());
-		flowButton.setButtonName(cmd.getButtonName());
-		flowButton.setDescription(cmd.getDescription());
-		flowButton.setGotoNodeId(cmd.getGotoNodeId());
-		flowButton.setNeedSubject(cmd.getNeedSubject());
-		flowButton.setNeedProcessor(cmd.getNeedProcessor());
+		if(cmd.getButtonName() != null) {
+			flowButton.setButtonName(cmd.getButtonName());	
+		}
+		if(cmd.getDescription() != null) {
+			flowButton.setDescription(cmd.getDescription());	
+		}
+		if(cmd.getGotoNodeId() != null) {
+			flowButton.setGotoNodeId(cmd.getGotoNodeId());	
+		}
+		if(cmd.getNeedSubject() != null) {
+			flowButton.setNeedSubject(cmd.getNeedSubject());	
+		}
+		if(cmd.getNeedProcessor() != null) {
+			flowButton.setNeedProcessor(cmd.getNeedProcessor());	
+		}
+		
 		flowButtonProvider.updateFlowButton(flowButton);
 		
 		if(null != cmd.getMessageAction()) {
@@ -883,6 +972,21 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return null;
+	}
+	
+	@Override
+	public FlowButtonDTO enableFlowButton(Long buttonId) {
+		Flow flow = getFlowByEntity(buttonId, FlowEntityType.FLOW_BUTTON);
+		flowMarkUpdated(flow);
+		
+		FlowButton flowButton = flowButtonProvider.getFlowButtonById(buttonId);
+		if(flowButton != null) {
+			flowButton.setStatus(FlowButtonStatus.ENABLED.getCode());
+			flowButtonProvider.updateFlowButton(flowButton);
+			return ConvertHelper.convert(flowButton, FlowButtonDTO.class);
+		}
+		
+		return null;		
 	}
 	
 	private FlowAction createButtonAction(FlowButton flowButton, FlowActionInfo actionInfo
@@ -1315,6 +1419,10 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowGraph getFlowGraph(Long flowId, Integer flowVer) {
+		if(flowVer.equals(0)) {
+			return getConfigGraph(flowId);
+		}
+		
 		String fmt = String.format("%d:%d", flowId, flowVer);
 		FlowGraph flowGraph = graphMap.get(fmt);
 		if(flowGraph == null) {
@@ -1364,6 +1472,34 @@ public class FlowServiceImpl implements FlowService {
 		return flowGraph;
 	}
 	
+	private FlowGraph getConfigGraph(Long flowId) {
+		FlowGraph flowGraph = new FlowGraph();
+		Flow flow = flowProvider.getFlowById(flowId);
+		if(flow == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");
+		}
+		flowGraph.setFlow(flow);
+		
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, 0);
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		int i = 1;
+		for(FlowNode fn : flowNodes) {
+			if(!fn.getNodeLevel().equals(i)) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error");	
+			}
+			
+			flowGraph.getNodes().add(getFlowGraphNode(fn, 0));	
+			i++;
+		}
+		
+		flowGraph.saveIds();
+		
+		return flowGraph;
+	}
+	
 	@Override
 	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
 		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.current().getUser().getId());
@@ -1381,6 +1517,14 @@ public class FlowServiceImpl implements FlowService {
 			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
 		}
     }
+	
+	@Override
+	public void processAutoStep(FlowAutoStepDTO stepDTO) {
+		FlowCaseState ctx = flowStateProcessor.prepareAutoStep(stepDTO);
+		if(ctx != null) {
+			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
+		}
+	}
 	
 	@Override
 	public void processMessageTimeout(FlowTimeout ft) {
@@ -1620,8 +1764,10 @@ public class FlowServiceImpl implements FlowService {
 			
 			String name;
 			if(sels != null && sels.size() > 0) {
+				updateFlowUserName(sels.get(0));
 				name = sels.get(0).getSelectionName();
 				for(int i = 1; i < sels.size() && i < 3; i++) {
+					updateFlowUserName(sels.get(i));
 					name = name + "," + sels.get(i).getSelectionName();
 				}
 				dto.setProcessUserName(name);
@@ -2292,5 +2438,44 @@ public class FlowServiceImpl implements FlowService {
     	Random r = new Random();
     	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
     	this.createFlowCase(cmd);
+	}
+
+	@Override
+	public FlowGraphDetailDTO getFlowGraphDetail(Long flowId) {
+		Flow flow = flowProvider.getFlowById(flowId);
+		FlowGraphDetailDTO graphDetail = ConvertHelper.convert(flow, FlowGraphDetailDTO.class);
+		
+		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
+		graphDetail.setSupervisors(selections);
+		
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowId
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+		if(seles != null && seles.size() > 0) {
+			seles.stream().forEach((sel) -> {
+				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
+			});
+		}
+		
+		List<FlowNodeDetailDTO> nodes = new ArrayList<>();
+		graphDetail.setNodes(nodes);
+		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
+		flowNodes.sort((n1, n2) -> {
+			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
+		});
+		
+		for(FlowNode fn: flowNodes) {
+			FlowNodeDetailDTO nodeDetail = this.getFlowNodeDetail(fn.getId());
+			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(fn.getId()
+					, FlowConstants.FLOW_CONFIG_VER, FlowUserType.PROCESSOR.getCode());
+			List<FlowButtonDetailDTO> btnDetails = new ArrayList<>();
+			for(FlowButton btn : buttons) {
+				btnDetails.add(this.getFlowButtonDetail(btn.getId()));	
+			}
+			
+			nodeDetail.setProcessButtons(btnDetails);
+			nodes.add(nodeDetail);
+		}
+		
+		return graphDetail;
 	}
 }

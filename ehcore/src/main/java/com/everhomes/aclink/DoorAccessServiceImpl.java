@@ -2375,7 +2375,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         if(borders.get(0).getPublicPort().equals(443)) {
             borderUrl = "wss://" + borderUrl + "/aclink";
         } else {
-            borderUrl = "ws://" + borderUrl + ":" + borders.get(0).getPublicAddress() + "/aclink";
+            borderUrl = "ws://" + borderUrl + ":" + borders.get(0).getPublicPort() + "/aclink";
         }
         
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(cmd.getDoorId());

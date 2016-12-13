@@ -2,7 +2,15 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
-public class FlowTimeoutStepDTO {
+/**
+ * <ul>
+ * <li>stepCount: 当前跳转的次数，通过这个值可以避免多次跳转</li>
+ * <li>autoStepType: {@link com.everhomes.rest.flow.FlowStepType}</li>
+ * </ul>
+ * @author janson
+ *
+ */
+public class FlowAutoStepDTO {
 	private Long flowCaseId;
 	private Long flowNodeId;
 	private Long flowMainId;

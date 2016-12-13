@@ -1,16 +1,14 @@
 package com.everhomes.flow;
 
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.user.UserInfo;
+
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.user.UserInfo;
-
 public class FlowCaseState {
-	private String moduleName;
 	private FlowModuleInfo module;
 	private FlowCase flowCase;
 	private UserInfo operator;
@@ -31,10 +29,11 @@ public class FlowCaseState {
 	}
 
 	public String getModuleName() {
-		return moduleName;
-	}
-	public void setModuleName(String moduleName) {
-		this.moduleName = moduleName;
+		if(this.module != null) {
+			return this.module.getModuleName();
+		}
+		
+		return null;
 	}
 	public FlowModuleInfo getModule() {
 		return module;

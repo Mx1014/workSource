@@ -44,6 +44,7 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.temporal.ChronoUnit;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -298,6 +299,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
         ParkingClearanceLogQueryObject qo = ConvertHelper.convert(cmd, ParkingClearanceLogQueryObject.class);
         qo.setPageSize(pageSize + 1);
+        // 传来的参数是一天的起始时间,需要给他加到一天的结束时间
+        if (qo.getEndTime() != null) {
+            qo.setEndTime(Instant.ofEpochMilli(qo.getEndTime()).plus(1L, ChronoUnit.DAYS).toEpochMilli());
+        }
         List<ParkingClearanceLog> logs = clearanceLogProvider.searchClearanceLog(qo);
         if (logs != null) {
             if (logs.size() > pageSize) {
@@ -397,6 +402,21 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     // 校验失败, 抛出异常, 异常信息附带参数值信息
     private void validate(Object o) {
         Set<ConstraintViolation<Object>> result = validator.validate(o);
+
+        /*for (ConstraintViolation<Object> violation : result) {
+            ConstraintDescriptor<?> constraintDescriptor = violation.getConstraintDescriptor();
+            String constraintAnnotationClassName = constraintDescriptor.getAnnotation().annotationType().getName();
+            if ("javax.validation.constraints.Size".equals(constraintAnnotationClassName)) {
+                Size size = (Size) constraintDescriptor.getAnnotation();
+                int max = size.max();
+                if (max > 0) {
+                    // localeStringService.getLocalizedString();
+                    LOGGER.error("Invalid parameter {}", violation.getPropertyPath());
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", violation.getPropertyPath());
+                }
+            }
+        }*/
+
         if (!result.isEmpty()) {
             result.stream().map(r -> r.getPropertyPath().toString() + " [ " + r.getInvalidValue() + " ]")
                     .reduce((i, a) -> i + ", " + a).ifPresent(r -> {

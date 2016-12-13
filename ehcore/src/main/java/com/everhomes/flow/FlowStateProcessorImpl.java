@@ -1,29 +1,9 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowServiceErrorCode;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowTimeoutStepDTO;
-import com.everhomes.rest.flow.FlowTimeoutType;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
@@ -34,6 +14,15 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class FlowStateProcessorImpl implements FlowStateProcessor {
@@ -86,7 +75,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		
 		ctx.setFlowCase(flowCase);
-		ctx.setModuleName(flowCase.getModuleName());
+		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 		
 		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		ctx.setFlowGraph(flowGraph);
@@ -103,8 +92,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	
 	@Override
 	public FlowCaseState prepareStepTimeout(FlowTimeout ft) {
+		FlowAutoStepDTO stepDTO = (FlowAutoStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowAutoStepDTO.class);
+		return prepareAutoStep(stepDTO);
+	}
+	
+	@Override
+	public FlowCaseState prepareAutoStep(FlowAutoStepDTO stepDTO) {
 		FlowCaseState ctx = new FlowCaseState();
-		FlowTimeoutStepDTO stepDTO = (FlowTimeoutStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowTimeoutStepDTO.class);
+		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
 		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
 				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
@@ -113,7 +108,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	    	UserContext.current().setUser(user);
 			
 			ctx.setFlowCase(flowCase);
-			ctx.setModuleName(flowCase.getModuleName());
+			ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 			
 			FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 			ctx.setFlowGraph(flowGraph);
@@ -126,12 +121,12 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			
 			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
 			ctx.setOperator(userInfo);
-			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent(stepDTO);
+			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 			ctx.setCurrentEvent(event);
 			
 			return ctx;
 		}
-		return null;
+		return null;		
 	}
 	
 	@Override
@@ -145,7 +140,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
 		}
 		ctx.setFlowCase(flowCase);
-		ctx.setModuleName(flowCase.getModuleName());
+		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 		ctx.setOperator(logonUser);
 		
 		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
@@ -322,14 +317,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		
 		//create step timeout
-		if(!curr.getFlowNode().getAutoStepMinute().equals(0)) {
+		if(!curr.getFlowNode().getAllowTimeoutAction().equals((byte)0)) {
 			FlowTimeout ft = new FlowTimeout();
 			ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
 			ft.setBelongTo(curr.getFlowNode().getId());
 			ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
 			ft.setStatus(FlowStatusType.VALID.getCode());
 			
-			FlowTimeoutStepDTO stepDTO = new FlowTimeoutStepDTO();
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 			stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
 			stepDTO.setFlowMainId(ctx.getFlowCase().getFlowMainId());
 			stepDTO.setFlowVersion(ctx.getFlowCase().getFlowVersion());

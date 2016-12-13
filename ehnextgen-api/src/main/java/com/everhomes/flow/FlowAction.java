@@ -7,7 +7,7 @@ public class FlowAction extends EhFlowActions {
 	 * 
 	 */
 	private static final long serialVersionUID = -3805976892366556884L;
-
+	
 	public Long getScriptId() {
 		return FlowActionCustomField.SCRIPT_ID.getIntegralValue(this);
 	}
@@ -46,6 +46,14 @@ public class FlowAction extends EhFlowActions {
 
 	public void setTrackerApplier(Long trackerApplier) {
 		FlowActionCustomField.TRACKER_APLIER.setIntegralValue(this, trackerApplier);
+	}
+
+	public Long getAllowTimeoutAction() {
+		return FlowActionCustomField.ALLOW_TIMEOUT_ACTION.getIntegralValue(this);
+	}
+
+	public void setAllowTimeoutAction(Long allowTimeoutAction) {
+		FlowActionCustomField.ALLOW_TIMEOUT_ACTION.setIntegralValue(this, allowTimeoutAction); 
 	}
 
 	@Override

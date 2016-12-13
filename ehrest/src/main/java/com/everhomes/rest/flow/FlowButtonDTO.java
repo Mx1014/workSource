@@ -28,6 +28,7 @@ public class FlowButtonDTO {
     private String     buttonName;
     private Byte needProcessor;
     private Byte needSubject;
+    private Integer remindCount;
     private String description;
 
 	public Byte getNeedProcessor() {
@@ -157,6 +158,16 @@ public class FlowButtonDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+
+	public Integer getRemindCount() {
+		return remindCount;
+	}
+
+
+	public void setRemindCount(Integer remindCount) {
+		this.remindCount = remindCount;
 	}
 
 
