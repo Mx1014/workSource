@@ -1,7 +1,8 @@
-// @formatter:off
 package com.everhomes.rest.launchad;
 
 import com.everhomes.util.StringHelper;
+
+import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
@@ -9,7 +10,6 @@ import com.everhomes.util.StringHelper;
  *     <li>namespaceId: 域空间id</li>
  *     <li>contentType: 广告类型 {@link com.everhomes.rest.launchad.LaunchAdType}</li>
  *     <li>contentUri: 广告文件uri</li>
- *     <li>contentUrl: 广告文件url</li>
  *     <li>timesPerDay: 每天显示次数, 为 0 则不限制</li>
  *     <li>displayInterval: 最小的显示间隔时间, 单位为分钟, 为 0 则不限制</li>
  *     <li>durationTime: 显示时间, 单位 秒</li>
@@ -19,13 +19,11 @@ import com.everhomes.util.StringHelper;
  *     <li>status: 状态 {@link com.everhomes.rest.launchad.LaunchAdStatus}</li>
  * </ul>
  */
-public class LaunchAdDTO {
+public class SetLaunchAdCommand {
 
-    private Long id;
-    private Integer namespaceId;
+    @NotNull private Integer namespaceId;
     private String contentType;
     private String contentUri;
-    private String contentUrl;
     private Integer timesPerDay;
     private Integer displayInterval;
     private Integer durationTime;
@@ -33,14 +31,6 @@ public class LaunchAdDTO {
     private Byte actionType;
     private String actionData;
     private Byte status;
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public Integer getNamespaceId() {
         return namespaceId;
@@ -64,14 +54,6 @@ public class LaunchAdDTO {
 
     public void setContentUri(String contentUri) {
         this.contentUri = contentUri;
-    }
-
-    public String getContentUrl() {
-        return contentUrl;
-    }
-
-    public void setContentUrl(String contentUrl) {
-        this.contentUrl = contentUrl;
     }
 
     public Integer getTimesPerDay() {
@@ -98,14 +80,6 @@ public class LaunchAdDTO {
         this.durationTime = durationTime;
     }
 
-    public Byte getStatus() {
-        return status;
-    }
-
-    public void setStatus(Byte status) {
-        this.status = status;
-    }
-
     public Byte getSkipFlag() {
         return skipFlag;
     }
@@ -128,6 +102,14 @@ public class LaunchAdDTO {
 
     public void setActionData(String actionData) {
         this.actionData = actionData;
+    }
+
+    public Byte getStatus() {
+        return status;
+    }
+
+    public void setStatus(Byte status) {
+        this.status = status;
     }
 
     @Override

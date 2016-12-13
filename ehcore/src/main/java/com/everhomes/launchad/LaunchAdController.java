@@ -6,11 +6,15 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.contentserver.UploadCsFileResponse;
 import com.everhomes.rest.launchad.LaunchAdDTO;
+import com.everhomes.rest.launchad.SetLaunchAdCommand;
 import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 /**
  * App启动广告模块
@@ -29,10 +33,30 @@ public class LaunchAdController extends ControllerBase {
      * <b>URL: /launchad/getLaunchad</b>
      */
     @RequestMapping("getLaunchad")
-    @RestReturn(value = LaunchAdDTO.class, collection = true)
+    @RestReturn(value = LaunchAdDTO.class)
     @RequireAuthentication(false)
     public RestResponse geLaunchAd() {
         return response(launchAdService.getLaunchAd());
+    }
+
+    /**
+     * <p>设置启动广告信息</p>
+     * <b>URL: /launchad/setLaunchAd</b>
+     */
+    @RequestMapping("setLaunchAd")
+    @RestReturn(value = LaunchAdDTO.class)
+    public RestResponse setLaunchAd(SetLaunchAdCommand cmd) {
+        return response(launchAdService.setLaunchAd(cmd));
+    }
+
+    /**
+     * <p>上传广告附件</p>
+     * <b>URL: /launchad/uploadLaunchAdFile</b>
+     */
+    @RequestMapping("uploadLaunchAdFile")
+    @RestReturn(value = UploadCsFileResponse.class)
+    public RestResponse uploadLaunchAdFile(@RequestParam("attachment") MultipartFile [] files) {
+        return response(launchAdService.uploadLaunchAdFile(files));
     }
 
     /*private RestResponse success() {
