@@ -86,7 +86,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		
 		ctx.setFlowCase(flowCase);
-		ctx.setModuleName(flowCase.getModuleName());
+		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 		
 		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		ctx.setFlowGraph(flowGraph);
@@ -119,7 +119,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	    	UserContext.current().setUser(user);
 			
 			ctx.setFlowCase(flowCase);
-			ctx.setModuleName(flowCase.getModuleName());
+			ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 			
 			FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 			ctx.setFlowGraph(flowGraph);
@@ -151,7 +151,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
 		}
 		ctx.setFlowCase(flowCase);
-		ctx.setModuleName(flowCase.getModuleName());
+		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 		ctx.setOperator(logonUser);
 		
 		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());

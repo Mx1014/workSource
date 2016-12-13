@@ -179,6 +179,13 @@ public class FlowProviderImpl implements FlowProvider {
 					query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(cmd.getOwnerType()));	
 				}
 				
+				if(cmd.getProjectId() != null) {
+					query.addConditions(Tables.EH_FLOWS.PROJECT_ID.eq(cmd.getProjectId()));	
+				}
+				if(cmd.getProjectType() != null) {
+					query.addConditions(Tables.EH_FLOWS.PROJECT_TYPE.eq(cmd.getProjectType()));
+				}
+				
 				query.addConditions(Tables.EH_FLOWS.STATUS.ne(FlowStatusType.INVALID.getCode()));
 				
 				if(cmd.getFlowVersion() != null) {
