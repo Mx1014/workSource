@@ -2975,6 +2975,7 @@ public class ActivityServiceImpl implements ActivityService {
 
         activity.setAchievement(cmd.getAchievement());
         activity.setAchievementType(cmd.getAchievementType());
+        activity.setAchievementRichtextUrl(cmd.getAchievementRichtextUrl());
         activityProvider.updateActivity(activity);
     }
 
