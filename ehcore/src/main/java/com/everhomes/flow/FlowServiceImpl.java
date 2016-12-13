@@ -938,6 +938,9 @@ public class FlowServiceImpl implements FlowService {
 		if(cmd.getNeedProcessor() != null) {
 			flowButton.setNeedProcessor(cmd.getNeedProcessor());	
 		}
+		if(cmd.getRemindCount() != null) {
+			flowButton.setRemindCount(cmd.getRemindCount());
+		}
 		
 		flowButtonProvider.updateFlowButton(flowButton);
 		
@@ -2481,4 +2484,6 @@ public class FlowServiceImpl implements FlowService {
 		
 		return graphDetail;
 	}
+	
+	
 }

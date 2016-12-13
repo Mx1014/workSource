@@ -12,6 +12,7 @@ public class UpdateFlowButtonCommand {
 	private Long gotoNodeId;
 	private Byte needSubject;
 	private Byte needProcessor;
+	private Integer remindCount;
 	
 	private FlowActionInfo messageAction;
 	private FlowActionInfo smsAction;
@@ -67,7 +68,12 @@ public class UpdateFlowButtonCommand {
 	public void setSmsAction(FlowActionInfo smsAction) {
 		this.smsAction = smsAction;
 	}
-
+	public Integer getRemindCount() {
+		return remindCount;
+	}
+	public void setRemindCount(Integer remindCount) {
+		this.remindCount = remindCount;
+	}
 	public List<Long> getEnterScriptIds() {
 		return enterScriptIds;
 	}
