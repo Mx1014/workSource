@@ -47,6 +47,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowTemplateCode;
@@ -1532,6 +1533,14 @@ public class FlowServiceImpl implements FlowService {
 			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
 		}
     }
+	
+	@Override
+	public void processAutoStep(FlowAutoStepDTO stepDTO) {
+		FlowCaseState ctx = flowStateProcessor.prepareAutoStep(stepDTO);
+		if(ctx != null) {
+			flowStateProcessor.step(ctx, ctx.getCurrentEvent());	
+		}
+	}
 	
 	@Override
 	public void processMessageTimeout(FlowTimeout ft) {

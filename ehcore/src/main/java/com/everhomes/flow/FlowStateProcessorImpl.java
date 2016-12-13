@@ -21,7 +21,7 @@ import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowTimeoutStepDTO;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.news.NewsCommentContentType;
@@ -103,8 +103,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	
 	@Override
 	public FlowCaseState prepareStepTimeout(FlowTimeout ft) {
+		FlowAutoStepDTO stepDTO = (FlowAutoStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowAutoStepDTO.class);
+		return prepareAutoStep(stepDTO);
+	}
+	
+	@Override
+	public FlowCaseState prepareAutoStep(FlowAutoStepDTO stepDTO) {
 		FlowCaseState ctx = new FlowCaseState();
-		FlowTimeoutStepDTO stepDTO = (FlowTimeoutStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowTimeoutStepDTO.class);
+		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
 		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
 				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
@@ -126,12 +132,12 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			
 			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
 			ctx.setOperator(userInfo);
-			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent(stepDTO);
+			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 			ctx.setCurrentEvent(event);
 			
 			return ctx;
 		}
-		return null;
+		return null;		
 	}
 	
 	@Override
@@ -329,7 +335,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
 			ft.setStatus(FlowStatusType.VALID.getCode());
 			
-			FlowTimeoutStepDTO stepDTO = new FlowTimeoutStepDTO();
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 			stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
 			stepDTO.setFlowMainId(ctx.getFlowCase().getFlowMainId());
 			stepDTO.setFlowVersion(ctx.getFlowCase().getFlowVersion());

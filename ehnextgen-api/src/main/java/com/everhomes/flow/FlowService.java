@@ -10,6 +10,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -394,6 +395,11 @@ public interface FlowService {
 	String getFireButtonTemplate(FlowStepType step, Map<String, Object> map);
 
 	FlowGraphDetailDTO getFlowGraphDetail(Long flowId);
+
+	/** 注意通过 stepCount 与 flowNodeId 来避免多次提交而产生多次下一步
+	 * @param stepDTO
+	 */
+	void processAutoStep(FlowAutoStepDTO stepDTO);
 	
 	//TODO 日志信息分类：
 	
