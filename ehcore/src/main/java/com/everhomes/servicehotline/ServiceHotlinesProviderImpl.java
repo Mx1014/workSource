@@ -88,7 +88,7 @@ public class ServiceHotlinesProviderImpl implements ServiceHotlinesProvider {
         if(null != locator && locator.getAnchor() != null) {
             query.addConditions(Tables.EH_SERVICE_HOTLINES.ID.gt(locator.getAnchor()));
             }
-
+        query.addOrderBy(Tables.EH_SERVICE_HOTLINES.DEFAULT_ORDER.asc());
         query.addLimit(count);
         List<ServiceHotline> objs = query.fetch().map((r) -> {
             return ConvertHelper.convert(r, ServiceHotline.class);
