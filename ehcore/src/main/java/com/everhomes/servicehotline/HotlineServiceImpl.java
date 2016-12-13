@@ -1,5 +1,6 @@
 package com.everhomes.servicehotline;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -39,6 +40,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -139,6 +141,10 @@ public class HotlineServiceImpl implements HotlineService {
 	public void addHotline(AddHotlineCommand cmd) {
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
+		hotline.setCreateTime((Timestamp) DateHelper.currentGMTTime());
+		hotline.setCreatorUid(UserContext.current().getUser().getId());
+		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
+		hotline.setUpdateTime((Timestamp) DateHelper.currentGMTTime());
 		this.serviceHotlinesProvider.createServiceHotline(hotline);
 
 	}
@@ -171,6 +177,8 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
+		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
+		hotline.setUpdateTime((Timestamp) DateHelper.currentGMTTime());
 		this.serviceHotlinesProvider.updateServiceHotline(hotline);
 	}
 
