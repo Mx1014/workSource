@@ -105,6 +105,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					"not exist app namespace mapping");
 		}
 		
+		
+		
+		
+		
+		
+		
 		TechparkDataType dataType = TechparkDataType.fromCode(cmd.getDataType());
 		switch (dataType) {
 		case BUILDING:

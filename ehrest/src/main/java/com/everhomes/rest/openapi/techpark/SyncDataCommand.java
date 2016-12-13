@@ -16,8 +16,28 @@ public class SyncDataCommand {
     private String varDataList;
     
     private String delDataList;
+    
+    private Byte allFlag;
+    
+    private Integer nextPage;
 
-    public String getAppKey() {
+    public Byte getAllFlag() {
+		return allFlag;
+	}
+
+	public void setAllFlag(Byte allFlag) {
+		this.allFlag = allFlag;
+	}
+
+	public Integer getNextPage() {
+		return nextPage;
+	}
+
+	public void setNextPage(Integer nextPage) {
+		this.nextPage = nextPage;
+	}
+
+	public String getAppKey() {
         return appKey;
     }
 
