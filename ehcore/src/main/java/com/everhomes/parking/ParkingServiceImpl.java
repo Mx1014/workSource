@@ -1239,7 +1239,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public SurplusCardCountDTO gettSurplusCardCount(GettParkingRequestCardConfigCommand cmd) {
+	public SurplusCardCountDTO getSurplusCardCount(GettParkingRequestCardConfigCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
 		Long flowId = cmd.getFlowId();
@@ -1255,7 +1255,9 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer count = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
 		
-		Integer totalCount = parkingFlow.getMaxRequestNum();
+		Integer totalCount = 0;
+		if(null != parkingFlow)
+			totalCount = parkingFlow.getMaxIssueNum();
 		SurplusCardCountDTO dto = new SurplusCardCountDTO();
 		
 		dto.setTotalCount(totalCount);

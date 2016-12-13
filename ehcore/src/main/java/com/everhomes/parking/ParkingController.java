@@ -350,14 +350,14 @@ public class ParkingController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /parking/gettSurplusCardCount</b>
+     * <b>URL: /parking/getSurplusCardCount</b>
      * <p>获取剩余月考数</p>
      */
-    @RequestMapping("gettSurplusCardCount")
+    @RequestMapping("getSurplusCardCount")
     @RestReturn(value=SurplusCardCountDTO.class)
-    public RestResponse gettSurplusCardCount(GettParkingRequestCardConfigCommand cmd) {
+    public RestResponse getSurplusCardCount(GettParkingRequestCardConfigCommand cmd) {
 
-    	SurplusCardCountDTO dto = parkingService.gettSurplusCardCount(cmd);
+    	SurplusCardCountDTO dto = parkingService.getSurplusCardCount(cmd);
 
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);

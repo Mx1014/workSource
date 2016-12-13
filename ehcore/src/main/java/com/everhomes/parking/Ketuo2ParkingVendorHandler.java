@@ -85,6 +85,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private static final String GET_CARd_RULE = "/api/pay/GetCardRule";
 	private static final String GET_TEMP_FEE = "/api/pay/GetParkingPaymentInfo";
 	private static final String PAY_TEMP_FEE = "/api/pay/PayParkingFee";
+	private static final String ADD_MONTH_CARD = "/api/card/AddMonthCarCardNo_KX";
 	private static final String RULE_TYPE = "1"; //只显示ruleType = 1时的充值项
 	
 	private CloseableHttpClient httpclient = HttpClients.createDefault();
@@ -354,30 +355,85 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-		//储能月卡车没有 归属地区分
+		//月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
 //		plateNumber = plateNumber.substring(1, plateNumber.length());
 		KetuoCard card = getCard(plateNumber);
-		String oldValidEnd = card.getValidTo();
-		Long time = strToLong(oldValidEnd);
-		String validStart = sdf1.format(addDays(time, 1));
-		String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
 		
-		param.put("cardId", Integer.parseInt(order.getCardNumber()));
-		param.put("ruleType", order.getRateToken());
-	    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
-	    param.put("payMoney", order.getPrice().intValue()*100);
-	    param.put("startTime", validStart);
-	    param.put("endTime", validEnd);
-		String json = post(param, RECHARGE);
+		if(null == card) {
+			String cardType = "2";
+			KetuoCardRate ketuoCardRate = null;
+			for(KetuoCardRate rate: getCardRule(cardType)) {
+				if(rate.getRuleId().equals(order.getRateToken())) {
+					ketuoCardRate = rate;
+				}
+			}
+			if(null == ketuoCardRate) {
+				LOGGER.error("Rate not found, cmd={}", order);
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"Rate not found.");
+			}
+//			order.setRateName(ketuoCardRate.getRuleName());
+//			order.setMonthCount(new BigDecimal(ketuoCardRate.getRuleAmount()));
+//			order.setPrice(new BigDecimal(Integer.parseInt(ketuoCardRate.getRuleMoney()) / 100));
+			
+			Integer payMoney = order.getPrice().intValue()*100 - Integer.parseInt(ketuoCardRate.getRuleMoney()) 
+					* (order.getMonthCount().intValue() - 1);
+
+			if(addMonthCard(order.getPlateNumber(), payMoney)) {
+				Integer count = order.getMonthCount().intValue();
+				if(count > 1) {
+					order.setMonthCount(new BigDecimal(count -1) );
+					order.setPrice(new BigDecimal(order.getPrice().intValue()*100 - payMoney));
+					return rechargeMonthlyCard(order);
+				}
+				return true;
+			}
+			return false;
+		}else {
+			String oldValidEnd = card.getValidTo();
+			Long time = strToLong(oldValidEnd);
+			String validStart = sdf1.format(addDays(time, 1));
+			String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
+			
+			param.put("cardId", card.getCardId());
+			param.put("ruleType", order.getRateToken());
+		    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
+		    param.put("payMoney", order.getPrice().intValue()*100);
+		    param.put("startTime", validStart);
+		    param.put("endTime", validEnd);
+			String json = post(param, RECHARGE);
+	        
+	        if(LOGGER.isDebugEnabled())
+				LOGGER.debug("Result={}, param={}", json, param);
+	        
+//			KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
+//			
+//			return entity.isSuccess();
+			JSONObject jsonObject = JSONObject.parseObject(json);
+			Object obj = jsonObject.get("resCode");
+			if(null != obj ) {
+				int resCode = (int) obj;
+				if(resCode == 0)
+					return true;
+				
+			}
+			return false;
+		}
+		
+    }
+	
+	private boolean addMonthCard(String plateNo, Integer money){
+
+		JSONObject param = new JSONObject();
+		param.put("plateNo", plateNo);
+		param.put("money", money);
+		String json = post(param, ADD_MONTH_CARD);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-//		
-//		return entity.isSuccess();
-		JSONObject jsonObject = JSONObject.parseObject(json);
+        JSONObject jsonObject = JSONObject.parseObject(json);
 		Object obj = jsonObject.get("resCode");
 		if(null != obj ) {
 			int resCode = (int) obj;

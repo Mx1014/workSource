@@ -103,5 +103,5 @@ public interface ParkingService {
     
     OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
     
-    SurplusCardCountDTO gettSurplusCardCount(GettParkingRequestCardConfigCommand cmd);
+    SurplusCardCountDTO getSurplusCardCount(GettParkingRequestCardConfigCommand cmd);
 }
