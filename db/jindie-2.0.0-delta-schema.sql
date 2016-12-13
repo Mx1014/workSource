@@ -17,12 +17,12 @@ CREATE TABLE `eh_techpark_syncdata_backup` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 科技园同步数据日志，主要是失败的或错误数据的日志，add by tt, 20161212
--- DROP TABLE IF EXISTS `eh_techpark_syncdata_log`;
-CREATE TABLE `eh_techpark_syncdata_log` (
+-- DROP TABLE IF EXISTS `eh_techpark_syncdata_logs`;
+CREATE TABLE `eh_techpark_syncdata_logs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `subject` TEXT VARCHAR(64) 'main content',
-  `description` TEXT COMMENT 'detail content',
+  `subject` VARCHAR(64) COMMENT 'subject',
+  `description` TEXT COMMENT 'description',
   `create_time` DATETIME DEFAULT NULL,
   `creator_uid` BIGINT DEFAULT NULL,
   
