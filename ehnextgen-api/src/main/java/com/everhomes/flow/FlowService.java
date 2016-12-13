@@ -10,6 +10,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowButtonDTO;
 import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -18,6 +19,7 @@ import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowNodeDTO;
@@ -31,6 +33,7 @@ import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
+import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -215,6 +218,8 @@ public interface FlowService {
 	 */
 	FlowButtonDTO disableFlowButton(DisableFlowButtonCommand cmd);
 
+	FlowButtonDTO enableFlowButton(Long buttonId);
+	
 	/**
 	 * 修改任务节点的消息提醒
 	 * @param cmd
@@ -388,6 +393,13 @@ public interface FlowService {
 	void testFlowCase();
 
 	String getFireButtonTemplate(FlowStepType step, Map<String, Object> map);
+
+	FlowGraphDetailDTO getFlowGraphDetail(Long flowId);
+
+	/** 注意通过 stepCount 与 flowNodeId 来避免多次提交而产生多次下一步
+	 * @param stepDTO
+	 */
+	void processAutoStep(FlowAutoStepDTO stepDTO);
 	
 	//TODO 日志信息分类：
 	

@@ -17,6 +17,7 @@ public class FlowNodeDTO {
     private Integer     nodeLevel;
     private Long     id;
     private String     nodeName;
+    private Byte allowTimeoutAction;
     private String params;
 
     public Byte getStatus() {
@@ -105,6 +106,14 @@ public class FlowNodeDTO {
 
 	public void setParams(String params) {
 		this.params = params;
+	}
+
+	public Byte getAllowTimeoutAction() {
+		return allowTimeoutAction;
+	}
+
+	public void setAllowTimeoutAction(Byte allowTimeoutAction) {
+		this.allowTimeoutAction = allowTimeoutAction;
 	}
 
 	@Override

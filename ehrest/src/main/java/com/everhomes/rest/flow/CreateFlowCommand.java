@@ -19,6 +19,11 @@ public class CreateFlowCommand {
     private String     moduleType;
     private Long orgId;
     private Long     moduleId;
+    private String stringTag1;
+    private String stringTag2;
+    private Long integralTag1;
+    private Long integralTag2;
+    
 	public String getFlowName() {
 		return flowName;
 	}
@@ -62,6 +67,31 @@ public class CreateFlowCommand {
 	}
 	public void setOrgId(Long orgId) {
 		this.orgId = orgId;
+	}
+
+	public String getStringTag1() {
+		return stringTag1;
+	}
+	public void setStringTag1(String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
+	public String getStringTag2() {
+		return stringTag2;
+	}
+	public void setStringTag2(String stringTag2) {
+		this.stringTag2 = stringTag2;
+	}
+	public Long getIntegralTag1() {
+		return integralTag1;
+	}
+	public void setIntegralTag1(Long integralTag1) {
+		this.integralTag1 = integralTag1;
+	}
+	public Long getIntegralTag2() {
+		return integralTag2;
+	}
+	public void setIntegralTag2(Long integralTag2) {
+		this.integralTag2 = integralTag2;
 	}
 	@Override
     public String toString() {

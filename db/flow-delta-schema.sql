@@ -93,6 +93,7 @@ CREATE TABLE `eh_flow_buttons` (
     `goto_node_id` BIGINT NOT NULL DEFAULT 0,
     `need_subject` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need subject for this step, 1: need subject for this step',
     `need_processor` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need processor, 1: need only one processor',
+    `remind_count` INTEGER NOT NULL DEFAULT 0,
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: disabled, 2: enabled',
 

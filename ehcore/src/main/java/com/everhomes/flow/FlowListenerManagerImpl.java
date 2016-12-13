@@ -9,35 +9,21 @@ import javax.annotation.PostConstruct;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowUserType;
 
 @Component
-public class FlowListenerManagerImpl implements FlowListenerManager {
+public class FlowListenerManagerImpl implements FlowListenerManager, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowListenerManagerImpl.class);
 	
 	  @Autowired
 	  List<FlowModuleListener> allListeners;
 	  
 	  private Map<String, FlowModuleInst> moduleMap = new HashMap<String, FlowModuleInst>();
-	  
-	  @PostConstruct
-	  void setup() {
-		  for(FlowModuleListener listener : allListeners) {
-			  try {
-				  FlowModuleInfo info = listener.initModule();
-				  FlowModuleInst inst = new FlowModuleInst();
-				  inst.setInfo(info);
-				  inst.setListener(listener);
-				  moduleMap.put(info.getModuleName(), inst);//TODO support TreeSet for listeners ?
-			  } catch(Exception ex) {
-				  LOGGER.error("module init error cls=" + listener.getClass(), ex);
-			  }
-			  
-		  }
-	  }
 	  
 	  public FlowListenerManagerImpl() {
 		  
@@ -136,5 +122,21 @@ public class FlowListenerManagerImpl implements FlowListenerManager {
 			  return listener.onFlowVariableRender(ctx, variable);  
 		  }		
 		  return null;
+	}
+
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent arg0) {
+		  for(FlowModuleListener listener : allListeners) {
+			  try {
+				  FlowModuleInfo info = listener.initModule();
+				  FlowModuleInst inst = new FlowModuleInst();
+				  inst.setInfo(info);
+				  inst.setListener(listener);
+				  moduleMap.put(info.getModuleName(), inst);//TODO support TreeSet for listeners ?
+			  } catch(Exception ex) {
+				  LOGGER.error("module init error cls=" + listener.getClass(), ex);
+			  }
+			  
+		  }
 	}
 }

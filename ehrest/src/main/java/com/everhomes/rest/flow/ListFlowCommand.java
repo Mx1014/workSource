@@ -2,6 +2,13 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>projectId: 项目 ID，如果有项目 ID， 则只搜索启用的 Flows</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class ListFlowCommand {
     private Integer     namespaceId;
     private Long     ownerId;
@@ -10,6 +17,8 @@ public class ListFlowCommand {
     private Long     moduleId;
     private Long flowMainId;
     private Integer flowVersion;
+    private Long projectId;
+    private String projectType;
     private Long pageAnchor;
     private Integer pageSize;
     
@@ -67,6 +76,18 @@ public class ListFlowCommand {
 	}
 	public void setFlowMainId(Long flowMainId) {
 		this.flowMainId = flowMainId;
+	}
+	public Long getProjectId() {
+		return projectId;
+	}
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+	public String getProjectType() {
+		return projectType;
+	}
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
 	}
 	@Override
     public String toString() {

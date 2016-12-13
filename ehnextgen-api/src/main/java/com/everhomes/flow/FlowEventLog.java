@@ -40,6 +40,14 @@ public class FlowEventLog extends EhFlowEventLogs {
 		FlowEventCustomField.TRACKER_APLIER.setIntegralValue(this, trackerApplier);
 	}
 
+	public Long getButtonFiredCount() {
+		return FlowEventCustomField.BUTTON_FIRED_COUNT.getIntegralValue(this);
+	}
+
+	public void setButtonFiredCount(Long buttonFiredCount) {
+		FlowEventCustomField.BUTTON_FIRED_COUNT.setIntegralValue(this, buttonFiredCount);
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

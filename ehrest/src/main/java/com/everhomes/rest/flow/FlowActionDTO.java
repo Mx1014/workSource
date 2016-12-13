@@ -23,6 +23,7 @@ public class FlowActionDTO {
     private Long reminderTickMinute;
     private Long trackerProcessor;
     private Long trackerApplier;
+    private Long allowTimeoutAction;
     
 	@ItemType(FlowUserSelectionDTO.class)
 	List<FlowUserSelectionDTO> processors;
@@ -153,6 +154,14 @@ public class FlowActionDTO {
 
 	public void setProcessors(List<FlowUserSelectionDTO> processors) {
 		this.processors = processors;
+	}
+
+	public Long getAllowTimeoutAction() {
+		return allowTimeoutAction;
+	}
+
+	public void setAllowTimeoutAction(Long allowTimeoutAction) {
+		this.allowTimeoutAction = allowTimeoutAction;
 	}
 
 	@Override

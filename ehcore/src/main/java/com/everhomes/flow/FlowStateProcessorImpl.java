@@ -21,7 +21,7 @@ import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStatusType;
 import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowTimeoutStepDTO;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.news.NewsCommentContentType;
@@ -103,8 +103,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	
 	@Override
 	public FlowCaseState prepareStepTimeout(FlowTimeout ft) {
+		FlowAutoStepDTO stepDTO = (FlowAutoStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowAutoStepDTO.class);
+		return prepareAutoStep(stepDTO);
+	}
+	
+	@Override
+	public FlowCaseState prepareAutoStep(FlowAutoStepDTO stepDTO) {
 		FlowCaseState ctx = new FlowCaseState();
-		FlowTimeoutStepDTO stepDTO = (FlowTimeoutStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowTimeoutStepDTO.class);
+		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
 		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
 				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
@@ -126,12 +132,12 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			
 			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
 			ctx.setOperator(userInfo);
-			FlowGraphStepTimeoutEvent event = new FlowGraphStepTimeoutEvent(stepDTO);
+			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 			ctx.setCurrentEvent(event);
 			
 			return ctx;
 		}
-		return null;
+		return null;		
 	}
 	
 	@Override
@@ -158,32 +164,38 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		ctx.setCurrentNode(node);
 		
 		FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
-		FlowSubject subject = new FlowSubject();
-		subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
-		subject.setBelongTo(cmd.getButtonId());
-		subject.setContent(cmd.getContent());
-		subject.setNamespaceId(button.getFlowButton().getNamespaceId());
-		subject.setStatus(FlowStatusType.VALID.getCode());
-		subject.setTitle(cmd.getTitle());
-		flowSubjectProvider.createFlowSubject(subject);
-		
-		if(null != cmd.getImages() && cmd.getImages().size() > 0) {
-			List<Attachment> attachments = new ArrayList<>();
-			for(String image : cmd.getImages()) {
-				Attachment attach = new Attachment();
-				attach.setContentType(NewsCommentContentType.IMAGE.getCode());
-				attach.setContentUri(image);
-				attach.setCreatorUid(logonUser.getId());
-				attach.setOwnerId(subject.getId());
-				attachments.add(attach);
-			}
-			attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
-		}
-		
 		FlowGraphButtonEvent event = new FlowGraphButtonEvent();
+		
+		if(cmd.getContent() != null 
+				|| (null != cmd.getImages() && cmd.getImages().size() > 0) ) {
+			FlowSubject subject = new FlowSubject();
+			subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
+			subject.setBelongTo(cmd.getButtonId());
+			subject.setContent(cmd.getContent());
+			subject.setNamespaceId(button.getFlowButton().getNamespaceId());
+			subject.setStatus(FlowStatusType.VALID.getCode());
+			subject.setTitle(cmd.getTitle());
+			flowSubjectProvider.createFlowSubject(subject);
+			
+			if(null != cmd.getImages() && cmd.getImages().size() > 0) {
+				List<Attachment> attachments = new ArrayList<>();
+				for(String image : cmd.getImages()) {
+					Attachment attach = new Attachment();
+					attach.setContentType(NewsCommentContentType.IMAGE.getCode());
+					attach.setContentUri(image);
+					attach.setCreatorUid(logonUser.getId());
+					attach.setOwnerId(subject.getId());
+					attachments.add(attach);
+				}
+				attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
+			}			
+			
+			event.setSubject(subject);
+		}
+
+		
 		event.setUserType(FlowUserType.fromCode(button.getFlowButton().getFlowUserType()));
 		event.setCmd(cmd);
-		event.setSubject(subject);
 		event.setFiredUser(ctx.getOperator());
 		ctx.setCurrentEvent(event);
 		
@@ -316,14 +328,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		
 		//create step timeout
-		if(!curr.getFlowNode().getAutoStepMinute().equals(0)) {
+		if(!curr.getFlowNode().getAllowTimeoutAction().equals((byte)0)) {
 			FlowTimeout ft = new FlowTimeout();
 			ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
 			ft.setBelongTo(curr.getFlowNode().getId());
 			ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
 			ft.setStatus(FlowStatusType.VALID.getCode());
 			
-			FlowTimeoutStepDTO stepDTO = new FlowTimeoutStepDTO();
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 			stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
 			stepDTO.setFlowMainId(ctx.getFlowCase().getFlowMainId());
 			stepDTO.setFlowVersion(ctx.getFlowCase().getFlowVersion());

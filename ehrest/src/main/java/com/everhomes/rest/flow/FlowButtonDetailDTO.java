@@ -17,6 +17,10 @@ public class FlowButtonDetailDTO {
     private Integer     flowVersion;
     private Long     id;
     private String     buttonName;
+    private Byte needProcessor;
+    private Byte needSubject;
+    private Integer remindCount;
+    private String description;
     
     private FlowActionDTO pushMessage;
     private FlowActionDTO pushSms;
@@ -126,6 +130,38 @@ public class FlowButtonDetailDTO {
 
 	public void setEnterScripts(List<FlowActionDTO> enterScripts) {
 		this.enterScripts = enterScripts;
+	}
+
+	public Byte getNeedProcessor() {
+		return needProcessor;
+	}
+
+	public void setNeedProcessor(Byte needProcessor) {
+		this.needProcessor = needProcessor;
+	}
+
+	public Byte getNeedSubject() {
+		return needSubject;
+	}
+
+	public void setNeedSubject(Byte needSubject) {
+		this.needSubject = needSubject;
+	}
+
+	public Integer getRemindCount() {
+		return remindCount;
+	}
+
+	public void setRemindCount(Integer remindCount) {
+		this.remindCount = remindCount;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
 	}
 
 	@Override

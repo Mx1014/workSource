@@ -7,21 +7,21 @@ import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowTimeoutStepDTO;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.user.User;
 import com.everhomes.util.RuntimeErrorException;
 
-public class FlowGraphStepTimeoutEvent implements FlowGraphEvent {
-	FlowTimeoutStepDTO stepDTO;
+public class FlowGraphAutoStepEvent implements FlowGraphEvent {
+	FlowAutoStepDTO stepDTO;
 	private FlowEventLogProvider flowEventLogProvider;
 	private FlowButtonProvider flowButtonProvider;
 	
-	public FlowGraphStepTimeoutEvent() {
+	public FlowGraphAutoStepEvent() {
 		this(null);
 	}
 	
-	public FlowGraphStepTimeoutEvent(FlowTimeoutStepDTO o) {
+	public FlowGraphAutoStepEvent(FlowAutoStepDTO o) {
 		this.stepDTO = o;
 		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
 		flowButtonProvider = PlatformContext.getComponent(FlowButtonProvider.class);

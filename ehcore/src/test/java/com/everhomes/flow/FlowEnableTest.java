@@ -24,6 +24,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -155,9 +156,17 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Long userId = testUser2.getId();
     	setTestContext(userId);
     	
+    	String flowName = "test-flow-1";
+    	Flow flow = flowProvider.findFlowByName(namespaceId, moduleId
+    			, null, orgId, FlowOwnerType.ENTERPRISE.getCode(), flowName);
+    	if(flow != null) {
+    		flowService.disableFlow(flow.getId());
+    		flowService.deleteFlow(flow.getId());
+    	}
+    	
     	//step1 create flow
     	CreateFlowCommand flowCmd = new CreateFlowCommand();
-    	flowCmd.setFlowName("test-flow-1");
+    	flowCmd.setFlowName(flowName);
     	flowCmd.setModuleId(moduleId);
     	flowCmd.setNamespaceId(namespaceId);
     	flowCmd.setOrgId(orgId);
@@ -535,6 +544,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex).getLogs().size() == 2);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getAllowComment().equals((byte)1));
@@ -920,5 +930,24 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	setTestContext(userId);
     	
     	flowService.testFlowCase();
+    }
+    
+    @Test
+    public void testFlowGraph0() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), 0);
+    	Assert.assertTrue(flowGraph.getNodes().size() == 3);
+    	Assert.assertTrue(flowGraph.getNodes().get(0).getApplierButtons().size() == 4);
+    	Assert.assertTrue(flowGraph.getNodes().get(0).getProcessorButtons().size() == 5);
+    	
+    	FlowGraphDetailDTO detailDTO = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	Assert.assertTrue(detailDTO.getNodes().size() == 3);
     }
 }

@@ -37,4 +37,6 @@ public interface FlowEventLogProvider {
 
 	FlowEventLog isProcessor(Long userId, FlowCase flowCase);
 
+	List<FlowEventLog> findFiredEventsByLog(FlowEventLog log);
+
 }
