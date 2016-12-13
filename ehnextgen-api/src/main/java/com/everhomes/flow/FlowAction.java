@@ -48,6 +48,14 @@ public class FlowAction extends EhFlowActions {
 		FlowActionCustomField.TRACKER_APLIER.setIntegralValue(this, trackerApplier);
 	}
 
+	public Long getRemindCount() {
+		return FlowActionCustomField.REMIND_COUNT.getIntegralValue(this);
+	}
+
+	public void setRemindCount(Long remindCount) {
+		FlowActionCustomField.REMIND_COUNT.setIntegralValue(this, remindCount);
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

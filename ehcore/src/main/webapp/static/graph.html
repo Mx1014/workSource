@@ -12,26 +12,20 @@
         border-collapse: collapse;
     }
 
-    th, td {
+    table, th, td {
         border: 1px solid black;
     }
 
     .tbouter {
-        border: 1px solid black;
+
     }
 
-    .tbinner {
-        border-left: 0px;!important;
-        border-right: 0px;!important;
-        border-bottom: 1px solid black;
-        border-top: 1px solid black;
-    }
 </style>
 </head>
 
 <body>
 <form>
-<input type="button" name="show" id="btnShow" value="Show"/>
+<input type="button" name="show" id="btnShow" value="TestShow"/>
 <div id="content"></div>
 </form>
 <script type="application/javascript">
@@ -46,25 +40,7 @@ if(!String.prototype.format) {
 	}
 }
 
-function renderTable2(graph, pdom) {
-	if(graph) {
-		if(typeof graph === 'string') {
-			$(pdom).html(graph);
-		} else {
-			var dom = $('<table></table>').addClass('table0');
-			for(var i = 0; i < graph.childs.length; i++) {
-				var col = $('<td></td>');
-				var row = $('<tr></tr>');
-				renderTable(graph.childs[i], col);
-				row.append(col);
-				dom.append(row);
-			}
-			pdom.append(dom);
-		}
-	}
-}
-
-function painMatrix(matrix, tbTxt, cls) {
+function paintMatrix(matrix, tbTxt, cls) {
 	var pained = {};
    var table;
    var tableTxt = "<table></table>";
@@ -173,7 +149,7 @@ Matrix.prototype.append = function(matrix, posx, posy) {
 	}
 }
 
-function showGraph2(){
+function showGraphTest(){
 //	var graph = {"childs": ["<h1>test1</h1>", "test2", "test3"]};
 	var matrix = new Matrix(3,3);
 	matrix.set(0, 0, {'html':'abc', 'rowSpan': 2});
@@ -183,12 +159,11 @@ function showGraph2(){
 	matrix.set(1, 2, 'testd');
 	matrix.set(2, 0, {'html':'teste', 'colSpan': 3});
 //	matrix.append(matrix);
-//	$("#content").append(painMatrix(matrix));
+//	$("#content").append(paintMatrix(matrix));
 
-//  $("#content").append(painMatrix(msgMatrix("")));
-//  $("#content").append(painMatrix(actionMatrix("")));
-//    $("#content").append(renderNode({"processors":[{"selectionName":"aaa"}]}));
-//      $("#content").append(painMatrix(btnMatrix({"buttonName":"test"})));
+//  $("#content").append(paintMatrix(msgMatrix("")));
+//  $("#content").append(paintMatrix(actionMatrix("")));
+//  $("#content").append(paintMatrix(btnMatrix({"buttonName":"test"})));
 }
 
 function selectionsToText(sels) {
@@ -273,24 +248,6 @@ function actionMatrix(action) {
     return matrix;
 }
 
-function renderNode(node) {
-    var matrix = new Matrix(4);
-
-    matrix.set(0, 0, "处理人员");
-    matrix.set(0, 1, {"html": selectionsToText(node.processors), "colSpan": 3});
-
-    matrix.set(1, 0, {"html": "消息提醒", "rowSpan": 8});
-    matrix.append(actionMatrix(node.reminder), 1, 1);
-
-    var start = matrix.rows;
-    for(var i = 0; i < node.processButtons.length; i++) {
-        matrix.append(btnMatrix(node.processButtons[i]), start, 0);
-        start += 2;
-    }
-
-    return painMatrix(matrix, "tbinner");
-}
-
 function nodeMatrix(node) {
     var matrix = new Matrix(4);
 
@@ -309,7 +266,7 @@ function nodeMatrix(node) {
     return matrix;
 }
 
-function showGraph(json) {
+function showFlowGraph(json) {
 	var table = $("<table></table>").addClass("tbouter");
 	var thead = $("<thead></thead>");
 
@@ -351,7 +308,7 @@ function showGraph(json) {
 		start += 4; 
 	}
 	
-    table.append(painMatrix(graphMatrix, "<tbody></tbody>"));
+    table.append(paintMatrix(graphMatrix, "<tbody></tbody>"));
     $("#content").append(table);
 }
 
@@ -361,7 +318,7 @@ function graphRequest() {
         url: "/evh/admin/flow/getFlowGraphDetail",
         data: {"flowId": 112},
         success: function(json) {
-            showGraph(json.response);
+            showFlowGraph(json.response);
         }
     });
 }
