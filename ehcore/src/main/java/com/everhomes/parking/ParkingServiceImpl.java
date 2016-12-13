@@ -332,6 +332,7 @@ public class ParkingServiceImpl implements ParkingService {
     	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
     			FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
 		Long flowId = flow.getId();
+		String tag1 = flow.getStringTag1();
 		
         if(cardListSize == 0){
         	ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingLot.getOwnerType(), 
@@ -370,7 +371,11 @@ public class ParkingServiceImpl implements ParkingService {
     		parkingCardRequest.setRequestorUid(user.getId());
     		//设置一些初始状态
     		parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.UNISSUED.getCode());
-    		parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+    		if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1))
+    			parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+    		else 
+    			parkingCardRequest.setStatus(ParkingCardRequestStatus.AUDITING.getCode());
+
     		parkingCardRequest.setCreatorUid(user.getId());
     		parkingCardRequest.setCreateTime(new Timestamp(System.currentTimeMillis()));
     		
