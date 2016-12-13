@@ -141,10 +141,10 @@ public class HotlineServiceImpl implements HotlineService {
 	public void addHotline(AddHotlineCommand cmd) {
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
-		hotline.setCreateTime((Timestamp) DateHelper.currentGMTTime());
+		hotline.setCreateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
 		hotline.setCreatorUid(UserContext.current().getUser().getId());
 		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
-		hotline.setUpdateTime((Timestamp) DateHelper.currentGMTTime());
+		hotline.setUpdateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
 		this.serviceHotlinesProvider.createServiceHotline(hotline);
 
 	}
@@ -178,7 +178,7 @@ public class HotlineServiceImpl implements HotlineService {
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
 				ServiceHotline.class);
 		hotline.setNamespaceId(UserContext.getCurrentNamespaceId());
-		hotline.setUpdateTime((Timestamp) DateHelper.currentGMTTime());
+		hotline.setUpdateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
 		this.serviceHotlinesProvider.updateServiceHotline(hotline);
 	}
 
