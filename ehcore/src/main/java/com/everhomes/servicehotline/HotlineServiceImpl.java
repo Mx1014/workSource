@@ -235,4 +235,24 @@ public class HotlineServiceImpl implements HotlineService {
 		}
 	}
 
+	@Override
+	public void updateHotlineOrder(UpdateHotlinesCommand cmd) {
+		if(cmd.getHotlines() ==null )
+			return  ;
+		this.dbProvider.execute((TransactionStatus status) -> {
+			for (UpdateHotlineCommand cmd1 : cmd.getHotlines()) {
+				ServiceHotline hotline = this.serviceHotlinesProvider.getServiceHotlineById(cmd1.getId());
+				if(null == hotline)
+					throw RuntimeErrorException
+					.errorWith(ErrorCodes.SCOPE_GENERAL,
+							ErrorCodes.ERROR_INVALID_PARAMETER,
+							"Invalid paramter   hotline can not found id = "+cmd1.getId());
+				hotline.setDefaultOrder(cmd1.getDefaultOrder());
+				hotline.setUpdateTime(new Timestamp( DateHelper.currentGMTTime().getTime()));
+				this.serviceHotlinesProvider.updateServiceHotline(hotline);
+			}
+			return null;
+		}); 
+	}
+
 }

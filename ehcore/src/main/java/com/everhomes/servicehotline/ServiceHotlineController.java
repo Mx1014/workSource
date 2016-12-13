@@ -136,6 +136,21 @@ public class ServiceHotlineController extends ControllerBase {
 	
 
 	/**
+	 * <b>URL: /hotline/updateHotlineOrder</b>
+	 * <p>
+	 * 排序
+	 * </p>
+	 */
+	@RequestMapping("updateHotlineOrder")
+	@RestReturn(value = String.class)
+	public RestResponse updateHotlineOrder(@Valid UpdateHotlinesCommand cmd) {
+		this.hotlineService.updateHotlineOrder(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}  
+	/**
 	 * <b>URL: /hotline/setHotlineSubject</b>
 	 * <p>
 	 * 功能开关 

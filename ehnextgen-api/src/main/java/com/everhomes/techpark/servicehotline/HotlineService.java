@@ -26,5 +26,7 @@ public interface HotlineService {
 
 	void setHotlineSubject(SetHotlineSubjectCommand cmd);
 
+	void updateHotlineOrder(UpdateHotlinesCommand cmd);
+
 
 }
