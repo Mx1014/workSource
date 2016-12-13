@@ -170,7 +170,8 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     		.and(Tables.EH_FLOW_CASES.STEP_COUNT.eq(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT)); //step_cout must equal the same
     	} else if (FlowCaseSearchType.DONE_LIST.equals(searchType)) {
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()))
-    		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()));    		
+    		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
+    		.and(FlowEventCustomField.BUTTON_FIRED_COUNT.getField().eq(0l));    		
     	} else if(FlowCaseSearchType.SUPERVISOR.equals(searchType)) {
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId())); 
@@ -360,5 +361,24 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 			}
     	});
     	
+    }
+    
+    @Override
+    public List<FlowEventLog> findFiredEventsByLog(FlowEventLog log) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(log.getFlowCaseId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_MAIN_ID.eq(log.getFlowMainId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(log.getFlowVersion()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.NAMESPACE_ID.eq(log.getNamespaceId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(log.getFlowUserId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(log.getLogType()));
+				
+				return query;
+			}
+    	});
     }
 }

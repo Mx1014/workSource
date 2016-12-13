@@ -322,7 +322,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		
 		//create step timeout
-		if(!curr.getFlowNode().getAutoStepMinute().equals(0)) {
+		if(!curr.getFlowNode().getAllowTimeoutAction().equals((byte)0)) {
 			FlowTimeout ft = new FlowTimeout();
 			ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
 			ft.setBelongTo(curr.getFlowNode().getId());

@@ -1,6 +1,7 @@
 package com.everhomes.flow;
 
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -233,6 +234,12 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		log.setLogType(FlowLogType.BUTTON_FIRED.getCode());
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
+		
+		List<FlowEventLog> likeLogs = flowEventLogProvider.findFiredEventsByLog(log);
+		if(likeLogs != null && likeLogs.size() > 0) {
+			log.setButtonFiredCount(new Long(likeLogs.size()));
+		}
+		
 		ctx.getLogs().add(log);	//added but not save to database now.
 	}
 
