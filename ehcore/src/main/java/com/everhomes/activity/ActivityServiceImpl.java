@@ -3031,6 +3031,10 @@ public class ActivityServiceImpl implements ActivityService {
             List<ActivityAttachmentDTO> dtos = attachments.stream().map((r) -> {
                 ActivityAttachmentDTO dto = ConvertHelper.convert(r, ActivityAttachmentDTO.class);
                 String contentUrl = contentServerService.parserUri(dto.getContentUri(), EntityType.ACTIVITY.getCode(), dto.getActivityId());
+                User creator = userProvider.findUserById(dto.getCreatorUid());
+                if(creator != null) {
+                    dto.setCreatorName(creator.getNickName());
+                }
                 dto.setContentUrl(contentUrl);
                 return dto;
             }).collect(Collectors.toList());
