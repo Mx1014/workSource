@@ -33,7 +33,7 @@ public class SearchParkingCardRequestsCommand {
     private Long pageAnchor;
     private Integer pageSize;
     
-    private Integer flowId;
+    private Long flowId;
     private String carBrand;
     private String carSerieName;
     
@@ -149,11 +149,11 @@ public class SearchParkingCardRequestsCommand {
         return StringHelper.toJsonString(this);
     }
 
-	public Integer getFlowId() {
+	public Long getFlowId() {
 		return flowId;
 	}
 
-	public void setFlowId(Integer flowId) {
+	public void setFlowId(Long flowId) {
 		this.flowId = flowId;
 	}
 }
