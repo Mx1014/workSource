@@ -188,7 +188,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
 
-		String stepType = flowNode.getAutoStepType();
+		String stepType = ctx.getStepType().getCode();
 		String param = flowNode.getParams();
 		
 		Long flowId = flowNode.getFlowMainId();
@@ -206,7 +206,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
 						ParkingCardRequestStatus.SUCCEED.getCode(), null);
 				
-				Integer totalCount = parkingFlow.getMaxRequestNum();
+				Integer totalCount = parkingFlow.getMaxIssueNum();
 				Integer surplusCount = totalCount - requestedCount;
 				if(surplusCount <= 0) {
 					LOGGER.error("surplusCount is 0.");

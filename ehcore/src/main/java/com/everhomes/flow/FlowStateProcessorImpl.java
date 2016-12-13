@@ -201,7 +201,13 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		//fire button actions
 		FlowGraphButton btn = flowGraph.getGraphButton(cmd.getButtonId());
+		
 		if(btn != null) {
+			//TODO:
+			FlowButton flowButton = btn.getFlowButton();
+			if(null != flowButton) {
+				ctx.setStepType(FlowStepType.fromCode(flowButton.getFlowStepType()));
+			}
 			if(null != btn.getMessage()) {
 				btn.getMessage().fireAction(ctx, event);
 			}

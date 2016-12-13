@@ -41,7 +41,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 	  
 	  @Override 
 	  public void onFlowCaseStart(FlowCaseState ctx) {
-		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
 		  if(inst != null) {
 			  ctx.setModule(inst.getInfo());
 			  FlowModuleListener listener = inst.getListener();
@@ -76,7 +76,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 	
 	@Override
 	public void onFlowButtonFired(FlowCaseState ctx) {
-		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
 		  if(inst != null) {
 			  ctx.setModule(inst.getInfo());
 			  FlowModuleListener listener = inst.getListener();
