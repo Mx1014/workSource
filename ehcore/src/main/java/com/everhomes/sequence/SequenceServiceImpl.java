@@ -1070,7 +1070,7 @@ public class SequenceServiceImpl implements SequenceService {
     
         syncTableSequence(null, EhEnergyMeterSettingLogs.class, Tables.EH_ENERGY_METER_SETTING_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_ENERGY_METER_SETTING_LOGS.ID.max()).from(Tables.EH_ENERGY_METER_SETTING_LOGS).fetchOne().value1();
-        });
+        }); 
         syncTableSequence(null, EhFlowScripts.class, Tables.EH_FLOW_SCRIPTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_FLOW_SCRIPTS.ID.max()).from(Tables.EH_FLOW_SCRIPTS).fetchOne().value1();
         });
@@ -1106,7 +1106,11 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhTerminalStatisticsTasks.class, Tables.EH_TERMINAL_STATISTICS_TASKS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_TERMINAL_STATISTICS_TASKS.ID.max()).from(Tables.EH_TERMINAL_STATISTICS_TASKS).fetchOne().value1();
         });
-
+ 
+         
+        syncTableSequence(null, EhServiceHotlines.class, Tables.EH_SERVICE_HOTLINES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_HOTLINES.ID.max()).from(Tables.EH_SERVICE_HOTLINES).fetchOne().value1();
+        }); 
         syncTableSequence(null, EhPmTaskTargetStatistics.class, Tables.EH_PM_TASK_TARGET_STATISTICS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PM_TASK_TARGET_STATISTICS.ID.max()).from(Tables.EH_PM_TASK_TARGET_STATISTICS).fetchOne().value1();
         });

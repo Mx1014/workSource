@@ -39,7 +39,7 @@ CREATE TABLE `eh_flows` (
   `integral_tag5` BIGINT DEFAULT 0,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_stats`;
 CREATE TABLE `eh_flow_stats` (
@@ -55,7 +55,7 @@ CREATE TABLE `eh_flow_stats` (
   `leave_count` INTEGER NOT NULL,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_nodes`;
 CREATE TABLE `eh_flow_nodes` (
@@ -76,7 +76,7 @@ CREATE TABLE `eh_flow_nodes` (
     `status` TINYINT NOT NULL DEFAULT 0 COMMENT 'invalid, valid',
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_buttons`;
 CREATE TABLE `eh_flow_buttons` (
@@ -110,7 +110,7 @@ CREATE TABLE `eh_flow_buttons` (
     `integral_tag5` BIGINT DEFAULT 0,
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_forms`;
 CREATE TABLE `eh_flow_forms` (
@@ -140,7 +140,7 @@ CREATE TABLE `eh_flow_forms` (
     `integral_tag5` BIGINT DEFAULT 0,
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_actions`;
 CREATE TABLE `eh_flow_actions` (
@@ -170,7 +170,7 @@ CREATE TABLE `eh_flow_actions` (
     `integral_tag5` BIGINT DEFAULT 0,
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_user_selections`;
 CREATE TABLE `eh_flow_user_selections` (
@@ -194,7 +194,7 @@ CREATE TABLE `eh_flow_user_selections` (
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_cases`;
 CREATE TABLE `eh_flow_cases` (
@@ -241,7 +241,7 @@ CREATE TABLE `eh_flow_cases` (
     `integral_tag5` BIGINT DEFAULT 0,
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_event_logs`;
 CREATE TABLE `eh_flow_event_logs` (
@@ -277,7 +277,7 @@ CREATE TABLE `eh_flow_event_logs` (
     `integral_tag5` BIGINT DEFAULT 0,
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_variables`;
 CREATE TABLE `eh_flow_variables` (
@@ -297,7 +297,7 @@ CREATE TABLE `eh_flow_variables` (
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_evaluates`;
 CREATE TABLE `eh_flow_evaluates` (
@@ -318,7 +318,7 @@ CREATE TABLE `eh_flow_evaluates` (
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- scripts for this module
 -- DROP TABLE IF EXISTS `eh_flow_scripts`;
@@ -338,7 +338,7 @@ CREATE TABLE `eh_flow_scripts` (
     `step_type` VARCHAR(64) NOT NULL COMMENT 'step_none, step_timeout, step_enter, step_leave',
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_subjects`;
 CREATE TABLE `eh_flow_subjects` (
@@ -354,7 +354,7 @@ CREATE TABLE `eh_flow_subjects` (
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
     PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_attachments`;
 CREATE TABLE `eh_flow_attachments` (
@@ -366,7 +366,7 @@ CREATE TABLE `eh_flow_attachments` (
   `create_time` DATETIME NOT NULL,
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_flow_timeouts`;
 CREATE TABLE `eh_flow_timeouts` (
@@ -380,14 +380,14 @@ CREATE TABLE `eh_flow_timeouts` (
     `status` TINYINT NOT NULL COMMENT '0: invalid, 1: valid',
 
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
 
 
 
 -- merge from activity1.6-delta-schema.sql by lqs 20161214
-ALTER TABLE eh_activities ADD COLUMN `achievement` text;
+ALTER TABLE eh_activities ADD COLUMN `achievement` TEXT;
 ALTER TABLE eh_activities ADD COLUMN `achievement_type` VARCHAR(32) COMMENT 'richtext, link';
 ALTER TABLE eh_activities ADD COLUMN `achievement_richtext_url` VARCHAR(512) COMMENT 'richtext page';
 
@@ -431,9 +431,9 @@ DROP TABLE IF EXISTS `eh_terminal_app_version_cumulatives`;
 CREATE TABLE `eh_terminal_app_version_cumulatives` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `app_version_realm` varchar(128) DEFAULT NULL,
-  `app_version` varchar(128) DEFAULT NULL,
-  `imei_number` varchar(128) DEFAULT '',
+  `app_version_realm` VARCHAR(128) DEFAULT NULL,
+  `app_version` VARCHAR(128) DEFAULT NULL,
+  `imei_number` VARCHAR(128) DEFAULT '',
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -443,9 +443,9 @@ DROP TABLE IF EXISTS `eh_terminal_app_version_actives`;
 CREATE TABLE `eh_terminal_app_version_actives` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `app_version_realm` varchar(128) DEFAULT NULL,
-  `app_version` varchar(128) DEFAULT NULL,
-  `imei_number` varchar(128) DEFAULT '',
+  `app_version_realm` VARCHAR(128) DEFAULT NULL,
+  `app_version` VARCHAR(128) DEFAULT NULL,
+  `imei_number` VARCHAR(128) DEFAULT '',
   `date` VARCHAR(32) DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -462,7 +462,7 @@ CREATE TABLE `eh_terminal_day_statistics` (
   `new_change_rate` DECIMAL(10,2) NOT NULL COMMENT 'today compared to yesterdays rate of change.',
   `active_change_rate` DECIMAL(10,2) NOT NULL COMMENT 'today compared to yesterdays rate of change.',
   `cumulative_change_rate` DECIMAL(10,2) NOT NULL COMMENT 'today compared to yesterdays rate of change.',
-  `active_rate` DECIMAL(10,2) NOT NUll COMMENT 'active_user_number/accumulative_user_number',
+  `active_rate` DECIMAL(10,2) NOT NULL COMMENT 'active_user_number/accumulative_user_number',
   `start_number` BIGINT NOT NULL COMMENT 'number of starts',
   `cumulative_user_number` BIGINT NOT NULL COMMENT 'cumulative number of users',
   `seven_active_user_number` BIGINT NOT NULL COMMENT '7 active number of users',
@@ -480,7 +480,7 @@ CREATE TABLE `eh_terminal_hour_statistics` (
   `new_user_number` BIGINT NOT NULL COMMENT 'number of new users',
   `active_user_number` BIGINT NOT NULL COMMENT 'number of active users',
   `change_rate` DECIMAL(10,2) NOT NULL COMMENT 'today compared to yesterdays rate of change.',
-  `active_rate` DECIMAL(10,2) NOT NUll COMMENT 'active_user_number/accumulative_user_number',
+  `active_rate` DECIMAL(10,2) NOT NULL COMMENT 'active_user_number/accumulative_user_number',
   `start_number` BIGINT NOT NULL COMMENT 'number of starts',
   `cumulative_user_number` BIGINT NOT NULL COMMENT 'cumulative number of users',
   `date` VARCHAR(32) DEFAULT NULL,
@@ -494,14 +494,14 @@ DROP TABLE IF EXISTS `eh_terminal_app_version_statistics`;
 CREATE TABLE `eh_terminal_app_version_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `app_version_realm` varchar(128) DEFAULT NULL,
-  `app_version` varchar(128) DEFAULT NULL,
+  `app_version_realm` VARCHAR(128) DEFAULT NULL,
+  `app_version` VARCHAR(128) DEFAULT NULL,
   `new_user_number` BIGINT NOT NULL COMMENT 'number of new users',
   `start_number` BIGINT NOT NULL COMMENT 'number of starts',
   `active_user_number` BIGINT NOT NULL COMMENT 'number of active users',
   `cumulative_user_number` BIGINT NOT NULL COMMENT 'cumulative of active users',
-  `version_cumulative_rate` DECIMAL(10,2) NOT NUll,
-  `version_active_rate` DECIMAL(10,2) NOT NUll,
+  `version_cumulative_rate` DECIMAL(10,2) NOT NULL,
+  `version_active_rate` DECIMAL(10,2) NOT NULL,
   `date` VARCHAR(32) DEFAULT NULL,
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`)
@@ -518,7 +518,7 @@ CREATE TABLE `eh_terminal_statistics_tasks` (
   `create_time` DATETIME DEFAULT NULL,
   PRIMARY KEY (`id`),
   UNIQUE KEY `task_no` (`task_no`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- app版本
 DROP TABLE IF EXISTS `eh_app_version`;
@@ -535,9 +535,51 @@ CREATE TABLE `eh_app_version` (
 
 -- 活动数据增加域空间字段
 ALTER TABLE `eh_user_activities` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
-ALTER TABLE `eh_user_activities` ADD COLUMN `version_realm` varchar(128) DEFAULT NULL;
+ALTER TABLE `eh_user_activities` ADD COLUMN `version_realm` VARCHAR(128) DEFAULT NULL;
 
 -- 菜单增加模块id字段
 ALTER TABLE `eh_web_menus` ADD COLUMN `module_id` BIGINT DEFAULT NULL;
 
+
+
+-- 
+-- 服务热线配置表
+-- 
+-- DROP TABLE IF EXISTS `eh_service_configurations`;
+
+CREATE TABLE `eh_service_configurations` (
+  `id` BIGINT AUTO_INCREMENT COMMENT 'id of the record',
+  `owner_type` VARCHAR(64) COMMENT 'community;group,organaization,exhibition,',
+  `owner_id` BIGINT DEFAULT '0',
+  `name` VARCHAR(64),
+  `value` VARCHAR(64),
+  `description` VARCHAR(256) ,
+  `namespace_id` INT DEFAULT '0',
+  `display_name` VARCHAR(128) ,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_config` (`owner_type`,`owner_id`,`name`,`value`,`namespace_id`)
+) ENGINE=INNODB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4
+
+
+
+-- 
+-- 服务热线表
+-- 
+-- DROP TABLE IF EXISTS `eh_service_hotlines`;
+CREATE TABLE `eh_service_hotlines` (
+  `id` BIGINT COMMENT 'id of the record',
+  `namespace_id` INTEGER DEFAULT '0',
+  `owner_type` VARCHAR(64) COMMENT 'community;group,organaization,exhibition,',
+  `owner_id` BIGINT(20) DEFAULT '0',
+  `service_type` INT COMMENT'1-公共热线 2-专属客服 4- 8-', 
+  `name` VARCHAR(64) COMMENT '热线/客服名称', 
+  `contact` VARCHAR(64) COMMENT '热线/客服 联系电话',
+  `user_id` BIGINT COMMENT '客服 userid', 
+  `description` VARCHAR(400) COMMENT '客服 描述',
+  `default_order` INTEGER DEFAULT '0' COMMENT '排序字段',
+  `create_time` DATETIME DEFAULT NULL,
+  `creator_uid` BIGINT DEFAULT NULL,
+  `update_time` DATETIME DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
