@@ -93,4 +93,6 @@ public interface ParkingProvider {
     void updateParkingCardRequest(ParkingCardRequest parkingCardRequest);
     
     Integer countParkingCardRequest(String ownerType, Long ownerId, Long parkingLotId, Long flowId, Byte geStatus, Byte status);
+    
+    ParkingFlow findParkingRequestCardConfig(Long id);
 }

@@ -36,6 +36,7 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
 import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
@@ -46,6 +47,7 @@ import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
+import com.everhomes.rest.parking.gettParkingRequestCardAgreementCommand;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
@@ -104,4 +106,6 @@ public interface ParkingService {
     OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
     
     SurplusCardCountDTO getSurplusCardCount(GettParkingRequestCardConfigCommand cmd);
+    
+    ParkingRequestCardAgreementDTO gettParkingRequestCardAgreement(gettParkingRequestCardAgreementCommand cmd);
 }

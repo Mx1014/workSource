@@ -33,6 +33,8 @@ public class ParkingRequestCardConfigDTO {
     private Integer maxIssueNum;
     private Long flowId;
     
+    private String cardAgreementUrl;
+    
 	public String getOwnerType() {
 		return ownerType;
 	}
@@ -122,4 +124,10 @@ public class ParkingRequestCardConfigDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+	public String getCardAgreementUrl() {
+		return cardAgreementUrl;
+	}
+	public void setCardAgreementUrl(String cardAgreementUrl) {
+		this.cardAgreementUrl = cardAgreementUrl;
+	}
 }

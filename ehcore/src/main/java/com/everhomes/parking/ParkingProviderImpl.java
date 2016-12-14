@@ -643,7 +643,17 @@ public class ParkingProviderImpl implements ParkingProvider {
 	     
 	    return ConvertHelper.convert(query.fetchAny(), ParkingFlow.class);
 	}
-	 
+	
+	@Override
+    public ParkingFlow findParkingRequestCardConfig(Long id) {
+		
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingFlow.class));
+		 
+		EhParkingFlowDao dao = new EhParkingFlowDao(context.configuration());
+		
+		return ConvertHelper.convert(dao.findById(id), ParkingFlow.class);
+    }
+	
 	@Override
     public void updatetParkingRequestCardConfig(ParkingFlow parkingFlow) {
 		 

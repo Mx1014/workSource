@@ -110,6 +110,7 @@ import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
+import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
 import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
@@ -122,6 +123,7 @@ import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
+import com.everhomes.rest.parking.gettParkingRequestCardAgreementCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -1207,7 +1209,10 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), flowId);
 		
-		return ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
+		ParkingRequestCardConfigDTO dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
+		if(null != parkingFlow)
+			dto.setCardAgreementUrl("/web/lib/html/park_payment_review.html?id=" + parkingFlow.getId());
+		return dto;
 	}
 
 	@Override
@@ -1296,6 +1301,17 @@ public class ParkingServiceImpl implements ParkingService {
 		dto.setTotalCount(totalCount);
 		dto.setSurplusCount(totalCount - count);
 		
+		return dto;
+	}
+
+	@Override
+	public ParkingRequestCardAgreementDTO gettParkingRequestCardAgreement(gettParkingRequestCardAgreementCommand cmd) {
+
+		ParkingRequestCardAgreementDTO dto = new ParkingRequestCardAgreementDTO();
+		ParkingFlow parkingFlow = parkingProvider.findParkingRequestCardConfig(cmd.getId());
+		
+		if(null != parkingFlow)
+			dto.setAgreement(parkingFlow.getCardAgreement());
 		return dto;
 	}
 	

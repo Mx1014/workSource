@@ -43,6 +43,7 @@ import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardRequestDTO;
 import com.everhomes.rest.parking.ParkingLotDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
 import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
@@ -54,6 +55,7 @@ import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
+import com.everhomes.rest.parking.gettParkingRequestCardAgreementCommand;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -342,6 +344,22 @@ public class ParkingController extends ControllerBase {
     public RestResponse gettParkingRequestCardConfig(GettParkingRequestCardConfigCommand cmd) {
 
     	ParkingRequestCardConfigDTO dto = parkingService.gettParkingRequestCardConfig(cmd);
+
+        RestResponse response = new RestResponse(dto);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /parking/gettParkingRequestCardAgreement</b>
+     * <p>获取申请月卡参数</p>
+     */
+    @RequestMapping("gettParkingRequestCardAgreement")
+    @RestReturn(value=ParkingRequestCardAgreementDTO.class)
+    public RestResponse gettParkingRequestCardAgreement(gettParkingRequestCardAgreementCommand cmd) {
+
+    	ParkingRequestCardAgreementDTO dto = parkingService.gettParkingRequestCardAgreement(cmd);
 
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
