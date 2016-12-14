@@ -6,15 +6,15 @@ INSERT INTO `eh_namespace_details` (`id`, `namespace_id`, `resource_type`, `crea
 
 SET @eh_configurations = (SELECT MAX(id) FROM `eh_configurations`);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
-	VALUES ((@eh_configurations := @eh_configurations + 1), 'app.agreements.url', 'http://core.zuolin.com/mobile/static/app_agreements/Tspace_agreements.html', 'the relative path for kexin app agreements', '999983', NULL);
+	VALUES ((@eh_configurations := @eh_configurations + 1), 'app.agreements.url', 'http://core.zuolin.com/mobile/static/app_agreements/zzh_agreements.html', 'the relative path for kexin app agreements', '999983', NULL);
 
-INSERT INTO `eh_version_realm` VALUES ('75', 'Android_Kexin', null, UTC_TIMESTAMP(), '999983');
-INSERT INTO `eh_version_realm` VALUES ('76', 'iOS_Kexin', null, UTC_TIMESTAMP(), '999983');
+INSERT INTO `eh_version_realm` VALUES ('79', 'Android_Kexin', null, UTC_TIMESTAMP(), '999983');
+INSERT INTO `eh_version_realm` VALUES ('80', 'iOS_Kexin', null, UTC_TIMESTAMP(), '999983');
 
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	values(170,75,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+	values(205,79,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	values(171,76,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+	values(206,80,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
 	VALUES(999983, 'sms.default.yzx', 1, 'zh_CN', '验证码-正中会', '33739');
