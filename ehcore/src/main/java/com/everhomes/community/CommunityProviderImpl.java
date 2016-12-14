@@ -1342,4 +1342,18 @@ public class CommunityProviderImpl implements CommunityProvider {
 		
 		return communities;
 	}
+
+    @Override
+    public List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final List<Community> communities = new ArrayList<Community>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+        query.addConditions(Tables.EH_COMMUNITIES.FEEDBACK_FORUM_ID.eq(feedbackForumId));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.fetch().map(r ->{
+            communities.add(ConvertHelper.convert(r, Community.class));
+           return null;
+        });
+        return communities;
+    }
 }

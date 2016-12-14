@@ -101,4 +101,6 @@ public interface CommunityProvider {
     
     List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId);
     List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids);
+
+    List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId);
 }

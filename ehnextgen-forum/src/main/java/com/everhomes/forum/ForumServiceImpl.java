@@ -3795,7 +3795,7 @@ public class ForumServiceImpl implements ForumService {
 //	    return this.createTopic(topicCmd);
 //	}
 
-    private void checkBlacklist(String ownerType, Long ownerId, Long categoryId){
+    private void checkBlacklist(String ownerType, Long ownerId, Long categoryId, Long forumId){
         ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
         ownerId = null == ownerId ? 0L : ownerId;
         Long userId = UserContext.current().getUser().getId();
@@ -3810,15 +3810,25 @@ public class ForumServiceImpl implements ForumService {
         }else if(CategoryConstants.CATEGORY_ID_TOPIC_COMMON == -1|| CategoryConstants.CATEGORY_ID_TOPIC_COMMON == categoryId|| CategoryConstants.CATEGORY_ID_TOPIC_POLLING == categoryId){
             privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
         }
+
+
         if(null != privilegeId){
             resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_ACTIVITY_POST);
+        }
+
+        //校验意见反馈论坛黑名单
+        if(null != forumId){
+            List<Community> communities = communityProvider.listCommunitiesByFeedbackForumId(forumId);
+            if(communities.size() > 0){
+                resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_FEEDBACK_FORUM);
+            }
         }
     }
 
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
         //黑名单权限校验 by sfyan20161213
-        checkBlacklist(null, null, cmd.getContentCategory());
+        checkBlacklist(null, null, cmd.getContentCategory(), cmd.getForumId());
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());

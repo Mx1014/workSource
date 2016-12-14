@@ -91,7 +91,10 @@ public interface PrivilegeConstants {
     //黑名单物业发帖、评论、回复评论
     public static final long BLACKLIST_PROPERTY_POST = 1006L;
 
-    //黑名发消息
+    //黑名单发消息
     public static final long BLACKLIST_SEND_MESSAGE = 1007L;
+
+    //黑名单意见反馈论坛
+    public static final long BLACKLIST_FEEDBACK_FORUM = 1008L;
 
 }
