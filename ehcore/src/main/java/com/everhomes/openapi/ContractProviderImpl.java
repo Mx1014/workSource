@@ -73,7 +73,6 @@ public class ContractProviderImpl implements ContractProvider {
 				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
 				.and(Tables.EH_CONTRACTS.CONTRACT_NUMBER.eq(contractNumber))
-				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 				.fetchOne();
 		if (record != null) {
 			return ConvertHelper.convert(record, Contract.class);
@@ -154,6 +153,16 @@ public class ContractProviderImpl implements ContractProvider {
 		}
 		
 		return new ArrayList<Contract>();
+	}
+
+	@Override
+	public List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId) {
+		return getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, Contract.class));
 	}
 
 	private EhContractsDao getReadWriteDao() {

@@ -73,16 +73,16 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 	}
 	
 	@Override
-	public ContractBuildingMapping findContractBuildingMappingByName(String contractNumber, String buildingName,
+	public ContractBuildingMapping findContractBuildingMappingByName(Integer namespaceId, Long organizationId, String contractNumber, String buildingName,
 			String apartmentName) {
-		SelectConditionStep<Record> step =getReadOnlyContext().select().from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+		Record record = getReadOnlyContext().select().from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
 				.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ORGANIZATION_ID.eq(organizationId))
 				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.APARTMENT_NAME.eq(apartmentName))
-				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-		if (StringUtils.isNotBlank(buildingName)) {
-			step = step.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName));
-		}
-		Record record = step.fetchOne();
+				.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.BUILDING_NAME.eq(buildingName))
+				.fetchOne();
+		
 		if (record != null) {
 			return ConvertHelper.convert(record, ContractBuildingMapping.class);
 		}
@@ -151,6 +151,17 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		}
 		
 		return new ArrayList<BuildingApartmentDTO>();
+	}
+
+	@Override
+	public List<ContractBuildingMapping> listContractBuildingMappingByContract(Integer namespaceId, Long organizationId,
+			String contractNumber) {
+		return getReadOnlyContext().select().from(Tables.EH_CONTRACT_BUILDING_MAPPINGS)
+			.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ORGANIZATION_ID.eq(organizationId))
+			.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.CONTRACT_NUMBER.eq(contractNumber))
+			.fetch()
+			.map(r->ConvertHelper.convert(r, ContractBuildingMapping.class));
 	}
 
 	private EhContractBuildingMappingsDao getReadWriteDao() {

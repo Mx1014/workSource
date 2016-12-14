@@ -14,8 +14,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhTechparkSyncdataLogDao;
-import com.everhomes.server.schema.tables.pojos.EhTechparkSyncdataLog;
+import com.everhomes.server.schema.tables.daos.EhTechparkSyncdataLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhTechparkSyncdataLogs;
 import com.everhomes.util.ConvertHelper;
 
 @Component
@@ -29,17 +29,17 @@ public class TechparkSyncdataLogProviderImpl implements TechparkSyncdataLogProvi
 
 	@Override
 	public void createTechparkSyncdataLog(TechparkSyncdataLog techparkSyncdataLog) {
-		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTechparkSyncdataLog.class));
+		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhTechparkSyncdataLogs.class));
 		techparkSyncdataLog.setId(id);
 		getReadWriteDao().insert(techparkSyncdataLog);
-		DaoHelper.publishDaoAction(DaoAction.CREATE, EhTechparkSyncdataLog.class, null);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhTechparkSyncdataLogs.class, null);
 	}
 
 	@Override
 	public void updateTechparkSyncdataLog(TechparkSyncdataLog techparkSyncdataLog) {
 		assert (techparkSyncdataLog.getId() != null);
 		getReadWriteDao().update(techparkSyncdataLog);
-		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhTechparkSyncdataLog.class, techparkSyncdataLog.getId());
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhTechparkSyncdataLogs.class, techparkSyncdataLog.getId());
 	}
 
 	@Override
@@ -50,21 +50,21 @@ public class TechparkSyncdataLogProviderImpl implements TechparkSyncdataLogProvi
 	
 	@Override
 	public List<TechparkSyncdataLog> listTechparkSyncdataLog() {
-		return getReadOnlyContext().select().from(Tables.EH_TECHPARK_SYNCDATA_LOG)
-				.orderBy(Tables.EH_TECHPARK_SYNCDATA_LOG.ID.asc())
+		return getReadOnlyContext().select().from(Tables.EH_TECHPARK_SYNCDATA_LOGS)
+				.orderBy(Tables.EH_TECHPARK_SYNCDATA_LOGS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, TechparkSyncdataLog.class));
 	}
 	
-	private EhTechparkSyncdataLogDao getReadWriteDao() {
+	private EhTechparkSyncdataLogsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
 
-	private EhTechparkSyncdataLogDao getReadOnlyDao() {
+	private EhTechparkSyncdataLogsDao getReadOnlyDao() {
 		return getDao(getReadOnlyContext());
 	}
 
-	private EhTechparkSyncdataLogDao getDao(DSLContext context) {
-		return new EhTechparkSyncdataLogDao(context.configuration());
+	private EhTechparkSyncdataLogsDao getDao(DSLContext context) {
+		return new EhTechparkSyncdataLogsDao(context.configuration());
 	}
 
 	private DSLContext getReadWriteContext() {

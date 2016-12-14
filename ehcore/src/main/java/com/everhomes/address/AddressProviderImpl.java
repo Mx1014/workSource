@@ -351,16 +351,24 @@ public class AddressProviderImpl implements AddressProvider {
 	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
 	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
 	        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.eq(apartmentName))
-	        .and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()));
-		if (StringUtils.isNotBlank(buildingName)) {
-			step = step.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName));
-		}
+			.and(Tables.EH_ADDRESSES.BUILDING_NAME.eq(buildingName));
+		
 	    Record record = step.fetchOne();
 	    
 		if (record != null) {
 			return ConvertHelper.convert(record, Address.class);
 		}
 		return null;
+	}
+
+	@Override
+	public List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ADDRESSES)
+	        .where(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+	        .and(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+	        .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType))
+	        .fetch()
+	        .map(r->ConvertHelper.convert(r, Address.class));
 	}
     
 }

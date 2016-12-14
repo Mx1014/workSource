@@ -13,4 +13,8 @@ public interface TechparkSyncdataBackupProvider {
 
 	List<TechparkSyncdataBackup> listTechparkSyncdataBackup();
 
+	List<TechparkSyncdataBackup> listTechparkSyncdataBackupByParam(Integer namespaceId, Byte dataType, Byte allFlag);
+
+	void updateTechparkSyncdataBackupInactive(List<TechparkSyncdataBackup> backupList);
+
 }

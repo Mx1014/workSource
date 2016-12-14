@@ -15,7 +15,7 @@ public interface ContractBuildingMappingProvider {
 
 	List<ContractBuildingMapping> listContractBuildingMapping();
 
-	ContractBuildingMapping findContractBuildingMappingByName(String contractNumber, String buildingName,
+	ContractBuildingMapping findContractBuildingMappingByName(Integer namespaceId, Long organizationId, String contractNumber, String buildingName,
 			String apartmentName);
 
 	void deleteContractBuildingMappingByOrganizatinName(Integer namespaceId, String name);
@@ -27,5 +27,8 @@ public interface ContractBuildingMappingProvider {
 	void deleteContractBuildingMapping(ContractBuildingMapping contractBuildingMapping);
 
 	ContractBuildingMapping findAnyContractBuildingMappingByNumber(String contractNumber);
+
+	List<ContractBuildingMapping> listContractBuildingMappingByContract(Integer namespaceId, Long organizationId,
+			String contractNumber);
 
 }

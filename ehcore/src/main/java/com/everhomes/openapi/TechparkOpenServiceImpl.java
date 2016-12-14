@@ -3,6 +3,7 @@ package com.everhomes.openapi;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -23,8 +24,11 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
@@ -36,6 +40,7 @@ import com.everhomes.rest.address.NamespaceAddressType;
 import com.everhomes.rest.address.NamespaceBuildingType;
 import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.openapi.TechparkDataType;
+import com.everhomes.rest.openapi.techpark.AllFlag;
 import com.everhomes.rest.openapi.techpark.CustomerApartment;
 import com.everhomes.rest.openapi.techpark.CustomerBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerContract;
@@ -46,6 +51,7 @@ import com.everhomes.rest.openapi.techpark.SyncDataCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
 import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -90,6 +96,15 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	@Autowired
 	private RolePrivilegeService rolePrivilegeService;
 	
+	@Autowired
+	private TechparkSyncdataBackupProvider techparkSyncdataBackupProvider;
+	
+	@Autowired
+	private TechparkSyncdataLogProvider techparkSyncdataLogProvider;
+	
+	@Autowired
+	private EnterpriseProvider enterpriseProvider;
+	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
 		if (StringUtils.isBlank(cmd.getAppKey()) || cmd.getDataType() == null) {
@@ -97,6 +112,15 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					"invalid parameters: cmd="+cmd);
 		}
 		
+		if (TechparkDataType.fromCode(cmd.getDataType()) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error data type");
+		}
+		
+		if (AllFlag.fromCode(cmd.getAllFlag()) == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"error allFlag value");
+		}
 		String appKey = cmd.getAppKey();
 		
 		AppNamespaceMapping appNamespaceMapping = appNamespaceMappingProvider.findAppNamespaceMappingByAppKey(appKey);
@@ -105,22 +129,54 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					"not exist app namespace mapping");
 		}
 		
+		// 插入备份表中
+		TechparkSyncdataBackup techparkSyncdataBackup = new TechparkSyncdataBackup();
+		techparkSyncdataBackup.setNamespaceId(appNamespaceMapping.getNamespaceId());
+		techparkSyncdataBackup.setDataType(cmd.getDataType());
+		techparkSyncdataBackup.setAllFlag(cmd.getAllFlag());
+		techparkSyncdataBackup.setNextPage(cmd.getNextPage());
+		techparkSyncdataBackup.setVarDataList(cmd.getVarDataList());
+		techparkSyncdataBackup.setDelDataList(cmd.getDelDataList());
+		techparkSyncdataBackup.setStatus(CommonStatus.ACTIVE.getCode());
+		techparkSyncdataBackup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		techparkSyncdataBackup.setCreatorUid(1L);
+		techparkSyncdataBackup.setUpdateTime(techparkSyncdataBackup.getCreateTime());
+		techparkSyncdataBackupProvider.createTechparkSyncdataBackup(techparkSyncdataBackup);
 		
-		
-		
-		
-		
-		
-		TechparkDataType dataType = TechparkDataType.fromCode(cmd.getDataType());
-		switch (dataType) {
+		//如果到最后一页了，则开始更新到我们数据库中
+		if (cmd.getNextPage() == null) {
+			dbProvider.execute(s->{
+				List<TechparkSyncdataBackup> backupList = techparkSyncdataBackupProvider.listTechparkSyncdataBackupByParam(appNamespaceMapping.getNamespaceId(), cmd.getDataType(), cmd.getAllFlag());
+				if (backupList == null || backupList.isEmpty()) {
+					return false;
+				}
+				if (AllFlag.fromCode(cmd.getAllFlag()) == AllFlag.ALL) {
+					// 全量更新
+					updateAllDate(cmd.getDataType(),appNamespaceMapping , backupList);
+				}else {
+					// 增量更新
+					updatePartDate(cmd.getDataType(), appNamespaceMapping, backupList);
+				}
+				techparkSyncdataBackupProvider.updateTechparkSyncdataBackupInactive(backupList);
+				return true;
+			});
+			
+		}
+	}
+
+	//全量更新基本思路：在我们数据中不在同步数据里的，删除；两边都在的，更新；不在我们数据库中，在同步数据里的，插入；
+	private void updateAllDate(Byte dataType, AppNamespaceMapping appNamespaceMapping,
+			List<TechparkSyncdataBackup> backupList) {
+		TechparkDataType techparkDataType = TechparkDataType.fromCode(dataType);
+		switch (techparkDataType) {
 		case BUILDING:
-			syncBuildings(appNamespaceMapping, cmd.getVarDataList(), cmd.getDelDataList());
+			syncAllBuildings(appNamespaceMapping, backupList);
 			break;
 		case APARTMENT:
-			syncApartments(appNamespaceMapping, cmd.getVarDataList(), cmd.getDelDataList());
+			syncAllApartments(appNamespaceMapping, backupList);
 			break;
 		case RENTING:
-			syncRentings(appNamespaceMapping, cmd.getVarDataList(), cmd.getDelDataList());
+			syncAllRentings(appNamespaceMapping, backupList);
 			break;
 		case WAITING_FOR_RENTING:
 			//暂无
@@ -130,9 +186,515 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"error data type");
 		}
-		
 	}
 
+	private void syncAllBuildings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+		List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
+		List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
+		// 如果两边都有，更新；如果我们有，他们没有，删除；
+		for (Building myBuilding : myBuildingList) {
+			CustomerBuilding customerBuilding = findFromTheirBuildingList(myBuilding, theirBuildingList);
+			if (customerBuilding != null) {
+				updateBuilding(myBuilding, customerBuilding);
+			}else {
+				deleteBuilding(myBuilding);
+			}
+		}
+		// 如果他们有，我们没有，插入
+		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+		for (CustomerBuilding customerBuilding : theirBuildingList) {
+			if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
+				continue;
+			}
+			// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+			Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+			if (building == null) {
+				insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+			}else {
+				updateBuilding(building, customerBuilding);
+			}
+		}
+	}
+
+	private void insertBuilding(Integer namespaceId, Long communityId, CustomerBuilding customerBuilding) {
+		if (StringUtils.isBlank(customerBuilding.getBuildingName())) {
+			return;
+		}
+		Building building = new Building();
+		building.setCommunityId(communityId);
+		building.setName(customerBuilding.getBuildingName());
+		building.setAliasName(customerBuilding.getBuildingName());
+		building.setStatus(CommonStatus.ACTIVE.getCode());
+		building.setCreatorUid(1L);
+		building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		building.setOperatorUid(1L);
+		building.setOperateTime(building.getCreateTime());
+		building.setNamespaceId(namespaceId);
+		building.setProductType(customerBuilding.getProductType());
+		building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
+		building.setJoininDate(getTimestampDate(customerBuilding.getJoininDate()));
+		building.setFloorCount(customerBuilding.getFloorCount());
+		building.setNamespaceBuildingType(NamespaceBuildingType.JINDIE.getCode());
+		building.setNamespaceBuildingToken(customerBuilding.getBuildingNumber());
+		buildingProvider.createBuilding(building);
+	}
+
+	private void deleteBuilding(Building building) {
+		if (CommonStatus.fromCode(building.getStatus()) != CommonStatus.INACTIVE) {
+			building.setOperatorUid(1L);
+			building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			building.setStatus(CommonStatus.INACTIVE.getCode());
+			buildingProvider.updateBuilding(building);
+		}
+	}
+
+	private void updateBuilding(Building building, CustomerBuilding customerBuilding) {
+		building.setName(customerBuilding.getBuildingName());
+		building.setAliasName(customerBuilding.getBuildingName());
+		building.setProductType(customerBuilding.getProductType());
+		building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
+		building.setJoininDate(getTimestampDate(customerBuilding.getJoininDate()));
+		building.setFloorCount(customerBuilding.getFloorCount());
+		building.setOperatorUid(1L);
+		building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		building.setNamespaceBuildingToken(customerBuilding.getBuildingNumber());
+		building.setStatus(CommonStatus.ACTIVE.getCode());
+		buildingProvider.updateBuilding(building);
+	}
+
+	private CustomerBuilding findFromTheirBuildingList(Building myBuilding, List<CustomerBuilding> theirBuildingList) {
+		for (CustomerBuilding customerBuilding : theirBuildingList) {
+			if (myBuilding.getName().equals(customerBuilding.getBuildingName())) {
+				customerBuilding.setDealed(true);
+				return customerBuilding;
+			}
+		}
+		return null;
+	}
+
+	private <T> List<T> mergeBackupList(List<TechparkSyncdataBackup> backupList, Class<T> targetClz) {
+		List<T> resultList = new ArrayList<>();
+		for (TechparkSyncdataBackup techparkSyncdataBackup : backupList) {
+			if (StringUtils.isNotBlank(techparkSyncdataBackup.getVarDataList())) {
+				resultList.addAll(JSONObject.parseArray(techparkSyncdataBackup.getVarDataList(), targetClz));
+			}
+		}
+		return resultList;
+	}
+
+	private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+		List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
+		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+		// 如果两边都有，更新；如果我们有，他们没有，删除；
+		for (Address myApartment : myApartmentList) {
+			CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
+			if (customerApartment != null) {
+				updateAddress(myApartment, customerApartment);
+			}else {
+				deleteAddress(myApartment);
+			}
+		}
+		// 如果他们有，我们没有，插入
+		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+		for (CustomerApartment customerApartment : theirApartmentList) {
+			if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+				continue;
+			}
+			// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+			Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+			if (address == null) {
+				insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+			}else {
+				updateAddress(address, customerApartment);
+			}
+		}
+	}
+
+
+	private void insertAddress(Integer namespaceId, Long communityId, CustomerApartment customerApartment) {
+		if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+			return;
+		}
+		Community community = communityProvider.findCommunityById(communityId);
+		if (community == null) {
+			community = new Community();
+			community.setId(communityId);
+		}
+		Address address = new Address();
+		address.setUuid(UUID.randomUUID().toString());
+		address.setCommunityId(community.getId());
+		address.setCityId(community.getCityId());
+		address.setCityName(community.getCityName());
+		address.setAreaId(community.getAreaId());
+		address.setAreaName(community.getAreaName());
+		address.setZipcode(community.getZipcode());
+		address.setAddress(customerApartment.getBuildingName()+"-"+customerApartment.getApartmentName());
+		address.setAddressAlias(address.getAddress());
+		address.setBuildingName(customerApartment.getBuildingName());
+		address.setBuildingAliasName(customerApartment.getBuildingName());
+		address.setApartmentName(customerApartment.getApartmentName());
+		address.setApartmentFloor(customerApartment.getApartmentFloor());
+		address.setStatus(CommonStatus.ACTIVE.getCode());
+		address.setCreatorUid(1L);
+		address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		address.setOperatorUid(1L);
+		address.setOperateTime(address.getCreateTime());
+		address.setAreaSize(customerApartment.getAreaSize());
+		address.setNamespaceId(namespaceId);
+		address.setRentArea(customerApartment.getRentArea());
+		address.setBuildArea(customerApartment.getBuildArea());
+		address.setInnerArea(customerApartment.getInnerArea());
+		address.setLayout(customerApartment.getLayout());
+		address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+		address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
+		addressProvider.createAddress(address);
+	}
+
+	private void deleteAddress(Address address) {
+		if (CommonStatus.fromCode(address.getStatus()) != CommonStatus.INACTIVE) {
+			address.setOperatorUid(1L);
+			address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			address.setStatus(CommonStatus.INACTIVE.getCode());
+			addressProvider.updateAddress(address);
+		}
+	}
+
+	private void updateAddress(Address address, CustomerApartment customerApartment) {
+		address.setApartmentFloor(customerApartment.getApartmentFloor());
+		address.setAreaSize(customerApartment.getAreaSize());
+		address.setRentArea(customerApartment.getRentArea());
+		address.setBuildArea(customerApartment.getBuildArea());
+		address.setInnerArea(customerApartment.getInnerArea());
+		address.setLayout(customerApartment.getLayout());
+		address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+		address.setOperatorUid(1L);
+		address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		address.setStatus(CommonStatus.ACTIVE.getCode());
+		addressProvider.updateAddress(address);
+	}
+
+	private CustomerApartment findFromTheirApartmentList(Address myApartment,
+			List<CustomerApartment> theirApartmentList) {
+		for (CustomerApartment customerApartment : theirApartmentList) {
+			if (myApartment.getBuildingName().equals(customerApartment.getBuildingName()) && myApartment.getApartmentName().equals(customerApartment.getApartmentName())) {
+				customerApartment.setDealed(true);
+				return customerApartment;
+			}
+		}
+		return null;
+	}
+
+	private void syncAllRentings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		/**
+		 * 合同比较复杂，牵涉到表比较多，包括以下表：
+		 * eh_contracts
+		 * eh_contract_building_mappings
+		 * eh_organizations
+		 * eh_organization_addresses
+		 * eh_organization_address_mappings
+		 * eh_organization_community_requests
+		 * eh_organization_details
+		 * eh_organization_members
+		 * eh_addresses
+		 * eh_buildings
+		 * eh_users
+		 * eh_user_identifiers
+		 */
+		
+		List<Organization> myOrganizationList = organizationProvider.listOrganizationByNamespaceType(appNamespaceMapping.getNamespaceId(), NamespaceOrganizationType.JINDIE.getCode());
+		List<CustomerRental> theirRentalList = mergeBackupList(backupList, CustomerRental.class);
+		for (Organization myOrganization : myOrganizationList) {
+			CustomerRental customerRental = findFromTheirRentalList(myOrganization, theirRentalList);
+			if (customerRental != null) {
+				updateOrganization(myOrganization, customerRental);
+				insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
+				insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
+			}else {
+				deleteOrganization(myOrganization);
+				deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+				deleteContracts(myOrganization);
+			}
+		}
+		for (CustomerRental customerRental : theirRentalList) {
+			if (customerRental.getDealed() != null && customerRental.getDealed().booleanValue() == true) {
+				continue;
+			}
+			Organization organization = organizationProvider.findOrganizationByNameAndNamespaceId(customerRental.getName(), appNamespaceMapping.getNamespaceId());
+			if (organization == null) {
+				insertOrganization(appNamespaceMapping, customerRental);
+				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+				insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+			}else {
+				updateOrganization(organization, customerRental);
+				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+				insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+			}
+		}
+	}
+
+	private void insertOrganization(AppNamespaceMapping appNamespaceMapping, CustomerRental customerRental) {
+		Organization organization = new Organization();
+		organization.setParentId(0L);
+		organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
+		organization.setName(customerRental.getName());
+		organization.setAddressId(0L);
+		organization.setPath("");
+		organization.setLevel(1);
+		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+		organization.setGroupType(OrganizationGroupType.ENTERPRISE.getCode());
+		organization.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setUpdateTime(organization.getCreateTime());
+		organization.setDirectlyEnterpriseId(0L);
+		organization.setNamespaceId(appNamespaceMapping.getNamespaceId());
+		organization.setShowFlag((byte)1);
+		organization.setNamespaceOrganizationType(NamespaceOrganizationType.JINDIE.getCode());
+		organization.setNamespaceOrganizationToken(customerRental.getNumber());
+		organizationProvider.createOrganization(organization);
+	}
+
+	private void deleteOrganization(Organization organization) {
+		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setStatus(OrganizationStatus.INACTIVE.getCode());
+		organizationProvider.updateOrganization(organization);
+	}
+
+	private void deleteContracts(Organization organization) {
+		contractProvider.deleteContractByOrganizationName(organization.getNamespaceId(), organization.getName());
+		contractBuildingMappingProvider.deleteContractBuildingMappingByOrganizatinName(organization.getNamespaceId(), organization.getName());
+	}
+
+	private void deleteOrganizationCommunityRequest(Long communityId, Organization organization) {
+		OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.findOrganizationCommunityRequestByOrganizationId(communityId, organization.getId());
+		if (organizationCommunityRequest != null && OrganizationCommunityRequestStatus.fromCode(organizationCommunityRequest.getMemberStatus()) != OrganizationCommunityRequestStatus.INACTIVE) {
+			organizationCommunityRequest.setMemberStatus(OrganizationCommunityRequestStatus.INACTIVE.getCode());
+			organizationProvider.updateOrganizationCommunityRequest(organizationCommunityRequest);
+		}
+	}
+
+	private void updateOrganization(Organization organization, CustomerRental customerRental) {
+		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organization.setNamespaceOrganizationToken(customerRental.getNumber());
+		organization.setStatus(OrganizationStatus.ACTIVE.getCode());
+		organizationProvider.updateOrganization(organization);
+	}
+
+	private List<CustomerContractBuilding> extractCustomerContractBuilding(CustomerRental customerRental) {
+		List<CustomerContractBuilding> resultList = new ArrayList<>();
+		if (customerRental != null) {
+			List<CustomerContract> customerContractList = customerRental.getContracts();
+			if (customerContractList != null && !customerContractList.isEmpty()) {
+				for (CustomerContract customerContract : customerContractList) {
+					List<CustomerContractBuilding> customerContractBuildingList = customerContract.getBuildings();
+					if (customerContractBuildingList != null && !customerContractBuildingList.isEmpty()) {
+						resultList.addAll(customerContractBuildingList);
+					}
+				}
+			}
+		}
+		return resultList;
+	}
+
+	private CustomerRental findFromTheirRentalList(Organization myOrganization, List<CustomerRental> theirRentalList) {
+		for (CustomerRental customerRental : theirRentalList) {
+			if (myOrganization.getName().equals(customerRental.getName())) {
+				customerRental.setDealed(true);
+				return customerRental;
+			}
+		}
+		return null;
+	}
+
+	//增量同步，基本原理是有就更新，无就插入，不做删除
+	private void updatePartDate(Byte dataType, AppNamespaceMapping appNamespaceMapping,
+			List<TechparkSyncdataBackup> backupList) {
+		TechparkDataType techparkDataType = TechparkDataType.fromCode(dataType);
+		switch (techparkDataType) {
+		case BUILDING:
+			syncPartBuildings(appNamespaceMapping, backupList);
+			break;
+		case APARTMENT:
+			syncPartApartments(appNamespaceMapping, backupList);
+			break;
+		case RENTING:
+			syncPartRentings(appNamespaceMapping, backupList);
+			break;
+		case WAITING_FOR_RENTING:
+			//暂无
+			break;
+
+		default:
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"error data type");
+		}
+	}
+
+	private void syncPartBuildings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
+		for (CustomerBuilding customerBuilding : theirBuildingList) {
+			Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+			if (building == null) {
+				insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+			}else {
+				updateBuilding(building, customerBuilding);
+			}
+		}
+	}
+
+	private void syncPartApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+		for (CustomerApartment customerApartment : theirApartmentList) {
+			if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+				continue;
+			}
+			Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+			if (address == null) {
+				insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+			}else {
+				updateAddress(address, customerApartment);
+			}
+		}
+	}
+
+	private void syncPartRentings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		List<CustomerRental> theirRentalList = mergeBackupList(backupList, CustomerRental.class);
+		for (CustomerRental customerRental : theirRentalList) {
+			Organization organization = organizationProvider.findOrganizationByName(customerRental.getName(), appNamespaceMapping.getNamespaceId());
+			if (organization == null) {
+				insertOrganization(appNamespaceMapping, customerRental);
+				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdatePartContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+				insertOrUpdatePartOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+			}else {
+				updateOrganization(organization, customerRental);
+				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+				insertOrUpdatePartContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+				insertOrUpdatePartOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+			}
+		}
+	}
+
+	private void insertOrUpdatePartContracts(Integer namespaceId, Long communityId, Organization organization,
+			List<CustomerContract> customerContractList) {
+		if (customerContractList == null || customerContractList.isEmpty()) {
+			return;
+		}
+		
+		for (CustomerContract customerContract : customerContractList) {
+			Contract contract = contractProvider.findContractByNumber(namespaceId, organization.getId(), customerContract.getContractNumber());
+			if (contract == null) {
+				insertContract(organization, customerContract);
+				insertOrUpdatePartContractBuildingMappings(contract, customerContract);
+			}else {
+				updateContract(contract, customerContract);
+				insertOrUpdatePartContractBuildingMappings(contract, customerContract);
+			}
+		}
+	}
+
+	private void insertOrUpdatePartContractBuildingMappings(Contract contract, CustomerContract customerContract) {
+		List<CustomerContractBuilding> customerContractBuildingList = customerContract.getBuildings();
+		if (customerContractBuildingList == null || customerContractBuildingList.isEmpty()) {
+			return;
+		}
+		
+		for (CustomerContractBuilding customerContractBuilding : customerContractBuildingList) {
+			if (StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+				continue;
+			}
+			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getNamespaceId(), contract.getOrganizationId(), customerContract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+			if (contractBuildingMapping == null) {
+				insertContractBuildingMapping(contract, customerContractBuilding);
+			}else {
+				updateContractBuildingMapping(contractBuildingMapping, customerContractBuilding);
+			}
+		}
+	}
+
+	private void insertOrUpdatePartOrganizationAddresses(Integer namespaceId, Long communityId,
+			Organization organization, List<CustomerContractBuilding> customerContractBuildingList) {
+		if (customerContractBuildingList == null || customerContractBuildingList.isEmpty()) {
+			return;
+		}
+		
+		//要处理三个表，organizationAddress、enterpriseAddress、organizationAddressMapping
+		for (CustomerContractBuilding customerContractBuilding : customerContractBuildingList) {
+			if (StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+				continue;
+			}
+			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+			if (address != null) {
+				OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddressByOrganizationIdAndAddressId(organization.getId(), address.getId());
+				if (organizationAddress == null) {
+					insertOrganizationAddress(namespaceId, communityId, organization, customerContractBuilding);
+				}else {
+					updateOrganizationAddress(namespaceId, communityId, organizationAddress, customerContractBuilding);
+				}
+				
+				EnterpriseAddress enterpriseAddress = enterpriseProvider.findEnterpriseAddressByEnterpriseIdAndAddressId(organization.getId(), address.getId());
+				if (enterpriseAddress == null) {
+					insertEnterpriseAddress(namespaceId, communityId, organization, customerContractBuilding);
+				}else {
+					updateEnterpriseAddress(namespaceId, communityId, enterpriseAddress, customerContractBuilding);
+				}
+				
+				Long superOrganizationId = getSuperOrganizationId(namespaceId, communityId); //管理公司的id
+				CommunityAddressMapping organizationAddressMapping = organizationProvider.findOrganizationAddressMapping(superOrganizationId, communityId, address.getId());
+				if (organizationAddressMapping == null) {
+					insertOrganizationAddressMapping(communityId, superOrganizationId, address);
+				}else {
+					updateOrganizationAddressMapping(organizationAddressMapping, address);
+				}
+			}
+		}
+	}
+
+	private void updateOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping, Address address) {
+		organizationAddressMapping.setOrganizationAddress(address.getAddress());
+		organizationAddressMapping.setLivingStatus(getLivingStatus(address.getLivingStatus()));
+		organizationProvider.updateOrganizationAddressMapping(organizationAddressMapping);
+	}
+
+	private void insertOrganizationAddressMapping(Long communityId, Long superOrganizationId, Address address) {
+		CommunityAddressMapping organizationAddressMapping = new CommunityAddressMapping();
+		organizationAddressMapping.setOrganizationId(superOrganizationId);
+		organizationAddressMapping.setCommunityId(communityId);
+		organizationAddressMapping.setAddressId(address.getId());
+		organizationAddressMapping.setOrganizationAddress(address.getAddress());
+		organizationAddressMapping.setLivingStatus(getLivingStatus(address.getLivingStatus()));
+		organizationProvider.createOrganizationAddressMapping(organizationAddressMapping);
+	}
+
+	private Long getSuperOrganizationId(Integer namespaceId, Long communityId){
+		List<OrganizationCommunityDTO> organizationCommunityDTOList = organizationProvider.findOrganizationCommunityByCommunityId(communityId);
+		Long organizationId = null;
+		if (organizationCommunityDTOList == null || organizationCommunityDTOList.isEmpty() || organizationCommunityDTOList.size() > 1) {
+			organizationId = 1000001L;
+		}else {
+			organizationId = organizationCommunityDTOList.get(0).getOrganizationId();
+		}
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if (organization.getNamespaceId().intValue() == namespaceId.intValue()) {
+			return organization.getId();
+		}else {
+			return 1000001L;
+		}
+	}
+	
 	private void syncBuildings(AppNamespaceMapping appNamespaceMapping, String varDataList, String delDataList) {
 		dbProvider.execute(s->{
 			insertOrUpdateBuildings(appNamespaceMapping, varDataList);
@@ -446,7 +1008,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateOrganizationCommunityRequest(communityId, organization);
 				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateContracts(namespaceId, community, organization, customerRental.getContracts());
+				insertOrUpdateAllContracts(namespaceId, community, organization, customerRental.getContracts());
 			}else {
 				organization.setName(customerRental.getName());
 //				organization.setDescription(customerRental.getNumber());
@@ -457,7 +1019,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateOrganizationCommunityRequest(communityId, organization);
 				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateContracts(namespaceId, community, organization, customerRental.getContracts());
+				insertOrUpdateAllContracts(namespaceId, community, organization, customerRental.getContracts());
 			}
 		}
 		if (LOGGER.isDebugEnabled()) {
@@ -511,67 +1073,325 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 	}
 
-	private void insertOrUpdateContracts(Integer namespaceId, Community community, Organization organization, List<CustomerContract> contracts) {
+	//全量同步合同
+	private void insertOrUpdateAllContracts(Integer namespaceId, Long communityId, Organization organization, List<CustomerContract> customerContractList) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~begin sync insert or update contracts");
 		}
-		if (contracts == null || contracts.size() == 0) {
+		if (customerContractList == null || customerContractList.size() == 0) {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("~~end sync insert or update contracts, no data and return directly");
 			}
 			return;
 		}
-		
-		for (CustomerContract customerContract : contracts) {
-			Contract contract = contractProvider.findContractByNumber(organization.getNamespaceId(), organization.getId(), customerContract.getContractNumber());
-			if (contract == null) {
-				contract = new Contract();
-				contract.setNamespaceId(organization.getNamespaceId());
-				contract.setOrganizationId(organization.getId());
-				contract.setOrganizationName(organization.getName());
-				contract.setContractNumber(customerContract.getContractNumber());
-				contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
-				contract.setStatus(CommonStatus.ACTIVE.getCode());
-				contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				contractProvider.createContract(contract);
-				insertOrUpdateContractBuildingMappings(contract, customerContract.getBuildings());
-				insertOrUpdateOrganizationAddresses(namespaceId, community, organization, customerContract.getBuildings());
+		// 列出这个组织所有的合同，然后比较，我有他无删，我无他有增，无有他有更新
+		List<Contract> contractList = contractProvider.listContractByOrganizationId(namespaceId, organization.getId());
+		for (Contract contract : contractList) {
+			CustomerContract customerContract = findFromTheirContractList(contract, customerContractList);
+			if (customerContract != null) {
+				updateContract(contract, customerContract);
+				insertOrUpdateAllContractBuildingMappings(contract, customerContract);
 			}else {
-				contract.setContractNumber(customerContract.getContractNumber());
-				contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
-				contractProvider.updateContract(contract);
-				insertOrUpdateContractBuildingMappings(contract, customerContract.getBuildings());
-				insertOrUpdateOrganizationAddresses(namespaceId, community, organization, customerContract.getBuildings());
+				deleteContract(contract);
+				deleteContractBuildingMappings(contract);
 			}
 		}
+		for (CustomerContract customerContract : customerContractList) {
+			Contract contract = insertContract(organization, customerContract);
+			insertAllContractBuildingMappings(contract, customerContract);
+		}
+		
 		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("~~end sync insert or update contracts, total="+contracts.size());
+			LOGGER.debug("~~end sync insert or update contracts, total="+customerContractList.size());
 		}
 	}
 
-	private void insertOrUpdateOrganizationAddresses(Integer namespaceId, Community community, Organization organization,
-			List<CustomerContractBuilding> buildings) {
+	private void insertAllContractBuildingMappings(Contract contract, CustomerContract customerContract) {
+		List<CustomerContractBuilding> customerContractBuildingList = customerContract.getBuildings();
+		if (customerContractBuildingList == null || customerContractBuildingList.isEmpty()) {
+			return;
+		}
+		for (CustomerContractBuilding customerContractBuilding : customerContractBuildingList) {
+			insertContractBuildingMapping(contract, customerContractBuilding);
+		}
+	}
+
+	private Contract insertContract(Organization organization, CustomerContract customerContract) {
+		Contract contract = new Contract();
+		contract.setNamespaceId(organization.getNamespaceId());
+		contract.setOrganizationId(organization.getId());
+		contract.setOrganizationName(organization.getName());
+		contract.setContractNumber(customerContract.getContractNumber());
+		contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
+		contract.setStatus(CommonStatus.ACTIVE.getCode());
+		contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractProvider.createContract(contract);
+		return contract;
+	}
+
+	private void deleteContractBuildingMappings(Contract contract) {
+		List<ContractBuildingMapping> myContractBuildingMappingList = contractBuildingMappingProvider.listContractBuildingMappingByContract(contract.getNamespaceId(), contract.getOrganizationId(), contract.getContractNumber());
+		myContractBuildingMappingList.forEach(c->{
+			if (CommonStatus.fromCode(c.getStatus()) != CommonStatus.INACTIVE) {
+				c.setStatus(CommonStatus.INACTIVE.getCode());
+				contractBuildingMappingProvider.updateContractBuildingMapping(c);
+			}
+		});
+	}
+
+	private void deleteContract(Contract contract) {
+		if (CommonStatus.fromCode(contract.getStatus()) != CommonStatus.INACTIVE) {
+			contract.setStatus(CommonStatus.INACTIVE.getCode());
+			contractProvider.updateContract(contract);
+		}
+	}
+
+	private void updateContract(Contract contract, CustomerContract customerContract) {
+		contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
+		contract.setStatus(CommonStatus.ACTIVE.getCode());
+		contractProvider.updateContract(contract);
+	}
+	
+
+	//全量同步合同地址
+	private void insertOrUpdateAllContractBuildingMappings(Contract contract, CustomerContract customerContract){
+		//比较合同中的地址
+		List<ContractBuildingMapping> myContractBuildingMappingList = contractBuildingMappingProvider.listContractBuildingMappingByContract(contract.getNamespaceId(), contract.getOrganizationId(), contract.getContractNumber());
+		List<CustomerContractBuilding> theirContractBuildingList = customerContract.getBuildings();
+		for (ContractBuildingMapping myContractBuildingMapping : myContractBuildingMappingList) {
+			CustomerContractBuilding customerContractBuilding = findFromTheirContractBuildingList(myContractBuildingMapping, theirContractBuildingList);
+			if (customerContractBuilding != null) {
+				updateContractBuildingMapping(myContractBuildingMapping, customerContractBuilding);
+			}else {
+				deleteContractBuildingMapping(myContractBuildingMapping);
+			}
+		}
+		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+			if ((customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) 
+					|| StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+				continue;
+			}
+			insertContractBuildingMapping(contract, customerContractBuilding);
+		}
+	}
+	
+	private CustomerContractBuilding findFromTheirContractBuildingList(
+			ContractBuildingMapping myContractBuildingMapping,
+			List<CustomerContractBuilding> theirContractBuildingList) {
+		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+			if (myContractBuildingMapping.getBuildingName().equals(customerContractBuilding.getBuildingName()) && myContractBuildingMapping.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
+				customerContractBuilding.setDealed(true);
+				return customerContractBuilding;
+			}
+		}
+		return null;
+	}
+
+	private void updateContractBuildingMapping(ContractBuildingMapping contractBuildingMapping,
+			CustomerContractBuilding customerContractBuilding) {
+		contractBuildingMapping.setAreaSize(customerContractBuilding.getAreaSize());
+		contractBuildingMapping.setStatus(CommonStatus.ACTIVE.getCode());
+		contractBuildingMappingProvider.updateContractBuildingMapping(contractBuildingMapping);
+	}
+
+	private void deleteContractBuildingMapping(ContractBuildingMapping contractBuildingMapping) {
+		if (CommonStatus.fromCode(contractBuildingMapping.getStatus()) != CommonStatus.INACTIVE) {
+			contractBuildingMapping.setStatus(CommonStatus.INACTIVE.getCode());
+			contractBuildingMappingProvider.updateContractBuildingMapping(contractBuildingMapping);
+		}
+	}
+
+	private void insertContractBuildingMapping(Contract contract, CustomerContractBuilding customerContractBuilding) {
+		if (StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+			return;
+		}
+		ContractBuildingMapping contractBuildingMapping = new ContractBuildingMapping();
+		contractBuildingMapping.setNamespaceId(contract.getNamespaceId());
+		contractBuildingMapping.setOrganizationId(contract.getOrganizationId());
+		contractBuildingMapping.setOrganizationName(contract.getOrganizationName());
+		contractBuildingMapping.setContractId(contract.getId());
+		contractBuildingMapping.setContractNumber(contract.getContractNumber());
+		contractBuildingMapping.setBuildingName(customerContractBuilding.getBuildingName());
+		contractBuildingMapping.setApartmentName(customerContractBuilding.getApartmentName());
+		contractBuildingMapping.setAreaSize(customerContractBuilding.getAreaSize());
+		contractBuildingMapping.setStatus(CommonStatus.ACTIVE.getCode());
+		contractBuildingMapping.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		contractBuildingMappingProvider.createContractBuildingMapping(contractBuildingMapping);
+	}
+
+	private CustomerContract findFromTheirContractList(Contract contract, List<CustomerContract> customerContractList) {
+		for (CustomerContract customerContract : customerContractList) {
+			if (contract.getContractNumber().equals(customerContract.getContractNumber())) {
+				customerContract.setDealed(true);
+				return customerContract;
+			}
+		}
+		return null;
+	}
+
+	//全量同步地址
+	private void insertOrUpdateAllOrganizationAddresses(Integer namespaceId, Long communityId, Organization organization,
+			List<CustomerContractBuilding> theirContractBuildingList) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~begin sync insert or update contract organization addresses");
 		}
-		if (buildings == null || buildings.size() == 0) {
+		if (theirContractBuildingList == null || theirContractBuildingList.size() == 0) {
 			if (LOGGER.isDebugEnabled()) {
 				LOGGER.debug("~~end sync insert or update contract organization addresses, no data and return directly");
 			}
 			return;
 		}
-		for (CustomerContractBuilding customerContractBuilding : buildings) {
-			Building building = insertOrUpdateBuilding(namespaceId, community.getId(), new CustomerBuilding(customerContractBuilding.getBuildingName()));
-			Address address = insertOrUpdateApartment(namespaceId, community, new CustomerApartment(customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName()));
-			
-			insertOrUpdateOrganizationAddress(organization, building, address);
-			insertOrUpdateOrganizationAddressMapping(organization, community, address);
+		//因为合同那里已经处理过一次楼栋门牌，这里初始化一下
+		theirContractBuildingList.forEach(b->b.setDealed(null));
+		
+		// 娘的，有三个organization address关联表：eh_enterprise_addresses、eh_organization_addresses、eh_organization_address_mappings，蛋疼，都要比较下
+		//处理OrganizationAddress
+		List<OrganizationAddress> myOrganizationAddressList = organizationProvider.listOrganizationAddressByOrganizationId(organization.getId());
+		for (OrganizationAddress organizationAddress : myOrganizationAddressList) {
+			CustomerContractBuilding customerContractBuilding = findFromTheirContractBuildingList(namespaceId, communityId, organizationAddress, theirContractBuildingList);
+			if (customerContractBuilding != null) {
+				updateOrganizationAddress(namespaceId, communityId, organizationAddress, customerContractBuilding);
+			}else {
+				deleteOrganizationAddress(organizationAddress);
+			}
 		}
-
-		if (LOGGER.isDebugEnabled()) {
-			LOGGER.debug("~~end sync insert or update contract organization addresses, total="+buildings.size());
+		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+			insertOrganizationAddress(namespaceId, communityId, organization, customerContractBuilding);
 		}
 		
+		
+		//处理EnterpriseAddress
+		theirContractBuildingList.forEach(b->b.setDealed(null));
+		List<EnterpriseAddress> myEnterpriseAddressList = organizationProvider.listEnterpriseAddressByOrganization(organization.getId());
+		for (EnterpriseAddress enterpriseAddress : myEnterpriseAddressList) {
+			CustomerContractBuilding customerContractBuilding = findFromTheirContractBuildingList(namespaceId, communityId, enterpriseAddress, theirContractBuildingList);
+			if (customerContractBuilding != null) {
+				updateEnterpriseAddress(namespaceId, communityId, enterpriseAddress, customerContractBuilding);
+			}else {
+				deleteEnterpriseAddress(enterpriseAddress);
+			}
+		}
+		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+			insertEnterpriseAddress(namespaceId, communityId, organization, customerContractBuilding);
+		}
+		
+		theirContractBuildingList.forEach(b->b.setDealed(null));
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync insert or update contract organization addresses, total="+theirContractBuildingList.size());
+		}
+		
+	}
+
+	private void insertEnterpriseAddress(Integer namespaceId, Long communityId, Organization organization,
+			CustomerContractBuilding customerContractBuilding) {
+		Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+		if (address == null) {
+			return;
+		}
+		EnterpriseAddress enterpriseAddress = new EnterpriseAddress();
+		enterpriseAddress.setEnterpriseId(organization.getId());
+		enterpriseAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+		enterpriseAddress.setCreatorUid(1L);
+		enterpriseAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		enterpriseAddress.setAddressId(address.getId());
+		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
+		if (building == null) {
+			enterpriseAddress.setBuildingId(0L);
+		}else {
+			enterpriseAddress.setBuildingId(building.getId());
+		}
+		enterpriseAddress.setBuildingName(customerContractBuilding.getBuildingName());
+		enterpriseProvider.createEnterpriseAddress(enterpriseAddress);
+	}
+
+	private void deleteEnterpriseAddress(EnterpriseAddress enterpriseAddress) {
+		enterpriseAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+		enterpriseAddress.setOperatorUid(1L);
+		enterpriseAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		enterpriseProvider.updateEnterpriseAddress(enterpriseAddress);
+	}
+
+	private void updateEnterpriseAddress(Integer namespaceId, Long communityId, EnterpriseAddress enterpriseAddress,
+			CustomerContractBuilding customerContractBuilding) {
+		enterpriseAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+		enterpriseAddress.setOperatorUid(1L);
+		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
+		if (building == null) {
+			enterpriseAddress.setBuildingId(0L);
+		}else {
+			enterpriseAddress.setBuildingId(building.getId());
+		}
+		enterpriseAddress.setBuildingName(customerContractBuilding.getBuildingName());
+		enterpriseAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		enterpriseProvider.updateEnterpriseAddress(enterpriseAddress);
+	}
+
+	private CustomerContractBuilding findFromTheirContractBuildingList(Integer namespaceId, Long communityId,
+			EnterpriseAddress enterpriseAddress, List<CustomerContractBuilding> theirContractBuildingList) {
+		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+			if (address != null && enterpriseAddress.getAddressId().longValue() == address.getId()) {
+				customerContractBuilding.setDealed(true);
+				return customerContractBuilding;
+			}
+		}
+		return null;
+	}
+
+	private void insertOrganizationAddress(Integer namespaceId, Long communityId, Organization organization, CustomerContractBuilding customerContractBuilding) {
+		Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+		if (address == null) {
+			return;
+		}
+		OrganizationAddress organizationAddress = new OrganizationAddress();
+		organizationAddress.setOrganizationId(organization.getId());
+		organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+		organizationAddress.setCreatorUid(1L);
+		organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationAddress.setAddressId(address.getId());
+		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
+		if (building == null) {
+			organizationAddress.setBuildingId(0L);
+		}else {
+			organizationAddress.setBuildingId(building.getId());
+		}
+		organizationAddress.setBuildingName(customerContractBuilding.getBuildingName());
+		organizationProvider.createOrganizationAddress(organizationAddress);
+	}
+
+	private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
+		organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+		organizationAddress.setOperatorUid(1L);
+		organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationProvider.updateOrganizationAddress(organizationAddress);
+	}
+
+	private void updateOrganizationAddress(Integer namespaceId, Long communityId, OrganizationAddress organizationAddress,
+			CustomerContractBuilding customerContractBuilding) {
+		organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+		organizationAddress.setOperatorUid(1L);
+		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
+		if (building == null) {
+			organizationAddress.setBuildingId(0L);
+		}else {
+			organizationAddress.setBuildingId(building.getId());
+		}
+		organizationAddress.setBuildingName(customerContractBuilding.getBuildingName());
+		organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationProvider.updateOrganizationAddress(organizationAddress);
+	}
+
+	private CustomerContractBuilding findFromTheirContractBuildingList(Integer namespaceId, Long communityId, OrganizationAddress organizationAddress,
+			List<CustomerContractBuilding> theirContractBuildingList) {
+		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+			if (address != null && organizationAddress.getAddressId().longValue() == address.getId()) {
+				customerContractBuilding.setDealed(true);
+				return customerContractBuilding;
+			}
+		}
+		return null;
 	}
 
 	private void insertOrUpdateOrganizationAddressMapping(Organization organization, Community community,
