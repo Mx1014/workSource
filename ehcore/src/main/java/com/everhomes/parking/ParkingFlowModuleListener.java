@@ -199,7 +199,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		long now = System.currentTimeMillis();
 		LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if("QUEUEING".equals(param)) {
+			if("AUDITING".equals(param)) {
+				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
+					parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+					parkingCardRequest.setAuditSucceedTime(new Timestamp(now));
+					parkingProvider.updateParkingCardRequest(parkingCardRequest);
+				}
+			}
+			else if("QUEUEING".equals(param)) {
 				
 				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
