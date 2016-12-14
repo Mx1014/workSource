@@ -1,5 +1,6 @@
 package com.everhomes.rest.blacklist;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import java.util.List;
@@ -20,6 +21,7 @@ public class AddUserBlacklistCommand {
 
     private Long userId;
 
+    @ItemType(Long.class)
     private List<Long> privilegeIds;
 
     public String getOwnerType() {
