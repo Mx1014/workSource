@@ -2144,7 +2144,7 @@ public class QualityServiceImpl implements QualityService {
 		StringBuilder sb = new StringBuilder();
 		for(String pathId : pathIds) {
 			Long specificationId = Long.valueOf(pathId);
-			QualityInspectionSpecifications specification = this.verifiedSpecificationById(specificationId, ownerType, ownerId);
+			QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(specificationId);
 			sb.append("/" + specification.getName());
 		}
 		
