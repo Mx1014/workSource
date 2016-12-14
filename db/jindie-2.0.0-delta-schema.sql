@@ -16,4 +16,4 @@ CREATE TABLE `eh_techpark_syncdata_backup` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
-ALTER TABLE `eh_organization_address_mappings` ADD COLUMN `namespace_type` INTEGER;
+ALTER TABLE `eh_organization_address_mappings` ADD COLUMN `namespace_type` VARCHAR(64);

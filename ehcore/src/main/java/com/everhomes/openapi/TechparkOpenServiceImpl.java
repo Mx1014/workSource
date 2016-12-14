@@ -676,6 +676,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		organizationAddressMapping.setAddressId(address.getId());
 		organizationAddressMapping.setOrganizationAddress(address.getAddress());
 		organizationAddressMapping.setLivingStatus(getLivingStatus(address.getLivingStatus()));
+		organizationAddressMapping.setNamespaceType(NamespaceAddressType.JINDIE.getCode());
 		organizationProvider.createOrganizationAddressMapping(organizationAddressMapping);
 	}
 
