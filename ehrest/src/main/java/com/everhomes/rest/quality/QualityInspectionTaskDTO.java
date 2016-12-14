@@ -21,6 +21,7 @@ import com.everhomes.util.StringHelper;
  *  <li>ownerId: 任务所属机构id</li>
  *  <li>targetType: 任务所属项目类型 com.everhomes.rest.quality.OwnerType</li>
  *  <li>targetId: 任务所属项目id</li>
+ *  <li>targetName: 任务所属项目名称</li>
  *  <li>taskName: 任务名称</li>
  *  <li>taskNumber: 任务编号</li>
  *  <li>groupName: 业务组名称</li>
@@ -67,6 +68,8 @@ public class QualityInspectionTaskDTO {
 	private String targetType;
 	
 	private Long targetId;
+
+	private String targetName;
 	
 	private String taskName;
 	
@@ -212,6 +215,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
+	}
+
+	public String getTargetName() {
+		return targetName;
+	}
+
+	public void setTargetName(String targetName) {
+		this.targetName = targetName;
 	}
 
 	public String getTaskName() {

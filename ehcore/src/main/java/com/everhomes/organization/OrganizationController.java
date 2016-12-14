@@ -1,8 +1,11 @@
 // @formatter:off
 package com.everhomes.organization;
 
+import java.io.IOException;
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.bootstrap.PlatformContext;
@@ -873,17 +876,14 @@ public class OrganizationController extends ControllerBase {
      * <b>URL: /org/verifyEnterpriseContact</b>
      * <p>通过点击邮箱认证通过认证申请</p>
      * @return {@link String}
+     * @throws IOException 
      */
     @RequestMapping("verifyEnterpriseContact")
     @RestReturn(value=String.class)
     @RequireAuthentication(false)
-    public RestResponse verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd) {
-    	this.organizationService.verifyEnterpriseContact(cmd);
-    	 RestResponse res = new RestResponse();
-         res.setErrorCode(ErrorCodes.SUCCESS);
-         res.setErrorDescription("OK");
-         
-         return res;
+    public void verifyEnterpriseContact(@Valid VerifyEnterpriseContactCommand cmd,HttpServletRequest request, HttpServletResponse response) throws IOException {
+    	String redirectUrl = this.organizationService.verifyEnterpriseContact(cmd);
+    	response.sendRedirect(redirectUrl);  
     }
     /**
      * <b>URL: /org/leaveForEnterpriseContact</b>
@@ -1252,6 +1252,46 @@ public class OrganizationController extends ControllerBase {
 		List<OrganizationDTO> enterpriseDtos = organizationService.listUserRelateOrganizations(namespaceId, user.getId(), OrganizationGroupType.ENTERPRISE);
 		
 		RestResponse res = new RestResponse(enterpriseDtos);
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationsByModuleId</b>
+	 * <p>获取获取业务部门的机构</p>
+	 */
+	@RequestMapping("listOrganizationsByModuleId")
+	@RestReturn(value=OrganizationDTO.class, collection = true)
+	public RestResponse listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationsByModuleId(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationContactByJobPositionId</b>
+	 * <p>根据通用岗位获取人员</p>
+	 */
+	@RequestMapping("listOrganizationContactByJobPositionId")
+	@RestReturn(value=OrganizationContactDTO.class, collection = true)
+	public RestResponse listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd){
+
+		RestResponse res = new RestResponse(organizationService.listOrganizationContactByJobPositionId(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationManagers</b>
+	 * <p>获取机构经理人员</p>
+	 */
+	@RequestMapping("listOrganizationManagers")
+	@RestReturn(value=OrganizationManagerDTO.class, collection = true)
+	public RestResponse listOrganizationManagers(ListOrganizationManagersCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationManagers(cmd));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;

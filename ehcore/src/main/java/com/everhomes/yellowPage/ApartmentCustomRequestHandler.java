@@ -32,6 +32,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ApartmentRequestInfoSearcher;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.CustomRequestHandler;
@@ -40,6 +41,7 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 
 @Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.APARTMENT_REQUEST_CUSTOM)
@@ -66,7 +68,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private ApartmentRequestInfoSearcher apartmentRequestInfoSearcher;
+	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
 	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -90,7 +92,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		
 		LOGGER.info("ApartmentCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createApartmentRequests(request);
-		apartmentRequestInfoSearcher.feedDoc(request);
+		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+		requestInfo.setTemplateType(cmd.getTemplateType());
+		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
 		

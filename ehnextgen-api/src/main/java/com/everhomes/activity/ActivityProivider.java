@@ -3,6 +3,7 @@ package com.everhomes.activity;
 import java.sql.Timestamp;
 import java.util.List;
 
+import com.everhomes.rest.activity.ActivityAttachmentDTO;
 import org.jooq.Condition;
 import org.jooq.Operator;
 
@@ -36,7 +37,7 @@ public interface ActivityProivider {
 
     void deleteRoster(ActivityRoster createRoster);
 
-    List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition);
+    List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime);
     
     Activity findActivityByUuid(String uuid);
     
@@ -47,5 +48,28 @@ public interface ActivityProivider {
 	List<Activity> listActivitiesForWarning(Integer namespaceId, Timestamp queryStartTime, Timestamp queryEndTime);
 	
 	List<ActivityCategories> listActivityEntryCategories(Integer namespaceId, String ownerType, Long ownerId, Long parentId, CategoryAdminStatus status);
-	
+
+    ActivityCategories findActivityCategoriesById(Long id);
+
+    void createActivityAttachment(ActivityAttachment attachment);
+
+    void updateActivityAttachment(ActivityAttachment attachment);
+
+    ActivityAttachment findByActivityAttachmentId(Long id);
+
+    void deleteActivityAttachment(Long id);
+
+    List<ActivityAttachment> listActivityAttachments(CrossShardListingLocator locator, int count, Long activityId);
+
+    boolean existActivityAttachments(Long activityId);
+
+    void createActivityGoods(ActivityGoods goods);
+
+    void updateActivityGoods(ActivityGoods goods);
+
+    void deleteActivityGoods(Long id);
+
+    ActivityGoods findActivityGoodsById(Long id);
+
+    List<ActivityGoods> listActivityGoods(CrossShardListingLocator locator, int count, Long activityId);
 }

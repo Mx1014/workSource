@@ -229,6 +229,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		userAgents.forEach((k,v)->{
 			if (VersionRealmType.fromCode(k) != null) {
 				context.setVersion(v);
+				context.setVersionRealm(k);
 				return;
 			}
 		});

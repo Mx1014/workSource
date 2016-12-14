@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -66,7 +68,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private SettleRequestInfoSearcher settleRequestInfoSearcher;
+	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
 	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -90,7 +92,9 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		
 		LOGGER.info("SettleCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createSettleRequests(request);
-		settleRequestInfoSearcher.feedDoc(request);
+		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+		requestInfo.setTemplateType(cmd.getTemplateType());
+		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
 		

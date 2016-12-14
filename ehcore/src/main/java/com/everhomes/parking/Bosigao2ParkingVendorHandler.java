@@ -87,17 +87,18 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			String expireDate =  cardInfo.getExpireDate();
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 
-			long expireTime = strToLong(expireDate);
+			long expireTime = strToLong2(expireDate+"235959");
 			long now = System.currentTimeMillis();
 			
-			if(expireTime < now){
+			if(expireTime <= now){
 				return resultList;
 			}
+			String userName = cardInfo.getUserName();
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
 			User user = UserContext.current().getUser();
-			parkingCardDTO.setPlateOwnerName(user.getNickName());
+			parkingCardDTO.setPlateOwnerName(StringUtils.isNotBlank(userName)?userName:user.getNickName());
 			parkingCardDTO.setPlateNumber(cardInfo.getPlateNo());
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
@@ -111,6 +112,22 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
         
         return resultList;
     }
+
+	private Long strToLong2(String str) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		
+		Long ts = null;
+		try {
+			ts = sdf.parse(str).getTime();
+		} catch (ParseException e) {
+			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"validityPeriod data format is not yyyymmdd.");
+		}
+		
+		return ts;
+	}
 
     @SuppressWarnings("unchecked")
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {

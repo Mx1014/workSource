@@ -4,11 +4,11 @@ package com.everhomes.rest.user;
  * <ul>来自于第三方用户的类型，对应eh_users表听 namespace_user_type字段
  * <li>WANKE("wanke"): 万科</li>
  * <li>WX("wx"): 微信</li>
- * <li></li>
+ * <li>JINDIE("jindie"): 金蝶</li>
  * </ul>
  */
 public enum NamespaceUserType {
-	WANKE("wanke"), WX("wx");
+	WANKE("wanke"), WX("wx"), JINDIE("jindie");
     
     private String code;
     private NamespaceUserType(String code) {

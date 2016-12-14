@@ -1,3 +1,85 @@
+-- 金蝶数据同步， add by tt, 20161117
+ALTER TABLE `eh_buildings` ADD COLUMN `product_type` VARCHAR(128);
+ALTER TABLE `eh_buildings` ADD COLUMN `complete_date` DATETIME;
+ALTER TABLE `eh_buildings` ADD COLUMN `joinin_date` DATETIME;
+ALTER TABLE `eh_buildings` ADD COLUMN `floor_count` VARCHAR(64);
+ALTER TABLE `eh_buildings` ADD COLUMN `namespace_building_type` VARCHAR(128);
+ALTER TABLE `eh_buildings` ADD COLUMN `namespace_building_token` VARCHAR(128);
+
+-- 下面这种写法速度更快点
+ALTER TABLE `eh_addresses` ADD COLUMN `rent_area` DOUBLE,
+	ADD COLUMN `build_area` DOUBLE,
+	ADD COLUMN `inner_area` DOUBLE,
+	ADD COLUMN `layout` VARCHAR(128),
+	ADD COLUMN `living_status` TINYINT,
+	ADD COLUMN `namespace_address_type` VARCHAR(128),
+	ADD COLUMN `namespace_address_token` VARCHAR(128);
+
+ALTER TABLE `eh_organization_details` ADD COLUMN `service_user_id` BIGINT NULL COMMENT 'customer service staff';
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_type` VARCHAR(128);
+ALTER TABLE `eh_organization_details` ADD COLUMN `namespace_organization_token` VARCHAR(128);
+
+-- DROP TABLE IF EXISTS `eh_contracts`;
+CREATE TABLE `eh_contracts` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
+  `contract_number` VARCHAR(128) NOT NULL,
+  `contract_end_date` DATETIME NOT NULL,
+  `status` TINYINT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_contract_building_mappings`;
+CREATE TABLE `eh_contract_building_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `organization_id` BIGINT,
+  `organization_name` VARCHAR(64),
+  `contract_id` BIGINT,
+  `contract_number` VARCHAR(128),
+  `building_name` VARCHAR(128),
+  `apartment_name` VARCHAR(128),
+  `area_size` DOUBLE,
+  `status` TINYINT,
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- DROP TABLE IF EXISTS `eh_app_namespace_mappings`;
+CREATE TABLE `eh_app_namespace_mappings` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` INT(11),
+  `app_key` VARCHAR(64),
+  `community_id` BIGINT,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+-- 以下从3.12.0合过来的，下次合代码请删除------------
+
 -- merge from organization-delta-schema.sql by lqs 20161128
 -- 资源分类定义 by sfyan 20161025
 -- DROP TABLE IF EXISTS `eh_resource_categories`;
@@ -292,6 +374,32 @@ CREATE TABLE `eh_pm_task_target_statistics` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+
+ALTER TABLE `eh_acls` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
+ALTER TABLE `eh_acls` ADD COLUMN `role_type` VARCHAR(32) COMMENT 'NULL: EhAclRole';
+ALTER TABLE `eh_acls` ADD COLUMN `scope` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag1` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag2` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag3` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag4` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `integral_tag5` BIGINT;
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag1` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag2` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag3` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag4` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD COLUMN `comment_tag5` VARCHAR(128);
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_namespace_id`(`namespace_id`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_scope`(`scope`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_itag1`(`integral_tag1`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_itag2`(`integral_tag2`); 
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_ctag1`(`comment_tag1`);
+ALTER TABLE `eh_acls` ADD INDEX `i_eh_acl_ctag2`(`comment_tag2`);
+
+ALTER TABLE `eh_acl_role_assignments` ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries';
+ALTER TABLE `eh_acl_role_assignments` ADD INDEX `i_eh_acl_role_asgn_namespace_id`(`namespace_id`);
+
+
 
 
 

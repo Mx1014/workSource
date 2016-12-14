@@ -84,6 +84,7 @@ public interface QualityProvider {
 	QualityInspectionStandardSpecificationMap createQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
 	void updateQualityInspectionStandardSpecificationMap(QualityInspectionStandardSpecificationMap map);
 	QualityInspectionSpecifications findSpecificationById(Long id, String ownerType, Long ownerId);
+	QualityInspectionSpecifications getSpecificationById(Long id);
 	
 	void populateStandardsSpecifications(final List<QualityInspectionStandards> standards);
 	void populateStandardSpecifications(QualityInspectionStandards standard);

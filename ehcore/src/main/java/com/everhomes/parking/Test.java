@@ -46,13 +46,13 @@ public class Test {
 	
 	
 	public static String post(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://220.160.111.114:9099" + type);
+		HttpPost httpPost = new HttpPost("http://113.108.41.29:8099" + type);
 		StringBuilder result = new StringBuilder();
 		
-        String key = "F7A0B971B199FD2A1017CEC5";
-        String iv = "20161013";
+        String key = "F7A0B971B199FD2A52468575";
+        String iv = "20161202";
         String user = "ktapi";
-        String pwd = "0306A9";
+        String pwd = "0306C3";
         String data = null;
 		try {
 			data = EncryptUtil.getEncString(param, key, iv);

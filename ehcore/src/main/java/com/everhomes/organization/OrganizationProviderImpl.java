@@ -1,8 +1,32 @@
 // @formatter:off
 package com.everhomes.organization;
+ 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Set;
+import java.util.stream.Collectors;
+
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.InsertQuery;
+import org.jooq.JoinType;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Result;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.everhomes.community.Community;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -18,38 +42,86 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
+import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
+import com.everhomes.rest.organization.OrganizationCommunityDTO;
+import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
+import com.everhomes.rest.organization.OrganizationCommunityRequestType;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationJobPositionStatus;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.VisibleFlag;
 import com.everhomes.rest.organization.pm.OrganizationScopeCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillingAccountsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillingTransactionsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationBillsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationCommunitiesDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationCommunityRequestsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationDetailsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionMapsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationJobPositionsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationMemberLogsDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationMembersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
+import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhGroups;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAssignedScopes;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationAttachments;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingAccounts;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBillingTransactions;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationBills;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunities;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationCommunityRequests;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationDetails;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositionMaps;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationJobPositions;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMemberLogs;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationMembers;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
+import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
+import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationBillingAccountsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationCommunitiesRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationCommunityRequestsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationDetailsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionMapsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationJobPositionsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationMemberLogsRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationMembersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationOrdersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationOwnersRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
+import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-
-import org.jooq.*;
-import org.jooq.impl.DefaultRecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Set;
-import java.util.stream.Collectors;
+ 
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(OrganizationProviderImpl.class);
@@ -1129,6 +1201,17 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return list;
 	}
 
+	@Override
+	public Integer getSignupCount(Long organizationId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.selectCount().from(Tables.EH_ORGANIZATION_MEMBERS)
+			.where(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(organizationId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.INACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.STATUS.ne(OrganizationMemberStatus.REJECT.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.fetchOne()
+			.value1();
+	}
 
 	@Override
 	public Organization findOrganizationByName(String name) {
@@ -1891,7 +1974,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_STATUS.ne(OrganizationCommunityRequestStatus.INACTIVE.getCode()));
         query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_TYPE.eq(OrganizationCommunityRequestType.Organization.getCode()));
         query.addConditions(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.COMMUNITY_ID.eq(comunityId));
-        query.addGroupBy(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID);
+        query.addGroupBy(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID);  //也就mysql支持这种错误的语法
         query.addOrderBy(Tables.EH_ORGANIZATION_COMMUNITY_REQUESTS.MEMBER_ID.desc());
         query.addLimit(count - contacts.size());
         query.fetch().map((r) -> {
@@ -2003,6 +2086,34 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         dao.insert(address);
         
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationAddresses.class, null);		
+	}
+	
+	@Override
+	public void createOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
+		
+		assert(addressMapping.getOrganizationId() != null);
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddressMappings.class));
+		addressMapping.setId(id);
+		
+		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
+		dao.insert(addressMapping);
+		
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationAddressMappings.class, null);		
+	}
+	
+	@Override
+	public void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping) {
+		
+		assert(addressMapping.getOrganizationId() != null);
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		
+		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
+		dao.update(addressMapping);
+		
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null);		
 	}
 	
 	@Override
@@ -2291,7 +2402,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return result;
+	}
 
+	@Override
+	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(ids));
+		if(queryBuilderCallback != null)
+			queryBuilderCallback.buildCondition(null, query);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
 	}
 
 
@@ -2537,6 +2662,19 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return ConvertHelper.convert(r, Organization.class);
 		return null;
 	}
+
+	@Override
+	public Organization findOrganizationByName(String name, Integer namespaceId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record r = context.select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+				.fetchOne();
+		if(r != null)
+			return ConvertHelper.convert(r, Organization.class);
+		return null;
+	}
 	
 	   // by Janson
     @Cacheable(value="listGroupMessageMembers", key="{#namespaceId, #groupId, #pageSize}", unless="#result.getSize() == 0")
@@ -2654,6 +2792,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return result;
 	}
+
+	@Override
 	public List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId) {
 		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2667,6 +2807,36 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public List<OrganizationJobPositionMap> listOrganizationJobPositionMapsByJobPositionId(Long jobPositionId) {
+		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.JOB_POSITION_ID.eq(jobPositionId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
+			return null;
+		});
+		return results;
+	}
+
+	@Override
+	public OrganizationJobPositionMap getOrganizationJobPositionMapByOrgIdAndJobPostionId(Long organizationId, Long jobPostionId) {
+		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.ORGANIZATION_ID.eq(organizationId));
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.JOB_POSITION_ID.eq(jobPostionId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
+			return null;
+		});
+		if(results.size() > 0){
+			return results.get(0);
+		}
+		return null;
+	}
+
+	@Override
 	public void deleteOrganizationJobPositionMapById(Long id){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationJobPositionMapsDao dao = new EhOrganizationJobPositionMapsDao(context.configuration());
@@ -2675,6 +2845,30 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public void createOrganizationMemberLog(OrganizationMemberLog orgLog) {
+ 
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationMemberLogs.class));
+		orgLog.setId(id);  
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationMemberLogsDao dao = new EhOrganizationMemberLogsDao(context.configuration());
+		dao.insert(orgLog);
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhOrganizationMemberLogs.class, null); 
+	}
+
+	@Override
+	public List<OrganizationMemberLog> listOrganizationMemberLogs(Long id) {
+		List<OrganizationMemberLog> results = new ArrayList<OrganizationMemberLog>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationMemberLogsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBER_LOGS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBER_LOGS.USER_ID.eq(id)); 
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationMemberLog.class));
+			return null;
+		});
+		if(results.size() == 0)
+			return null;
+		return results;
+	}
 	public void createOrganizationJobPositionMap(OrganizationJobPositionMap organizationJobPositionMap){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationJobPositionMapsDao dao = new EhOrganizationJobPositionMapsDao(context.configuration());
@@ -2763,5 +2957,42 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		dao.deleteById(id);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationJobPositions.class, null);
 	}
+
+	@Override
+	public OrganizationAddress findOrganizationAddress(Long organizationId, Long addressId, Long buildingId) {
+		final OrganizationAddress[] result = new OrganizationAddress[1];
+
+        this.dbProvider.mapReduce(AccessSpec.readOnly(), result, 
+            (DSLContext context, Object reducingContext) -> {
+           	 context.select().from(Tables.EH_ORGANIZATION_ADDRESSES)
+       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
+       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.BUILDING_ID.eq(buildingId))
+       		 .fetch().map(r ->{
+       			return result[0] = ConvertHelper.convert(r,OrganizationAddress.class);
+       		});
+           	 return true;
+       				 
+            });
+        
+        return result[0];
+	}
+
+	@Override
+	public CommunityAddressMapping findOrganizationAddressMapping(Long organizationId, Long communityId,
+			Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> records = context.select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId)
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId)))
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ADDRESS_ID.eq(addressId))
+				.fetch();
+
+		if(records != null && !records.isEmpty()){
+			return ConvertHelper.convert(records.get(0), CommunityAddressMapping.class);
+		}
+		return null;
+	}
+	
 	
 }

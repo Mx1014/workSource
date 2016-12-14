@@ -911,6 +911,7 @@ public class QualityServiceImpl implements QualityService {
 			
 		    // 由于现网存在着大量categoryId为0的任务，故不能直接抛异常，先暂时去掉校验 by lqs 20160715
 			//QualityInspectionCategories category = verifiedCategoryById(r.getCategoryId());
+
 		    QualityInspectionSpecifications category = qualityProvider.findSpecificationById(r.getCategoryId(), r.getOwnerType(), r.getOwnerId());
 		    if(category != null) {
 		        r.setCategoryName(getSpecificationNamePath(category.getPath(), category.getOwnerType(), category.getOwnerId()));
@@ -924,7 +925,13 @@ public class QualityServiceImpl implements QualityService {
         		}
         	}
         	
-        	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);  
+        	QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);
+
+			Community community = communityProvider.findCommunityById(r.getTargetId());
+			if(community != null) {
+				dto.setTargetName(community.getName());
+			}
+
         	if(category != null) {
         	    dto.setCategoryDescription(category.getDescription());
         	}
@@ -937,10 +944,10 @@ public class QualityServiceImpl implements QualityService {
 			if(group != null)
 				dto.setGroupName(group.getName());
         	
-//			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
-//        	 
-//        	dto.setGroupUsers(groupUsers);
-//        	
+			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
+
+        	dto.setGroupUsers(groupUsers);
+
 			if(r.getRecord() != null) {
 	        	QualityInspectionTaskRecordsDTO recordDto = ConvertHelper.convert(r.getRecord(), QualityInspectionTaskRecordsDTO.class);
 	        	if(recordDto != null) {
@@ -2137,7 +2144,7 @@ public class QualityServiceImpl implements QualityService {
 		StringBuilder sb = new StringBuilder();
 		for(String pathId : pathIds) {
 			Long specificationId = Long.valueOf(pathId);
-			QualityInspectionSpecifications specification = this.verifiedSpecificationById(specificationId, ownerType, ownerId);
+			QualityInspectionSpecifications specification = qualityProvider.getSpecificationById(specificationId);
 			sb.append("/" + specification.getName());
 		}
 		

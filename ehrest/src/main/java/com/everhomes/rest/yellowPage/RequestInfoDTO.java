@@ -28,6 +28,8 @@ public class RequestInfoDTO {
 	
 	private String createTime;
 
+	private String templateType;
+
 
 	public Long getId() {
 		return id;
@@ -76,7 +78,15 @@ public class RequestInfoDTO {
 	public void setCreateTime(String createTime) {
 		this.createTime = createTime;
 	}
-	
+
+	public String getTemplateType() {
+		return templateType;
+	}
+
+	public void setTemplateType(String templateType) {
+		this.templateType = templateType;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
