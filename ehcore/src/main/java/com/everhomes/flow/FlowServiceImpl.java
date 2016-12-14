@@ -247,6 +247,8 @@ public class FlowServiceImpl implements FlowService {
     	obj.setStatus(FlowStatusType.CONFIG.getCode());
     	obj.setOrganizationId(cmd.getOrgId());
     	obj.setNamespaceId(cmd.getNamespaceId());
+    	obj.setProjectId(cmd.getProjectId());
+    	obj.setProjectType(cmd.getProjectType());
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
 
@@ -1646,6 +1648,13 @@ public class FlowServiceImpl implements FlowService {
 		flowCase.setOwnerType(snapshotFlow.getOwnerType());
 		flowCase.setCaseType(FlowCaseType.INNER.getCode());
 		flowCase.setStatus(FlowCaseStatus.INITIAL.getCode());
+		
+		if(flowCaseCmd.getProjectId() == null) {
+			//use default projectId
+			flowCase.setProjectId(snapshotFlow.getProjectId());
+			flowCase.setProjectType(snapshotFlow.getProjectType());
+		}
+		
 		flowCaseProvider.createFlowCase(flowCase);
 		flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());//get again for default values
 		
@@ -2423,7 +2432,7 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public void testFlowCase() {
 	    Long moduleId = 111l;
-	    Long orgId = 1001027l;
+	    Long orgId = 1000001l;
 	    
     	Long applyUserId = UserContext.current().getUser().getId();
     	
