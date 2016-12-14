@@ -30,6 +30,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
 		userService = PlatformContext.getComponent(UserService.class);
 		flowService = PlatformContext.getComponent(FlowService.class);
+//		flowButtonProvider = PlatformContext.getComponent(FlowButtonProvider.class);
 	}
 	
 	@Override
@@ -81,6 +82,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		FlowStepType nextStep = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
 		ctx.setStepType(nextStep);
 		
+		FlowLogType logType = FlowLogType.BUTTON_FIRED;
 		FlowEventLog log = null;
 		FlowEventLog tracker = null;
 		FlowCase flowCase = ctx.getFlowCase();
@@ -189,6 +191,26 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		case REMINDER_STEP:
 			next = current;
 			ctx.setNextNode(next);
+			
+			logType = FlowLogType.NODE_REMIND;
+			log = new FlowEventLog();
+			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			log.setFlowCaseId(ctx.getFlowCase().getId());
+			log.setFlowUserId(firedUser.getId());
+			log.setLogType(logType.getCode());
+			log.setFlowNodeId(next.getFlowNode().getId());
+			List<FlowEventLog> remindLogs = flowEventLogProvider.findFiredEventsByLog(log);
+			
+			if(!btn.getFlowButton().getRemindCount().equals(0l) 
+					&& remindLogs != null 
+					&& remindLogs.size() > btn.getFlowButton().getRemindCount().intValue()) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_REMIND_ERROR, "remind count overflow");
+			}
+			
+			tracker = null;
+			
 			break;
 		case EVALUATE_STEP:
 			//TODO save evaluate score
@@ -221,26 +243,31 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
 		log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
 		log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+		log.setFlowCaseId(ctx.getFlowCase().getId());
+		log.setFlowUserId(firedUser.getId());
+		log.setLogType(logType.getCode());
+		
+		//Important!!! not change this order
+		if(logType == FlowLogType.BUTTON_FIRED) {
+			List<FlowEventLog> likeLogs = flowEventLogProvider.findFiredEventsByLog(log);
+			if(likeLogs != null && likeLogs.size() > 0) {
+				log.setButtonFiredCount(new Long(likeLogs.size()));
+			}	
+		}
+		
 		log.setFlowButtonId(btn.getFlowButton().getId());
 		log.setFlowNodeId(next.getFlowNode().getId());
 		log.setParentId(0l);
-		log.setFlowCaseId(ctx.getFlowCase().getId());
-		log.setFlowUserId(firedUser.getId());
 		log.setFlowUserName(firedUser.getNickName());
 		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
 			log.setFlowSelectionId(cmd.getEntityId());
 		}
 		log.setSubjectId(subject.getId());
-		log.setLogType(FlowLogType.BUTTON_FIRED.getCode());
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
 		
-		List<FlowEventLog> likeLogs = flowEventLogProvider.findFiredEventsByLog(log);
-		if(likeLogs != null && likeLogs.size() > 0) {
-			log.setButtonFiredCount(new Long(likeLogs.size()));
-		}
-		
 		ctx.getLogs().add(log);	//added but not save to database now.
+
 	}
 
 	@Override

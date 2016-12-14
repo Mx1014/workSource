@@ -112,6 +112,11 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         if (cmd.getUserIds() != null) {
+            Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
+            if (flow == null) {
+                LOGGER.error("There is no workflow enabled.");
+                throw errorWith(ParkingErrorCode.SCOPE_CLEARANCE, ParkingErrorCode.ERROR_NO_WORK_FLOW_ENABLED, "There is no workflow enabled.");
+            }
             for (Long userId : cmd.getUserIds()) {
                 // 检查当前停车场里是否已经有当前用户了
                 ParkingClearanceOperator operator = clearanceOperatorProvider.findByParkingLotIdAndUid(cmd.getParkingLotId(), userId, cmd.getOperatorType());
@@ -128,6 +133,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 newOperator.setOperatorId(user.getId());
                 newOperator.setStatus(ParkingCommonStatus.ACTIVE.getCode());
                 dbProvider.execute(status -> {
+                    // 添加工作流处理人员
+                    flowService.addSnapshotProcessUser(flow.getId(), userId);
                     clearanceOperatorProvider.createClearanceOperator(newOperator);
                     this.assignmentPrivileges(cmd.getOperatorType(), cmd.getParkingLotId(), userId);
                     return true;
@@ -190,11 +197,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public void deleteClearanceOperator(DeleteClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
+
         coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_OPERATOR.getCode() + cmd.getId()).tryEnter(() -> {
             ParkingClearanceOperator operator = clearanceOperatorProvider.findById(cmd.getId());
             if (operator != null) {
                 boolean success = dbProvider.execute(status -> {
                     long privilegeId = this.getPrivilegeId(operator.getOperatorType());
+                    // 删除工作流处理人员
+                    this.deleteFlowProcessor(operator);
+                    // 删除权限
                     rolePrivilegeService.deleteAcls(
                             EntityType.PARKING_LOT.getCode(),//
                             operator.getParkingLotId(),//
@@ -204,6 +215,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                             new ArrayList<>(Collections.singletonList(privilegeId))
                     );
                     clearanceOperatorProvider.deleteClearanceOperator(operator);
+                    // 添加工作流处理人员
                     return true;
                 });
                 if (!success) {
@@ -215,6 +227,14 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 LOGGER.error("The operator is not exist, id = {}", cmd.getId());
             }
         });
+    }
+
+    private void deleteFlowProcessor(ParkingClearanceOperator operator) {
+        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, operator.getParkingLotId(), FlowOwnerType.PARKING.getCode());
+        // 删除当前工作流的处理人员
+        if (flow != null) {
+            flowService.deleteSnapshotProcessUser(flow.getId(), operator.getOperatorId());
+        }
     }
 
     @Override
@@ -316,7 +336,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     @Override
     public CheckAuthorityResponse checkAuthority(CheckAuthorityCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        // checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
 
@@ -324,7 +344,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
         long privilegeId = -1;
         // 没有权限时的提示消息
-        String message = "";
+        String message = null;
         if (actionType == ActionType.PARKING_CLEARANCE) {
             privilegeId = APPLY_PRIVILEGE_ID;
             message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
@@ -342,7 +362,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
                             cmd.getOrganizationId(), privilegeId);
                     status = CheckAuthorityStatus.SUCCESS;
-                    message = "";
+                    message = null;
                     break;// 只要有一个停车场的权限就放行
                 } catch (Exception e) {
                     // ignore

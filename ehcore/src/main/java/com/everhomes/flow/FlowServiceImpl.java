@@ -922,6 +922,9 @@ public class FlowServiceImpl implements FlowService {
 		if(cmd.getNeedProcessor() != null) {
 			flowButton.setNeedProcessor(cmd.getNeedProcessor());	
 		}
+		if(cmd.getRemindCount() != null) {
+			flowButton.setRemindCount(cmd.getRemindCount());
+		}
 		
 		flowButtonProvider.updateFlowButton(flowButton);
 		
@@ -2478,4 +2481,76 @@ public class FlowServiceImpl implements FlowService {
 		
 		return graphDetail;
 	}
+	
+	@Override
+	public void deleteSnapshotProcessUser(Long flowId, Long userId) {
+		Flow flow = flowProvider.getFlowById(flowId);
+		if(!flow.getFlowMainId().equals(0l)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "Please use a config flowId");	
+		}
+		
+		deleteAllNodeProcessors(flow, flow.getId(), 0, userId);
+		
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+		if(snapshotFlow != null) {
+			deleteAllNodeProcessors(snapshotFlow, flow.getFlowMainId(), flow.getFlowVersion(), userId);
+		}
+	}
+	
+	private void deleteAllNodeProcessors(Flow snapshotFlow, Long flowMainId,
+			Integer ver, Long userId) {
+		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowMainId, ver);
+		List<FlowUserSelection> objs = new ArrayList<>();
+		for(FlowNode fn : nodes) {
+			FlowUserSelection sel = flowUserSelectionProvider.findFlowNodeSelectionUser(fn.getId(), ver, userId);
+			if(sel != null) {
+				objs.add(sel);
+			}
+		}
+		
+		flowUserSelectionProvider.deleteFlowUserSelections(objs);
+	}
+
+	@Override
+	public void addSnapshotProcessUser(Long flowId, Long userId) {
+		Flow flow = flowProvider.getFlowById(flowId);
+		if(!flow.getFlowMainId().equals(0l)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "Please use a config flowId");	
+		}
+		
+		addAllNodeProcessors(flow, flow.getId(), 0, userId);
+		
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+		if(snapshotFlow != null) {
+			addAllNodeProcessors(snapshotFlow, flow.getFlowMainId(), flow.getFlowVersion(), userId);
+		}
+	}
+	
+	private void addAllNodeProcessors(Flow flow, Long flowMainId, Integer ver, Long userId) {
+		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowMainId, ver);
+		List<FlowUserSelection> objs = new ArrayList<>();
+		for(FlowNode fn : nodes) {
+			FlowUserSelection sel = flowUserSelectionProvider.findFlowNodeSelectionUser(fn.getId(), ver, userId);
+			if(sel == null) {
+				sel = new FlowUserSelection();
+				sel.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+				sel.setBelongTo(fn.getId());
+				sel.setBelongType(FlowUserType.PROCESSOR.getCode());
+				sel.setFlowMainId(flowMainId);
+				sel.setFlowVersion(ver);
+				sel.setNamespaceId(fn.getNamespaceId());
+				sel.setOrganizationId(flow.getOrganizationId());
+				sel.setSelectType(FlowUserSelectionType.DEPARTMENT.getCode());
+				sel.setSourceIdA(userId);
+				sel.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
+				sel.setStatus(FlowStatusType.VALID.getCode());
+				updateFlowUserName(sel);
+				
+				objs.add(sel);
+			}
+		}
+		
+		flowUserSelectionProvider.createFlowUserSelections(objs);
+	}
+	
 }

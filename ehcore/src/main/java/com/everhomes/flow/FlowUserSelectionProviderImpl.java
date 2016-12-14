@@ -18,7 +18,11 @@ import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowStatusType;
+import com.everhomes.rest.flow.FlowUserSelectionType;
+import com.everhomes.rest.flow.FlowUserSourceType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhFlowUserSelectionsDao;
@@ -151,5 +155,58 @@ public class FlowUserSelectionProviderImpl implements FlowUserSelectionProvider 
     	}
     	
     	return seles;
+    }
+    
+    @Override
+    public FlowUserSelection findFlowNodeSelectionUser(Long flowNodeId, Integer ver, Long userId) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowUserSelection> seles = queryFlowUserSelections(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_TO.eq(flowNodeId));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_ENTITY.eq(FlowEntityType.FLOW_NODE.getCode()));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.BELONG_TYPE.eq(FlowUserType.PROCESSOR.getCode()));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.STATUS.ne(FlowStatusType.INVALID.getCode()));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.SOURCE_ID_A.eq(userId));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.SELECT_TYPE.eq(FlowUserSelectionType.DEPARTMENT.getCode()));
+				query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.SOURCE_TYPE_A.eq(FlowUserSourceType.SOURCE_USER.getCode()));
+				if(ver != null) {
+					query.addConditions(Tables.EH_FLOW_USER_SELECTIONS.FLOW_VERSION.eq(ver));
+				}
+				return query;
+			}
+    		
+    	});
+    	
+    	if(seles != null && seles.size() > 0) {
+    		return seles.get(0);
+    	}
+    	
+    	return null;
+    }
+    
+    @Override
+    public void createFlowUserSelections(List<FlowUserSelection> objs) {
+    	if(objs == null || objs.size() == 0) {
+    		return;
+    	}
+    	
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowUserSelections.class));
+        objs.stream().forEach((obj)->{
+        	long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowUserSelections.class));
+        	obj.setId(id);
+        	prepareObj(obj);
+        });
+        
+        EhFlowUserSelectionsDao dao = new EhFlowUserSelectionsDao(context.configuration());
+        dao.insert(objs.toArray(new FlowUserSelection[objs.size()]));
+    }
+    
+    @Override
+    public void deleteFlowUserSelections(List<FlowUserSelection> objs) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowUserSelections.class));
+        EhFlowUserSelectionsDao dao = new EhFlowUserSelectionsDao(context.configuration());
+        dao.delete(objs.toArray(new FlowUserSelection[objs.size()]));
     }
 }

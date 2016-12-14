@@ -491,7 +491,7 @@ CREATE TABLE `eh_flow_buttons` (
   `need_processor` TINYINT NOT NULL DEFAULT 0 COMMENT '0: not need processor, 1: need only one processor',
   `create_time` DATETIME NOT NULL COMMENT 'record create time',
   `status` TINYINT NOT NULL COMMENT '0: invalid, 1: disabled, 2: enabled',
-
+  `remind_count` INTEGER NOT NULL DEFAULT 0,
   `string_tag1` VARCHAR(128),
   `string_tag2` VARCHAR(128),
   `string_tag3` VARCHAR(128),

@@ -30,5 +30,7 @@ public interface FlowProvider {
 
 	Flow getEnabledSnapshotFlow(Integer namespaceId, Long moduleId, String moduleType,
 			Long ownerId, String ownerType);
+
+	Flow getSnapshotFlowById(Long flowId);
 	
 }
