@@ -38,6 +38,10 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.order.OrderUtil;
@@ -47,6 +51,8 @@ import com.everhomes.parking.ketuo.KetuoCardRate;
 import com.everhomes.parking.ketuo.KetuoCardType;
 import com.everhomes.parking.ketuo.KetuoJsonEntity;
 import com.everhomes.parking.ketuo.KetuoTemoFee;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
@@ -102,7 +108,12 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
     private UserProvider userProvider;
 	@Autowired
 	private OrderUtil commonOrderUtil;
-	
+	@Autowired
+	private FlowService flowService;
+//    @Autowired
+//	private FlowProvider flowProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
@@ -385,9 +396,24 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 				if(count > 1) {
 					order.setMonthCount(new BigDecimal(count -1) );
 					order.setPrice(new BigDecimal(order.getPrice().intValue()*100 - payMoney));
-					return rechargeMonthlyCard(order);
+					if(rechargeMonthlyCard(order)) {
+						User user = UserContext.current().getUser();
+				    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), order.getOwnerType(), 
+				    			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), null, null, null);
+				    	ParkingCardRequest parkingCardRequest = list.get(0);
+				    	FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+			    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			    		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+			    		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
+			    		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
+			    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			    		stepDTO.setStepCount(flowCase.getStepCount());
+			    		flowService.processAutoStep(stepDTO);
+			    		return true;
+					}else
+						return false;
 				}
-				return true;
 			}
 			return false;
 		}else {
@@ -402,6 +428,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		    param.put("payMoney", order.getPrice().intValue()*100);
 		    param.put("startTime", validStart);
 		    param.put("endTime", validEnd);
+		    param.put("freeMoney", card.getFreeMoney());
 			String json = post(param, RECHARGE);
 	        
 	        if(LOGGER.isDebugEnabled())
