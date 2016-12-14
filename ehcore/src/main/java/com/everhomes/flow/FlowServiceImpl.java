@@ -1716,25 +1716,8 @@ public class FlowServiceImpl implements FlowService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
-		if(cmd.getNamespaceId() == null) {
-			cmd.setNamespaceId(UserContext.current().getNamespaceId());
-		}
-		if(cmd.getNamespaceId() == null) {
-			cmd.setNamespaceId(0);
-		}
-		if(cmd.getModuleType() == null) {
-			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
-		}
-		if(cmd.getOwnerId() == null) {
-			cmd.setOwnerId(0l);
-		}
-		if(cmd.getModuleId() == null) {
-			cmd.setModuleId(0l);
-		}
-		
+	
+	private FlowVariableResponse listFlowTextVariables(ListFlowVariablesCommand cmd) {
 		FlowVariableResponse resp = new FlowVariableResponse();
 		List<FlowVariableDTO> dtos = new ArrayList<>();
 		resp.setDtos(dtos);
@@ -1780,7 +1763,49 @@ public class FlowServiceImpl implements FlowService {
         	}
         }
         
-        return resp;
+        return resp;		
+	}
+
+	@Override
+	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.current().getNamespaceId());
+		}
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(0);
+		}
+		if(cmd.getModuleType() == null) {
+			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		}
+		if(cmd.getOwnerId() == null) {
+			cmd.setOwnerId(0l);
+		}
+		if(cmd.getModuleId() == null) {
+			cmd.setModuleId(0l);
+		}
+		
+		String flowVariableType = FlowVariableType.TEXT.getCode();
+		if(flowVariableType.equals(cmd.getFlowVariableType())) {
+			return listFlowTextVariables(cmd);
+		} else {
+			FlowVariableResponse resp = new FlowVariableResponse();
+			String para = null;
+			List<FlowVariable> vars = flowVariableProvider.findVariables(cmd.getNamespaceId()
+	        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.NODE_USER.getCode());
+			
+			List<FlowVariableDTO> dtos = new ArrayList<>();
+			resp.setDtos(dtos);
+			
+			Map<String, Long> map = new HashMap<String, Long>();
+			for(FlowVariable var : vars) {
+				if(!map.containsKey(var.getName())) {
+	        		dtos.add(ConvertHelper.convert(var, FlowVariableDTO.class));
+	        		map.put(var.getName(), 1l);
+	        	}
+			}
+			
+			return resp;
+		}
 	}
 	
 	private void updateCaseDTO(FlowCaseDTO dto) {

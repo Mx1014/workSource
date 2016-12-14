@@ -8,14 +8,6 @@ import com.everhomes.rest.user.UserInfo;
 
 public interface FlowUserSelectionService {
 	/**
-	 * 通过一个用户选择，获取所有的相关的用户
-	 * @param userSelection
-	 * @return
-	 */
-	List<Long> findUsersBySelection(FlowUserSelection userSelection);
-	
-	
-	/**
 	 * 请求一个 Organization 下的当前用户或者所有用户
 	 * @param orgId
 	 * @param ownerType
