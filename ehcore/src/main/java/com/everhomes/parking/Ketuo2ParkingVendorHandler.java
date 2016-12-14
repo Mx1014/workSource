@@ -38,6 +38,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowProvider;
@@ -61,6 +62,7 @@ import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
+import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingCardType;
 import com.everhomes.rest.parking.ParkingLotRechargeType;
 import com.everhomes.rest.parking.ParkingLotVendor;
@@ -69,6 +71,7 @@ import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
+import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
@@ -110,8 +113,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private OrderUtil commonOrderUtil;
 	@Autowired
 	private FlowService flowService;
-//    @Autowired
-//	private FlowProvider flowProvider;
+    @Autowired
+	private FlowProvider flowProvider;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
 	@Override
@@ -399,17 +402,32 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 					if(rechargeMonthlyCard(order)) {
 						User user = UserContext.current().getUser();
 				    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), order.getOwnerType(), 
-				    			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), null, null, null);
-				    	ParkingCardRequest parkingCardRequest = list.get(0);
-				    	FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
-			    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-			    		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
-			    		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
-			    		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
-			    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-			    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-			    		stepDTO.setStepCount(flowCase.getStepCount());
-			    		flowService.processAutoStep(stepDTO);
+				    			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
+				    			null, null, null, null);
+				    	ParkingCardRequest parkingCardRequest = null;
+				    	for(ParkingCardRequest p: list) {
+				    		Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
+				    		String tag1 = flow.getStringTag1();
+				    		if(null == tag1) {
+				    			LOGGER.error("Flow tag is null, flow={}", flow);
+				    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				    					"Flow tag is null.");
+				    		}
+				    		if(ParkingRequestFlowType.INTELLIGENT.getCode() == Integer.valueOf(tag1)) {
+				    			parkingCardRequest = p;
+				    		}
+				    	}
+				    	if(null != parkingCardRequest) {
+				    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+				    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+				    		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+				    		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
+				    		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
+				    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+				    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+				    		stepDTO.setStepCount(flowCase.getStepCount());
+				    		flowService.processAutoStep(stepDTO);
+				    	}
 			    		return true;
 					}
 				}
