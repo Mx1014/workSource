@@ -411,9 +411,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			    		stepDTO.setStepCount(flowCase.getStepCount());
 			    		flowService.processAutoStep(stepDTO);
 			    		return true;
-					}else
-						return false;
+					}
 				}
+				return true;
 			}
 			return false;
 		}else {
