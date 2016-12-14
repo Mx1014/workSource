@@ -58,6 +58,7 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationMemberLog;
 import com.everhomes.organization.OrganizationOwner;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -124,11 +125,13 @@ import com.everhomes.rest.community.admin.ListCommunityManagersAdminCommand;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
 import com.everhomes.rest.community.admin.ListComunitiesByKeywordAdminCommand;
 import com.everhomes.rest.community.admin.ListUserCommunitiesCommand;
+import com.everhomes.rest.community.admin.OrganizationMemberLogDTO;
 import com.everhomes.rest.community.admin.QryCommunityUserAddressByUserIdCommand;
 import com.everhomes.rest.community.admin.RejectCommunityAdminCommand;
 import com.everhomes.rest.community.admin.SmsTemplate;
 import com.everhomes.rest.community.admin.UpdateBuildingAdminCommand;
 import com.everhomes.rest.community.admin.UpdateCommunityAdminCommand;
+import com.everhomes.rest.community.admin.UpdateCommunityUserCommand;
 import com.everhomes.rest.community.admin.UpdateResourceCategoryCommand;
 import com.everhomes.rest.community.admin.UserCommunityDTO;
 import com.everhomes.rest.community.admin.VerifyBuildingAdminCommand;
@@ -1538,9 +1541,28 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setGender(user.getGender());
 			dto.setPhone(null != userIdentifier ? userIdentifier.getIdentifierToken() : null);
 			dto.setApplyTime(user.getCreateTime());
-			dto.setOrgDtos(orgDtos);
+			dto.setOrgDtos(orgDtos); 
+			dto.setCreateTime(user.getCreateTime() != null ? user.getCreateTime().getTime() : null);
+			dto.setExecutiveFlag(user.getExecutiveTag());
+			dto.setIdentityNumber(user.getIdentityNumberTag());
+			dto.setPosition(user.getPositionTag());
 		}
 		
+		List<OrganizationMemberLog> memberLogs = this.organizationProvider.listOrganizationMemberLogs(user.getId());
+		dto.setMemberLogDTOs(new ArrayList<OrganizationMemberLogDTO>());
+		if(null != memberLogs){
+			for(OrganizationMemberLog log : memberLogs){
+				OrganizationMemberLogDTO logDTO = ConvertHelper.convert(log, OrganizationMemberLogDTO.class);
+				logDTO.setOperateTime(log.getOperateTime().getTime());
+				Organization org = this.organizationProvider.findOrganizationById(log.getOrganizationId());
+				if(null != org)
+					logDTO.setOrganizationName(org.getName());
+				User operator = this.userProvider.findUserById(log.getOperatorUid());
+				if(null != operator)
+					logDTO.setOperatorNickName(operator.getNickName());
+				dto.getMemberLogDTOs().add(logDTO);
+			}
+		}
 		return dto;
 	}
 	
@@ -1659,7 +1681,7 @@ public class CommunityServiceImpl implements CommunityService {
 			index = 10000;
 		}
 		
-		users = userProvider.listUserByKeyword(cmd.getKeywords(), namespaceId, locator, index);
+		users = userProvider.listUserByKeyword(cmd.getKeywords(),cmd.getExecutiveFlag(), namespaceId, locator, index);
 		
 		if(null == users) 
 			return res;
@@ -1672,6 +1694,9 @@ public class CommunityServiceImpl implements CommunityService {
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
 			dto.setApplyTime(user.getCreateTime());
 			dto.setIsAuth(2);
+			dto.setExecutiveFlag(user.getExecutiveTag());
+			dto.setIdentityNumber(user.getIdentityNumberTag());
+			dto.setPosition(user.getPositionTag());
 			if(null != members){
 				for (OrganizationMember member : members) {
 					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
@@ -2477,7 +2502,23 @@ public class CommunityServiceImpl implements CommunityService {
 	}
 
 
-	@Override
+	@Override 
+	public void updateCommunityUser(UpdateCommunityUserCommand cmd) { 
+		if(null == cmd.getUserId() )
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid userid parameter");
+		User user = userProvider.findUserById(cmd.getUserId());
+
+		if(null == user)
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+					"Invalid userid parameter: no this user");
+		user.setExecutiveTag(cmd.getExecutiveFlag());
+		user.setIdentityNumberTag(cmd.getIdentityNumber());
+		user.setPositionTag(cmd.getPosition());
+		userProvider.updateUser(user); 
+		
+	}
+	
 	public void createResourceCategory(CreateResourceCategoryCommand cmd) {
 		
 		Long ownerId = cmd.getOwnerId();
@@ -2619,7 +2660,7 @@ public class CommunityServiceImpl implements CommunityService {
 				namespaceId);
 		if(null != rca)
 			communityProvider.deleteResourceCategoryAssignmentById(rca.getId());
-		
+		 
 	}
 	
 	private void checkResourceCategoryId(Long id) {

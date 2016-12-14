@@ -3,6 +3,7 @@ package com.everhomes.organization;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 
 import javax.servlet.http.HttpServletResponse;
 
@@ -15,8 +16,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.openapi.Contract;
 import com.everhomes.rest.acl.admin.AclRoleAssignmentsDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.ApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchApproveContactCommand;
 import com.everhomes.rest.enterprise.BatchRejectContactCommand;
@@ -355,7 +358,7 @@ public interface OrganizationService {
  
 	List<OrganizationDTO> listOrganizationsByEmail(ListOrganizationsByEmailCommand cmd);
 	void applyForEnterpriseContactByEmail(ApplyForEnterpriseContactByEmailCommand cmd); 
-	void verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
+	String verifyEnterpriseContact(VerifyEnterpriseContactCommand cmd);
   
 	
 	List<OrganizationMemberDTO> convertOrganizationMemberDTO(List<OrganizationMember> organizationMembers, Organization org);
@@ -387,4 +390,19 @@ public interface OrganizationService {
 			List<Long> memberUids);
 
 	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId);
+	ContractDTO processContract(Contract c);
+	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
+			Integer namespaceId);
+	List<OrganizationContactDTO> getAdmins(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId, Long serviceUserId);
+	List<String> getBusinessContactPhone(Long organizationId);
+	Set<String> getOrganizationContactPhone(Long organizationId);
+	List<String> getAdminPhone(Long organizationId);
+	OrganizationServiceUser getServiceUser(Long organizationId);
+
+	List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd);
+
+	List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd);
+
+	List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd);
 }

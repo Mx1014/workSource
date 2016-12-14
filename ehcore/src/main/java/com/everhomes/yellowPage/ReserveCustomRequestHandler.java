@@ -6,6 +6,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.util.ConvertHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -65,7 +67,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
-	private ReserveRequestInfoSearcher reserveRequestInfoSearcher;
+	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
 	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -79,17 +81,18 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		request.setCategoryId(cmd.getCategoryId());
 		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());
 		request.setServiceAllianceId(cmd.getServiceAllianceId());
-	  
+		request.setTemplateType(cmd.getTemplateType());
 		User user = UserContext.current().getUser();
 		request.setCreatorUid(user.getId());
 		request.setCreatorName(user.getNickName());
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		if(identifier != null)
 			request.setCreatorMobile(identifier.getIdentifierToken());
-		
+
 		LOGGER.info("ReserveCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createReservationRequests(request);
-		reserveRequestInfoSearcher.feedDoc(request);
+		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
 		

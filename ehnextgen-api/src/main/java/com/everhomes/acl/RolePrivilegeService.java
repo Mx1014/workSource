@@ -11,6 +11,7 @@ import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.serviceModule.ServiceModulePrivilegeType;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.organization.ListOrganizationAdministratorCommand;
@@ -281,4 +282,8 @@ public interface RolePrivilegeService {
      * @param privilegeType
      */
 	void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType);
+
+	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds);
+
+	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
 }

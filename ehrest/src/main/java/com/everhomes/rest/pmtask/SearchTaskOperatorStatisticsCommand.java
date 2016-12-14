@@ -17,6 +17,7 @@ import com.everhomes.util.StringHelper;
 public class SearchTaskOperatorStatisticsCommand {
 	private String ownerType;
     private Long ownerId;
+    private Long organizationId;
 	private Integer namespaceId;
 	private Long taskCategoryId;
 	private String keyword;
@@ -75,5 +76,11 @@ public class SearchTaskOperatorStatisticsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getOrganizationId() {
+		return organizationId;
+	}
+	public void setOrganizationId(Long organizationId) {
+		this.organizationId = organizationId;
 	}
 }

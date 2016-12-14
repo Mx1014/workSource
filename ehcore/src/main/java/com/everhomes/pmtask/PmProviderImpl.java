@@ -80,7 +80,7 @@ public class PmProviderImpl implements PmTaskProvider{
     }
 	
 	@Override
-    public List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Long roleId, Long pageAnchor, Integer pageSize){
+    public List<PmTaskTarget> listTaskTargets(String ownerType, Long ownerId, Byte roleId, Long pageAnchor, Integer pageSize){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectQuery<EhPmTaskTargetsRecord> query = context.selectQuery(Tables.EH_PM_TASK_TARGETS);
 
@@ -102,7 +102,7 @@ public class PmProviderImpl implements PmTaskProvider{
     }
 	
 	@Override
-    public PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Long roleId, String targetType, Long targetId){
+    public PmTaskTarget findTaskTarget(String ownerType, Long ownerId, Byte roleId, String targetType, Long targetId){
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectQuery<EhPmTaskTargetsRecord> query = context.selectQuery(Tables.EH_PM_TASK_TARGETS);
 
@@ -218,7 +218,7 @@ public class PmProviderImpl implements PmTaskProvider{
 	}
 	
 	@Override
-	public List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId, Long userId){
+	public List<PmTask> listPmTask4Stat(String ownerType, Long ownerId, Long taskCategoryId, Long userId, Timestamp startDate, Timestamp endDate){
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         SelectQuery<EhPmTasksRecord> query = context.selectQuery(Tables.EH_PM_TASKS);
 
@@ -235,6 +235,10 @@ public class PmProviderImpl implements PmTaskProvider{
         			or(Tables.EH_PM_TASKS.STATUS.eq(PmTaskStatus.REVISITED.getCode())));
         	query.addGroupBy(Tables.EH_PM_TASKS.ID);
         }
+        if(null != startDate)
+            query.addConditions(Tables.EH_PM_TASKS.CREATE_TIME.gt(startDate));
+        if(null != endDate)
+            query.addConditions(Tables.EH_PM_TASKS.CREATE_TIME.lt(endDate));
         query.addConditions(Tables.EH_PM_TASKS.OPERATOR_STAR.ne((byte)0));
         
         List<PmTask> result = query.fetch().map(

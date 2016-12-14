@@ -3801,6 +3801,7 @@ public class PunchServiceImpl implements PunchService {
 			
 			List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(org.getPath()+"%", groupTypeList);
 			List<Long> orgIds = new ArrayList<Long>();
+			orgIds.add(org.getId());
 			for (Organization o : orgs){
 				orgIds.add(o.getId());
 			}

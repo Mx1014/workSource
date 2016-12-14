@@ -32,6 +32,10 @@ import com.everhomes.util.StringHelper;
  *<li>uuid:活动唯一的标识</li>
  *<li>mediaUrl:活动url</li>
  *<li>favoriteFlag: 是否收藏标记，参见{@link com.everhomes.rest.forum.PostFavoriteFlag}</li>
+ * <li>achievement: 活动成果</li>
+ * <li>achievementType: 活动成果文本类型 richtext：富文本, link：第三方链接 </li>
+ * <li>achievementRichtextUrl: 活动成果富文本页面url</li>
+ * <li>activityAttachmentFlag: 是否有活动附件 true: 有 false: 无</li>
  *</ul>
  */
 public class ActivityDTO {
@@ -80,7 +84,47 @@ public class ActivityDTO {
     private String content;
     private Integer maxQuantity;
     private String version;
-    
+
+    private String achievementType;
+
+    private String achievement;
+
+    private boolean activityAttachmentFlag;
+
+    private String achievementRichtextUrl;
+
+    public String getAchievementRichtextUrl() {
+        return achievementRichtextUrl;
+    }
+
+    public void setAchievementRichtextUrl(String achievementRichtextUrl) {
+        this.achievementRichtextUrl = achievementRichtextUrl;
+    }
+
+    public String getAchievementType() {
+        return achievementType;
+    }
+
+    public void setAchievementType(String achievementType) {
+        this.achievementType = achievementType;
+    }
+
+    public String getAchievement() {
+        return achievement;
+    }
+
+    public void setAchievement(String achievement) {
+        this.achievement = achievement;
+    }
+
+    public boolean isActivityAttachmentFlag() {
+        return activityAttachmentFlag;
+    }
+
+    public void setActivityAttachmentFlag(boolean activityAttachmentFlag) {
+        this.activityAttachmentFlag = activityAttachmentFlag;
+    }
+
     public String getVersion() {
 		return version;
 	}

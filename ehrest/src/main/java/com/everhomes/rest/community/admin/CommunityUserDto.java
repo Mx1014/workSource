@@ -2,6 +2,14 @@ package com.everhomes.rest.community.admin;
 
 import java.sql.Timestamp;
 
+/**
+ * <ul>
+
+ * <li>executiveFlag：是否高管 0-否 1-是</li>
+ * <li>position：职位</li>
+ * <li>identityNumber：身份证号</li> 
+ * </ul>
+ */
 public class CommunityUserDto {
 
 	private Long     id;
@@ -29,8 +37,35 @@ public class CommunityUserDto {
 	private Timestamp applyTime;
 	
 	private String phone;
+
+    private Byte executiveFlag;
+    private String position;
+    private String identityNumber;
 	
-	
+	public Byte getExecutiveFlag() {
+		return executiveFlag;
+	}
+
+	public void setExecutiveFlag(Byte executiveFlag) {
+		this.executiveFlag = executiveFlag;
+	}
+
+	public String getPosition() {
+		return position;
+	}
+
+	public void setPosition(String position) {
+		this.position = position;
+	}
+
+	public String getIdentityNumber() {
+		return identityNumber;
+	}
+
+	public void setIdentityNumber(String identityNumber) {
+		this.identityNumber = identityNumber;
+	}
+
 	public Long getId() {
 		return id;
 	}

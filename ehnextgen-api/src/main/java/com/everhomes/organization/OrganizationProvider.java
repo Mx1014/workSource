@@ -233,6 +233,10 @@ public interface OrganizationProvider {
 	List<OrganizationMember> listOrganizationMembers(Long orgId,List<Long> memberUids);
  
 	List<OrganizationCommunityRequest> listOrganizationCommunityRequests(Long communityId);
+ 
+	void createOrganizationMemberLog(OrganizationMemberLog orgLog);
+	List<OrganizationMemberLog> listOrganizationMemberLogs(Long id);
+ 
 
 	List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId);
 
@@ -258,4 +262,15 @@ public interface OrganizationProvider {
 	OrganizationMember getOrganizationMemberByContactToken(Integer currentNamespaceId,String email); 
  
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
+	Organization findOrganizationByName(String name, Integer namespaceId);
+	Integer getSignupCount(Long organizationId);
+	OrganizationAddress findOrganizationAddress(Long id, Long id2, Long id3);
+	void createOrganizationAddressMapping(CommunityAddressMapping addressMapping);
+	void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping);
+	CommunityAddressMapping findOrganizationAddressMapping(Long organizationId, Long communityId, Long addressId);
+	List<OrganizationJobPositionMap> listOrganizationJobPositionMapsByJobPositionId(Long jobPositionId);
+
+	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, ListingQueryBuilderCallback queryBuilderCallback);
+
+	OrganizationJobPositionMap getOrganizationJobPositionMapByOrgIdAndJobPostionId(Long organizationId, Long jobPostionId);
 }
