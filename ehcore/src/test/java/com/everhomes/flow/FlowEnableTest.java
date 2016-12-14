@@ -999,4 +999,38 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	FlowGraphDetailDTO detailDTO = flowService.getFlowGraphDetail(flow.getFlowMainId());
     	Assert.assertTrue(detailDTO.getNodes().size() == 3);
     }
+    
+    @Test
+    public void testFlowSearch2() {
+    	Long userId = testUser1.getId();
+    	setTestContext(userId);
+    	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.APPLIER.getCode());
+    	cmd.setNamespaceId(namespaceId);
+    	cmd.setModuleId(moduleId);
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp != null);
+    }
+    
+    @Test
+    public void testDeleteSnapshotProcessUser() {
+    	Long userId = testUser1.getId();
+    	setTestContext(userId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	FlowGraphDetailDTO detailDTO1 = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	flowService.deleteSnapshotProcessUser(flow.getFlowMainId(), userId);
+    	
+    	FlowGraphDetailDTO detailDTO2 = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	Assert.assertTrue(detailDTO2.getNodes().get(0).getProcessors().size() == (detailDTO1.getNodes().get(0).getProcessors().size()-1) );
+    	
+    	flowService.addSnapshotProcessUser(flow.getFlowMainId(), userId);
+    	detailDTO2 = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	Assert.assertTrue(detailDTO2.getNodes().get(0).getProcessors().size() == detailDTO1.getNodes().get(0).getProcessors().size() );
+    }
 }

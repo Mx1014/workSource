@@ -25,13 +25,12 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowEventLogProvider flowEventLogProvider;
 	private UserService userService;
 	private FlowService flowService;
-	private FlowButtonProvider flowButtonProvider;
 	
 	public FlowGraphButtonEvent() {
 		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
 		userService = PlatformContext.getComponent(UserService.class);
 		flowService = PlatformContext.getComponent(FlowService.class);
-		flowButtonProvider = PlatformContext.getComponent(FlowButtonProvider.class);
+//		flowButtonProvider = PlatformContext.getComponent(FlowButtonProvider.class);
 	}
 	
 	@Override

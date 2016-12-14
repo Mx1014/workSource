@@ -400,6 +400,20 @@ public interface FlowService {
 	 * @param stepDTO
 	 */
 	void processAutoStep(FlowAutoStepDTO stepDTO);
+
+	/**
+	 * 添加配置中所有节点的处理人员，同时修改正在运行的处理人员。不需要重新启动或关闭 flow
+	 * @param flowId 配置当中的 flowId
+	 * @param userId
+	 */
+	void addSnapshotProcessUser(Long flowId, Long userId);
+
+	/**
+	 * 删除配置中所有节点的处理人员，同时修改正在运行的处理人员。不需要重新启动或关闭 flow
+	 * @param flowId 配置当中的 flowId
+	 * @param userId
+	 */
+	void deleteSnapshotProcessUser(Long flowId, Long userId);
 	
 	//TODO 日志信息分类：
 	

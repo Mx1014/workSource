@@ -269,4 +269,27 @@ public class FlowProviderImpl implements FlowProvider {
 		
 		return null;
 	}
+	
+	@Override
+	public Flow getSnapshotFlowById(Long flowId) {
+		List<Flow> flows = this.queryFlows(new ListingLocator(), 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(flowId));
+				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
+				query.addOrderBy(Tables.EH_FLOWS.FLOW_VERSION.desc());
+				
+				return query;
+			}
+			
+		});
+		
+		if(flows != null && flows.size() > 0) {
+			return flows.get(0);
+		}
+		
+		return null;
+	}
 }
