@@ -12,7 +12,7 @@ public interface FlowUserSelectionService {
 	 * @param userSelection
 	 * @return
 	 */
-	List<UserInfo> findUsersBySelection(FlowUserSelection userSelection);
+	List<Long> findUsersBySelection(FlowUserSelection userSelection);
 	
 	
 	/**
@@ -22,7 +22,7 @@ public interface FlowUserSelectionService {
 	 * @param includeAll
 	 * @return
 	 */
-	List<UserInfo> findUsersByOrganizationId(Long orgId, FlowOwnerType ownerType, Boolean includeAll);
+	List<Long> findUsersByOrganizationId(Long orgId, FlowOwnerType ownerType, Boolean includeAll);
 	
 	/**
 	 * 查询某一个岗位以及某一个部门下的所有用户
@@ -31,7 +31,7 @@ public interface FlowUserSelectionService {
 	 * @param departmentId
 	 * @return
 	 */
-	List<UserInfo> findUsersByJobPosition(Long parentOrgId, Long jobPositionId, Long departmentId);
+	List<Long> findUsersByJobPositionId(Long parentOrgId, Long jobPositionId, Long departmentId);
 	
 	/**
 	 * 查询某个部门下的所有经理
@@ -39,38 +39,5 @@ public interface FlowUserSelectionService {
 	 * @param departmentId
 	 * @return
 	 */
-	List<UserInfo> findManagersByDepartmentId(Long parentOrgId, Long departmentId);
-	
-	/**
-	 * 查询一个部门下的所有子部门
-	 * @param parentOrgId
-	 * @param includeAll
-	 * @return
-	 */
-	List<Organization> listOrganizations(Long parentOrgId, Boolean includeAll);
-	
-	void listJobPositionsByOrganizationId(Long parentOrgId);
-	
-	/**
-	 * 选择工作流的督办人员
-	 * @param selection
-	 * @return
-	 */
-	Long selectFlowSuperviser(Long flowId, FlowUserSelection selection);
-	
-	/**
-	 * 某工作流节点处理人员
-	 * @param flowNodeId
-	 * @param selection
-	 * @return
-	 */
-	Long selectFlowNodeProcessor(Long flowNodeId, FlowUserSelection selection);
-	
-	/**
-	 * 某动作的处理用户
-	 * @param actionId
-	 * @param selection
-	 * @return
-	 */
-	Long selectActionUser(Long actionId, FlowUserSelection selection);
+	List<Long> findManagersByDepartmentId(Long parentOrgId, Long departmentId);
 }
