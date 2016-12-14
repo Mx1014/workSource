@@ -197,14 +197,12 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		String tag1 = flow.getStringTag1();
 		
 		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
+		LOGGER.debug("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if("AUDITING".equals(param)) {
-				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 					parkingCardRequest.setAuditSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
-				}
 			}
 			else if("QUEUEING".equals(param)) {
 				
@@ -237,15 +235,18 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
-			}else if("SUCCEED".equals(param)) {
+			}
+		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+			if("SUCCEED".equals(param)) {
 				parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
 				parkingCardRequest.setOpenCardTime(new Timestamp(now));
 				parkingProvider.updateParkingCardRequest(parkingCardRequest);
+			}else {
+				parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+				parkingCardRequest.setCancelTime(new Timestamp(now));
+				parkingProvider.updateParkingCardRequest(parkingCardRequest);
 			}
-		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-			parkingCardRequest.setCancelTime(new Timestamp(now));
-			parkingProvider.updateParkingCardRequest(parkingCardRequest);
+			
 		}
 		
 	}
