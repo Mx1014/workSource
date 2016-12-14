@@ -1176,7 +1176,7 @@ public class ParkingServiceImpl implements ParkingService {
         	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
         			FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
 
-        	flowId = flow.getId();
+        	flowId = flow.getFlowMainId();
 //        	LOGGER.error("FlowId cannot be null.");
 //    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 //    				"FlowId cannot be null.");
