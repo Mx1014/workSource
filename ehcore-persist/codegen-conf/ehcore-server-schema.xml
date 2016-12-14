@@ -123,6 +123,7 @@
         eh_activity_categories |
         eh_energy_meters | eh_energy_meter_reading_logs | eh_energy_meter_change_logs | eh_energy_meter_categories | eh_energy_meter_setting_logs | eh_energy_meter_default_settings | eh_energy_meter_formulas | eh_energy_meter_formula_variables |
         eh_energy_date_statistics | eh_energy_month_statistics | eh_energy_count_statistics | eh_energy_yoy_statistics |
+		eh_terminal_app_version_cumulatives | eh_terminal_app_version_actives | eh_terminal_day_statistics | eh_terminal_hour_statistics | eh_terminal_app_version_statistics | eh_app_version | eh_terminal_statistics_tasks |
         eh_pm_task_target_statistics |
         eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
         eh_activity_attachments | eh_activity_goods |        

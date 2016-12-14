@@ -28,9 +28,12 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
+import com.everhomes.serviceModule.ServiceModuleAssignment;
+import com.everhomes.serviceModule.ServiceModuleProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 import org.apache.poi.ss.usermodel.Font;
@@ -39,6 +42,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.simplejavamail.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.Mailer;
@@ -340,6 +345,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Autowired
 	private UserWithoutConfAccountSearcher userSearcher;
+
+	@Autowired
+	private ServiceModuleProvider serviceModuleProvider;
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -6186,6 +6194,12 @@ System.out.println();
 		return rganizationDTOs;
 	}
 
+	@Override
+	public List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd){
+		checkOrganization(cmd.getOrganizationId());
+		return this.getOrganizationManagers(cmd.getOrganizationId());
+	}
+
 	/**
 	 * 获取机构经理
 	 * @param organizationId
@@ -8649,6 +8663,69 @@ System.out.println();
         	}
 		}
 		return response;
+	}
+
+	@Override
+	public List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd) {
+		List<OrganizationDTO> organizationDTOs = new ArrayList<>();
+
+		List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getOrganizationId(), cmd.getModuleId());
+		assignments.addAll(serviceModuleProvider.listServiceModuleAssignmentByModuleId(cmd.getOwnerType(),cmd.getOwnerId(), cmd.getOrganizationId(), 0L)); //负责全部业务模块的对象，也要查询出来
+		for (ServiceModuleAssignment assignment: assignments) {
+			if(EntityType.fromCode(assignment.getTargetType()) == EntityType.ORGANIZATIONS){
+				Organization organization = organizationProvider.findOrganizationById(assignment.getTargetId());
+
+				if(null != organization && OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE){
+					if(null == cmd.getGroupTypes() || cmd.getGroupTypes().size() == 0){
+						organizationDTOs.add(ConvertHelper.convert(organization, OrganizationDTO.class));
+					}else{
+						if(cmd.getGroupTypes().contains(organization.getGroupType())){
+							organizationDTOs.add(ConvertHelper.convert(organization, OrganizationDTO.class));
+						}
+					}
+				}
+			}
+		}
+		return organizationDTOs;
+	}
+
+	@Override
+	public List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd) {
+		Organization organization = checkOrganization(cmd.getOrganizationId());
+		List<Long> organizationIds = new ArrayList<>();
+		if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
+			List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getJobPositionId());
+			for (OrganizationJobPositionMap map: maps) {
+				organizationIds.add(map.getOrganizationId());
+			}
+		}else{
+			List<String> groupTypes = new ArrayList<>();
+			groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
+			List<Organization> jobPositions = organizationProvider.listOrganizationByGroupTypes(cmd.getOrganizationId(), groupTypes);
+			for (Organization jobPosition: jobPositions) {
+				if(null != organizationProvider.getOrganizationJobPositionMapByOrgIdAndJobPostionId(jobPosition.getId(),cmd.getJobPositionId())){
+					organizationIds.add(jobPosition.getId());
+				}
+			}
+		}
+
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
+		if(organizationIds.size() > 0){
+			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(organizationIds, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+					return query;
+				}
+			});
+
+			for (OrganizationMember member: members) {
+				dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
+			}
+		}
+
+		return dtos;
 	}
 }
 
