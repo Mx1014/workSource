@@ -197,6 +197,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		String tag1 = flow.getStringTag1();
 		
 		long now = System.currentTimeMillis();
+		LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if("QUEUEING".equals(param)) {
 				
@@ -218,6 +219,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setIssueTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}else {
+					LOGGER.debug("update parking request, stepType={}, tag1={}", stepType, tag1);
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);

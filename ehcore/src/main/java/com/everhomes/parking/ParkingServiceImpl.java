@@ -42,6 +42,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -50,10 +51,12 @@ import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -157,6 +160,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private FlowService flowService;
     @Autowired
 	private FlowProvider flowProvider;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -809,7 +814,7 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
 		
-		Integer totalCount = parkingFlow.getMaxRequestNum();
+		Integer totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - requestedCount;
 		if(count > surplusCount) {
 			LOGGER.error("Count is rather than surplusCount.");
@@ -822,47 +827,61 @@ public class ParkingServiceImpl implements ParkingService {
     				"Count is rather than quequeCount.");
 		}
 		
-		Flow flow = flowProvider.findSnapshotFlow(flowId, FlowConstants.FLOW_CONFIG_START);
-        String tag1 = flow.getStringTag1();
-		StringBuilder strBuilder = new StringBuilder();
-		List<ParkingCardRequest> list = null;
-		if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
-			list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
-	    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
-	    			null, flowId, null, cmd.getCount());
-	    	
-			if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
+		dbProvider.execute((TransactionStatus transactionStatus) -> {
+			Flow flow = flowProvider.findSnapshotFlow(flowId, FlowConstants.FLOW_CONFIG_START);
+	        String tag1 = flow.getStringTag1();
+			StringBuilder strBuilder = new StringBuilder();
+			List<ParkingCardRequest> list = null;
+			if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
+				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
+		    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
+		    			null, flowId, null, cmd.getCount());
+		    	
+				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 
-				setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.PROCESSING.getCode());
+					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.PROCESSING.getCode());
 
+				}else {
+					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.SUCCEED.getCode());
+
+				}
 			}else {
+				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
+		    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.PROCESSING.getCode(),
+		    			null, flowId, null, cmd.getCount());
 				setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.SUCCEED.getCode());
-
 			}
-		}else {
-			list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
-	    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.PROCESSING.getCode(),
-	    			null, flowId, null, cmd.getCount());
-			setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.SUCCEED.getCode());
-		}
-    	
-    	
-    	parkingProvider.updateParkingCardRequest(list);
-    	if(LOGGER.isDebugEnabled()) {
-    	    LOGGER.debug("Issue parking cards, requestIds=[{}]", strBuilder.toString());
-    	}
-    	Integer namespaceId = UserContext.getCurrentNamespaceId();
-    	Map<String, Object> map = new HashMap<String, Object>();
-		String deadline = deadline(parkingLot.getCardReserveDays());
-	    map.put("deadline", deadline);
-		String scope = ParkingNotificationTemplateCode.SCOPE;
-		int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
-		String locale = "zh_CN";
-		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId, scope, code, locale, map, "");
-		list.forEach(applier -> {
-			sendMessageToUser(applier.getRequestorUid(), notifyTextForApplicant);
+	    	
+	    	parkingProvider.updateParkingCardRequest(list);
+	    	
+	    	list.forEach(q -> {
+	    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(q.getFlowCaseId());
+	    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+	    		stepDTO.setFlowCaseId(q.getFlowCaseId());
+	    		stepDTO.setFlowMainId(q.getFlowId());
+	    		stepDTO.setFlowVersion(q.getFlowVersion());
+	    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+	    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+	    		stepDTO.setStepCount(flowCase.getStepCount());
+	    		flowService.processAutoStep(stepDTO);
+	    	});
+	    	
+	    	if(LOGGER.isDebugEnabled()) {
+	    	    LOGGER.debug("Issue parking cards, requestIds=[{}]", strBuilder.toString());
+	    	}
+	    	Integer namespaceId = UserContext.getCurrentNamespaceId();
+	    	Map<String, Object> map = new HashMap<String, Object>();
+			String deadline = deadline(parkingLot.getCardReserveDays());
+		    map.put("deadline", deadline);
+			String scope = ParkingNotificationTemplateCode.SCOPE;
+			int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
+			String locale = "zh_CN";
+			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId, scope, code, locale, map, "");
+			list.forEach(applier -> {
+				sendMessageToUser(applier.getRequestorUid(), notifyTextForApplicant);
+			});
+			return null;
 		});
-    	
     	
 	}
 
@@ -1148,18 +1167,22 @@ public class ParkingServiceImpl implements ParkingService {
 	public ListParkingCarSeriesResponse listParkingCarSeries(ListParkingCarSeriesCommand cmd) {
 		
 		ListParkingCarSeriesResponse response = new ListParkingCarSeriesResponse();
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+//		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		Integer pageSize = cmd.getPageSize();
 
 		List<ParkingCarSerie> list = parkingProvider.listParkingCarSeries(cmd.getParentId(), cmd.getPageAnchor(), pageSize);
     	int size = list.size(); 				
     	if(size > 0){
     		response.setCarSeries(list.stream().map(r -> ConvertHelper.convert(r, ParkingCarSerieDTO.class))
     				.collect(Collectors.toList()));
-    		if(size != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size-1).getId());
-        	}
+    		if(null != pageSize) {
+    			if(size != pageSize){
+            		response.setNextPageAnchor(null);
+            	}else{
+            		response.setNextPageAnchor(list.get(size-1).getId());
+            	}	
+    		}
     	}
     	
 		return response;
