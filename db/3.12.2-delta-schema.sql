@@ -558,7 +558,7 @@ CREATE TABLE `eh_service_configurations` (
   `display_name` VARCHAR(128) ,
   PRIMARY KEY (`id`),
   UNIQUE KEY `unique_config` (`owner_type`,`owner_id`,`name`,`value`,`namespace_id`)
-) ENGINE=INNODB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4
+) ENGINE=INNODB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4 ;
 
 
 
