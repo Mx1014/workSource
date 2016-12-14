@@ -4,16 +4,18 @@
 -- DROP TABLE IF EXISTS `eh_service_configurations`;
 
 CREATE TABLE `eh_service_configurations` (
-  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `id` BIGINT AUTO_INCREMENT COMMENT 'id of the record',
   `owner_type` VARCHAR(64) COMMENT 'community;group,organaization,exhibition,',
-  `owner_id` BIGINT(20) DEFAULT '0',
-  `name` VARCHAR(64) NOT NULL,
-  `value` VARCHAR(256) NOT NULL,
-  `description` VARCHAR(256) DEFAULT NULL,
-  `namespace_id` INT(11) NOT NULL DEFAULT '0',
-  `display_name` VARCHAR(128) DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+  `owner_id` BIGINT DEFAULT '0',
+  `name` VARCHAR(64),
+  `value` VARCHAR(64),
+  `description` VARCHAR(256) ,
+  `namespace_id` INT DEFAULT '0',
+  `display_name` VARCHAR(128) ,
+  PRIMARY KEY (`id`),
+  UNIQUE KEY `unique_config` (`owner_type`,`owner_id`,`name`,`value`,`namespace_id`)
+) ENGINE=INNODB AUTO_INCREMENT=80 DEFAULT CHARSET=utf8mb4
+
 
 
 -- 
