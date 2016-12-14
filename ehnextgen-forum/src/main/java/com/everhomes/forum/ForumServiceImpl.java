@@ -1689,7 +1689,7 @@ public class ForumServiceImpl implements ForumService {
         Post post = processCommentCommand(userId, cmd);
 
         //黑名单权限校验 by sfyan20161213
-        checkBlacklist(null, null, post.getContentCategory());
+        checkBlacklist(null, null, post.getContentCategory(), post.getForumId());
         post.setContentCategory(null);
 
         Long embededAppId = cmd.getEmbeddedAppId();
