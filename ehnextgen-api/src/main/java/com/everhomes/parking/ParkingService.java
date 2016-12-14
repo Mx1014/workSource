@@ -3,6 +3,7 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import com.everhomes.rest.flow.ListFlowBriefResponse;
@@ -93,7 +94,7 @@ public interface ParkingService {
     
     ListParkingCarSeriesResponse listParkingCarSeries(ListParkingCarSeriesCommand cmd);
     
-    ParkingRequestCardConfigDTO gettParkingRequestCardConfig(GettParkingRequestCardConfigCommand cmd);
+    ParkingRequestCardConfigDTO gettParkingRequestCardConfig(HttpServletRequest request, GettParkingRequestCardConfigCommand cmd);
     
     void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd);
     

@@ -15,6 +15,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
@@ -1191,7 +1192,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingRequestCardConfigDTO gettParkingRequestCardConfig(GettParkingRequestCardConfigCommand cmd) {
+	public ParkingRequestCardConfigDTO gettParkingRequestCardConfig(HttpServletRequest request, GettParkingRequestCardConfigCommand cmd) {
 		
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
@@ -1210,8 +1211,11 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), parkingLot.getId(), flowId);
 		
 		ParkingRequestCardConfigDTO dto = ConvertHelper.convert(parkingFlow, ParkingRequestCardConfigDTO.class);
+		
+		String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
+
 		if(null != parkingFlow)
-			dto.setCardAgreementUrl("/web/lib/html/park_payment_review.html?id=" + parkingFlow.getId());
+			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?id=" + parkingFlow.getId());
 		return dto;
 	}
 

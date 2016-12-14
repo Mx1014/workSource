@@ -3,6 +3,7 @@ package com.everhomes.parking;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
@@ -341,9 +342,9 @@ public class ParkingController extends ControllerBase {
      */
     @RequestMapping("gettParkingRequestCardConfig")
     @RestReturn(value=ParkingRequestCardConfigDTO.class)
-    public RestResponse gettParkingRequestCardConfig(GettParkingRequestCardConfigCommand cmd) {
+    public RestResponse gettParkingRequestCardConfig(HttpServletRequest request, GettParkingRequestCardConfigCommand cmd) {
 
-    	ParkingRequestCardConfigDTO dto = parkingService.gettParkingRequestCardConfig(cmd);
+    	ParkingRequestCardConfigDTO dto = parkingService.gettParkingRequestCardConfig(request, cmd);
 
         RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
