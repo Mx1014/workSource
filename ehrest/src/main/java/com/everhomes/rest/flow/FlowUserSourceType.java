@@ -5,13 +5,13 @@ package com.everhomes.rest.flow;
  * <li>source_user: 用户选择源为普通用户</li>
  * <li>source_department: 用户选择源为部门</li>
  * <li>source_position: 用户选择源为职位</li>
- * 
+ * <li>source_nodeid: 目标节点 id</li>
  * </ul>
  * @author janson
  *
  */
 public enum FlowUserSourceType {
-	SOURCE_USER("source_user"), SOURCE_DEPARTMENT("source_department"), SOURCE_POSITION("source_position");
+	SOURCE_USER("source_user"), SOURCE_DEPARTMENT("source_department"), SOURCE_POSITION("source_position"), SOURCE_NODEID("source_nodeid");
 	
 	private String code;
     private FlowUserSourceType(String code) {
