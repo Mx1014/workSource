@@ -159,6 +159,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private Building insertOrUpdateBuilding(Integer namespaceId, Long communityId, CustomerBuilding customerBuilding) {
+		if (StringUtils.isBlank(customerBuilding.getBuildingName())) {
+			return null;
+		}
 		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerBuilding.getBuildingName());
 		// 如果不存在就插入，如果存在就更新
 		if (building == null) {
@@ -278,6 +281,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private Address insertOrUpdateApartment(Integer namespaceId, Community community,
 			CustomerApartment customerApartment) {
+		if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+			return null;
+		}
 		Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, community.getId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
 		if (address == null) {
 			address = new Address();
@@ -555,11 +561,16 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		for (CustomerContractBuilding customerContractBuilding : buildings) {
+			if (StringUtils.isBlank(customerContractBuilding.getBuildingName())) {
+				continue;
+			}
 			Building building = insertOrUpdateBuilding(namespaceId, community.getId(), new CustomerBuilding(customerContractBuilding.getBuildingName()));
 			Address address = insertOrUpdateApartment(namespaceId, community, new CustomerApartment(customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName()));
 			
-			insertOrUpdateOrganizationAddress(organization, building, address);
-			insertOrUpdateOrganizationAddressMapping(organization, community, address);
+			if (building != null && address != null) {
+				insertOrUpdateOrganizationAddress(organization, building, address);
+				insertOrUpdateOrganizationAddressMapping(organization, community, address);
+			}
 		}
 
 		if (LOGGER.isDebugEnabled()) {
@@ -617,6 +628,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		for (CustomerContractBuilding customerContractBuilding : buildings) {
+			if (StringUtils.isBlank(customerContractBuilding.getBuildingName())) {
+				continue;
+			}
 			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
 			if (contractBuildingMapping == null) {
 				contractBuildingMapping = new ContractBuildingMapping();
