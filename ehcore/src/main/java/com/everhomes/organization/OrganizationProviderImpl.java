@@ -3001,4 +3001,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		return null;
 	}
 
+	@Override
+	public List<CommunityAddressMapping> listOrganizationAddressMappingByNamespaceType(Long superOrganizationId,
+			Long communityId, String namespaceType) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(superOrganizationId)
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId)))
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.NAMESPACE_TYPE.eq(namespaceType))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, CommunityAddressMapping.class));
+	}
+
+	@Override
+	public void deleteOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
+		dao.delete(organizationAddressMapping);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null); 
+	}
+
 }

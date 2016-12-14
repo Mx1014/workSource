@@ -275,5 +275,8 @@ public interface OrganizationProvider {
 			Long communityId);
 	List<EnterpriseAddress> listEnterpriseAddressByOrganization(Long organizationId);
 	OrganizationAddress findOrganizationAddressByOrganizationIdAndAddressId(Long organizationId, Long addressId);
+	List<CommunityAddressMapping> listOrganizationAddressMappingByNamespaceType(Long superOrganizationId,
+			Long communityId, String namespaceType);
+	void deleteOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping);
  
 }
