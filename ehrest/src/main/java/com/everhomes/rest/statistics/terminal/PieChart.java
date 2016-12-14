@@ -3,6 +3,8 @@ package com.everhomes.rest.statistics.terminal;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
+
 /**
  *<ul>
  *<li>data:饼图数据<li>
@@ -10,6 +12,7 @@ import java.util.List;
  */
 public class PieChart {
 
+	@ItemType(PieChartData.class)
 	private List<PieChartData> data;
 
 	public List<PieChartData> getData() {
