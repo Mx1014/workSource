@@ -1,0 +1,152 @@
+package com.everhomes.rest.flow;
+
+import java.sql.Timestamp;
+import java.util.List;
+
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+/**
+ * 节点的详细信息，包括名字，包括消息提醒，包括任务跟踪，其它信息
+ * @author janson
+ *
+ */
+public class FlowNodeDetailDTO {
+	 private Long     id;
+    private Byte     status;
+    private String     description;
+    private Integer     autoStepHour;
+    private Long     flowMainId;
+    private Timestamp     createTime;
+    private Integer     namespaceId;
+    private Integer     flowVersion;
+    private Integer     nodeLevel;
+    private String     nodeName;
+    
+	@ItemType(FlowUserSelectionDTO.class)
+	List<FlowUserSelectionDTO> processors;
+	
+	FlowNodeReminderDTO reminder;
+	
+	FlowNodeTrackerDTO tracker;
+	
+	@ItemType(FlowButtonDetailDTO.class)
+	List<FlowButtonDetailDTO> processButtons;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
+
+	public Byte getStatus() {
+		return status;
+	}
+
+	public void setStatus(Byte status) {
+		this.status = status;
+	}
+
+	public String getDescription() {
+		return description;
+	}
+
+	public void setDescription(String description) {
+		this.description = description;
+	}
+
+	public Integer getAutoStepHour() {
+		return autoStepHour;
+	}
+
+	public void setAutoStepHour(Integer autoStepHour) {
+		this.autoStepHour = autoStepHour;
+	}
+
+	public Long getFlowMainId() {
+		return flowMainId;
+	}
+
+	public void setFlowMainId(Long flowMainId) {
+		this.flowMainId = flowMainId;
+	}
+
+	public Timestamp getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Timestamp createTime) {
+		this.createTime = createTime;
+	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
+	public Integer getFlowVersion() {
+		return flowVersion;
+	}
+
+	public void setFlowVersion(Integer flowVersion) {
+		this.flowVersion = flowVersion;
+	}
+
+	public Integer getNodeLevel() {
+		return nodeLevel;
+	}
+
+	public void setNodeLevel(Integer nodeLevel) {
+		this.nodeLevel = nodeLevel;
+	}
+
+	public String getNodeName() {
+		return nodeName;
+	}
+
+	public void setNodeName(String nodeName) {
+		this.nodeName = nodeName;
+	}
+
+	public List<FlowUserSelectionDTO> getProcessors() {
+		return processors;
+	}
+
+	public void setProcessors(List<FlowUserSelectionDTO> processors) {
+		this.processors = processors;
+	}
+
+	public FlowNodeReminderDTO getReminder() {
+		return reminder;
+	}
+
+	public void setReminder(FlowNodeReminderDTO reminder) {
+		this.reminder = reminder;
+	}
+
+	public FlowNodeTrackerDTO getTracker() {
+		return tracker;
+	}
+
+	public void setTracker(FlowNodeTrackerDTO tracker) {
+		this.tracker = tracker;
+	}
+
+	public List<FlowButtonDetailDTO> getProcessButtons() {
+		return processButtons;
+	}
+
+	public void setProcessButtons(List<FlowButtonDetailDTO> processButtons) {
+		this.processButtons = processButtons;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+}

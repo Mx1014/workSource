@@ -1,0 +1,470 @@
+package com.everhomes.flow;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Component;
+
+import com.everhomes.bigcollection.BigCollectionProvider;
+import com.everhomes.news.Attachment;
+import com.everhomes.news.AttachmentProvider;
+import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowEntityType;
+import com.everhomes.rest.flow.FlowFireButtonCommand;
+import com.everhomes.rest.flow.FlowLogType;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
+import com.everhomes.rest.flow.FlowStatusType;
+import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.rest.flow.FlowTimeoutType;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.news.NewsCommentContentType;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+
+@Component
+public class FlowStateProcessorImpl implements FlowStateProcessor {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FlowStateProcessorImpl.class);
+	
+	@Autowired
+	private FlowListenerManager flowListenerManager;
+	
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
+	
+	@Autowired
+	private FlowService flowService;
+	
+	@Autowired
+	private FlowNodeProvider flowNodeProvider;
+	
+	@Autowired
+	private FlowSubjectProvider flowSubjectProvider;
+	
+    @Autowired
+    private AttachmentProvider attachmentProvider;
+	
+   @Autowired
+   BigCollectionProvider bigCollectionProvider;
+   
+   @Autowired
+   private UserService userService;
+   
+   @Autowired
+   private UserProvider userProvider;
+   
+   @Autowired
+   private FlowEventLogProvider flowEventLogProvider;
+   
+   ThreadPoolTaskScheduler scheduler;
+   
+   public FlowStateProcessorImpl() {
+	   scheduler = new ThreadPoolTaskScheduler();
+	   scheduler.setPoolSize(3);
+   }
+    
+//	private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+	
+	@Override
+	public FlowCaseState prepareStart(UserInfo logonUser, FlowCase flowCase) {
+		FlowCaseState ctx = new FlowCaseState();
+		if(flowCase == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
+		}
+		
+		ctx.setFlowCase(flowCase);
+		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
+		
+		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		ctx.setFlowGraph(flowGraph);
+		
+		FlowGraphStartEvent event = new FlowGraphStartEvent();
+		ctx.setCurrentEvent(event);
+		ctx.setOperator(logonUser);
+		flowService.createSnapshotSupervisors(ctx);
+		
+		flowListenerManager.onFlowCaseStart(ctx);
+		
+		return ctx;
+	}
+	
+	@Override
+	public FlowCaseState prepareStepTimeout(FlowTimeout ft) {
+		FlowAutoStepDTO stepDTO = (FlowAutoStepDTO) StringHelper.fromJsonString(ft.getJson(), FlowAutoStepDTO.class);
+		return prepareAutoStep(stepDTO);
+	}
+	
+	@Override
+	public FlowCaseState prepareAutoStep(FlowAutoStepDTO stepDTO) {
+		FlowCaseState ctx = new FlowCaseState();
+		
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
+		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
+				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
+			
+	    	User user = userProvider.findUserById(User.SYSTEM_UID);
+	    	UserContext.current().setUser(user);
+			
+			ctx.setFlowCase(flowCase);
+			ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
+			
+			FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+			ctx.setFlowGraph(flowGraph);
+			
+			FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+			if(node == null) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
+			}
+			ctx.setCurrentNode(node);
+			
+			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
+			ctx.setOperator(userInfo);
+			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
+			ctx.setCurrentEvent(event);
+			
+			return ctx;
+		}
+		return null;		
+	}
+	
+	@Override
+	public FlowCaseState prepareButtonFire(UserInfo logonUser, FlowFireButtonCommand cmd) {
+		FlowCaseState ctx = new FlowCaseState();
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
+		if(flowCase == null 
+				|| flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
+				|| flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
+				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
+		}
+		ctx.setFlowCase(flowCase);
+		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
+		ctx.setOperator(logonUser);
+		
+		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		ctx.setFlowGraph(flowGraph);
+		
+		FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+		if(node == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
+		}
+		ctx.setCurrentNode(node);
+		
+		FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
+		FlowGraphButtonEvent event = new FlowGraphButtonEvent();
+		
+		if(cmd.getContent() != null 
+				|| (null != cmd.getImages() && cmd.getImages().size() > 0) ) {
+			FlowSubject subject = new FlowSubject();
+			subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
+			subject.setBelongTo(cmd.getButtonId());
+			subject.setContent(cmd.getContent());
+			subject.setNamespaceId(button.getFlowButton().getNamespaceId());
+			subject.setStatus(FlowStatusType.VALID.getCode());
+			subject.setTitle(cmd.getTitle());
+			flowSubjectProvider.createFlowSubject(subject);
+			
+			if(null != cmd.getImages() && cmd.getImages().size() > 0) {
+				List<Attachment> attachments = new ArrayList<>();
+				for(String image : cmd.getImages()) {
+					Attachment attach = new Attachment();
+					attach.setContentType(NewsCommentContentType.IMAGE.getCode());
+					attach.setContentUri(image);
+					attach.setCreatorUid(logonUser.getId());
+					attach.setOwnerId(subject.getId());
+					attachments.add(attach);
+				}
+				attachmentProvider.createAttachments(EhFlowAttachments.class, attachments);
+			}			
+			
+			event.setSubject(subject);
+		}
+
+		
+		event.setUserType(FlowUserType.fromCode(button.getFlowButton().getFlowUserType()));
+		event.setCmd(cmd);
+		event.setFiredUser(ctx.getOperator());
+		ctx.setCurrentEvent(event);
+		
+		//fire button actions
+		FlowGraphButton btn = flowGraph.getGraphButton(cmd.getButtonId());
+		if(btn != null) {
+			if(null != btn.getMessage()) {
+				btn.getMessage().fireAction(ctx, event);
+			}
+			if(null != btn.getSms()) {
+				btn.getSms().fireAction(ctx, event);
+			}
+			if(null != btn.getScripts()) {
+				for(FlowGraphAction action : btn.getScripts()) {
+					action.fireAction(ctx, event);
+				}
+			}
+		}
+		
+		flowListenerManager.onFlowButtonFired(ctx);
+		
+		return ctx;
+	}
+	
+	@Override
+	public void step(FlowCaseState ctx, FlowGraphEvent event) {
+		boolean stepOK = true;
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		if(event != null) {
+			event.fire(ctx);
+		}
+		FlowGraphNode nextNode = ctx.getNextNode();
+		if(ctx.getStepType() != null && currentNode != nextNode) {
+			try {
+				if(currentNode != null) {
+					//Only leave once time
+					currentNode.stepLeave(ctx, nextNode);	
+				}
+				
+				ctx.setPrefixNode(currentNode);
+				ctx.setCurrentNode(nextNode);
+				ctx.setNextNode(null);
+				
+				//create processor's
+				flowService.createSnapshotNodeProcessors(ctx, nextNode);	
+				
+				nextNode.stepEnter(ctx, currentNode);	
+				
+				stepOK = true;
+			} catch(FlowStepErrorException ex) {
+				stepOK = false;
+			}
+		}
+		
+		//Now save info to databases here
+		if(stepOK) {
+			flowService.flushState(ctx);
+		} else {
+			LOGGER.warn("step error flowCaseId=" + ctx.getFlowCase().getId());
+		}
+	}
+	
+	//normal step functions
+	@Override
+	public void normalStepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException {
+		FlowStepType fromStep = ctx.getStepType();
+		FlowGraphNode curr = ctx.getCurrentNode();
+		
+		if(curr.getFlowNode().getNodeLevel() > 1) {
+			ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
+		}
+		ctx.getFlowCase().setCurrentNodeId(curr.getFlowNode().getId());
+		boolean logStep = false;
+		
+		FlowEventLog log = null;
+//		log = flowEventLogProvider.getStepEvent(ctx.getFlowCase().getId(), curr.getFlowNode().getId(), ctx.getFlowCase().getStepCount(), fromStep);
+//		if(log != null && fromStep != FlowStepType.COMMENT_STEP) {
+//			return;
+//		}
+		
+		flowListenerManager.onFlowCaseStateChanged(ctx);
+		
+		//TODO use schedule ? scheduler.execute();
+		
+		//TODO do action in a delay thread
+		if(curr.getMessageAction() != null) {
+			curr.getMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(curr.getSmsAction() != null) {
+			curr.getSmsAction().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(curr.getTickMessageAction() != null) {
+			curr.getTickMessageAction().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(curr.getTickSMSAction() != null) {
+			curr.getTickSMSAction().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		
+		switch(fromStep) {
+		case NO_STEP:
+			break;
+		case APPROVE_STEP:
+			logStep = true;
+			if(curr.getTrackApproveEnter() != null) {
+				curr.getTrackApproveEnter().fireAction(ctx, null);	
+			}
+			
+			break;
+		case REJECT_STEP:
+			logStep = true;
+			if(curr.getTrackRejectEnter() != null) {
+				curr.getTrackRejectEnter().fireAction(ctx, null);	
+			}
+			
+			break;
+		case TRANSFER_STEP:
+			break;
+		case COMMENT_STEP:
+			break;
+		case ABSORT_STEP:
+			logStep = true;
+			flowListenerManager.onFlowCaseAbsorted(ctx);
+			break;
+		case REMINDER_STEP:
+			break;
+		case EVALUATE_STEP:
+			break;
+		default:
+			break;
+		}
+		
+		//create step timeout
+		if(!curr.getFlowNode().getAllowTimeoutAction().equals((byte)0)) {
+			FlowTimeout ft = new FlowTimeout();
+			ft.setBelongEntity(FlowEntityType.FLOW_NODE.getCode());
+			ft.setBelongTo(curr.getFlowNode().getId());
+			ft.setTimeoutType(FlowTimeoutType.STEP_TIMEOUT.getCode());
+			ft.setStatus(FlowStatusType.VALID.getCode());
+			
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setFlowCaseId(ctx.getFlowCase().getId());
+			stepDTO.setFlowMainId(ctx.getFlowCase().getFlowMainId());
+			stepDTO.setFlowVersion(ctx.getFlowCase().getFlowVersion());
+			stepDTO.setStepCount(ctx.getFlowCase().getStepCount());
+			stepDTO.setFlowNodeId(curr.getFlowNode().getId());
+			stepDTO.setAutoStepType(curr.getFlowNode().getAutoStepType());
+			ft.setJson(stepDTO.toString());
+			
+			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 60*1000l;
+//			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 1000;
+			ft.setTimeoutTick(new Timestamp(timeoutTick));
+			
+//			flowTimeoutService.pushTimeout(ft);
+			ctx.getTimeouts().add(ft);
+		}
+		
+		if(logStep && log == null) {
+			UserInfo firedUser = ctx.getOperator();
+			log = new FlowEventLog();
+			log.setId(flowEventLogProvider.getNextId());
+			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			log.setFlowNodeId(curr.getFlowNode().getId());
+			log.setParentId(0l);
+			log.setFlowCaseId(ctx.getFlowCase().getId());
+			if(firedUser != null) {
+				log.setFlowUserId(firedUser.getId());
+				log.setFlowUserName(firedUser.getNickName());	
+			}
+			log.setButtonFiredStep(fromStep.getCode());
+			log.setLogType(FlowLogType.STEP_TRACKER.getCode());
+			log.setStepCount(ctx.getFlowCase().getStepCount());
+			ctx.getLogs().add(log);	//added but not save to database now.
+		}
+	}
+	
+	@Override
+	public void normalStepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException {
+		FlowStepType fromStep = ctx.getStepType();
+		FlowGraphNode curr = ctx.getCurrentNode();
+		switch(fromStep) {
+		case NO_STEP:
+			break;
+		case APPROVE_STEP:
+			break;
+		case REJECT_STEP:
+			break;
+		case TRANSFER_STEP:
+			if(curr.getTrackTransferLeave() != null) {
+				curr.getTrackTransferLeave().fireAction(ctx, null);	
+			}
+			
+			break;
+		case COMMENT_STEP:
+			break;
+		case ABSORT_STEP:
+			break;
+		case REMINDER_STEP:
+			break;
+		case EVALUATE_STEP:
+			break;
+		default:
+			break;
+		}
+	}
+	
+	@Override
+	public void endStepEnter(FlowCaseState ctx, FlowGraphNode from) {
+		FlowStepType fromStep = ctx.getStepType();
+		FlowGraphNode curr = ctx.getCurrentNode();
+		ctx.getFlowCase().setCurrentNodeId(curr.getFlowNode().getId());
+		boolean logStep = false;
+		
+		switch(fromStep) {
+		case NO_STEP:
+			break;
+		case APPROVE_STEP:
+			ctx.getFlowCase().setStatus(FlowCaseStatus.FINISHED.getCode());
+			break;
+		case EVALUATE_STEP:
+			break;
+		case ABSORT_STEP:
+			logStep = true;
+			ctx.getFlowCase().setStatus(FlowCaseStatus.ABSORTED.getCode());
+			break;
+		default:
+			break;
+		}
+		
+		flowListenerManager.onFlowCaseEnd(ctx);
+		
+		if(logStep) {
+			UserInfo firedUser = ctx.getOperator();
+			FlowEventLog log = new FlowEventLog();
+			log.setId(flowEventLogProvider.getNextId());
+			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			log.setFlowNodeId(curr.getFlowNode().getId());
+			log.setParentId(0l);
+			log.setFlowCaseId(ctx.getFlowCase().getId());
+			if(firedUser != null) {
+				log.setFlowUserId(firedUser.getId());
+				log.setFlowUserName(firedUser.getNickName());	
+			}
+			log.setButtonFiredStep(fromStep.getCode());
+			log.setLogType(FlowLogType.STEP_TRACKER.getCode());
+			log.setStepCount(ctx.getFlowCase().getStepCount());
+			ctx.getLogs().add(log);	//added but not save to database now.
+		}
+	}
+	
+	//variable support
+	@Override
+	public UserInfo getApplier(FlowCaseState ctx, String variable) {
+		String key = "applier-caseid:" + ctx.getFlowCase().getId().toString();
+		UserInfo userInfo = (UserInfo)ctx.getExtra().get(key);
+		if(userInfo == null) {
+			userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
+			if(userInfo != null) {
+				ctx.getExtra().put(key, userInfo);
+			}
+		}
+		return userInfo;
+	}
+	
+	@Override
+	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
+		return ctx.getOperator();
+	}
+}

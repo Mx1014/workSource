@@ -124,12 +124,12 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
         LOGGER.info("Aclink connected: id= " + sInfo.getDto().getId() + ", uuid=" + uuid);
     }
     
-    private void disConnected(WebSocketSession session) throws Exception {
+    private void disConnected(WebSocketSession session, String info) throws Exception {
         String uuid = uuidFromSession(session);
         AclinkWebSocketState state = session2State.remove(session);
         uuid2Session.remove(uuid);
         
-        LOGGER.info("Aclink disConnected: uuid= " + uuid);
+        LOGGER.info("Aclink disConnected: uuid= " + uuid + " info=" + info);
         
         if(state != null) {
             Map<String, String> params = new HashMap<String, String>();
@@ -150,12 +150,12 @@ public class AclinkWebSocketHandler extends BinaryWebSocketHandler {
     
     @Override
     public void afterConnectionClosed(WebSocketSession session, CloseStatus arg1) throws Exception {
-        disConnected(session);
+        disConnected(session, "normal closed");
     }
     
     @Override
     public void handleTransportError(WebSocketSession session, Throwable arg1) throws Exception {
-        disConnected(session);
+        disConnected(session, "error closed=" + arg1.getMessage());
     }
     
     @Scheduled(fixedDelay=20000, initialDelay=5000)
