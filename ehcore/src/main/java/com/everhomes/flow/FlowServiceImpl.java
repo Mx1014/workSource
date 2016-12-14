@@ -2447,8 +2447,6 @@ public class FlowServiceImpl implements FlowService {
     	cmd.setFlowVersion(flow.getFlowVersion());
     	cmd.setReferId(0l);
     	cmd.setReferType("test-type");
-    	cmd.setProjectId(888l);
-    	cmd.setProjectType("test-project-type");
     	
     	Random r = new Random();
     	cmd.setContent("test content" + String.valueOf(r.nextDouble()));
