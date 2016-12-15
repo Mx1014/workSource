@@ -796,7 +796,10 @@ INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `des
     VALUES(999992, 'park.notification', 1, 'zh_CN', '新的月卡发放通知排队用户申请月卡成功', '月卡申请成功，请携带公司出具的工作证明（含公司名称、姓名、手机号、车牌号等信息）于“${deadline}”17:30前，前往深业物业管理处办理月卡，超过该时间 视为自动放弃。');	
 	
 	
-	
+-- 更新 UFine广场“租车”改为“送水” add by se 20161202
+update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14780865190262357246%3F_k%3Dzlbiz#sign_suffix"}', icon_uri = 'cs://1/image/aW1hZ2UvTVRwbVlXVmtNV0UwTmpNMU9EbG1aVGd3TXpRME5EaG1OMkZqTUdZNVl6QTFNUQ',
+item_label = '送水', item_name= '送水'
+where id in (10641, 10645) and namespace_id = 999990;	
 	
 	
 	

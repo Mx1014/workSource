@@ -102,7 +102,7 @@ public class FlowModuleListenerDummy1 implements FlowModuleListener {
 	@Override
 	public void onFlowButtonFired(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
-		
+
 	}
 
 }

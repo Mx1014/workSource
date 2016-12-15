@@ -107,9 +107,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     private User testUser1;
     private User testUser2;
     private User testUser3;
-    private Integer namespaceId = 0;
+    private User testUser4;
+    private Integer namespaceId = 1000000;
+    private Long projectId = 240111044331048600l;
+    private String projectType = "EhCommunities";
     private Long moduleId = 111l;
-    private Long orgId = 1001027l;
+    private Long orgId = 1000001l;
     
     
     @Before
@@ -119,9 +122,11 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	String u1 = "15002095483";
     	String u2 = "17788754324";
     	String u3 = "13927485221";
+    	String u4 = "13632650699";
     	testUser1 = userService.findUserByIndentifier(namespaceId, u1);
     	testUser2 = userService.findUserByIndentifier(namespaceId, u2);
     	testUser3 = userService.findUserByIndentifier(namespaceId, u3);
+    	testUser4 = userService.findUserByIndentifier(namespaceId, u4);
     }
     
     @After
@@ -172,6 +177,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowCmd.setOrgId(orgId);
     	flowCmd.setOwnerId(orgId);
     	flowCmd.setOwnerType(FlowOwnerType.ENTERPRISE.getCode());
+    	flowCmd.setProjectId(projectId);
+    	flowCmd.setProjectType(projectType);
     	FlowDTO flowDTO = flowService.createFlow(flowCmd);
     	
     	CreateFlowUserSelectionCommand flowSel = new CreateFlowUserSelectionCommand();
@@ -241,6 +248,14 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	
+    	//REMIND_COUNT
+    	FlowButton remindButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
+    	buttonCmd = new UpdateFlowButtonCommand();
+    	buttonCmd.setFlowButtonId(remindButton.getId());
+    	buttonCmd.setRemindCount(2);
+    	flowService.updateFlowButton(buttonCmd);
+    	
     	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	
@@ -293,7 +308,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     private void setTestContext(Long userId) {
     	User user = userProvider.findUserById(userId);
-    	UserContext.current().setUser(user);;
+    	UserContext.current().setUser(user);
+    	UserContext.current().setNamespaceId(namespaceId);
     }
     
     private void addNodeProcessor(FlowNodeDTO dto, Long orgId) {
@@ -391,6 +407,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	//add two test users
     	users.add(testUser1.getId());
     	users.add(testUser2.getId());
+    	users.add(testUser4.getId());
     	
     	return users;
     }
@@ -925,6 +942,47 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     }
     
     @Test
+    public void testFlowCaseRemind() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	Assert.assertTrue(flow.getFlowVersion().equals(1));
+    	
+    	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), flow.getFlowVersion());
+    	Assert.assertTrue(flowGraph.getNodes().size() == 5);
+    	
+    	int nodeIndex = 1;
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    			, flow.getFlowVersion()
+    			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
+    	Assert.assertTrue(flowButton != null);
+    	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	
+    	FlowFireButtonCommand fireButton = new FlowFireButtonCommand();
+    	fireButton.setButtonId(flowButton.getId());
+    	fireButton.setContent("test-approve-content");
+    	fireButton.setFlowCaseId(flowCaseId);
+    	fireButton.setTitle("test-title");
+    	fireButton.getImages().add("cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ");
+    	flowService.fireButton(fireButton);
+    	
+    	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.APPLIER);
+    	Assert.assertTrue(dto.getButtons().size() == 3);
+    	Assert.assertTrue(dto.getNodes().size() == 5);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex).getLogs().size() == 1);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex).getIsCurrentNode().equals((byte)1));
+    }
+    
+    @Test
     public void testCase() {
     	Long userId = testUser2.getId();
     	setTestContext(userId);
@@ -949,5 +1007,39 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	FlowGraphDetailDTO detailDTO = flowService.getFlowGraphDetail(flow.getFlowMainId());
     	Assert.assertTrue(detailDTO.getNodes().size() == 3);
+    }
+    
+    @Test
+    public void testFlowSearch2() {
+    	Long userId = testUser1.getId();
+    	setTestContext(userId);
+    	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.APPLIER.getCode());
+    	cmd.setNamespaceId(namespaceId);
+    	cmd.setModuleId(moduleId);
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp != null);
+    }
+    
+    @Test
+    public void testDeleteSnapshotProcessUser() {
+    	Long userId = testUser1.getId();
+    	setTestContext(userId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	FlowGraphDetailDTO detailDTO1 = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	flowService.deleteSnapshotProcessUser(flow.getFlowMainId(), userId);
+    	
+    	FlowGraphDetailDTO detailDTO2 = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	Assert.assertTrue(detailDTO2.getNodes().get(0).getProcessors().size() == (detailDTO1.getNodes().get(0).getProcessors().size()-1) );
+    	
+    	flowService.addSnapshotProcessUser(flow.getFlowMainId(), userId);
+    	detailDTO2 = flowService.getFlowGraphDetail(flow.getFlowMainId());
+    	Assert.assertTrue(detailDTO2.getNodes().get(0).getProcessors().size() == detailDTO1.getNodes().get(0).getProcessors().size() );
     }
 }

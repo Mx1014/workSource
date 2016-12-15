@@ -56,6 +56,7 @@ import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
+import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.techpark.onlinePay.OnlinePayBillCommand;
 import com.everhomes.rest.techpark.onlinePay.PayStatus;
 import com.everhomes.rest.techpark.onlinePay.RechargeStatus;
@@ -268,6 +269,7 @@ public class ParkServiceImpl implements ParkService {
 		parkingRechargeOrder.setOrderNo(bill);
 		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getValidityPeriod(), cmd.getMonths()));
 		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getValidityPeriod(), 1));
+		parkingRechargeOrder.setRechargeType(ParkingRechargeType.MONTHLY.getCode());
 		
 		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);
 		}catch(Exception e) {

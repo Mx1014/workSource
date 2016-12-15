@@ -264,5 +264,13 @@ public interface OrganizationProvider {
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
 	Organization findOrganizationByName(String name, Integer namespaceId);
 	Integer getSignupCount(Long organizationId);
- 
+	OrganizationAddress findOrganizationAddress(Long id, Long id2, Long id3);
+	void createOrganizationAddressMapping(CommunityAddressMapping addressMapping);
+	void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping);
+	CommunityAddressMapping findOrganizationAddressMapping(Long organizationId, Long communityId, Long addressId);
+	List<OrganizationJobPositionMap> listOrganizationJobPositionMapsByJobPositionId(Long jobPositionId);
+
+	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, ListingQueryBuilderCallback queryBuilderCallback);
+
+	OrganizationJobPositionMap getOrganizationJobPositionMapByOrgIdAndJobPostionId(Long organizationId, Long jobPostionId);
 }

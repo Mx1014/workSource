@@ -137,7 +137,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		cond = cond.and(Tables.EH_FLOW_CASES.APPLY_USER_ID.eq(cmd.getUserId()));
     		
     	    if(locator.getAnchor() != null) {
-    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));
+    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
     	        }
     	    
         	if(cmd.getModuleId() != null) {
@@ -162,7 +162,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		
     		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
     		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-    		    	.where(cond).limit(count).fetch().map(new FlowCaseRecordMapper());
+    		    	.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc())
+    		    	.limit(count).fetch().map(new FlowCaseRecordMapper());
     		
     		List<FlowCaseDetail> objs = records.stream().map((r) -> {
     			return ConvertHelper.convert(r, FlowCaseDetail.class);
@@ -212,7 +213,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		}
     		
     	    if(locator.getAnchor() != null) {
-    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.gt(locator.getAnchor()));
+    	    	cond = cond.and(Tables.EH_FLOW_CASES.ID.lt(locator.getAnchor()));
     	        }
     	    
         	if(cmd.getModuleId() != null) {
@@ -237,7 +238,8 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     		
     		List<EhFlowCasesRecord> records = context.select().from(Tables.EH_FLOW_CASES).join(Tables.EH_FLOWS)
     		    	.on(Tables.EH_FLOW_CASES.FLOW_MAIN_ID.eq(Tables.EH_FLOWS.FLOW_MAIN_ID).and(Tables.EH_FLOW_CASES.FLOW_VERSION.eq(Tables.EH_FLOWS.FLOW_VERSION)))
-    		    	.where(cond).limit(count).fetch().map(new FlowCaseRecordMapper());
+    		    	.where(cond).orderBy(Tables.EH_FLOW_CASES.ID.desc()).limit(count)
+    		    	.fetch().map(new FlowCaseRecordMapper());
     		
     		List<FlowCaseDetail> objs = records.stream().map((r) -> {
     			return ConvertHelper.convert(r, FlowCaseDetail.class);

@@ -2285,7 +2285,7 @@ public class GroupServiceImpl implements GroupService {
         Group group = this.groupProvider.findGroupById(groupId);
         if(group == null || group.getStatus().byteValue() == GroupAdminStatus.INACTIVE.getCode()) {
         	int code = GroupServiceErrorCode.ERROR_GROUP_NOT_FOUND;
-        	if (GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
+        	if (group != null && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
 				code = GroupServiceErrorCode.ERROR_GROUP_CLUB_NOT_FOUND;
 			}
             LOGGER.error("Group not found, operatorUid=" + operatorUid + ", groupId=" + groupId + ", tag=" + tag);

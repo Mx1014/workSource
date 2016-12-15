@@ -27,4 +27,11 @@ public interface FlowUserSelectionProvider {
 	List<FlowUserSelection> findSelectionByBelong(Long belongId,
 			String belongEntity, String flowUserBelongType, Integer ver);
 
+	FlowUserSelection findFlowNodeSelectionUser(Long flowNodeId, Integer ver,
+			Long userId);
+
+	void createFlowUserSelections(List<FlowUserSelection> objs);
+
+	void deleteFlowUserSelections(List<FlowUserSelection> objs);
+
 }

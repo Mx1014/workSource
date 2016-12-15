@@ -1,11 +1,7 @@
 package com.everhomes.flow;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.annotation.PostConstruct;
-
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowUserType;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -13,8 +9,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowUserType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class FlowListenerManagerImpl implements FlowListenerManager, ApplicationListener<ContextRefreshedEvent> {
@@ -24,7 +21,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 	  List<FlowModuleListener> allListeners;
 	  
 	  private Map<String, FlowModuleInst> moduleMap = new HashMap<String, FlowModuleInst>();
-	  
+
 	  public FlowListenerManagerImpl() {
 		  
 	  }
@@ -56,7 +53,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
 		  if(inst != null) {
 			  ctx.setModule(inst.getInfo());
 			  FlowModuleListener listener = inst.getListener();
@@ -66,7 +63,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
-		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
 		  if(inst != null) {
 			  ctx.setModule(inst.getInfo());
 			  FlowModuleListener listener = inst.getListener();
@@ -86,7 +83,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
 		  if(inst != null) {
 			  ctx.setModule(inst.getInfo());
 			  FlowModuleListener listener = inst.getListener();
@@ -96,7 +93,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
 	@Override
 	public void onFlowCaseActionFired(FlowCaseState ctx) {
-		  FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		  FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
 		  if(inst != null) {
 			  ctx.setModule(inst.getInfo());
 			  FlowModuleListener listener = inst.getListener();
@@ -126,7 +123,7 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 
 	@Override
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-		FlowModuleInst inst = moduleMap.get(ctx.getModule());
+		FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
 		  if(inst != null) {
 			  FlowModuleListener listener = inst.getListener();
 			  return listener.onFlowVariableRender(ctx, variable);  

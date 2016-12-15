@@ -19,6 +19,8 @@ public class CreateFlowCommand {
     private String     moduleType;
     private Long orgId;
     private Long     moduleId;
+    private String projectType;
+    private Long projectId;
     private String stringTag1;
     private String stringTag2;
     private Long integralTag1;
@@ -92,6 +94,18 @@ public class CreateFlowCommand {
 	}
 	public void setIntegralTag2(Long integralTag2) {
 		this.integralTag2 = integralTag2;
+	}
+	public String getProjectType() {
+		return projectType;
+	}
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
+	}
+	public Long getProjectId() {
+		return projectId;
+	}
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
 	}
 	@Override
     public String toString() {

@@ -14,6 +14,7 @@ public class FlowVariableDTO {
     private String     moduleType;
     private Long     id;
     private Long     moduleId;
+    private String params;
 
 
     public String getName() {
@@ -83,6 +84,16 @@ public class FlowVariableDTO {
 
 	public void setModuleId(Long moduleId) {
 		this.moduleId = moduleId;
+	}
+
+
+	public String getParams() {
+		return params;
+	}
+
+
+	public void setParams(String params) {
+		this.params = params;
 	}
 
 

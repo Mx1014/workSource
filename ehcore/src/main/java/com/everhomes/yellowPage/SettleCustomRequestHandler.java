@@ -93,7 +93,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		LOGGER.info("SettleCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createSettleRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
-		requestInfo.setTemplateType("EhSettleRequests");
+		requestInfo.setTemplateType(cmd.getTemplateType());
 		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());

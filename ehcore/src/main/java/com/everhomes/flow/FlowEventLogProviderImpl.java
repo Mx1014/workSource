@@ -377,6 +377,10 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(log.getFlowUserId()));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(log.getLogType()));
 				
+				if(log.getFlowNodeId() != null) {
+					query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(log.getFlowNodeId()));
+				}
+				
 				return query;
 			}
     	});

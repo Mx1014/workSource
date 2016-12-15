@@ -24,10 +24,12 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.NamespaceAddressType;
@@ -43,6 +45,7 @@ import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
 import com.everhomes.rest.organization.CreateOrganizationAccountCommand;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
+import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationCommunityRequestStatus;
 import com.everhomes.rest.organization.OrganizationCommunityRequestType;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -147,41 +150,49 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		
 		List<CustomerBuilding> list = JSONObject.parseArray(varDataList, CustomerBuilding.class);
 		for (CustomerBuilding customerBuilding : list) {
-			Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerBuilding.getBuildingName());
-			// 如果不存在就插入，如果存在就更新
-			if (building == null) {
-				building = new Building();
-				building.setCommunityId(communityId);
-				building.setName(customerBuilding.getBuildingName());
-				building.setAliasName(customerBuilding.getBuildingNumber());
-				building.setStatus(CommonStatus.ACTIVE.getCode());
-				building.setCreatorUid(1L);
-				building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				building.setOperatorUid(1L);
-				building.setOperateTime(building.getCreateTime());
-				building.setNamespaceId(namespaceId);
-				building.setProductType(customerBuilding.getProductType());
-				building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
-				building.setJoininDate(getTimestampDate(customerBuilding.getJoininDate()));
-				building.setFloorCount(customerBuilding.getFloorCount());
-				building.setNamespaceBuildingType(NamespaceBuildingType.JINDIE.getCode());
-				buildingProvider.createBuilding(building);
-			}else {
-				building.setName(customerBuilding.getBuildingName());
-				building.setAliasName(customerBuilding.getBuildingNumber());
-				building.setProductType(customerBuilding.getProductType());
-				building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
-				building.setJoininDate(getTimestampDate(customerBuilding.getJoininDate()));
-				building.setFloorCount(customerBuilding.getFloorCount());
-				building.setOperatorUid(1L);
-				building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				buildingProvider.updateBuilding(building);
-			}
+			insertOrUpdateBuilding(namespaceId, communityId, customerBuilding);
 		}
 
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~end sync insert or update buildings, total="+list.size());
 		}
+	}
+
+	private Building insertOrUpdateBuilding(Integer namespaceId, Long communityId, CustomerBuilding customerBuilding) {
+		if (StringUtils.isBlank(customerBuilding.getBuildingName())) {
+			return null;
+		}
+		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerBuilding.getBuildingName());
+		// 如果不存在就插入，如果存在就更新
+		if (building == null) {
+			building = new Building();
+			building.setCommunityId(communityId);
+			building.setName(customerBuilding.getBuildingName());
+			building.setAliasName(customerBuilding.getBuildingNumber());
+			building.setStatus(CommonStatus.ACTIVE.getCode());
+			building.setCreatorUid(1L);
+			building.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			building.setOperatorUid(1L);
+			building.setOperateTime(building.getCreateTime());
+			building.setNamespaceId(namespaceId);
+			building.setProductType(customerBuilding.getProductType());
+			building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
+			building.setJoininDate(getTimestampDate(customerBuilding.getJoininDate()));
+			building.setFloorCount(customerBuilding.getFloorCount());
+			building.setNamespaceBuildingType(NamespaceBuildingType.JINDIE.getCode());
+			buildingProvider.createBuilding(building);
+		}else {
+			building.setName(customerBuilding.getBuildingName());
+			building.setAliasName(customerBuilding.getBuildingNumber());
+			building.setProductType(customerBuilding.getProductType());
+			building.setCompleteDate(getTimestampDate(customerBuilding.getCompleteDate()));
+			building.setJoininDate(getTimestampDate(customerBuilding.getJoininDate()));
+			building.setFloorCount(customerBuilding.getFloorCount());
+			building.setOperatorUid(1L);
+			building.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			buildingProvider.updateBuilding(building);
+		}
+		return building;
 	}
 
 	private Timestamp getTimestampDate(String dateString) {
@@ -256,59 +267,69 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		Community community = communityProvider.findCommunityById(communityId);
 		if (community == null) {
 			community = new Community();
+			community.setId(communityId);
 		}
 		
 		List<CustomerApartment> list = JSONObject.parseArray(varDataList, CustomerApartment.class);
 		for (CustomerApartment customerApartment : list) {
-			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerApartment.getBuildingName(), customerApartment.getApartmentName());
-			if (address == null) {
-				address = new Address();
-				address.setUuid(UUID.randomUUID().toString());
-				address.setCommunityId(communityId);
-				address.setCityId(community.getCityId());
-				address.setCityName(community.getCityName());
-				address.setAreaId(community.getAreaId());
-				address.setAreaName(community.getAreaName());
-				address.setZipcode(community.getZipcode());
-				address.setAddress(community.getAddress());
-				address.setAddressAlias(community.getAddress());
-				address.setBuildingName(customerApartment.getBuildingName());
-				address.setBuildingAliasName(customerApartment.getBuildingName());
-				address.setApartmentName(customerApartment.getApartmentName());
-				address.setApartmentFloor(customerApartment.getApartmentFloor());
-				address.setStatus(CommonStatus.ACTIVE.getCode());
-				address.setCreatorUid(1L);
-				address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				address.setOperatorUid(1L);
-				address.setOperateTime(address.getCreateTime());
-				address.setAreaSize(customerApartment.getAreaSize());
-				address.setNamespaceId(namespaceId);
-				address.setRentArea(customerApartment.getRentArea());
-				address.setBuildArea(customerApartment.getBuildArea());
-				address.setInnerArea(customerApartment.getInnerArea());
-				address.setLayout(customerApartment.getLayout());
-				address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
-				address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
-				addressProvider.createAddress(address);
-			}else {
-				address.setBuildingName(customerApartment.getBuildingName());
-				address.setBuildingAliasName(customerApartment.getBuildingName());
-				address.setApartmentName(customerApartment.getApartmentName());
-				address.setApartmentFloor(customerApartment.getApartmentFloor());
-				address.setAreaSize(customerApartment.getAreaSize());
-				address.setRentArea(customerApartment.getRentArea());
-				address.setBuildArea(customerApartment.getBuildArea());
-				address.setInnerArea(customerApartment.getInnerArea());
-				address.setLayout(customerApartment.getLayout());
-				address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
-				address.setOperatorUid(1L);
-				address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				addressProvider.updateAddress(address);
-			}
+			insertOrUpdateApartment(namespaceId, community, customerApartment);
 		}
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~end sync insert or update apartments, total="+list.size());
 		}
+	}
+
+	private Address insertOrUpdateApartment(Integer namespaceId, Community community,
+			CustomerApartment customerApartment) {
+		if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+			return null;
+		}
+		Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, community.getId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+		if (address == null) {
+			address = new Address();
+			address.setUuid(UUID.randomUUID().toString());
+			address.setCommunityId(community.getId());
+			address.setCityId(community.getCityId());
+			address.setCityName(community.getCityName());
+			address.setAreaId(community.getAreaId());
+			address.setAreaName(community.getAreaName());
+			address.setZipcode(community.getZipcode());
+			address.setAddress(community.getAddress());
+			address.setAddressAlias(community.getAddress());
+			address.setBuildingName(customerApartment.getBuildingName());
+			address.setBuildingAliasName(customerApartment.getBuildingName());
+			address.setApartmentName(customerApartment.getApartmentName());
+			address.setApartmentFloor(customerApartment.getApartmentFloor());
+			address.setStatus(CommonStatus.ACTIVE.getCode());
+			address.setCreatorUid(1L);
+			address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			address.setOperatorUid(1L);
+			address.setOperateTime(address.getCreateTime());
+			address.setAreaSize(customerApartment.getAreaSize());
+			address.setNamespaceId(namespaceId);
+			address.setRentArea(customerApartment.getRentArea());
+			address.setBuildArea(customerApartment.getBuildArea());
+			address.setInnerArea(customerApartment.getInnerArea());
+			address.setLayout(customerApartment.getLayout());
+			address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+			address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
+			addressProvider.createAddress(address);
+		}else {
+			address.setBuildingName(customerApartment.getBuildingName());
+			address.setBuildingAliasName(customerApartment.getBuildingName());
+			address.setApartmentName(customerApartment.getApartmentName());
+			address.setApartmentFloor(customerApartment.getApartmentFloor());
+			address.setAreaSize(customerApartment.getAreaSize());
+			address.setRentArea(customerApartment.getRentArea());
+			address.setBuildArea(customerApartment.getBuildArea());
+			address.setInnerArea(customerApartment.getInnerArea());
+			address.setLayout(customerApartment.getLayout());
+			address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
+			address.setOperatorUid(1L);
+			address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			addressProvider.updateAddress(address);
+		}
+		return address;
 	}
 
 	private Byte getLivingStatus(Byte livingStatus) {
@@ -321,6 +342,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 //		6-扩租（出租）
 //		7-保留（其他）
 		CustomerLivingStatus customerLivingStatus = CustomerLivingStatus.fromCode(livingStatus);
+		if (customerLivingStatus == null) {
+			return PmAddressMappingStatus.DEFAULT.getCode();
+		}
 		switch (customerLivingStatus) {
 		case NOT_RENTAL:
 		case NOT_RENTING:
@@ -389,6 +413,11 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		Integer namespaceId = appNamespaceMapping.getNamespaceId();
 		Long communityId = appNamespaceMapping.getCommunityId();
+		Community community = communityProvider.findCommunityById(communityId);
+		if (community == null) {
+			community = new Community();
+			community.setId(communityId);
+		}
 		
 		List<CustomerRental> list = JSONObject.parseArray(varDataList, CustomerRental.class);
 		for (CustomerRental customerRental : list) {
@@ -417,7 +446,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateOrganizationCommunityRequest(communityId, organization);
 				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateContracts(organization, customerRental.getContracts());
+				insertOrUpdateContracts(namespaceId, community, organization, customerRental.getContracts());
 			}else {
 				organization.setName(customerRental.getName());
 //				organization.setDescription(customerRental.getNumber());
@@ -428,7 +457,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateOrganizationCommunityRequest(communityId, organization);
 				insertOrUpdateOrganizationMembers(namespaceId, organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateContracts(organization, customerRental.getContracts());
+				insertOrUpdateContracts(namespaceId, community, organization, customerRental.getContracts());
 			}
 		}
 		if (LOGGER.isDebugEnabled()) {
@@ -482,7 +511,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 	}
 
-	private void insertOrUpdateContracts(Organization organization, List<CustomerContract> contracts) {
+	private void insertOrUpdateContracts(Integer namespaceId, Community community, Organization organization, List<CustomerContract> contracts) {
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~begin sync insert or update contracts");
 		}
@@ -506,15 +535,85 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				contract.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				contractProvider.createContract(contract);
 				insertOrUpdateContractBuildingMappings(contract, customerContract.getBuildings());
+				insertOrUpdateOrganizationAddresses(namespaceId, community, organization, customerContract.getBuildings());
 			}else {
 				contract.setContractNumber(customerContract.getContractNumber());
 				contract.setContractEndDate(getTimestampDate(customerContract.getContractEndDate()));
 				contractProvider.updateContract(contract);
 				insertOrUpdateContractBuildingMappings(contract, customerContract.getBuildings());
+				insertOrUpdateOrganizationAddresses(namespaceId, community, organization, customerContract.getBuildings());
 			}
 		}
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~end sync insert or update contracts, total="+contracts.size());
+		}
+	}
+
+	private void insertOrUpdateOrganizationAddresses(Integer namespaceId, Community community, Organization organization,
+			List<CustomerContractBuilding> buildings) {
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~begin sync insert or update contract organization addresses");
+		}
+		if (buildings == null || buildings.size() == 0) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("~~end sync insert or update contract organization addresses, no data and return directly");
+			}
+			return;
+		}
+		for (CustomerContractBuilding customerContractBuilding : buildings) {
+			if (StringUtils.isBlank(customerContractBuilding.getBuildingName())) {
+				continue;
+			}
+			Building building = insertOrUpdateBuilding(namespaceId, community.getId(), new CustomerBuilding(customerContractBuilding.getBuildingName()));
+			Address address = insertOrUpdateApartment(namespaceId, community, new CustomerApartment(customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName()));
+			
+			if (building != null && address != null) {
+				insertOrUpdateOrganizationAddress(organization, building, address);
+				insertOrUpdateOrganizationAddressMapping(organization, community, address);
+			}
+		}
+
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("~~end sync insert or update contract organization addresses, total="+buildings.size());
+		}
+		
+	}
+
+	private void insertOrUpdateOrganizationAddressMapping(Organization organization, Community community,
+			Address address) {
+		CommunityAddressMapping addressMapping = organizationProvider.findOrganizationAddressMapping(organization.getId(), community.getId(), address.getId());
+		if (addressMapping == null) {
+			addressMapping = new CommunityAddressMapping();
+			addressMapping.setOrganizationId(organization.getId());
+			addressMapping.setCommunityId(community.getId());
+			addressMapping.setAddressId(community.getId());
+			addressMapping.setOrganizationAddress(address.getAddress());
+			addressMapping.setLivingStatus(PmAddressMappingStatus.RENT.getCode());
+			organizationProvider.createOrganizationAddressMapping(addressMapping);
+		}else {
+			addressMapping.setOrganizationAddress(address.getAddress());
+//			addressMapping.setLivingStatus(PmAddressMappingStatus.RENT.getCode());
+			organizationProvider.updateOrganizationAddressMapping(addressMapping);
+		}
+	}
+
+	private void insertOrUpdateOrganizationAddress(Organization organization, Building building, Address address) {
+		OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddress(organization.getId(), address.getId(), building.getId());
+		if (organizationAddress == null) {
+			organizationAddress = new OrganizationAddress();
+			organizationAddress.setOrganizationId(organization.getId());
+			organizationAddress.setAddressId(address.getId());
+			organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+			organizationAddress.setCreatorUid(1L);
+			organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organizationAddress.setBuildingId(building.getId());
+			organizationAddress.setBuildingName(building.getName());
+			organizationProvider.createOrganizationAddress(organizationAddress);
+		}else {
+			organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
+			organizationAddress.setOperatorUid(1L);
+			organizationAddress.setBuildingName(building.getName());
+			organizationProvider.updateOrganizationAddress(organizationAddress);
 		}
 	}
 
@@ -529,6 +628,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		for (CustomerContractBuilding customerContractBuilding : buildings) {
+			if (StringUtils.isBlank(customerContractBuilding.getBuildingName())) {
+				continue;
+			}
 			ContractBuildingMapping contractBuildingMapping = contractBuildingMappingProvider.findContractBuildingMappingByName(contract.getContractNumber(), customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
 			if (contractBuildingMapping == null) {
 				contractBuildingMapping = new ContractBuildingMapping();
