@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.serviceModule;
+package com.everhomes.module;
 
 import org.jooq.Condition;
 

@@ -427,7 +427,7 @@ CREATE TABLE `eh_activity_goods` (
 -- merge from terminal-stat-delta-schema.sql by by sfyan 20161214
 -- 运营统计 by sfyan 20161214
 -- 终端app版本累计用户
-DROP TABLE IF EXISTS `eh_terminal_app_version_cumulatives`;
+-- DROP TABLE IF EXISTS `eh_terminal_app_version_cumulatives`;
 CREATE TABLE `eh_terminal_app_version_cumulatives` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -439,7 +439,7 @@ CREATE TABLE `eh_terminal_app_version_cumulatives` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端app版本活跃用户
-DROP TABLE IF EXISTS `eh_terminal_app_version_actives`;
+-- DROP TABLE IF EXISTS `eh_terminal_app_version_actives`;
 CREATE TABLE `eh_terminal_app_version_actives` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -452,7 +452,7 @@ CREATE TABLE `eh_terminal_app_version_actives` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端日统计
-DROP TABLE IF EXISTS `eh_terminal_day_statistics`;
+-- DROP TABLE IF EXISTS `eh_terminal_day_statistics`;
 CREATE TABLE `eh_terminal_day_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -473,7 +473,7 @@ CREATE TABLE `eh_terminal_day_statistics` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端时统计
-DROP TABLE IF EXISTS `eh_terminal_hour_statistics`;
+-- DROP TABLE IF EXISTS `eh_terminal_hour_statistics`;
 CREATE TABLE `eh_terminal_hour_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -490,7 +490,7 @@ CREATE TABLE `eh_terminal_hour_statistics` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端app版本统计
-DROP TABLE IF EXISTS `eh_terminal_app_version_statistics`;
+-- DROP TABLE IF EXISTS `eh_terminal_app_version_statistics`;
 CREATE TABLE `eh_terminal_app_version_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -509,7 +509,7 @@ CREATE TABLE `eh_terminal_app_version_statistics` (
 
 
 -- 统计任务记录
-DROP TABLE IF EXISTS `eh_app_version`;
+-- DROP TABLE IF EXISTS `eh_app_version`;
 CREATE TABLE `eh_terminal_statistics_tasks` (
   `id` BIGINT NOT NULL,
   `task_no` VARCHAR(20) NOT NULL,
@@ -521,7 +521,7 @@ CREATE TABLE `eh_terminal_statistics_tasks` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- app版本
-DROP TABLE IF EXISTS `eh_app_version`;
+-- DROP TABLE IF EXISTS `eh_app_version`;
 CREATE TABLE `eh_app_version` (
   `id` BIGINT NOT NULL,
   `type` VARCHAR(20) NOT NULL,
@@ -733,3 +733,25 @@ CREATE TABLE `eh_parking_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- App启动广告   add by xq.tian  2016/11/28
+--
+-- DROP TABLE IF EXISTS `eh_launch_advertisements`;
+CREATE TABLE `eh_launch_advertisements` (
+  `id` BIGINT  NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `content_type` VARCHAR(32) COMMENT '1: IMAGE, 2: VIDEO',
+  `content_uri` VARCHAR(1024) COMMENT 'advertisement image/gif/video uri',
+  `times_per_day` INTEGER DEFAULT 0 COMMENT 'The maximum number of times to display per day',
+  `display_interval` INTEGER DEFAULT 0 COMMENT 'Minimum display time interval, ',
+  `duration_time` INTEGER COMMENT 'duration time',
+  `skip_flag` TINYINT COMMENT '0: can not skip, 1: skip',
+  `action_type` TINYINT COMMENT '0: can not click, 1: click',
+  `action_data` TEXT COMMENT 'If allow click, the jumped url',
+  `status` TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;

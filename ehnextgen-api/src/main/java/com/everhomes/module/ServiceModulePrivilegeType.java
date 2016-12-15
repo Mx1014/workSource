@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.serviceModule;
+package com.everhomes.module;
 
 public enum ServiceModulePrivilegeType {
     ORDINARY((byte) 0), SUPER((byte) 1);
