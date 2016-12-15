@@ -5306,6 +5306,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setContactName(cmd.getAccountName());
 				m.setTargetType(OrganizationMemberTargetType.USER.getCode());
 				m.setTargetId(userIdentifier.getOwnerUid());
+				m.setNamespaceId(namespaceId);
 				organizationProvider.updateOrganizationMember(m);
 				
 //				userSearcher.feedDoc(m);

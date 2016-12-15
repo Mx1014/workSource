@@ -73,6 +73,10 @@ public class UserContext {
 	    return getCurrentNamespaceId(null);
 	}
 	
+	public static void setCurrentNamespaceId(Integer namespaceId) {
+		current().setNamespaceId(namespaceId);
+	}
+	
 	public static Integer getCurrentNamespaceId(Integer namespaceId){
 		UserContext context = s_userContexts.get();
 		

@@ -86,6 +86,7 @@ public class ContractProviderImpl implements ContractProvider {
 			.set(Tables.EH_CONTRACTS.STATUS, CommonStatus.INACTIVE.getCode())
 			.where(Tables.EH_CONTRACTS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_CONTRACTS.ORGANIZATION_NAME.eq(organizationName))
+			.and(Tables.EH_CONTRACTS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
 			.execute();
 	}
 

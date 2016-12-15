@@ -54,6 +54,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -140,17 +141,19 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				if (backupList == null || backupList.isEmpty()) {
 					return false;
 				}
-				if (AllFlag.fromCode(cmd.getAllFlag()) == AllFlag.ALL) {
-					// 全量更新
-					updateAllDate(cmd.getDataType(),appNamespaceMapping , backupList);
-				}else {
-					// 增量更新
-					updatePartDate(cmd.getDataType(), appNamespaceMapping, backupList);
+				try {
+					if (AllFlag.fromCode(cmd.getAllFlag()) == AllFlag.ALL) {
+						// 全量更新
+						updateAllDate(cmd.getDataType(),appNamespaceMapping , backupList);
+					}else {
+						// 增量更新
+						updatePartDate(cmd.getDataType(), appNamespaceMapping, backupList);
+					}
+				} finally {
+					techparkSyncdataBackupProvider.updateTechparkSyncdataBackupInactive(backupList);
 				}
-				techparkSyncdataBackupProvider.updateTechparkSyncdataBackupInactive(backupList);
 				return true;
 			});
-			
 		}
 	}
 
@@ -193,16 +196,18 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		// 如果他们有，我们没有，插入
 		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-		for (CustomerBuilding customerBuilding : theirBuildingList) {
-			if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
-				continue;
-			}
-			// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-			Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
-			if (building == null) {
-				insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
-			}else {
-				updateBuilding(building, customerBuilding);
+		if (theirBuildingList != null) {
+			for (CustomerBuilding customerBuilding : theirBuildingList) {
+				if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
+					continue;
+				}
+				// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+				Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+				if (building == null) {
+					insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+				}else {
+					updateBuilding(building, customerBuilding);
+				}
 			}
 		}
 	}
@@ -254,10 +259,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private CustomerBuilding findFromTheirBuildingList(Building myBuilding, List<CustomerBuilding> theirBuildingList) {
-		for (CustomerBuilding customerBuilding : theirBuildingList) {
-			if (myBuilding.getName().equals(customerBuilding.getBuildingName())) {
-				customerBuilding.setDealed(true);
-				return customerBuilding;
+		if (theirBuildingList != null) {
+			for (CustomerBuilding customerBuilding : theirBuildingList) {
+				if (myBuilding.getName().equals(customerBuilding.getBuildingName())) {
+					customerBuilding.setDealed(true);
+					return customerBuilding;
+				}
 			}
 		}
 		return null;
@@ -267,7 +274,10 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		List<T> resultList = new ArrayList<>();
 		for (TechparkSyncdataBackup techparkSyncdataBackup : backupList) {
 			if (StringUtils.isNotBlank(techparkSyncdataBackup.getVarDataList())) {
-				resultList.addAll(JSONObject.parseArray(techparkSyncdataBackup.getVarDataList(), targetClz));
+				List<T> list = JSONObject.parseArray(techparkSyncdataBackup.getVarDataList(), targetClz);
+				if (list != null) {
+					resultList.addAll(list);
+				}
 			}
 		}
 		return resultList;
@@ -288,20 +298,21 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		// 如果他们有，我们没有，插入
 		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-		for (CustomerApartment customerApartment : theirApartmentList) {
-			if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
-				continue;
-			}
-			// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-			Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-			if (address == null) {
-				insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
-			}else {
-				updateAddress(address, customerApartment);
+		if (theirApartmentList != null) {
+			for (CustomerApartment customerApartment : theirApartmentList) {
+				if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+					continue;
+				}
+				// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+				Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+				if (address == null) {
+					insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+				}else {
+					updateAddress(address, customerApartment);
+				}
 			}
 		}
 	}
-
 
 	private void insertAddress(Integer namespaceId, Long communityId, CustomerApartment customerApartment) {
 		if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
@@ -367,10 +378,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private CustomerApartment findFromTheirApartmentList(Address myApartment,
 			List<CustomerApartment> theirApartmentList) {
-		for (CustomerApartment customerApartment : theirApartmentList) {
-			if (myApartment.getBuildingName().equals(customerApartment.getBuildingName()) && myApartment.getApartmentName().equals(customerApartment.getApartmentName())) {
-				customerApartment.setDealed(true);
-				return customerApartment;
+		if (theirApartmentList != null) {
+			for (CustomerApartment customerApartment : theirApartmentList) {
+				if (myApartment.getBuildingName().equals(customerApartment.getBuildingName()) && myApartment.getApartmentName().equals(customerApartment.getApartmentName())) {
+					customerApartment.setDealed(true);
+					return customerApartment;
+				}
 			}
 		}
 		return null;
@@ -416,7 +429,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			}
 			Organization organization = organizationProvider.findOrganizationByNameAndNamespaceId(customerRental.getName(), appNamespaceMapping.getNamespaceId());
 			if (organization == null) {
-				insertOrganization(appNamespaceMapping, customerRental);
+				organization = insertOrganization(appNamespaceMapping, customerRental);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
 				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
@@ -433,7 +446,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 	}
 
-	private void insertOrganization(AppNamespaceMapping appNamespaceMapping, CustomerRental customerRental) {
+	private Organization insertOrganization(AppNamespaceMapping appNamespaceMapping, CustomerRental customerRental) {
 		Organization organization = new Organization();
 		organization.setParentId(0L);
 		organization.setOrganizationType(OrganizationType.ENTERPRISE.getCode());
@@ -451,12 +464,15 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		organization.setNamespaceOrganizationType(NamespaceOrganizationType.JINDIE.getCode());
 		organization.setNamespaceOrganizationToken(customerRental.getNumber());
 		organizationProvider.createOrganization(organization);
+		return organization;
 	}
 
 	private void deleteOrganization(Organization organization) {
-		organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organization.setStatus(OrganizationStatus.INACTIVE.getCode());
-		organizationProvider.updateOrganization(organization);
+		if (OrganizationStatus.fromCode(organization.getStatus()) != OrganizationStatus.INACTIVE) {
+			organization.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organization.setStatus(OrganizationStatus.INACTIVE.getCode());
+			organizationProvider.updateOrganization(organization);
+		}
 	}
 
 	private void deleteContracts(Organization organization) {
@@ -561,7 +577,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		for (CustomerRental customerRental : theirRentalList) {
 			Organization organization = organizationProvider.findOrganizationByName(customerRental.getName(), appNamespaceMapping.getNamespaceId());
 			if (organization == null) {
-				insertOrganization(appNamespaceMapping, customerRental);
+				organization = insertOrganization(appNamespaceMapping, customerRental);
 				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
 				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
 				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
@@ -587,7 +603,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		for (CustomerContract customerContract : customerContractList) {
 			Contract contract = contractProvider.findContractByNumber(namespaceId, organization.getId(), customerContract.getContractNumber());
 			if (contract == null) {
-				insertContract(organization, customerContract);
+				contract = insertContract(organization, customerContract);
 				insertOrUpdatePartContractBuildingMappings(contract, customerContract);
 			}else {
 				updateContract(contract, customerContract);
@@ -655,7 +671,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private void updateOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping, Address address) {
 		organizationAddressMapping.setOrganizationAddress(address.getAddress());
-		organizationAddressMapping.setLivingStatus(getLivingStatus(address.getLivingStatus()));
+		organizationAddressMapping.setLivingStatus(address.getLivingStatus());
 		organizationProvider.updateOrganizationAddressMapping(organizationAddressMapping);
 	}
 
@@ -665,7 +681,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		organizationAddressMapping.setCommunityId(communityId);
 		organizationAddressMapping.setAddressId(address.getId());
 		organizationAddressMapping.setOrganizationAddress(address.getAddress());
-		organizationAddressMapping.setLivingStatus(getLivingStatus(address.getLivingStatus()));
+		organizationAddressMapping.setLivingStatus(address.getLivingStatus());
 		organizationAddressMapping.setNamespaceType(NamespaceAddressType.JINDIE.getCode());
 		organizationProvider.createOrganizationAddressMapping(organizationAddressMapping);
 	}
@@ -776,6 +792,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					cmd.setContactName(contactArray[i]);
 					cmd.setContactToken(contactPhoneArray[i]);
 					cmd.setOrganizationId(organization.getId());
+					UserContext.setCurrentNamespaceId(namespaceId);
 					rolePrivilegeService.createOrganizationAdmin(cmd, namespaceId);
 				}
 			}
@@ -789,12 +806,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~begin sync insert or update contracts");
 		}
-		if (customerContractList == null || customerContractList.size() == 0) {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("~~end sync insert or update contracts, no data and return directly");
-			}
-			return;
-		}
+		
 		// 列出这个组织所有的合同，然后比较，我有他无删，我无他有增，无有他有更新
 		List<Contract> contractList = contractProvider.listContractByOrganizationId(namespaceId, organization.getId());
 		for (Contract contract : contractList) {
@@ -807,9 +819,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				deleteContractBuildingMappings(contract);
 			}
 		}
-		for (CustomerContract customerContract : customerContractList) {
-			Contract contract = insertContract(organization, customerContract);
-			insertAllContractBuildingMappings(contract, customerContract);
+		if (customerContractList != null) {
+			for (CustomerContract customerContract : customerContractList) {
+				if (customerContract.getDealed() != null && customerContract.getDealed().booleanValue() == true) {
+					continue;
+				}
+				Contract contract = insertContract(organization, customerContract);
+				insertAllContractBuildingMappings(contract, customerContract);
+			}
 		}
 		
 		if (LOGGER.isDebugEnabled()) {
@@ -863,7 +880,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		contractProvider.updateContract(contract);
 	}
 	
-
 	//全量同步合同地址
 	private void insertOrUpdateAllContractBuildingMappings(Contract contract, CustomerContract customerContract){
 		//比较合同中的地址
@@ -877,22 +893,26 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				deleteContractBuildingMapping(myContractBuildingMapping);
 			}
 		}
-		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-			if ((customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) 
-					|| StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
-				continue;
+		if (theirContractBuildingList != null) {
+			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+				if ((customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) 
+						|| StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+					continue;
+				}
+				insertContractBuildingMapping(contract, customerContractBuilding);
 			}
-			insertContractBuildingMapping(contract, customerContractBuilding);
 		}
 	}
 	
 	private CustomerContractBuilding findFromTheirContractBuildingList(
 			ContractBuildingMapping myContractBuildingMapping,
 			List<CustomerContractBuilding> theirContractBuildingList) {
-		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-			if (myContractBuildingMapping.getBuildingName().equals(customerContractBuilding.getBuildingName()) && myContractBuildingMapping.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
-				customerContractBuilding.setDealed(true);
-				return customerContractBuilding;
+		if (theirContractBuildingList != null) {
+			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+				if (myContractBuildingMapping.getBuildingName().equals(customerContractBuilding.getBuildingName()) && myContractBuildingMapping.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
+					customerContractBuilding.setDealed(true);
+					return customerContractBuilding;
+				}
 			}
 		}
 		return null;
@@ -931,10 +951,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private CustomerContract findFromTheirContractList(Contract contract, List<CustomerContract> customerContractList) {
-		for (CustomerContract customerContract : customerContractList) {
-			if (contract.getContractNumber().equals(customerContract.getContractNumber())) {
-				customerContract.setDealed(true);
-				return customerContract;
+		if (customerContractList != null) {
+			for (CustomerContract customerContract : customerContractList) {
+				if (contract.getContractNumber().equals(customerContract.getContractNumber())) {
+					customerContract.setDealed(true);
+					return customerContract;
+				}
 			}
 		}
 		return null;
@@ -946,14 +968,10 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~begin sync insert or update contract organization addresses");
 		}
-		if (theirContractBuildingList == null || theirContractBuildingList.size() == 0) {
-			if (LOGGER.isDebugEnabled()) {
-				LOGGER.debug("~~end sync insert or update contract organization addresses, no data and return directly");
-			}
-			return;
-		}
 		//因为合同那里已经处理过一次楼栋门牌，这里初始化一下
-		theirContractBuildingList.forEach(b->b.setDealed(null));
+		if (theirContractBuildingList != null) {
+			theirContractBuildingList.forEach(b->b.setDealed(null));
+		}
 		
 		// 娘的，有三个organization address关联表：eh_enterprise_addresses、eh_organization_addresses、eh_organization_address_mappings，蛋疼，都要比较下
 		//处理OrganizationAddress
@@ -966,13 +984,19 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				deleteOrganizationAddress(organizationAddress);
 			}
 		}
-		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-			insertOrganizationAddress(namespaceId, communityId, organization, customerContractBuilding);
+		if (theirContractBuildingList != null) {
+			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+				if (customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) {
+					continue;
+				}
+				insertOrganizationAddress(namespaceId, communityId, organization, customerContractBuilding);
+			}
 		}
 		
-		
 		//处理EnterpriseAddress
-		theirContractBuildingList.forEach(b->b.setDealed(null));
+		if (theirContractBuildingList != null) {
+			theirContractBuildingList.forEach(b->b.setDealed(null));
+		}
 		List<EnterpriseAddress> myEnterpriseAddressList = organizationProvider.listEnterpriseAddressByOrganization(organization.getId());
 		for (EnterpriseAddress enterpriseAddress : myEnterpriseAddressList) {
 			CustomerContractBuilding customerContractBuilding = findFromTheirContractBuildingList(namespaceId, communityId, enterpriseAddress, theirContractBuildingList);
@@ -982,12 +1006,19 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				deleteEnterpriseAddress(enterpriseAddress);
 			}
 		}
-		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-			insertEnterpriseAddress(namespaceId, communityId, organization, customerContractBuilding);
+		if (theirContractBuildingList != null) {
+			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+				if (customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) {
+					continue;
+				}
+				insertEnterpriseAddress(namespaceId, communityId, organization, customerContractBuilding);
+			}
 		}
 		
 		//处理organizationAddressMapping，这个表比较蛋疼，organizationId用的是管理的公司的id，更蛋疼的是，不知道哪个起的名字CommunityAddressMapping
-		theirContractBuildingList.forEach(b->b.setDealed(null));
+		if (theirContractBuildingList != null) {
+			theirContractBuildingList.forEach(b->b.setDealed(null));
+		}
 		Long superOrganizationId = getSuperOrganizationId(namespaceId, communityId);
 		List<CommunityAddressMapping> myOrganizationAddressMappingList = organizationProvider.listOrganizationAddressMappingByNamespaceType(superOrganizationId, communityId, NamespaceAddressType.JINDIE.getCode());
 		for (CommunityAddressMapping organizationAddressMapping : myOrganizationAddressMappingList) {
@@ -999,23 +1030,29 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				deleteOrganizationAddressMapping(organizationAddressMapping);
 			}
 		}
-		for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-			if ((customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) 
-					|| StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
-				continue;
-			}
-			//有的地址可能是我们系统里本来就有的，这部分也是做更新操作
-			Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
-			if (address != null) {
-				CommunityAddressMapping organizaitonAddressMapping = organizationProvider.findOrganizationAddressMapping(superOrganizationId, communityId, address.getId());
-				if (organizaitonAddressMapping == null) {
-					insertOrganizationAddressMapping(communityId, superOrganizationId, address);
-				}else {
-					updateOrganizationAddressMapping(organizaitonAddressMapping, address);
+		if (theirContractBuildingList != null) {
+			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+				if ((customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) 
+						|| StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+					continue;
+				}
+				//有的地址可能是我们系统里本来就有的，这部分也是做更新操作
+				Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
+				if (address != null) {
+					CommunityAddressMapping organizaitonAddressMapping = organizationProvider.findOrganizationAddressMapping(superOrganizationId, communityId, address.getId());
+					if (organizaitonAddressMapping == null) {
+						insertOrganizationAddressMapping(communityId, superOrganizationId, address);
+					}else {
+						updateOrganizationAddressMapping(organizaitonAddressMapping, address);
+					}
 				}
 			}
 		}
-
+		
+		if (theirContractBuildingList != null) {
+			theirContractBuildingList.forEach(b->b.setDealed(null));
+		}
+		
 		if (LOGGER.isDebugEnabled()) {
 			LOGGER.debug("~~end sync insert or update contract organization addresses, total="+theirContractBuildingList.size());
 		}
@@ -1029,12 +1066,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private CustomerContractBuilding findFromTheirContractBuildingList(
 			CommunityAddressMapping organizationAddressMapping,
 			List<CustomerContractBuilding> theirContractBuildingList) {
-		Address address = addressProvider.findAddressById(organizationAddressMapping.getAddressId());
-		if (address != null && address.getBuildingName() != null && address.getApartmentName() != null) {
-			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-				if (address.getBuildingName().equals(customerContractBuilding.getBuildingName()) && address.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
-					customerContractBuilding.setDealed(true);
-					return customerContractBuilding;
+		if (theirContractBuildingList != null) {
+			Address address = addressProvider.findAddressById(organizationAddressMapping.getAddressId());
+			if (address != null && address.getBuildingName() != null && address.getApartmentName() != null) {
+				for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+					if (address.getBuildingName().equals(customerContractBuilding.getBuildingName()) && address.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
+						customerContractBuilding.setDealed(true);
+						return customerContractBuilding;
+					}
 				}
 			}
 		}
@@ -1043,6 +1082,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private void insertEnterpriseAddress(Integer namespaceId, Long communityId, Organization organization,
 			CustomerContractBuilding customerContractBuilding) {
+		if (StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+			return;
+		}
 		Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
 		if (address == null) {
 			return;
@@ -1064,10 +1106,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void deleteEnterpriseAddress(EnterpriseAddress enterpriseAddress) {
-		enterpriseAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
-		enterpriseAddress.setOperatorUid(1L);
-		enterpriseAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		enterpriseProvider.updateEnterpriseAddress(enterpriseAddress);
+		if (OrganizationAddressStatus.fromCode(enterpriseAddress.getStatus()) != OrganizationAddressStatus.INACTIVE) {
+			enterpriseAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+			enterpriseAddress.setOperatorUid(1L);
+			enterpriseAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			enterpriseProvider.updateEnterpriseAddress(enterpriseAddress);
+		}
 	}
 
 	private void updateEnterpriseAddress(Integer namespaceId, Long communityId, EnterpriseAddress enterpriseAddress,
@@ -1087,12 +1131,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private CustomerContractBuilding findFromTheirContractBuildingList(Integer namespaceId, Long communityId,
 			EnterpriseAddress enterpriseAddress, List<CustomerContractBuilding> theirContractBuildingList) {
-		Address address = addressProvider.findAddressById(enterpriseAddress.getAddressId());
-		if (address != null && address.getBuildingName() != null && address.getApartmentName() != null) {
-			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-				if (address.getBuildingName().equals(customerContractBuilding.getBuildingName()) && address.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
-					customerContractBuilding.setDealed(true);
-					return customerContractBuilding;
+		if (theirContractBuildingList != null) {
+			Address address = addressProvider.findAddressById(enterpriseAddress.getAddressId());
+			if (address != null && address.getBuildingName() != null && address.getApartmentName() != null) {
+				for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+					if (address.getBuildingName().equals(customerContractBuilding.getBuildingName()) && address.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
+						customerContractBuilding.setDealed(true);
+						return customerContractBuilding;
+					}
 				}
 			}
 		}
@@ -1100,6 +1146,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void insertOrganizationAddress(Integer namespaceId, Long communityId, Organization organization, CustomerContractBuilding customerContractBuilding) {
+		if (StringUtils.isBlank(customerContractBuilding.getBuildingName()) || StringUtils.isBlank(customerContractBuilding.getApartmentName())) {
+			return;
+		}
 		Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, communityId, customerContractBuilding.getBuildingName(), customerContractBuilding.getApartmentName());
 		if (address == null) {
 			return;
@@ -1121,10 +1170,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void deleteOrganizationAddress(OrganizationAddress organizationAddress) {
-		organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
-		organizationAddress.setOperatorUid(1L);
-		organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		organizationProvider.updateOrganizationAddress(organizationAddress);
+		if (OrganizationAddressStatus.fromCode(organizationAddress.getStatus()) != OrganizationAddressStatus.INACTIVE) {
+			organizationAddress.setStatus(OrganizationAddressStatus.INACTIVE.getCode());
+			organizationAddress.setOperatorUid(1L);
+			organizationAddress.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			organizationProvider.updateOrganizationAddress(organizationAddress);
+		}
 	}
 
 	private void updateOrganizationAddress(Integer namespaceId, Long communityId, OrganizationAddress organizationAddress,
@@ -1144,12 +1195,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private CustomerContractBuilding findFromTheirContractBuildingList(Integer namespaceId, Long communityId, OrganizationAddress organizationAddress,
 			List<CustomerContractBuilding> theirContractBuildingList) {
-		Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
-		if (address != null && address.getBuildingName() != null && address.getApartmentName() != null) {
-			for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
-				if (address.getBuildingName().equals(customerContractBuilding.getBuildingName()) && address.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
-					customerContractBuilding.setDealed(true);
-					return customerContractBuilding;
+		if (theirContractBuildingList != null) {
+			Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+			if (address != null && address.getBuildingName() != null && address.getApartmentName() != null) {
+				for (CustomerContractBuilding customerContractBuilding : theirContractBuildingList) {
+					if (address.getBuildingName().equals(customerContractBuilding.getBuildingName()) && address.getApartmentName().equals(customerContractBuilding.getApartmentName())) {
+						customerContractBuilding.setDealed(true);
+						return customerContractBuilding;
+					}
 				}
 			}
 		}

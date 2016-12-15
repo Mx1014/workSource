@@ -108,6 +108,7 @@ public class ContractBuildingMappingProviderImpl implements ContractBuildingMapp
 		.set(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS, CommonStatus.INACTIVE.getCode())
 		.where(Tables.EH_CONTRACT_BUILDING_MAPPINGS.NAMESPACE_ID.eq(namespaceId))
 		.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.ORGANIZATION_NAME.eq(organizationName))
+		.and(Tables.EH_CONTRACT_BUILDING_MAPPINGS.STATUS.ne(CommonStatus.INACTIVE.getCode()))
 		.execute();
 	}
 

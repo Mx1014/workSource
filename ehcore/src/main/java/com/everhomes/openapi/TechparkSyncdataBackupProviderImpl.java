@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.openapi;
 
+import java.sql.Timestamp;
 import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
@@ -20,6 +21,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhTechparkSyncdataBackupDao;
 import com.everhomes.server.schema.tables.pojos.EhTechparkSyncdataBackup;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class TechparkSyncdataBackupProviderImpl implements TechparkSyncdataBackupProvider {
@@ -73,6 +75,7 @@ public class TechparkSyncdataBackupProviderImpl implements TechparkSyncdataBacku
 	public void updateTechparkSyncdataBackupInactive(List<TechparkSyncdataBackup> backupList) {
 		List<EhTechparkSyncdataBackup> list = backupList.stream().map(b->{
 				b.setStatus(CommonStatus.INACTIVE.getCode()); 
+				b.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 				return b;
 			}).collect(Collectors.toList());
 		getReadWriteDao().update(list);
