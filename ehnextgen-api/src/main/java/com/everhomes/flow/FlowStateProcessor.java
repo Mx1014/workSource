@@ -1,5 +1,7 @@
 package com.everhomes.flow;
 
+import java.util.List;
+
 import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.user.UserInfo;
@@ -28,5 +30,9 @@ public interface FlowStateProcessor {
 	UserInfo getCurrProcessor(FlowCaseState ctx, String variable);
 
 	FlowCaseState prepareAutoStep(FlowAutoStepDTO stepDTO);
+
+	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
+
+	List<Long> getSupervisorSelection(FlowCaseState ctx, FlowUserSelection sel);
 
 }

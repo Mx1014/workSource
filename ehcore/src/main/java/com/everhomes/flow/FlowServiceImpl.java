@@ -1553,10 +1553,24 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public void processMessageTimeout(FlowTimeout ft) {
 		FlowTimeoutMessageDTO dto = (FlowTimeoutMessageDTO)StringHelper.fromJsonString(ft.getJson(), FlowTimeoutMessageDTO.class);
-		FlowCaseState ctx = new FlowCaseState();
 		if(dto == null) {
 			LOGGER.error("flowtimeout error ft=" + ft.getId());
+			return;
 		}
+//		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+//		stepDTO.setAutoStepType(FlowStepType.NO_STEP.getCode());
+//		stepDTO.setFlowCaseId(dto.getFlowCaseId());
+//		stepDTO.setFlowMainId(dto.getFlowMainId());
+//		stepDTO.setFlowNodeId(dto.getFlowNodeId());
+//		stepDTO.setFlowVersion(dto.getFlowVersion());
+//		stepDTO.setStepCount(dto.getStepCount());
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(dto, FlowAutoStepDTO.class);
+		FlowCaseState ctx = flowStateProcessor.prepareAutoStep(stepDTO);
+		if(ctx == null) {
+			LOGGER.error("flowtimeout context error ft=" + ft.getId());
+			return;
+		}
+		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(dto.getFlowCaseId());
 		FlowAction flowAction = flowActionProvider.getFlowActionById(ft.getBelongTo());
 		ctx.setFlowCase(flowCase);
@@ -2198,19 +2212,20 @@ public class FlowServiceImpl implements FlowService {
 		return resp;
 	}
 	
+	
 	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
+		return resolvUserSelections(ctx, entityType, entityId, selections, true);
+	}
+	
+	@Override
+	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, boolean includeParams) {
 		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
 		if(selections == null) {
 			return users;
 		}
 		
-		Flow flow = null;
-		if(ctx.getFlowGraph() != null) {
-			flow = ctx.getFlowGraph().getFlow();
-		} else {
-			flow = flowProvider.findSnapshotFlow(ctx.getFlowCase().getFlowMainId(), ctx.getFlowCase().getFlowVersion());
-		}
+		Flow flow = ctx.getFlowGraph().getFlow();
 		Long orgId = flow.getOrganizationId();
 		
 		for(FlowUserSelection sel : selections) {
@@ -2253,7 +2268,7 @@ public class FlowServiceImpl implements FlowService {
 					LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
 				}
 				
-			} else if(FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
+			} else if(includeParams && FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
 				if(sel.getSourceIdA() != null) {
 					FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
 					variable.getScriptCls();

@@ -69,6 +69,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
    @Autowired
    private FlowEventLogProvider flowEventLogProvider;
    
+   @Autowired
+   private FlowUserSelectionProvider flowUserSelectionProvider;
+   
    ThreadPoolTaskScheduler scheduler;
    
    public FlowStateProcessorImpl() {
@@ -468,7 +471,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		return ctx.getOperator();
 	}
 	
-	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection seles) {
+	@Override
+	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel) {
 		List<Long> users = new ArrayList<>();
 		UserInfo userInfo = getApplier(ctx, "");
 		if(null != userInfo) {
@@ -476,6 +480,14 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		}
 		
 		return users;
+	}
+	
+	@Override
+	public List<Long> getSupervisorSelection(FlowCaseState ctx, FlowUserSelection sel) {
+		FlowCase flowCase = ctx.getFlowCase();
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowCase.getFlowMainId()
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), flowCase.getFlowVersion());
+		return flowService.resolvUserSelections(ctx, FlowEntityType.FLOW, null, selections, false);
 	}
 	
 }

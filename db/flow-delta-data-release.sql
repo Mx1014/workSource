@@ -63,3 +63,11 @@ VALUES ('2004', '0', '0', '', '0', '', 'numberProcessor', 'N节点处理人', 'n
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ('2005', '0', '0', '', '0', '', 'supervisor', '督办', 'node_user', 'bean_id', 'flow-variable-supervisor', '1');
+
+
+
+SET @id := (SELECT MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+VALUES((@id := @id+1),'1000000','0','0','0','/home','Bizs','FLOW_TASKS','任务管理','cs://1/image/aW1hZ2UvTVRvME1UWXpZak01WkdSa05USmxNekppT1RWaVlUa3lZemt3WkRabFlUSXhZZw','1','1','56','','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin','0',NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+VALUES((@id := @id+1),'1000000','0','0','0','/home','Bizs','FLOW_TASKS','任务管理','cs://1/image/aW1hZ2UvTVRvME1UWXpZak01WkdSa05USmxNekppT1RWaVlUa3lZemt3WkRabFlUSXhZZw','1','1','56','','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist','0',NULL);
