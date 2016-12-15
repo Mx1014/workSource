@@ -1,5 +1,9 @@
 package com.everhomes.flow;
 
+import java.util.List;
+
+import com.everhomes.rest.flow.FlowEntityType;
+
 public interface FlowVariableUserResolver {
 	public static final String APPLIER = "flow-variable-applier";
 	public static final String PREFIX_NODE_PROCESSOR = "flow-variable-prefix-node-processor";
@@ -8,5 +12,5 @@ public interface FlowVariableUserResolver {
 	public static final String N_NODE_PROCESSOR = "flow-variable-n-node-processor";
 	public static final String SUPERVISOR = "flow-variable-supervisor";
 	
-	String variableUserResolve(FlowCaseState ctx, FlowUserSelection userSelection);
+	List<Long> variableUserResolve(FlowCaseState ctx, FlowEntityType fromEntity, Long entityId, FlowUserSelection userSelection);
 }
