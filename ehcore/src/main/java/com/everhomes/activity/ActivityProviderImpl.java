@@ -55,6 +55,7 @@ import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.yellowPage.ServiceAllianceCategories;
@@ -205,6 +206,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, createRoster.getActivityId()));
         EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
         createRoster.setId(id);
+        createRoster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.insert(createRoster);
     }
 
@@ -584,6 +586,50 @@ public class ActivityProviderImpl implements ActivityProivider {
 			return result.map(r->ConvertHelper.convert(r, Activity.class));
 		}
 		return new ArrayList<Activity>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<ActivityRoster> listActivitySignupByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITY_ROSTER)
+			.join(Tables.EH_ACTIVITIES)
+			.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+			.and(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ACTIVITY_ROSTER.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ACTIVITY_ROSTER.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
+		}
+		return new ArrayList<ActivityRoster>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<ActivityRoster> listActivitySignupByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITY_ROSTER)
+			.join(Tables.EH_ACTIVITIES)
+			.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+			.and(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc(), Tables.EH_ACTIVITY_ROSTER.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
+		}
+		return new ArrayList<ActivityRoster>();
 	}
 
 
