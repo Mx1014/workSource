@@ -370,6 +370,16 @@ public class ContentServerServiceImpl implements ContentServerService {
                 LOGGER.error("Failed to upload file, contentType={}, fileName={}, orgFileName={}", 
                     file.getContentType(), file.getName(), file.getOriginalFilename(), e);
             } finally {
+//                Long size = file.getSize();
+//                if(size < 1000) {
+//                    csFileResponse.setSize(size + "B");
+//                } else if(size > 1024 && size < 1024*1024) {
+//                    csFileResponse.setSize(size/1024.0 + "KB");
+//                } else if(size > 1024*1024 && size < 1024*1024*1024) {
+//                    csFileResponse.setSize(size/(1024.0*1024) + "MB");
+//                } else if(size > 1024*1024*1024) {
+//                    csFileResponse.setSize(size/(1024.0*1024*1024) + "GB");
+//                }
                 if(fileStream != null) {
                     try {
                         fileStream.close();

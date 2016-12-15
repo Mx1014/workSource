@@ -1,3 +1,5 @@
+delete from eh_web_menu_privileges;
+
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10000', '信息发布', '0', '/10000', '0', '1', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10100', '论坛/公告', '10000', '/10000/10100', '0', '2', '2', '0', UTC_TIMESTAMP());
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('10200', '园区简介', '40000', '/40000/10200', '0', '2', '2', '0', UTC_TIMESTAMP());
@@ -387,7 +389,6 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10049, '0', '园区报 管理员', '园区报 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10052, '0', '园区简介 管理员', '园区简介 业务模块权限', NULL);
 
-delete from eh_web_menu_privileges;
 
 -- 考勤管理：打卡 菜单改变
 delete from eh_acl_privileges where id >= 790 and id <= 794;

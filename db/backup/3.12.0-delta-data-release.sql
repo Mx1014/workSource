@@ -48,6 +48,8 @@ UPDATE eh_locale_templates SET namespace_id = 0 WHERE scope = 'pmtask.notificati
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 
+-- 华润oe 原活动默认为白领活动 by xiongying20161209
+update eh_activity_categories set default_flag = 1 where id = 1000000 and namespace_id = 999985;
 INSERT INTO `eh_acls`(`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`) 
 SELECT (@acl_id := @acl_id + 1), 'EhCommunities', owner_id, '1', '904', target_id, '0', '1', '2016-11-29 19:50:55', '0', 'EhUsers', CONCAT('EhCommunities',owner_id,'.pmtask')
  FROM eh_pm_task_targets WHERE role_id = 1;
@@ -707,6 +709,10 @@ ON m.id = t.menu_id
 ) tm JOIN eh_web_menus mm ON tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) WHERE mm.id NOT IN (SELECT menu_id FROM eh_web_menu_privileges WHERE privilege_id>=10000);
 
 
+<<<<<<< HEAD:db/3.12.0-delta-data-release.sql
+-- 华润oe 原活动默认为白领活动 by xiongying20161209
+update eh_activity_categories set default_flag = 1 where id = 1000000 and namespace_id = 999985;
+=======
 -- 更新科技园 停车车主昵称 add by sw 20101206
 update eh_parking_recharge_orders set recharge_type =1 where recharge_type = 0;
 update eh_parking_recharge_orders set plate_owner_name = '陈程伟' where plate_number = '粤BD225W' and create_time > '2016-11-01 00:00:00'; 
@@ -770,5 +776,14 @@ update eh_parking_recharge_orders set plate_owner_name = '叶芳' where plate_nu
 update eh_parking_recharge_orders set plate_owner_name = '林先生' where plate_number = '粤BH79B5' and create_time > '2016-11-01 00:00:00'; 
 update eh_parking_recharge_orders set plate_owner_name = '周健' where plate_number = '粤B4271Q' and create_time > '2016-11-01 00:00:00'; 
 update eh_parking_recharge_orders set plate_owner_name = '熊锋' where plate_number = '粤B8726J' and create_time > '2016-11-01 00:00:00'; 
-update eh_parking_recharge_orders set plate_owner_name = '陶耀军' where plate_number = '粤BM22N8' and create_time > '2016-11-01 00:00:00'; 
+update eh_parking_recharge_orders set plate_owner_name = '陶耀军' where plate_number = '粤BM22N8' and create_time > '2016-11-01 00:00:00';
 
+--
+-- 能耗管理菜单调整  add by xq.tian  2016/12/08
+--
+UPDATE `eh_web_menus` SET `sort_num` = '490' WHERE `id` = '49100';
+UPDATE `eh_web_menus` SET `sort_num` = '491' WHERE `id` = '49110';
+UPDATE `eh_web_menus` SET `sort_num` = '492' WHERE `id` = '49120';
+UPDATE `eh_web_menus` SET `sort_num` = '493' WHERE `id` = '49130';
+UPDATE `eh_web_menus` SET `sort_num` = '494' WHERE `id` = '49140';
+>>>>>>> 8cc7df3542d01e20fa667f3c723ea5eef50d4542:db/backup/3.12.0-delta-data-release.sql

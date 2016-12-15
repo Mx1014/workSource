@@ -2619,6 +2619,13 @@ INSERT INTO `eh_enterprise_contact_entries` (`id`,  `enterprise_id`,  `contact_i
                 
                 
 
+-- 海岸馨服务管理后台“资源预约”模块新增“加时空调”类型，对应app广场服务新配入口 add by sw 20131209
+
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) VALUES('10450','加时空调','0',NULL,'0','999993');
 
 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+	VALUES ('112726', '999993', '0', '0', '0', '/home', 'Bizs', '加时空调', '加时空调', 'cs://1/image/aW1hZ2UvTVRvNE1UY3pZek15Tm1RNFl6VTVOR1EwTXpRd05EZGlNMkUyTWpOaE1tTmlZdw', '1', '1', '49', '{\"resourceTypeId\":10450,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'park_tourist', '1', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+	VALUES ('112727', '999993', '0', '0', '0', '/home', 'Bizs', '加时空调', '加时空调', 'cs://1/image/aW1hZ2UvTVRvNE1UY3pZek15Tm1RNFl6VTVOR1EwTXpRd05EZGlNMkUyTWpOaE1tTmlZdw', '1', '1', '49', '{\"resourceTypeId\":10450,\"pageType\":0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1', NULL);
 

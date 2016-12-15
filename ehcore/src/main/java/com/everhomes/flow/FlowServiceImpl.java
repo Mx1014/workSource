@@ -231,6 +231,8 @@ public class FlowServiceImpl implements FlowService {
     	obj.setStatus(FlowStatusType.CONFIG.getCode());
     	obj.setOrganizationId(cmd.getOrgId());
     	obj.setNamespaceId(cmd.getNamespaceId());
+    	obj.setProjectId(cmd.getProjectId());
+    	obj.setProjectType(cmd.getProjectType());
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
 
@@ -1630,6 +1632,13 @@ public class FlowServiceImpl implements FlowService {
 		flowCase.setOwnerType(snapshotFlow.getOwnerType());
 		flowCase.setCaseType(FlowCaseType.INNER.getCode());
 		flowCase.setStatus(FlowCaseStatus.INITIAL.getCode());
+		
+		if(flowCaseCmd.getProjectId() == null) {
+			//use default projectId
+			flowCase.setProjectId(snapshotFlow.getProjectId());
+			flowCase.setProjectType(snapshotFlow.getProjectType());
+		}
+		
 		flowCaseProvider.createFlowCase(flowCase);
 		flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());//get again for default values
 		
@@ -1691,25 +1700,8 @@ public class FlowServiceImpl implements FlowService {
 		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
-		if(cmd.getNamespaceId() == null) {
-			cmd.setNamespaceId(UserContext.current().getNamespaceId());
-		}
-		if(cmd.getNamespaceId() == null) {
-			cmd.setNamespaceId(0);
-		}
-		if(cmd.getModuleType() == null) {
-			cmd.setModuleType(FlowModuleType.NO_MODULE.getCode());
-		}
-		if(cmd.getOwnerId() == null) {
-			cmd.setOwnerId(0l);
-		}
-		if(cmd.getModuleId() == null) {
-			cmd.setModuleId(0l);
-		}
-		
+	
+	private FlowVariableResponse listFlowTextVariables(Flow flow, ListFlowVariablesCommand cmd) {
 		FlowVariableResponse resp = new FlowVariableResponse();
 		List<FlowVariableDTO> dtos = new ArrayList<>();
 		resp.setDtos(dtos);
@@ -1717,18 +1709,18 @@ public class FlowServiceImpl implements FlowService {
         List<FlowVariable> vars = new ArrayList<>();
         String para = null;
         List<FlowVariable> vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-        		, cmd.getOwnerId(), cmd.getOwnerType(), cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        		, flow.getOwnerId(), flow.getOwnerType(), flow.getModuleId(), flow.getModuleType(), para, FlowVariableType.TEXT.getCode());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        		, 0l, null, flow.getModuleId(), flow.getModuleType(), para, FlowVariableType.TEXT.getCode());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
         
         vars2 = flowVariableProvider.findVariables(cmd.getNamespaceId()
-        		, 0l, null, cmd.getModuleId(), cmd.getModuleType(), para, FlowVariableType.TEXT.getCode());
+        		, 0l, null, flow.getModuleId(), flow.getModuleType(), para, FlowVariableType.TEXT.getCode());
         if(vars2 != null) {
         	vars.addAll(vars2);
         }
@@ -1755,7 +1747,50 @@ public class FlowServiceImpl implements FlowService {
         	}
         }
         
-        return resp;
+        return resp;		
+	}
+
+	@Override
+	public FlowVariableResponse listFlowVariables(ListFlowVariablesCommand cmd) {
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.current().getNamespaceId());
+		}
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(0);
+		}
+		
+		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
+		if(entityType == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
+		}
+		
+		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
+		if(flow == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow not found");	
+		}
+		
+		String flowVariableType = FlowVariableType.TEXT.getCode();
+		if(flowVariableType.equals(cmd.getFlowVariableType())) {
+			return listFlowTextVariables(flow, cmd);
+		} else {
+			FlowVariableResponse resp = new FlowVariableResponse();
+			String para = null;
+			List<FlowVariable> vars = flowVariableProvider.findVariables(cmd.getNamespaceId()
+	        		, 0l, null, 0l, null, para, FlowVariableType.NODE_USER.getCode());
+			
+			List<FlowVariableDTO> dtos = new ArrayList<>();
+			resp.setDtos(dtos);
+			
+			Map<String, Long> map = new HashMap<String, Long>();
+			for(FlowVariable var : vars) {
+				if(!map.containsKey(var.getName())) {
+	        		dtos.add(ConvertHelper.convert(var, FlowVariableDTO.class));
+	        		map.put(var.getName(), 1l);
+	        	}
+			}
+			
+			return resp;
+		}
 	}
 	
 	private void updateCaseDTO(FlowCaseDTO dto) {
@@ -2156,6 +2191,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	private List<Long> resolvUserSelections(List<FlowUserSelection> selections) {
+		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
 		if(selections == null) {
 			return users;
@@ -2420,7 +2456,7 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public void testFlowCase() {
 	    Long moduleId = 111l;
-	    Long orgId = 1001027l;
+	    Long orgId = 1000001l;
 	    
     	Long applyUserId = UserContext.current().getUser().getId();
     	
@@ -2435,8 +2471,6 @@ public class FlowServiceImpl implements FlowService {
     	cmd.setFlowVersion(flow.getFlowVersion());
     	cmd.setReferId(0l);
     	cmd.setReferType("test-type");
-    	cmd.setProjectId(888l);
-    	cmd.setProjectType("test-project-type");
     	
     	Random r = new Random();
     	cmd.setContent("test content" + String.valueOf(r.nextDouble()));

@@ -17,6 +17,7 @@ public class FlowSingleUserSelectionCommand {
 	private String sourceTypeA;
 	private Long sourceIdB;
 	private String sourceTypeB;
+	private String params;
 
 	public String getFlowUserSelectionType() {
 		return flowUserSelectionType;
@@ -56,6 +57,14 @@ public class FlowSingleUserSelectionCommand {
 
 	public void setSourceTypeB(String sourceTypeB) {
 		this.sourceTypeB = sourceTypeB;
+	}
+
+	public String getParams() {
+		return params;
+	}
+
+	public void setParams(String params) {
+		this.params = params;
 	}
 
 	@Override

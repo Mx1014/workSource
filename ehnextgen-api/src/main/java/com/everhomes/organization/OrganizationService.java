@@ -404,4 +404,10 @@ public interface OrganizationService {
 	Set<String> getOrganizationContactPhone(Long organizationId);
 	List<String> getAdminPhone(Long organizationId);
 	OrganizationServiceUser getServiceUser(Long organizationId);
+
+	List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd);
+
+	List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd);
+
+	List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd);
 }

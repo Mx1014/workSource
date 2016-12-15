@@ -456,4 +456,15 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
 		return ctx.getOperator();
 	}
+	
+	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection seles) {
+		List<Long> users = new ArrayList<>();
+		UserInfo userInfo = getApplier(ctx, "");
+		if(null != userInfo) {
+			users.add(userInfo.getId());
+		}
+		
+		return users;
+	}
+	
 }
