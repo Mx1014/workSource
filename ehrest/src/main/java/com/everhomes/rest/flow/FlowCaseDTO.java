@@ -54,6 +54,7 @@ public class FlowCaseDTO {
 	private Timestamp createTime;
     private Byte allowApplierUpdate;
     private String flowNodeName;
+    private String currNodeParams;
 
 	public Long getId() {
 		return id;
@@ -261,6 +262,14 @@ public class FlowCaseDTO {
 
 	public void setFlowNodeName(String flowNodeName) {
 		this.flowNodeName = flowNodeName;
+	}
+
+	public String getCurrNodeParams() {
+		return currNodeParams;
+	}
+
+	public void setCurrNodeParams(String currNodeParams) {
+		this.currNodeParams = currNodeParams;
 	}
 
 	@Override
