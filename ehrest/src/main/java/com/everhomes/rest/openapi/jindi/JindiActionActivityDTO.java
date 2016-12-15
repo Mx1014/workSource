@@ -12,9 +12,18 @@ import java.sql.Timestamp;
 public class JindiActionActivityDTO extends JindiDataDTO {
 	private Long id;
 	private Long userId;
+	private String userName;
 	private String subject;
 	private Timestamp startTime;
 	private Byte status;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
 	public Byte getStatus() {
 		return status;

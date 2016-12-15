@@ -13,6 +13,8 @@ import com.everhomes.rest.openapi.jindi.JindiActionForumPostDTO;
 import com.everhomes.rest.openapi.jindi.JindiActionType;
 import com.everhomes.rest.openapi.jindi.JindiDataType;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 
 /**
  * 
@@ -28,6 +30,9 @@ public class JindiOpenActionForumPostHandler implements JindiOpenHandler {
 	
 	@Autowired
 	private CommunityProvider communityProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
 	
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
@@ -50,6 +55,7 @@ public class JindiOpenActionForumPostHandler implements JindiOpenHandler {
 				JindiActionForumPostDTO data = new JindiActionForumPostDTO();
 				data.setId(src.getId());
 				data.setUserId(src.getCreatorUid());
+				data.setUserName(getUser(src.getCreatorUid()).getNickName());
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getUpdateTime());
 				data.setSubject(src.getSubject());
@@ -64,6 +70,14 @@ public class JindiOpenActionForumPostHandler implements JindiOpenHandler {
 				}
 				
 				return data;
+			}
+
+			private User getUser(Long id) {
+				User user = null;
+				if (id == null || (user = userProvider.findUserById(id)) == null) {
+					user = new User();
+				}
+				return user;
 			}
 		});
 	}

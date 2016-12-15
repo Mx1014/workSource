@@ -11,6 +11,8 @@ import com.everhomes.rest.openapi.jindi.JindiActionActivityDTO;
 import com.everhomes.rest.openapi.jindi.JindiActionType;
 import com.everhomes.rest.openapi.jindi.JindiDataType;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 
 /**
  * 
@@ -23,6 +25,9 @@ public class JindiOpenActionActivityHandler implements JindiOpenHandler {
 
 	@Autowired
 	private ActivityProivider activityProivider;
+	
+	@Autowired
+	private UserProvider userProvider;
 	
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
@@ -45,12 +50,21 @@ public class JindiOpenActionActivityHandler implements JindiOpenHandler {
 				JindiActionActivityDTO data = new JindiActionActivityDTO();
 				data.setId(src.getId());
 				data.setUserId(src.getCreatorUid());
+				data.setUserName(getUser(src.getCreatorUid()).getNickName());
 				data.setSubject(src.getSubject());
 				data.setStartTime(src.getStartTime());
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getUpdateTime());
 				data.setStatus(src.getStatus());
 				return data;
+			}
+
+			private User getUser(Long id) {
+				User user = null;
+				if (id == null || (user = userProvider.findUserById(id)) == null) {
+					user = new User();
+				}
+				return user;
 			}
 		});
 	}

@@ -10,8 +10,15 @@ package com.everhomes.rest.openapi.jindi;
 public class JindiActionActivitySignupDTO extends JindiDataDTO {
 	private Long id;
 	private Long userId;
+	private String userName;
 	private Long activityId;
 	
+	public String getUserName() {
+		return userName;
+	}
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 	public Long getId() {
 		return id;
 	}

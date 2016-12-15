@@ -13,6 +13,8 @@ import com.everhomes.rest.openapi.jindi.JindiDataType;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
 import com.everhomes.statistics.transaction.StatTransaction;
 import com.everhomes.statistics.transaction.StatTransactionProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserProvider;
 
 /**
  * 
@@ -28,6 +30,9 @@ public class JindiOpenActionBusinessHandler implements JindiOpenHandler {
 	
 	@Autowired
 	private CommunityProvider communityProvider;
+	
+	@Autowired
+	private UserProvider userProvider;
 	
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
@@ -54,6 +59,7 @@ public class JindiOpenActionBusinessHandler implements JindiOpenHandler {
 				JindiActionBusinessDTO data = new JindiActionBusinessDTO();
 				data.setId(src.getId());
 				data.setUserId(src.getPayerUid());
+				data.setUserName(getUser(src.getPayerUid()).getNickName());
 				data.setCommunityId(src.getCommunityId());
 				data.setTransactionNo(src.getTransactionNo());
 				data.setPaidTime(src.getPaidTime());
@@ -68,6 +74,14 @@ public class JindiOpenActionBusinessHandler implements JindiOpenHandler {
 				}
 				
 				return data;
+			}
+
+			private User getUser(Long id) {
+				User user = null;
+				if (id == null || (user = userProvider.findUserById(id)) == null) {
+					user = new User();
+				}
+				return user;
 			}
 		});
 	}

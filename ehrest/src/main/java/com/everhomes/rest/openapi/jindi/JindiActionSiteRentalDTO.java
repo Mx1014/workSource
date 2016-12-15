@@ -13,6 +13,7 @@ import java.sql.Timestamp;
 public class JindiActionSiteRentalDTO extends JindiDataDTO {
 	private Long id;
 	private Long userId;
+	private String userName;
 	private Long communityId;
 	private String communityName;
 	private String phone;
@@ -22,6 +23,14 @@ public class JindiActionSiteRentalDTO extends JindiDataDTO {
 	private String vendorType;
 	private Timestamp reserveTime;
 	private BigDecimal payTotalMoney;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
 	public Long getId() {
 		return id;

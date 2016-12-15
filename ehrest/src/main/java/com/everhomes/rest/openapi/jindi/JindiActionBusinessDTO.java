@@ -13,12 +13,21 @@ import java.sql.Timestamp;
 public class JindiActionBusinessDTO extends JindiDataDTO {
 	private Long id;
 	private Long userId;
+	private String userName;
 	private Long communityId;
 	private String communityName;
 	private String transactionNo;
 	private Timestamp paidTime;
 	private Byte paidChannel;
 	private BigDecimal paidAmount;
+
+	public String getUserName() {
+		return userName;
+	}
+
+	public void setUserName(String userName) {
+		this.userName = userName;
+	}
 
 	public Long getUserId() {
 		return userId;
