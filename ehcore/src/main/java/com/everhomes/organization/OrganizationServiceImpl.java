@@ -1,9 +1,7 @@
 // @formatter:off
 package com.everhomes.organization;
 
-<<<<<<< HEAD
 import com.everhomes.acl.*;
-=======
 import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileInputStream;
@@ -65,7 +63,6 @@ import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
->>>>>>> origin/flow
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
