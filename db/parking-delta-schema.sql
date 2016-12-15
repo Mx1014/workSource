@@ -4,14 +4,6 @@ ALTER TABLE eh_parking_lots ADD COLUMN `recharge_type` TINYINT NOT NULL DEFAULT 
 ALTER TABLE eh_parking_lots ADD COLUMN `is_support_recharge` TINYINT NOT NULL DEFAULT 0 COMMENT 'out date card recharge flag , 1: support recharge , 0: not ';
 ALTER TABLE eh_parking_lots ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
 
-
--- ALTER TABLE eh_parking_lots ADD COLUMN `request_month_count` INT NOT NUll DEFAULT 0 COMMENT 'organization of address';
--- ALTER TABLE eh_parking_lots ADD COLUMN `request_recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: all month, 2: number of days';
-
--- ALTER TABLE eh_parking_lots ADD COLUMN `card_request_tip` TEXT;
--- ALTER TABLE eh_parking_lots ADD COLUMN `card_agreement` TEXT;
--- ALTER TABLE eh_parking_lots ADD COLUMN `max_issue_num` INTEGER NOT NULL DEFAULT 1 COMMENT 'the max num of the issue card';
-
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_brand` VARCHAR(64) COMMENT 'car brand';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_color` VARCHAR(64) COMMENT 'car color';
 ALTER TABLE eh_parking_card_requests ADD COLUMN `car_serie_name` VARCHAR(64) COMMENT 'car serie name';
@@ -27,7 +19,7 @@ ALTER TABLE eh_parking_card_requests ADD COLUMN `cancel_time` DATETIME;
 
 
 
- DROP TABLE IF EXISTS `eh_parking_flow`;
+-- DROP TABLE IF EXISTS `eh_parking_flow`;
 CREATE TABLE `eh_parking_flow` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -51,7 +43,7 @@ CREATE TABLE `eh_parking_flow` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_parking_statistics`;
+-- DROP TABLE IF EXISTS `eh_parking_statistics`;
 CREATE TABLE `eh_parking_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -67,7 +59,7 @@ CREATE TABLE `eh_parking_statistics` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
-DROP TABLE IF EXISTS `eh_parking_car_series`;
+-- DROP TABLE IF EXISTS `eh_parking_car_series`;
 CREATE TABLE `eh_parking_car_series`(
   `id` BIGINT NOT NULL,
   `parent_id` BIGINT NOT NULL DEFAULT 0,
@@ -84,7 +76,7 @@ CREATE TABLE `eh_parking_car_series`(
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
- DROP TABLE IF EXISTS `eh_parking_attachments`;
+-- DROP TABLE IF EXISTS `eh_parking_attachments`;
 CREATE TABLE `eh_parking_attachments` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `owner_type` VARCHAR(32) COMMENT 'attachment object owner type',
