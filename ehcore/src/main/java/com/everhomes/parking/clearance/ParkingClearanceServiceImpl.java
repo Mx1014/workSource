@@ -345,10 +345,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         validate(cmd);
         // checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
-
         ActionType actionType = ActionType.fromCode(cmd.getActionType());
-
         long privilegeId = -1;
         // 没有权限时的提示消息
         String message = null;
@@ -361,6 +358,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_TASK_MESSAGE_CODE, currLocale(), "");
         }
+
+        List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
 
         CheckAuthorityStatus status = CheckAuthorityStatus.FAILURE;
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
