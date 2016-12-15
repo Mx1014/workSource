@@ -1,5 +1,7 @@
 package com.everhomes.flow;
 
+import java.util.List;
+
 import org.junit.After;
 import org.junit.Assert;
 import org.junit.Before;
@@ -11,6 +13,7 @@ import org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfigurat
 import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.organization.ListOrganizationJobPositionCommand;
 import com.everhomes.rest.organization.ListOrganizationJobPositionResponse;
@@ -83,9 +86,12 @@ public class FlowUserTest extends LoginAuthTestCase {
     	
     	ListOrganizationJobPositionCommand cmd = new ListOrganizationJobPositionCommand();
     	cmd.setOwnerId(orgId);
-    	cmd.setOwnerType("ENTERPRISE");
+    	cmd.setOwnerType(EntityType.ORGANIZATIONS.getCode());
     	ListOrganizationJobPositionResponse resp = organizationService.listOrganizationJobPositions(cmd);
     	Assert.assertTrue(resp.getRequests().size() > 0);
+    	
+    	List<Long> users = flowUserSelectionService.findUsersByJobPositionId(null, resp.getRequests().get(0).getId(), 300014l);
+    	Assert.assertTrue(users.size() > 0);
     }
     
 }

@@ -2232,7 +2232,7 @@ public class FlowServiceImpl implements FlowService {
 					}
 					
 				} else {
-					LOGGER.error("resolvUser selId=" + sel.getId() + " position parse error!");
+					LOGGER.error("resolvUser selId= " + sel.getId() + " position parse error!");
 				}
 				
 			} else if(FlowUserSelectionType.MANAGER.getCode().equals(sel.getSelectType())) {
@@ -2240,6 +2240,7 @@ public class FlowServiceImpl implements FlowService {
 				if(sel.getOrganizationId() != null) {
 					parentOrgId = sel.getOrganizationId();
 				}
+				
 				Long departmentId = parentOrgId;
 				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
 					if(null != sel.getSourceIdA()) {
@@ -2249,11 +2250,25 @@ public class FlowServiceImpl implements FlowService {
 					List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId);
 					users.addAll(tmp);
 				} else {
-					LOGGER.error("resolvUser selId=" + sel.getId() + " manager parse error!");
+					LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
 				}
 				
-			} else {
-				LOGGER.error("resolvUser selId=" + sel.getId() + " position parse error!");
+			} else if(FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
+				if(sel.getSourceIdA() != null) {
+					FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
+					variable.getScriptCls();
+					FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
+		        	if(ftr != null) {
+		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel);
+		        		if(null != tmp) {
+		        			users.addAll(tmp);
+		        		}
+		        	}
+		        	
+				} else {
+					LOGGER.error("user params error selId= " + sel.getId() + " variable error!");
+				}
+				
 			}
 		}
 		
