@@ -184,7 +184,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 			}
 			
-		}else if(cmd.getServiceType().equals(YellowPageType.PARKENTSERVICEHOTLINE.getCode())){
+		}else if(cmd.getType().equals(YellowPageType.PARKENTSERVICEHOTLINE.getCode())){
 			GetHotlineListCommand cmd2 = ConvertHelper.convert(cmd, GetHotlineListCommand.class);
 			cmd2.setServiceType(ServiceType.SERVICE_HOTLINE.getCode());
 			GetHotlineListResponse resp2 = this.hotlineService.getHotlineList(cmd2);
