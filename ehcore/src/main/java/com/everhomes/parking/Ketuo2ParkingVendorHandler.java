@@ -725,6 +725,15 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		if(rates.size() !=0) {
 			KetuoCardRate rate = rates.get(0);
 			
+			List<KetuoCardType> types = getCardType();
+			String typeName = null;
+			for(KetuoCardType kt: types) {
+				if("2".equals(kt.getCarType())) {
+					typeName = kt.getTypeName();
+					break;
+				}
+			}
+			
 			dto.setOwnerId(cmd.getOwnerId());
 			dto.setOwnerType(cmd.getOwnerType());
 			dto.setParkingLotId(cmd.getParkingLotId());
@@ -738,7 +747,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 //			dto.setRateName(r.getRuleName());
 			dto.setRateName(rateName);
 //			dto.setCardType(r.getRuleType());
-			dto.setCardType(rate.getTypeName());
+			dto.setCardType(typeName);
 			dto.setMonthCount(new BigDecimal(rate.getRuleAmount()));
 			dto.setPrice(new BigDecimal(Integer.parseInt(rate.getRuleMoney()) / 100));
 
