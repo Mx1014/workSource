@@ -33,6 +33,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -370,7 +371,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     status = CheckAuthorityStatus.SUCCESS;
                     message = null;
                     break;// 只要有一个停车场的权限就放行
-                } catch (Exception e) {
+                } catch (RuntimeErrorException ree) {
                     // ignore
                 }
             }
