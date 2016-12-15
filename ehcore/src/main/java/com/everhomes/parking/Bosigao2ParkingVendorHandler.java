@@ -90,6 +90,14 @@ public class Bosigao2ParkingVendorHandler implements ParkingVendorHandler {
 			long expireTime = strToLong2(expireDate+"235959");
 			long now = System.currentTimeMillis();
 			
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
+	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
+	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
+	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000;
+	    		expireTime = expireTime + cardReserveTime;
+	    	}
+			
 			if(expireTime <= now){
 				return resultList;
 			}

@@ -43,6 +43,7 @@ import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateStatus;
+import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -94,6 +95,14 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			Long endTime = strToLong2(validEnd+"235959");
 			long now = System.currentTimeMillis();
 			
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
+	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
+	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
+	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000;
+	    		endTime = endTime + cardReserveTime;
+	    	}
+	    	
 			if(endTime < now){
 				return resultList;
 			}
