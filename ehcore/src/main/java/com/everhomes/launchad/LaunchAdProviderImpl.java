@@ -3,7 +3,6 @@ package com.everhomes.launchad;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.launchad.LaunchAdStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLaunchAdvertisementsDao;
@@ -33,7 +32,7 @@ public class LaunchAdProviderImpl implements LaunchAdProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         return context.selectFrom(Tables.EH_LAUNCH_ADVERTISEMENTS)
                 .where(Tables.EH_LAUNCH_ADVERTISEMENTS.NAMESPACE_ID.eq(namespaceId))
-                .and(Tables.EH_LAUNCH_ADVERTISEMENTS.STATUS.eq(LaunchAdStatus.ACTIVE.getCode()))
+                // .and(Tables.EH_LAUNCH_ADVERTISEMENTS.STATUS.eq(LaunchAdStatus.ACTIVE.getCode()))
                 .fetchAnyInto(LaunchAd.class);
     }
 
