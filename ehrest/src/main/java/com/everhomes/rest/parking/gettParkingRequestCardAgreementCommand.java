@@ -1,15 +1,14 @@
 package com.everhomes.rest.parking;
 
 public class gettParkingRequestCardAgreementCommand {
-	private Long id;
+	private Long configId;
 
-	public Long getId() {
-		return id;
+	public Long getConfigId() {
+		return configId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setConfigId(Long configId) {
+		this.configId = configId;
 	}
-	
-	
+
 }

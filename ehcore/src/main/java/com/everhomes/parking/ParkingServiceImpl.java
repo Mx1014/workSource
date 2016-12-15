@@ -125,6 +125,7 @@ import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
 import com.everhomes.rest.parking.gettParkingRequestCardAgreementCommand;
+import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -132,6 +133,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -165,6 +167,8 @@ public class ParkingServiceImpl implements ParkingService {
 	private FlowProvider flowProvider;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private UserService userService;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -1214,8 +1218,17 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
-		if(null != parkingFlow)
-			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?id=" + parkingFlow.getId());
+		if(null != parkingFlow) {
+			GetSignatureCommandResponse result = userService.getSignature();
+			StringBuilder sb = new StringBuilder();
+			sb.append("&id=").append(result.getId());
+			sb.append("&signature=").append(result.getSignature());
+			sb.append("&appKey=").append(result.getAppKey());
+			sb.append("&timeStamp=").append(result.getTimeStamp());
+			sb.append("&randomNum=").append(result.getRandomNum());
+			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId() + sb.toString());
+
+		}
 		return dto;
 	}
 
@@ -1312,7 +1325,7 @@ public class ParkingServiceImpl implements ParkingService {
 	public ParkingRequestCardAgreementDTO gettParkingRequestCardAgreement(gettParkingRequestCardAgreementCommand cmd) {
 
 		ParkingRequestCardAgreementDTO dto = new ParkingRequestCardAgreementDTO();
-		ParkingFlow parkingFlow = parkingProvider.findParkingRequestCardConfig(cmd.getId());
+		ParkingFlow parkingFlow = parkingProvider.findParkingRequestCardConfig(cmd.getConfigId());
 		
 		if(null != parkingFlow)
 			dto.setAgreement(parkingFlow.getCardAgreement());
