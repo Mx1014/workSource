@@ -35,6 +35,7 @@ public class QueryOrganizationTopicCommand {
     private Byte officialFlag;
     private Byte privateFlag;
     private Long categoryId;
+    private Byte orderByCreateTime;
     
     @ItemType(Long.class)
     private List<Long> excludeCategories;
@@ -71,9 +72,15 @@ public class QueryOrganizationTopicCommand {
 		this.communityId = communityId;
 	}
 
+    public Byte getOrderByCreateTime() {
+        return orderByCreateTime;
+    }
 
+    public void setOrderByCreateTime(Byte orderByCreateTime) {
+        this.orderByCreateTime = orderByCreateTime;
+    }
 
-	public Long getOrganizationId() {
+    public Long getOrganizationId() {
         return organizationId;
     }
 

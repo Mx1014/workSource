@@ -117,7 +117,6 @@ import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.user.TargetType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -2403,7 +2402,21 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return result;
+	}
 
+	@Override
+	public List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, ListingQueryBuilderCallback queryBuilderCallback) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.in(ids));
+		if(queryBuilderCallback != null)
+			queryBuilderCallback.buildCondition(null, query);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+		return result;
 	}
 
 
@@ -2779,6 +2792,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		return result;
 	}
+
+	@Override
 	public List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId) {
 		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
@@ -2789,6 +2804,36 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			return null;
 		});
 		return results;
+	}
+
+	@Override
+	public List<OrganizationJobPositionMap> listOrganizationJobPositionMapsByJobPositionId(Long jobPositionId) {
+		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.JOB_POSITION_ID.eq(jobPositionId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
+			return null;
+		});
+		return results;
+	}
+
+	@Override
+	public OrganizationJobPositionMap getOrganizationJobPositionMapByOrgIdAndJobPostionId(Long organizationId, Long jobPostionId) {
+		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.ORGANIZATION_ID.eq(organizationId));
+		query.addConditions(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS.JOB_POSITION_ID.eq(jobPostionId));
+		query.fetch().map(r -> {
+			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
+			return null;
+		});
+		if(results.size() > 0){
+			return results.get(0);
+		}
+		return null;
 	}
 
 	@Override

@@ -23,6 +23,8 @@ public class FlowDTO {
     private Long     moduleId;
     private Long     startNode;
     private Long     ownerId;
+    private Long projectId;
+    private String projectType;
 
     public String getFlowName() {
 		return flowName;
@@ -150,6 +152,22 @@ public class FlowDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getProjectType() {
+		return projectType;
+	}
+
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
 	}
 
 	@Override

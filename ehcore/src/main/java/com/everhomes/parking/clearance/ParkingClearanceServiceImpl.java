@@ -320,7 +320,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Override
     public SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
-        // test();
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         SearchClearanceLogsResponse response = new SearchClearanceLogsResponse();
@@ -339,12 +338,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             response.setLogs(logs.stream().limit(pageSize).map(this::toClearanceLogDTO).collect(Collectors.toList()));
         }
         return response;
-    }
-
-    private void test() {
-        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, 10001L, FlowOwnerType.PARKING.getCode());
-        FlowGraphDetailDTO flowDTO = flowService.getFlowGraphDetail(flow.getId());
-        System.out.println(flowDTO);
     }
 
     @Override
