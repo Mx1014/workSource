@@ -26,6 +26,11 @@ CREATE TABLE `eh_flows` (
   `end_node` BIGINT NOT NULL DEFAULT 0,
   `last_node` BIGINT NOT NULL DEFAULT 0,
 
+  `need_evaluate` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no evaluate, 1: need evaluate',
+  `evaluate_start` BIGINT NOT NULL DEFAULT 0,
+  `evaluate_end` BIGINT NOT NULL DEFAULT 0,
+  `evaluate_step` VARCHAR(64) COMMENT 'NoStep, ApproveStep',
+
   `string_tag1` VARCHAR(128),
   `string_tag2` VARCHAR(128),
   `string_tag3` VARCHAR(128),
@@ -306,16 +311,31 @@ CREATE TABLE `eh_flow_evaluates` (
 
     `owner_id` BIGINT NOT NULL,
     `owner_type` VARCHAR(64) NOT NULL,
+    `project_id` BIGINT NOT NULL,
+    `project_type` VARCHAR(64),
     `module_id` BIGINT NOT NULL COMMENT 'the module id',
     `module_type` VARCHAR(64) NOT NULL,
 
     `star` TINYINT NOT NULL,
+    `evaluate_item_id` BIGINT NOT NULL,
     `user_id` BIGINT NOT NULL,
-    `flow_node_id` BIGINT NOT NULL,
+    `flow_node_id` BIGINT NOT NULL DEFAULT 0,
     `flow_case_id` BIGINT NOT NULL,
     `flow_main_id` BIGINT NOT NULL,
     `flow_version` INTEGER NOT NULL,
     `create_time` DATETIME NOT NULL COMMENT 'record create time',
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+DROP TABLE IF EXISTS `eh_flow_evaluate_items`;
+CREATE TABLE `eh_flow_evaluate_items` (
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
+    `name` VARCHAR(128) NOT NULL,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
