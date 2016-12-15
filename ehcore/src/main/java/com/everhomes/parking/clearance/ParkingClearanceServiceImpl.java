@@ -112,11 +112,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         if (cmd.getUserIds() != null) {
-            Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
-            if (flow == null) {
-                LOGGER.error("There is no workflow enabled.");
-                throw errorWith(ParkingErrorCode.SCOPE_CLEARANCE, ParkingErrorCode.ERROR_NO_WORK_FLOW_ENABLED, "There is no workflow enabled.");
-            }
             for (Long userId : cmd.getUserIds()) {
                 // 检查当前停车场里是否已经有当前用户了
                 ParkingClearanceOperator operator = clearanceOperatorProvider.findByParkingLotIdAndUid(cmd.getParkingLotId(), userId, cmd.getOperatorType());
@@ -133,13 +128,24 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 newOperator.setOperatorId(user.getId());
                 newOperator.setStatus(ParkingCommonStatus.ACTIVE.getCode());
                 dbProvider.execute(status -> {
-                    // 添加工作流处理人员
-                    flowService.addSnapshotProcessUser(flow.getId(), userId);
                     clearanceOperatorProvider.createClearanceOperator(newOperator);
+                    this.addFlowProcessor(cmd, userId);
                     this.assignmentPrivileges(cmd.getOperatorType(), cmd.getParkingLotId(), userId);
                     return true;
                 });
             }
+        }
+    }
+
+    // 添加工作流处理人员
+    private void addFlowProcessor(CreateClearanceOperatorCommand cmd, Long userId) {
+        if (ParkingClearanceOperatorType.fromCode(cmd.getOperatorType()) == ParkingClearanceOperatorType.PROCESSOR) {
+            Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, cmd.getParkingLotId(), FlowOwnerType.PARKING.getCode());
+            if (flow == null) {
+                LOGGER.error("There is no workflow enabled.");
+                throw errorWith(ParkingErrorCode.SCOPE_CLEARANCE, ParkingErrorCode.ERROR_NO_WORK_FLOW_ENABLED, "There is no workflow enabled.");
+            }
+            flowService.addSnapshotProcessUser(flow.getFlowMainId(), userId);
         }
     }
 
@@ -211,11 +217,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                             operator.getParkingLotId(),//
                             EntityType.USER.getCode(),//
                             operator.getOperatorId(),//
-                            MODULE_ID,//
+                            null,//
                             new ArrayList<>(Collections.singletonList(privilegeId))
                     );
                     clearanceOperatorProvider.deleteClearanceOperator(operator);
-                    // 添加工作流处理人员
                     return true;
                 });
                 if (!success) {
@@ -230,10 +235,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     }
 
     private void deleteFlowProcessor(ParkingClearanceOperator operator) {
-        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, operator.getParkingLotId(), FlowOwnerType.PARKING.getCode());
-        // 删除当前工作流的处理人员
-        if (flow != null) {
-            flowService.deleteSnapshotProcessUser(flow.getId(), operator.getOperatorId());
+        if (ParkingClearanceOperatorType.fromCode(operator.getOperatorType()) == ParkingClearanceOperatorType.PROCESSOR) {
+            Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, operator.getParkingLotId(), FlowOwnerType.PARKING.getCode());
+            // 删除当前工作流的处理人员
+            if (flow != null) {
+                flowService.deleteSnapshotProcessUser(flow.getFlowMainId(), operator.getOperatorId());
+            }
         }
     }
 
@@ -313,6 +320,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Override
     public SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
+        // test();
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         SearchClearanceLogsResponse response = new SearchClearanceLogsResponse();
@@ -331,6 +339,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             response.setLogs(logs.stream().limit(pageSize).map(this::toClearanceLogDTO).collect(Collectors.toList()));
         }
         return response;
+    }
+
+    private void test() {
+        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, 10001L, FlowOwnerType.PARKING.getCode());
+        FlowGraphDetailDTO flowDTO = flowService.getFlowGraphDetail(flow.getId());
+        System.out.println(flowDTO);
     }
 
     @Override
@@ -508,18 +522,19 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public void onFlowButtonFired(FlowCaseState ctx) {
         String params = ctx.getCurrentNode().getFlowNode().getParams();
         Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
-        ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(((String) map.get("status")));
-
-        if (status == ParkingClearanceLogStatus.PROCESSING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
-            Long logId = ctx.getFlowCase().getReferId();
-            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
-                    log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
-                    clearanceLogProvider.updateClearanceLog(log);
-                }
-                return null;
-            });
+        if (map != null) {
+            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(((String) map.get("status")));
+            if (status == ParkingClearanceLogStatus.PROCESSING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
+                Long logId = ctx.getFlowCase().getReferId();
+                coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+                    ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+                    if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
+                        log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
+                        clearanceLogProvider.updateClearanceLog(log);
+                    }
+                    return null;
+                });
+            }
         }
     }
 

@@ -96,7 +96,11 @@ public enum EntityType {
         else if(code.equalsIgnoreCase(IMPERSONATION.getCode())) {
             return IMPERSONATION;
         }
-        
+        for (EntityType entityType : EntityType.values()) {
+            if (entityType.getCode().equals(code)) {
+                return entityType;
+            }
+        }
         return null;
     }
 }

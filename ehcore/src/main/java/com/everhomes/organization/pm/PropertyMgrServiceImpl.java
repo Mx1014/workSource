@@ -1534,7 +1534,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             loaCmd.setOrganizationId(organizationId);
             ListOrganizationMemberCommandResponse lomcResponse = rolePrivilegeService.listOrganizationAdministrators(loaCmd);
             if (lomcResponse != null && lomcResponse.getMembers() != null) {
-                pmAdminIds.addAll(lomcResponse.getMembers().stream().map(OrganizationMemberDTO::getId).collect(Collectors.toList()));
+                pmAdminIds.addAll(lomcResponse.getMembers().stream().map(OrganizationMemberDTO::getTargetId).collect(Collectors.toList()));
             }
         }
         return pmAdminIds;
