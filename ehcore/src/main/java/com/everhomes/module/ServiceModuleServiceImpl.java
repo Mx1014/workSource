@@ -1,4 +1,4 @@
-package com.everhomes.serviceModule;
+package com.everhomes.module;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -12,10 +12,14 @@ import org.springframework.stereotype.Service;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.entity.EntityType;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleScope;
+import com.everhomes.module.ServiceModuleService;
 import com.everhomes.rest.acl.ListServiceModulesCommand;
 import com.everhomes.rest.acl.ServiceModuleDTO;
-import com.everhomes.rest.serviceModule.ServiceModuleScopeApplyPolicy;
-import com.everhomes.rest.serviceModule.ServiceModuleType;
+import com.everhomes.rest.module.ServiceModuleScopeApplyPolicy;
+import com.everhomes.rest.module.ServiceModuleType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;

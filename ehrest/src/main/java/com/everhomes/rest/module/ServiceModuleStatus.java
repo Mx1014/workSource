@@ -1,16 +1,19 @@
 // @formatter:off
-package com.everhomes.rest.serviceModule;
+package com.everhomes.rest.module;
 
 /**
  * <ul>
+ * <li>INACTIVE: 无效的</li>
+ * <li>CONFIRMING: 待审核</li>
+ * <li>ACTIVE: 正常</li>
  * </ul>
  */
-public enum ServiceModuleScopeApplyPolicy {
-    DEFAULT((byte)0), OVERRIDE((byte)1), REVERT((byte)2)/*, CUSTOMIZED((byte)3)*/;
+public enum ServiceModuleStatus {
+    INACTIVE((byte)0), CONFIRMING((byte)1), ACTIVE((byte)2);
     
     private byte code;
     
-    private ServiceModuleScopeApplyPolicy(byte code) {
+    private ServiceModuleStatus(byte code) {
         this.code = code;
     }
     
@@ -18,19 +21,19 @@ public enum ServiceModuleScopeApplyPolicy {
         return this.code;
     }
     
-    public static ServiceModuleScopeApplyPolicy fromCode(Byte code) {
+    public static ServiceModuleStatus fromCode(Byte code) {
         if(code == null)
             return null;
         
         switch(code.byteValue()) {
         case 0 :
-            return DEFAULT;
+            return INACTIVE;
             
         case 1 :
-            return OVERRIDE;
+            return CONFIRMING;
             
         case 2 :
-            return REVERT;
+            return ACTIVE;
         
         default :
             break;

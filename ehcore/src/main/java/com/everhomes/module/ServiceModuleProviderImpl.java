@@ -1,12 +1,18 @@
 // @formatter:off
-package com.everhomes.serviceModule;
+package com.everhomes.module;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleAssignment;
+import com.everhomes.module.ServiceModulePrivilege;
+import com.everhomes.module.ServiceModulePrivilegeType;
+import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.module.ServiceModuleScope;
 import com.everhomes.naming.NameMapper;
-import com.everhomes.rest.serviceModule.ServiceModuleStatus;
+import com.everhomes.rest.module.ServiceModuleStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhServiceModules;
