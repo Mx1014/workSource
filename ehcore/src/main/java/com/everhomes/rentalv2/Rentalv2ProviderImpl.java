@@ -40,6 +40,7 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.rentalv2.DateLength;
 import com.everhomes.rest.rentalv2.RentalSiteStatus;
 import com.everhomes.rest.rentalv2.RentalType;
+import com.everhomes.rest.rentalv2.ResourceOrderStatus;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.sequence.SequenceProvider;
@@ -901,6 +902,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
         	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
 		if(null!= status&&status.size()!=0)
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.in(status));
+		else
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DISABLE.getCode()));
 		step.where(condition);
 
 		List<RentalResource> result = step
@@ -998,8 +1001,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		Condition condition = Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID
 				.equal(id);
-//		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-//				.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.STATUS
+				.ne(ResourceOrderStatus.DISPLOY.getCode()));
 		step.where(condition);
 		List<RentalResourceOrder> result  = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -1115,6 +1118,24 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return result ;
 		return null;
 	}
+	@Override
+	public List<RentalOrder> listSuccessRentalBills() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_ORDERS);
+		//TODO：
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
+				.eq(SiteBillStatus.SUCCESS.getCode()); 
+		step.where(condition);
+		List<RentalOrder> result = step
+				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+	
 //
 //	@Override
 //	public void createRentalRule(RentalRule rentalRule) {
@@ -1900,8 +1921,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return priceToString(minPrice,rentalType,timeStep)+"~" +priceToString(maxPrice,rentalType,timeStep);
 	}
-
-
+ 
 	private boolean isInteger(double d){
 		double eps = 0.0001;
 		return Math.abs(d - (double)((int)d)) < eps;
@@ -1919,7 +1939,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
 		return "";
 	}
-
+ 
 	@Override
 	public void deleteRentalCellsByResourceId(Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1929,7 +1949,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(rentalSiteId);
 		step.where(condition);
 		step.execute();
-	}
+	} 
  
 	
 }

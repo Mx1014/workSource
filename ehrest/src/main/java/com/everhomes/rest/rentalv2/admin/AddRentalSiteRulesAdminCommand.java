@@ -32,10 +32,14 @@ import com.everhomes.util.StringHelper;
  * <li>workdayPrice: 工作日价格</li>
  * <li>weekendPrice: 周末价格</li>
  * <li>siteCounts: 可预约个数</li>
- * <li>siteNumbers: 用户填写的可预约个数个场所编号</li>
+ * <li>siteNumbers: 用户填写的可预约个数个场所编号{@link com.everhomes.rest.rentalv2.admin.SiteNumberDTO}}</li>
  * <li>cancelTime: 至少提前取消时间</li>
  * <li>refundFlag: 是否允许退款</li>
  * <li>refundRatio: 退款比例</li>
+ * <li>discountType: 状态，0不打折1满钱减钱优惠 2满天减钱 3 比例 参考{@link com.everhomes.rest.rentalv2.admin.DiscountType}</li> 
+ * <li>fullPrice: 满多少钱</li>
+ * <li>cutPrice: 减多少钱</li> 
+ * <li>discountRatio: 折扣比例</li> 
  * </ul>
  */
 public class AddRentalSiteRulesAdminCommand {
@@ -65,12 +69,19 @@ public class AddRentalSiteRulesAdminCommand {
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
 	private Double siteCounts;
-	@ItemType(String.class)
-	private List<String> siteNumbers;
+	@ItemType(SiteNumberDTO.class)
+	private List<SiteNumberDTO> siteNumbers;
 	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
 
+	@NotNull
+	private Byte discountType;
+
+	private java.math.BigDecimal fullPrice;
+	private java.math.BigDecimal cutPrice;
+
+    private Double discountRatio;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -259,12 +270,44 @@ public class AddRentalSiteRulesAdminCommand {
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
 	}
+ 
+	public Byte getDiscountType() {
+		return discountType;
+	}
 
-	public List<String> getSiteNumbers() {
+	public void setDiscountType(Byte discountType) {
+		this.discountType = discountType;
+	}
+
+	public java.math.BigDecimal getFullPrice() {
+		return fullPrice;
+	}
+
+	public void setFullPrice(java.math.BigDecimal fullPrice) {
+		this.fullPrice = fullPrice;
+	}
+
+	public java.math.BigDecimal getCutPrice() {
+		return cutPrice;
+	}
+
+	public void setCutPrice(java.math.BigDecimal cutPrice) {
+		this.cutPrice = cutPrice;
+	}
+
+	public Double getDiscountRatio() {
+		return discountRatio;
+	}
+
+	public void setDiscountRatio(Double discountRatio) {
+		this.discountRatio = discountRatio;
+	}
+
+	public List<SiteNumberDTO> getSiteNumbers() {
 		return siteNumbers;
 	}
 
-	public void setSiteNumbers(List<String> siteNumbers) {
+	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
 	}
 	
