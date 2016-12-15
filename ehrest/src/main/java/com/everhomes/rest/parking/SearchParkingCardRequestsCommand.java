@@ -27,6 +27,7 @@ public class SearchParkingCardRequestsCommand {
     private String plateNumber;
     private String plateOwnerName;
     private String plateOwnerPhone;
+    private String plateOwnerEntperiseName;
     private Long startDate;
     private Long endDate;
     private Byte status;
@@ -155,5 +156,13 @@ public class SearchParkingCardRequestsCommand {
 
 	public void setFlowId(Long flowId) {
 		this.flowId = flowId;
+	}
+
+	public String getPlateOwnerEntperiseName() {
+		return plateOwnerEntperiseName;
+	}
+
+	public void setPlateOwnerEntperiseName(String plateOwnerEntperiseName) {
+		this.plateOwnerEntperiseName = plateOwnerEntperiseName;
 	}
 }

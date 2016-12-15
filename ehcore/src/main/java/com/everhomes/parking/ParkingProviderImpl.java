@@ -433,7 +433,8 @@ public class ParkingProviderImpl implements ParkingProvider {
     @Override
     public List<ParkingCardRequest> searchParkingCardRequests(String ownerType, Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate, Timestamp endDate,
-    		Byte status, String carBrand, String carSerieName, Long flowId, Long pageAnchor, Integer pageSize){
+    		Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, Long flowId, 
+    		Long pageAnchor, Integer pageSize){
 
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
@@ -452,6 +453,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_NUMBER.eq(plateNumber));
         if(StringUtils.isNotBlank(plateOwnerName))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_NAME.eq(plateOwnerName));
+        if(StringUtils.isNotBlank(plateOwnerEntperiseName))
+        	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_ENTPERISE_NAME.eq(plateOwnerEntperiseName));
         if(StringUtils.isNotBlank(plateOwnerPhone))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.PLATE_OWNER_PHONE.eq(plateOwnerPhone));
         if(StringUtils.isNotBlank(carBrand))

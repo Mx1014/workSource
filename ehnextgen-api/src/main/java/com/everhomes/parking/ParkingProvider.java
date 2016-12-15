@@ -44,7 +44,8 @@ public interface ParkingProvider {
     
     List<ParkingCardRequest> searchParkingCardRequests(String ownerType,Long ownerId, Long parkingLotId,
     		String plateNumber, String plateOwnerName, String plateOwnerPhone, Timestamp startDate,
-    		Timestamp endDate, Byte status, String carBrand, String carSerieName, Long flowId, Long pageAnchor, Integer pageSize);
+    		Timestamp endDate, Byte status, String carBrand, String carSerieName, String plateOwnerEntperiseName, 
+    		Long flowId, Long pageAnchor, Integer pageSize);
     
     void setParkingLotConfig(ParkingLot parkingLot);
     

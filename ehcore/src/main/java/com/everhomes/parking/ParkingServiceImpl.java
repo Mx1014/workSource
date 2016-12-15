@@ -721,7 +721,7 @@ public class ParkingServiceImpl implements ParkingService {
     	List<ParkingCardRequest> list = parkingProvider.searchParkingCardRequests(cmd.getOwnerType(), 
     			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(), 
     			cmd.getPlateOwnerPhone(), startDate, endDate, cmd.getStatus(), cmd.getCarBrand(), 
-    			cmd.getCarSerieName(), cmd.getFlowId(), cmd.getPageAnchor(), pageSize);
+    			cmd.getCarSerieName(), cmd.getPlateOwnerEntperiseName(), cmd.getFlowId(), cmd.getPageAnchor(), pageSize);
     	
     	Long userId = UserContext.current().getUser().getId();
     	int size = list.size();
