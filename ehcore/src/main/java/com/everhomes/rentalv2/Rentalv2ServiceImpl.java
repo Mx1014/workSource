@@ -1153,9 +1153,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		beginCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalEndTime());
 		endCalendar.setTimeInMillis(DateHelper.currentGMTTime().getTime()+rentalSite.getRentalStartTime());
 		
-		BigDecimal minPrice = new BigDecimal(0);
+		BigDecimal minPrice = null;
 		Double minTimeStep = 1.0;
-		BigDecimal maxPrice = new BigDecimal(0);
+		BigDecimal maxPrice = null;
 		Double maxTimeStep = 1.0;
 		
 		try {
@@ -1171,21 +1171,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					//对于按小时预约的,取平均值进行计算
 					if(cell.getRentalType().equals(RentalType.HOUR.getCode())){
 						//最小值超过了cell值,则cell值代替最小值
-						if(minPrice.divide(new BigDecimal(minTimeStep), 3, RoundingMode.HALF_UP).compareTo(
+						if(minPrice == null || minPrice.divide(new BigDecimal(minTimeStep), 3, RoundingMode.HALF_UP).compareTo(
 								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == 1){
 							minPrice = cell.getPrice();
 							minTimeStep = cell.getTimeStep();
 						}
-						if(maxPrice.divide(new BigDecimal( maxTimeStep), 3, RoundingMode.HALF_UP).compareTo(
+						if(maxPrice == null ||  maxPrice.divide(new BigDecimal( maxTimeStep), 3, RoundingMode.HALF_UP).compareTo(
 								cell.getPrice().divide(new BigDecimal(cell.getTimeStep()), 3, RoundingMode.HALF_UP)) == -1){
 							maxPrice = cell.getPrice();
 							maxTimeStep = cell.getTimeStep();
 						}
 					}else{
-						if(minPrice.compareTo(cell.getPrice()) == -1){
+						if(minPrice == null || minPrice.compareTo(cell.getPrice()) == 1){
 							minPrice = cell.getPrice(); 
 						}
-						if(maxPrice.compareTo(cell.getPrice()) == 1){
+						if(maxPrice == null || maxPrice.compareTo(cell.getPrice()) == -1){
 							maxPrice = cell.getPrice(); 
 						}
 					}
