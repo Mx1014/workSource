@@ -2194,7 +2194,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	private List<Long> resolvUserSelections(List<FlowUserSelection> selections) {
-		//TODO remote dup users
+		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
 		if(selections == null) {
 			return users;

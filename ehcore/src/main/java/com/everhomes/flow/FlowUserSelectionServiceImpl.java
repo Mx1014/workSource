@@ -6,12 +6,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.user.UserInfo;
 
 @Component
 public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
-
+	@Autowired
+	OrganizationService organizationService;
+	
 	@Override
 	public List<Long> findUsersByOrganizationId(Long orgId,
 			FlowOwnerType ownerType, Boolean includeAll) {
@@ -22,7 +25,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 	@Override
 	public List<Long> findUsersByJobPositionId(Long parentOrgId,
 			Long jobPositionId, Long departmentId) {
-		// TODO Auto-generated method stub
+		// DepartmentId is also organizationId
 		return null;
 	}
 
