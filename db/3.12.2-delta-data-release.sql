@@ -429,3 +429,5 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'pa
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10013', 'zh_CN', '发放月卡资格数量不可大于当前排队数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10014', 'zh_CN', '操作失败，当前无剩余月卡');
 
+-- 更新 资源预订  默认参数 菜单 data_type add by sw 20161215
+update eh_web_menus set data_type = 'resource--defaultParameter' where id = 40410;
