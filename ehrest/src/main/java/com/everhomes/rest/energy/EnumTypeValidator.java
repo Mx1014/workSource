@@ -12,7 +12,7 @@ import java.lang.reflect.Method;
  * 参数枚举类型校验器
  * Created by xq.tian on 2016/11/9.
  */
-public class EnumTypeValidator implements ConstraintValidator<EnumType, Byte> {
+public class EnumTypeValidator implements ConstraintValidator<EnumType, Object> {
 
     private final Logger LOGGER = LoggerFactory.getLogger(this.getClass());
 
@@ -24,13 +24,13 @@ public class EnumTypeValidator implements ConstraintValidator<EnumType, Byte> {
     }
 
     @Override
-    public boolean isValid(Byte value, ConstraintValidatorContext context) {
-        if (enumType.nullValue() && value == null) {
-            return true;
+    public boolean isValid(Object value, ConstraintValidatorContext context) {
+        if (value == null) {
+            return enumType.nullValue();
         }
         try {
             Class<?> enumClass = enumType.value();
-            Method fromCodeMethod = enumClass.getMethod("fromCode", Byte.class);
+            Method fromCodeMethod = enumClass.getMethod("fromCode", value.getClass());
             Object retVal = fromCodeMethod.invoke(enumClass, value);
             return retVal != null;
         } catch (NoSuchMethodException | InvocationTargetException | IllegalAccessException e) {

@@ -32,6 +32,7 @@ public enum CoordinationLocks {
 
 	UPDATE_APPROVAL_TARGET_RULE("update_approval_target_rule"),
     STAT_SETTLEMENT("stat.settlement"),
+    STAT_TERMINAL("stat.terminal"),
 
     UPDATE_ORGANIZATION_OWNER("organization.owner.update"),
     UPDATE_ORGANIZATION_OWNER_CAR("organization.owner.car.update"),
@@ -40,7 +41,12 @@ public enum CoordinationLocks {
     CONTRACT_SCHEDULE("contract.schedule"),
 
     PMTASK_STATISTICS("pmtask.statistics"),
-    PMTASK_TARGET_STATISTICS("pmtask.target.statistics");
+    PMTASK_TARGET_STATISTICS("pmtask.target.statistics"),
+    
+    PARKING_STATISTICS("parking.statistics"),
+
+    PARKING_CLEARANCE_LOG("parking.clearance.log"),
+    PARKING_CLEARANCE_OPERATOR("parking.clearance.operator");
 
     private String code;
     private CoordinationLocks(String code) {

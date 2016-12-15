@@ -71,8 +71,8 @@ public class UpdateDefaultRuleAdminCommand {
 	private BigDecimal workdayPrice;
 	private BigDecimal weekendPrice;
 	private Double siteCounts;
-	@ItemType(String.class)
-	private List<String> siteNumbers;
+	@ItemType(SiteNumberDTO.class)
+	private List<SiteNumberDTO> siteNumbers;
 	private Long cancelTime;
 	private Byte refundFlag;
 	private Integer refundRatio;
@@ -277,11 +277,11 @@ public class UpdateDefaultRuleAdminCommand {
 	public void setRefundRatio(Integer refundRatio) {
 		this.refundRatio = refundRatio;
 	}
-	public List<String> getSiteNumbers() {
+	public List<SiteNumberDTO> getSiteNumbers() {
 		return siteNumbers;
 	}
-	public void setSiteNumbers(List<String> siteNumbers) {
+	public void setSiteNumbers(List<SiteNumberDTO> siteNumbers) {
 		this.siteNumbers = siteNumbers;
-	}
+	} 
 
 }

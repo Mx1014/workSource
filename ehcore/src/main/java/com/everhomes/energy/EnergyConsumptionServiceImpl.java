@@ -214,11 +214,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterDTO dto = ConvertHelper.convert(meter, EnergyMeterDTO.class);
 
         // 表的类型
-        String meterType = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_TYPE, String.valueOf(meter.getMeterType()), currLocale(), "");
+        String meterType = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_TYPE, String.valueOf(meter.getMeterType()), currLocale(), "");
         dto.setMeterType(meterType);
 
         // 表的状态
-        String meterStatus = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_STATUS, String.valueOf(meter.getStatus()), currLocale(), "");
+        String meterStatus = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_STATUS, String.valueOf(meter.getStatus()), currLocale(), "");
         dto.setStatus(meterStatus);
 
         // 账单项目
@@ -816,7 +816,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             meter.setNamespaceId(currNamespaceId());
             meter.setName(result.getA());
             meter.setMeterNumber(result.getB());
-            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocaleStringCode.SCOPE_METER_TYPE, result.getC(), currLocale());
+            LocaleString meterTypeLocale = localeStringProvider.findByText(EnergyLocalStringCode.SCOPE_METER_TYPE, result.getC(), currLocale());
             if (meterTypeLocale != null) {
                 meter.setMeterType(Byte.valueOf(meterTypeLocale.getCode()));
             } else {
@@ -1558,7 +1558,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
         }
         // 表的类型
-        String meterType = localeStringService.getLocalizedString(EnergyLocaleStringCode.SCOPE_METER_TYPE, String.valueOf(setting.getMeterType()), currLocale(), "");
+        String meterType = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_TYPE, String.valueOf(setting.getMeterType()), currLocale(), "");
         dto.setMeterType(meterType);
         return dto;
     }

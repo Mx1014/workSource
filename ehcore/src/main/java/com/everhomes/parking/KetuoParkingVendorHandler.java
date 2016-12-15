@@ -50,8 +50,10 @@ import com.everhomes.parking.ketuo.KetuoTemoFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
+import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardType;
 import com.everhomes.rest.parking.ParkingLotVendor;
@@ -60,6 +62,7 @@ import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
+import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
@@ -114,6 +117,14 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 
 			long expireTime = strToLong(expireDate);
 			long now = System.currentTimeMillis();
+			
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
+	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
+	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
+	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000;
+	    		expireTime = expireTime + cardReserveTime;
+	    	}
 			
 			if(expireTime < now){
 				return resultList;
@@ -590,5 +601,11 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 				LOGGER.error("Close httpclient error.");
 			}
 		}
+	}
+
+	@Override
+	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

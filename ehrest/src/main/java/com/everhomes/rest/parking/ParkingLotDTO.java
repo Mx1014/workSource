@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.parking;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
@@ -24,9 +25,17 @@ public class ParkingLotDTO {
     private String vendorName;
     private Integer cardReserveDays;
     private Timestamp createTime;
-    private Integer maxRequestNum;
+    
     private Byte tempfeeFlag;
     private Byte rateFlag;
+    
+    private Byte isSupportRecharge;
+    private Integer rechargeMonthCount;
+    private Byte rechargeType;
+    
+    private BigDecimal totalAmount;
+    
+    private Integer flowMode;
     
     public ParkingLotDTO() {
     }
@@ -87,19 +96,6 @@ public class ParkingLotDTO {
         this.createTime = createTime;
     }
 
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
-	public Integer getMaxRequestNum() {
-		return maxRequestNum;
-	}
-
-	public void setMaxRequestNum(Integer maxRequestNum) {
-		this.maxRequestNum = maxRequestNum;
-	}
-
 	public Byte getTempfeeFlag() {
 		return tempfeeFlag;
 	}
@@ -115,4 +111,50 @@ public class ParkingLotDTO {
 	public void setRateFlag(Byte rateFlag) {
 		this.rateFlag = rateFlag;
 	}
+	
+	public Integer getRechargeMonthCount() {
+		return rechargeMonthCount;
+	}
+
+	public void setRechargeMonthCount(Integer rechargeMonthCount) {
+		this.rechargeMonthCount = rechargeMonthCount;
+	}
+
+	public Byte getRechargeType() {
+		return rechargeType;
+	}
+
+	public void setRechargeType(Byte rechargeType) {
+		this.rechargeType = rechargeType;
+	}
+
+	public BigDecimal getTotalAmount() {
+		return totalAmount;
+	}
+
+	public void setTotalAmount(BigDecimal totalAmount) {
+		this.totalAmount = totalAmount;
+	}
+
+	@Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
+
+	public Byte getIsSupportRecharge() {
+		return isSupportRecharge;
+	}
+
+	public void setIsSupportRecharge(Byte isSupportRecharge) {
+		this.isSupportRecharge = isSupportRecharge;
+	}
+
+	public Integer getFlowMode() {
+		return flowMode;
+	}
+
+	public void setFlowMode(Integer flowMode) {
+		this.flowMode = flowMode;
+	}
+
 }

@@ -1,6 +1,7 @@
 package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
+
 import java.util.List;
 import java.sql.Timestamp;
 
@@ -23,6 +24,10 @@ public class FlowDTO {
     private Long     moduleId;
     private Long     startNode;
     private Long     ownerId;
+    private Long projectId;
+    private String projectType;
+
+    private String stringTag1;
 
     public String getFlowName() {
 		return flowName;
@@ -152,9 +157,33 @@ public class FlowDTO {
 		this.ownerId = ownerId;
 	}
 
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
+
+	public String getProjectType() {
+		return projectType;
+	}
+
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getStringTag1() {
+		return stringTag1;
+	}
+
+	public void setStringTag1(String stringTag1) {
+		this.stringTag1 = stringTag1;
+	}
 }
 

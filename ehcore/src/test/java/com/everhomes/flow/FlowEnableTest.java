@@ -107,9 +107,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     private User testUser1;
     private User testUser2;
     private User testUser3;
-    private Integer namespaceId = 0;
+    private User testUser4;
+    private Integer namespaceId = 1000000;
+    private Long projectId = 240111044331048600l;
+    private String projectType = "EhCommunities";
     private Long moduleId = 111l;
-    private Long orgId = 1001027l;
+    private Long orgId = 1000001l;
     
     
     @Before
@@ -119,9 +122,11 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	String u1 = "15002095483";
     	String u2 = "17788754324";
     	String u3 = "13927485221";
+    	String u4 = "13632650699";
     	testUser1 = userService.findUserByIndentifier(namespaceId, u1);
     	testUser2 = userService.findUserByIndentifier(namespaceId, u2);
     	testUser3 = userService.findUserByIndentifier(namespaceId, u3);
+    	testUser4 = userService.findUserByIndentifier(namespaceId, u4);
     }
     
     @After
@@ -172,6 +177,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowCmd.setOrgId(orgId);
     	flowCmd.setOwnerId(orgId);
     	flowCmd.setOwnerType(FlowOwnerType.ENTERPRISE.getCode());
+    	flowCmd.setProjectId(projectId);
+    	flowCmd.setProjectType(projectType);
     	FlowDTO flowDTO = flowService.createFlow(flowCmd);
     	
     	CreateFlowUserSelectionCommand flowSel = new CreateFlowUserSelectionCommand();
@@ -301,7 +308,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     private void setTestContext(Long userId) {
     	User user = userProvider.findUserById(userId);
-    	UserContext.current().setUser(user);;
+    	UserContext.current().setUser(user);
+    	UserContext.current().setNamespaceId(namespaceId);
     }
     
     private void addNodeProcessor(FlowNodeDTO dto, Long orgId) {
@@ -399,6 +407,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	//add two test users
     	users.add(testUser1.getId());
     	users.add(testUser2.getId());
+    	users.add(testUser4.getId());
     	
     	return users;
     }

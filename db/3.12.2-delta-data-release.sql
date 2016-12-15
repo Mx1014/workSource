@@ -1,0 +1,433 @@
+-- merge from terminal-stat-delta-release.sql by by sfyan 20161214
+-- 运营统计相关数据
+SET @configuration_id = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO eh_configurations(`id`,`name`,`value`,`description`,`namespace_id`)VALUES((@configuration_id := @configuration_id + 1), 'terminal.statistics.cron.expression','0 0 2 * * ?','schedule cron expression',0);
+
+-- 统计分析菜单
+DELETE FROM `eh_web_menus` WHERE id IN (40700);
+DELETE FROM `eh_web_menu_scopes` WHERE menu_id IN (40700);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (41300,'统计分析',40000,NULL,NULL,1,2,'/40000/41300','park',462);
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (41310,'应用统计',41300,NULL,'application_statistic',0,2,'/40000/41300/41310','park',462);
+INSERT INTO `eh_web_menus` VALUES (41320, '结算管理', 41300, NULL, 'settlement_management', '1', '2', '/40000/41300/41320', 'park', '462');
+
+INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
+VALUES (10060,0,'统计分析','统计分析 管理员权限',NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),10060,41300,'统计分析',1,1,'统计分析 管理员权限',710);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),10060,41310,'统计分析',1,1,'统计分析 管理员权限',710);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),10060,41320,'结算管理',1,1,'结算管理 管理员权限',710);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),10026,41320,'结算管理',1,1,'结算管理 全部权限',710);
+
+
+DELETE FROM `eh_service_modules` WHERE id IN (40700);
+DELETE FROM `eh_service_module_scopes` WHERE module_id IN (40700);
+SET @module_privilege_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('41300', '统计分析', '40000', '/40000/41300', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) VALUES ((@module_privilege_id := @module_privilege_id + 1), '41300', '1', '10060', NULL, '0', UTC_TIMESTAMP());
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`,`namespace_id`,`role_type`,`scope`) VALUES ((@acl_id := @acl_id + 1),'EhOrganizations',NULL,1,10060,1001,0,0,UTC_TIMESTAMP(),0,'EhAclRoles','');
+INSERT INTO `eh_acls` (`id`,`owner_type`,`owner_id`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`,`namespace_id`,`role_type`,`scope`) VALUES ((@acl_id := @acl_id + 1),'EhOrganizations',1000750,1,10060,226707,0,0,UTC_TIMESTAMP(),0,'EhUsers','');
+
+
+-- app版本数据整理
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('2','android','1.0.8','','0','1048584','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('3','android','1.0.9','','0','1048585','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('4','android','1.0.10','','0','1048586','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('5','android','1.0.12','','0','1048588','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('6','android','1.0.13','','0','1048589','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('7','android','1.0.15','','0','1048591','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('8','android','2.0','','0','2097150','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('9','android','2.0.2','','0','2097154','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('10','android','2.1.0','','0','2098176','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('11','android','2.2.0','','0','2099200','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('12','android','2.2.2','','0','2099202','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('13','android','2.3','','0','2099212','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('14','android','2.4.1','','0','2101249','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('15','android','2.4.2','','0','2101250','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('16','android','2.5.0','','0','2102272','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('17','android','2.6.0','','0','2103296','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('18','android','2.7.0','','0','2104320','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('19','android','2.7.2','','0','2104322','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('20','android','2.8.0','','0','2105344','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('21','android','3.0.0','','0','3145728','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('22','android','3.0.4','','0','3145732','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('23','android','3.0.6','','0','3145734','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('24','android','3.2.0','','0','3147776','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('25','android','3.2.2','','0','3147778','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('26','android','3.2.4','','0','3147780','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('27','android','3.4.0','','0','3149824','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('28','android','3.8.0','','0','3153920','2016-12-01 14:57:55');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('29','android','3.9.0','','0','3154944','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('30','android','3.10.0','','0','3155968','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('31','android','3.11.0','','0','3156992','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('32','android','3.11.2','','0','3156994','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('33','android','3.11.3','','0','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('34','ios','2.0.4','','0','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('35','ios','2.2.0','','0','2099200','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('36','ios','2.2.2','','0','2099202','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('37','ios','2.3.0','','0','2100224','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('38','ios','2.4.0','','0','2101248','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('39','ios','2.4.2','','0','2101250','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('40','ios','2.5.0','','0','2102272','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('41','ios','2.6.0','','0','2103296','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('42','ios','2.7.2','','0','2104322','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('43','ios','2.8.0','','0','2105344','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('44','ios','2.8.2','','0','2105346','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('45','ios','3.0.0','','0','3145728','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('46','ios','3.0.4','','0','3145732','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('47','ios','3.0.6','','0','3145734','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('48','ios','3.2.0','','0','3147776','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('49','ios','3.2.2','','0','3147778','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('50','ios','3.4.0','','0','3149824','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('51','ios','3.8.0','','0','3153920','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('52','ios','3.8.2','','0','3153922','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('53','ios','3.9.0','','0','3154944','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('54','ios','3.10.0','','0','3155968','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('55','ios','3.11.0','','0','3156992','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('56','ios','3.11.2','','0','3156994','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('57','android','1.0.0','','1000000','1048576','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('58','android','1.0.2','','1000000','1048578','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('59','android','1.1.0','','1000000','1049600','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('60','android','3.4.0','','1000000','3149824','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('61','android','3.6.0','','1000000','3151872','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('62','android','3.10.0','','1000000','3155968','2016-12-01 14:57:57');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('63','android','3.11.0','','1000000','3156992','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('64','ios','1.0.0','','1000000','1048576','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('65','ios','1.0.2','','1000000','1048578','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('66','ios','1.1.0','','1000000','1049600','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('67','ios','1.1.2','','1000000','1049602','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('68','ios','3.4.0','','1000000','3149824','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('69','ios','3.6.0','','1000000','3151872','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('70','ios','3.7.0','','1000000','3152896','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('71','ios','3.7.4','','1000000','3152900','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('72','ios','3.8.0','','1000000','3153920','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('73','ios','3.8.2','','1000000','3153922','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('74','ios','3.9.0','','1000000','3154944','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('75','ios','3.9.2','','1000000','3154946','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('76','ios','3.10.0','','1000000','3155968','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('77','ios','3.10.1','','1000000','3155969','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('78','ios','3.11.0','','1000000','3156992','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('79','android','3.0.2','','999999','3145730','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('80','android','3.1.0','','999999','3146752','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('81','android','3.6.2','','999999','3151874','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('82','android','3.7.0','','999999','3152896','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('83','android','3.9.0','','999999','3154944','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('84','android','3.9.2','','999999','3154946','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('85','android','3.10.0','','999999','3155968','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('86','android','3.10.2','','999999','3155970','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('87','android','3.11.0','','999999','3156992','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('88','ios','3.0.2','','999999','3145730','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('89','ios','3.1.0','','999999','3146752','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('90','ios','3.6.1','','999999','3151873','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('91','ios','3.7.0','','999999','3152896','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('92','ios','3.9.0','','999999','3154944','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('93','ios','3.9.2','','999999','3154946','2016-12-01 14:57:58');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('94','ios','3.10.0','','999999','3155968','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('95','ios','3.10.2','','999999','3155970','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('96','ios','3.11.0','','999999','3156992','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('97','android','1.0.0','','999993','1048576','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('98','android','3.6.2','','999993','3151874','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('99','android','3.9.0','','999993','3154944','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('100','android','3.11.0','','999993','3156992','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('101','ios','1.0.0','','999993','1048576','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('102','ios','3.6.0','','999993','3151872','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('103','ios','3.9.0','','999993','3154944','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('104','ios','3.11.0','','999993','3156992','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('105','android','1.0.0','','999992','1048576','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('106','android','3.7.0','','999992','3152896','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('107','android','3.9.0','','999992','3154944','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('108','android','3.9.2','','999992','3154946','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('109','android','3.10.0','','999992','3155968','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('110','android','3.11.0','','999992','3156992','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('111','android','3.11.2','','999992','3156994','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('112','android','3.11.3','','999992','3156995','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('113','ios','1.0.0','','999992','1048576','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('114','ios','3.7.0','','999992','3152896','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('115','ios','3.7.1','','999992','3152897','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('116','ios','3.9.0','','999992','3154944','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('117','ios','3.9.2','','999992','3154946','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('118','ios','3.10.2','','999992','3155970','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('119','ios','3.11.0','','999992','3156992','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('120','ios','3.11.2','','999992','3156994','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('121','android','3.6.2','','999990','3151874','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('122','android','3.7.0','','999990','3152896','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('123','android','3.8.0','','999990','3153920','2016-12-01 14:57:59');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('124','android','3.9.0','','999990','3154944','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('125','android','3.10.2','','999990','3155970','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('126','android','3.11.2','','999990','3156994','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('127','android','3.11.3','','999990','3156995','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('128','ios','3.6','','999990','3151870','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('129','ios','3.7','','999990','3152895','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('130','ios','3.7.1','','999990','3152897','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('131','ios','3.8','','999990','3154900','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('132','ios','3.9','','999990','3154945','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('133','ios','3.10.2','','999990','3155970','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('134','ios','3.11.2','','999990','3156994','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('135','ios','3.11.3','','999990','3156995','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('136','android','3.8.0','','999989','3153920','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('137','android','3.9.0','','999989','3154944','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('138','android','3.9.2','','999989','3154946','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('139','android','3.10.0','','999989','3155968','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('140','ios','3.8.0','','999989','3153920','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('141','ios','3.8.1','','999989','3153921','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('142','ios','3.9.0','','999989','3154944','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('143','ios','3.9.2','','999989','3154946','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('144','ios','3.10.0','','999989','3155968','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('145','android','3.8.2','','999991','3153922','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('146','android','3.9.2','','999991','3154946','2016-12-01 14:58:00');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('147','android','3.10.0','','999991','3155968','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('148','android','3.11.2','','999991','3156994','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('149','android','3.11.3','','999991','3156995','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('150','ios','3.8.0','','999991','3153920','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('151','ios','3.8.2','','999991','3153922','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('152','ios','3.9.2','','999991','3154946','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('153','ios','3.10.0','','999991','3155968','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('154','ios','3.11.2','','999991','3156994','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('155','android','3.10.0','','999987','3155968','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('156','android','3.10.2','','999987','3155970','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('157','ios','3.10.0','','999987','3155968','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('158','ios','3.10.2','','999987','3155970','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('159','ios','3.10.4','','999987','3155972','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('160','android','3.10.0','','999986','3155968','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('161','android','3.10.2','','999986','3155970','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('162','android','3.11.3','','999986','3156995','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('163','ios','3.10.0','','999986','3155968','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('164','ios','3.10.2','','999986','3155970','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('165','ios','3.10.6','','999986','3155974','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('166','ios','3.11.2','','999986','3156994','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('167','android','3.10.4','','999984','3155972','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('168','android','3.11.0','','999984','3156992','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('169','android','3.11.3','','999984','3156995','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('170','ios','3.10.4','','999984','3155972','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('171','ios','3.10.6','','999984','3155974','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('172','ios','3.11.0','','999984','3156992','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('173','ios','3.11.2','','999984','3156994','2016-12-01 14:58:01');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('174','android','3.9.2','','999988','3154946','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('175','android','3.10.2','','999988','3155970','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('176','android','3.10.4','','999988','3155972','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('177','ios','3.9.0','','999988','3154944','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('178','ios','3.9.2','','999988','3154946','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('179','ios','3.10.0','','999988','3155968','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('180','ios','3.10.3','','999988','3155971','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('181','ios','3.10.4','','999988','3155972','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('182','ios','3.10.6','','999988','3155974','2016-12-01 14:58:02');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES('183','android','3.10.2','','0','3155970','2016-12-02 16:23:18');
+
+-- 给菜单都配置上业务模块
+UPDATE `eh_web_menus` SET `module_id` = id WHERE `parent_id` IN (10000,20000,30000,40000);
+
+UPDATE `eh_web_menus` SET `module_id` = 10850 WHERE `path` like '%/10850/%';
+UPDATE `eh_web_menus` SET `module_id` = 20100 WHERE `path` like '%/20100/%';
+UPDATE `eh_web_menus` SET `module_id` = 20400 WHERE `path` like '%/20400/%';
+UPDATE `eh_web_menus` SET `module_id` = 20600 WHERE `path` like '%/20600/%';
+UPDATE `eh_web_menus` SET `module_id` = 20800 WHERE `path` like '%/20800/%';
+UPDATE `eh_web_menus` SET `module_id` = 40100 WHERE `path` like '%/40100/%';
+UPDATE `eh_web_menus` SET `module_id` = 40200 WHERE `path` like '%/40200/%';
+UPDATE `eh_web_menus` SET `module_id` = 40400 WHERE `path` like '%/40400/%';
+UPDATE `eh_web_menus` SET `module_id` = 40500 WHERE `path` like '%/40500/%';
+UPDATE `eh_web_menus` SET `module_id` = 40800 WHERE `path` like '%/40800/%';
+UPDATE `eh_web_menus` SET `module_id` = 41000 WHERE `path` like '%/41000/%';
+UPDATE `eh_web_menus` SET `module_id` = 41200 WHERE `path` like '%/41200/%';
+UPDATE `eh_web_menus` SET `module_id` = 41300 WHERE `path` like '%/41300/%';
+UPDATE `eh_web_menus` SET `module_id` = 41400 WHERE `path` like '%/41400/%';
+UPDATE `eh_web_menus` SET `module_id` = 10750 WHERE `path` like '%/10750/%';
+
+
+
+-- merge from flow-delta-data-release.sql by lqs 20161214
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.start_step', '开始', 'start-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.approve_step', '下一步', 'approve-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.reject_step', '驳回', 'reject-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.transfer_step', '转交', 'transfer-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.comment_step', '附言', 'comment-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.absort_step', '终止', 'absort-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.reminder_step', '催办', 'reminder-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.evaluate_step', '评价', 'evaluate-step');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'flow.stepname.end_step', '结束', 'end-step');
+
+-- step message templates
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10001, 'zh_CN', '${nodeName} 已完成', '${nodeName} 已完成');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10002, 'zh_CN', '${nodeName} 被驳回', '${nodeName} 驳回');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10003, 'zh_CN', '${applierName} 已取消任务', '${applierName} 已取消任务');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10004, 'zh_CN', '${nodeName} 已转交', '${nodeName} 已转交');
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10005, 'zh_CN', '${nodeName} 上传了 ${imageCount}张图片', '${nodeName} 上传了 ${imageCount}张图片');
+
+-- text variables
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1000', '0', '0', '', '0', '', 'applierName', '发起人姓名', 'text', 'bean_id', 'flow-variable-applier-name', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1001', '0', '0', '', '0', '', 'applierPhone', '发起人手机号码', 'text', 'bean_id', 'flow-variable-applier-phone', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1002', '0', '0', '', '0', '', 'currProcessorName', '本节点处理人姓名', 'text', 'bean_id', 'flow-variable-curr-processor-name', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1003', '0', '0', '', '0', '', 'currProcessorPhone', '本节点处理人手机号码', 'text', 'bean_id', 'flow-variable-curr-processor-phone', '1');
+
+
+-- user variables
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2000', '0', '0', '', '0', '', 'applier', '发起人', 'node_user', 'bean_id', 'flow-variable-applier', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2001', '0', '0', '', '0', '', 'prefixProcessor', '上一节点处理人', 'node_user', 'bean_id', 'flow-variable-prefix-node-processor', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2002', '0', '0', '', '0', '', 'currProcessor', '本节点处理人', 'node_user', 'bean_id', 'flow-variable-current-node-processor', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2003', '0', '0', '', '0', '', 'nextProcessor', '下个节点处理人', 'node_user', 'bean_id', 'flow-variable-next-node-processor', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2004', '0', '0', '', '0', '', 'numberProcessor', 'N节点处理人', 'node_user', 'bean_id', 'flow-variable-n-node-processor', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2005', '0', '0', '', '0', '', 'supervisor', '督办', 'node_user', 'bean_id', 'flow-variable-supervisor', '1');
+
+
+UPDATE `eh_web_menus` SET `module_id` = 10850 WHERE `path` LIKE '%/10850/%';
+UPDATE `eh_web_menus` SET `module_id` = 20100 WHERE `path` LIKE '%/20100/%';
+UPDATE `eh_web_menus` SET `module_id` = 20400 WHERE `path` LIKE '%/20400/%';
+UPDATE `eh_web_menus` SET `module_id` = 20600 WHERE `path` LIKE '%/20600/%';
+UPDATE `eh_web_menus` SET `module_id` = 20800 WHERE `path` LIKE '%/20800/%';
+UPDATE `eh_web_menus` SET `module_id` = 40100 WHERE `path` LIKE '%/40100/%';
+UPDATE `eh_web_menus` SET `module_id` = 40200 WHERE `path` LIKE '%/40200/%';
+UPDATE `eh_web_menus` SET `module_id` = 40400 WHERE `path` LIKE '%/40400/%';
+UPDATE `eh_web_menus` SET `module_id` = 40500 WHERE `path` LIKE '%/40500/%';
+UPDATE `eh_web_menus` SET `module_id` = 40800 WHERE `path` LIKE '%/40800/%';
+UPDATE `eh_web_menus` SET `module_id` = 41000 WHERE `path` LIKE '%/41000/%';
+UPDATE `eh_web_menus` SET `module_id` = 41200 WHERE `path` LIKE '%/41200/%';
+UPDATE `eh_web_menus` SET `module_id` = 41300 WHERE `path` LIKE '%/41300/%';
+UPDATE `eh_web_menus` SET `module_id` = 41400 WHERE `path` LIKE '%/41400/%';
+UPDATE `eh_web_menus` SET `module_id` = 10750 WHERE `path` LIKE '%/10750/%';
+
+-- 创源 服务热线 
+SET @id := (SELECT MAX(id) FROM eh_launch_pad_items);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','咨询热线','cs://1/image/aW1hZ2UvTVRvME1UWXpZak01WkdSa05USmxNekppT1RWaVlUa3lZemt3WkRabFlUSXhZZw','1','1','45','','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin','0',NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','咨询热线','cs://1/image/aW1hZ2UvTVRvME1UWXpZak01WkdSa05USmxNekppT1RWaVlUa3lZemt3WkRabFlUSXhZZw','1','1','45','','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist','0',NULL);
+
+
+
+
+
+
+-- merge from parking-clearance-1.0-delta-data-debug.sql by lqs 20161215
+--
+-- 车辆放行模块   add by xq.tian  2016/12/05
+--
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
+VALUES ('41500', '车辆放行', '40000', '/40000/41500', '0', '2', '2', '0', UTC_TIMESTAMP());
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES ('10056', '0', '车辆放行 申请放行', '车辆放行 申请放行权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES ('10057', '0', '车辆放行 处理放行任务', '车辆放行 处理放行任务权限', NULL);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `role_type`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10056, 1001, 0, 'EhAclRoles', 1, NOW());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `role_type`,  `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10057, 1001, 0, 'EhAclRoles', 1, NOW());
+
+SET @eh_service_module_privileges = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges := @eh_service_module_privileges + 1), '41500', '1', '10056', NULL, '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges := @eh_service_module_privileges + 1), '41500', '1', '10057', NULL, '0', UTC_TIMESTAMP());
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10056, 20900, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10057, 20900, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10056, 20910, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10057, 20910, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10056, 20920, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10057, 20920, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10056, 20930, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10057, 20930, '车辆放行', 1, 1, '车辆放行  全部权限', 202);
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (20900, '车辆放行', 20000, NULL, 'parking_clearance', 1, 2, '/20000/20900', 'park', 300);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (20910, '权限设置', 20900, NULL, 'vehicle_setting', 0, 2, '/20000/20900/20910', 'park', 301);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (20920, '放行记录', 20900, NULL, 'release_record', 0, 2, '/20000/20900/20920', 'park', 302);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (20930, '工作流设置', 20900, NULL, 'workflow_setting', 0, 2, '/20000/20900/20930', 'park', 303);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 20900, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 20910, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 20920, '', 'EhNamespaces', 999984, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 20930, '', 'EhNamespaces', 999984, 2);
+
+--
+-- 模板
+--
+SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '1', 'zh_CN', '停车放行申请人看到的内容', '[{"key":"停车场名","value":"${parkingLotName}","entityType":"list"},{"key":"车牌号码","value":"${plateNumber}","entityType":"list"},{"key":"预计来访时间","value":"${clearanceTime}","entityType":"list"},{"key":"备注","value":"${remarks}","entityType":"text"}]', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '2', 'zh_CN', '停车放行处理人看到的内容', '[{"key":"停车场名","value":"${parkingLotName}","entityType":"list"},{"key":"申请人","value":"${applicant}","entityType":"list"},{"key":"手机号","value":"${identifierToken}","entityType":"list"},{"key":"车牌号码","value":"${plateNumber}","entityType":"list"},{"key":"预计来访时间","value":"${clearanceTime}","entityType":"list"},{"key":"备注","value":"${remarks}","entityType":"text"}]', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '3', 'zh_CN', '工作流摘要内容', '车牌号码：${plateNumber}\n来访时间：${clearanceTime}', '0');
+
+SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance', '1', 'zh_CN', '无');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance', '2', 'zh_CN', '对不起,您没有权限申请放行');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance', '3', 'zh_CN', '对不起,您没有权限处理放行任务');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance', '10001', 'zh_CN', '删除用户失败');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance', '10002', 'zh_CN', '没有启用的工作流');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance.log.status', '1', 'zh_CN', '处理中');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance.log.status', '2', 'zh_CN', '已完成');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance.log.status', '3', 'zh_CN', '已取消');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance.log.status', '4', 'zh_CN', '待处理');
+
+
+-- 停车充值
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10012', 'zh_CN', '发放月卡资格数量不可大于当前剩余月卡数');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10013', 'zh_CN', '发放月卡资格数量不可大于当前排队数');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10014', 'zh_CN', '操作失败，当前无剩余月卡');
+
+-- 更新 资源预订  默认参数 菜单 data_type add by sw 20161215
+update eh_web_menus set data_type = 'resource--defaultParameter' where id = 40410;

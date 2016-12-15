@@ -17,8 +17,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AddRentalBillItemCommand {
-	@NotNull
-	private Long rentalSiteId;   
+//	@NotNull
+//	private Long rentalSiteId;   
 	@NotNull
 	private Long rentalBillId; 
 	@ItemType(SiteItemDTO.class)
@@ -31,13 +31,13 @@ public class AddRentalBillItemCommand {
 		return StringHelper.toJsonString(this);
 	}
 
-	public Long getRentalSiteId() {
-		return rentalSiteId;
-	}
-
-	public void setRentalSiteId(Long rentalSiteId) {
-		this.rentalSiteId = rentalSiteId;
-	}
+//	public Long getRentalSiteId() {
+//		return rentalSiteId;
+//	}
+//
+//	public void setRentalSiteId(Long rentalSiteId) {
+//		this.rentalSiteId = rentalSiteId;
+//	}
 
 	  
 	 

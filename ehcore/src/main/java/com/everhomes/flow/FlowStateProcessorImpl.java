@@ -1,29 +1,9 @@
 package com.everhomes.flow;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
-import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowServiceErrorCode;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowTimeoutType;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
@@ -34,6 +14,15 @@ import com.everhomes.user.UserService;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskScheduler;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class FlowStateProcessorImpl implements FlowStateProcessor {
@@ -201,7 +190,13 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		//fire button actions
 		FlowGraphButton btn = flowGraph.getGraphButton(cmd.getButtonId());
+		
 		if(btn != null) {
+			//TODO:
+			FlowButton flowButton = btn.getFlowButton();
+			if(null != flowButton) {
+				ctx.setStepType(FlowStepType.fromCode(flowButton.getFlowStepType()));
+			}
 			if(null != btn.getMessage()) {
 				btn.getMessage().fireAction(ctx, event);
 			}
@@ -467,4 +462,15 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
 		return ctx.getOperator();
 	}
+	
+	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection seles) {
+		List<Long> users = new ArrayList<>();
+		UserInfo userInfo = getApplier(ctx, "");
+		if(null != userInfo) {
+			users.add(userInfo.getId());
+		}
+		
+		return users;
+	}
+	
 }
