@@ -73,20 +73,19 @@ public class OrganizationMemberDTO {
 	private List<OrganizationDTO> groups;
 	
 	@ItemType(OrganizationDTO.class)
-	private List<OrganizationDTO> departments;
-
+	private List<OrganizationDTO> departments; 
+ 
     private Byte executiveFlag;
     private String position;
-    private String idNumber;
-    
+    private String idNumber; 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> jobPositions;
 
     @ItemType(OrganizationDTO.class)
     private List<OrganizationDTO> jobLevels;
-	
+ 
 	private Integer proccesingTaskCount;
-	
+	 
 	public OrganizationMemberDTO() {
     }
 
