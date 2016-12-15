@@ -90,6 +90,7 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -148,6 +149,8 @@ import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
 import com.everhomes.search.UserWithoutConfAccountSearcher;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.serviceModule.ServiceModuleAssignment;
+import com.everhomes.serviceModule.ServiceModuleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
@@ -162,6 +165,8 @@ import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.simplejavamail.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.Mailer;
@@ -201,7 +206,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private NamespaceProvider namespaceProvider;
 	
 	@Autowired
-	LocaleStringService localeStringService;
+    LocaleStringService localeStringService;
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;

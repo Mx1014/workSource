@@ -127,3 +127,10 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 INSERT INTO `eh_launch_advertisements` (`id`, `namespace_id`, `content_type`, `content_uri`, `times_per_day`, `display_interval`, `duration_time`, `skip_flag`, `action_type`, `action_data`, `status`, `creator_uid`, `create_time`, `update_uid`, `update_time`)
 VALUES ('1', '0', 'VIDEO', 'cs://1/file/ZmlsZS9Nem96TmprMU1EaGxORE0xWkdSbVptTXdZemcwWmpaaE16Y3pOMk00T0RSak53', '1', '0', '3', '1', '14', '{\"url\":\"http://www.baidu.com\"}', '2', NULL, NULL, NULL, NULL);
+
+
+SELECT max(id) FROM `eh_launch_pad_items` INTO @launch_pad_item_id;
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), '999984', '0', '0', '0', '/home', 'Bizs', 'PARKING_CLEARANCE', '车辆放行', 'cs://1/image/aW1hZ2UvTVRvME5tTXpZVEEwWlRKa1lqQXlaVFEwTmpkaU5XRTJORGN5WVdJM056QmpZUQ', '1', '1', '57', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), '999984', '0', '0', '0', '/home', 'Bizs', 'PARKING_CLEARANCE_TASK', '放行任务', 'cs://1/image/aW1hZ2UvTVRvME5tTXpZVEEwWlRKa1lqQXlaVFEwTmpkaU5XRTJORGN5WVdJM056QmpZUQ', '1', '1', '58', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);
