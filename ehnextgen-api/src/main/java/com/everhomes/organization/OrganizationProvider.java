@@ -278,5 +278,7 @@ public interface OrganizationProvider {
 	List<CommunityAddressMapping> listOrganizationAddressMappingByNamespaceType(Long superOrganizationId,
 			Long communityId, String namespaceType);
 	void deleteOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping);
+	Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId, String namespaceToken,
+			String namespaceType);
  
 }

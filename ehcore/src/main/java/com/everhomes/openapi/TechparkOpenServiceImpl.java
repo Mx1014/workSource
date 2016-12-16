@@ -56,6 +56,7 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -99,7 +100,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private EnterpriseProvider enterpriseProvider;
 	
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
-	private ExecutorService fixedThreadPool = Executors.newFixedThreadPool(1); 
+	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
+	
+	private ExecutorService rentalThreadPool = Executors.newFixedThreadPool(20); 
 	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
@@ -141,28 +144,27 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		
 		//如果到最后一页了，则开始更新到我们数据库中
 		if (cmd.getNextPage() == null) {
-			fixedThreadPool.execute(()->{
+			queueThreadPool.execute(()->{
 				if (LOGGER.isDebugEnabled()) {
 					LOGGER.debug("enter into thread=================");
 				}
-				dbProvider.execute(s->{
-					List<TechparkSyncdataBackup> backupList = techparkSyncdataBackupProvider.listTechparkSyncdataBackupByParam(appNamespaceMapping.getNamespaceId(), cmd.getDataType(), cmd.getAllFlag());
-					if (backupList == null || backupList.isEmpty()) {
-						return false;
+				
+				List<TechparkSyncdataBackup> backupList = techparkSyncdataBackupProvider.listTechparkSyncdataBackupByParam(appNamespaceMapping.getNamespaceId(), cmd.getDataType(), cmd.getAllFlag());
+				if (backupList == null || backupList.isEmpty()) {
+					return ;
+				}
+				try {
+					if (AllFlag.fromCode(cmd.getAllFlag()) == AllFlag.ALL) {
+						// 全量更新
+						updateAllDate(cmd.getDataType(),appNamespaceMapping , backupList);
+					}else {
+						// 增量更新
+						updatePartDate(cmd.getDataType(), appNamespaceMapping, backupList);
 					}
-					try {
-						if (AllFlag.fromCode(cmd.getAllFlag()) == AllFlag.ALL) {
-							// 全量更新
-							updateAllDate(cmd.getDataType(),appNamespaceMapping , backupList);
-						}else {
-							// 增量更新
-							updatePartDate(cmd.getDataType(), appNamespaceMapping, backupList);
-						}
-					} finally {
-						techparkSyncdataBackupProvider.updateTechparkSyncdataBackupInactive(backupList);
-					}
-					return true;
-				});
+				} finally {
+					techparkSyncdataBackupProvider.updateTechparkSyncdataBackupInactive(backupList);
+				}
+				
 				if (LOGGER.isDebugEnabled()) {
 					LOGGER.debug("get out thread=================");
 				}
@@ -195,34 +197,37 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void syncAllBuildings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
-		//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-		List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
-		List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
-		// 如果两边都有，更新；如果我们有，他们没有，删除；
-		for (Building myBuilding : myBuildingList) {
-			CustomerBuilding customerBuilding = findFromTheirBuildingList(myBuilding, theirBuildingList);
-			if (customerBuilding != null) {
-				updateBuilding(myBuilding, customerBuilding);
-			}else {
-				deleteBuilding(myBuilding);
-			}
-		}
-		// 如果他们有，我们没有，插入
-		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-		if (theirBuildingList != null) {
-			for (CustomerBuilding customerBuilding : theirBuildingList) {
-				if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
-					continue;
-				}
-				// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-				Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
-				if (building == null) {
-					insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+		dbProvider.execute(s->{
+			//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+			List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
+			List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
+			// 如果两边都有，更新；如果我们有，他们没有，删除；
+			for (Building myBuilding : myBuildingList) {
+				CustomerBuilding customerBuilding = findFromTheirBuildingList(myBuilding, theirBuildingList);
+				if (customerBuilding != null) {
+					updateBuilding(myBuilding, customerBuilding);
 				}else {
-					updateBuilding(building, customerBuilding);
+					deleteBuilding(myBuilding);
 				}
 			}
-		}
+			// 如果他们有，我们没有，插入
+			// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+			if (theirBuildingList != null) {
+				for (CustomerBuilding customerBuilding : theirBuildingList) {
+					if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
+						continue;
+					}
+					// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+					Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+					if (building == null) {
+						insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+					}else {
+						updateBuilding(building, customerBuilding);
+					}
+				}
+			}
+			return true;
+		});
 	}
 
 	private void insertBuilding(Integer namespaceId, Long communityId, CustomerBuilding customerBuilding) {
@@ -297,34 +302,37 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
-		//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-		List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
-		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
-		// 如果两边都有，更新；如果我们有，他们没有，删除；
-		for (Address myApartment : myApartmentList) {
-			CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
-			if (customerApartment != null) {
-				updateAddress(myApartment, customerApartment);
-			}else {
-				deleteAddress(myApartment);
-			}
-		}
-		// 如果他们有，我们没有，插入
-		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-		if (theirApartmentList != null) {
-			for (CustomerApartment customerApartment : theirApartmentList) {
-				if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
-					continue;
-				}
-				// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-				Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-				if (address == null) {
-					insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+		dbProvider.execute(s->{
+			//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+			List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
+			List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+			// 如果两边都有，更新；如果我们有，他们没有，删除；
+			for (Address myApartment : myApartmentList) {
+				CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
+				if (customerApartment != null) {
+					updateAddress(myApartment, customerApartment);
 				}else {
-					updateAddress(address, customerApartment);
+					deleteAddress(myApartment);
 				}
 			}
-		}
+			// 如果他们有，我们没有，插入
+			// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+			if (theirApartmentList != null) {
+				for (CustomerApartment customerApartment : theirApartmentList) {
+					if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+						continue;
+					}
+					// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+					Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+					if (address == null) {
+						insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+					}else {
+						updateAddress(address, customerApartment);
+					}
+				}
+			}
+			return true;
+		});
 	}
 
 	private void insertAddress(Integer namespaceId, Long communityId, CustomerApartment customerApartment) {
@@ -428,41 +436,60 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		
 		List<Organization> myOrganizationList = organizationProvider.listOrganizationByNamespaceType(appNamespaceMapping.getNamespaceId(), NamespaceOrganizationType.JINDIE.getCode());
 		List<CustomerRental> theirRentalList = mergeBackupList(backupList, CustomerRental.class);
+		//有的组织名称过长，格式化一下
+		for (CustomerRental customerRental : theirRentalList) {
+			String name = customerRental.getName();
+			if (name != null && name.length() > 64) {
+				customerRental.setName(name.substring(0,64).trim());
+			}
+		}
 		for (Organization myOrganization : myOrganizationList) {
 			CustomerRental customerRental = findFromTheirRentalList(myOrganization, theirRentalList);
-			if (customerRental != null) {
-				updateOrganization(myOrganization, customerRental);
-				insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
-				insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
-			}else {
-				deleteOrganization(myOrganization);
-				deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-				deleteContracts(myOrganization);
-			}
+			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
+			rentalThreadPool.execute(()->{
+				dbProvider.execute(s->{
+					if (customerRental != null) {
+						updateOrganization(myOrganization, customerRental);
+						insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
+						insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
+					}else {
+						deleteOrganization(myOrganization);
+						deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+						deleteContracts(myOrganization);
+					}
+					return true;
+				});
+			});
+			
 		}
 		for (CustomerRental customerRental : theirRentalList) {
 			if (customerRental.getDealed() != null && customerRental.getDealed().booleanValue() == true) {
 				continue;
 			}
-			Organization organization = organizationProvider.findOrganizationByNameAndNamespaceId(customerRental.getName(), appNamespaceMapping.getNamespaceId());
-			if (organization == null) {
-				organization = insertOrganization(appNamespaceMapping, customerRental);
-				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
-				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
-				insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
-			}else {
-				updateOrganization(organization, customerRental);
-				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
-				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
-				insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
-			}
+			rentalThreadPool.execute(()->{
+				dbProvider.execute(s->{
+					Organization organization = organizationProvider.findOrganizationByNameAndNamespaceIdForJindie(customerRental.getName(), appNamespaceMapping.getNamespaceId(), customerRental.getNumber(), NamespaceOrganizationType.JINDIE.getCode());
+					if (organization == null) {
+						organization = insertOrganization(appNamespaceMapping, customerRental);
+						insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+						insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+					}else {
+						updateOrganization(organization, customerRental);
+						insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+						insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+					}
+					return true;
+				});
+			});
 		}
 	}
 
@@ -566,51 +593,70 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void syncPartBuildings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
-		List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
-		for (CustomerBuilding customerBuilding : theirBuildingList) {
-			Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
-			if (building == null) {
-				insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
-			}else {
-				updateBuilding(building, customerBuilding);
+		dbProvider.execute(s->{
+			List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
+			for (CustomerBuilding customerBuilding : theirBuildingList) {
+				Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+				if (building == null) {
+					insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+				}else {
+					updateBuilding(building, customerBuilding);
+				}
 			}
-		}
+			return true;
+		});
 	}
 
 	private void syncPartApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
-		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
-		for (CustomerApartment customerApartment : theirApartmentList) {
-			if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
-				continue;
+		dbProvider.execute(s->{
+			List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+			for (CustomerApartment customerApartment : theirApartmentList) {
+				if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+					continue;
+				}
+				Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+				if (address == null) {
+					insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+				}else {
+					updateAddress(address, customerApartment);
+				}
 			}
-			Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-			if (address == null) {
-				insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
-			}else {
-				updateAddress(address, customerApartment);
-			}
-		}
+			return true;
+		});
 	}
 
 	private void syncPartRentings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
 		List<CustomerRental> theirRentalList = mergeBackupList(backupList, CustomerRental.class);
+		//有的组织名称过长，格式化一下
 		for (CustomerRental customerRental : theirRentalList) {
-			Organization organization = organizationProvider.findOrganizationByName(customerRental.getName(), appNamespaceMapping.getNamespaceId());
-			if (organization == null) {
-				organization = insertOrganization(appNamespaceMapping, customerRental);
-				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
-				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdatePartContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
-				insertOrUpdatePartOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
-			}else {
-				updateOrganization(organization, customerRental);
-				insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
-				insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
-				insertOrUpdatePartContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
-				insertOrUpdatePartOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+			String name = customerRental.getName();
+			if (name != null && name.length() > 64) {
+				customerRental.setName(name.substring(0,64).trim());
 			}
+		}
+		for (CustomerRental customerRental : theirRentalList) {
+			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
+			rentalThreadPool.execute(()->{
+				dbProvider.execute(s->{
+					Organization organization = organizationProvider.findOrganizationByNameAndNamespaceIdForJindie(customerRental.getName(), appNamespaceMapping.getNamespaceId(), customerRental.getNumber(), NamespaceOrganizationType.JINDIE.getCode());
+					if (organization == null) {
+						organization = insertOrganization(appNamespaceMapping, customerRental);
+						insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdatePartContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+						insertOrUpdatePartOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+					}else {
+						updateOrganization(organization, customerRental);
+						insertOrUpdateOrganizationDetail(organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), organization);
+						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), organization, customerRental.getContact(), customerRental.getContactPhone());
+						insertOrUpdatePartContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, customerRental.getContracts());
+						insertOrUpdatePartOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), organization, extractCustomerContractBuilding(customerRental));
+					}
+					return true;
+				});
+			});
 		}
 	}
 
@@ -805,19 +851,22 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			String[] contactArray = contact.split(",");
 			String[] contactPhoneArray = contactPhone.split(",");
 			int length = Math.min(contactArray.length, contactPhoneArray.length);
-			
+
+			User user = new User();
+			user.setId(1L);
+			UserContext.setCurrentUser(user);
+			UserContext.setCurrentNamespaceId(namespaceId);
 			for(int i=0; i<length; i++) {
 				if (StringUtils.isNotBlank(contactArray[i]) && StringUtils.isNotBlank(contactPhoneArray[i])) {
 					CreateOrganizationAdminCommand cmd = new CreateOrganizationAdminCommand();
 					cmd.setContactName(contactArray[i]);
 					cmd.setContactToken(contactPhoneArray[i]);
 					cmd.setOrganizationId(organization.getId());
-					UserContext.setCurrentNamespaceId(namespaceId);
 					rolePrivilegeService.createOrganizationAdmin(cmd, namespaceId);
 				}
 			}
 		} catch (Exception e) {
-			LOGGER.error("sync organization members error: organizationId="+organization.getId()+", contact="+contact+", contactPhone="+contactPhone);
+			LOGGER.error("sync organization members error: organizationId="+organization.getId()+", contact="+contact+", contactPhone="+contactPhone, e);
 		}
 	}
 

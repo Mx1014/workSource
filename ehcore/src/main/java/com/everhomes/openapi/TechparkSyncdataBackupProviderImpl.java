@@ -73,12 +73,12 @@ public class TechparkSyncdataBackupProviderImpl implements TechparkSyncdataBacku
 
 	@Override
 	public void updateTechparkSyncdataBackupInactive(List<TechparkSyncdataBackup> backupList) {
-		List<EhTechparkSyncdataBackup> list = backupList.stream().map(b->{
-				b.setStatus(CommonStatus.INACTIVE.getCode()); 
-				b.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-				return b;
-			}).collect(Collectors.toList());
-		getReadWriteDao().update(list);
+		backupList.forEach(b->{
+			b.setStatus(CommonStatus.INACTIVE.getCode()); 
+			b.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+			updateTechparkSyncdataBackup(b);
+		});
+				
 	}
 
 	private EhTechparkSyncdataBackupDao getReadWriteDao() {

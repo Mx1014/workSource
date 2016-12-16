@@ -2654,6 +2654,40 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId,
+			String namespaceToken, String namespaceType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TYPE.eq(namespaceType))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN.eq(namespaceToken))
+			.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, Organization.class);
+		}
+		
+		//组织名字有重复的
+		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			List<Organization> organizationList = result.map(r->ConvertHelper.convert(r, Organization.class));
+			if (organizationList.size() > 1) {
+				for (Organization organization : organizationList) {
+					if (OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
+						return organization;
+					}
+				}
+			}
+			return organizationList.get(0);
+		}
+		
+		return null;
+	}
+
+	@Override
 	public Organization findOrganizationByName(String name, Integer namespaceId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Record r = context.select().from(Tables.EH_ORGANIZATIONS)
