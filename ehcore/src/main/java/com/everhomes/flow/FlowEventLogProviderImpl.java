@@ -309,7 +309,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     }
     
     @Override
-    public List<FlowEventLog> findStepEventLogs(Long caseId, Long userId) {
+    public List<FlowEventLog> findStepEventLogs(Long caseId, Long stepCount) {
     	ListingLocator locator = new ListingLocator();
     	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
 			@Override
@@ -317,7 +317,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 					ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
-				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(userId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
 				
 				return query;
 			}

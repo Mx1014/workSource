@@ -39,6 +39,12 @@ public interface FlowEventLogProvider {
 
 	List<FlowEventLog> findFiredEventsByLog(FlowEventLog log);
 
-	List<FlowEventLog> findStepEventLogs(Long caseId, Long userId);
+	/**
+	 * 找到某一步当中的跳转日志
+	 * @param caseId
+	 * @param stepCount
+	 * @return
+	 */
+	List<FlowEventLog> findStepEventLogs(Long caseId, Long stepCount);
 
 }

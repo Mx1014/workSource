@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.user.User;
 
 @Component(FlowVariableUserResolver.PREFIX_NODE_PROCESSOR)
 public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUserResolver {
@@ -48,7 +49,18 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 		}
 		
 		//found fired buttons
-//		flowEventLogProvider.findStepEventLogs(caseId, userId);
+		List<FlowEventLog> logs = flowEventLogProvider.findStepEventLogs(flowCase.getId());
+		List<Long> users = new ArrayList<Long>();
+		if(logs != null && logs.size() > 0) {
+			for(FlowEventLog log : logs) {
+				if(log.getFlowUserId() != null && log.getFlowUserId() >= User.MAX_SYSTEM_USER_ID) {
+					users.add(log.getFlowUserId());
+				}
+			}
+		}
+		if(users.size() > 0) {
+			return users;
+		}
 		
 		FlowGraphNode graphNode = ctx.getFlowGraph().getNodes().get(node.getNodeLevel() - 1);
 		node = graphNode.getFlowNode();
