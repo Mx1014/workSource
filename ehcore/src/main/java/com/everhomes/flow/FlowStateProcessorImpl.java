@@ -138,6 +138,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 			ctx.setCurrentEvent(event);
 			
+			FlowStepType stepType = FlowStepType.fromCode(stepDTO.getAutoStepType());
+			if(stepType != null) {
+				ctx.setStepType(stepType);	
+			}
+			
 			return ctx;
 		}
 		return null;		
@@ -322,8 +327,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case COMMENT_STEP:
 			break;
 		case ABSORT_STEP:
-			logStep = true;
-			flowListenerManager.onFlowCaseAbsorted(ctx);
+			logStep = true;//Never enter here
 			break;
 		case REMINDER_STEP:
 			break;
@@ -427,6 +431,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case ABSORT_STEP:
 			logStep = true;
 			ctx.getFlowCase().setStatus(FlowCaseStatus.ABSORTED.getCode());
+			flowListenerManager.onFlowCaseAbsorted(ctx);
 			break;
 		default:
 			break;
