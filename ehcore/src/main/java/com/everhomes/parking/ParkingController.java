@@ -26,6 +26,7 @@ import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
+import com.everhomes.rest.parking.GetRechargeResultCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
 import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
@@ -453,9 +454,8 @@ public class ParkingController extends ControllerBase {
     @RequestMapping("getParkingActivity")
     @RestReturn(value=ParkingActivityDTO.class)
     public RestResponse getParkingActivity(GetParkingActivityCommand cmd) {
-        ParkingActivityDTO activity = null;
-        
-        activity = parkingService.getParkingActivity(cmd);
+
+        ParkingActivityDTO activity = parkingService.getParkingActivity(cmd);
         RestResponse response = new RestResponse(activity);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -476,10 +476,25 @@ public class ParkingController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
-    
+
+    /**
+     * <b>URL: /parking/getRechargeResult</b>
+            * <p>支付后，获取支付结果</p>
+            */
+    @RequestMapping("getRechargeResult")
+    @RestReturn(value = String.class)
+    public RestResponse getRechargeResult(GetRechargeResultCommand cmd) {
+
+        parkingService.getRechargeResult(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
      * <b>URL: /parking/deleteParkingRechargeOrder</b>
-     * <p>支付后，由统一支付调用此接口来通知各厂商支付结果</p>
+     * <p>删除订单</p>
      */
     @RequestMapping("deleteParkingRechargeOrder")
     @RestReturn(value = String.class)
