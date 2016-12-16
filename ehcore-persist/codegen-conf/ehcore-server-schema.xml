@@ -125,6 +125,7 @@
         eh_energy_date_statistics | eh_energy_month_statistics | eh_energy_count_statistics | eh_energy_yoy_statistics |
         eh_pm_task_target_statistics |
         eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
+        eh_service_alliance_invest_requests |
 
         </includes>
             <!-- All elements that are excluded from your schema
