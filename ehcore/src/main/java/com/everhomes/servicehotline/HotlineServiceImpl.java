@@ -156,6 +156,7 @@ public class HotlineServiceImpl implements HotlineService {
 		}catch(Exception e){
 			//LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri);
 		}
+		return null;
 	}
 	@Override
 	public void addHotline(AddHotlineCommand cmd) {
