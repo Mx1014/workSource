@@ -42,4 +42,9 @@ public interface DoorAuthProvider {
 
     AuthVisitorStasticResponse authVistorStatistic(AuthVisitorStatisticCommand cmd);
 
+	void updateDoorAuth(List<DoorAuth> objs);
+
+	List<DoorAuth> queryValidDoorAuths(ListingLocator locator, Long userId,
+			Long ownerId, Byte ownerType, int count);
+
 }
