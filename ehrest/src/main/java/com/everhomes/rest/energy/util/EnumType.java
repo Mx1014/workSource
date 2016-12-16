@@ -1,4 +1,4 @@
-package com.everhomes.rest.energy;
+package com.everhomes.rest.energy.util;
 
 import javax.validation.Constraint;
 import javax.validation.Payload;

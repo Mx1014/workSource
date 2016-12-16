@@ -2,7 +2,7 @@
 package com.everhomes.rest.parking.clearance;
 
 import com.everhomes.discover.ItemType;
-import com.everhomes.rest.energy.EnumType;
+import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
