@@ -350,6 +350,20 @@ public class YellowPageController  extends ControllerBase {
     }
 
     /**
+     * <b>URL: /yellowPage/searchOneselfRequestInfo</b>
+     * <p> 搜索申请信息-app</p>
+     */
+    @RequestMapping("searchOneselfRequestInfo")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse searchOneselfRequestInfo(@Valid SearchOneselfRequestInfoCommand cmd) {
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchOneselfRequestInfo(cmd);
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    /**
    	 * <b>URL: /yellowPage/syncSARequestInfo</b>
    	 * <p> 同步申请信息</p>
    	 */
@@ -364,36 +378,5 @@ public class YellowPageController  extends ControllerBase {
        	response.setErrorDescription("OK");
        	return response;
        }
-       
-//    /**
-//     * <b>URL: /yellowPage/syncSettleRequestInfo</b>
-//     * <p> 同步申请信息</p>
-//     */
-//    @RequestMapping("syncSettleRequestInfo")
-//    @RestReturn(value = String.class)
-//    public RestResponse syncSettleRequestInfo() {
-//
-//        this.settleRequestInfoSearcher.syncFromDb();
-//
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /yellowPage/syncReserveRequestInfo</b>
-//     * <p> 同步申请信息</p>
-//     */
-//    @RequestMapping("syncReserveRequestInfo")
-//    @RestReturn(value = String.class)
-//    public RestResponse syncReserveRequestInfo() {
-//
-//        this.reserveRequestInfoSearcher.syncFromDb();
-//
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+
 }

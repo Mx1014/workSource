@@ -8,7 +8,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
 import com.everhomes.user.CustomRequestConstants;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -304,7 +306,44 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		return response;
 	}
 
-	private XContentBuilder createDoc(ServiceAllianceRequestInfo request){
+    @Override
+    public SearchRequestInfoResponse searchOneselfRequestInfo(SearchOneselfRequestInfoCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+        QueryBuilder qb = null;
+
+        FilterBuilder fb = FilterBuilders.termFilter("type", cmd.getType());
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("creatorUid", UserContext.current().getUser().getId()));
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("ServiceAllianceRequestInfoSearcherImpl query builder ："+builder);
+
+        SearchResponse rsp = builder.execute().actionGet();
+        SearchRequestInfoResponse response = new SearchRequestInfoResponse();
+        List<RequestInfoDTO> dtos = getDTOs(rsp);
+
+        if(dtos.size() > pageSize){
+            response.setNextPageAnchor(anchor+1);
+            dtos.remove(dtos.size() - 1);
+        }
+
+        response.setDtos(dtos);
+
+        return response;
+    }
+
+    private XContentBuilder createDoc(ServiceAllianceRequestInfo request){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("templateType", request.getTemplateType());
@@ -314,6 +353,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("creatorName", request.getCreatorName());
             b.field("creatorMobile", request.getCreatorMobile());
             b.field("createTime", request.getCreateTime().getTime());
+            b.field("creatorUid", request.getCreatorUid());
             String d = format.format(request.getCreateTime().getTime());  
             try {
 				Date date=format.parse(d);
