@@ -448,6 +448,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
 			rentalThreadPool.execute(()->{
 				dbProvider.execute(s->{
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
+					}
 					if (customerRental != null) {
 						updateOrganization(myOrganization, customerRental);
 						insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
@@ -471,6 +474,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			}
 			rentalThreadPool.execute(()->{
 				dbProvider.execute(s->{
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
+					}
 					Organization organization = organizationProvider.findOrganizationByNameAndNamespaceIdForJindie(customerRental.getName(), appNamespaceMapping.getNamespaceId(), customerRental.getNumber(), NamespaceOrganizationType.JINDIE.getCode());
 					if (organization == null) {
 						organization = insertOrganization(appNamespaceMapping, customerRental);
@@ -638,6 +644,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
 			rentalThreadPool.execute(()->{
 				dbProvider.execute(s->{
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
+					}
 					Organization organization = organizationProvider.findOrganizationByNameAndNamespaceIdForJindie(customerRental.getName(), appNamespaceMapping.getNamespaceId(), customerRental.getNumber(), NamespaceOrganizationType.JINDIE.getCode());
 					if (organization == null) {
 						organization = insertOrganization(appNamespaceMapping, customerRental);
