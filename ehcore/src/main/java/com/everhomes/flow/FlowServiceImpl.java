@@ -809,6 +809,7 @@ public class FlowServiceImpl implements FlowService {
 		userSel.setSourceTypeA(selCmd.getSourceTypeA());
 		userSel.setSourceTypeB(selCmd.getSourceTypeB());
 		userSel.setStatus(FlowStatusType.VALID.getCode());
+		userSel.setSelectionName(selCmd.getSelectionName());
 		
 		updateFlowUserName(userSel);
 		flowUserSelectionProvider.createFlowUserSelection(userSel);		

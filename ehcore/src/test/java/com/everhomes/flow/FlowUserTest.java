@@ -77,7 +77,7 @@ public class FlowUserTest extends LoginAuthTestCase {
     
     private void setTestContext(Long userId) {
     	User user = userProvider.findUserById(userId);
-    	UserContext.current().setUser(user);;
+    	UserContext.current().setUser(user);
     }
     
     @Test
