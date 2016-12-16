@@ -112,11 +112,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        if (cmd.getUserIds() != null) {
+
+
+        if (cmd.getUserIds() != null && cmd.getUserIds().size() > 0) {
+            int alreadyInsertUserCount = 0;
             for (Long userId : cmd.getUserIds()) {
                 // 检查当前停车场里是否已经有当前用户了
                 ParkingClearanceOperator operator = clearanceOperatorProvider.findByParkingLotIdAndUid(cmd.getParkingLotId(), userId, cmd.getOperatorType());
                 if (operator != null) {
+                    alreadyInsertUserCount++;
                     continue;
                 }
                 User user = this.findUserById(userId);
@@ -134,6 +138,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     this.assignmentPrivileges(cmd.getOperatorType(), cmd.getParkingLotId(), userId);
                     return true;
                 });
+            }
+            // 此次添加的用户都已经在数据库里了, 就给个提示, 测试要求的
+            if (alreadyInsertUserCount == cmd.getUserIds().size()) {
+                throw errorWith(ParkingErrorCode.SCOPE_CLEARANCE, ParkingErrorCode.ERROR_USER_ALREADY_IN_DATABASE, "All user is in database");
             }
         }
     }
