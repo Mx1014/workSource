@@ -2214,14 +2214,14 @@ public class FlowServiceImpl implements FlowService {
 	
 	
 	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
-		return resolvUserSelections(ctx, entityType, entityId, selections, true);
+		return resolvUserSelections(ctx, entityType, entityId, selections, 1);
 	}
 	
 	@Override
-	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, boolean includeParams) {
+	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
 		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
-		if(selections == null) {
+		if(selections == null || loopCnt >= 5) {
 			return users;
 		}
 		
@@ -2268,13 +2268,13 @@ public class FlowServiceImpl implements FlowService {
 					LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
 				}
 				
-			} else if(includeParams && FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
+			} else if(FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
 				if(sel.getSourceIdA() != null) {
 					FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
 					variable.getScriptCls();
 					FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
 		        	if(ftr != null) {
-		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel);
+		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel, loopCnt + 1);
 		        		if(null != tmp) {
 		        			users.addAll(tmp);
 		        		}

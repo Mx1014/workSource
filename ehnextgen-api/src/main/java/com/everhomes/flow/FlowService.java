@@ -417,7 +417,7 @@ public interface FlowService {
 
 	List<Long> resolvUserSelections(FlowCaseState ctx,
 			FlowEntityType entityType, Long entityId,
-			List<FlowUserSelection> selections, boolean includeParams);
+			List<FlowUserSelection> selections, int loopCnt);
 	
 	//TODO 日志信息分类：
 	

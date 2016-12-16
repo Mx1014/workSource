@@ -33,6 +33,4 @@ public interface FlowStateProcessor {
 
 	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
 
-	List<Long> getSupervisorSelection(FlowCaseState ctx, FlowUserSelection sel);
-
 }

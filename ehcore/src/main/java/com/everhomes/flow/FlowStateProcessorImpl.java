@@ -481,13 +481,4 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		return users;
 	}
-	
-	@Override
-	public List<Long> getSupervisorSelection(FlowCaseState ctx, FlowUserSelection sel) {
-		FlowCase flowCase = ctx.getFlowCase();
-		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowCase.getFlowMainId()
-				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), flowCase.getFlowVersion());
-		return flowService.resolvUserSelections(ctx, FlowEntityType.FLOW, null, selections, false);
-	}
-	
 }

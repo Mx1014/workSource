@@ -14,7 +14,7 @@ public class FlowVariableApplyUserResolver implements FlowVariableUserResolver {
 	
 	@Override
 	public List<Long> variableUserResolve(FlowCaseState ctx, FlowEntityType fromEntity, Long entityId,
-			FlowUserSelection userSelection) {
+			FlowUserSelection userSelection, int loopCnt) {
 		return flowStateProcessor.getApplierSelection(ctx, userSelection);
 	}
 
