@@ -352,3 +352,8 @@ UPDATE eh_web_menu_scopes SET apply_policy = 1, menu_name = '投诉建议' WHERE
 
 UPDATE eh_web_menu_scopes SET apply_policy = 1, menu_name = '充值管理' WHERE menu_id = 40810 AND owner_type = 'EhNamespaces' AND owner_id = 999983;
 
+--
+-- 参数检查错误模板  add by xq.tian  2016/12/16
+--
+SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parameters.error', '10001', 'zh_CN', '参数长度超过限制');
