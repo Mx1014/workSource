@@ -10,7 +10,8 @@ INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf
 VALUES (41300,'统计分析',40000,NULL,NULL,1,2,'/40000/41300','park',462);
 INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
 VALUES (41310,'应用统计',41300,NULL,'application_statistic',0,2,'/40000/41300/41310','park',462);
-INSERT INTO `eh_web_menus` VALUES (41320, '结算管理', 41300, NULL, 'settlement_management', '1', '2', '/40000/41300/41320', 'park', '462');
+INSERT INTO `eh_web_menus` (`id`,`name`,`parent_id`,`icon_url`,`data_type`,`leaf_flag`,`status`,`path`,`type`,`sort_num`)
+VALUES (41320, '结算管理', 41300, NULL, 'settlement_management', '1', '2', '/40000/41300/41320', 'park', '462');
 
 INSERT INTO `eh_acl_privileges` (`id`,`app_id`,`name`,`description`,`tag`)
 VALUES (10060,0,'统计分析','统计分析 管理员权限',NULL);
