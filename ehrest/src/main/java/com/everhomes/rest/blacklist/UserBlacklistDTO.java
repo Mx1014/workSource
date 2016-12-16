@@ -4,6 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>id: 黑名单id</li>
  * <li>userId: 用户id</li>
  * <li>contactName: 名称</li>
  * <li>contactToken: 联系方式</li>
@@ -12,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class UserBlacklistDTO {
+
+    private Long id;
 
     private Long userId;
 
@@ -22,6 +25,14 @@ public class UserBlacklistDTO {
     private Byte gender;
 
     private Long createTime;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public Long getUserId() {
         return userId;
