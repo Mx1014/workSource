@@ -357,3 +357,40 @@ UPDATE eh_web_menu_scopes SET apply_policy = 1, menu_name = '充值管理' WHERE
 --
 SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parameters.error', '10001', 'zh_CN', '参数长度超过限制');
+
+-- 添加工作流菜单  add by sw 20161216
+INSERT INTO `eh_web_menus` VALUES ('40850', '工作流设置', '40800', null, 'react:/working-flow/flow-list', '0', '2', '/40000/40800/40850', 'park', '475');
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10028', '40850', '停车缴费', '1', '1', '停车缴费 全部权限', '710');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40850, '', 'EhNamespaces', 1000000, 2);
+
+INSERT INTO `eh_web_menus` VALUES ('70000', '任务管理', '0', 'fa fa-group', null, '1', '2', '/70000', 'park', '600');
+
+INSERT INTO `eh_web_menus` VALUES ('70100', '任务列表', '70000', null, 'react:/task-management/task-list', '0', '2', '/70000/70100', 'park', '610');
+INSERT INTO `eh_web_menus` VALUES ('70200', '业务授权视图', '70000', null, 'flow_view', '0', '2', '/70000/70200', 'park', '620');
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10028', '40850', '停车缴费', '1', '1', '停车缴费 全部权限', '710');
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10065, '0', '任务管理 管理员', '任务管理 业务模块权限', NULL);
+
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10065', '70000', '任务管理', '1', '1', '任务管理 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10065', '70100', '任务管理', '1', '1', '任务管理 全部权限', '711');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10065', '70200', '任务管理', '1', '1', '任务管理 全部权限', '712');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40850, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 70000, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 70100, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 70200, '', 'EhNamespaces', 1000000, 2);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now() FROM `eh_acl_privileges` WHERE id = 10065 ;
