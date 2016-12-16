@@ -39,4 +39,6 @@ public interface FlowEventLogProvider {
 
 	List<FlowEventLog> findFiredEventsByLog(FlowEventLog log);
 
+	List<FlowEventLog> findStepEventLogs(Long caseId, Long userId);
+
 }

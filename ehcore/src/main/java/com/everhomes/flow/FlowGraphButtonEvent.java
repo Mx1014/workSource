@@ -246,6 +246,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		log.setFlowCaseId(ctx.getFlowCase().getId());
 		log.setFlowUserId(firedUser.getId());
 		log.setLogType(logType.getCode());
+		log.setButtonFiredCount(0l);
 		
 		//Important!!! not change this order
 		if(logType == FlowLogType.BUTTON_FIRED) {

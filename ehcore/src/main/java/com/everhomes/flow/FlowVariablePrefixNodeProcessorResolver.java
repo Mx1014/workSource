@@ -24,6 +24,9 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 	@Autowired
 	FlowNodeProvider flowNodeProvider;
 	
+	@Autowired
+	FlowEventLogProvider flowEventLogProvider;
+	
 	@Override
 	public List<Long> variableUserResolve(FlowCaseState ctx, FlowEntityType fromEntity, Long entityId,
 			FlowUserSelection userSelection, int loopCnt) {
@@ -45,6 +48,7 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 		}
 		
 		//found fired buttons
+//		flowEventLogProvider.findStepEventLogs(caseId, userId);
 		
 		FlowGraphNode graphNode = ctx.getFlowGraph().getNodes().get(node.getNodeLevel() - 1);
 		node = graphNode.getFlowNode();
