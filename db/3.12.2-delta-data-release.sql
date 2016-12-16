@@ -345,3 +345,10 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 
 -- 更新 资源预订  默认参数 菜单 data_type add by sw 20161215
 update eh_web_menus set data_type = 'resource--defaultParameter' where id = 40410;
+
+-- 科兴菜单 by sfyan 20161216
+DELETE FROM eh_web_menu_scopes WHERE menu_id IN (20400,20410,20420) AND owner_type = 'EhNamespaces' AND owner_id = 999983;
+UPDATE eh_web_menu_scopes SET apply_policy = 1, menu_name = '投诉建议' WHERE menu_id = 20100 AND owner_type = 'EhNamespaces' AND owner_id = 999983;
+
+UPDATE eh_web_menu_scopes SET apply_policy = 1, menu_name = '充值管理' WHERE menu_id = 40810 AND owner_type = 'EhNamespaces' AND owner_id = 999983;
+

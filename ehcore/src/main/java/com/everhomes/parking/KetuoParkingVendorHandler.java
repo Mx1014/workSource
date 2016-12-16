@@ -122,7 +122,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000;
+	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
 	    		expireTime = expireTime + cardReserveTime;
 	    	}
 			
