@@ -2158,6 +2158,13 @@ public class FlowServiceImpl implements FlowService {
 			return dto;
 		}
 
+		if(moduleId.equals(115L)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(115L);
+			dto.setModuleName("rental");
+			dto.setDisplayName("资源预约");
+			return dto;
+		}
 		return null;
 	}
 

@@ -166,7 +166,7 @@ public class ParkingServiceImpl implements ParkingService {
     @Autowired
 	private FlowProvider flowProvider;
     @Autowired
-    private FlowCaseProvider flowCaseProvider;
+    private FlowCaseProvid+er flowCaseProvider;
     @Autowired
     private UserService userService;
     
