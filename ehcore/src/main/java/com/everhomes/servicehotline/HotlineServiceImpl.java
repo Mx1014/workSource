@@ -13,7 +13,9 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.rentalv2.NormalFlag;
@@ -30,6 +32,7 @@ import com.everhomes.rest.servicehotline.ServiceType;
 import com.everhomes.rest.servicehotline.SetHotlineSubjectCommand;
 import com.everhomes.rest.servicehotline.UpdateHotlineCommand;
 import com.everhomes.rest.servicehotline.UpdateHotlinesCommand;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.techpark.servicehotline.ServiceConfiguration;
@@ -39,6 +42,7 @@ import com.everhomes.techpark.servicehotline.ServiceHotlinesProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -52,7 +56,13 @@ public class HotlineServiceImpl implements HotlineService {
 
 	@Autowired
 	private ServiceHotlinesProvider serviceHotlinesProvider;
-
+	
+	@Autowired
+	private UserService userService;
+	
+	@Autowired
+	private ContentServerService contentServerService;
+	
 	@Autowired
 	private UserProvider userProvider;
 	
@@ -129,14 +139,24 @@ public class HotlineServiceImpl implements HotlineService {
 			if(null != r.getUserId()){
 				User user = this.userProvider.findUserById(r.getUserId());
 				if (null != user)
-					dto.setAvatar(user.getAvatar());
+					dto.setAvatar(populateUserAvatar ( user,user.getAvatar()));
 			}
 			hotlines.add(dto);
 		});
 		resp.setHotlines(hotlines);
 		return resp;
 	}
-
+	private String populateUserAvatar( User user,String avatarUri) {
+		if(avatarUri == null || avatarUri.trim().length() == 0) {
+			avatarUri = userService.getUserAvatarUriByGender(user.getId(), user.getNamespaceId(), user.getGender());
+		} 
+		try{
+			String url=contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId());
+			return url;
+		}catch(Exception e){
+			//LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri);
+		}
+	}
 	@Override
 	public void addHotline(AddHotlineCommand cmd) {
 		ServiceHotline hotline = ConvertHelper.convert(cmd,
