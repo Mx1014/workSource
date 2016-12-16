@@ -7,6 +7,8 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -96,6 +98,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	@Autowired
 	private EnterpriseProvider enterpriseProvider;
 	
+	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
+	private ExecutorService fixedThreadPool = Executors.newFixedThreadPool(1); 
+	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
 		if (StringUtils.isBlank(cmd.getAppKey()) || cmd.getDataType() == null) {
@@ -136,23 +141,31 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		
 		//如果到最后一页了，则开始更新到我们数据库中
 		if (cmd.getNextPage() == null) {
-			dbProvider.execute(s->{
-				List<TechparkSyncdataBackup> backupList = techparkSyncdataBackupProvider.listTechparkSyncdataBackupByParam(appNamespaceMapping.getNamespaceId(), cmd.getDataType(), cmd.getAllFlag());
-				if (backupList == null || backupList.isEmpty()) {
-					return false;
+			fixedThreadPool.execute(()->{
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("enter into thread=================");
 				}
-				try {
-					if (AllFlag.fromCode(cmd.getAllFlag()) == AllFlag.ALL) {
-						// 全量更新
-						updateAllDate(cmd.getDataType(),appNamespaceMapping , backupList);
-					}else {
-						// 增量更新
-						updatePartDate(cmd.getDataType(), appNamespaceMapping, backupList);
+				dbProvider.execute(s->{
+					List<TechparkSyncdataBackup> backupList = techparkSyncdataBackupProvider.listTechparkSyncdataBackupByParam(appNamespaceMapping.getNamespaceId(), cmd.getDataType(), cmd.getAllFlag());
+					if (backupList == null || backupList.isEmpty()) {
+						return false;
 					}
-				} finally {
-					techparkSyncdataBackupProvider.updateTechparkSyncdataBackupInactive(backupList);
+					try {
+						if (AllFlag.fromCode(cmd.getAllFlag()) == AllFlag.ALL) {
+							// 全量更新
+							updateAllDate(cmd.getDataType(),appNamespaceMapping , backupList);
+						}else {
+							// 增量更新
+							updatePartDate(cmd.getDataType(), appNamespaceMapping, backupList);
+						}
+					} finally {
+						techparkSyncdataBackupProvider.updateTechparkSyncdataBackupInactive(backupList);
+					}
+					return true;
+				});
+				if (LOGGER.isDebugEnabled()) {
+					LOGGER.debug("get out thread=================");
 				}
-				return true;
 			});
 		}
 	}
@@ -331,7 +344,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setAreaId(community.getAreaId());
 		address.setAreaName(community.getAreaName());
 		address.setZipcode(community.getZipcode());
-		address.setAddress(customerApartment.getBuildingName()+"-"+customerApartment.getApartmentName());
+		address.setAddress(getAddress(customerApartment.getBuildingName(), customerApartment.getApartmentName()));
 		address.setAddressAlias(address.getAddress());
 		address.setBuildingName(customerApartment.getBuildingName());
 		address.setBuildingAliasName(customerApartment.getBuildingName());
@@ -351,6 +364,13 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
 		address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
 		addressProvider.createAddress(address);
+	}
+	
+	private String getAddress(String buildingName, String apartmentName){
+		if (apartmentName.contains(buildingName)) {
+			return apartmentName;
+		}
+		return buildingName+"-"+apartmentName;
 	}
 
 	private void deleteAddress(Address address) {
