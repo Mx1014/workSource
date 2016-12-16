@@ -413,6 +413,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case ABSORT_STEP:
 			logStep = true;
 			ctx.getFlowCase().setStatus(FlowCaseStatus.ABSORTED.getCode());
+            flowListenerManager.onFlowCaseAbsorted(ctx);
 			break;
 		default:
 			break;
