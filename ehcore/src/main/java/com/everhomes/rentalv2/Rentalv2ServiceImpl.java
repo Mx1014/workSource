@@ -1582,7 +1582,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
 				}else {
 //					useDetailSB.append("使用时间:");
-					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate()));
+					useDetailSB.append(bigenDateSF.format(rsr.getResourceRentalDate())+" ");
 					if(rsr.getAmorpm().equals(AmorpmFlag.AM.getCode()))
 						useDetailSB.append(this.localeStringService.getLocalizedString(PunchNotificationTemplateCode.SCOPE,
 								""+AmorpmFlag.AM.getCode(), PunchNotificationTemplateCode.locale, "morning"));
@@ -3112,7 +3112,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
 					
-					if(rSiteItem.getRentalResourceId()!=bill.getRentalResourceId())
+					if(!rSiteItem.getRentalResourceId().equals(bill.getRentalResourceId()))
 						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter item id is not this site");
 						
