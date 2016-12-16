@@ -29,10 +29,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -77,6 +82,7 @@ import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
+import com.everhomes.rest.parking.GetRechargeResultCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
 import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IsOrderDelete;
@@ -169,6 +175,8 @@ public class ParkingServiceImpl implements ParkingService {
     private FlowCaseProvider flowCaseProvider;
     @Autowired
     private UserService userService;
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -1330,6 +1338,53 @@ public class ParkingServiceImpl implements ParkingService {
 		if(null != parkingFlow)
 			dto.setAgreement(parkingFlow.getCardAgreement());
 		return dto;
+	}
+
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+	@Override
+	public void getRechargeResult(GetRechargeResultCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+		
+		if(null == order) {
+			LOGGER.error("Order not found, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Order not found.");
+		}
+		
+		Byte orderStatus = order.getRechargeStatus();
+		String key = "parking-recharge" + order.getId();
+		String value = String.valueOf(order.getId());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+      
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        
+//        Object value = .get(key);
+        long now = System.currentTimeMillis();
+        long time = now + 10 * 1000;
+//        NamedLock lock =coordinationProvider.getNamedLock(CoordinationLocks.PARKING_RECHARGE.getCode() + "_" + order.getId());
+//        lock.enter(()-> {
+////			tempss.put(order.getId(), order);
+//        	lock.setLockAcquireTimeoutSeconds(5);
+			valueOperations.set(key, value);
+
+			LOGGER.error("wait order notify", cmd);
+
+    		while(orderStatus == ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode() 
+    				&& null != valueOperations.get(key) && time >= System.currentTimeMillis()) {
+    			try {
+//    				lock.wait(5000);
+					System.out.println("wait ~~~~~~~~~~~~~~~~~~~~~~~~~~");
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    		}
+		
 	}
 	
 }
