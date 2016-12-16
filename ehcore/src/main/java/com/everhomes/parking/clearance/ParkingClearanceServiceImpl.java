@@ -16,6 +16,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
+import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -43,6 +44,8 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -438,27 +441,43 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private void validate(Object o) {
         Set<ConstraintViolation<Object>> result = validator.validate(o);
 
-        /*for (ConstraintViolation<Object> violation : result) {
-            ConstraintDescriptor<?> constraintDescriptor = violation.getConstraintDescriptor();
+        for (ConstraintViolation<Object> v : result) {
+            ConstraintDescriptor<?> constraintDescriptor = v.getConstraintDescriptor();
             String constraintAnnotationClassName = constraintDescriptor.getAnnotation().annotationType().getName();
-            if ("javax.validation.constraints.Size".equals(constraintAnnotationClassName)) {
-                Size size = (Size) constraintDescriptor.getAnnotation();
-                int max = size.max();
-                if (max > 0) {
-                    // localeStringService.getLocalizedString();
-                    LOGGER.error("Invalid parameter {}", violation.getPropertyPath());
-                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", violation.getPropertyPath());
-                }
+            switch (constraintAnnotationClassName) {
+                // 参数长度检查
+                case "javax.validation.constraints.Size":
+                    Size size = (Size) constraintDescriptor.getAnnotation();
+                    int max = size.max();
+                    if (max > 0) {
+                        LOGGER.error("Parameter over length: [ {} ]", v.getPropertyPath());
+                        throw errorWith(ParamErrorCodes.SCOPE, ParamErrorCodes.ERROR_OVER_LENGTH,
+                                "Parameter over length: [ %s ]", v.getPropertyPath());
+                    }
+                    break;
+                // 其他参数检查
+                default:
+                    LOGGER.error("Invalid parameter {} [ {} ]", v.getPropertyPath(), v.getInvalidValue());
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "Invalid parameter %s [ %s ]", v.getPropertyPath(), v.getInvalidValue());
             }
-        }*/
+        }
 
+        /*if ("javax.validation.constraints.Size".equals(constraintAnnotationClassName)) {
+            Size size = (Size) constraintDescriptor.getAnnotation();
+            int max = size.max();
+            if (max > 0) {
+                LOGGER.error("Parameter over length: [ {} ]", v.getPropertyPath());
+                throw errorWith(ParamErrorCodes.SCOPE, ParamErrorCodes.ERROR_OVER_LENGTH, "Parameter over length: [ %s ]", v.getPropertyPath());
+            }
+        }
         if (!result.isEmpty()) {
             result.stream().map(r -> r.getPropertyPath().toString() + " [ " + r.getInvalidValue() + " ]")
                     .reduce((i, a) -> i + ", " + a).ifPresent(r -> {
                 LOGGER.error("Invalid parameter {}", r);
                 throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
             });
-        }
+        }*/
     }
 
     @Override
