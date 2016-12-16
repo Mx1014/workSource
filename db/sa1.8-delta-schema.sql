@@ -1,3 +1,4 @@
+ALTER TABLE `eh_service_alliance_apartment_requests` ADD COLUMN `template_type` VARCHAR(128) NOT NULL DEFAULT '';
 ALTER TABLE `eh_settle_requests` ADD COLUMN `template_type` VARCHAR(128) NOT NULL DEFAULT '';
 ALTER TABLE `eh_service_alliance_requests` ADD COLUMN `template_type` VARCHAR(128) NOT NULL DEFAULT '';
 ALTER TABLE `eh_service_alliance_requests` ADD COLUMN `remarks` VARCHAR(1024);
