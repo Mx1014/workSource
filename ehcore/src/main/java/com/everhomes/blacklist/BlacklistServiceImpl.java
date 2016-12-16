@@ -94,6 +94,7 @@ public class BlacklistServiceImpl implements BlacklistService{
 		res.setDtos(userBlacklists.stream().map(r -> {
 			UserBlacklistDTO dto = ConvertHelper.convert(r, UserBlacklistDTO.class);
 			dto.setCreateTime(r.getCreateTime().getTime());
+			dto.setUserId(r.getOwnerUid());
 			return dto;
 		}).collect(Collectors.toList()));
 		res.setNextPageAnchor(locator.getAnchor());
