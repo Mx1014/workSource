@@ -1114,6 +1114,7 @@ public class FlowServiceImpl implements FlowService {
 			flow.setStatus(FlowStatusType.RUNNING.getCode());
 			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flow.setUpdateTime(now);
+			flow.setRunTime(now);
 			flowProvider.updateFlow(flow);
 			return true;
 		} else if(flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
@@ -1188,6 +1189,7 @@ public class FlowServiceImpl implements FlowService {
 			//running now
 			now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flowNew.setUpdateTime(now);
+			flowNew.setRunTime(now);
 			flowNew.setStatus(FlowStatusType.RUNNING.getCode());
 			flowProvider.updateFlow(flowNew);
 			
@@ -1634,7 +1636,11 @@ public class FlowServiceImpl implements FlowService {
 	 */
 	@Override
 	public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-		return flowProvider.getEnabledSnapshotFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+		Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+		if(flow != null) {
+			return flowProvider.getSnapshotFlowById(flow.getId());
+		}
+		return null;
 	}
 
 	@Override

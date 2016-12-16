@@ -43,6 +43,9 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 			LOGGER.warn("nextNode not found flowCaseId= " + flowCase.getId() );
 			return new ArrayList<Long>();
 		}
+		
+		//found fired buttons
+		
 		FlowGraphNode graphNode = ctx.getFlowGraph().getNodes().get(node.getNodeLevel() - 1);
 		node = graphNode.getFlowNode();
 		

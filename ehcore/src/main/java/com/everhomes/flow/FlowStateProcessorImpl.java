@@ -216,6 +216,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 					action.fireAction(ctx, event);
 				}
 			}
+			
+			FlowStepType stepType = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
+			ctx.setStepType(stepType);
 		}
 		
 		flowListenerManager.onFlowButtonFired(ctx);
