@@ -5,6 +5,7 @@ import java.util.Locale;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.messaging.PushMessageResolver;
@@ -28,6 +29,9 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
    
     @Autowired
     private LocaleStringService localeStringService;
+
+    @Autowired
+    private ConfigurationProvider configurationProvider;
     
     @Override
     public DeviceMessage resolvMessage(UserLogin senderLogin, UserLogin destLogin, Message msg) {
@@ -43,7 +47,13 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
                 "You have a message"));
                 
         deviceMessage.setAlertType(DeviceMessageType.SIMPLE.getCode());
-        deviceMessage.setTitle("左邻App");//TODO
+        
+        // 由于eh_locale_strings表没有namespace_id，故只能先把配置项放配置表，
+        // 按产品要求每个域空间需要使用不同的标题 BUG:http://devops.lab.everhomes.com/issues/4448  by lqs 20161217
+        Integer namespaceId = senderLogin.getNamespaceId();
+        String messageTitle = this.configurationProvider.getValue(namespaceId, "message.title", "左邻App");
+        // deviceMessage.setTitle("左邻App");
+        deviceMessage.setTitle(messageTitle);
         
         deviceMessage.setBadge(new Integer((int)messagingService.getMessageCountInLoginMessageBox(destLogin)));
         
