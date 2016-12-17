@@ -351,30 +351,36 @@ public class ParkingServiceImpl implements ParkingService {
 		String ownerType = FlowOwnerType.PARKING.getCode();
     	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
     			FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
-		Long flowId = flow.getId();
+		Long flowId = flow.getFlowMainId();
 		String tag1 = flow.getStringTag1();
 		
         if(cardListSize == 0){
+        	
         	ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingLot.getOwnerType(), 
         			parkingLot.getOwnerId(), parkingLot.getId(), flowId);
+        	
         	List<ParkingCardRequest> requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), null, null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
+        	
         	int requestlistSize = requestlist.size();
         	if(null != parkingFlow && requestlistSize >= parkingFlow.getMaxRequestNum()){
         		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
     					"The card request is rather than max request num.");
         	}
+        	
         	requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
+        	
         	requestlistSize = requestlist.size();
         	if(requestlistSize > 0){
         		LOGGER.error("PlateNumber is already applied, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
     					"plateNumber is already applied.");
         	}
+        	
         }
         ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
         ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
@@ -422,7 +428,7 @@ public class ParkingServiceImpl implements ParkingService {
     		//TODO: 新建flowcase
     		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
     		createFlowCaseCommand.setApplyUserId(user.getId());
-    		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+    		createFlowCaseCommand.setFlowMainId(flowId);
     		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
     		createFlowCaseCommand.setReferId(parkingCardRequest.getId());
     		createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
@@ -824,13 +830,16 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId);
+		
 		Integer requestedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
+		
 		Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
 		
 		Integer totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - requestedCount;
+		
 		if(count > surplusCount) {
 			LOGGER.error("Count is rather than surplusCount.");
     		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
@@ -855,10 +864,9 @@ public class ParkingServiceImpl implements ParkingService {
 				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 
 					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.PROCESSING.getCode());
-
 				}else {
+					
 					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.SUCCEED.getCode());
-
 				}
 			}else {
 				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
