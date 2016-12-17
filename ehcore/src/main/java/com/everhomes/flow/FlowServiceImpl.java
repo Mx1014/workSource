@@ -1130,7 +1130,13 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
-		clearSnapshotGraph(snapshotFlow);
+		if(snapshotFlow != null) {
+			clearSnapshotGraph(snapshotFlow);
+			if(snapshotFlow.getFlowVersion() > flow.getFlowVersion()) {
+				flow.setFlowVersion(snapshotFlow.getFlowVersion() + 1);
+			}
+		}
+		
 		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
 		flowNodes.sort((n1, n2) -> {
@@ -1477,6 +1483,12 @@ public class FlowServiceImpl implements FlowService {
 				graphMap.remove(fmt);
 			}	
 		}
+	}
+	
+	@Override
+	public void clearFlowGraphCache(Long flowId) {
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+		clearSnapshotGraph(snapshotFlow);
 	}
 	
 	private FlowGraph getSnapshotGraph(Long flowId, Integer flowVer) {
@@ -2659,7 +2671,7 @@ public class FlowServiceImpl implements FlowService {
 		
 		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
 		if(snapshotFlow != null) {
-			deleteAllNodeProcessors(snapshotFlow, flow.getFlowMainId(), flow.getFlowVersion(), userId);
+			deleteAllNodeProcessors(snapshotFlow, snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion(), userId);
 		}
 	}
 	

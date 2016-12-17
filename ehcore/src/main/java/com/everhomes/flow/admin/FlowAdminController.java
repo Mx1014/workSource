@@ -451,4 +451,19 @@ public class FlowAdminController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /admin/flow/clearFlowCache</b>
+     * <p> 创建一个新 Flow，一个业务模块，名字不能重复 </p>
+     * @return Flow 的详细信息
+     */
+    @RequestMapping("clearFlowCache")
+    @RestReturn(value=String.class)
+    public RestResponse clearFlowCache(@Valid FlowIdCommand cmd) {
+    	flowService.clearFlowGraphCache(cmd.getFlowId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
