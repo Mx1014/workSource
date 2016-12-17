@@ -804,10 +804,10 @@ ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL D
 ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
 
-ALTER TABLE `eh_flows` ADD COLUMN `project_id` BIGINT NOT NULL;
-ALTER TABLE `eh_flows` ADD COLUMN `project_type` VARCHAR(64);
-ALTER TABLE `eh_flows` ADD COLUMN `evaluate_item_id` BIGINT NOT NULL;
-ALTER TABLE `eh_flows` MODIFY COLUMN `flow_node_id` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `project_id` BIGINT NOT NULL;
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `project_type` VARCHAR(64);
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `evaluate_item_id` BIGINT NOT NULL;
+ALTER TABLE `eh_flow_evaluates` MODIFY COLUMN `flow_node_id` BIGINT NOT NULL DEFAULT 0;
 
 -- DROP TABLE IF EXISTS `eh_flow_evaluate_items`;
 CREATE TABLE `eh_flow_evaluate_items` (
