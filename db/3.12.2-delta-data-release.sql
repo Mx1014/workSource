@@ -399,3 +399,9 @@ SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now(), 'Eh
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ('2006', '0', '0', '', '0', '', 'targetProcessor', '目标节点处理人', 'node_user', 'bean_id', 'flow-variable-target-node-processor', '1');
+
+
+-- 添加消息标题 by lqs 20161217
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'message.title', '左邻App', '消息标题：左邻APP');
+INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (999993, 'message.title', '海岸馨服务', '消息标题：海岸馨服务');
+
