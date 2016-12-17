@@ -1226,10 +1226,11 @@ public class FlowServiceImpl implements FlowService {
 			flowNew.setUpdateTime(now);
 			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
 			flowProvider.updateFlow(flowNew);			
-		} else {
-			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
-			graphMap.put(fmt, flowGraph);
 		}
+//		else { //TODO save graph right now ?
+//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
+//			graphMap.put(fmt, flowGraph);
+//		}
 		
 		return isOk;
 	}
@@ -1587,7 +1588,7 @@ public class FlowServiceImpl implements FlowService {
 //		stepDTO.setFlowVersion(dto.getFlowVersion());
 //		stepDTO.setStepCount(dto.getStepCount());
 		FlowAutoStepDTO stepDTO = ConvertHelper.convert(dto, FlowAutoStepDTO.class);
-		FlowCaseState ctx = flowStateProcessor.prepareAutoStep(stepDTO);
+		FlowCaseState ctx = flowStateProcessor.prepareNoStep(stepDTO);
 		if(ctx == null) {
 			LOGGER.error("flowtimeout context error ft=" + ft.getId());
 			return;
@@ -1822,18 +1823,18 @@ public class FlowServiceImpl implements FlowService {
 			cmd.setNamespaceId(0);
 		}
 		
-		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
-		if(entityType == null) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
-		}
-		
-		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
-		if(flow == null) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow not found");	
-		}
-		
 		String flowVariableType = FlowVariableType.TEXT.getCode();
 		if(flowVariableType.equals(cmd.getFlowVariableType())) {
+			FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
+			if(entityType == null) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
+			}
+			
+			Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
+			if(flow == null) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow not found");	
+			}
+			
 			return listFlowTextVariables(flow, cmd);
 		} else {
 			FlowVariableResponse resp = new FlowVariableResponse();
@@ -2318,7 +2319,7 @@ public class FlowServiceImpl implements FlowService {
 			} else if(FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
 				if(sel.getSourceIdA() != null) {
 					FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
-					variable.getScriptCls();
+//					variable.getScriptCls();
 					FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
 		        	if(ftr != null) {
 		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel, loopCnt + 1);

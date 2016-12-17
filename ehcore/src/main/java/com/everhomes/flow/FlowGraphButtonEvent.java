@@ -219,6 +219,19 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			break;
 		}
 		
+		//button actions
+		if(null != btn.getMessage()) {
+			btn.getMessage().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(null != btn.getSms()) {
+			btn.getSms().fireAction(ctx, ctx.getCurrentEvent());
+		}
+		if(null != btn.getScripts()) {
+			for(FlowGraphAction action : btn.getScripts()) {
+				action.fireAction(ctx, ctx.getCurrentEvent());
+			}
+		}
+		
 		if(tracker != null && subject != null) {
 			tracker.setId(flowEventLogProvider.getNextId());
 			tracker.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());

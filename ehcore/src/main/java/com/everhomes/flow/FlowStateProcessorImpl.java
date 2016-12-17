@@ -149,6 +149,43 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	}
 	
 	@Override
+	public FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO) {
+		FlowCaseState ctx = new FlowCaseState();
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
+    	User user = userProvider.findUserById(User.SYSTEM_UID);
+    	UserContext.current().setUser(user);
+    	
+    	//Important, never update this to database!!!
+    	flowCase.setCurrentNodeId(stepDTO.getFlowNodeId());
+    	flowCase.setStepCount(stepDTO.getStepCount());
+    	
+		ctx.setFlowCase(flowCase);
+		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
+		
+		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		ctx.setFlowGraph(flowGraph);
+		
+		FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+		if(node == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
+		}
+		ctx.setCurrentNode(node);
+		
+		if(stepDTO.getFlowTargetId() != null) {
+			FlowGraphNode targetNode = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+			ctx.setNextNode(targetNode);
+		}
+		
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
+		ctx.setOperator(userInfo);
+//		FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
+		ctx.setCurrentEvent(null);
+		ctx.setStepType(FlowStepType.NO_STEP);	
+		
+		return ctx;	
+	}
+	
+	@Override
 	public FlowCaseState prepareButtonFire(UserInfo logonUser, FlowFireButtonCommand cmd) {
 		FlowCaseState ctx = new FlowCaseState();
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
@@ -210,17 +247,17 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		//fire button actions
 		FlowGraphButton btn = flowGraph.getGraphButton(cmd.getButtonId());
 		if(btn != null) {
-			if(null != btn.getMessage()) {
-				btn.getMessage().fireAction(ctx, event);
-			}
-			if(null != btn.getSms()) {
-				btn.getSms().fireAction(ctx, event);
-			}
-			if(null != btn.getScripts()) {
-				for(FlowGraphAction action : btn.getScripts()) {
-					action.fireAction(ctx, event);
-				}
-			}
+//			if(null != btn.getMessage()) { //In fire event
+//				btn.getMessage().fireAction(ctx, event);
+//			}
+//			if(null != btn.getSms()) {
+//				btn.getSms().fireAction(ctx, event);
+//			}
+//			if(null != btn.getScripts()) {
+//				for(FlowGraphAction action : btn.getScripts()) {
+//					action.fireAction(ctx, event);
+//				}
+//			}
 			
 			FlowStepType stepType = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
 			ctx.setStepType(stepType);
