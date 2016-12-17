@@ -362,7 +362,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 添加工作流菜单  add by sw 20161216
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('70000', '任务管理', '0', '/70000', '2', '2', '2', '0', UTC_TIMESTAMP());
 
-INSERT INTO `eh_web_menus` VALUES ('40850', '工作流设置', '40800', null, 'react:/working-flow/flow-list', '0', '2', '/40000/40800/40850', 'park', '475', 40800);
+INSERT INTO `eh_web_menus` VALUES ('40850', '工作流设置', '40800', null, 'react:/working-flow/flow-list/parking-payment/40800', '0', '2', '/40000/40800/40850', 'park', '475', 40800);
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10028', '40850', '停车缴费', '1', '1', '停车缴费 全部权限', '710');
 
