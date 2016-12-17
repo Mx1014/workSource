@@ -326,11 +326,11 @@ UPDATE `eh_web_menus` SET `module_id` = 41300 WHERE `path` LIKE '%/41300/%';
 UPDATE `eh_web_menus` SET `module_id` = 41400 WHERE `path` LIKE '%/41400/%';
 UPDATE `eh_web_menus` SET `module_id` = 10750 WHERE `path` LIKE '%/10750/%';
 
--- 创源 服务热线 
+-- 创源 服务热线
 SET @id := (SELECT MAX(id) FROM eh_launch_pad_items);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','咨询热线','cs://1/image/aW1hZ2UvTVRvME1UWXpZak01WkdSa05USmxNekppT1RWaVlUa3lZemt3WkRabFlUSXhZZw','1','1','45','','0','0','1','0','','0',NULL,NULL,NULL,'1','pm_admin','0',NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) 
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','咨询热线','cs://1/image/aW1hZ2UvTVRvME1UWXpZak01WkdSa05USmxNekppT1RWaVlUa3lZemt3WkRabFlUSXhZZw','1','1','45','','0','0','1','0','','0',NULL,NULL,NULL,'1','park_tourist','0',NULL);
 
 
@@ -339,7 +339,7 @@ VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','�
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10012', 'zh_CN', '发放月卡资格数量不可大于当前剩余月卡数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10013', 'zh_CN', '发放月卡资格数量不可大于当前排队数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10014', 'zh_CN', '操作失败，当前无剩余月卡');
-INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`) 
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`)
 	VALUES ('10006', 'community', '240111044331055940', '科兴科学园停车场', 'KETUO2', NULL, '41', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '0');
 
 
@@ -394,3 +394,8 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
 SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now(), 'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10078 ;
+
+-- add target node processor variable, by Janson 20161216
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2006', '0', '0', '', '0', '', 'targetProcessor', '目标节点处理人', 'node_user', 'bean_id', 'flow-variable-target-node-processor', '1');
