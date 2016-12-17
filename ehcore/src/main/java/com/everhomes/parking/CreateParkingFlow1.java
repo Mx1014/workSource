@@ -573,12 +573,12 @@ public class CreateParkingFlow1 {
 
     	UpdateFlowNodeCommand updateFlowCmd = new UpdateFlowNodeCommand();
     	updateFlowCmd.setFlowNodeId(node1.getId());
-    	updateFlowCmd.setParams("AUDITING");
+    	updateFlowCmd.setParams("QUEUEING");
     	flowService.updateFlowNode(updateFlowCmd);
     	
     	UpdateFlowNodeCommand updateFlowCmd2 = new UpdateFlowNodeCommand();
     	updateFlowCmd2.setFlowNodeId(node2.getId());
-    	updateFlowCmd2.setParams("QUEUEING");
+    	updateFlowCmd2.setParams("PROCESSING");
     	flowService.updateFlowNode(updateFlowCmd2);
     	
     	UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
