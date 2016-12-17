@@ -1355,6 +1355,10 @@ public class ParkingServiceImpl implements ParkingService {
 		}
 		
 		Byte orderStatus = order.getRechargeStatus();
+		if(orderStatus == ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
+			return;
+		}
+		
 		String key = "parking-recharge" + order.getId();
 		String value = String.valueOf(order.getId());
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
@@ -1364,17 +1368,19 @@ public class ParkingServiceImpl implements ParkingService {
         
 //        Object value = .get(key);
         long now = System.currentTimeMillis();
-        long time = now + 10 * 1000;
+        long eTime = now + 5 * 1000;
+        long sTime = eTime;
 //        NamedLock lock =coordinationProvider.getNamedLock(CoordinationLocks.PARKING_RECHARGE.getCode() + "_" + order.getId());
 //        lock.enter(()-> {
 ////			tempss.put(order.getId(), order);
 //        	lock.setLockAcquireTimeoutSeconds(5);
 			valueOperations.set(key, value);
 
-			LOGGER.error("wait order notify", cmd);
+			LOGGER.error("wait order notify, cmd={}, startTime={}", cmd, eTime);
 
     		while(orderStatus == ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode() 
-    				&& null != valueOperations.get(key) && time >= System.currentTimeMillis()) {
+    				&& null != valueOperations.get(key) && eTime >= sTime) {
+    			
     			try {
 //    				lock.wait(5000);
 					System.out.println("wait ~~~~~~~~~~~~~~~~~~~~~~~~~~");
@@ -1383,6 +1389,13 @@ public class ParkingServiceImpl implements ParkingService {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
+    			sTime = System.currentTimeMillis();
+    		}
+    		
+    		if(sTime >= eTime) {
+    			LOGGER.error("Get recharge result time out, cmd={}", cmd);
+        		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+        				"Get recharge result time out.");
     		}
 		
 	}
