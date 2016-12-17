@@ -102,7 +102,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
 	
-	private ExecutorService rentalThreadPool = Executors.newFixedThreadPool(20); 
+	private ExecutorService rentalThreadPool = Executors.newFixedThreadPool(10); 
 	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
@@ -448,10 +448,10 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
 			rentalThreadPool.execute(()->{
 				dbProvider.execute(s->{
-					if (LOGGER.isDebugEnabled()) {
-						LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
-					}
 					if (customerRental != null) {
+						if (LOGGER.isDebugEnabled()) {
+							LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
+						}
 						updateOrganization(myOrganization, customerRental);
 						insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
 						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
@@ -566,7 +566,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private CustomerRental findFromTheirRentalList(Organization myOrganization, List<CustomerRental> theirRentalList) {
 		for (CustomerRental customerRental : theirRentalList) {
-			if (myOrganization.getName().equals(customerRental.getName())) {
+			if (myOrganization.getName().equals(customerRental.getName()) && myOrganization.getNamespaceOrganizationToken().equals(customerRental.getNumber())) {
 				customerRental.setDealed(true);
 				return customerRental;
 			}

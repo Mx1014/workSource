@@ -2676,12 +2676,13 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			List<Organization> organizationList = result.map(r->ConvertHelper.convert(r, Organization.class));
 			if (organizationList.size() > 1) {
 				for (Organization organization : organizationList) {
-					if (OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE) {
+					if (OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE && organization.getNamespaceOrganizationToken() == null) {
 						return organization;
 					}
 				}
-			}
-			return organizationList.get(0);
+			}else if (organizationList.get(0).getNamespaceOrganizationToken() == null) {
+				return organizationList.get(0);
+			} 
 		}
 		
 		return null;
