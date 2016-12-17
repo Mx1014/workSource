@@ -1031,6 +1031,9 @@ public class FlowServiceImpl implements FlowService {
 			return true;
 		}
 		
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+		clearSnapshotGraph(snapshotFlow);
+		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
 		flowNodes.sort((n1, n2) -> {
 			return n1.getNodeLevel().compareTo(n2.getNodeLevel());
@@ -1368,12 +1371,22 @@ public class FlowServiceImpl implements FlowService {
 		return flowGraph;
 	}
 	
+	private void clearSnapshotGraph(Flow snapshotFlow) {
+		if(snapshotFlow != null) {
+			for(int i = 1; i < snapshotFlow.getFlowVersion(); i++) {
+				String fmt = String.format("%d:%d", snapshotFlow.getFlowMainId(), i);
+				graphMap.remove(fmt);
+			}	
+		}
+	}
+	
 	private FlowGraph getSnapshotGraph(Long flowId, Integer flowVer) {
 		if(flowVer <= 0) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");	
 		}
 		
 		FlowGraph flowGraph = new FlowGraph();
+		flowGraph.setCreateTime(System.currentTimeMillis());
 		Flow flow = flowProvider.findSnapshotFlow(flowId, flowVer);
 		if(flow == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");
@@ -1533,6 +1546,10 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		if(FlowStatusType.RUNNING.equals(flow.getStatus())) {
+			
+			Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+			clearSnapshotGraph(snapshotFlow);
+			
 			flow.setStatus(FlowStatusType.STOP.getCode());
 			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flow.setUpdateTime(now);
@@ -1723,7 +1740,7 @@ public class FlowServiceImpl implements FlowService {
 		} else {
 			FlowVariableResponse resp = new FlowVariableResponse();
 			String para = null;
-			List<FlowVariable> vars = flowVariableProvider.findVariables(cmd.getNamespaceId()
+			List<FlowVariable> vars = flowVariableProvider.findVariables(0
 	        		, 0l, null, 0l, null, para, FlowVariableType.NODE_USER.getCode());
 			
 			List<FlowVariableDTO> dtos = new ArrayList<>();

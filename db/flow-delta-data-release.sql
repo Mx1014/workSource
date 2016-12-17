@@ -64,6 +64,10 @@ INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
 VALUES ('2005', '0', '0', '', '0', '', 'supervisor', '督办', 'node_user', 'bean_id', 'flow-variable-supervisor', '1');
 
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2006', '0', '0', '', '0', '', 'targetProcessor', '目标节点处理人', 'node_user', 'bean_id', 'flow-variable-target-node-processor', '1');
+
 
 
 SET @id := (SELECT MAX(id) FROM eh_launch_pad_items);

@@ -286,7 +286,10 @@ public class FlowProviderImpl implements FlowProvider {
 				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
 				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
 				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0l));
+<<<<<<< HEAD
 //				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.ne(0l));
+=======
+>>>>>>> flow
 				query.addOrderBy(Tables.EH_FLOWS.RUN_TIME.desc());
 				
 				return query;

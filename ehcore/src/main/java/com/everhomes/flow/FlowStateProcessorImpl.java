@@ -145,7 +145,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				|| flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists, flowCaseId=" + flowCase);
 		}
 		ctx.setFlowCase(flowCase);
 		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
@@ -156,7 +156,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
 		if(node == null) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists, flowNodeId=" + flowCase.getCurrentNodeId());
 		}
 		ctx.setCurrentNode(node);
 		
