@@ -212,6 +212,11 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
 						ParkingCardRequestStatus.SUCCEED.getCode(), null);
 				
+				if(null == parkingFlow) {
+					LOGGER.error("surplusCount is 0.");
+		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
+		    				"surplusCount is 0.");
+				}
 				Integer totalCount = parkingFlow.getMaxIssueNum();
 				Integer surplusCount = totalCount - requestedCount;
 				if(surplusCount <= 0) {
