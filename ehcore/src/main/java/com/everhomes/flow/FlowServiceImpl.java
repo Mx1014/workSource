@@ -1041,7 +1041,13 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
-		clearSnapshotGraph(snapshotFlow);
+		if(snapshotFlow != null) {
+			clearSnapshotGraph(snapshotFlow);
+			if(snapshotFlow.getFlowVersion() > flow.getFlowVersion()) {
+				flow.setFlowVersion(snapshotFlow.getFlowVersion() + 1);
+			}
+		}
+		
 		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
 		flowNodes.sort((n1, n2) -> {
@@ -1137,10 +1143,12 @@ public class FlowServiceImpl implements FlowService {
 			flowNew.setUpdateTime(now);
 			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
 			flowProvider.updateFlow(flowNew);			
-		} else {
-			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
-			graphMap.put(fmt, flowGraph);
 		}
+		
+//		else {
+//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
+//			graphMap.put(fmt, flowGraph);
+//		}
 		
 		return isOk;
 	}
