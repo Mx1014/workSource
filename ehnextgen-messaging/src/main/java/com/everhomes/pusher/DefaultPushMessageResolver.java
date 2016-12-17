@@ -50,7 +50,7 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         
         // 由于eh_locale_strings表没有namespace_id，故只能先把配置项放配置表，
         // 按产品要求每个域空间需要使用不同的标题 BUG:http://devops.lab.everhomes.com/issues/4448  by lqs 20161217
-        Integer namespaceId = senderLogin.getNamespaceId();
+        Integer namespaceId = destLogin.getNamespaceId();
         String messageTitle = this.configurationProvider.getValue(namespaceId, "message.title", "左邻App");
         // deviceMessage.setTitle("左邻App");
         deviceMessage.setTitle(messageTitle);
