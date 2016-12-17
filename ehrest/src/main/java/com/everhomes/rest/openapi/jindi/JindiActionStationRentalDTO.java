@@ -14,32 +14,9 @@ public class JindiActionStationRentalDTO extends JindiDataDTO {
 	private Long userId;
 	private String userName;
 	private String phone;
-	
-	
-	private Long communityId;
-	private String communityName;
-	private Long buildingId;
-	private String buildingName;
-	private Long addressId;
-	private String apartmentName;
-	private Long organizationId;
-	private String organizationName;
-	private String requestorName;
-	private String requestorPhone;
-	private Timestamp receiveTime;
-	private String content;
-	private String receiveByName;
-	private Timestamp receiveEndTime;
-	private Integer star;
+	private Timestamp reserveTime;
+	private String spaceName;
 	private Byte status;
-
-	public String getUserName() {
-		return userName;
-	}
-
-	public void setUserName(String userName) {
-		this.userName = userName;
-	}
 
 	public Long getId() {
 		return id;
@@ -57,124 +34,36 @@ public class JindiActionStationRentalDTO extends JindiDataDTO {
 		this.userId = userId;
 	}
 
-	public Long getCommunityId() {
-		return communityId;
+	public String getUserName() {
+		return userName;
 	}
 
-	public void setCommunityId(Long communityId) {
-		this.communityId = communityId;
+	public void setUserName(String userName) {
+		this.userName = userName;
 	}
 
-	public String getCommunityName() {
-		return communityName;
+	public String getPhone() {
+		return phone;
 	}
 
-	public void setCommunityName(String communityName) {
-		this.communityName = communityName;
+	public void setPhone(String phone) {
+		this.phone = phone;
 	}
 
-	public Long getBuildingId() {
-		return buildingId;
+	public Timestamp getReserveTime() {
+		return reserveTime;
 	}
 
-	public void setBuildingId(Long buildingId) {
-		this.buildingId = buildingId;
+	public void setReserveTime(Timestamp reserveTime) {
+		this.reserveTime = reserveTime;
 	}
 
-	public String getBuildingName() {
-		return buildingName;
+	public String getSpaceName() {
+		return spaceName;
 	}
 
-	public void setBuildingName(String buildingName) {
-		this.buildingName = buildingName;
-	}
-
-	public Long getAddressId() {
-		return addressId;
-	}
-
-	public void setAddressId(Long addressId) {
-		this.addressId = addressId;
-	}
-
-	public String getApartmentName() {
-		return apartmentName;
-	}
-
-	public void setApartmentName(String apartmentName) {
-		this.apartmentName = apartmentName;
-	}
-
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
-
-	public String getOrganizationName() {
-		return organizationName;
-	}
-
-	public void setOrganizationName(String organizationName) {
-		this.organizationName = organizationName;
-	}
-
-	public String getRequestorName() {
-		return requestorName;
-	}
-
-	public void setRequestorName(String requestorName) {
-		this.requestorName = requestorName;
-	}
-
-	public String getRequestorPhone() {
-		return requestorPhone;
-	}
-
-	public void setRequestorPhone(String requestorPhone) {
-		this.requestorPhone = requestorPhone;
-	}
-
-	public Timestamp getReceiveTime() {
-		return receiveTime;
-	}
-
-	public void setReceiveTime(Timestamp receiveTime) {
-		this.receiveTime = receiveTime;
-	}
-
-	public String getContent() {
-		return content;
-	}
-
-	public void setContent(String content) {
-		this.content = content;
-	}
-
-	public String getReceiveByName() {
-		return receiveByName;
-	}
-
-	public void setReceiveByName(String receiveByName) {
-		this.receiveByName = receiveByName;
-	}
-
-	public Timestamp getReceiveEndTime() {
-		return receiveEndTime;
-	}
-
-	public void setReceiveEndTime(Timestamp receiveEndTime) {
-		this.receiveEndTime = receiveEndTime;
-	}
-
-	public Integer getStar() {
-		return star;
-	}
-
-	public void setStar(Integer star) {
-		this.star = star;
+	public void setSpaceName(String spaceName) {
+		this.spaceName = spaceName;
 	}
 
 	public Byte getStatus() {
@@ -184,4 +73,5 @@ public class JindiActionStationRentalDTO extends JindiDataDTO {
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
+
 }

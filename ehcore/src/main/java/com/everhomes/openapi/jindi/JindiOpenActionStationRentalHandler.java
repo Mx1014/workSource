@@ -1,26 +1,13 @@
 package com.everhomes.openapi.jindi;
 
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.building.Building;
-import com.everhomes.building.BuildingProvider;
-import com.everhomes.community.Community;
-import com.everhomes.community.CommunityProvider;
 import com.everhomes.officecubicle.OfficeCubicleOrder;
 import com.everhomes.officecubicle.OfficeCubicleProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.pmtask.PmTask;
-import com.everhomes.pmtask.PmTaskLog;
-import com.everhomes.pmtask.PmTaskProvider;
-import com.everhomes.rest.openapi.jindi.JindiActionRepairDTO;
+import com.everhomes.rest.openapi.jindi.JindiActionStationRentalDTO;
 import com.everhomes.rest.openapi.jindi.JindiActionType;
 import com.everhomes.rest.openapi.jindi.JindiDataType;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
@@ -60,29 +47,16 @@ public class JindiOpenActionStationRentalHandler implements JindiOpenHandler {
 
 			@Override
 			public Object complementInfo(JindiFetchDataCommand cmd, OfficeCubicleOrder src) {
-				JindiActionRepairDTO data = new JindiActionRepairDTO();
+				JindiActionStationRentalDTO data = new JindiActionStationRentalDTO();
 				data.setId(src.getId());
-				data.setUserId(pmTask.getCreatorUid());
-				data.setUserName(getUser(pmTask.getCreatorUid()).getNickName());
-				data.setCommunityId(community.getId());
-				data.setCommunityName(community.getName());
-				data.setBuildingId(building.getId());
-				data.setBuildingName(building.getName());
-				data.setAddressId(address.getId());
-				data.setApartmentName(address.getApartmentName());
-				data.setOrganizationId(organization.getId());
-				data.setOrganizationName(organization.getName());
-				data.setRequestorName(pmTask.getRequestorName());
-				data.setRequestorPhone(pmTask.getRequestorPhone());
-				data.setReceiveTime(pmTask.getProcessingTime());
-				data.setContent(pmTask.getContent());
-				data.setReceiveByName(getUser(src.getTargetId()).getNickName());
-				data.setReceiveEndTime(pmTask.getProcessedTime());
-				data.setStar(pmTask.getStar()==null?null:pmTask.getStar().intValue());
+				data.setUserId(src.getReserverUid());
+				data.setUserName(src.getReserverName()==null?getUser(src.getReserverUid()).getNickName():src.getReserverName());
+				data.setPhone(src.getReserveContactToken());
+				data.setReserveTime(src.getReserveTime());
+				data.setSpaceName(src.getSpaceName());
 				data.setStatus(src.getStatus());
-				data.setCreateTime(pmTask.getCreateTime());
-				data.setUpdateTime(src.getOperatorTime());
-				
+				data.setCreateTime(src.getCreateTime());
+				data.setUpdateTime(src.getUpdateTime());
 				return data;
 			}
 			

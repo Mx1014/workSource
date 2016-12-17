@@ -38,6 +38,7 @@ import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecor
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleSpacesRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
@@ -179,6 +180,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleOrders.class));
 		order.setId(id);
+		order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		order.setUpdateTime(order.getCreateTime());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleOrdersRecord record = ConvertHelper.convert(order, EhOfficeCubicleOrdersRecord.class);
 		InsertQuery<EhOfficeCubicleOrdersRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_ORDERS);
@@ -201,6 +204,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleOrdersDao dao = new EhOfficeCubicleOrdersDao(context.configuration());
+		order.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(order);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, OfficeCubicleOrder.class, order.getId());
 
@@ -252,7 +256,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> result = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS)
 			.where(Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.UPDATE_TIME.eq(new Timestamp(timestamp)))
 			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.gt(pageAnchor))
 			.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.asc())
 			.limit(pageSize)
@@ -272,8 +276,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		Result<Record> result = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS)
 			.where(Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(namespaceId))
-			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.gt(new Timestamp(timestamp)))
-			.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.RESERVE_TIME.asc(), Tables.EH_OFFICE_CUBICLE_ORDERS.ID.asc())
+			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.UPDATE_TIME.asc(), Tables.EH_OFFICE_CUBICLE_ORDERS.ID.asc())
 			.limit(pageSize)
 			.fetch();
 			
