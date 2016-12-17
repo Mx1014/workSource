@@ -240,8 +240,38 @@ public class FlowProviderImpl implements FlowProvider {
 		return flows.get(0);
 	}
 	
+//	@Override
+//	public Flow getEnabledSnapshotFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+//		List<Flow> flows = this.queryFlows(new ListingLocator(), 1, new ListingQueryBuilderCallback() {
+//
+//			@Override
+//			public SelectQuery<? extends Record> buildCondition(
+//					ListingLocator locator, SelectQuery<? extends Record> query) {
+//				query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(namespaceId));
+//				query.addConditions(Tables.EH_FLOWS.MODULE_ID.eq(moduleId));
+//				if(moduleType != null) {
+//					query.addConditions(Tables.EH_FLOWS.MODULE_TYPE.eq(moduleType));	
+//				}
+//				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));	
+//				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
+//				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
+//				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.ne(0l));
+//				query.addOrderBy(Tables.EH_FLOWS.FLOW_VERSION.desc());
+//				
+//				return query;
+//			}
+//			
+//		});
+//		
+//		if(flows != null && flows.size() > 0) {
+//			return flows.get(0);
+//		}
+//		
+//		return null;
+//	}
+	
 	@Override
-	public Flow getEnabledSnapshotFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
+	public Flow getEnabledConfigFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
 		List<Flow> flows = this.queryFlows(new ListingLocator(), 1, new ListingQueryBuilderCallback() {
 
 			@Override
@@ -255,8 +285,9 @@ public class FlowProviderImpl implements FlowProvider {
 				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));	
 				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
 				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
-				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.ne(0l)); // Got a main flow, not snapshot flow.	
-				query.addOrderBy(Tables.EH_FLOWS.FLOW_VERSION.desc());
+				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0l));
+				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.ne(0l));
+				query.addOrderBy(Tables.EH_FLOWS.RUN_TIME.desc());
 				
 				return query;
 			}

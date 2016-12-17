@@ -36,11 +36,11 @@ CREATE TABLE `eh_flows` (
   `string_tag3` VARCHAR(128),
   `string_tag4` VARCHAR(128),
   `string_tag5` VARCHAR(128),
-  `integral_tag1` BIGINT DEFAULT 0,
-  `integral_tag2` BIGINT DEFAULT 0,
-  `integral_tag3` BIGINT DEFAULT 0,
-  `integral_tag4` BIGINT DEFAULT 0,
-  `integral_tag5` BIGINT DEFAULT 0,
+  `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+  `integral_tag5` BIGINT NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -107,11 +107,11 @@ CREATE TABLE `eh_flow_buttons` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    `integral_tag1` BIGINT DEFAULT 0,
-    `integral_tag2` BIGINT DEFAULT 0,
-    `integral_tag3` BIGINT DEFAULT 0,
-    `integral_tag4` BIGINT DEFAULT 0,
-    `integral_tag5` BIGINT DEFAULT 0,
+    `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag5` BIGINT NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -137,11 +137,11 @@ CREATE TABLE `eh_flow_forms` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    `integral_tag1` BIGINT DEFAULT 0,
-    `integral_tag2` BIGINT DEFAULT 0,
-    `integral_tag3` BIGINT DEFAULT 0,
-    `integral_tag4` BIGINT DEFAULT 0,
-    `integral_tag5` BIGINT DEFAULT 0,
+    `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag5` BIGINT NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -167,11 +167,11 @@ CREATE TABLE `eh_flow_actions` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    `integral_tag1` BIGINT DEFAULT 0,
-    `integral_tag2` BIGINT DEFAULT 0,
-    `integral_tag3` BIGINT DEFAULT 0,
-    `integral_tag4` BIGINT DEFAULT 0,
-    `integral_tag5` BIGINT DEFAULT 0,
+    `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag5` BIGINT NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -239,11 +239,11 @@ CREATE TABLE `eh_flow_cases` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    `integral_tag1` BIGINT DEFAULT 0,
-    `integral_tag2` BIGINT DEFAULT 0,
-    `integral_tag3` BIGINT DEFAULT 0,
-    `integral_tag4` BIGINT DEFAULT 0,
-    `integral_tag5` BIGINT DEFAULT 0,
+    `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag5` BIGINT NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -275,11 +275,11 @@ CREATE TABLE `eh_flow_event_logs` (
     `string_tag3` VARCHAR(128),
     `string_tag4` VARCHAR(128),
     `string_tag5` VARCHAR(128),
-    `integral_tag1` BIGINT DEFAULT 0,
-    `integral_tag2` BIGINT DEFAULT 0,
-    `integral_tag3` BIGINT DEFAULT 0,
-    `integral_tag4` BIGINT DEFAULT 0,
-    `integral_tag5` BIGINT DEFAULT 0,
+    `integral_tag1` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag2` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag3` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag4` BIGINT NOT NULL DEFAULT 0,
+    `integral_tag5` BIGINT NOT NULL DEFAULT 0,
 
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
