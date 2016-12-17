@@ -12,6 +12,7 @@ public class FlowGraph {
 	private Map<Long, FlowGraphNode> idToNode;
 	private Map<Long, FlowGraphButton> idToButton;
 	private Map<Long, FlowGraphAction> idToAction;
+	private Long createTime;
 	
 	public FlowGraph() {
 		nodes = new ArrayList<FlowGraphNode>();
@@ -19,7 +20,7 @@ public class FlowGraph {
 		idToButton = new HashMap<Long, FlowGraphButton>();
 		idToAction = new HashMap<Long, FlowGraphAction>();
 	}
-	
+
 	public Flow getFlow() {
 		return flow;
 	}
@@ -94,5 +95,13 @@ public class FlowGraph {
 			
 			saveNodeIds(node);
 		}
+	}
+
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
 	}
 }

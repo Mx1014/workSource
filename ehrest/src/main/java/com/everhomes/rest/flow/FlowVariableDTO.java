@@ -15,6 +15,7 @@ public class FlowVariableDTO {
     private Long     id;
     private Long     moduleId;
     private String params;
+    private String label;
 
 
     public String getName() {
@@ -94,6 +95,16 @@ public class FlowVariableDTO {
 
 	public void setParams(String params) {
 		this.params = params;
+	}
+
+
+	public String getLabel() {
+		return label;
+	}
+
+
+	public void setLabel(String label) {
+		this.label = label;
 	}
 
 
