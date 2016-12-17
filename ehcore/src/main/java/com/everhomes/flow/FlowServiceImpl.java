@@ -1397,6 +1397,12 @@ public class FlowServiceImpl implements FlowService {
 		}
 	}
 	
+	@Override
+	public void clearFlowGraphCache(Long flowId) {
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+		clearSnapshotGraph(snapshotFlow);
+	}
+	
 	private FlowGraph getSnapshotGraph(Long flowId, Integer flowVer) {
 		if(flowVer <= 0) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");	

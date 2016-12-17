@@ -56,6 +56,9 @@ public class CreateParkingFlow1 {
     	flowCmd.setOrgId(orgId);
     	flowCmd.setOwnerId(owenrId);
     	flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
+    	Long projectId = 240111044331048623L;
+    	flowCmd.setProjectId(projectId);
+    	flowCmd.setProjectType("EhCommunities");
     	FlowDTO flowDTO = flowService.createFlow(flowCmd);
     	
     	CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
@@ -215,6 +218,9 @@ public class CreateParkingFlow1 {
 		flowCmd.setOrgId(orgId);
 		flowCmd.setOwnerId(owenrId);
 		flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
+    	Long projectId = 240111044331048623L;
+    	flowCmd.setProjectId(projectId);
+    	flowCmd.setProjectType("EhCommunities");
 		FlowDTO flowDTO = flowService.createFlow(flowCmd);
 
 		CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
@@ -548,6 +554,9 @@ public class CreateParkingFlow1 {
     	flowCmd.setOrgId(orgId);
     	flowCmd.setOwnerId(owenrId);
     	flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
+    	Long projectId = 240111044331048623L;
+    	flowCmd.setProjectId(projectId);
+    	flowCmd.setProjectType("EhCommunities");
     	FlowDTO flowDTO = flowService.createFlow(flowCmd);
     	
     	CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
