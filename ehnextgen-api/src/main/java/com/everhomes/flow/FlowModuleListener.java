@@ -17,6 +17,8 @@ public interface FlowModuleListener {
 	 */
 	FlowModuleInfo initModule();
 	
+	void onFlowCreating(Flow flow);
+	
 	/**
 	 * 当 FlowCase 开始运行时
 	 * @param ctx
