@@ -257,7 +257,11 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
 			log.setFlowSelectionId(cmd.getEntityId());
 		}
-		log.setSubjectId(subject.getId());
+		
+		if(subject != null) {
+			log.setSubjectId(subject.getId());
+		}
+		
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
 		
