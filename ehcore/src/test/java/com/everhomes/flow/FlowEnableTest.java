@@ -506,7 +506,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
     	
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
 //    	Long flowCaseId = 34l;
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(dto.getButtons().size() == 3);
@@ -541,7 +541,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
     	
     	ListButtonProcessorSelectionsCommand selCmd = new ListButtonProcessorSelectionsCommand();
     	selCmd.setButtonId(flowButton.getId());
@@ -624,6 +624,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     @Test
     public void testFlowCommentButton() {
     	//TODO must run testFlowCase() first
+//    	testFlowCase();
     	
     	Long userId = testUser2.getId();
     	setTestContext(userId);
@@ -648,7 +649,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
     	
     	FlowFireButtonCommand fireButton = new FlowFireButtonCommand();
     	fireButton.setButtonId(flowButton.getId());
@@ -659,7 +660,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowService.fireButton(fireButton);
     	
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
-    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex).getLogs().size() > 1);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex).getIsCurrentNode().equals((byte)1));
@@ -691,7 +692,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
     	
     	ListButtonProcessorSelectionsCommand selCmd = new ListButtonProcessorSelectionsCommand();
     	selCmd.setButtonId(flowButton.getId());
@@ -767,6 +768,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Test
     public void testFlowCaseAbsort() {
+//    	testFlowCase();
+    	
     	Long userId = testUser2.getId();
     	setTestContext(userId);
     	
@@ -790,7 +793,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
     	
     	ListButtonProcessorSelectionsCommand selCmd = new ListButtonProcessorSelectionsCommand();
     	selCmd.setButtonId(flowButton.getId());
@@ -808,7 +811,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowService.fireButton(fireButton);
     	
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
-    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
@@ -858,8 +861,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowService.fireButton(fireButton);
     	
     	dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
-    	Assert.assertTrue(dto.getButtons().size() == 4);
-    	Assert.assertTrue(dto.getNodes().size() == 4);
+    	Assert.assertTrue(dto.getButtons().size() == 0);
+    	Assert.assertTrue(dto.getNodes().size() == 5);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
     }
     
@@ -867,6 +870,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     public void testFlowCaseTransfer() {
     	Long userId = testUser2.getId();
     	setTestContext(userId);
+    	
+//    	testFlowCase();
     	
     	String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = orgId;
@@ -887,7 +892,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
     	
     	ListButtonProcessorSelectionsCommand selCmd = new ListButtonProcessorSelectionsCommand();
     	selCmd.setButtonId(flowButton.getId());
@@ -905,7 +910,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowService.fireButton(fireButton);
     	
     	FlowCaseDetailDTO dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
-    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getLogs().size() == 1);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex+1).getIsCurrentNode().equals((byte)1));
@@ -929,9 +934,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowService.fireButton(fireButton);
     	
     	dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
-    	Assert.assertTrue(dto.getButtons().size() == 4);
+    	Assert.assertTrue(dto.getButtons().size() == 3);
     	Assert.assertTrue(dto.getNodes().size() == 5);
-    	Assert.assertTrue(dto.getNodes().get(nodeIndex).getLogs().size() == 1);
+    	Assert.assertTrue(dto.getNodes().get(nodeIndex).getLogs().size() == 2);
     	Assert.assertTrue(dto.getNodes().get(nodeIndex).getIsCurrentNode().equals((byte)1));
     	
     	SearchFlowCaseCommand cmd2 = new SearchFlowCaseCommand();
@@ -945,6 +950,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     public void testFlowCaseRemind() {
     	Long userId = testUser2.getId();
     	setTestContext(userId);
+    	
+//    	testFlowCase();
     	
     	String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = orgId;
@@ -965,7 +972,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
-    	Long flowCaseId = resp.getFlowCases().get(resp.getFlowCases().size()-1).getId();
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
     	
     	FlowFireButtonCommand fireButton = new FlowFireButtonCommand();
     	fireButton.setButtonId(flowButton.getId());
