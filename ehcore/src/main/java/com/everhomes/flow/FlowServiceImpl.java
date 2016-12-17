@@ -309,6 +309,14 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public ListFlowBriefResponse listBriefFlows(ListFlowCommand cmd) {
+		if(cmd == null) {//TODO need this ?
+			return null;
+		}
+		
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
 		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		cmd.setPageSize(count);
 		ListFlowBriefResponse resp = new ListFlowBriefResponse();
