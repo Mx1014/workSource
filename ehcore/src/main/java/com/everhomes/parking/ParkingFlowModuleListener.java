@@ -321,4 +321,10 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 //        parkingCardRequest.setIssueTime(new Timestamp(System.currentTimeMillis()));
 //        parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
 //	}
+	
+	@Override
+	public void onFlowCreating(Flow flow) {
+		// TODO Auto-generated method stub
+	//Added by Janson	
+	}
 }

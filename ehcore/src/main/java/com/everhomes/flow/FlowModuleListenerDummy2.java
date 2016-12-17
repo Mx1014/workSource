@@ -105,4 +105,10 @@ public class FlowModuleListenerDummy2 implements FlowModuleListener {
 		
 	}
 
+	@Override
+	public void onFlowCreating(Flow flow) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

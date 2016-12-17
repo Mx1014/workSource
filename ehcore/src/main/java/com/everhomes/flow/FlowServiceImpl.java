@@ -21,6 +21,9 @@ import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
+import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
+import com.everhomes.serviceModule.ServiceModule;
+import com.everhomes.serviceModule.ServiceModuleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -107,6 +110,9 @@ public class FlowServiceImpl implements FlowService {
 	@Autowired
 	private FlowTimeoutService flowTimeoutService;
 	
+	@Autowired
+	private ServiceModuleProvider serviceModuleProvider;
+	
     @Autowired
     MessagingService messagingService;
     
@@ -160,6 +166,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setNamespaceId(cmd.getNamespaceId());
     	obj.setProjectId(cmd.getProjectId());
     	obj.setProjectType(cmd.getProjectType());
+    	flowListenerManager.onFlowCreating(obj);
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
 
@@ -1373,7 +1380,7 @@ public class FlowServiceImpl implements FlowService {
 	
 	private void clearSnapshotGraph(Flow snapshotFlow) {
 		if(snapshotFlow != null) {
-			for(int i = 1; i < snapshotFlow.getFlowVersion(); i++) {
+			for(int i = 1; i <= snapshotFlow.getFlowVersion(); i++) {
 				String fmt = String.format("%d:%d", snapshotFlow.getFlowMainId(), i);
 				graphMap.remove(fmt);
 			}	
@@ -1545,7 +1552,7 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow not exists");	
 		}
 		
-		if(FlowStatusType.RUNNING.equals(flow.getStatus())) {
+		if(flow.getStatus() != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
 			
 			Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
 			clearSnapshotGraph(snapshotFlow);
@@ -2108,22 +2115,15 @@ public class FlowServiceImpl implements FlowService {
 			return dto;
 		}
 		
-		if(moduleId.equals(ParkingFlowConstant.PARKING_RECHARGE_MODULE)) {
+		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
+		if(serviceModule != null) {
 			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(ParkingFlowConstant.PARKING_RECHARGE_MODULE);
-			dto.setModuleName("jiaoliu");
-			dto.setDisplayName("停车缴费");
+			dto.setDisplayName(serviceModule.getName());
+			dto.setModuleName(serviceModule.getName());
+			dto.setModuleId(moduleId);
 			return dto;
 		}
 		
-		if(moduleId.equals(41500L)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(41500L);
-			dto.setModuleName("车辆放行");
-			dto.setDisplayName("车辆放行");
-			return dto;
-		}
-
 		return null;
 	}
 
@@ -2133,36 +2133,38 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowModuleDTO> modules = new ArrayList<FlowModuleDTO>();
 		resp.setModules(modules);
 		
-		FlowModuleDTO dto = new FlowModuleDTO();
-		dto.setModuleId(111l);
-		dto.setModuleName("yuanqu");
-		dto.setDisplayName("园区入驻");
-		modules.add(dto);
+//		FlowModuleDTO dto = new FlowModuleDTO();
+//		dto.setModuleId(111l);
+//		dto.setModuleName("yuanqu");
+//		dto.setDisplayName("园区入驻");
+//		modules.add(dto);
+//		
+//		dto = new FlowModuleDTO();
+//		dto.setModuleId(112l);
+//		dto.setModuleName("wuye");
+//		dto.setDisplayName("物业保修");
+//		modules.add(dto);
+//		
+//		dto = new FlowModuleDTO();
+//		dto.setModuleId(113l);
+//		dto.setModuleName("yueka");
+//		dto.setDisplayName("月卡申请");
+//		modules.add(dto);
+//		
+//		dto = new FlowModuleDTO();
+//		dto.setModuleId(114l);
+//		dto.setModuleName("jiaoliu");
+//		dto.setDisplayName("交流大厅");
+//		modules.add(dto);
 		
-		dto = new FlowModuleDTO();
-		dto.setModuleId(112l);
-		dto.setModuleName("wuye");
-		dto.setDisplayName("物业保修");
-		modules.add(dto);
+		flowListenerManager.getModules().forEach(m -> {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(m.getModuleId());
+			dto.setModuleName(m.getModuleName());
+			dto.setDisplayName(m.getModuleName());
+			modules.add(dto);
+		});
 		
-		dto = new FlowModuleDTO();
-		dto.setModuleId(113l);
-		dto.setModuleName("yueka");
-		dto.setDisplayName("月卡申请");
-		modules.add(dto);
-		
-		dto = new FlowModuleDTO();
-		dto.setModuleId(114l);
-		dto.setModuleName("jiaoliu");
-		dto.setDisplayName("交流大厅");
-		modules.add(dto);
-
-		dto = new FlowModuleDTO();
-		dto.setModuleId(41500L);
-		dto.setModuleName("车辆放行");
-		dto.setDisplayName("车辆放行");
-		modules.add(dto);
-
 		return resp;
 	}
 	

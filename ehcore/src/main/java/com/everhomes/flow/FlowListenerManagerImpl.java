@@ -1,7 +1,12 @@
 package com.everhomes.flow;
 
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowUserType;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,9 +14,9 @@ import org.springframework.context.ApplicationListener;
 import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.stereotype.Component;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowUserType;
 
 @Component
 public class FlowListenerManagerImpl implements FlowListenerManager, ApplicationListener<ContextRefreshedEvent> {
@@ -19,6 +24,9 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 	
 	  @Autowired
 	  List<FlowModuleListener> allListeners;
+	  
+	  @Autowired
+	  FlowService flowService;
 	  
 	  private Map<String, FlowModuleInst> moduleMap = new HashMap<String, FlowModuleInst>();
 
@@ -34,6 +42,27 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 		  }
 		  
 		  return null;
+	  }
+	  
+	  @Override
+	  public List<FlowModuleInfo> getModules() {
+		  return moduleMap.values().stream().map(inst-> {
+			  return inst.getInfo();
+		  }).collect(Collectors.toList());
+	  }
+	  
+	  @Override
+	  public void onFlowCreating(Flow flow) {
+		  FlowModuleDTO module = flowService.getModuleById(flow.getModuleId());
+		  if(module == null) {
+			  return;
+		  }
+		  
+		  FlowModuleInst inst = moduleMap.get(module.getDisplayName());
+		  if(inst != null) {
+			  FlowModuleListener listener = inst.getListener();
+			  listener.onFlowCreating(flow); 
+		  }		  
 	  }
 	  
 	  @Override 
