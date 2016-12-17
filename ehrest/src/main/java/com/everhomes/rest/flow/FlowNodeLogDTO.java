@@ -24,6 +24,7 @@ public class FlowNodeLogDTO {
 	private Byte allowComment;
 	private Byte isCurrentNode;
 	private Long commentButtonId;
+	private String params;
 
 	@ItemType(FlowEventLogDTO.class)
 	private List<FlowEventLogDTO> logs;
@@ -86,6 +87,14 @@ public class FlowNodeLogDTO {
 
 	public void setCommentButtonId(Long commentButtonId) {
 		this.commentButtonId = commentButtonId;
+	}
+
+	public String getParams() {
+		return params;
+	}
+
+	public void setParams(String params) {
+		this.params = params;
 	}
 
 	@Override

@@ -46,6 +46,8 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -143,8 +145,10 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -257,6 +261,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private DoorUserPermissionProvider doorUserPermissionProvider;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
     
     final Pattern npattern = Pattern.compile("\\d+");
     
@@ -2703,6 +2710,73 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setDtos(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+    
+    private void deleteAllAuths(Integer namespaceId, Long orgId, Long userId) {
+		ListingLocator locator = new ListingLocator();
+		int count = 100;
+		List<DoorAuth> doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, null, null, count);
+		if(doorAuths == null || doorAuths.size() == 0) {
+			return;
+		}
+		
+		do {
+			List<DoorAuth> dels = new ArrayList<DoorAuth>();
+			for(DoorAuth doorAuth : doorAuths) {
+				DoorAccessOwnerType ownerType = DoorAccessOwnerType.fromCode(doorAuth.getOwnerType());
+				
+				if(ownerType == DoorAccessOwnerType.COMMUNITY) {
+					Community c = communityProvider.findCommunityById(doorAuth.getOwnerId());
+					if(c != null && c.getNamespaceId().equals(namespaceId)) {
+						doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+						dels.add(doorAuth);
+					}
+				} else if(ownerType == DoorAccessOwnerType.ENTERPRISE) {
+					Organization org = organizationProvider.findOrganizationById(doorAuth.getOwnerId());
+					if(org != null && org.getNamespaceId().equals(namespaceId)) {
+						doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+						dels.add(doorAuth);
+					}
+				}
+			}
+			
+			if(dels.size() > 0) {
+				doorAuthProvider.updateDoorAuth(dels);
+			}
+			
+			if(locator.getAnchor() != null) {
+				doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, null, null, count);	
+			}
+			
+		} while (doorAuths != null && doorAuths.size() > 0 && locator.getAnchor() != null);
+    }
+    
+    @Override
+    public void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId) {
+    	ListUserRelatedOrganizationsCommand cmd = new ListUserRelatedOrganizationsCommand();
+    	List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(cmd);
+    	if(dtos.isEmpty()) {
+    		deleteAllAuths(namespaceId, orgId, userId);
+    	} else {
+    		ListingLocator locator = new ListingLocator();
+    		int count = 100;
+    		List<DoorAuth> doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, orgId, DoorAccessOwnerType.ENTERPRISE.getCode(), count);
+    		if(doorAuths == null || doorAuths.size() == 0) {
+    			return;
+    		}
+    		
+    		do {
+    			for(DoorAuth doorAuth : doorAuths) {
+    				doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+    			}
+    			doorAuthProvider.updateDoorAuth(doorAuths);
+    		
+    			if(locator.getAnchor() != null) {
+    				doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, orgId, DoorAccessOwnerType.ENTERPRISE.getCode(), count);	
+    			}
+    			
+    		} while (doorAuths != null && doorAuths.size() > 0 && locator.getAnchor() != null);
+    	}
     }
     
     @Override

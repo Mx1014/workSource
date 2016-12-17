@@ -12,5 +12,5 @@ public interface FlowVariableUserResolver {
 	public static final String N_NODE_PROCESSOR = "flow-variable-n-node-processor";
 	public static final String SUPERVISOR = "flow-variable-supervisor";
 	
-	List<Long> variableUserResolve(FlowCaseState ctx, FlowEntityType fromEntity, Long entityId, FlowUserSelection userSelection);
+	List<Long> variableUserResolve(FlowCaseState ctx, FlowEntityType fromEntity, Long entityId, FlowUserSelection userSelection, int loopCnt);
 }

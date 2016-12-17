@@ -113,6 +113,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     LocaleTemplateService localeTemplateService;
     
+    @Autowired
+    FlowUserSelectionService flowUserSelectionService;
+    
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
     private StringTemplateLoader templateLoader;
@@ -714,6 +717,7 @@ public class FlowServiceImpl implements FlowService {
 		userSel.setSourceTypeA(selCmd.getSourceTypeA());
 		userSel.setSourceTypeB(selCmd.getSourceTypeB());
 		userSel.setStatus(FlowStatusType.VALID.getCode());
+		userSel.setSelectionName(selCmd.getSelectionName());
 		
 		updateFlowUserName(userSel);
 		flowUserSelectionProvider.createFlowUserSelection(userSel);		
@@ -1019,6 +1023,7 @@ public class FlowServiceImpl implements FlowService {
 			flow.setStatus(FlowStatusType.RUNNING.getCode());
 			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flow.setUpdateTime(now);
+			flow.setRunTime(now);
 			flowProvider.updateFlow(flow);
 			return true;
 		} else if(flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
@@ -1093,6 +1098,7 @@ public class FlowServiceImpl implements FlowService {
 			//running now
 			now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flowNew.setUpdateTime(now);
+			flowNew.setRunTime(now);
 			flowNew.setStatus(FlowStatusType.RUNNING.getCode());
 			flowProvider.updateFlow(flowNew);
 			
@@ -1458,10 +1464,24 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public void processMessageTimeout(FlowTimeout ft) {
 		FlowTimeoutMessageDTO dto = (FlowTimeoutMessageDTO)StringHelper.fromJsonString(ft.getJson(), FlowTimeoutMessageDTO.class);
-		FlowCaseState ctx = new FlowCaseState();
 		if(dto == null) {
 			LOGGER.error("flowtimeout error ft=" + ft.getId());
+			return;
 		}
+//		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+//		stepDTO.setAutoStepType(FlowStepType.NO_STEP.getCode());
+//		stepDTO.setFlowCaseId(dto.getFlowCaseId());
+//		stepDTO.setFlowMainId(dto.getFlowMainId());
+//		stepDTO.setFlowNodeId(dto.getFlowNodeId());
+//		stepDTO.setFlowVersion(dto.getFlowVersion());
+//		stepDTO.setStepCount(dto.getStepCount());
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(dto, FlowAutoStepDTO.class);
+		FlowCaseState ctx = flowStateProcessor.prepareAutoStep(stepDTO);
+		if(ctx == null) {
+			LOGGER.error("flowtimeout context error ft=" + ft.getId());
+			return;
+		}
+		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(dto.getFlowCaseId());
 		FlowAction flowAction = flowActionProvider.getFlowActionById(ft.getBelongTo());
 		ctx.setFlowCase(flowCase);
@@ -1477,7 +1497,7 @@ public class FlowServiceImpl implements FlowService {
 
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ft.getBelongTo()
 				, ft.getBelongEntity(), FlowUserType.PROCESSOR.getCode());
-		List<Long> users = resolvUserSelections(selections);
+		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_ACTION, flowAction.getId(), selections);
 		String dataStr = parseActionTemplate(ctx, ft.getBelongTo(), flowAction.getRenderText());
 		for(Long userId : users) {
 			MessageDTO messageDto = new MessageDTO();
@@ -1525,7 +1545,11 @@ public class FlowServiceImpl implements FlowService {
 	 */
 	@Override
 	public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-		return flowProvider.getEnabledSnapshotFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+		Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+		if(flow != null) {
+			return flowProvider.getSnapshotFlowById(flow.getId());
+		}
+		return null;
 	}
 
 	@Override
@@ -1782,6 +1806,7 @@ public class FlowServiceImpl implements FlowService {
 					FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
 					if(flowNode != null) {
 						dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
+						dto.setCurrNodeParams(flowNode.getParams());
 					}
 				}
 				if(2 == type) {
@@ -1885,6 +1910,7 @@ public class FlowServiceImpl implements FlowService {
 				nodeLogDTO.setNodeId(currNode.getId());
 				nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
 				nodeLogDTO.setNodeName(currNode.getNodeName());
+				nodeLogDTO.setParams(currNode.getParams());
 				
 				if(flowCase.getStepCount().equals(eventLog.getStepCount())) {
 					nodeLogDTO.setIsCurrentNode((byte)1);
@@ -2123,17 +2149,79 @@ public class FlowServiceImpl implements FlowService {
 		return resp;
 	}
 	
-	private List<Long> resolvUserSelections(List<FlowUserSelection> selections) {
+	
+	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
+		return resolvUserSelections(ctx, entityType, entityId, selections, 1);
+	}
+	
+	@Override
+	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
 		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
-		if(selections == null) {
+		if(selections == null || loopCnt >= 5) {
 			return users;
 		}
+		
+		Flow flow = ctx.getFlowGraph().getFlow();
+		Long orgId = flow.getOrganizationId();
 		
 		for(FlowUserSelection sel : selections) {
 			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
-			}	
+			} else if(FlowUserSelectionType.POSITION.getCode().equals(sel.getSelectType())) {
+				Long parentOrgId = orgId;
+				if(sel.getOrganizationId() != null) {
+					parentOrgId = sel.getOrganizationId();
+				}
+				Long departmentId = parentOrgId;
+				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeB())) {
+					departmentId = sel.getSourceIdB();
+				}
+				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceIdA())) {
+					List<Long> tmp = flowUserSelectionService.findUsersByJobPositionId(parentOrgId, sel.getSourceIdA(), departmentId);
+					if(tmp != null) {
+						users.addAll(tmp);	
+					}
+					
+				} else {
+					LOGGER.error("resolvUser selId= " + sel.getId() + " position parse error!");
+				}
+				
+			} else if(FlowUserSelectionType.MANAGER.getCode().equals(sel.getSelectType())) {
+				Long parentOrgId = orgId;
+				if(sel.getOrganizationId() != null) {
+					parentOrgId = sel.getOrganizationId();
+				}
+				
+				Long departmentId = parentOrgId;
+				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
+					if(null != sel.getSourceIdA()) {
+						departmentId = sel.getSourceIdA();	
+					}
+					
+					List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId);
+					users.addAll(tmp);
+				} else {
+					LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
+				}
+				
+			} else if(FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
+				if(sel.getSourceIdA() != null) {
+					FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
+					variable.getScriptCls();
+					FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
+		        	if(ftr != null) {
+		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel, loopCnt + 1);
+		        		if(null != tmp) {
+		        			users.addAll(tmp);
+		        		}
+		        	}
+		        	
+				} else {
+					LOGGER.error("user params error selId= " + sel.getId() + " variable error!");
+				}
+				
+			}
 		}
 		
 		return users;
@@ -2143,7 +2231,7 @@ public class FlowServiceImpl implements FlowService {
 	public void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
 				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
-		List<Long> users = resolvUserSelections(selections);
+		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);
 		if(users.size() > 0) {
 			for(Long selUser : users) {
 				FlowEventLog log = new FlowEventLog();
@@ -2183,7 +2271,7 @@ public class FlowServiceImpl implements FlowService {
 		FlowCase flowCase = ctx.getFlowCase();
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowCase.getFlowMainId()
 				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), flowCase.getFlowVersion());
-		List<Long> users = resolvUserSelections(selections);
+		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW, null, selections);
 		if(users.size() > 0) {
 			for(Long selUser : users) {
 				FlowEventLog log = new FlowEventLog();

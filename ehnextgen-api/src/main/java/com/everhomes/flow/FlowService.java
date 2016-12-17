@@ -414,6 +414,10 @@ public interface FlowService {
 	 * @param userId
 	 */
 	void deleteSnapshotProcessUser(Long flowId, Long userId);
+
+	List<Long> resolvUserSelections(FlowCaseState ctx,
+			FlowEntityType entityType, Long entityId,
+			List<FlowUserSelection> selections, int loopCnt);
 	
 	//TODO 日志信息分类：
 	
