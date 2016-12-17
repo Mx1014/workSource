@@ -518,8 +518,7 @@ public class CreateParkingFlow1 {
     	cmd.setFlowNodeId(dto.getId());
     	
     	FlowActionInfo action = createActionInfo(
-    			"applierName: ${applierName} applierPhone: ${applierPhone} currProcessorName:${currProcessorName} currProcessorPhone: ${currProcessorPhone}"
-    			+ " test-track-enter-action-" + dto.getId(), orgId);
+    			"处理中，请稍候" + dto.getId(), orgId);
     	action.setTrackerApplier(1l);
     	action.setTrackerProcessor(1l);
     	cmd.setEnterTracker(action);

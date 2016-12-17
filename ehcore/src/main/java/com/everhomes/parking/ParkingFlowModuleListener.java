@@ -23,6 +23,7 @@ import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -35,6 +36,7 @@ import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
 
 @Component
 public class ParkingFlowModuleListener implements FlowModuleListener {
@@ -98,30 +100,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		List<FlowCaseEntity> entities = new ArrayList<>();
-//		FlowCaseEntity e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("test-list-key");
-//		e.setValue("test-list-value");
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("test-list-key2");
-//		e.setValue("test-list-value2");
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
-//		e.setKey("test-multi-key3");
-//		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
-//		e.setKey("test-text-key2");
-//		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
-//		entities.add(e);
+		
 		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 		
 		ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
@@ -158,7 +137,45 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
 		dto.setRanking(count);
 		
-		flowCase.setCustomObject(JSONObject.toJSONString(dto));
+		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
+		
+		List<FlowCaseEntity> entities = new ArrayList<>();
+		FlowCaseEntity e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("姓名");
+		e.setValue(dto.getPlateOwnerName());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("手机号");
+		e.setValue(dto.getPlateOwnerPhone());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("公司");
+		e.setValue(dto.getPlateOwnerEntperiseName());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("车牌号");
+		e.setValue(dto.getPlateNumber());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("品牌");
+		e.setValue(dto.getCarBrand());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("车系");
+		e.setValue(dto.getCarSerieName());
+		entities.add(e);
+		
 		return entities;
 	}
 
