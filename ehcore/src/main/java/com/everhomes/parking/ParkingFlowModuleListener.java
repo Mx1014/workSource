@@ -293,6 +293,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCreating(Flow flow) {
 		// TODO Auto-generated method stub
-	//Added by Janson	
+		if("申请排队模式".equals(flow.getFlowName()))
+			flow.setStringTag1("1");
+		else if("半自动化模式".equals(flow.getFlowName()))
+			flow.setStringTag1("2");
+		else if("智能模式".equals(flow.getFlowName()))
+			flow.setStringTag1("3");
+		else
+			flow.setStringTag1("1");
+
 	}
 }
