@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -552,7 +553,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
-		return createParkingTempOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
+		return createParkingOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
 	}
 	
 	@Override
@@ -565,11 +566,11 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		return createParkingTempOrder(param, ParkingRechargeType.TEMPORARY.getCode());
+		return createParkingOrder(param, ParkingRechargeType.TEMPORARY.getCode());
 
 	}
 	
-	private CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
+	private CommonOrderDTO createParkingOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
@@ -630,8 +631,12 @@ public class ParkingServiceImpl implements ParkingService {
 		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		orderCmd.setSubject("停车充值订单");
-		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
-//		orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag)
+			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		else
+			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
 
 		CommonOrderDTO dto = null;
 		try {
