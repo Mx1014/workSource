@@ -148,20 +148,20 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     		locator.setAnchor(cmd.getAnchor());
     	}
 
-        cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode()));
-
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
-    	if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
-    		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
+        if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode()));
+            cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
     		.and(Tables.EH_FLOW_CASES.STEP_COUNT.eq(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT)); //step_cout must equal the same
     	} else if (FlowCaseSearchType.DONE_LIST.equals(searchType)) {
-            cond = cond.or(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.FINISHED.getCode()));
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode(), FlowCaseStatus.FINISHED.getCode()));
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
     		.and(FlowEventCustomField.BUTTON_FIRED_COUNT.getField().eq(0l));    		
     	} else if(FlowCaseSearchType.SUPERVISOR.equals(searchType)) {
-    		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()))
+            cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode()));
+            cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.FLOW_SUPERVISOR.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId())); 
     	} else {
     		return null;
