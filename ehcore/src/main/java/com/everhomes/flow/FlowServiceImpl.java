@@ -2153,7 +2153,15 @@ public class FlowServiceImpl implements FlowService {
 			dto.setModuleId(moduleId);
 			return dto;
 		}
-		
+		 
+		if(moduleId.equals(41500L)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(41500L);
+			dto.setModuleName("车辆放行");
+			dto.setDisplayName("车辆放行");
+			return dto;
+		}
+ 
 		return null;
 	}
 
