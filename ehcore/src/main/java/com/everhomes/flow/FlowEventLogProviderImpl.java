@@ -2,42 +2,29 @@ package com.everhomes.flow;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.naming.NameMapper;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.flow.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhFlowEventLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
+import com.everhomes.server.schema.tables.pojos.EhFlowEventLogs;
+import com.everhomes.server.schema.tables.records.EhFlowEventLogsRecord;
+import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Field;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.EhFlowEventLogsDao;
-import com.everhomes.server.schema.tables.pojos.EhFlowCases;
-import com.everhomes.server.schema.tables.pojos.EhFlowEventLogs;
-import com.everhomes.server.schema.tables.records.EhFlowCasesRecord;
-import com.everhomes.server.schema.tables.records.EhFlowEventLogsRecord;
-import com.everhomes.sharding.ShardIterator;
-import com.everhomes.sharding.ShardingProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class FlowEventLogProviderImpl implements FlowEventLogProvider {
@@ -160,15 +147,16 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	if(locator.getAnchor() == null) {
     		locator.setAnchor(cmd.getAnchor());
     	}
-    	
-    	cond = cond.and(Tables.EH_FLOW_CASES.STATUS.eq(FlowCaseStatus.INITIAL.getCode()).or(Tables.EH_FLOW_CASES.STATUS.eq(FlowCaseStatus.PROCESS.getCode())));
-    	
-    	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
+
+        cond = cond.and(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.INITIAL.getCode(), FlowCaseStatus.PROCESS.getCode()));
+
+        FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
     	if(FlowCaseSearchType.TODO_LIST.equals(searchType)) {
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
     		.and(Tables.EH_FLOW_CASES.STEP_COUNT.eq(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT)); //step_cout must equal the same
     	} else if (FlowCaseSearchType.DONE_LIST.equals(searchType)) {
+            cond = cond.or(Tables.EH_FLOW_CASES.STATUS.in(FlowCaseStatus.FINISHED.getCode()));
     		cond = cond.and(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.BUTTON_FIRED.getCode()))
     		.and(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(cmd.getUserId()))
     		.and(FlowEventCustomField.BUTTON_FIRED_COUNT.getField().eq(0l));    		
@@ -302,6 +290,22 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 					ListingLocator locator, SelectQuery<? extends Record> query) {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+				
+				return query;
+			}
+    	});    	
+    }
+    
+    @Override
+    public List<FlowEventLog> findStepEventLogs(Long caseId, Long stepCount) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
 				
 				return query;
 			}

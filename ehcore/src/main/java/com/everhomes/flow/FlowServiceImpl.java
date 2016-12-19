@@ -8,87 +8,12 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.flow.ActionStepType;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.CreateFlowCommand;
-import com.everhomes.rest.flow.CreateFlowNodeCommand;
-import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
-import com.everhomes.rest.flow.DisableFlowButtonCommand;
-import com.everhomes.rest.flow.FlowAutoStepDTO;
-import com.everhomes.rest.flow.FlowGraphDetailDTO;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowTemplateCode;
-import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
-import com.everhomes.rest.flow.FlowTimeoutType;
-import com.everhomes.rest.flow.FlowUserSelectionType;
-import com.everhomes.rest.flow.FlowUserSourceType;
-import com.everhomes.rest.flow.FlowActionDTO;
-import com.everhomes.rest.flow.FlowActionInfo;
-import com.everhomes.rest.flow.FlowActionStatus;
-import com.everhomes.rest.flow.FlowActionStepType;
-import com.everhomes.rest.flow.FlowActionType;
-import com.everhomes.rest.flow.FlowButtonDTO;
-import com.everhomes.rest.flow.FlowButtonDetailDTO;
-import com.everhomes.rest.flow.FlowButtonStatus;
-import com.everhomes.rest.flow.FlowCaseDTO;
-import com.everhomes.rest.flow.FlowCaseDetailDTO;
-import com.everhomes.rest.flow.FlowCaseEntity;
-import com.everhomes.rest.flow.FlowCaseSearchType;
-import com.everhomes.rest.flow.FlowCaseStatus;
-import com.everhomes.rest.flow.FlowCaseType;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowDTO;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowEvaluateDTO;
-import com.everhomes.rest.flow.FlowEventLogDTO;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowModuleDTO;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowNodeDTO;
-import com.everhomes.rest.flow.FlowNodeDetailDTO;
-import com.everhomes.rest.flow.FlowNodeLogDTO;
-import com.everhomes.rest.flow.FlowNodePriority;
-import com.everhomes.rest.flow.FlowNodeReminderDTO;
-import com.everhomes.rest.flow.FlowNodeStatus;
-import com.everhomes.rest.flow.FlowNodeTrackerDTO;
-import com.everhomes.rest.flow.FlowPostEvaluateCommand;
-import com.everhomes.rest.flow.FlowPostSubjectCommand;
-import com.everhomes.rest.flow.FlowPostSubjectDTO;
-import com.everhomes.rest.flow.FlowServiceErrorCode;
-import com.everhomes.rest.flow.FlowSingleUserSelectionCommand;
-import com.everhomes.rest.flow.FlowStatusType;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowSubjectDTO;
-import com.everhomes.rest.flow.FlowUserSelectionDTO;
-import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.flow.FlowVariableDTO;
-import com.everhomes.rest.flow.FlowVariableResponse;
-import com.everhomes.rest.flow.FlowVariableType;
-import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
-import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
-import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
-import com.everhomes.rest.flow.ListFlowBriefResponse;
-import com.everhomes.rest.flow.ListFlowButtonResponse;
-import com.everhomes.rest.flow.ListFlowModulesCommand;
-import com.everhomes.rest.flow.ListFlowModulesResponse;
-import com.everhomes.rest.flow.SearchFlowCaseCommand;
-import com.everhomes.rest.flow.SearchFlowCaseResponse;
-import com.everhomes.rest.flow.ListFlowCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
-import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
-import com.everhomes.rest.flow.ListFlowVariablesCommand;
-import com.everhomes.rest.flow.UpdateFlowButtonCommand;
-import com.everhomes.rest.flow.UpdateFlowNameCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeCommand;
-import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
-import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -98,6 +23,7 @@ import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
+import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -107,9 +33,11 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -184,11 +112,17 @@ public class FlowServiceImpl implements FlowService {
 	@Autowired
 	private FlowTimeoutService flowTimeoutService;
 	
+	@Autowired
+	private ServiceModuleProvider serviceModuleProvider;
+	
     @Autowired
     MessagingService messagingService;
     
     @Autowired
     LocaleTemplateService localeTemplateService;
+    
+    @Autowired
+    FlowUserSelectionService flowUserSelectionService;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
@@ -234,6 +168,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setNamespaceId(cmd.getNamespaceId());
     	obj.setProjectId(cmd.getProjectId());
     	obj.setProjectType(cmd.getProjectType());
+    	flowListenerManager.onFlowCreating(obj);
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
 
@@ -374,6 +309,14 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public ListFlowBriefResponse listBriefFlows(ListFlowCommand cmd) {
+		if(cmd == null) {//TODO need this ?
+			return null;
+		}
+		
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
 		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		cmd.setPageSize(count);
 		ListFlowBriefResponse resp = new ListFlowBriefResponse();
@@ -791,6 +734,7 @@ public class FlowServiceImpl implements FlowService {
 		userSel.setSourceTypeA(selCmd.getSourceTypeA());
 		userSel.setSourceTypeB(selCmd.getSourceTypeB());
 		userSel.setStatus(FlowStatusType.VALID.getCode());
+		userSel.setSelectionName(selCmd.getSelectionName());
 		
 		updateFlowUserName(userSel);
 		flowUserSelectionProvider.createFlowUserSelection(userSel);		
@@ -1096,12 +1040,22 @@ public class FlowServiceImpl implements FlowService {
 			flow.setStatus(FlowStatusType.RUNNING.getCode());
 			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flow.setUpdateTime(now);
+			flow.setRunTime(now);
 			flowProvider.updateFlow(flow);
 			return true;
 		} else if(flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
 			//already running
 			return true;
 		}
+		
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+		if(snapshotFlow != null) {
+			clearSnapshotGraph(snapshotFlow);
+			if(snapshotFlow.getFlowVersion() > flow.getFlowVersion()) {
+				flow.setFlowVersion(snapshotFlow.getFlowVersion() + 1);
+			}
+		}
+		
 		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
 		flowNodes.sort((n1, n2) -> {
@@ -1170,6 +1124,7 @@ public class FlowServiceImpl implements FlowService {
 			//running now
 			now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flowNew.setUpdateTime(now);
+			flowNew.setRunTime(now);
 			flowNew.setStatus(FlowStatusType.RUNNING.getCode());
 			flowProvider.updateFlow(flowNew);
 			
@@ -1196,10 +1151,12 @@ public class FlowServiceImpl implements FlowService {
 			flowNew.setUpdateTime(now);
 			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
 			flowProvider.updateFlow(flowNew);			
-		} else {
-			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
-			graphMap.put(fmt, flowGraph);
 		}
+		
+//		else {
+//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
+//			graphMap.put(fmt, flowGraph);
+//		}
 		
 		return isOk;
 	}
@@ -1439,12 +1396,28 @@ public class FlowServiceImpl implements FlowService {
 		return flowGraph;
 	}
 	
+	private void clearSnapshotGraph(Flow snapshotFlow) {
+		if(snapshotFlow != null) {
+			for(int i = 1; i <= snapshotFlow.getFlowVersion(); i++) {
+				String fmt = String.format("%d:%d", snapshotFlow.getFlowMainId(), i);
+				graphMap.remove(fmt);
+			}	
+		}
+	}
+	
+	@Override
+	public void clearFlowGraphCache(Long flowId) {
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+		clearSnapshotGraph(snapshotFlow);
+	}
+	
 	private FlowGraph getSnapshotGraph(Long flowId, Integer flowVer) {
 		if(flowVer <= 0) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");	
 		}
 		
 		FlowGraph flowGraph = new FlowGraph();
+		flowGraph.setCreateTime(System.currentTimeMillis());
 		Flow flow = flowProvider.findSnapshotFlow(flowId, flowVer);
 		if(flow == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_SNAPSHOT_NOEXISTS, "snapshot noexists");
@@ -1535,10 +1508,24 @@ public class FlowServiceImpl implements FlowService {
 	@Override
 	public void processMessageTimeout(FlowTimeout ft) {
 		FlowTimeoutMessageDTO dto = (FlowTimeoutMessageDTO)StringHelper.fromJsonString(ft.getJson(), FlowTimeoutMessageDTO.class);
-		FlowCaseState ctx = new FlowCaseState();
 		if(dto == null) {
 			LOGGER.error("flowtimeout error ft=" + ft.getId());
+			return;
 		}
+//		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+//		stepDTO.setAutoStepType(FlowStepType.NO_STEP.getCode());
+//		stepDTO.setFlowCaseId(dto.getFlowCaseId());
+//		stepDTO.setFlowMainId(dto.getFlowMainId());
+//		stepDTO.setFlowNodeId(dto.getFlowNodeId());
+//		stepDTO.setFlowVersion(dto.getFlowVersion());
+//		stepDTO.setStepCount(dto.getStepCount());
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(dto, FlowAutoStepDTO.class);
+		FlowCaseState ctx = flowStateProcessor.prepareAutoStep(stepDTO);
+		if(ctx == null) {
+			LOGGER.error("flowtimeout context error ft=" + ft.getId());
+			return;
+		}
+		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(dto.getFlowCaseId());
 		FlowAction flowAction = flowActionProvider.getFlowActionById(ft.getBelongTo());
 		ctx.setFlowCase(flowCase);
@@ -1554,7 +1541,7 @@ public class FlowServiceImpl implements FlowService {
 
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ft.getBelongTo()
 				, ft.getBelongEntity(), FlowUserType.PROCESSOR.getCode());
-		List<Long> users = resolvUserSelections(selections);
+		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_ACTION, flowAction.getId(), selections);
 		String dataStr = parseActionTemplate(ctx, ft.getBelongTo(), flowAction.getRenderText());
 		for(Long userId : users) {
 			MessageDTO messageDto = new MessageDTO();
@@ -1589,7 +1576,11 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flow not exists");	
 		}
 		
-		if(FlowStatusType.RUNNING.equals(flow.getStatus())) {
+		if(flow.getStatus() != null && flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+			
+			Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
+			clearSnapshotGraph(snapshotFlow);
+			
 			flow.setStatus(FlowStatusType.STOP.getCode());
 			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
 			flow.setUpdateTime(now);
@@ -1602,7 +1593,11 @@ public class FlowServiceImpl implements FlowService {
 	 */
 	@Override
 	public Flow getEnabledFlow(Integer namespaceId, Long moduleId, String moduleType, Long ownerId, String ownerType) {
-		return flowProvider.getEnabledSnapshotFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+		Flow flow = flowProvider.getEnabledConfigFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+		if(flow != null) {
+			return flowProvider.getSnapshotFlowById(flow.getId());
+		}
+		return null;
 	}
 
 	@Override
@@ -1776,7 +1771,7 @@ public class FlowServiceImpl implements FlowService {
 		} else {
 			FlowVariableResponse resp = new FlowVariableResponse();
 			String para = null;
-			List<FlowVariable> vars = flowVariableProvider.findVariables(cmd.getNamespaceId()
+			List<FlowVariable> vars = flowVariableProvider.findVariables(0
 	        		, 0l, null, 0l, null, para, FlowVariableType.NODE_USER.getCode());
 			
 			List<FlowVariableDTO> dtos = new ArrayList<>();
@@ -1859,6 +1854,7 @@ public class FlowServiceImpl implements FlowService {
 					FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
 					if(flowNode != null) {
 						dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
+						dto.setCurrNodeParams(flowNode.getParams());
 					}
 				}
 				if(2 == type) {
@@ -1962,6 +1958,7 @@ public class FlowServiceImpl implements FlowService {
 				nodeLogDTO.setNodeId(currNode.getId());
 				nodeLogDTO.setNodeLevel(currNode.getNodeLevel());
 				nodeLogDTO.setNodeName(currNode.getNodeName());
+				nodeLogDTO.setParams(currNode.getParams());
 				
 				if(flowCase.getStepCount().equals(eventLog.getStepCount())) {
 					nodeLogDTO.setIsCurrentNode((byte)1);
@@ -2142,22 +2139,15 @@ public class FlowServiceImpl implements FlowService {
 			return dto;
 		}
 		
-		if(moduleId.equals(ParkingFlowConstant.PARKING_RECHARGE_MODULE)) {
+		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
+		if(serviceModule != null) {
 			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(ParkingFlowConstant.PARKING_RECHARGE_MODULE);
-			dto.setModuleName("jiaoliu");
-			dto.setDisplayName("停车缴费");
+			dto.setDisplayName(serviceModule.getName());
+			dto.setModuleName(serviceModule.getName());
+			dto.setModuleId(moduleId);
 			return dto;
 		}
 		
-		if(moduleId.equals(41500L)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(41500L);
-			dto.setModuleName("车辆放行");
-			dto.setDisplayName("车辆放行");
-			return dto;
-		}
-
 		return null;
 	}
 
@@ -2167,50 +2157,114 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowModuleDTO> modules = new ArrayList<FlowModuleDTO>();
 		resp.setModules(modules);
 		
-		FlowModuleDTO dto = new FlowModuleDTO();
-		dto.setModuleId(111l);
-		dto.setModuleName("yuanqu");
-		dto.setDisplayName("园区入驻");
-		modules.add(dto);
+//		FlowModuleDTO dto = new FlowModuleDTO();
+//		dto.setModuleId(111l);
+//		dto.setModuleName("yuanqu");
+//		dto.setDisplayName("园区入驻");
+//		modules.add(dto);
+//		
+//		dto = new FlowModuleDTO();
+//		dto.setModuleId(112l);
+//		dto.setModuleName("wuye");
+//		dto.setDisplayName("物业保修");
+//		modules.add(dto);
+//		
+//		dto = new FlowModuleDTO();
+//		dto.setModuleId(113l);
+//		dto.setModuleName("yueka");
+//		dto.setDisplayName("月卡申请");
+//		modules.add(dto);
+//		
+//		dto = new FlowModuleDTO();
+//		dto.setModuleId(114l);
+//		dto.setModuleName("jiaoliu");
+//		dto.setDisplayName("交流大厅");
+//		modules.add(dto);
 		
-		dto = new FlowModuleDTO();
-		dto.setModuleId(112l);
-		dto.setModuleName("wuye");
-		dto.setDisplayName("物业保修");
-		modules.add(dto);
+		flowListenerManager.getModules().forEach(m -> {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(m.getModuleId());
+			dto.setModuleName(m.getModuleName());
+			dto.setDisplayName(m.getModuleName());
+			modules.add(dto);
+		});
 		
-		dto = new FlowModuleDTO();
-		dto.setModuleId(113l);
-		dto.setModuleName("yueka");
-		dto.setDisplayName("月卡申请");
-		modules.add(dto);
-		
-		dto = new FlowModuleDTO();
-		dto.setModuleId(114l);
-		dto.setModuleName("jiaoliu");
-		dto.setDisplayName("交流大厅");
-		modules.add(dto);
-
-		dto = new FlowModuleDTO();
-		dto.setModuleId(41500L);
-		dto.setModuleName("车辆放行");
-		dto.setDisplayName("车辆放行");
-		modules.add(dto);
-
 		return resp;
 	}
 	
-	private List<Long> resolvUserSelections(List<FlowUserSelection> selections) {
+	
+	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
+		return resolvUserSelections(ctx, entityType, entityId, selections, 1);
+	}
+	
+	@Override
+	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
 		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
-		if(selections == null) {
+		if(selections == null || loopCnt >= 5) {
 			return users;
 		}
+		
+		Flow flow = ctx.getFlowGraph().getFlow();
+		Long orgId = flow.getOrganizationId();
 		
 		for(FlowUserSelection sel : selections) {
 			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
-			}	
+			} else if(FlowUserSelectionType.POSITION.getCode().equals(sel.getSelectType())) {
+				Long parentOrgId = orgId;
+				if(sel.getOrganizationId() != null) {
+					parentOrgId = sel.getOrganizationId();
+				}
+				Long departmentId = parentOrgId;
+				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeB())) {
+					departmentId = sel.getSourceIdB();
+				}
+				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceIdA())) {
+					List<Long> tmp = flowUserSelectionService.findUsersByJobPositionId(parentOrgId, sel.getSourceIdA(), departmentId);
+					if(tmp != null) {
+						users.addAll(tmp);	
+					}
+					
+				} else {
+					LOGGER.error("resolvUser selId= " + sel.getId() + " position parse error!");
+				}
+				
+			} else if(FlowUserSelectionType.MANAGER.getCode().equals(sel.getSelectType())) {
+				Long parentOrgId = orgId;
+				if(sel.getOrganizationId() != null) {
+					parentOrgId = sel.getOrganizationId();
+				}
+				
+				Long departmentId = parentOrgId;
+				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
+					if(null != sel.getSourceIdA()) {
+						departmentId = sel.getSourceIdA();	
+					}
+					
+					List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId);
+					users.addAll(tmp);
+				} else {
+					LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
+				}
+				
+			} else if(FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
+				if(sel.getSourceIdA() != null) {
+					FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
+					variable.getScriptCls();
+					FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
+		        	if(ftr != null) {
+		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel, loopCnt + 1);
+		        		if(null != tmp) {
+		        			users.addAll(tmp);
+		        		}
+		        	}
+		        	
+				} else {
+					LOGGER.error("user params error selId= " + sel.getId() + " variable error!");
+				}
+				
+			}
 		}
 		
 		return users;
@@ -2220,7 +2274,7 @@ public class FlowServiceImpl implements FlowService {
 	public void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
 				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
-		List<Long> users = resolvUserSelections(selections);
+		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);
 		if(users.size() > 0) {
 			for(Long selUser : users) {
 				FlowEventLog log = new FlowEventLog();
@@ -2260,7 +2314,7 @@ public class FlowServiceImpl implements FlowService {
 		FlowCase flowCase = ctx.getFlowCase();
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flowCase.getFlowMainId()
 				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), flowCase.getFlowVersion());
-		List<Long> users = resolvUserSelections(selections);
+		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW, null, selections);
 		if(users.size() > 0) {
 			for(Long selUser : users) {
 				FlowEventLog log = new FlowEventLog();
@@ -2537,7 +2591,7 @@ public class FlowServiceImpl implements FlowService {
 		
 		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
 		if(snapshotFlow != null) {
-			deleteAllNodeProcessors(snapshotFlow, flow.getFlowMainId(), flow.getFlowVersion(), userId);
+			deleteAllNodeProcessors(snapshotFlow, snapshotFlow.getFlowMainId(), flow.getFlowVersion(), userId);
 		}
 	}
 	
@@ -2566,7 +2620,7 @@ public class FlowServiceImpl implements FlowService {
 		
 		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
 		if(snapshotFlow != null) {
-			addAllNodeProcessors(snapshotFlow, flow.getFlowMainId(), flow.getFlowVersion(), userId);
+			addAllNodeProcessors(snapshotFlow, snapshotFlow.getFlowMainId(), flow.getFlowVersion(), userId);
 		}
 	}
 	

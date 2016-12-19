@@ -32,12 +32,18 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
@@ -118,6 +124,12 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	private FlowProvider flowProvider;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
+	
+	@Autowired
+    private DbProvider dbProvider;
+    
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
     		Long parkingLotId, String plateNumber) {
@@ -239,6 +251,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		return result;
     }
 
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
     @Override
     public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
     	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
@@ -247,9 +261,21 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			}
 			else {
 				if(recharge(order)){
-					order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-					parkingProvider.updateParkingRechargeOrder(order);
+					dbProvider.execute((TransactionStatus transactionStatus) -> {
+						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+						parkingProvider.updateParkingRechargeOrder(order);
+						
+						String key = "parking-recharge" + order.getId();
+						String value = String.valueOf(order.getId());
+				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+				      
+				        LOGGER.error("Delete parking order key, key={}", key);
+				        redisTemplate.delete(key);
+			        
+			        return null;
+					});
 				}
 			}
 		}

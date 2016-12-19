@@ -755,3 +755,100 @@ CREATE TABLE `eh_launch_advertisements` (
   `update_time` DATETIME,
   PRIMARY KEY (`id`)
 ) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+
+
+-- merge from flow branch by lqs 20161217
+ALTER TABLE `eh_flows` ADD COLUMN `need_evaluate` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no evaluate, 1: need evaluate';
+ALTER TABLE `eh_flows` ADD COLUMN `evaluate_start` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` ADD COLUMN `evaluate_end` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` ADD COLUMN `evaluate_step` VARCHAR(64) COMMENT 'NoStep, ApproveStep';
+
+UPDATE `eh_flows` SET `integral_tag1`=0;
+UPDATE `eh_flows` SET `integral_tag2`=0;
+UPDATE `eh_flows` SET `integral_tag3`=0;
+UPDATE `eh_flows` SET `integral_tag4`=0;
+UPDATE `eh_flows` SET `integral_tag5`=0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_buttons` SET `integral_tag1`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag2`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag3`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag4`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_forms` SET `integral_tag1`=0;
+UPDATE `eh_flow_forms` SET `integral_tag2`=0;
+UPDATE `eh_flow_forms` SET `integral_tag3`=0;
+UPDATE `eh_flow_forms` SET `integral_tag4`=0;
+UPDATE `eh_flow_forms` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_actions` SET `integral_tag1`=0;
+UPDATE `eh_flow_actions` SET `integral_tag2`=0;
+UPDATE `eh_flow_actions` SET `integral_tag3`=0;
+UPDATE `eh_flow_actions` SET `integral_tag4`=0;
+UPDATE `eh_flow_actions` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+
+ALTER TABLE `eh_flow_user_selections` ADD COLUMN `params` VARCHAR(64);
+
+
+UPDATE `eh_flow_cases` SET `integral_tag1`=0;
+UPDATE `eh_flow_cases` SET `integral_tag2`=0;
+UPDATE `eh_flow_cases` SET `integral_tag3`=0;
+UPDATE `eh_flow_cases` SET `integral_tag4`=0;
+UPDATE `eh_flow_cases` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_event_logs` SET `integral_tag1`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag2`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag3`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag4`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `project_id` BIGINT NOT NULL;
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `project_type` VARCHAR(64);
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `evaluate_item_id` BIGINT NOT NULL;
+
+UPDATE `eh_flow_evaluates` SET `flow_node_id`=0;
+ALTER TABLE `eh_flow_evaluates` MODIFY COLUMN `flow_node_id` BIGINT NOT NULL DEFAULT 0;
+
+-- DROP TABLE IF EXISTS `eh_flow_evaluate_items`;
+CREATE TABLE `eh_flow_evaluate_items` (
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
+    `name` VARCHAR(128) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

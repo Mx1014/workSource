@@ -29,10 +29,15 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -77,6 +82,7 @@ import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
 import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
+import com.everhomes.rest.parking.GetRechargeResultCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
 import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IsOrderDelete;
@@ -169,6 +175,8 @@ public class ParkingServiceImpl implements ParkingService {
     private FlowCaseProvider flowCaseProvider;
     @Autowired
     private UserService userService;
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -343,30 +351,36 @@ public class ParkingServiceImpl implements ParkingService {
 		String ownerType = FlowOwnerType.PARKING.getCode();
     	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
     			FlowModuleType.NO_MODULE.getCode(), parkingLot.getId(), ownerType);
-		Long flowId = flow.getId();
+		Long flowId = flow.getFlowMainId();
 		String tag1 = flow.getStringTag1();
 		
         if(cardListSize == 0){
+        	
         	ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingLot.getOwnerType(), 
         			parkingLot.getOwnerId(), parkingLot.getId(), flowId);
+        	
         	List<ParkingCardRequest> requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), null, null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
+        	
         	int requestlistSize = requestlist.size();
         	if(null != parkingFlow && requestlistSize >= parkingFlow.getMaxRequestNum()){
         		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
     					"The card request is rather than max request num.");
         	}
+        	
         	requestlist = parkingProvider.listParkingCardRequests(user.getId(), cmd.getOwnerType(), 
         			cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), null,
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
+        	
         	requestlistSize = requestlist.size();
         	if(requestlistSize > 0){
         		LOGGER.error("PlateNumber is already applied, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PLATE_APPLIED,
     					"plateNumber is already applied.");
         	}
+        	
         }
         ParkingCardRequestDTO parkingCardRequestDTO = new ParkingCardRequestDTO();
         ParkingCardRequest parkingCardRequest = new ParkingCardRequest();
@@ -414,7 +428,7 @@ public class ParkingServiceImpl implements ParkingService {
     		//TODO: 新建flowcase
     		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
     		createFlowCaseCommand.setApplyUserId(user.getId());
-    		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+    		createFlowCaseCommand.setFlowMainId(flowId);
     		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
     		createFlowCaseCommand.setReferId(parkingCardRequest.getId());
     		createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
@@ -816,13 +830,16 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId);
+		
 		Integer requestedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
+		
 		Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
 		
 		Integer totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - requestedCount;
+		
 		if(count > surplusCount) {
 			LOGGER.error("Count is rather than surplusCount.");
     		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
@@ -847,10 +864,9 @@ public class ParkingServiceImpl implements ParkingService {
 				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 
 					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.PROCESSING.getCode());
-
 				}else {
+					
 					setParkingCardRequestsStatus(list, strBuilder, ParkingCardRequestStatus.SUCCEED.getCode());
-
 				}
 			}else {
 				list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
@@ -1330,6 +1346,66 @@ public class ParkingServiceImpl implements ParkingService {
 		if(null != parkingFlow)
 			dto.setAgreement(parkingFlow.getCardAgreement());
 		return dto;
+	}
+
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+	@Override
+	public void getRechargeResult(GetRechargeResultCommand cmd) {
+		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
+
+		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
+		
+		if(null == order) {
+			LOGGER.error("Order not found, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Order not found.");
+		}
+		
+		Byte orderStatus = order.getRechargeStatus();
+		if(orderStatus == ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
+			return;
+		}
+		
+		String key = "parking-recharge" + order.getId();
+		String value = String.valueOf(order.getId());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+      
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+        
+//        Object value = .get(key);
+        long now = System.currentTimeMillis();
+        long eTime = now + 5 * 1000;
+        long sTime = eTime;
+//        NamedLock lock =coordinationProvider.getNamedLock(CoordinationLocks.PARKING_RECHARGE.getCode() + "_" + order.getId());
+//        lock.enter(()-> {
+////			tempss.put(order.getId(), order);
+//        	lock.setLockAcquireTimeoutSeconds(5);
+			valueOperations.set(key, value);
+
+			LOGGER.error("wait order notify, cmd={}, startTime={}", cmd, eTime);
+
+    		while(orderStatus == ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode() 
+    				&& null != valueOperations.get(key) && eTime >= sTime) {
+    			
+    			try {
+//    				lock.wait(5000);
+					System.out.println("wait ~~~~~~~~~~~~~~~~~~~~~~~~~~");
+					Thread.sleep(500);
+				} catch (InterruptedException e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+    			sTime = System.currentTimeMillis();
+    		}
+    		
+    		if(sTime >= eTime) {
+    			LOGGER.error("Get recharge result time out, cmd={}", cmd);
+        		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+        				"Get recharge result time out.");
+    		}
+		
 	}
 	
 }

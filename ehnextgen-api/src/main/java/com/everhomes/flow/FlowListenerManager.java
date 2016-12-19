@@ -69,4 +69,8 @@ public interface FlowListenerManager {
 	void onFlowButtonFired(FlowCaseState ctx);
 
 	FlowModuleInfo getModule(String module);
+	
+	List<FlowModuleInfo> getModules();
+
+	void onFlowCreating(Flow flow);
 }

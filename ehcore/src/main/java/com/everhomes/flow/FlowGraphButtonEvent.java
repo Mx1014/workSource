@@ -1,20 +1,14 @@
 package com.everhomes.flow;
 
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.rest.flow.FlowEntityType;
-import com.everhomes.rest.flow.FlowEventType;
-import com.everhomes.rest.flow.FlowFireButtonCommand;
-import com.everhomes.rest.flow.FlowLogType;
-import com.everhomes.rest.flow.FlowServiceErrorCode;
-import com.everhomes.rest.flow.FlowStepType;
-import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class FlowGraphButtonEvent implements FlowGraphEvent {
 	private FlowUserType userType;
@@ -246,6 +240,7 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		log.setFlowCaseId(ctx.getFlowCase().getId());
 		log.setFlowUserId(firedUser.getId());
 		log.setLogType(logType.getCode());
+        log.setButtonFiredCount(0L);
 		
 		//Important!!! not change this order
 		if(logType == FlowLogType.BUTTON_FIRED) {
@@ -262,7 +257,11 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
 			log.setFlowSelectionId(cmd.getEntityId());
 		}
-		log.setSubjectId(subject.getId());
+		
+		if(subject != null) {
+			log.setSubjectId(subject.getId());
+		}
+		
 		log.setButtonFiredStep(nextStep.getCode());
 		log.setButtonFiredFromNode(current.getFlowNode().getId());
 		

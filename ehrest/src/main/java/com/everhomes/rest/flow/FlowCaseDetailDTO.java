@@ -41,6 +41,7 @@ public class FlowCaseDetailDTO {
     private Integer evaluateScore;
 	private Byte allowApplierUpdate;
 	private String customObject;
+	private String currNodeParams;
     
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> entities;
@@ -272,6 +273,14 @@ public class FlowCaseDetailDTO {
 
 	public void setCustomObject(String customObject) {
 		this.customObject = customObject;
+	}
+
+	public String getCurrNodeParams() {
+		return currNodeParams;
+	}
+
+	public void setCurrNodeParams(String currNodeParams) {
+		this.currNodeParams = currNodeParams;
 	}
 
 	@Override
