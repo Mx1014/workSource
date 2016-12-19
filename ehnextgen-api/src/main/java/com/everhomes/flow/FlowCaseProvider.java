@@ -28,4 +28,6 @@ public interface FlowCaseProvider {
 	List<FlowCaseDetail> findAdminFlowCases(ListingLocator locator, int count,
 			SearchFlowCaseCommand cmd);
 
+	FlowCase findFlowCaseByReferId(Long referId, String referType, Long moduleId);
+
 }
