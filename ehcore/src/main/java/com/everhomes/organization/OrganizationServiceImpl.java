@@ -106,7 +106,7 @@ import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rentalv2.PunchNotificationTemplateCode;
+import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
@@ -8432,7 +8432,7 @@ System.out.println();
 		map.put("verifyUrl", verifyUrl); 
 		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
-				VerifyMailTemplateCode.SUBJECT_CODE, PunchNotificationTemplateCode.locale, "加入企业验证邮件"); 
+				VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件"); 
 		Email email = new EmailBuilder()
 	    .from(appName, "zuolin@zuolin.com")
 	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
