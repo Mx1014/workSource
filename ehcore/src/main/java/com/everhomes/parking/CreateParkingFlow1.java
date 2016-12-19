@@ -336,6 +336,7 @@ public class CreateParkingFlow1 {
     	updateFlowCmd3.setParams("{\"nodeType\":\"SUCCEED\"}");
     	updateFlowCmd3.setAutoStepMinute(0);
     	updateFlowCmd3.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+    	updateFlowCmd3.setAllowTimeoutAction((byte)1);
     	flowService.updateFlowNode(updateFlowCmd3);
     	
     	addNodeProcessor(node1, orgId);

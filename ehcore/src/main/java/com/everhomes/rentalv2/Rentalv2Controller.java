@@ -55,7 +55,7 @@ import com.everhomes.techpark.punch.PunchController;
 public class Rentalv2Controller extends ControllerBase {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(PunchController.class);
-
+	public static final Long moduleId = 40400L;
 	@Autowired
 	private Rentalv2Service rentalService;
 //	/**

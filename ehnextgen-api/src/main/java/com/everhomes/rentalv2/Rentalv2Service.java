@@ -234,4 +234,10 @@ public interface Rentalv2Service {
 
 	void deleteCheckOperator(AddCheckOperatorCommand cmd);
 
+
+	void onOrderSuccess(RentalOrder bill);
+
+
+	void onOrderCancel(RentalOrder order);
+
 }
