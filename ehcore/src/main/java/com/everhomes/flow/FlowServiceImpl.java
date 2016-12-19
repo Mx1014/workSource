@@ -2119,29 +2119,29 @@ public class FlowServiceImpl implements FlowService {
 			return dto;
 		}
 		
-		if(moduleId.equals(112l)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(112l);
-			dto.setModuleName("wuye");
-			dto.setDisplayName("物业保修");
-			return dto;
-		}
-		
-		if(moduleId.equals(113l)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(113l);
-			dto.setModuleName("yueka");
-			dto.setDisplayName("月卡申请");
-			return dto;
-		}
-		
-		if(moduleId.equals(114l)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(114l);
-			dto.setModuleName("jiaoliu");
-			dto.setDisplayName("交流大厅");
-			return dto;
-		}
+//		if(moduleId.equals(112l)) {
+//			FlowModuleDTO dto = new FlowModuleDTO();
+//			dto.setModuleId(112l);
+//			dto.setModuleName("wuye");
+//			dto.setDisplayName("物业保修");
+//			return dto;
+//		}
+//		
+//		if(moduleId.equals(113l)) {
+//			FlowModuleDTO dto = new FlowModuleDTO();
+//			dto.setModuleId(113l);
+//			dto.setModuleName("yueka");
+//			dto.setDisplayName("月卡申请");
+//			return dto;
+//		}
+//		
+//		if(moduleId.equals(114l)) {
+//			FlowModuleDTO dto = new FlowModuleDTO();
+//			dto.setModuleId(114l);
+//			dto.setModuleName("jiaoliu");
+//			dto.setDisplayName("交流大厅");
+//			return dto;
+//		}
 		
 		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
 		if(serviceModule != null) {
