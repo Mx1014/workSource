@@ -1447,5 +1447,17 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
  
+-- 活动标签
+SET @eh_hot_tags = (SELECT max(id) FROM `eh_hot_tags`);   
+INSERT INTO `eh_hot_tags` (`id`, `namespace_id`, `service_type`, `name`, `status`, `default_order`, `create_time`, `create_uid`, `delete_time`, `delete_uid`) 
+    VALUES ((@eh_hot_tags := @eh_hot_tags + 1), 999983, 'activity', '爱情小镇', '1', '0', UTC_TIMESTAMP(), '1', NULL, NULL);
+INSERT INTO `eh_hot_tags` (`id`, `namespace_id`, `service_type`, `name`, `status`, `default_order`, `create_time`, `create_uid`, `delete_time`, `delete_uid`) 
+    VALUES ((@eh_hot_tags := @eh_hot_tags + 1), 999983, 'activity', '篮球赛', '1', '0', UTC_TIMESTAMP(), '1', NULL, NULL);
+INSERT INTO `eh_hot_tags` (`id`, `namespace_id`, `service_type`, `name`, `status`, `default_order`, `create_time`, `create_uid`, `delete_time`, `delete_uid`) 
+    VALUES ((@eh_hot_tags := @eh_hot_tags + 1), 999983, 'activity', '自驾游', '1', '0', UTC_TIMESTAMP(), '1', NULL, NULL);
+INSERT INTO `eh_hot_tags` (`id`, `namespace_id`, `service_type`, `name`, `status`, `default_order`, `create_time`, `create_uid`, `delete_time`, `delete_uid`) 
+    VALUES ((@eh_hot_tags := @eh_hot_tags + 1), 999983, 'activity', '联谊', '1', '0', UTC_TIMESTAMP(), '1', NULL, NULL);
+INSERT INTO `eh_hot_tags` (`id`, `namespace_id`, `service_type`, `name`, `status`, `default_order`, `create_time`, `create_uid`, `delete_time`, `delete_uid`) 
+    VALUES ((@eh_hot_tags := @eh_hot_tags + 1), 999983, 'activity', '沙龙', '1', '0', UTC_TIMESTAMP(), '1', NULL, NULL);
 
 
