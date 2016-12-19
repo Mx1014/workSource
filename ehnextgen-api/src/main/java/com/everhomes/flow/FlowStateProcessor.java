@@ -33,4 +33,6 @@ public interface FlowStateProcessor {
 
 	List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel);
 
+	FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO);
+
 }
