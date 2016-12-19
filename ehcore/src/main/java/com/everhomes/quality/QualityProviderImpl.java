@@ -1725,8 +1725,8 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		query.fetch().map((r) -> {
 			Double totalScore = r.getValue("totalScore", Double.class);
-			QualityInspectionSpecifications parentSpecification = findSpecificationById(r.getValue(
-					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID), ownerType, ownerId);
+			QualityInspectionSpecifications parentSpecification = getSpecificationById(r.getValue(
+					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID));
 			if(parentSpecification.getScore() < totalScore) {
 				score.setScore(parentSpecification.getScore());
 			} else {
