@@ -7775,7 +7775,7 @@ System.out.println();
 		
 		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
 		
-		dbProvider.execute((TransactionStatus status) -> {
+		OrganizationMemberLog dbLog = dbProvider.execute((TransactionStatus status) -> {
 			
 			List<Organization> departments = organizationProvider.listOrganizationByGroupTypes(organization.getPath() + "/%", groupTypes);
 			
@@ -7811,8 +7811,13 @@ System.out.println();
 	    	orgLog.setRequestType(RequestType.ADMIN.getCode());
 	    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
 	    	this.organizationProvider.createOrganizationMemberLog(orgLog);
-			return null;
+			return orgLog;
 		});
+		
+		//Remove door auth, by Janon 2016-12-15
+		if(dbLog != null) {
+			doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), organization.getId(), dbLog.getUserId());	
+		}
 	}
 	
 	@Override
