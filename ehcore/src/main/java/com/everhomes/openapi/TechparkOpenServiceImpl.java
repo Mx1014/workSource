@@ -102,7 +102,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
 	
-	private ExecutorService rentalThreadPool = Executors.newFixedThreadPool(10); 
+	private ExecutorService rentalThreadPool = Executors.newFixedThreadPool(6); 
 	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
