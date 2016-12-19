@@ -3255,28 +3255,29 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Long ownerId = order.getCommunityId();
 		String ownerType = FlowOwnerType.COMMUNITY.getCode();
     	Flow flow = flowService.getEnabledFlow(namespaceId, Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
-
-    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
-    	cmd.setApplyUserId(order.getRentalUid());
-    	cmd.setFlowMainId(flow.getFlowMainId());
-    	cmd.setFlowVersion(flow.getFlowVersion());
-    	cmd.setReferId(order.getId());
-    	cmd.setReferType(REFER_TYPE);
-
-    	Map<String, String> map = new HashMap<String, String>();  
-        map.put("resourceName", order.getResourceName());
-        String useDetail = order.getUseDetail();
-        if(useDetail.contains("\n")){
-        	String[] splitUseDetail = useDetail.split("\n");
-        	useDetail = splitUseDetail[0]+"...";
-        }
-        map.put("useDetail", useDetail ); 
-		String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
-				RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
-		
-    	cmd.setContent(contentString);
-    	
-    	FlowCase flowCase = flowService.createFlowCase(cmd);
+    	if(null!=flow){
+	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
+	    	cmd.setApplyUserId(order.getRentalUid());
+	    	cmd.setFlowMainId(flow.getFlowMainId());
+	    	cmd.setFlowVersion(flow.getFlowVersion());
+	    	cmd.setReferId(order.getId());
+	    	cmd.setReferType(REFER_TYPE);
+	
+	    	Map<String, String> map = new HashMap<String, String>();  
+	        map.put("resourceName", order.getResourceName());
+	        String useDetail = order.getUseDetail();
+	        if(useDetail.contains("\n")){
+	        	String[] splitUseDetail = useDetail.split("\n");
+	        	useDetail = splitUseDetail[0]+"...";
+	        }
+	        map.put("useDetail", useDetail ); 
+			String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
+					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
+			
+	    	cmd.setContent(contentString);
+	    	
+	    	FlowCase flowCase = flowService.createFlowCase(cmd);
+    	}
 		//发消息给管理员
 		addOrderSendMessage(order );
 	}

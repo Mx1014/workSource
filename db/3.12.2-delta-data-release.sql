@@ -409,6 +409,7 @@ INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`)
 
 -- 科兴菜单 by sfyan 20161219
 UPDATE eh_web_menus SET NAME = '充值管理' WHERE id = 40810;
+DELETE FROM eh_web_menu_scopes WHERE menu_id IN (40750) AND owner_type = 'EhNamespaces' AND owner_id = 999983;
 
 
 -- 资源预订工作流模板，add by wh, 20161219
