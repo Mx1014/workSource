@@ -391,6 +391,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("ownerType", request.getOwnerType());
             b.field("ownerId", request.getOwnerId());
             b.field("creatorName", request.getCreatorName());
+            b.field("creatorOrganizationId", request.getCreatorOrganizationId());
             b.field("creatorMobile", request.getCreatorMobile());
             b.field("createTime", request.getCreateTime().getTime());
             b.field("creatorUid", request.getCreatorUid());
