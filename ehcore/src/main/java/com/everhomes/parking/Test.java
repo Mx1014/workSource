@@ -41,7 +41,7 @@ public class Test {
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("plateNo", "B12346");
+		param.put("plateNo", "BX082N");
 //		param.put("money", "30000");
 ////		param.put("carType", "2");
 //		param.put("plateNo", "B12347");
@@ -72,9 +72,9 @@ public class Test {
 		StringBuilder result = new StringBuilder();
 		
         String key = "F7A0B971B199FD2A1017CEC5";
-        String iv = "20161213";
+        String iv = "20161216";
         String user = "ktapi";
-        String pwd = "0306C3";
+        String pwd = "0306A9";
         String data = null;
 		try {
 			data = EncryptUtil.getEncString(param, key, iv);

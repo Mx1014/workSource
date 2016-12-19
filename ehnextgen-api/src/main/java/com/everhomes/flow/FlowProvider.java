@@ -28,9 +28,9 @@ public interface FlowProvider {
 
 	Flow findSnapshotFlow(Long flowId, Integer flowVer);
 
-	Flow getEnabledSnapshotFlow(Integer namespaceId, Long moduleId, String moduleType,
-			Long ownerId, String ownerType);
-
 	Flow getSnapshotFlowById(Long flowId);
+
+	Flow getEnabledConfigFlow(Integer namespaceId, Long moduleId,
+			String moduleType, Long ownerId, String ownerType);
 	
 }

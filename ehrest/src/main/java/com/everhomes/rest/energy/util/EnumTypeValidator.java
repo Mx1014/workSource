@@ -1,4 +1,4 @@
-package com.everhomes.rest.energy;
+package com.everhomes.rest.energy.util;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;

@@ -1,5 +1,5 @@
 // @formatter:off
-package com.everhomes.rest.serviceModule;
+package com.everhomes.rest.module;
 
 /**
  * <ul>

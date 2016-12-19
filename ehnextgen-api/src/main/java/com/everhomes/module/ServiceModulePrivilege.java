@@ -1,13 +1,13 @@
-package com.everhomes.serviceModule;
+package com.everhomes.module;
 
-import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
+import com.everhomes.server.schema.tables.pojos.EhServiceModulePrivileges;
 import com.everhomes.util.StringHelper;
 
-public class ServiceModuleAssignment extends EhServiceModuleAssignments {
+public class ServiceModulePrivilege extends EhServiceModulePrivileges {
 
 	private static final long serialVersionUID = -1852518988310908484L;
 
-	public ServiceModuleAssignment() {
+	public ServiceModulePrivilege() {
     }
     
     @Override

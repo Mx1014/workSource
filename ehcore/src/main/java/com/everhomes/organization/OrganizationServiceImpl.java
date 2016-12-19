@@ -33,8 +33,6 @@ import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.rest.organization.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.*;
-import com.everhomes.serviceModule.ServiceModuleAssignment;
-import com.everhomes.serviceModule.ServiceModuleProvider;
 import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 
 import org.apache.poi.ss.usermodel.Font;
@@ -63,6 +61,7 @@ import com.everhomes.acl.ResourceUserRoleResolver;
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.aclink.DoorAccessService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
@@ -92,9 +91,12 @@ import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.module.ServiceModuleAssignment;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.openapi.Contract;
@@ -155,12 +157,15 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.simplejavamail.email.Email;
 import org.simplejavamail.email.EmailBuilder;
 import org.simplejavamail.mailer.Mailer;
@@ -175,6 +180,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -199,7 +205,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	private NamespaceProvider namespaceProvider;
 	
 	@Autowired
-	LocaleStringService localeStringService;
+    LocaleStringService localeStringService;
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
@@ -284,6 +290,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Autowired
 	private ServiceModuleProvider serviceModuleProvider;
+	
+	@Autowired
+	private DoorAccessService doorAccessService;
 
 	private int getPageCount(int totalCount, int pageSize){
 		int pageCount = totalCount/pageSize;
@@ -4755,6 +4764,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 			}
 		}
         sendMessageForContactLeave(member);
+        
+        //Remove door auth, by Janon 2016-12-15
+        doorAccessService.deleteAuthWhenLeaveFromOrg(UserContext.getCurrentNamespaceId(), enterpriseId, userId);
         
         // 需要给用户默认一下小区（以机构所在园区为准），否则会在用户退出时没有小区而客户端拿不到场景而卡死
         // http://devops.lab.everhomes.com/issues/2812  by lqs 20161017

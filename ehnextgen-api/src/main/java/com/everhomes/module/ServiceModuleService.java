@@ -1,4 +1,4 @@
-package com.everhomes.serviceModule;
+package com.everhomes.module;
 
 import java.util.List;
 

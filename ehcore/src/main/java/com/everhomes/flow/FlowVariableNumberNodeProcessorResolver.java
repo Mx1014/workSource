@@ -11,7 +11,7 @@ public class FlowVariableNumberNodeProcessorResolver implements FlowVariableUser
 
 	@Override
 	public List<Long> variableUserResolve(FlowCaseState ctx, FlowEntityType fromEntity, Long entityId,
-			FlowUserSelection userSelection) {
+			FlowUserSelection userSelection, int loopCnt) {
 		// TODO Auto-generated method stub
 		return null;
 	}

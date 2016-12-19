@@ -1152,6 +1152,9 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(Tables.EH_ACTIVITY_GOODS.ID.max()).from(Tables.EH_ACTIVITY_GOODS).fetchOne().value1();
         });
 
+        syncTableSequence(null, EhFlowTimeouts.class, Tables.EH_FLOW_TIMEOUTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_FLOW_TIMEOUTS.ID.max()).from(Tables.EH_FLOW_TIMEOUTS).fetchOne().value1();
+        });
         syncTableSequence(null, EhParkingClearanceOperators.class, Tables.EH_PARKING_CLEARANCE_OPERATORS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_PARKING_CLEARANCE_OPERATORS.ID.max()).from(Tables.EH_PARKING_CLEARANCE_OPERATORS).fetchOne().value1();
         });
@@ -1161,6 +1164,10 @@ public class SequenceServiceImpl implements SequenceService {
 
         syncTableSequence(null, EhOrganizationAddressMappings.class, Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.max()).from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS).fetchOne().value1();
+        });
+
+        syncTableSequence(null, EhLaunchAdvertisements.class, Tables.EH_LAUNCH_ADVERTISEMENTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_LAUNCH_ADVERTISEMENTS.ID.max()).from(Tables.EH_LAUNCH_ADVERTISEMENTS).fetchOne().value1();
         });
     }
 

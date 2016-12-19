@@ -58,6 +58,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
    @Autowired
    private FlowEventLogProvider flowEventLogProvider;
    
+   @Autowired
+   private FlowUserSelectionProvider flowUserSelectionProvider;
+   
    ThreadPoolTaskScheduler scheduler;
    
    public FlowStateProcessorImpl() {
@@ -124,6 +127,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 			ctx.setCurrentEvent(event);
 			
+			FlowStepType stepType = FlowStepType.fromCode(stepDTO.getAutoStepType());
+			if(stepType != null) {
+				ctx.setStepType(stepType);	
+			}
+			
 			return ctx;
 		}
 		return null;		
@@ -137,7 +145,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				|| flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.FINISHED.getCode())
 				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists");
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists, flowCaseId=" + flowCase);
 		}
 		ctx.setFlowCase(flowCase);
 		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
@@ -148,7 +156,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
 		if(node == null) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists, flowNodeId=" + flowCase.getCurrentNodeId());
 		}
 		ctx.setCurrentNode(node);
 		
@@ -208,6 +216,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 					action.fireAction(ctx, event);
 				}
 			}
+
+            FlowStepType stepType = FlowStepType.fromCode(btn.getFlowButton().getFlowStepType());
+            ctx.setStepType(stepType);
 		}
 		
 		flowListenerManager.onFlowButtonFired(ctx);
@@ -311,8 +322,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case COMMENT_STEP:
 			break;
 		case ABSORT_STEP:
-			logStep = true;
-			flowListenerManager.onFlowCaseAbsorted(ctx);
+			logStep = true;//Never enter here
 			break;
 		case REMINDER_STEP:
 			break;
@@ -416,6 +426,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case ABSORT_STEP:
 			logStep = true;
 			ctx.getFlowCase().setStatus(FlowCaseStatus.ABSORTED.getCode());
+
+            flowListenerManager.onFlowCaseAbsorted(ctx);
 			break;
 		default:
 			break;
@@ -463,7 +475,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		return ctx.getOperator();
 	}
 	
-	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection seles) {
+	@Override
+	public List<Long> getApplierSelection(FlowCaseState ctx, FlowUserSelection sel) {
 		List<Long> users = new ArrayList<>();
 		UserInfo userInfo = getApplier(ctx, "");
 		if(null != userInfo) {
@@ -472,5 +485,4 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		return users;
 	}
-	
 }

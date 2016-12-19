@@ -7,7 +7,9 @@ import net.greghaines.jesque.Job;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.ApplicationListener;
 import org.springframework.context.annotation.Lazy;
+import org.springframework.context.event.ContextRefreshedEvent;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 
@@ -18,7 +20,7 @@ import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.util.DateHelper;
 
 @Component
-public class FlowTimeoutServiceImpl implements FlowTimeoutService {
+public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationListener<ContextRefreshedEvent> {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowTimeoutServiceImpl.class);
 	
     @Autowired
@@ -33,14 +35,18 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService {
 	@Autowired
 	FlowService flowService;
     
-    private String queueDelay = "flowdelays2";
-    private String queueNoDelay = "flownodelays2";
+    private String queueDelay = "flowdelays";
+    private String queueNoDelay = "flownodelays";
     
-    @PostConstruct
-    public void setup() {
+    private void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueDelay);
         workerPoolFactory.getWorkerPool().addQueue(queueNoDelay);
     }
+    
+	@Override
+	public void onApplicationEvent(ContextRefreshedEvent arg0) {
+		setup();
+	}
     
     @Override
     public void pushTimeout(FlowTimeout ft) {

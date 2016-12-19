@@ -11,11 +11,14 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.module.ServiceModule;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
+import com.everhomes.rest.energy.util.ParamErrorCodes;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -27,13 +30,13 @@ import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.clearance.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.serviceModule.ServiceModule;
-import com.everhomes.serviceModule.ServiceModuleProvider;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +45,9 @@ import org.springframework.stereotype.Service;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import javax.validation.constraints.Size;
+import javax.validation.metadata.ConstraintDescriptor;
+
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -111,11 +117,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        if (cmd.getUserIds() != null) {
+
+
+        if (cmd.getUserIds() != null && cmd.getUserIds().size() > 0) {
+            int alreadyInsertUserCount = 0;
             for (Long userId : cmd.getUserIds()) {
                 // 检查当前停车场里是否已经有当前用户了
                 ParkingClearanceOperator operator = clearanceOperatorProvider.findByParkingLotIdAndUid(cmd.getParkingLotId(), userId, cmd.getOperatorType());
                 if (operator != null) {
+                    alreadyInsertUserCount++;
                     continue;
                 }
                 User user = this.findUserById(userId);
@@ -133,6 +143,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     this.assignmentPrivileges(cmd.getOperatorType(), cmd.getParkingLotId(), userId);
                     return true;
                 });
+            }
+            // 此次添加的用户都已经在数据库里了, 就给个提示, 测试要求的
+            if (alreadyInsertUserCount == cmd.getUserIds().size()) {
+                throw errorWith(ParkingErrorCode.SCOPE_CLEARANCE, ParkingErrorCode.ERROR_USER_ALREADY_IN_DATABASE, "All user is in database");
             }
         }
     }
@@ -320,7 +334,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
 
     @Override
     public SearchClearanceLogsResponse searchClearanceLog(SearchClearanceLogCommand cmd) {
-        // test();
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         SearchClearanceLogsResponse response = new SearchClearanceLogsResponse();
@@ -341,21 +354,12 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         return response;
     }
 
-    private void test() {
-        Flow flow = flowService.getEnabledFlow(currNamespaceId(), MODULE_ID, null, 10001L, FlowOwnerType.PARKING.getCode());
-        FlowGraphDetailDTO flowDTO = flowService.getFlowGraphDetail(flow.getId());
-        System.out.println(flowDTO);
-    }
-
     @Override
     public CheckAuthorityResponse checkAuthority(CheckAuthorityCommand cmd) {
         validate(cmd);
         // checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
-        List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
-
         ActionType actionType = ActionType.fromCode(cmd.getActionType());
-
         long privilegeId = -1;
         // 没有权限时的提示消息
         String message = null;
@@ -369,6 +373,8 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_TASK_MESSAGE_CODE, currLocale(), "");
         }
 
+        List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
+
         CheckAuthorityStatus status = CheckAuthorityStatus.FAILURE;
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
             for (ParkingLot parkingLot : parkingLots) {
@@ -378,7 +384,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     status = CheckAuthorityStatus.SUCCESS;
                     message = null;
                     break;// 只要有一个停车场的权限就放行
-                } catch (Exception e) {
+                } catch (RuntimeErrorException ree) {
                     // ignore
                 }
             }
@@ -437,27 +443,43 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private void validate(Object o) {
         Set<ConstraintViolation<Object>> result = validator.validate(o);
 
-        /*for (ConstraintViolation<Object> violation : result) {
-            ConstraintDescriptor<?> constraintDescriptor = violation.getConstraintDescriptor();
+        for (ConstraintViolation<Object> v : result) {
+            ConstraintDescriptor<?> constraintDescriptor = v.getConstraintDescriptor();
             String constraintAnnotationClassName = constraintDescriptor.getAnnotation().annotationType().getName();
-            if ("javax.validation.constraints.Size".equals(constraintAnnotationClassName)) {
-                Size size = (Size) constraintDescriptor.getAnnotation();
-                int max = size.max();
-                if (max > 0) {
-                    // localeStringService.getLocalizedString();
-                    LOGGER.error("Invalid parameter {}", violation.getPropertyPath());
-                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", violation.getPropertyPath());
-                }
+            switch (constraintAnnotationClassName) {
+                // 参数长度检查
+                case "javax.validation.constraints.Size":
+                    Size size = (Size) constraintDescriptor.getAnnotation();
+                    int max = size.max();
+                    if (max > 0) {
+                        LOGGER.error("Parameter over length: [ {} ]", v.getPropertyPath());
+                        throw errorWith(ParamErrorCodes.SCOPE, ParamErrorCodes.ERROR_OVER_LENGTH,
+                                "Parameter over length: [ %s ]", v.getPropertyPath());
+                    }
+                    break;
+                // 其他参数检查
+                default:
+                    LOGGER.error("Invalid parameter {} [ {} ]", v.getPropertyPath(), v.getInvalidValue());
+                    throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                            "Invalid parameter %s [ %s ]", v.getPropertyPath(), v.getInvalidValue());
             }
-        }*/
+        }
 
+        /*if ("javax.validation.constraints.Size".equals(constraintAnnotationClassName)) {
+            Size size = (Size) constraintDescriptor.getAnnotation();
+            int max = size.max();
+            if (max > 0) {
+                LOGGER.error("Parameter over length: [ {} ]", v.getPropertyPath());
+                throw errorWith(ParamErrorCodes.SCOPE, ParamErrorCodes.ERROR_OVER_LENGTH, "Parameter over length: [ %s ]", v.getPropertyPath());
+            }
+        }
         if (!result.isEmpty()) {
             result.stream().map(r -> r.getPropertyPath().toString() + " [ " + r.getInvalidValue() + " ]")
                     .reduce((i, a) -> i + ", " + a).ifPresent(r -> {
                 LOGGER.error("Invalid parameter {}", r);
                 throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
             });
-        }
+        }*/
     }
 
     @Override
@@ -579,4 +601,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public String onFlowVariableRender(FlowCaseState ctx, String variable) {
         return null;
     }
+    
+	@Override
+	public void onFlowCreating(Flow flow) {
+		// TODO Auto-generated method stub
+	//Added by Janson	
+	}
 }

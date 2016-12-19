@@ -95,18 +95,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-		List<FlowCaseEntity> entities = new ArrayList<>();
-//		FlowCaseEntity e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("test-list-key");
-//		e.setValue("test-list-value");
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("test-list-key2");
-//		e.setValue("test-list-value2");
-//		entities.add(e);
+		List<FlowCaseEntity> entities = new ArrayList<>(); 
 //		
 //		e = new FlowCaseEntity();
 //		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -119,7 +108,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 //		e.setKey("test-text-key2");
 //		e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
 //		entities.add(e);
-		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+		R parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
 		
 		ParkingCardRequestDTO dto = ConvertHelper.convert(parkingCardRequest, ParkingCardRequestDTO.class);
     	

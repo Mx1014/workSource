@@ -427,7 +427,7 @@ CREATE TABLE `eh_activity_goods` (
 -- merge from terminal-stat-delta-schema.sql by by sfyan 20161214
 -- 运营统计 by sfyan 20161214
 -- 终端app版本累计用户
-DROP TABLE IF EXISTS `eh_terminal_app_version_cumulatives`;
+-- DROP TABLE IF EXISTS `eh_terminal_app_version_cumulatives`;
 CREATE TABLE `eh_terminal_app_version_cumulatives` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -439,7 +439,7 @@ CREATE TABLE `eh_terminal_app_version_cumulatives` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端app版本活跃用户
-DROP TABLE IF EXISTS `eh_terminal_app_version_actives`;
+-- DROP TABLE IF EXISTS `eh_terminal_app_version_actives`;
 CREATE TABLE `eh_terminal_app_version_actives` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -452,7 +452,7 @@ CREATE TABLE `eh_terminal_app_version_actives` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端日统计
-DROP TABLE IF EXISTS `eh_terminal_day_statistics`;
+-- DROP TABLE IF EXISTS `eh_terminal_day_statistics`;
 CREATE TABLE `eh_terminal_day_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -473,7 +473,7 @@ CREATE TABLE `eh_terminal_day_statistics` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端时统计
-DROP TABLE IF EXISTS `eh_terminal_hour_statistics`;
+-- DROP TABLE IF EXISTS `eh_terminal_hour_statistics`;
 CREATE TABLE `eh_terminal_hour_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -490,7 +490,7 @@ CREATE TABLE `eh_terminal_hour_statistics` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 终端app版本统计
-DROP TABLE IF EXISTS `eh_terminal_app_version_statistics`;
+-- DROP TABLE IF EXISTS `eh_terminal_app_version_statistics`;
 CREATE TABLE `eh_terminal_app_version_statistics` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT '0',
@@ -509,7 +509,7 @@ CREATE TABLE `eh_terminal_app_version_statistics` (
 
 
 -- 统计任务记录
-DROP TABLE IF EXISTS `eh_app_version`;
+-- DROP TABLE IF EXISTS `eh_app_version`;
 CREATE TABLE `eh_terminal_statistics_tasks` (
   `id` BIGINT NOT NULL,
   `task_no` VARCHAR(20) NOT NULL,
@@ -521,7 +521,7 @@ CREATE TABLE `eh_terminal_statistics_tasks` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- app版本
-DROP TABLE IF EXISTS `eh_app_version`;
+-- DROP TABLE IF EXISTS `eh_app_version`;
 CREATE TABLE `eh_app_version` (
   `id` BIGINT NOT NULL,
   `type` VARCHAR(20) NOT NULL,
@@ -733,3 +733,122 @@ CREATE TABLE `eh_parking_attachments` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+--
+-- App启动广告   add by xq.tian  2016/11/28
+--
+-- DROP TABLE IF EXISTS `eh_launch_advertisements`;
+CREATE TABLE `eh_launch_advertisements` (
+  `id` BIGINT  NOT NULL,
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+  `content_type` VARCHAR(32) COMMENT '1: IMAGE, 2: VIDEO',
+  `content_uri` VARCHAR(1024) COMMENT 'advertisement image/gif/video uri',
+  `times_per_day` INTEGER DEFAULT 0 COMMENT 'The maximum number of times to display per day',
+  `display_interval` INTEGER DEFAULT 0 COMMENT 'Minimum display time interval, ',
+  `duration_time` INTEGER COMMENT 'duration time',
+  `skip_flag` TINYINT COMMENT '0: can not skip, 1: skip',
+  `action_type` TINYINT COMMENT '0: can not click, 1: click',
+  `action_data` TEXT COMMENT 'If allow click, the jumped url',
+  `status` TINYINT COMMENT '0: inactive, 1: waitingForApproval, 2: active',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE = INNODB DEFAULT CHARSET = utf8mb4;
+
+
+
+-- merge from flow branch by lqs 20161217
+ALTER TABLE `eh_flows` ADD COLUMN `need_evaluate` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no evaluate, 1: need evaluate';
+ALTER TABLE `eh_flows` ADD COLUMN `evaluate_start` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` ADD COLUMN `evaluate_end` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` ADD COLUMN `evaluate_step` VARCHAR(64) COMMENT 'NoStep, ApproveStep';
+
+UPDATE `eh_flows` SET `integral_tag1`=0;
+UPDATE `eh_flows` SET `integral_tag2`=0;
+UPDATE `eh_flows` SET `integral_tag3`=0;
+UPDATE `eh_flows` SET `integral_tag4`=0;
+UPDATE `eh_flows` SET `integral_tag5`=0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flows` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_buttons` SET `integral_tag1`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag2`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag3`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag4`=0;
+UPDATE `eh_flow_buttons` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_buttons` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_forms` SET `integral_tag1`=0;
+UPDATE `eh_flow_forms` SET `integral_tag2`=0;
+UPDATE `eh_flow_forms` SET `integral_tag3`=0;
+UPDATE `eh_flow_forms` SET `integral_tag4`=0;
+UPDATE `eh_flow_forms` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_forms` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_actions` SET `integral_tag1`=0;
+UPDATE `eh_flow_actions` SET `integral_tag2`=0;
+UPDATE `eh_flow_actions` SET `integral_tag3`=0;
+UPDATE `eh_flow_actions` SET `integral_tag4`=0;
+UPDATE `eh_flow_actions` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_actions` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+
+ALTER TABLE `eh_flow_user_selections` ADD COLUMN `params` VARCHAR(64);
+
+
+UPDATE `eh_flow_cases` SET `integral_tag1`=0;
+UPDATE `eh_flow_cases` SET `integral_tag2`=0;
+UPDATE `eh_flow_cases` SET `integral_tag3`=0;
+UPDATE `eh_flow_cases` SET `integral_tag4`=0;
+UPDATE `eh_flow_cases` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_cases` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+UPDATE `eh_flow_event_logs` SET `integral_tag1`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag2`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag3`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag4`=0;
+UPDATE `eh_flow_event_logs` SET `integral_tag5`=0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag1` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag2` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag3` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag4` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE `eh_flow_event_logs` MODIFY COLUMN `integral_tag5` BIGINT NOT NULL DEFAULT 0;
+
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `project_id` BIGINT NOT NULL;
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `project_type` VARCHAR(64);
+ALTER TABLE `eh_flow_evaluates` ADD COLUMN `evaluate_item_id` BIGINT NOT NULL;
+
+UPDATE `eh_flow_evaluates` SET `flow_node_id`=0;
+ALTER TABLE `eh_flow_evaluates` MODIFY COLUMN `flow_node_id` BIGINT NOT NULL DEFAULT 0;
+
+-- DROP TABLE IF EXISTS `eh_flow_evaluate_items`;
+CREATE TABLE `eh_flow_evaluate_items` (
+    `id` BIGINT NOT NULL,
+    `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+    `flow_main_id` BIGINT NOT NULL,
+    `flow_version` INTEGER NOT NULL,
+    `name` VARCHAR(128) NOT NULL,
+
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
