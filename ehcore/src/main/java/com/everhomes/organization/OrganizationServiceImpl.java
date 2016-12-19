@@ -2347,8 +2347,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 
 	@Override
 	public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd) {
-		User user = UserContext.current().getUser();
-
+		return listUserRelateOrgs(cmd, UserContext.current().getUser());
+	}
+	
+	//Added by Janson 20161217
+	@Override
+	public List<OrganizationSimpleDTO> listUserRelateOrgs(ListUserRelatedOrganizationsCommand cmd, User user) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		List<OrganizationSimpleDTO> orgs = new ArrayList<OrganizationSimpleDTO>();

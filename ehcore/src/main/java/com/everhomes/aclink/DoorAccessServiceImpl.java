@@ -2755,7 +2755,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId) {
     	ListUserRelatedOrganizationsCommand cmd = new ListUserRelatedOrganizationsCommand();
-    	List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(cmd);
+    	User user = userProvider.findUserById(userId);
+    	List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(cmd, user);
     	if(dtos.isEmpty()) {
     		deleteAllAuths(namespaceId, orgId, userId);
     		LOGGER.info("delete all auths orgId=" + orgId + " userId=" + userId);
