@@ -70,7 +70,24 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseAbsorted(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+
+		String stepType = ctx.getStepType().getCode();
+		String param = flowNode.getParams();
+		
+		Long flowId = flowNode.getFlowMainId();
+		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		String tag1 = flow.getStringTag1();
+		
+		long now = System.currentTimeMillis();
+		LOGGER.debug("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
+		
+		parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
+		parkingCardRequest.setCancelTime(new Timestamp(System.currentTimeMillis()));
+		parkingProvider.updateParkingCardRequest(parkingCardRequest);
 		
 	}
 
