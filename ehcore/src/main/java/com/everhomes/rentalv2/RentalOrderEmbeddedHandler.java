@@ -57,6 +57,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 					else if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 						if(order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0){
 							order.setStatus(SiteBillStatus.SUCCESS.getCode());
+							rentalService.onBillSuccess(order);
 							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
 							if(null == userIdentifier){
 								LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
@@ -73,8 +74,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 						LOGGER.error("待付款订单:id ["+order.getId()+"]状态有问题： 订单状态是："+order.getStatus());
 					}
 					rentalProvider.updateRentalBill(order);
-					rentalProvider.updateRentalOrderPayorderMap(orderMap);
-					rentalService.addOrderSendMessage(order);
+					rentalProvider.updateRentalOrderPayorderMap(orderMap); 
 				} 
 	}
 

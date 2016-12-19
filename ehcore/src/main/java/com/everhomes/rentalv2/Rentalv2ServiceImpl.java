@@ -3207,10 +3207,19 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			this.setSignatureParam(response);
 			return null;
 		});
-		if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode()))
-			addOrderSendMessage(bill );
+		if(bill.getStatus().equals(SiteBillStatus.SUCCESS.getCode())){
+			
+			onBillSuccess(bill);
+		}
 		// 客户端生成订单
 		return response;
+	}
+	@Override
+	public void onBillSuccess(RentalOrder bill) {
+		// TODO 加工作流
+		
+		//发消息给管理员
+		addOrderSendMessage(bill );
 	}
 
 	private boolean valiItem(RentalItemsOrder rib) {
