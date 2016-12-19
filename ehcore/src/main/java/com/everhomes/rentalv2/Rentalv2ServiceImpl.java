@@ -77,6 +77,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -307,6 +309,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     WorkerPoolFactory workerPoolFactory;
     @Autowired
     private FlowService flowService;
+    @Autowired
+    private FlowCaseProvider flowCaseProvider;
     
     @PostConstruct
     public void setup() {
@@ -3229,11 +3233,18 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	private static final String REFER_TYPE= "rental.order";
 	@Override
 	public void onOrderCancel(RentalOrder order) {
-		//TODO:终止工作流
-		FlowAutoStepDTO dto = new FlowAutoStepDTO();
-		dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
-//		dto.set
-		this.flowService.processAutoStep(dto);
+		//终止工作流
+		FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(order.getId(), REFER_TYPE, Rentalv2Controller.moduleId);
+		if(null != flowcase ){
+			FlowAutoStepDTO dto = new FlowAutoStepDTO();
+			dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+			dto.setFlowCaseId(flowcase.getId());
+			dto.setFlowMainId(flowcase.getFlowMainId());
+			dto.setFlowNodeId(flowcase.getCurrentNodeId());
+			dto.setFlowVersion(flowcase.getFlowVersion());
+			dto.setStepCount(flowcase.getStepCount());
+			this.flowService.processAutoStep(dto);
+		}
 		//发消息
 		cancelOrderSendMessage(order);
 	}
