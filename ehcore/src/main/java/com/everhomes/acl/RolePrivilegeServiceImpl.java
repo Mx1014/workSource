@@ -1962,9 +1962,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-
-	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId){
+	@Override
+	public void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId){
 		deleteAcls(resourceType, resourceId, targetType, targetId, null, null);
+	}
+
+	@Override
+	public void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> privilegeIds){
+		deleteAcls(resourceType, resourceId, targetType, targetId, null, privilegeIds);
 	}
 
 	/**

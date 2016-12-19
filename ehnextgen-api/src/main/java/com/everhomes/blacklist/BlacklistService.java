@@ -30,6 +30,12 @@ public interface BlacklistService {
     void addUserBlacklist(AddUserBlacklistCommand cmd);
 
     /**
+     * 编辑用户黑名单
+     * @param cmd
+     */
+    void editUserBlacklist(AddUserBlacklistCommand cmd);
+
+    /**
      * 批量解除黑名单
      * @param cmd
      */

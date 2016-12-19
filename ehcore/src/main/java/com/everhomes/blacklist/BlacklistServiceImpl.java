@@ -173,6 +173,44 @@ public class BlacklistServiceImpl implements BlacklistService{
 	}
 
 	@Override
+	public void editUserBlacklist(AddUserBlacklistCommand cmd) {
+		User user = userProvider.findUserById(cmd.getUserId());
+
+		if(null == user){
+			LOGGER.error("user does not exist, userId ={},", cmd.getUserId());
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USER_NOT_EXISTS,
+					"user does not exist");
+		}
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+		if(null == userIdentifier){
+			LOGGER.error("user does not exist, userId ={},", cmd.getUserId());
+			throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_USER_NOT_EXISTS,
+					"user does not exist");
+		}
+
+		if(StringUtils.isEmpty(cmd.getOwnerType())){
+			cmd.setOwnerType("");
+		}
+
+		if(null == cmd.getOwnerId()){
+			cmd.setOwnerId(0L);
+		}
+
+		dbProvider.execute((TransactionStatus status) -> {
+			AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ROLE.getCode(), RoleConstants.BLACKLIST);
+			List<Long> privilegeIds = new ArrayList<>();
+			List<Acl> acls = aclProvider.getResourceAclByRole("system",null, descriptor);
+			for (Acl acl: acls) {
+				privilegeIds.add(acl.getPrivilegeId());
+			}
+			rolePrivilegeService.deleteAcls(cmd.getOwnerType(),cmd.getOwnerId(), EntityType.USER.getCode(), cmd.getUserId(), privilegeIds);
+			rolePrivilegeService.assignmentPrivileges(cmd.getOwnerType(),cmd.getOwnerId(),EntityType.USER.getCode(), cmd.getUserId(), BlacklistErrorCode.SCOPE, cmd.getPrivilegeIds());
+			return null;
+		});
+	}
+
+	@Override
 	public void batchDeleteUserBlacklist(BatchDeleteUserBlacklistCommand cmd) {
 		if(StringUtils.isEmpty(cmd.getOwnerType())){
 			cmd.setOwnerType("");

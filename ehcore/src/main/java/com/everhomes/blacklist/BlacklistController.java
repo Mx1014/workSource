@@ -63,6 +63,20 @@ public class BlacklistController extends ControllerBase {
     }
 
     /**
+     * <b>URL: /blacklist/editUserBlacklist</b>
+     * <p>编辑黑名单</p>
+     */
+    @RequestMapping("editUserBlacklist")
+    @RestReturn(value=String.class)
+    public RestResponse editUserBlacklist(@Valid AddUserBlacklistCommand cmd) {
+        blacklistService.editUserBlacklist(cmd);
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /blacklist/batchDeleteUserBlacklist</b>
      * <p>批量解除黑名单</p>
      */
