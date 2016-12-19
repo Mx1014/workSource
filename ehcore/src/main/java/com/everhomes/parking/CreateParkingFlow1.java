@@ -10,6 +10,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -481,11 +482,35 @@ public class CreateParkingFlow1 {
     private void updateNodeReminder(FlowNodeDTO dto, Long orgId) {
     	UpdateFlowNodeReminderCommand remindCmd = new UpdateFlowNodeReminderCommand();
     	remindCmd.setFlowNodeId(dto.getId());
-    	FlowActionInfo action = createActionInfo("test-remind-action-" + dto.getId(), orgId);
+    	FlowActionInfo action = createActionInfo("申请成功，请耐心等候发放月卡资格", orgId);
     	remindCmd.setMessageAction(action);
-    	action = createActionInfo("test-remind-tick-action-" + dto.getId(), orgId);
-    	action.setReminderAfterMinute(10l);
-    	action.setReminderTickMinute(20l);
+    	action = createActionInfo("申请成功，请耐心等候发放月卡资格", orgId);
+    	action.setReminderAfterMinute(0l);
+    	action.setReminderTickMinute(5l);
+    	remindCmd.setTickMessageAction(action);
+    	flowService.updateFlowNodeReminder(remindCmd);
+    }
+    
+    private void updateNodeReminder2(FlowNodeDTO dto, Long orgId) {
+    	UpdateFlowNodeReminderCommand remindCmd = new UpdateFlowNodeReminderCommand();
+    	remindCmd.setFlowNodeId(dto.getId());
+    	FlowActionInfo action = createActionInfo("排队成功，请尽快携带资料前往管理处办理月卡", orgId);
+    	remindCmd.setMessageAction(action);
+    	action = createActionInfo("排队成功，请尽快携带资料前往管理处办理月卡", orgId);
+    	action.setReminderAfterMinute(0l);
+    	action.setReminderTickMinute(5l);
+    	remindCmd.setTickMessageAction(action);
+    	flowService.updateFlowNodeReminder(remindCmd);
+    }
+    
+    private void updateNodeReminder3(FlowNodeDTO dto, Long orgId) {
+    	UpdateFlowNodeReminderCommand remindCmd = new UpdateFlowNodeReminderCommand();
+    	remindCmd.setFlowNodeId(dto.getId());
+    	FlowActionInfo action = createActionInfo("恭喜，您的月卡申请已成功办理", orgId);
+    	remindCmd.setMessageAction(action);
+    	action = createActionInfo("恭喜，您的月卡申请已成功办理", orgId);
+    	action.setReminderAfterMinute(0l);
+    	action.setReminderTickMinute(5l);
     	remindCmd.setTickMessageAction(action);
     	flowService.updateFlowNodeReminder(remindCmd);
     }
@@ -518,18 +543,56 @@ public class CreateParkingFlow1 {
     	cmd.setFlowNodeId(dto.getId());
     	
     	FlowActionInfo action = createActionInfo(
-    			"处理中，请稍候" + dto.getId(), orgId);
+    			"申请成功，请耐心等候发放月卡资格", orgId);
     	action.setTrackerApplier(1l);
     	action.setTrackerProcessor(1l);
     	cmd.setEnterTracker(action);
     	
-    	action = createActionInfo("test-track-reject-action-" + dto.getId(), orgId);
+    	action = createActionInfo("申请成功，请耐心等候发放月卡资格", orgId);
     	action.setTrackerApplier(0l);
     	action.setTrackerProcessor(1l);
     	
     	cmd.setRejectTracker(action);
     	flowService.updateFlowNodeTracker(cmd);
     }
+    
+    private void updateNodeTracker2(FlowNodeDTO dto, Long orgId) {
+    	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
+    	cmd.setFlowNodeId(dto.getId());
+    	
+    	FlowActionInfo action = createActionInfo(
+    			"排队成功，请尽快携带资料前往管理处办理月卡", orgId);
+    	action.setTrackerApplier(1l);
+    	action.setTrackerProcessor(1l);
+    	cmd.setEnterTracker(action);
+    	
+    	action = createActionInfo("排队成功，请尽快携带资料前往管理处办理月卡", orgId);
+    	action.setTrackerApplier(0l);
+    	action.setTrackerProcessor(1l);
+    	
+    	cmd.setRejectTracker(action);
+    	flowService.updateFlowNodeTracker(cmd);
+    }
+    
+    private void updateNodeTracker3(FlowNodeDTO dto, Long orgId) {
+    	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
+    	cmd.setFlowNodeId(dto.getId());
+    	
+    	FlowActionInfo action = createActionInfo(
+    			"恭喜，您的月卡申请已成功办理", orgId);
+    	action.setTrackerApplier(1l);
+    	action.setTrackerProcessor(1l);
+    	cmd.setEnterTracker(action);
+    	
+    	action = createActionInfo("恭喜，您的月卡申请已成功办理", orgId);
+    	action.setTrackerApplier(0l);
+    	action.setTrackerProcessor(1l);
+    	
+    	cmd.setRejectTracker(action);
+    	flowService.updateFlowNodeTracker(cmd);
+    }
+    
+    
     
     private List<Long> getOrgUsers(Long id) {
     	List<Long> users = new ArrayList<>();
@@ -553,6 +616,7 @@ public class CreateParkingFlow1 {
     	flowCmd.setOrgId(orgId);
     	flowCmd.setOwnerId(owenrId);
     	flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
+    	flowCmd.setStringTag1("1");
     	Long projectId = 240111044331048623L;
     	flowCmd.setProjectId(projectId);
     	flowCmd.setProjectType("EhCommunities");
@@ -591,7 +655,10 @@ public class CreateParkingFlow1 {
     	
     	UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
     	updateFlowCmd3.setFlowNodeId(node3.getId());
+    	// 办理成功 自动跳入结束
     	updateFlowCmd3.setParams("SUCCEED");
+    	updateFlowCmd3.setAutoStepMinute(0);
+    	updateFlowCmd3.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
     	flowService.updateFlowNode(updateFlowCmd3);
     	
     	addNodeProcessor(node1, orgId);
@@ -599,12 +666,12 @@ public class CreateParkingFlow1 {
     	addNodeProcessor(node3, orgId);
     
     	updateNodeReminder(node1, orgId);
-    	updateNodeReminder(node2, orgId);
-    	updateNodeReminder(node3, orgId);
+    	updateNodeReminder2(node2, orgId);
+    	updateNodeReminder3(node3, orgId);
     	
     	updateNodeTracker(node1, orgId);
-    	updateNodeTracker(node2, orgId);
-    	updateNodeTracker(node3, orgId);
+    	updateNodeTracker2(node2, orgId);
+    	updateNodeTracker3(node3, orgId);
     	//发放资格按钮
     	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
@@ -616,8 +683,14 @@ public class CreateParkingFlow1 {
     	buttonCmd.setDescription("发放资格");
     	buttonCmd.setFlowButtonId(flowButton1.getId());
     	buttonCmd.setNeedProcessor((byte)1);
-    	buttonCmd.setNeedSubject((byte)1);    	
+    	buttonCmd.setNeedSubject((byte)1);
+    	
+    	FlowActionInfo buttonAction = createActionInfo("排队成功，请尽快携带资料前往管理处办理月卡", orgId);
+    	buttonCmd.setMessageAction(buttonAction);
+    	updateTargetVarAction(buttonAction);
+    	
     	flowService.updateFlowButton(buttonCmd);
+    	
     	//驳回按钮
     	FlowButton flowButton11 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
@@ -645,8 +718,10 @@ public class CreateParkingFlow1 {
     	buttonCmd.setNeedProcessor((byte)1);
     	buttonCmd.setNeedSubject((byte)1);
     	
-    	FlowActionInfo buttonAction = createActionInfo("test-button2-info", orgId);
+    	buttonAction = createActionInfo("恭喜，您的月卡申请已成功办理", orgId);
     	buttonCmd.setMessageAction(buttonAction);
+    	updateTargetVarAction(buttonAction);
+    	
     	flowService.updateFlowButton(buttonCmd);
     	//取消资格
     	FlowButton flowButton21 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
@@ -665,6 +740,18 @@ public class CreateParkingFlow1 {
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	
-//    	Boolean ok = flowService.enableFlow(flowDTO.getId());
+    	Boolean ok = flowService.enableFlow(flowDTO.getId());
+    }
+    
+    private void updateTargetVarAction(FlowActionInfo action) {
+    	ListFlowVariablesCommand cmd = new ListFlowVariablesCommand();
+    	cmd.setFlowVariableType(FlowVariableType.NODE_USER.getCode());
+    	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
+    	
+		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
+		singCmd.setFlowUserSelectionType(FlowUserSelectionType.VARIABLE.getCode());
+		singCmd.setSourceIdA(resp.getDtos().get(resp.getDtos().size()-1).getId());
+		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_VARIABLE.getCode());
+		action.getUserSelections().getSelections().add(singCmd);
     }
 }

@@ -834,21 +834,36 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer requestedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
 		
-		Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
-				parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
-		
 		Integer totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - requestedCount;
 		
-		if(count > surplusCount) {
-			LOGGER.error("Count is rather than surplusCount.");
-    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
-    				"Count is rather than surplusCount.");
-		}
-		if(count > quequeCount) {
-			LOGGER.error("Count is rather than quequeCount.");
-    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_QUEQUE_NUM,
-    				"Count is rather than quequeCount.");
+		if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
+			Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
+
+			if(count > surplusCount) {
+				LOGGER.error("Count is rather than surplusCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
+	    				"Count is rather than surplusCount.");
+			}
+			if(count > quequeCount) {
+				LOGGER.error("Count is rather than quequeCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_QUEQUE_NUM,
+	    				"Count is rather than quequeCount.");
+			}
+		}else {
+			Integer processingCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
+			if(count > surplusCount) {
+				LOGGER.error("Count is rather than surplusCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_SURPLUS_NUM,
+	    				"Count is rather than surplusCount.");
+			}
+			if(count > processingCount) {
+				LOGGER.error("Count is rather than processingCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_QUEQUE_NUM,
+	    				"Count is rather than processingCount.");
+			}
 		}
 		
 		dbProvider.execute((TransactionStatus transactionStatus) -> {
