@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -32,18 +33,24 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.FieldContentType;
+import com.everhomes.rest.user.FieldDTO;
 import com.everhomes.rest.user.FieldType;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
 import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.CustomRequestHandler;
 import com.everhomes.user.RequestAttachments;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -76,6 +83,9 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
+
+	@Autowired
+	private UserActivityService userActivityService;
 			
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -186,21 +196,31 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	
 	private String getNote(ServiceAllianceRequests request) {
 		
-		String name = (request.getName() == null) ? "" : request.getName();
-		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
-		String organizationName = (request.getOrganizationName() == null) ? "" : request.getOrganizationName();
-		String cityName = (request.getCityName() == null) ? "" : request.getCityName();
-		String industry = (request.getIndustry() == null) ? "" : request.getIndustry();
-		String projectDesc = (request.getProjectDesc() == null) ? "" : request.getProjectDesc();
-		String financingStage = (request.getFinancingStage() == null) ? "" : request.getFinancingStage();
-		BigDecimal financingAmount = (request.getFinancingAmount() == null) ? new BigDecimal(0) : request.getFinancingAmount();
-		Double transferShares = (request.getTransferShares() == null) ? 0.0 : request.getTransferShares();
+		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
+		if(fieldList != null && fieldList.size() > 0) {
+			StringBuilder sb = new StringBuilder();
+			for(RequestFieldDTO field : fieldList) {
+				sb.append(field.getFieldName() + ":" + field.getFieldValue() + "\n");
+			}
+			
+			return sb.toString();
+		}
 		
-		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "企业名称:" + organizationName
-				 + "\n" + "企业城市:" + cityName + "\n" + "企业行业:" + industry + "\n"
-				 + "项目描述:" + projectDesc + "\n" + "融资阶段:" + financingStage + "\n" + "融资金额（万元）:"
-				 + financingAmount + "\n" + "出让股份 %:" + transferShares + "\n";
-		return note;
+//		String name = (request.getName() == null) ? "" : request.getName();
+//		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
+//		String organizationName = (request.getOrganizationName() == null) ? "" : request.getOrganizationName();
+//		String cityName = (request.getCityName() == null) ? "" : request.getCityName();
+//		String industry = (request.getIndustry() == null) ? "" : request.getIndustry();
+//		String projectDesc = (request.getProjectDesc() == null) ? "" : request.getProjectDesc();
+//		String financingStage = (request.getFinancingStage() == null) ? "" : request.getFinancingStage();
+//		BigDecimal financingAmount = (request.getFinancingAmount() == null) ? new BigDecimal(0) : request.getFinancingAmount();
+//		Double transferShares = (request.getTransferShares() == null) ? 0.0 : request.getTransferShares();
+//		
+//		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "企业名称:" + organizationName
+//				 + "\n" + "企业城市:" + cityName + "\n" + "企业行业:" + industry + "\n"
+//				 + "项目描述:" + projectDesc + "\n" + "融资阶段:" + financingStage + "\n" + "融资金额（万元）:"
+//				 + financingAmount + "\n" + "出让股份 %:" + transferShares + "\n";
+		return null;
 	}
 
 	@Override
@@ -247,98 +267,137 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	}
 	
 	//硬转，纯体力
-	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceRequests fields) {
-		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
-		RequestFieldDTO dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceRequests field) {
 		
-		dto.setFieldValue(fields.getName());
-		dto.setFieldName("姓名");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getMobile());
-		dto.setFieldName("手机号");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getOrganizationName());
-		dto.setFieldName("企业名称");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getCityName());
-		dto.setFieldName("企业城市");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getIndustry());
-		dto.setFieldName("企业行业");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getProjectDesc());
-		dto.setFieldName("项目描述");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getFinancingStage());
-		dto.setFieldName("融资阶段");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldType(FieldType.DECIMAL.getCode());
-		if(fields.getFinancingAmount() != null) {
-			dto.setFieldValue(fields.getFinancingAmount().toString());
-		}
-		dto.setFieldName("融资金额（万元）");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+		GetCustomRequestTemplateCommand command = new GetCustomRequestTemplateCommand();
+		command.setTemplateType(field.getTemplateType());
+		RequestTemplateDTO template = userActivityService.getCustomRequestTemplate(command);
 
-		dto.setFieldType(FieldType.NUMBER.getCode());
-		if(fields.getTransferShares() != null) {
-			dto.setFieldValue(fields.getTransferShares().toString());
+		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
+		if(template != null && template.getDtos() != null && template.getDtos().size() > 0) {
+			EhServiceAllianceRequests request = ConvertHelper.convert(field, EhServiceAllianceRequests.class);
+			Field[] fields = request.getClass().getDeclaredFields();
+			for (FieldDTO fieldDTO : template.getDtos()) {
+				RequestFieldDTO dto = new RequestFieldDTO();
+				dto.setFieldType(fieldDTO.getFieldType());
+				dto.setFieldContentType(fieldDTO.getFieldContentType());
+
+				for (Field requestField : fields) {
+					requestField.setAccessible(true);  
+					// 表示为private类型
+					if (requestField.getModifiers() == 2) {
+						if(requestField.getName().equals(fieldDTO.getFieldName())){
+							// 字段值
+							try {
+								dto.setFieldValue(requestField.get(request).toString());
+								break;
+							} catch (IllegalArgumentException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+
+				dto.setFieldName(fieldDTO.getFieldDisplayName());
+				list.add(dto);
+			}
 		}
-		dto.setFieldName("出让股份 %");
-		list.add(dto);
 		
-		dto = new RequestFieldDTO();
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldType(FieldType.DATETIME.getCode());
-		if(fields.getCreateTime() != null) {
-			dto.setFieldValue(fields.getCreateTime().toString());
-		}
-		dto.setFieldName("提交时间");
-		list.add(dto);
-		
-		List<RequestAttachments> attachments =  userActivityProvider.listRequestAttachments(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM, fields.getId());
+//		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
+//		RequestFieldDTO dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getName());
+//		dto.setFieldName("姓名");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getMobile());
+//		dto.setFieldName("手机号");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getOrganizationName());
+//		dto.setFieldName("企业名称");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getCityName());
+//		dto.setFieldName("企业城市");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getIndustry());
+//		dto.setFieldName("企业行业");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getProjectDesc());
+//		dto.setFieldName("项目描述");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getFinancingStage());
+//		dto.setFieldName("融资阶段");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldType(FieldType.DECIMAL.getCode());
+//		if(fields.getFinancingAmount() != null) {
+//			dto.setFieldValue(fields.getFinancingAmount().toString());
+//		}
+//		dto.setFieldName("融资金额（万元）");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//
+//		dto.setFieldType(FieldType.NUMBER.getCode());
+//		if(fields.getTransferShares() != null) {
+//			dto.setFieldValue(fields.getTransferShares().toString());
+//		}
+//		dto.setFieldName("出让股份 %");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldType(FieldType.DATETIME.getCode());
+//		if(fields.getCreateTime() != null) {
+//			dto.setFieldValue(fields.getCreateTime().toString());
+//		}
+//		dto.setFieldName("提交时间");
+//		list.add(dto);
+//		
+		List<RequestAttachments> attachments =  userActivityProvider.listRequestAttachments(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM, field.getId());
 		if(attachments != null && attachments.size() > 0) {
 			for(RequestAttachments attachment : attachments) {
-				dto = new RequestFieldDTO();
+				RequestFieldDTO dto = new RequestFieldDTO();
 				dto.setFieldType(FieldType.STRING.getCode());
 				dto.setFieldContentType(FieldContentType.TEXT.getCode());
 				

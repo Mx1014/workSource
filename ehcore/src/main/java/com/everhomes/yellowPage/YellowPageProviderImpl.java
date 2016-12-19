@@ -855,4 +855,48 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 			return null;
 		return result.get(0);
 	}
+
+	@Override
+	public void createInvestRequests(ServiceAllianceInvestRequests request) {
+
+	}
+
+	@Override
+	public ServiceAllianceInvestRequests findInvestRequests(Long id) {
+		return null;
+	}
+
+	@Override
+	public List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize) {
+		List<ServiceAllianceInvestRequests> requests = new ArrayList<ServiceAllianceInvestRequests>();
+
+		if (locator.getShardIterator() == null) {
+			AccessSpec accessSpec = AccessSpec.readOnlyWith(EhServiceAllianceInvestRequests.class);
+			ShardIterator shardIterator = new ShardIterator(accessSpec);
+			locator.setShardIterator(shardIterator);
+		}
+		this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+			SelectQuery<EhServiceAllianceInvestRequestsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS);
+			if(locator.getAnchor() != null)
+				query.addConditions(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS.ID.gt(locator.getAnchor()));
+
+			query.addLimit(pageSize - requests.size());
+
+			query.fetch().map((r) -> {
+
+				requests.add(ConvertHelper.convert(r, ServiceAllianceInvestRequests.class));
+				return null;
+			});
+
+			if (requests.size() >= pageSize) {
+				locator.setAnchor(requests.get(requests.size() - 1).getId());
+				return AfterAction.done;
+			} else {
+				locator.setAnchor(null);
+			}
+			return AfterAction.next;
+		});
+
+		return requests;
+	}
 }

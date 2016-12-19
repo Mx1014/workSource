@@ -87,4 +87,9 @@ public interface YellowPageProvider {
 	
 	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
 
+	void createInvestRequests(ServiceAllianceInvestRequests request);
+	ServiceAllianceInvestRequests findInvestRequests(Long id);
+	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
+
+
 }

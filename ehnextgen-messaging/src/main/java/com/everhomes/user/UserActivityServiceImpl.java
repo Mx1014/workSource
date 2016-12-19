@@ -1217,8 +1217,19 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         if(!StringUtils.isEmpty(templateType)) {
             String handlerPrefix = CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX;
-            if(templateType.length() > 7 && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(templateType.substring(0, 7))) {
-            	templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+//            if(templateType.length() > 7 && CustomRequestConstants.RESERVE_REQUEST_CUSTOM.equals(templateType.substring(0, 7))) {
+//            	templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+//            }
+            if(templateType.startsWith(CustomRequestConstants.RESERVE_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.RESERVE_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.APARTMENT_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.SETTLE_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.SETTLE_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.INVEST_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.INVEST_REQUEST_CUSTOM;
             }
             handler = PlatformContext.getComponent(handlerPrefix + templateType);
         }

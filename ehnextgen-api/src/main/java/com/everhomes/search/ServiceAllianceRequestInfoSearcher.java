@@ -13,6 +13,7 @@ public interface ServiceAllianceRequestInfoSearcher {
     void bulkUpdateReservationRequests(List<ReservationRequests> requests);
     void bulkUpdateSettleRequests(List<SettleRequests> requests);
     void bulkUpdateServiceAllianceApartmentRequests(List<ServiceAllianceApartmentRequests> requests);
+    void bulkUpdateServiceAllianceInvestRequests(List<ServiceAllianceInvestRequests> requests);
     void feedDoc(ServiceAllianceRequestInfo request);
     void syncFromDb();
     SearchRequestInfoResponse searchRequestInfo(SearchRequestInfoCommand cmd);
