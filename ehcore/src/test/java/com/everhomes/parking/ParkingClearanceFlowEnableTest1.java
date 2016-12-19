@@ -1,9 +1,11 @@
 package com.everhomes.parking;
 
 import com.everhomes.flow.*;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.organization.*;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -23,8 +25,10 @@ import org.springframework.context.annotation.ComponentScan;
 import org.springframework.context.annotation.Configuration;
 
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Random;
+import java.util.stream.Collectors;
 
 public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
@@ -138,7 +142,7 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
     	FlowDTO flowDTO = flowService.createFlow(flowCmd);
     	
-    	CreateFlowUserSelectionCommand flowSel = new CreateFlowUserSelectionCommand();
+    	/*CreateFlowUserSelectionCommand flowSel = new CreateFlowUserSelectionCommand();
     	flowSel.setBelongTo(flowDTO.getId());
     	flowSel.setFlowEntityType(FlowEntityType.FLOW.getCode());
     	flowSel.setFlowUserType(FlowUserType.SUPERVISOR.getCode());
@@ -149,92 +153,123 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	List<FlowSingleUserSelectionCommand> flowSUSS = new ArrayList<>();
     	flowSUSS.add(flowSUS);
     	flowSel.setSelections(flowSUSS);
-    	flowService.createFlowUserSelection(flowSel);
+    	flowService.createFlowUserSelection(flowSel);*/
     	
     	CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
     	nodeCmd.setFlowMainId(flowDTO.getId());
     	nodeCmd.setNamespaceId(namespaceId);
     	nodeCmd.setNodeLevel(1);
-    	nodeCmd.setNodeName("车辆放行节点1");
+    	nodeCmd.setNodeName("等待处理");
+        nodeCmd.setParams("{\"code\":1, \"status\":\"PROCESSING\"}");
     	FlowNodeDTO node1 = flowService.createFlowNode(nodeCmd);
     	
     	nodeCmd = new CreateFlowNodeCommand();
     	nodeCmd.setFlowMainId(flowDTO.getId());
     	nodeCmd.setNamespaceId(namespaceId);
     	nodeCmd.setNodeLevel(2);
-    	nodeCmd.setNodeName("车辆放行节点2");
+    	nodeCmd.setNodeName("正在处理");
     	FlowNodeDTO node2 = flowService.createFlowNode(nodeCmd);
     	
-    	nodeCmd = new CreateFlowNodeCommand();
-    	nodeCmd.setFlowMainId(flowDTO.getId());
-    	nodeCmd.setNamespaceId(namespaceId);
-    	nodeCmd.setNodeLevel(3);
-    	nodeCmd.setNodeName("车辆放行节点3");
-    	FlowNodeDTO node3 = flowService.createFlowNode(nodeCmd);
+    	// addNodeProcessor(node1, orgId);
+    	// addNodeProcessor(node2, orgId);
+
+    	// updateNodeReminder(node1, orgId);
+    	// updateNodeReminder(node2, orgId);
+
+    	// updateNodeTracker(node1, orgId);
+    	// updateNodeTracker(node2, orgId);
+    	// updateNodeTracker(node3, orgId);
     	
-    	//support auto step
-    	UpdateFlowNodeCommand updateFlowCmd = new UpdateFlowNodeCommand();
-    	updateFlowCmd.setAutoStepMinute(10);
-    	updateFlowCmd.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-    	updateFlowCmd.setFlowNodeId(node1.getId());
-    	flowService.updateFlowNode(updateFlowCmd);
-    	
-    	addNodeProcessor(node1, orgId);
-    	addNodeProcessor(node2, orgId);
-    	addNodeProcessor(node3, orgId);
-    
-    	updateNodeReminder(node1, orgId);
-    	updateNodeReminder(node2, orgId);
-    	updateNodeReminder(node3, orgId);
-    	
-    	updateNodeTracker(node1, orgId);
-    	updateNodeTracker(node2, orgId);
-    	updateNodeTracker(node3, orgId);
-    	
-    	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton node1ApproveStepButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	
     	UpdateFlowButtonCommand buttonCmd = new UpdateFlowButtonCommand();
     	buttonCmd.setButtonName("受理");
     	buttonCmd.setDescription("我要处理");
-    	buttonCmd.setFlowButtonId(flowButton1.getId());
+    	buttonCmd.setFlowButtonId(node1ApproveStepButton.getId());
     	buttonCmd.setNeedProcessor((byte)1);
     	buttonCmd.setNeedSubject((byte)1);
-    	
-    	FlowActionInfo buttonAction = createActionInfo("任务已被受理 testApplier:${applierName} ", orgId);
+
+    	FlowActionInfo buttonAction = createActionInfo("任务已被受理 处理人:${applierName} ", orgId);
     	buttonCmd.setMessageAction(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
     	
     	//REMIND_COUNT
-    	FlowButton remindButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    	FlowButton node1ApplierRemindButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	buttonCmd = new UpdateFlowButtonCommand();
-    	buttonCmd.setFlowButtonId(remindButton.getId());
+    	buttonCmd.setFlowButtonId(node1ApplierRemindButton.getId());
+        buttonCmd.setButtonName("催办");
+        buttonCmd.setDescription("催办描述");
     	buttonCmd.setRemindCount(2);
     	flowService.updateFlowButton(buttonCmd);
-    	
-    	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
-    			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
-    	
+
+    	FlowButton node1ApplierAbsortButton = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
+    			, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.APPLIER.getCode());
     	buttonCmd = new UpdateFlowButtonCommand();
-    	buttonCmd.setButtonName("注释");
-    	buttonCmd.setDescription("描述信息");
-    	buttonCmd.setFlowButtonId(flowButton2.getId());
-    	buttonCmd.setNeedProcessor((byte)1);
-    	buttonCmd.setNeedSubject((byte)1);
-    	
-    	buttonAction = createActionInfo("任务添加了注释信息", orgId);
-    	buttonCmd.setMessageAction(buttonAction);
+    	buttonCmd.setFlowButtonId(node1ApplierAbsortButton.getId());
+        buttonCmd.setButtonName("取消");
+        buttonCmd.setDescription("取消描述");
+        buttonCmd.setNeedSubject((byte)1);
     	flowService.updateFlowButton(buttonCmd);
-    	
-    	FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
-    			, FlowStepType.TRANSFER_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
-    	DisableFlowButtonCommand disCmd = new DisableFlowButtonCommand();
-    	disCmd.setFlowButtonId(flowButton3.getId());
-    	flowService.disableFlowButton(disCmd);
+
+        FlowButton node2ApproveStepButton = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+                , FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+        buttonCmd = new UpdateFlowButtonCommand();
+        buttonCmd.setFlowButtonId(node2ApproveStepButton.getId());
+        buttonCmd.setButtonName("完成");
+        buttonCmd.setDescription("完成描述");
+        buttonCmd.setNeedSubject((byte)1);
+        flowService.updateFlowButton(buttonCmd);
+
+        //REMIND_COUNT
+        FlowButton node2ApplierRemindButton = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+                , FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
+        buttonCmd = new UpdateFlowButtonCommand();
+        buttonCmd.setFlowButtonId(node2ApplierRemindButton.getId());
+        buttonCmd.setButtonName("催办");
+        buttonCmd.setDescription("催办描述");
+        buttonCmd.setRemindCount(2);
+        flowService.updateFlowButton(buttonCmd);
+
+        FlowButton node2ApplierAbsortButton = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
+                , FlowStepType.ABSORT_STEP.getCode(), FlowUserType.APPLIER.getCode());
+        buttonCmd = new UpdateFlowButtonCommand();
+        buttonCmd.setFlowButtonId(node2ApplierAbsortButton.getId());
+        buttonCmd.setButtonName("取消");
+        buttonCmd.setDescription("取消描述");
+        buttonCmd.setNeedSubject((byte)1);
+        flowService.updateFlowButton(buttonCmd);
+
+        List<FlowButton> flowButtons = flowButtonProvider.queryFlowButtons(new ListingLocator(), 100, (locator, query) -> {
+            query.addConditions(Tables.EH_FLOW_BUTTONS.FLOW_NODE_ID.in(node1.getId(), node2.getId()));
+            return query;
+        });
+
+        List<Long> needButtonIdList = Arrays.asList(
+                node1ApplierAbsortButton.getId(),
+                node1ApplierRemindButton.getId(),
+                node1ApproveStepButton.getId(),
+                node2ApplierAbsortButton.getId(),
+                node2ApplierRemindButton.getId(),
+                node2ApproveStepButton.getId()
+        );
+
+        // 把不需要的按钮关掉
+        List<FlowButton> updateButtonIdList = flowButtons.stream().filter(r -> !needButtonIdList.contains(r.getId())).collect(Collectors.toList());
+        for (FlowButton flowButton : updateButtonIdList) {
+            flowButton.setStatus(Byte.valueOf("1"));
+            flowButtonProvider.updateFlowButton(flowButton);
+        }
     	
     	Boolean ok = flowService.enableFlow(flowDTO.getId());
     	Assert.assertTrue(ok);
+    }
+
+    @Test
+    public void enableFlow(){
+        Boolean ok = flowService.enableFlow(26L);
+        Assert.assertTrue(ok);
     }
     
     @Test
@@ -290,12 +325,13 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     private void updateNodeReminder(FlowNodeDTO dto, Long orgId) {
     	UpdateFlowNodeReminderCommand remindCmd = new UpdateFlowNodeReminderCommand();
     	remindCmd.setFlowNodeId(dto.getId());
-    	FlowActionInfo action = createActionInfo("test-remind-action-" + dto.getId(), orgId);
+    	FlowActionInfo action = createActionInfo("您有一个车辆放行任务未处理", orgId);
     	remindCmd.setMessageAction(action);
-    	action = createActionInfo("test-remind-tick-action-" + dto.getId(), orgId);
-    	action.setReminderAfterMinute(10l);
-    	action.setReminderTickMinute(20l);
-    	remindCmd.setTickMessageAction(action);
+
+    	// action = createActionInfo("催办:tick:节点id:" + dto.getId(), orgId);
+    	// action.setReminderAfterMinute(10L);
+    	// action.setReminderTickMinute(20L);
+    	// remindCmd.setTickMessageAction(action);
     	flowService.updateFlowNodeReminder(remindCmd);
     }
     
@@ -327,13 +363,13 @@ public class ParkingClearanceFlowEnableTest1 extends LoginAuthTestCase {
     	cmd.setFlowNodeId(dto.getId());
     	
     	FlowActionInfo action = createActionInfo(
-    			"applierName: ${applierName} applierPhone: ${applierPhone} currProcessorName:${currProcessorName} currProcessorPhone: ${currProcessorPhone}"
-    			+ " test-track-enter-action-" + dto.getId(), orgId);
+    			"申请人: ${applierName} 申请人电话: ${applierPhone}\n处理人:${currProcessorName} 处理人电话: ${currProcessorPhone}\n"
+    			+ "驳回:节点id:" + dto.getId(), orgId);
     	action.setTrackerApplier(1l);
     	action.setTrackerProcessor(1l);
     	cmd.setEnterTracker(action);
     	
-    	action = createActionInfo("test-track-reject-action-" + dto.getId(), orgId);
+    	action = createActionInfo("驳回:节点id:" + dto.getId(), orgId);
     	action.setTrackerApplier(0l);
     	action.setTrackerProcessor(1l);
     	
