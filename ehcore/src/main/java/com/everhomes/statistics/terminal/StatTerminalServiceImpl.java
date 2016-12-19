@@ -254,11 +254,13 @@ public class StatTerminalServiceImpl implements StatTerminalService{
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         TerminalDayStatistics dayStatistics = statTerminalProvider.getTerminalDayStatisticsByDay(date, namespaceId);
         TerminalDayStatisticsDTO day = ConvertHelper.convert(dayStatistics, TerminalDayStatisticsDTO.class);
-        day.setActiveChangeRate(dayStatistics.getActiveChangeRate().doubleValue());
-        day.setCumulativeChangeRate(dayStatistics.getCumulativeChangeRate().doubleValue());
-        day.setNewChangeRate(dayStatistics.getNewChangeRate().doubleValue());
-        day.setStartChangeRate(dayStatistics.getStartChangeRate().doubleValue());
-        day.setActiveRate(dayStatistics.getActiveRate().doubleValue());
+        if(null != dayStatistics){
+            day.setActiveChangeRate(dayStatistics.getActiveChangeRate().doubleValue());
+            day.setCumulativeChangeRate(dayStatistics.getCumulativeChangeRate().doubleValue());
+            day.setNewChangeRate(dayStatistics.getNewChangeRate().doubleValue());
+            day.setStartChangeRate(dayStatistics.getStartChangeRate().doubleValue());
+            day.setActiveRate(dayStatistics.getActiveRate().doubleValue());
+        }
         return day;
     }
 

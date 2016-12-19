@@ -1,21 +1,5 @@
 package com.everhomes.pmtask;
 
-import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.util.List;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Record1;
-import org.jooq.SelectJoinStep;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DefaultRecordMapper;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -29,23 +13,23 @@ import com.everhomes.schema.tables.pojos.EhNamespaces;
 import com.everhomes.schema.tables.records.EhNamespacesRecord;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskLogsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskTargetStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskTargetsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTasksDao;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskAttachments;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskLogs;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskStatistics;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskTargetStatistics;
-import com.everhomes.server.schema.tables.pojos.EhPmTaskTargets;
-import com.everhomes.server.schema.tables.pojos.EhPmTasks;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
 import com.everhomes.server.schema.tables.records.EhPmTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskLogsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTaskTargetsRecord;
 import com.everhomes.server.schema.tables.records.EhPmTasksRecord;
 import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class PmProviderImpl implements PmTaskProvider{

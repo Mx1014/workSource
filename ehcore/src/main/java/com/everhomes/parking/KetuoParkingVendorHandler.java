@@ -32,12 +32,18 @@ import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.order.OrderUtil;
@@ -50,8 +56,10 @@ import com.everhomes.parking.ketuo.KetuoTemoFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
+import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardType;
 import com.everhomes.rest.parking.ParkingLotVendor;
@@ -60,6 +68,7 @@ import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
+import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
@@ -97,6 +106,10 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
     private UserProvider userProvider;
 	@Autowired
 	private OrderUtil commonOrderUtil;
+	@Autowired
+    private BigCollectionProvider bigCollectionProvider;
+	@Autowired
+    private DbProvider dbProvider;
 	
 	@Override
     public List<ParkingCardDTO> getParkingCardsByPlate(String ownerType, Long ownerId,
@@ -114,6 +127,14 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 
 			long expireTime = strToLong(expireDate);
 			long now = System.currentTimeMillis();
+			
+			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
+	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
+	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
+	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
+	    		expireTime = expireTime + cardReserveTime;
+	    	}
 			
 			if(expireTime < now){
 				return resultList;
@@ -208,6 +229,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		return result;
     }
 
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
     @Override
     public void notifyParkingRechargeOrderPayment(ParkingRechargeOrder order, String payStatus) {
     	if(order.getRechargeStatus() != ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
@@ -216,9 +239,21 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			}
 			else {
 				if(recharge(order)){
-					order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
-					order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
-					parkingProvider.updateParkingRechargeOrder(order);
+					dbProvider.execute((TransactionStatus transactionStatus) -> {
+						order.setRechargeStatus(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode());
+						order.setRechargeTime(new Timestamp(System.currentTimeMillis()));
+						parkingProvider.updateParkingRechargeOrder(order);
+						
+						String key = "parking-recharge" + order.getId();
+						String value = String.valueOf(order.getId());
+				        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+				        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+				      
+				        LOGGER.error("Delete parking order key, key={}", key);
+				        redisTemplate.delete(key);
+			        
+			        return null;
+					});
 				}
 			}
 		}
@@ -590,5 +625,11 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 				LOGGER.error("Close httpclient error.");
 			}
 		}
+	}
+
+	@Override
+	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

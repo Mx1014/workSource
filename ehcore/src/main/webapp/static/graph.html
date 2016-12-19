@@ -316,7 +316,7 @@ function graphRequest() {
     $.ajax({
         dataType: "json",
         url: "/evh/admin/flow/getFlowGraphDetail",
-        data: {"flowId": 127},
+        data: {"flowId": 10},
         success: function(json) {
             showFlowGraph(json.response);
         }

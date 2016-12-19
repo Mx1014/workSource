@@ -914,8 +914,11 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setStartTime(activity.getStartTime().toString());
-        dto.setStopTime(activity.getEndTime().toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String convertStartTime = format.format(activity.getStartTime().getTime());
+        String convertEndTime = format.format(activity.getEndTime().getTime());
+        dto.setStartTime(convertStartTime);
+        dto.setStopTime(convertEndTime);
         dto.setGroupId(activity.getGroupId());
         fixupVideoInfo(dto);//added by janson
         return dto;
@@ -1045,8 +1048,11 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setStartTime(activity.getStartTime().toString());
-        dto.setStopTime(activity.getEndTime().toString());
+        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        String convertStartTime = format.format(activity.getStartTime().getTime());
+        String convertEndTime = format.format(activity.getEndTime().getTime());
+        dto.setStartTime(convertStartTime);
+        dto.setStopTime(convertEndTime);
         dto.setGroupId(activity.getGroupId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setForumId(post.getForumId());
