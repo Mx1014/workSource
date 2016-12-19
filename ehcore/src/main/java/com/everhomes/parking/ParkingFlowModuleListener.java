@@ -135,7 +135,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		
 		Integer count = parkingProvider.waitingCardCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
 				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
-		dto.setRanking(count);
+		dto.setRanking(count + 1);
 		
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
 		

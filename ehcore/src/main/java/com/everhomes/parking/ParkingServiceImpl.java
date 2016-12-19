@@ -488,7 +488,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
-		dto.setRanking(count);
+		dto.setRanking(count + 1);
     	return dto;
     }
     
@@ -853,7 +853,7 @@ public class ParkingServiceImpl implements ParkingService {
 			}
 		}else {
 			Integer processingCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
-					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
+					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.PROCESSING.getCode());
 			if(count > surplusCount) {
 				LOGGER.error("Count is rather than surplusCount.");
 	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_SURPLUS_NUM,
@@ -924,14 +924,26 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	private void setParkingCardRequestsStatus(List<ParkingCardRequest> list, StringBuilder strBuilder, Byte status) {
-		list.stream().forEach(r -> {
-			
-			r.setStatus(status);
-			if(strBuilder.length() > 0) {
-			    strBuilder.append(", ");
-			}
-			strBuilder.append(r.getId());
-		});
+		if(ParkingCardRequestStatus.PROCESSING.getCode() == status) {
+			list.stream().forEach(r -> {
+				r.setIssueTime(new Timestamp(System.currentTimeMillis()));
+				r.setStatus(status);
+				if(strBuilder.length() > 0) {
+				    strBuilder.append(", ");
+				}
+				strBuilder.append(r.getId());
+			});
+		}else {
+			list.stream().forEach(r -> {
+				r.setProcessSucceedTime(new Timestamp(System.currentTimeMillis()));
+				r.setStatus(status);
+				if(strBuilder.length() > 0) {
+				    strBuilder.append(", ");
+				}
+				strBuilder.append(r.getId());
+			});
+		}
+		
 	}
 	
 	private String deadline(Integer day) {
