@@ -85,7 +85,7 @@ import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.GetRechargeResultCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
-import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
+import com.everhomes.rest.parking.GetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -131,7 +131,7 @@ import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
-import com.everhomes.rest.parking.gettParkingRequestCardAgreementCommand;
+import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -1244,7 +1244,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingRequestCardConfigDTO gettParkingRequestCardConfig(HttpServletRequest request, GettParkingRequestCardConfigCommand cmd) {
+	public ParkingRequestCardConfigDTO getParkingRequestCardConfig(HttpServletRequest request, GetParkingRequestCardConfigCommand cmd) {
 		
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
@@ -1342,7 +1342,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public SurplusCardCountDTO getSurplusCardCount(GettParkingRequestCardConfigCommand cmd) {
+	public SurplusCardCountDTO getSurplusCardCount(GetParkingRequestCardConfigCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
 		Long flowId = cmd.getFlowId();
@@ -1370,7 +1370,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingRequestCardAgreementDTO gettParkingRequestCardAgreement(gettParkingRequestCardAgreementCommand cmd) {
+	public ParkingRequestCardAgreementDTO getParkingRequestCardAgreement(GetParkingRequestCardAgreementCommand cmd) {
 
 		ParkingRequestCardAgreementDTO dto = new ParkingRequestCardAgreementDTO();
 		ParkingFlow parkingFlow = parkingProvider.findParkingRequestCardConfig(cmd.getConfigId());
