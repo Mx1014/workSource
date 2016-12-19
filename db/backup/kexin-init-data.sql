@@ -1446,6 +1446,4 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), 999983, 0, 0, 0, '/home/Biz', 'BizList', 'Urban Table', 'Urban Table', 'cs://1/image/aW1hZ2UvTVRvM09UaGhZMkl4TUdNMU5tVXhObVJpWWpSbE5tUmtNRFF5TTJVNFkyVXdOZw', 1, 1, 14, '{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14692462917469898322%3F_k%3Dzlbiz#sign_suffix"}', 0, 0, 1, 1, '', 0,NULL,NULL,NULL, '0', 'park_tourist');
 
 
- 
-
 
