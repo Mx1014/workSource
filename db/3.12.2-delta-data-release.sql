@@ -405,3 +405,6 @@ VALUES ('2006', '0', '0', '', '0', '', 'targetProcessor', '目标节点处理人
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'message.title', '左邻App', '消息标题：左邻APP');
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (999993, 'message.title', '海岸馨服务', '消息标题：海岸馨服务');
 
+-- 科兴菜单 by sfyan 20161219
+UPDATE eh_web_menus SET name = '充值管理' WHERE id = 40810;
+
