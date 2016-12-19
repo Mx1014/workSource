@@ -168,6 +168,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setNamespaceId(cmd.getNamespaceId());
     	obj.setProjectId(cmd.getProjectId());
     	obj.setProjectType(cmd.getProjectType());
+    	obj.setStringTag1(cmd.getStringTag1());
     	flowListenerManager.onFlowCreating(obj);
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {

@@ -1119,7 +1119,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 					organizationProvider.updateOrganizationAddress(organizationAddress);
 				}
 			}
-			
+
+			organizationSearcher.deleteById(cmd.getId());
 			return null;
 		});
 	}
