@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -272,5 +273,29 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         }
         
         return false;
+    }
+    
+    @Override
+    public FlowCase findFlowCaseByReferId(Long referId, String referType, Long moduleId) {
+    	ListingLocator locator = new ListingLocator();
+    	
+    	List<FlowCase> objs = this.queryFlowCases(locator, 1, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_CASES.REFER_ID.eq(referId));
+				query.addConditions(Tables.EH_FLOW_CASES.REFER_TYPE.eq(referType));
+				query.addConditions(Tables.EH_FLOW_CASES.MODULE_ID.eq(moduleId));
+				return query;
+			}
+    		
+    	});
+    	
+    	if(objs != null && objs.size() > 0) {
+    		return objs.get(0);
+    	}
+    	
+    	return null;
     }
 }

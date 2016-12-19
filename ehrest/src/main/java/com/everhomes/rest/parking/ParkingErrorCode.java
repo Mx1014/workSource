@@ -20,6 +20,10 @@ public interface ParkingErrorCode {
 
     static final int ERROR_ISSUE_CARD = 10014;  //操作失败，当前无剩余月卡
     
+    static final int ERROR_PROCESS_CARD_SURPLUS_NUM = 10015;  //发放月卡数量不可大于当前剩余月卡数
+    
+    static final int ERROR_PROCESS_CARD_QUEQUE_NUM = 10016;  //发放月卡数量不可大于当前待办理月卡数
+    
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";

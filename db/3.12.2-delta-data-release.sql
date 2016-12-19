@@ -339,6 +339,8 @@ VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','�
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10012', 'zh_CN', '发放月卡资格数量不可大于当前剩余月卡数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10013', 'zh_CN', '发放月卡资格数量不可大于当前排队数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10014', 'zh_CN', '操作失败，当前无剩余月卡');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10015', 'zh_CN', '发放月卡数量不可大于当前剩余月卡数');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10016', 'zh_CN', '发放月卡数量不可大于当前待办理月卡数');
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`)
 	VALUES ('10006', 'community', '240111044331055940', '科兴科学园停车场', 'KETUO2', NULL, '41', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '0');
 

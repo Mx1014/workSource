@@ -249,6 +249,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	FlowActionInfo buttonAction = createActionInfo("test-button1-info testApplier:${applierName} ", orgId);
     	buttonCmd.setMessageAction(buttonAction);
+    	updateTargetVarAction(buttonAction);
+    	
     	flowService.updateFlowButton(buttonCmd);
     	
     	//REMIND_COUNT
@@ -369,6 +371,18 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	return action;
     }
     
+    private void updateTargetVarAction(FlowActionInfo action) {
+    	ListFlowVariablesCommand cmd = new ListFlowVariablesCommand();
+    	cmd.setFlowVariableType(FlowVariableType.NODE_USER.getCode());
+    	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
+    	
+		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
+		singCmd.setFlowUserSelectionType(FlowUserSelectionType.VARIABLE.getCode());
+		singCmd.setSourceIdA(resp.getDtos().get(resp.getDtos().size()-1).getId());
+		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_VARIABLE.getCode());
+		action.getUserSelections().getSelections().add(singCmd);
+    }
+    
     private void updateNodeTracker(FlowNodeDTO dto, Long orgId) {
     	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
     	cmd.setFlowNodeId(dto.getId());
@@ -482,7 +496,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(flowCase.getId() > 0);
     	
 //    	try {
-//			Thread.currentThread().sleep(15 * 1000);
+//			Thread.currentThread().sleep(100005 * 1000);
 //		} catch (InterruptedException e) {
 //			e.printStackTrace();
 //		}
@@ -523,6 +537,8 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     public void testFlowCaseSteps() {
     	Long userId = testUser2.getId();
     	setTestContext(userId);
+    	
+    	testFlowCase();
     	
     	String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = orgId;
@@ -622,6 +638,12 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(dto.getButtons().size() == 0);
     	Assert.assertTrue(dto.getNodes().size() == 5);
+    	
+    	try {
+			Thread.currentThread().sleep(100005 * 1000);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
     }
     
     @Test

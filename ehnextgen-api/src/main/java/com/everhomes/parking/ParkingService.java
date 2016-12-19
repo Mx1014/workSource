@@ -19,7 +19,7 @@ import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.GetRechargeResultCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
-import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
+import com.everhomes.rest.parking.GetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
@@ -49,7 +49,7 @@ import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
-import com.everhomes.rest.parking.gettParkingRequestCardAgreementCommand;
+import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
 
 public interface ParkingService {
 	List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd);
@@ -95,7 +95,7 @@ public interface ParkingService {
     
     ListParkingCarSeriesResponse listParkingCarSeries(ListParkingCarSeriesCommand cmd);
     
-    ParkingRequestCardConfigDTO gettParkingRequestCardConfig(HttpServletRequest request, GettParkingRequestCardConfigCommand cmd);
+    ParkingRequestCardConfigDTO getParkingRequestCardConfig(HttpServletRequest request, GetParkingRequestCardConfigCommand cmd);
     
     void setParkingRequestCardConfig(SetParkingRequestCardConfigCommand cmd);
     
@@ -107,9 +107,9 @@ public interface ParkingService {
     
     OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd);
     
-    SurplusCardCountDTO getSurplusCardCount(GettParkingRequestCardConfigCommand cmd);
+    SurplusCardCountDTO getSurplusCardCount(GetParkingRequestCardConfigCommand cmd);
     
-    ParkingRequestCardAgreementDTO gettParkingRequestCardAgreement(gettParkingRequestCardAgreementCommand cmd);
+    ParkingRequestCardAgreementDTO getParkingRequestCardAgreement(GetParkingRequestCardAgreementCommand cmd);
     
     void getRechargeResult(GetRechargeResultCommand cmd);
 }

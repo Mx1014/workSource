@@ -203,7 +203,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         StringBuilder conditionSb = new StringBuilder("");
         StringBuilder condition2 = new StringBuilder("");
         //status =1 时 统计排队
-        sb.append("select case e1.status when 1 then count(*) else 0 end as ranking,e1.* from eh_parking_card_requests e1 left join (select * from eh_parking_card_requests e3 where e3.status =1 ");
+        sb.append("select case e1.status when 2 then count(*) else 0 end as ranking,e1.* from eh_parking_card_requests e1 left join (select * from eh_parking_card_requests e3 where e3.status =2 ");
        // case e1.status when  1 then count(*) else 0 end
         if(userId != null)
         	conditionSb.append(" and e1.REQUESTOR_UID = ").append(userId);
@@ -440,7 +440,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         SelectQuery<EhParkingCardRequestsRecord> query = context.selectQuery(Tables.EH_PARKING_CARD_REQUESTS);
         
         if (null != pageAnchor && pageAnchor != 0)
-			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.lt(new Timestamp(pageAnchor)));
+			query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.gt(new Timestamp(pageAnchor)));
         if(StringUtils.isNotBlank(ownerType))
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.OWNER_TYPE.eq(ownerType));
         if(null != ownerId)
@@ -468,7 +468,7 @@ public class ParkingProviderImpl implements ParkingProvider {
         if(null != endDate)
         	query.addConditions(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.le(endDate));
 
-        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.desc());
+        query.addOrderBy(Tables.EH_PARKING_CARD_REQUESTS.CREATE_TIME.asc());
         if(null != pageSize)
         	query.addLimit(pageSize);
         

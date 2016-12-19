@@ -271,12 +271,11 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		List<StatServiceSettlementResult> results = new ArrayList<StatServiceSettlementResult>();
 		Condition condition = Tables.EH_STAT_SETTLEMENTS.PAID_DATE.eq(date);
-		if(null == PaidChannel.fromCode(paidChannel)){
+		if(null != PaidChannel.fromCode(paidChannel)){
 			condition = condition.and(Tables.EH_STAT_SETTLEMENTS.PAID_CHANNEL.eq(paidChannel));
 		}
 		SelectQuery<EhStatSettlementsRecord> query = context.selectQuery(Tables.EH_STAT_SETTLEMENTS);
 		query.addConditions(condition);
-		
 		query.fetch().map((r) -> {
 			StatServiceSettlementResult statServiceSettlementResult = ConvertHelper.convert(r, StatServiceSettlementResult.class);
 			
@@ -424,7 +423,8 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_PAID_AMOUNT.sum(),
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_REFUND_AMOUNT.sum(),
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_PAID_AMOUNT.sum(),
-				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum())
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_PAID_COUNT.sum())
 				.from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS)
 				.where(condition)
 				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE)
