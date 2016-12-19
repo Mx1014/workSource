@@ -4,7 +4,7 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
-public class GettParkingRequestCardConfigCommand {
+public class GetParkingRequestCardConfigCommand {
 	@NotNull
     private String ownerType;
 	@NotNull

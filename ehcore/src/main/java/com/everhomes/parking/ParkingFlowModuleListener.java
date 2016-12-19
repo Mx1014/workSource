@@ -135,7 +135,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		
 		Integer count = parkingProvider.waitingCardCount(parkingCardRequest.getOwnerType(), parkingCardRequest.getOwnerId(),
 				parkingCardRequest.getParkingLotId(), parkingCardRequest.getCreateTime());
-		dto.setRanking(count);
+		dto.setRanking(count + 1);
 		
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
 		
@@ -273,77 +273,6 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		
 	}
 
-//	@Override
-//	public void issueParkingCards(IssueParkingCardsCommand cmd) {
-//		
-//		if(cmd.getCount() == null) {
-//        	LOGGER.error("Count cannot be null.");
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//    				"Count cannot be null.");
-//        }
-//		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-//        
-//		StringBuilder strBuilder = new StringBuilder();
-//		// 补上ownerType、ownerId、parkingLotId参数，以区分清楚是哪个小区哪个停车场的车牌，否则会发放其它园区的车牌 by lqs 20161103
-//    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
-//    			cmd.getOwnerId(), cmd.getParkingLotId(), null, ParkingCardRequestStatus.QUEUEING.getCode(),
-//    			null, null, cmd.getCount())
-//    			.stream().map(r -> {
-//    				r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
-//    				if(strBuilder.length() > 0) {
-//    				    strBuilder.append(", ");
-//    				}
-//    				strBuilder.append(r.getId());
-//					return r;
-//    			}).collect(Collectors.toList());
-//    	
-//    	parkingProvider.updateParkingCardRequest(list);
-//    	// 添加日志，方便定位哪个车牌被修改状态了（即发放了） by lqs 20161103
-//    	if(LOGGER.isDebugEnabled()) {
-//    	    LOGGER.debug("Issue parking cards, requestIds=[{}]", strBuilder.toString());
-//    	}
-//    	Integer namespaceId = UserContext.getCurrentNamespaceId();
-//    	Map<String, Object> map = new HashMap<String, Object>();
-//		String deadline = deadline(parkingLot.getCardReserveDays());
-//	    map.put("deadline", deadline);
-//		String scope = ParkingNotificationTemplateCode.SCOPE;
-//		int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
-//		String locale = "zh_CN";
-//		String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(namespaceId, scope, code, locale, map, "");
-//		list.forEach(applier -> {
-//			sendMessageToUser(applier.getRequestorUid(), notifyTextForApplicant);
-//		});
-//    	
-//    	
-//	}
-	
-//	private void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd){
-//		
-//        checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
-//        if(cmd.getId() == null){
-//        	LOGGER.error("Id cannot be null.");
-//    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-//    				"Id cannot be null.");
-//        }
-//        
-//        ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(cmd.getId());
-//        if(parkingCardRequest == null){
-//        	LOGGER.error("ParkingCardRequest not found, cmd={}", cmd);
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//				"ParkingCardRequest not found");
-//        }
-//        if(parkingCardRequest.getStatus() != ParkingCardRequestStatus.NOTIFIED.getCode()){
-//        	LOGGER.error("ParkingCardRequest status is not notified, cmd={}", cmd);
-//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-//				"ParkingCardRequest status is not notified.");
-//        }
-//        //设置已领取状态和 领取时间
-//        parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
-//        parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.ISSUED.getCode());
-//        parkingCardRequest.setIssueTime(new Timestamp(System.currentTimeMillis()));
-//        parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
-//	}
-	
 	@Override
 	public void onFlowCreating(Flow flow) {
 		// TODO Auto-generated method stub

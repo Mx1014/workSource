@@ -17,6 +17,7 @@ public class FlowAutoStepDTO {
 	private Integer flowVersion;
 	private Long stepCount;
 	private String autoStepType;
+	private Long flowTargetId;
 
 	public Long getFlowCaseId() {
 		return flowCaseId;
@@ -64,6 +65,14 @@ public class FlowAutoStepDTO {
 
 	public void setAutoStepType(String autoStepType) {
 		this.autoStepType = autoStepType;
+	}
+
+	public Long getFlowTargetId() {
+		return flowTargetId;
+	}
+
+	public void setFlowTargetId(Long flowTargetId) {
+		this.flowTargetId = flowTargetId;
 	}
 
 	@Override

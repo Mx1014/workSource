@@ -168,6 +168,7 @@ public class FlowServiceImpl implements FlowService {
     	obj.setNamespaceId(cmd.getNamespaceId());
     	obj.setProjectId(cmd.getProjectId());
     	obj.setProjectType(cmd.getProjectType());
+    	obj.setStringTag1(cmd.getStringTag1());
     	flowListenerManager.onFlowCreating(obj);
     	
     	Flow resultObj = this.dbProvider.execute(new TransactionCallback<Flow>() {
@@ -1152,6 +1153,10 @@ public class FlowServiceImpl implements FlowService {
 			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
 			flowProvider.updateFlow(flowNew);			
 		}
+//		else { //TODO save graph right now ?
+//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
+//			graphMap.put(fmt, flowGraph);
+//		}
 		
 //		else {
 //			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
@@ -1520,7 +1525,7 @@ public class FlowServiceImpl implements FlowService {
 //		stepDTO.setFlowVersion(dto.getFlowVersion());
 //		stepDTO.setStepCount(dto.getStepCount());
 		FlowAutoStepDTO stepDTO = ConvertHelper.convert(dto, FlowAutoStepDTO.class);
-		FlowCaseState ctx = flowStateProcessor.prepareAutoStep(stepDTO);
+		FlowCaseState ctx = flowStateProcessor.prepareNoStep(stepDTO);
 		if(ctx == null) {
 			LOGGER.error("flowtimeout context error ft=" + ft.getId());
 			return;
@@ -1755,18 +1760,18 @@ public class FlowServiceImpl implements FlowService {
 			cmd.setNamespaceId(0);
 		}
 		
-		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
-		if(entityType == null) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
-		}
-		
-		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
-		if(flow == null) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow not found");	
-		}
-		
 		String flowVariableType = FlowVariableType.TEXT.getCode();
 		if(flowVariableType.equals(cmd.getFlowVariableType())) {
+			FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
+			if(entityType == null) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
+			}
+			
+			Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
+			if(flow == null) {
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow not found");	
+			}
+			
 			return listFlowTextVariables(flow, cmd);
 		} else {
 			FlowVariableResponse resp = new FlowVariableResponse();
@@ -2115,29 +2120,29 @@ public class FlowServiceImpl implements FlowService {
 			return dto;
 		}
 		
-		if(moduleId.equals(112l)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(112l);
-			dto.setModuleName("wuye");
-			dto.setDisplayName("物业保修");
-			return dto;
-		}
-		
-		if(moduleId.equals(113l)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(113l);
-			dto.setModuleName("yueka");
-			dto.setDisplayName("月卡申请");
-			return dto;
-		}
-		
-		if(moduleId.equals(114l)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(114l);
-			dto.setModuleName("jiaoliu");
-			dto.setDisplayName("交流大厅");
-			return dto;
-		}
+//		if(moduleId.equals(112l)) {
+//			FlowModuleDTO dto = new FlowModuleDTO();
+//			dto.setModuleId(112l);
+//			dto.setModuleName("wuye");
+//			dto.setDisplayName("物业保修");
+//			return dto;
+//		}
+//		
+//		if(moduleId.equals(113l)) {
+//			FlowModuleDTO dto = new FlowModuleDTO();
+//			dto.setModuleId(113l);
+//			dto.setModuleName("yueka");
+//			dto.setDisplayName("月卡申请");
+//			return dto;
+//		}
+//		
+//		if(moduleId.equals(114l)) {
+//			FlowModuleDTO dto = new FlowModuleDTO();
+//			dto.setModuleId(114l);
+//			dto.setModuleName("jiaoliu");
+//			dto.setDisplayName("交流大厅");
+//			return dto;
+//		}
 		
 		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(moduleId);
 		if(serviceModule != null) {
@@ -2251,7 +2256,7 @@ public class FlowServiceImpl implements FlowService {
 			} else if(FlowUserSelectionType.VARIABLE.getCode().equals(sel.getSelectType())) {
 				if(sel.getSourceIdA() != null) {
 					FlowVariable variable = flowVariableProvider.getFlowVariableById(sel.getSourceIdA());
-					variable.getScriptCls();
+//					variable.getScriptCls();
 					FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
 		        	if(ftr != null) {
 		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel, loopCnt + 1);
@@ -2591,7 +2596,7 @@ public class FlowServiceImpl implements FlowService {
 		
 		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
 		if(snapshotFlow != null) {
-			deleteAllNodeProcessors(snapshotFlow, snapshotFlow.getFlowMainId(), flow.getFlowVersion(), userId);
+			deleteAllNodeProcessors(snapshotFlow, snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion(), userId);
 		}
 	}
 	

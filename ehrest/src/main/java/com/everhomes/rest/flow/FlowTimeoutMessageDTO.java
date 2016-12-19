@@ -5,6 +5,7 @@ import com.everhomes.util.StringHelper;
 public class FlowTimeoutMessageDTO {
 	private Long flowCaseId;
 	private Long flowNodeId;
+	private Long flowTargetId;
 	private Long flowMainId;
 	private Integer flowVersion;
 	private Long stepCount;
@@ -74,6 +75,14 @@ public class FlowTimeoutMessageDTO {
 
 	public void setRemindCount(Long remindCount) {
 		this.remindCount = remindCount;
+	}
+
+	public Long getFlowTargetId() {
+		return flowTargetId;
+	}
+
+	public void setFlowTargetId(Long flowTargetId) {
+		this.flowTargetId = flowTargetId;
 	}
 
 	@Override

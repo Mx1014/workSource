@@ -2717,6 +2717,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
 		int count = 100;
 		List<DoorAuth> doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, null, null, count);
 		if(doorAuths == null || doorAuths.size() == 0) {
+			LOGGER.info("deleteAllAuths. doorAuths not found, orgId=" + orgId + " userId=" + userId);
 			return;
 		}
 		
@@ -2757,11 +2758,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     	List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(cmd);
     	if(dtos.isEmpty()) {
     		deleteAllAuths(namespaceId, orgId, userId);
+    		LOGGER.info("delete all auths orgId=" + orgId + " userId=" + userId);
     	} else {
     		ListingLocator locator = new ListingLocator();
     		int count = 100;
     		List<DoorAuth> doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, orgId, DoorAccessOwnerType.ENTERPRISE.getCode(), count);
     		if(doorAuths == null || doorAuths.size() == 0) {
+    			LOGGER.info("has more orgs. doorAuths not found, orgId=" + orgId + " userId=" + userId);
     			return;
     		}
     		
@@ -2777,6 +2780,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     			
     		} while (doorAuths != null && doorAuths.size() > 0 && locator.getAnchor() != null);
     	}
+    	
+    	LOGGER.info("delete all auths ok! orgId=" + orgId + " userId=" + userId);
     }
     
     @Override

@@ -6,6 +6,7 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
 import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Calendar;
@@ -84,7 +85,7 @@ import com.everhomes.rest.parking.GetParkingActivityCommand;
 import com.everhomes.rest.parking.GetParkingTempFeeCommand;
 import com.everhomes.rest.parking.GetRechargeResultCommand;
 import com.everhomes.rest.parking.GetRequestParkingCardDetailCommand;
-import com.everhomes.rest.parking.GettParkingRequestCardConfigCommand;
+import com.everhomes.rest.parking.GetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.IsOrderDelete;
 import com.everhomes.rest.parking.IssueParkingCardsCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
@@ -130,7 +131,7 @@ import com.everhomes.rest.parking.SetParkingCardIssueFlagCommand;
 import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
-import com.everhomes.rest.parking.gettParkingRequestCardAgreementCommand;
+import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
 import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -488,7 +489,7 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		Integer count = parkingProvider.waitingCardCount(cmd.getOwnerType(), cmd.getOwnerId(),
 				cmd.getParkingLotId(), parkingCardRequest.getCreateTime());
-		dto.setRanking(count);
+		dto.setRanking(count + 1);
     	return dto;
     }
     
@@ -552,7 +553,7 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
-		return createParkingTempOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
+		return createParkingOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
 	}
 	
 	@Override
@@ -565,11 +566,11 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
-		return createParkingTempOrder(param, ParkingRechargeType.TEMPORARY.getCode());
+		return createParkingOrder(param, ParkingRechargeType.TEMPORARY.getCode());
 
 	}
 	
-	private CommonOrderDTO createParkingTempOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
+	private CommonOrderDTO createParkingOrder(CreateParkingRechargeOrderCommand cmd, Byte rechargeType) {
 		checkPlateNumber(cmd.getPlateNumber());
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
@@ -630,8 +631,12 @@ public class ParkingServiceImpl implements ParkingService {
 		orderCmd.setOrderNo(parkingRechargeOrder.getId().toString());
 		orderCmd.setOrderType(OrderType.OrderTypeEnum.PARKING.getPycode());
 		orderCmd.setSubject("停车充值订单");
-		orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
-//		orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		
+		boolean flag = configProvider.getBooleanValue("parking.order.amount", false);
+		if(flag)
+			orderCmd.setTotalFee(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		else
+			orderCmd.setTotalFee(parkingRechargeOrder.getPrice());
 
 		CommonOrderDTO dto = null;
 		try {
@@ -834,21 +839,36 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer requestedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
 		
-		Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
-				parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
-		
 		Integer totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - requestedCount;
 		
-		if(count > surplusCount) {
-			LOGGER.error("Count is rather than surplusCount.");
-    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
-    				"Count is rather than surplusCount.");
-		}
-		if(count > quequeCount) {
-			LOGGER.error("Count is rather than quequeCount.");
-    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_QUEQUE_NUM,
-    				"Count is rather than quequeCount.");
+		if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
+			Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
+
+			if(count > surplusCount) {
+				LOGGER.error("Count is rather than surplusCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
+	    				"Count is rather than surplusCount.");
+			}
+			if(count > quequeCount) {
+				LOGGER.error("Count is rather than quequeCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_QUEQUE_NUM,
+	    				"Count is rather than quequeCount.");
+			}
+		}else {
+			Integer processingCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.PROCESSING.getCode());
+			if(count > surplusCount) {
+				LOGGER.error("Count is rather than surplusCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_SURPLUS_NUM,
+	    				"Count is rather than surplusCount.");
+			}
+			if(count > processingCount) {
+				LOGGER.error("Count is rather than processingCount.");
+	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_QUEQUE_NUM,
+	    				"Count is rather than processingCount.");
+			}
 		}
 		
 		dbProvider.execute((TransactionStatus transactionStatus) -> {
@@ -909,14 +929,26 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	private void setParkingCardRequestsStatus(List<ParkingCardRequest> list, StringBuilder strBuilder, Byte status) {
-		list.stream().forEach(r -> {
-			
-			r.setStatus(status);
-			if(strBuilder.length() > 0) {
-			    strBuilder.append(", ");
-			}
-			strBuilder.append(r.getId());
-		});
+		if(ParkingCardRequestStatus.PROCESSING.getCode() == status) {
+			list.stream().forEach(r -> {
+				r.setIssueTime(new Timestamp(System.currentTimeMillis()));
+				r.setStatus(status);
+				if(strBuilder.length() > 0) {
+				    strBuilder.append(", ");
+				}
+				strBuilder.append(r.getId());
+			});
+		}else {
+			list.stream().forEach(r -> {
+				r.setProcessSucceedTime(new Timestamp(System.currentTimeMillis()));
+				r.setStatus(status);
+				if(strBuilder.length() > 0) {
+				    strBuilder.append(", ");
+				}
+				strBuilder.append(r.getId());
+			});
+		}
+		
 	}
 	
 	private String deadline(Integer day) {
@@ -1212,7 +1244,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingRequestCardConfigDTO gettParkingRequestCardConfig(HttpServletRequest request, GettParkingRequestCardConfigCommand cmd) {
+	public ParkingRequestCardConfigDTO getParkingRequestCardConfig(HttpServletRequest request, GetParkingRequestCardConfigCommand cmd) {
 		
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
@@ -1310,7 +1342,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public SurplusCardCountDTO getSurplusCardCount(GettParkingRequestCardConfigCommand cmd) {
+	public SurplusCardCountDTO getSurplusCardCount(GetParkingRequestCardConfigCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
     	
 		Long flowId = cmd.getFlowId();
@@ -1338,7 +1370,7 @@ public class ParkingServiceImpl implements ParkingService {
 	}
 
 	@Override
-	public ParkingRequestCardAgreementDTO gettParkingRequestCardAgreement(gettParkingRequestCardAgreementCommand cmd) {
+	public ParkingRequestCardAgreementDTO getParkingRequestCardAgreement(GetParkingRequestCardAgreementCommand cmd) {
 
 		ParkingRequestCardAgreementDTO dto = new ParkingRequestCardAgreementDTO();
 		ParkingFlow parkingFlow = parkingProvider.findParkingRequestCardConfig(cmd.getConfigId());
