@@ -682,8 +682,8 @@ public class CreateParkingFlow1 {
     	buttonCmd.setButtonName("发放资格");
     	buttonCmd.setDescription("发放资格");
     	buttonCmd.setFlowButtonId(flowButton1.getId());
-    	buttonCmd.setNeedProcessor((byte)1);
-    	buttonCmd.setNeedSubject((byte)1);
+    	buttonCmd.setNeedProcessor((byte)0);
+    	buttonCmd.setNeedSubject((byte)0);
     	
     	FlowActionInfo buttonAction = createActionInfo("排队成功，请尽快携带资料前往管理处办理月卡", orgId);
     	buttonCmd.setMessageAction(buttonAction);
@@ -701,8 +701,8 @@ public class CreateParkingFlow1 {
     	buttonCmd11.setButtonName("驳回");
     	buttonCmd11.setDescription("驳回");
     	buttonCmd11.setFlowButtonId(flowButton11.getId());
-    	buttonCmd11.setNeedProcessor((byte)1);
-    	buttonCmd11.setNeedSubject((byte)1);    	
+    	buttonCmd11.setNeedProcessor((byte)0);
+    	buttonCmd11.setNeedSubject((byte)0);    	
     	flowService.updateFlowButton(buttonCmd11);
     	
     	//办理月卡
@@ -715,8 +715,8 @@ public class CreateParkingFlow1 {
     	buttonCmd.setButtonName("办理");
     	buttonCmd.setDescription("办理");
     	buttonCmd.setFlowButtonId(flowButton2.getId());
-    	buttonCmd.setNeedProcessor((byte)1);
-    	buttonCmd.setNeedSubject((byte)1);
+    	buttonCmd.setNeedProcessor((byte)0);
+    	buttonCmd.setNeedSubject((byte)0);
     	
     	buttonAction = createActionInfo("恭喜，您的月卡申请已成功办理", orgId);
     	buttonCmd.setMessageAction(buttonAction);
@@ -733,8 +733,8 @@ public class CreateParkingFlow1 {
     	buttonCmd.setButtonName("取消资格");
     	buttonCmd.setDescription("取消资格");
     	buttonCmd.setFlowButtonId(flowButton21.getId());
-    	buttonCmd.setNeedProcessor((byte)1);
-    	buttonCmd.setNeedSubject((byte)1);
+    	buttonCmd.setNeedProcessor((byte)0);
+    	buttonCmd.setNeedSubject((byte)0);
     	
     	buttonAction = createActionInfo("取消资格", orgId);
     	buttonCmd.setMessageAction(buttonAction);
