@@ -57,7 +57,7 @@ public class RentalOrderEmbeddedHandler implements OrderEmbeddedHandler {
 					else if(order.getStatus().equals(SiteBillStatus.PAYINGFINAL.getCode())){
 						if(order.getPayTotalMoney().compareTo(order.getPaidMoney()) == 0){
 							order.setStatus(SiteBillStatus.SUCCESS.getCode());
-							rentalService.onBillSuccess(order);
+							rentalService.onOrderSuccess(order);
 							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getCreatorUid(), IdentifierType.MOBILE.getCode()) ;
 							if(null == userIdentifier){
 								LOGGER.error("userIdentifier is null...userId = " + order.getCreatorUid());
