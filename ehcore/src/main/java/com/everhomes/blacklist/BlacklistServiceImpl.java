@@ -124,6 +124,11 @@ public class BlacklistServiceImpl implements BlacklistService{
 		UserBlacklistDTO userBlacklistDTO = new UserBlacklistDTO();
 		userBlacklistDTO.setUserId(userIdentifier.getOwnerUid());
 		userBlacklistDTO.setContactToken(userIdentifier.getIdentifierToken());
+
+		User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+		if(null != user){
+			userBlacklistDTO.setContactName(user.getNickName());
+		}
 		return userBlacklistDTO;
 	}
 
