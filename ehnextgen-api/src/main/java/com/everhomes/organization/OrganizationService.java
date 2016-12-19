@@ -52,11 +52,14 @@ import com.everhomes.rest.ui.privilege.GetEntranceByPrivilegeResponse;
 import com.everhomes.rest.user.UserTokenCommand;
 import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.user.admin.ImportDataResponse;
+import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.util.List;
 import java.util.Map;
 
@@ -410,4 +413,6 @@ public interface OrganizationService {
 	List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd);
 
 	List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd);
+	List<OrganizationSimpleDTO> listUserRelateOrgs(
+			ListUserRelatedOrganizationsCommand cmd, User user);
 }
