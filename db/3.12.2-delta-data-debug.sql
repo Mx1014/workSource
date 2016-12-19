@@ -129,7 +129,7 @@ INSERT INTO `eh_launch_advertisements` (`id`, `namespace_id`, `content_type`, `c
 VALUES ('1', '0', 'VIDEO', 'cs://1/file/ZmlsZS9Nem96TmprMU1EaGxORE0xWkdSbVptTXdZemcwWmpaaE16Y3pOMk00T0RSak53', '1', '0', '3', '1', '14', '{\"url\":\"http://www.baidu.com\"}', '2', NULL, NULL, NULL, NULL);
 
 
-SELECT max(id) FROM `eh_launch_pad_items` INTO @launch_pad_item_id;
+SELECT MAX(id) FROM `eh_launch_pad_items` INTO @launch_pad_item_id;
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), '999984', '0', '0', '0', '/home', 'Bizs', 'PARKING_CLEARANCE', '车辆放行', 'cs://1/image/aW1hZ2UvTVRvME5tTXpZVEEwWlRKa1lqQXlaVFEwTmpkaU5XRTJORGN5WVdJM056QmpZUQ', '1', '1', '57', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
@@ -146,3 +146,24 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 添加消息标题 by lqs 20161217
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (0, 'message.title', '左邻App', '消息标题：左邻APP');
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (999993, 'message.title', '海岸馨服务', '消息标题：海岸馨服务');
+
+
+-- 资源预订工作流模板，add by wh, 20161219
+SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
+
+-- 资源预订工作流中文，added by wh ,2016-12-19
+SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'user', 'zh_CN', '发起人');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'contact', 'zh_CN', '联系电话');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'organization', 'zh_CN', '企业');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'resourceName', 'zh_CN', '资源名称');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'useDetail', 'zh_CN', '使用时间');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'count', 'zh_CN', '预约数量');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'price', 'zh_CN', '订单金额');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'item', 'zh_CN', '购买商品');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'content', 'zh_CN', '显示内容');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'license', 'zh_CN', '车牌');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'remark', 'zh_CN', '备注');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'attachment', 'zh_CN', '附件'); 
