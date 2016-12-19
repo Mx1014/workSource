@@ -73,17 +73,14 @@ public class ParkingClearanceTestDataController extends ControllerBase {
     }
 
     private User testUser1;
-    private User testUser2;
-    private Integer namespaceId = 999992;// 999984
+    private Integer namespaceId = 999984;// 999984
     private Long moduleId = 41500L;
-    private Long orgId = 1000750L;// 1008218L
+    private Long orgId = 1008218L;// 1008218L
     private List<Long> parkingLotIds;
 
     public void init() {
-        String u1 = "13510551322";
-        String u2 = "11111111111";
+        String u1 = "13600161256";
         testUser1 = userService.findUserByIndentifier(namespaceId, u1);
-        testUser2 = userService.findUserByIndentifier(namespaceId, u2);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         parkingLotIds = context.select(Tables.EH_PARKING_LOTS.ID).from(Tables.EH_PARKING_LOTS)
@@ -317,7 +314,6 @@ public class ParkingClearanceTestDataController extends ControllerBase {
     private List<Long> getOrgUsers(Long id) {
         List<Long> users = new ArrayList<>();
         users.add(testUser1.getId());
-        users.add(testUser2.getId());
         return users;
     }
 }

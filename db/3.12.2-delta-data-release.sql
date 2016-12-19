@@ -225,21 +225,21 @@ INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `de
 -- 给菜单都配置上业务模块
 UPDATE `eh_web_menus` SET `module_id` = id WHERE `parent_id` IN (10000,20000,30000,40000);
 
-UPDATE `eh_web_menus` SET `module_id` = 10850 WHERE `path` like '%/10850/%';
-UPDATE `eh_web_menus` SET `module_id` = 20100 WHERE `path` like '%/20100/%';
-UPDATE `eh_web_menus` SET `module_id` = 20400 WHERE `path` like '%/20400/%';
-UPDATE `eh_web_menus` SET `module_id` = 20600 WHERE `path` like '%/20600/%';
-UPDATE `eh_web_menus` SET `module_id` = 20800 WHERE `path` like '%/20800/%';
-UPDATE `eh_web_menus` SET `module_id` = 40100 WHERE `path` like '%/40100/%';
-UPDATE `eh_web_menus` SET `module_id` = 40200 WHERE `path` like '%/40200/%';
-UPDATE `eh_web_menus` SET `module_id` = 40400 WHERE `path` like '%/40400/%';
-UPDATE `eh_web_menus` SET `module_id` = 40500 WHERE `path` like '%/40500/%';
-UPDATE `eh_web_menus` SET `module_id` = 40800 WHERE `path` like '%/40800/%';
-UPDATE `eh_web_menus` SET `module_id` = 41000 WHERE `path` like '%/41000/%';
-UPDATE `eh_web_menus` SET `module_id` = 41200 WHERE `path` like '%/41200/%';
-UPDATE `eh_web_menus` SET `module_id` = 41300 WHERE `path` like '%/41300/%';
-UPDATE `eh_web_menus` SET `module_id` = 41400 WHERE `path` like '%/41400/%';
-UPDATE `eh_web_menus` SET `module_id` = 10750 WHERE `path` like '%/10750/%';
+UPDATE `eh_web_menus` SET `module_id` = 10850 WHERE `path` LIKE '%/10850/%';
+UPDATE `eh_web_menus` SET `module_id` = 20100 WHERE `path` LIKE '%/20100/%';
+UPDATE `eh_web_menus` SET `module_id` = 20400 WHERE `path` LIKE '%/20400/%';
+UPDATE `eh_web_menus` SET `module_id` = 20600 WHERE `path` LIKE '%/20600/%';
+UPDATE `eh_web_menus` SET `module_id` = 20800 WHERE `path` LIKE '%/20800/%';
+UPDATE `eh_web_menus` SET `module_id` = 40100 WHERE `path` LIKE '%/40100/%';
+UPDATE `eh_web_menus` SET `module_id` = 40200 WHERE `path` LIKE '%/40200/%';
+UPDATE `eh_web_menus` SET `module_id` = 40400 WHERE `path` LIKE '%/40400/%';
+UPDATE `eh_web_menus` SET `module_id` = 40500 WHERE `path` LIKE '%/40500/%';
+UPDATE `eh_web_menus` SET `module_id` = 40800 WHERE `path` LIKE '%/40800/%';
+UPDATE `eh_web_menus` SET `module_id` = 41000 WHERE `path` LIKE '%/41000/%';
+UPDATE `eh_web_menus` SET `module_id` = 41200 WHERE `path` LIKE '%/41200/%';
+UPDATE `eh_web_menus` SET `module_id` = 41300 WHERE `path` LIKE '%/41300/%';
+UPDATE `eh_web_menus` SET `module_id` = 41400 WHERE `path` LIKE '%/41400/%';
+UPDATE `eh_web_menus` SET `module_id` = 10750 WHERE `path` LIKE '%/10750/%';
 
 
 
@@ -346,7 +346,7 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 
 
 -- 更新 资源预订  默认参数 菜单 data_type add by sw 20161215
-update eh_web_menus set data_type = 'resource--defaultParameter' where id = 40410;
+UPDATE eh_web_menus SET data_type = 'resource--defaultParameter' WHERE id = 40410;
 
 -- 科兴菜单 by sfyan 20161216
 DELETE FROM eh_web_menu_scopes WHERE menu_id IN (20400,20410,20420) AND owner_type = 'EhNamespaces' AND owner_id = 999983;
@@ -364,14 +364,14 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 添加工作流菜单  add by sw 20161216
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) VALUES ('70000', '任务管理', '0', '/70000', '2', '2', '2', '0', UTC_TIMESTAMP());
 
-INSERT INTO `eh_web_menus` VALUES ('40850', '工作流设置', '40800', null, 'react:/working-flow/flow-list/parking-payment/40800', '0', '2', '/40000/40800/40850', 'park', '475', 40800);
+INSERT INTO `eh_web_menus` VALUES ('40850', '工作流设置', '40800', NULL, 'react:/working-flow/flow-list/parking-payment/40800', '0', '2', '/40000/40800/40850', 'park', '475', 40800);
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10028', '40850', '停车缴费', '1', '1', '停车缴费 全部权限', '710');
 
-INSERT INTO `eh_web_menus` VALUES ('70000', '任务管理', '0', 'fa fa-group', null, '1', '2', '/70000', 'park', '600', 70000);
+INSERT INTO `eh_web_menus` VALUES ('70000', '任务管理', '0', 'fa fa-group', NULL, '1', '2', '/70000', 'park', '600', 70000);
 
-INSERT INTO `eh_web_menus` VALUES ('70100', '任务列表', '70000', null, 'react:/task-management/task-list/70100', '0', '2', '/70000/70100', 'park', '610', 70000);
-INSERT INTO `eh_web_menus` VALUES ('70200', '业务授权视图', '70000', null, 'flow_view', '0', '2', '/70000/70200', 'park', '620', 70000);
+INSERT INTO `eh_web_menus` VALUES ('70100', '任务列表', '70000', NULL, 'react:/task-management/task-list/70100', '0', '2', '/70000/70100', 'park', '610', 70000);
+INSERT INTO `eh_web_menus` VALUES ('70200', '业务授权视图', '70000', NULL, 'flow_view', '0', '2', '/70000/70200', 'park', '620', 70000);
 
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10028', '40850', '停车缴费', '1', '1', '停车缴费 全部权限', '710');
@@ -395,7 +395,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now(), 'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10078 ;
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,NOW(), 'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10078 ;
 
 -- add target node processor variable, by Janson 20161216
 INSERT INTO `eh_flow_variables`
@@ -408,5 +408,26 @@ INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`)
 INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`) VALUES (999993, 'message.title', '海岸馨服务', '消息标题：海岸馨服务');
 
 -- 科兴菜单 by sfyan 20161219
-UPDATE eh_web_menus SET name = '充值管理' WHERE id = 40810;
+UPDATE eh_web_menus SET NAME = '充值管理' WHERE id = 40810;
+DELETE FROM eh_web_menu_scopes WHERE menu_id IN (40750) AND owner_type = 'EhNamespaces' AND owner_id = 999983;
 
+
+-- 资源预订工作流模板，add by wh, 20161219
+SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
+
+-- 资源预订工作流中文，added by wh ,2016-12-19
+SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'user', 'zh_CN', '发起人');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'contact', 'zh_CN', '联系电话');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'organization', 'zh_CN', '企业');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'resourceName', 'zh_CN', '资源名称');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'useDetail', 'zh_CN', '使用时间');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'count', 'zh_CN', '预约数量');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'price', 'zh_CN', '订单金额');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'item', 'zh_CN', '购买商品');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'content', 'zh_CN', '显示内容');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'license', 'zh_CN', '车牌');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'remark', 'zh_CN', '备注');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'attachment', 'zh_CN', '附件'); 

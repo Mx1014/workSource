@@ -2120,13 +2120,14 @@ public class FlowServiceImpl implements FlowService {
 			return dto;
 		}
 		
-//		if(moduleId.equals(112l)) {
-//			FlowModuleDTO dto = new FlowModuleDTO();
-//			dto.setModuleId(112l);
-//			dto.setModuleName("wuye");
-//			dto.setDisplayName("物业保修");
-//			return dto;
-//		}
+		if(moduleId.equals(112l)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(112l);
+			dto.setModuleName("testwuye");
+			dto.setDisplayName("testwuye");
+			return dto;
+		}
+		
 //		
 //		if(moduleId.equals(113l)) {
 //			FlowModuleDTO dto = new FlowModuleDTO();
@@ -2152,7 +2153,15 @@ public class FlowServiceImpl implements FlowService {
 			dto.setModuleId(moduleId);
 			return dto;
 		}
-		
+		 
+		if(moduleId.equals(41500L)) {
+			FlowModuleDTO dto = new FlowModuleDTO();
+			dto.setModuleId(41500L);
+			dto.setModuleName("车辆放行");
+			dto.setDisplayName("车辆放行");
+			return dto;
+		}
+ 
 		return null;
 	}
 
