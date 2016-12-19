@@ -1067,6 +1067,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				if (customerContractBuilding.getDealed() != null && customerContractBuilding.getDealed().booleanValue() == true) {
 					continue;
 				}
+				//因为不同的合同里可能会有一样的地址，所以这里要检查一下，把前面插入过的相同的记录就不用再插入了
 				insertOrganizationAddress(namespaceId, communityId, organization, customerContractBuilding);
 			}
 		}
@@ -1105,7 +1106,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				Address address = addressProvider.findAddressById(organizationAddressMapping.getAddressId());
 				updateOrganizationAddressMapping(organizationAddressMapping, address);
 			}else {
-				deleteOrganizationAddressMapping(organizationAddressMapping);
+				//这里不能删除，因为是所有的企业的父id都一样，删了就完了
+//				deleteOrganizationAddressMapping(organizationAddressMapping);
 			}
 		}
 		if (theirContractBuildingList != null) {
@@ -1167,13 +1169,20 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		if (address == null) {
 			return;
 		}
-		EnterpriseAddress enterpriseAddress = new EnterpriseAddress();
+		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
+		//因为不同的合同里可能会有一样的地址，所以这里要检查一下，把前面插入过的相同的记录就不用再插入了
+		EnterpriseAddress enterpriseAddress = enterpriseProvider.findEnterpriseAddressByEnterpriseIdAndAddressId(organization.getId(), address.getId());
+		if (enterpriseAddress != null) {
+			return;
+		}
+		enterpriseAddress = new EnterpriseAddress();
 		enterpriseAddress.setEnterpriseId(organization.getId());
 		enterpriseAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 		enterpriseAddress.setCreatorUid(1L);
 		enterpriseAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		enterpriseAddress.setOperatorUid(1L);
+		enterpriseAddress.setUpdateTime(enterpriseAddress.getCreateTime());
 		enterpriseAddress.setAddressId(address.getId());
-		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
 		if (building == null) {
 			enterpriseAddress.setBuildingId(0L);
 		}else {
@@ -1231,13 +1240,21 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		if (address == null) {
 			return;
 		}
-		OrganizationAddress organizationAddress = new OrganizationAddress();
+		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
+		//因为不同的合同里可能会有一样的地址，所以这里要检查一下，把前面插入过的相同的记录就不用再插入了
+		OrganizationAddress organizationAddress = organizationProvider.findOrganizationAddress(organization.getId(), address.getId(), building==null?0L:building.getId());
+		if (organizationAddress != null) {
+			return;
+		}
+		
+		organizationAddress = new OrganizationAddress();
 		organizationAddress.setOrganizationId(organization.getId());
 		organizationAddress.setStatus(OrganizationAddressStatus.ACTIVE.getCode());
 		organizationAddress.setCreatorUid(1L);
 		organizationAddress.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		organizationAddress.setOperatorUid(1L);
+		organizationAddress.setUpdateTime(organizationAddress.getCreateTime());
 		organizationAddress.setAddressId(address.getId());
-		Building building = buildingProvider.findBuildingByName(namespaceId, communityId, customerContractBuilding.getBuildingName());
 		if (building == null) {
 			organizationAddress.setBuildingId(0L);
 		}else {
