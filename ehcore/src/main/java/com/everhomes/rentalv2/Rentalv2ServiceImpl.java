@@ -1889,6 +1889,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     }
     
 	private void sendMessageToUser(Long userId, String content) {
+		if(null == userId)
+			return;
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
