@@ -10,7 +10,7 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowOwnerType {
-	ENTERPRISE("ENTERPRISE"), DEPARTMENT("DEPARTMENT"), COMMUNITY("COMMUNITY"),PARKING("PARKING");
+	ENTERPRISE("ENTERPRISE"), DEPARTMENT("DEPARTMENT"), COMMUNITY("COMMUNITY"),PARKING("PARKING"),RENTALRESOURCETYPE("RENTALRESOURCETYPE");
 	
 	private String code;
     private FlowOwnerType(String code) {

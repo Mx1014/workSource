@@ -3252,8 +3252,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void onOrderSuccess(RentalOrder order) {
 		//加工作流
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
-		Long ownerId = order.getCommunityId();
-		String ownerType = FlowOwnerType.COMMUNITY.getCode();
+		Long ownerId = order.getResourceTypeId();
+		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
     	Flow flow = flowService.getEnabledFlow(namespaceId, Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
     	if(null!=flow){
 	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
