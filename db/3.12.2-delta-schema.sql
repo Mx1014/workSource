@@ -873,3 +873,7 @@ CREATE TABLE `eh_techpark_syncdata_backup` (
 
 ALTER TABLE `eh_organization_address_mappings` ADD COLUMN `namespace_type` VARCHAR(64);
 ALTER TABLE `eh_organizations` CHANGE COLUMN `name` `name` VARCHAR(128);
+
+-- 物业报修
+ALTER TABLE eh_pm_tasks ADD COLUMN `flow_case_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'flow case id';
+
