@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <ul> 按钮时间触发
  * <li>flowCaseId: 工作流任务 ID </li>
  * <li>buttonId: 工作流按钮 ID </li>
+ * <li>stepCount: 当前节点的 stepCount，用来防止重复提交</li>
  * <li>title: 评论标题 </li>
  * <li>content: 评论内容</li>
  * <li>entityId: 用户 ID 或者 选择人员的 ID </li>
@@ -22,6 +23,7 @@ import com.everhomes.util.StringHelper;
 public class FlowFireButtonCommand {
 	private Long flowCaseId;
 	private Long buttonId;
+	private Long stepCount;
 	
 	@ItemType(String.class)
 	private List<String> images;
@@ -90,6 +92,14 @@ public class FlowFireButtonCommand {
 
 	public void setFlowEntityType(String flowEntityType) {
 		this.flowEntityType = flowEntityType;
+	}
+
+	public Long getStepCount() {
+		return stepCount;
+	}
+
+	public void setStepCount(Long stepCount) {
+		this.stepCount = stepCount;
 	}
 
 	@Override
