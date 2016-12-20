@@ -433,7 +433,8 @@ public class ParkingServiceImpl implements ParkingService {
     		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
     		createFlowCaseCommand.setReferId(parkingCardRequest.getId());
     		createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
-    		createFlowCaseCommand.setContent("parking card request");
+    		createFlowCaseCommand.setContent("车牌号码：" + parkingCardRequest.getPlateNumber() + "\n"
+    				+ "车主电话：" + parkingCardRequest.getPlateOwnerPhone());
         	
         	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
     		

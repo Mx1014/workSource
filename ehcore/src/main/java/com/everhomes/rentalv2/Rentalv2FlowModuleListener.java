@@ -244,7 +244,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				entities.add(e);
 			} else if (attachment.getAttachmentType().equals(AttachmentType.ATTACHMENT.getCode())) {
 				e = new FlowCaseEntity();
-				e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
+				e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
 				e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 						"attachment", RentalNotificationTemplateCode.locale, ""));
 				e.setValue(this.contentServerService.parserUri(attachment.getContent(),

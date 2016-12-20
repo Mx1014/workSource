@@ -41,6 +41,7 @@ import com.everhomes.promotion.PromotionService;
 import com.everhomes.pushmessage.*;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -1530,11 +1531,11 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
     private List<Long> getPmAdminIdsByOrganizationIds(List<Long> organizationIds) {
         List<Long> pmAdminIds = new ArrayList<>();
         for (Long organizationId : organizationIds) {
-            ListOrganizationAdministratorCommand loaCmd = new ListOrganizationAdministratorCommand();
+            ListServiceModuleAdministratorsCommand loaCmd = new ListServiceModuleAdministratorsCommand();
             loaCmd.setOrganizationId(organizationId);
-            ListOrganizationMemberCommandResponse lomcResponse = rolePrivilegeService.listOrganizationAdministrators(loaCmd);
-            if (lomcResponse != null && lomcResponse.getMembers() != null) {
-                pmAdminIds.addAll(lomcResponse.getMembers().stream().map(OrganizationMemberDTO::getTargetId).collect(Collectors.toList()));
+            List<OrganizationContactDTO> contactDTOs = rolePrivilegeService.listOrganizationAdministrators(loaCmd);
+            if (contactDTOs != null && contactDTOs.size() > 0) {
+                pmAdminIds.addAll(contactDTOs.stream().map(OrganizationContactDTO::getTargetId).collect(Collectors.toList()));
             }
         }
         return pmAdminIds;
