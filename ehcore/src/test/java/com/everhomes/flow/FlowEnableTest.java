@@ -24,8 +24,12 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowEvaluateDTO;
 import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
+import com.everhomes.rest.flow.FlowEvaluateItemStar;
+import com.everhomes.rest.flow.FlowEvaluateResultDTO;
 import com.everhomes.rest.flow.FlowGraphDetailDTO;
+import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -1146,6 +1150,73 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(evaDTO.getEvaluateEnd().equals(flowGraph.getNodes().get(2).getFlowNode().getId()));
     	Assert.assertTrue(evaDTO.getItems().size() == 2);
     	
+    }
+    
+    @Test
+    public void testEvaluateButton() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+    	testFlowCase();
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	Assert.assertTrue(flow.getFlowVersion().equals(1));
+    	
+    	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), flow.getFlowVersion());
+    	Assert.assertTrue(flowGraph.getNodes().size() == 5);
+    	
+    	int nodeIndex = 1;
+    	FlowButton flowButton = flowButtonProvider.findFlowButtonByStepType(flowGraph.getNodes().get(nodeIndex).getFlowNode().getId()
+    			, flow.getFlowVersion()
+    			, FlowStepType.APPROVE_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
+    	Assert.assertTrue(flowButton != null);
+    	
+    	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    	
+    	Long flowCaseId = resp.getFlowCases().get(0).getId();
+    	
+    	FlowFireButtonCommand fireButton = new FlowFireButtonCommand();
+    	fireButton.setButtonId(flowButton.getId());
+    	fireButton.setContent("test-approve-content");
+    	fireButton.setFlowCaseId(flowCaseId);
+    	fireButton.setTitle("test-title");
+//    	fireButton.setEntityId(selResp.getSelections().get(0).getId());
+//    	fireButton.setFlowEntityType(FlowEntityType.FLOW_SELECTION.getCode());
+    	fireButton.getImages().add("cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ");
+    	flowService.fireButton(fireButton);
+    	
+    	resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    	Assert.assertTrue(resp.getFlowCases().get(0).getNeedEvaluate() > 0);
+    	
+    	FlowEvaluateDTO evaInfo = flowService.getEvaluateInfo(flowCaseId);
+    	Assert.assertTrue(evaInfo.getResults().size() == 2);
+    	Assert.assertTrue(evaInfo.getHasResults() <= 0);
+    	
+    	FlowPostEvaluateCommand evaCmd = new FlowPostEvaluateCommand();
+    	evaCmd.setFlowCaseId(flowCaseId);
+    	evaCmd.setFlowNodeId(resp.getFlowCases().get(0).getCurrentNodeId());
+    	
+    	List<FlowEvaluateItemStar> stars = new ArrayList<>();
+    	byte b = 2;
+    	for(FlowEvaluateResultDTO rlt : evaInfo.getResults()) {
+    		FlowEvaluateItemStar star = new FlowEvaluateItemStar();
+    		star.setItemId(rlt.getEvaluateItemId());
+    		star.setStat((byte)b);
+    		b++;
+    		stars.add(star);
+    	}
+    	evaCmd.setStars(stars);
+    	flowService.postEvaluate(evaCmd);
+    	
+    	evaInfo = flowService.getEvaluateInfo(flowCaseId);
+    	Assert.assertTrue(evaInfo.getHasResults() > 0);
     	
     }
 }

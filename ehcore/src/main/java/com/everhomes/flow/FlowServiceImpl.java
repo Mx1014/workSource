@@ -1815,27 +1815,38 @@ public class FlowServiceImpl implements FlowService {
 		}
 	}
 	
-	private void updateCaseDTO(FlowCaseDTO dto) {
-		FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
-		if(flowNode != null) {
-			dto.setFlowNodeName(flowNode.getNodeName());
-			List<FlowUserSelection> sels = flowUserSelectionProvider.findSelectionByBelong(flowNode.getId()
-					, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
-			
-			String name;
-			if(sels != null && sels.size() > 0) {
-				updateFlowUserName(sels.get(0));
-				name = sels.get(0).getSelectionName();
-				for(int i = 1; i < sels.size() && i < 3; i++) {
-					updateFlowUserName(sels.get(i));
-					name = name + "," + sels.get(i).getSelectionName();
-				}
-				dto.setProcessUserName(name);
+	private void updateCaseDTO(FlowCase flowCase, FlowNode flowNode, FlowCaseDTO dto) {
+		dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
+		dto.setCurrNodeParams(flowNode.getParams());
+		dto.setFlowNodeName(flowNode.getNodeName());
+		List<FlowUserSelection> sels = flowUserSelectionProvider.findSelectionByBelong(flowNode.getId()
+				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+		
+		String name;
+		if(sels != null && sels.size() > 0) {
+			updateFlowUserName(sels.get(0));
+			name = sels.get(0).getSelectionName();
+			for(int i = 1; i < sels.size() && i < 3; i++) {
+				updateFlowUserName(sels.get(i));
+				name = name + "," + sels.get(i).getSelectionName();
 			}
+			dto.setProcessUserName(name);
 		}
 		
-		//TODO for evaluate
+		Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		
+		//evaluate
 		dto.setNeedEvaluate((byte)0);
+		List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCase.getId(), snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
+		if(evas != null && evas.size() > 0) {
+			dto.setEvaluateScore(new Integer(evas.get(0).getStar()));
+		} else {
+			 if(!snapshotFlow.getNeedEvaluate().equals((byte)0) 
+					 && flowNode.getNodeLevel() >= snapshotFlow.getEvaluateStart() 
+					 && flowNode.getNodeLevel() <= snapshotFlow.getEvaluateEnd() ) {
+				 dto.setNeedEvaluate((byte)1);
+			 }
+		}
 		
 	}
 
@@ -1858,16 +1869,15 @@ public class FlowServiceImpl implements FlowService {
 		ListingLocator locator = new ListingLocator();
 		
 		List<FlowCaseDetail> details = null;
-		int type = 0;
 		
 		if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
-			type = 1;
+//			type = 1;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
 		} else if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
-			type = 2;
+//			type = 2;
 			details = flowCaseProvider.findAdminFlowCases(locator, count, cmd);
 		} else {
-			type = 3;
+//			type = 3;
 			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
 			
 		}
@@ -1876,15 +1886,9 @@ public class FlowServiceImpl implements FlowService {
 		if(details != null) {
 			for(FlowCaseDetail detail : details) {
 				FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
-				if(1 == type) {
-					FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
-					if(flowNode != null) {
-						dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
-						dto.setCurrNodeParams(flowNode.getParams());
-					}
-				}
-				if(2 == type) {
-					updateCaseDTO(dto);
+				FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
+				if(flowNode != null) {
+					updateCaseDTO(detail, flowNode, dto);	
 				}
 				dtos.add(dto);
 			}	
@@ -1929,17 +1933,6 @@ public class FlowServiceImpl implements FlowService {
 		dto.setEntities(entities);
 		if(dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
 			return dto;
-		}
-		
-		//evaluate
-		dto.setIsEvaluate((byte)0);
-		List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCase.getId(), snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
-		if(evas != null && evas.size() > 0) {
-			dto.setEvaluateScore(new Integer(evas.get(0).getStar()));
-		} else {
-			 if(!snapshotFlow.getNeedEvaluate().equals((byte)0)) {
-				 dto.setIsEvaluate((byte)1);
-			 }
 		}
 		
 		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
@@ -2037,6 +2030,9 @@ public class FlowServiceImpl implements FlowService {
 							String dateStr = sdf1.format(new Date(eventDTO.getCreateTime().getTime()));
 							eventDTO.setLogContent(dateStr + " " + eventDTO.getLogContent());
 						}
+						if(FlowStepType.EVALUATE_STEP.getCode().equals(t.getButtonFiredStep())) {
+							eventDTO.setIsEvaluate((byte)1);
+						}
 						nodeLogDTO.getLogs().add(eventDTO);			
 					});
 				}
@@ -2102,7 +2098,85 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowEvaluateDTO postEvaluate(FlowPostEvaluateCommand cmd) {
-		// TODO Auto-generated method stub
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(cmd.getFlowCaseId());
+		Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		if(flowCase == null || snapshotFlow == null || snapshotFlow.getNeedEvaluate().equals((byte)0)
+				|| flowCase.getStatus().equals(FlowCaseStatus.INVALID.getCode())
+				) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists, flowCaseId=" + flowCase);
+		}
+		
+		Map<Long, FlowEvaluateItemStar> evaMap = new HashMap<Long, FlowEvaluateItemStar>();
+		if(cmd.getStars() != null && cmd.getStars().size() > 0) {
+			cmd.getStars().forEach(ev -> {
+				evaMap.put(ev.getItemId(), ev);
+			});
+		}
+		
+		List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		if(items == null || evaMap.size() != items.size()) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "params error");
+		}
+		
+		List<FlowEvaluate> flowEvas = new ArrayList<>();
+		for(FlowEvaluateItem item : items) {
+			FlowEvaluate eva = new FlowEvaluate();
+			eva.setEvaluateItemId(item.getId());
+			eva.setFlowCaseId(cmd.getFlowCaseId());
+			eva.setFlowMainId(flowCase.getFlowMainId());
+			eva.setFlowVersion(flowCase.getFlowVersion());
+			eva.setFlowNodeId(flowCase.getCurrentNodeId());
+			eva.setModuleId(flowCase.getModuleId());
+			eva.setModuleType(flowCase.getModuleType());
+			eva.setProjectId(flowCase.getProjectId());
+			eva.setProjectType(flowCase.getProjectType());
+			eva.setNamespaceId(flowCase.getNamespaceId());
+			eva.setOwnerId(flowCase.getOwnerId());
+			eva.setOwnerType(flowCase.getOwnerType());
+			eva.setUserId(UserContext.current().getUser().getId());
+			eva.setStar(evaMap.get(item.getId()).getStat());
+			flowEvas.add(eva);
+		}
+		
+		flowEvaluateProvider.createFlowEvaluate(flowEvas);
+		
+		FlowEventLog tracker = new FlowEventLog();
+		Map<String, Object> templateMap = new HashMap<String, Object>();
+		
+		templateMap.put("score", String.valueOf(flowEvas.get(0).getStar()));
+		tracker.setLogContent(getFireButtonTemplate(FlowStepType.EVALUATE_STEP, templateMap));	
+		tracker.setStepCount(flowCase.getStepCount());
+		tracker.setId(flowEventLogProvider.getNextId());
+		tracker.setFlowMainId(flowCase.getFlowMainId());
+		tracker.setFlowVersion(flowCase.getFlowVersion());
+		tracker.setNamespaceId(flowCase.getNamespaceId());
+		tracker.setFlowNodeId(flowCase.getCurrentNodeId());
+		tracker.setParentId(0l);
+		tracker.setFlowCaseId(flowCase.getId());
+		tracker.setFlowUserId(UserContext.current().getUser().getId());
+		tracker.setLogType(FlowLogType.NODE_TRACKER.getCode());
+		tracker.setButtonFiredStep(FlowStepType.EVALUATE_STEP.getCode());
+		if(items.size() > 0) {
+			tracker.setSubjectId(1l);	
+		}
+		tracker.setTrackerApplier(1l);
+		tracker.setTrackerProcessor(1l);	
+		
+		if(snapshotFlow.getEvaluateStep() != null 
+				&& snapshotFlow.getEvaluateStep().equals(FlowStepType.APPROVE_STEP.getCode())) {
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setAutoStepType(snapshotFlow.getEvaluateStep());
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			if(cmd.getStepCount() == null) {
+				cmd.setStepCount(flowCase.getStepCount());
+			}
+			stepDTO.setStepCount(cmd.getStepCount());
+			processAutoStep(stepDTO);//fire next step
+		}
+		
+		//TODO ignore the result ?
 		return null;
 	}
 	
@@ -2557,6 +2631,8 @@ public class FlowServiceImpl implements FlowService {
         	break;
         case COMMENT_STEP:
         	code = FlowTemplateCode.COMMENT_STEP;
+        case EVALUATE_STEP:
+        	code = FlowTemplateCode.EVALUATE_STEP;
         	break;
         default:
         	break;
@@ -2779,8 +2855,11 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
 		}
 		
-		flow.setEvaluateStart(cmd.getEvaluateStart());
-		flow.setEvaluateEnd(cmd.getEvaluateEnd());
+		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
+		FlowNode node2 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateEnd());
+		
+		flow.setEvaluateStart(new Long(node1.getNodeLevel()));
+		flow.setEvaluateEnd(new Long(node2.getNodeLevel()));
 		flow.setEvaluateStep(cmd.getEvaluateStep());
 		flow.setEvaluateStep(cmd.getEvaluateStep());
 		flow.setNeedEvaluate(cmd.getNeedEvaluate());
@@ -2892,6 +2971,10 @@ public class FlowServiceImpl implements FlowService {
 				rltDTO.setStar(evaMap.get(item.getId()).getStar());	
 			}
 			
+		}
+		
+		if(items.size() == evaMap.size()) {
+			dto.setHasResults((byte)1);
 		}
 		
 		return dto;

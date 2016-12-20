@@ -184,6 +184,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists, flowCaseId=" + flowCase);
 		}
+		
+		if(cmd.getStepCount() != null && !cmd.getStepCount().equals(flowCase.getStepCount())) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "step busy");
+		}
+		
 		ctx.setFlowCase(flowCase);
 		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 		ctx.setOperator(logonUser);

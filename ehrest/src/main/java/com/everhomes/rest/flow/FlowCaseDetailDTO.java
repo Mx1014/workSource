@@ -10,7 +10,6 @@ import com.everhomes.util.StringHelper;
  * <ul> 工作流的详细信息
  * <li>entities: 实体的详细信息 {@link com.everhomes.rest.flow.FlowCaseEntity}</li>
  * <li>allowApplierUpdate: 是否准许申请者修改实体详情</li>
- * <li>isEvaluate: 是否支持评价， 1表示支持，0 表示不支持</li>
  * </ul>
  * @author janson
  *
@@ -37,7 +36,6 @@ public class FlowCaseDetailDTO {
     private Long     currentNodeId;
     private Long     ownerId;
     private String moduleLink;
-    private Byte isEvaluate;
     private Integer evaluateScore;
 	private Byte allowApplierUpdate;
 	private String customObject;
@@ -201,14 +199,6 @@ public class FlowCaseDetailDTO {
 
 	public void setModuleLink(String moduleLink) {
 		this.moduleLink = moduleLink;
-	}
-
-	public Byte getIsEvaluate() {
-		return isEvaluate;
-	}
-
-	public void setIsEvaluate(Byte isEvaluate) {
-		this.isEvaluate = isEvaluate;
 	}
 
 	public Integer getEvaluateScore() {
