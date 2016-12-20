@@ -215,6 +215,38 @@ public class CreateParkingFlow1 {
     	return action;
     }
     
+    private FlowActionInfo createNodeActionInfo(String text, Long orgId) {
+    	
+    	UpdateFlowNodeReminderCommand cccmd = new UpdateFlowNodeReminderCommand();
+    	FlowActionInfo action = new FlowActionInfo();
+    	action.setReminderAfterMinute(1L);
+    	action.setReminderTickMinute(1L);
+    	action.setRenderText(text);
+    	action.setTrackerApplier(1L);
+    	action.setTrackerProcessor(1L);
+    	cccmd.setMessageAction(action);
+    	
+    	CreateFlowUserSelectionCommand seleCmd = new CreateFlowUserSelectionCommand();
+    	seleCmd.setFlowEntityType(FlowEntityType.FLOW_ACTION.getCode());
+    	seleCmd.setFlowUserType(FlowUserType.PROCESSOR.getCode());
+    	
+    	List<FlowSingleUserSelectionCommand> sels = new ArrayList<>();
+    	List<Long> users = getOrgUsers(orgId);
+    	for(Long u : users) {
+    		FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
+    		singCmd.setSourceIdA(u);
+    		singCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
+    		singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
+    		sels.add(singCmd);
+    	}
+    	seleCmd.setSelections(sels);
+    	action.setUserSelections(seleCmd);
+    	
+    	flowService.updateFlowNodeReminder(cccmd);
+    	
+    	return action;
+    }
+    
     private void updateNodeTracker(FlowNodeDTO dto, Long orgId) {
     	UpdateFlowNodeTrackerCommand cmd = new UpdateFlowNodeTrackerCommand();
     	cmd.setFlowNodeId(dto.getId());
@@ -324,6 +356,24 @@ public class CreateParkingFlow1 {
     	updateFlowCmd.setFlowNodeId(node1.getId());
     	updateFlowCmd.setParams("{\"nodeType\":\"QUEUEING\"}");
     	flowService.updateFlowNode(updateFlowCmd);
+    	
+    	UpdateFlowNodeReminderCommand cccmd = new UpdateFlowNodeReminderCommand();
+    	cccmd.setMessageAction(createNodeActionInfo("测试提示消息", orgId));
+    	cccmd.setFlowNodeId(node1.getId());
+    	cccmd.setTickMessageAction(createNodeActionInfo("测试提示消息", orgId));
+    	flowService.updateFlowNodeReminder(cccmd);
+    	
+    	cccmd = new UpdateFlowNodeReminderCommand();
+    	cccmd.setMessageAction(createNodeActionInfo("测试提示消息", orgId));
+    	cccmd.setFlowNodeId(node2.getId());
+    	cccmd.setTickMessageAction(createNodeActionInfo("测试提示消息", orgId));
+    	flowService.updateFlowNodeReminder(cccmd);
+    	
+    	cccmd = new UpdateFlowNodeReminderCommand();
+    	cccmd.setMessageAction(createNodeActionInfo("测试提示消息", orgId));
+    	cccmd.setFlowNodeId(node3.getId());
+    	cccmd.setTickMessageAction(createNodeActionInfo("测试提示消息", orgId));
+    	flowService.updateFlowNodeReminder(cccmd);
     	
     	UpdateFlowNodeCommand updateFlowCmd2 = new UpdateFlowNodeCommand();
     	updateFlowCmd2.setFlowNodeId(node2.getId());

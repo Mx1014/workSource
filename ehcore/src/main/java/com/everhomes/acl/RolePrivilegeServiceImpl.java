@@ -1,86 +1,32 @@
 package com.everhomes.acl;
 
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.stream.Collectors;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-import javax.servlet.http.HttpServletResponse;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.ResourceCategory;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.*;
+import com.everhomes.organization.*;
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.ResourceCategoryAssignmentDTO;
-import com.everhomes.rest.community.ResourceCategoryDTO;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.organization.*;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
-
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.slf4j.Logger;
@@ -89,58 +35,14 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.StringUtils;
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.db.DbProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.organization.*;
-import com.everhomes.payment.util.DownloadUtil;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.admin.ImportDataResponse;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.excel.RowResult;
-import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import javax.servlet.http.HttpServletResponse;
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class RolePrivilegeServiceImpl implements RolePrivilegeService {
@@ -1436,7 +1338,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<OrganizationContactDTO> listOrganizationAdministrators(ListServiceModuleAdministratorsCommand cmd) {
-		List<OrganizationMember> members = this.getRoleMembers(cmd.getOrganizationId(), RoleConstants.ENTERPRISE_SUPER_ADMIN);
+		List<OrganizationMember> members = this.getRoleMembers(cmd.getOrganizationId(), RoleConstants.ENTERPRISE_SUPER_ADMIN, cmd.getKeywords());
 		return members.stream().map(r -> {
 			return ConvertHelper.convert(r, OrganizationContactDTO.class);
 		}).collect(Collectors.toList());
@@ -1456,6 +1358,28 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				if(EntityType.fromCode(roleassignment.getTargetType()) == EntityType.USER && roleassignment.getRoleId().equals(roleId)){
 					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
 					if(null != member)members.add(member);
+				}
+			}
+		}
+		return members;
+	}
+
+	/**
+	 * 获取角色人员, 可以根据关键字搜索的
+     */
+	private List<OrganizationMember> getRoleMembers(Long organizationId, Long roleId, String keywords){
+		List<OrganizationMember> members = new ArrayList<>();
+		List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResource(EntityType.ORGANIZATIONS.getCode(), organizationId);
+		if(null != roleAssignments){
+			for (RoleAssignment roleassignment: roleAssignments) {
+				if(EntityType.fromCode(roleassignment.getTargetType()) == EntityType.USER && roleassignment.getRoleId().equals(roleId)){
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(roleassignment.getTargetId(), organizationId);
+                    if (null != member) {
+                        if (keywords != null && !(member.getContactName().contains(keywords) || member.getContactToken().contains(keywords))) {
+                            continue;
+                        }
+                        members.add(member);
+                    }
 				}
 			}
 		}

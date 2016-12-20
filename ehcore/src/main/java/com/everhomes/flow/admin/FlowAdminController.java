@@ -25,6 +25,7 @@ import com.everhomes.rest.flow.FlowButtonDetailDTO;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowDTO;
+import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
 import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowNodeDTO;
@@ -46,6 +47,7 @@ import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
@@ -462,6 +464,34 @@ public class FlowAdminController extends ControllerBase {
     public RestResponse clearFlowCache(@Valid FlowIdCommand cmd) {
     	flowService.clearFlowGraphCache(cmd.getFlowId());
         RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/flow/updateFlowEvaluate</b>
+     * <p> 修改工作流的评分属性 </p>
+     * @return
+     */
+    @RequestMapping("updateFlowEvaluate")
+    @RestReturn(value=FlowEvaluateDetailDTO.class)
+    public RestResponse updateFlowEvaluate(@Valid UpdateFlowEvaluateCommand cmd) {
+        RestResponse response = new RestResponse(flowService.updateFlowEvaluate(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/flow/getFlowEvaluate</b>
+     * <p> 获取工作流的评分信息 </p>
+     * @return
+     */
+    @RequestMapping("getFlowEvaluate")
+    @RestReturn(value=FlowEvaluateDetailDTO.class)
+    public RestResponse getFlowEvaluate(@Valid FlowIdCommand cmd) {
+        RestResponse response = new RestResponse(flowService.getFlowEvaluate(cmd.getFlowId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -6,6 +6,13 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ * <li>isEvaluate: 是否是评价节点</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class FlowEventLogDTO {
     private Long     id;
     private Long     flowMainId;
@@ -23,6 +30,7 @@ public class FlowEventLogDTO {
     private Long     flowCaseId;
     private Long     flowButtonId;
     private Timestamp createTime;
+    private Byte isEvaluate;
 
     public Long getId() {
 		return id;
@@ -150,6 +158,14 @@ public class FlowEventLogDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public Byte getIsEvaluate() {
+		return isEvaluate;
+	}
+
+	public void setIsEvaluate(Byte isEvaluate) {
+		this.isEvaluate = isEvaluate;
 	}
 
 	@Override

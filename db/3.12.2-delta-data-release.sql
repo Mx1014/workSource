@@ -336,6 +336,7 @@ VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','�
 
 
 -- 停车充值
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10011', 'zh_CN', '抱歉，你申请的月卡数量已到上限');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10012', 'zh_CN', '发放月卡资格数量不可大于当前剩余月卡数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10013', 'zh_CN', '发放月卡资格数量不可大于当前排队数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10014', 'zh_CN', '操作失败，当前无剩余月卡');
