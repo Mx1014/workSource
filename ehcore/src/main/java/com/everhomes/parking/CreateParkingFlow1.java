@@ -242,8 +242,6 @@ public class CreateParkingFlow1 {
     	seleCmd.setSelections(sels);
     	action.setUserSelections(seleCmd);
     	
-    	flowService.updateFlowNodeReminder(cccmd);
-    	
     	return action;
     }
     
