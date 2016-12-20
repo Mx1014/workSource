@@ -431,3 +431,13 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'license', 'zh_CN', '车牌');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'remark', 'zh_CN', '备注');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'attachment', 'zh_CN', '附件'); 
+
+-- 资源预订新增工作流菜单  add by sw 20161220
+INSERT INTO `eh_web_menus` VALUES ('40450', '工作流设置', '40400', NULL, 'react:/working-flow/flow-list/resource-reservation/40400', '0', '2', '/40000/40400/40450', 'park', '475', 40800);
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10023', '40450', '资源预订', '1', '1', '资源预订 全部权限', '710');
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40450, '', 'EhNamespaces', 1000000, 2);
+
+
