@@ -12,8 +12,17 @@ public class CustomerRental {
     private String contactPhone;
     @ItemType(CustomerContract.class)
     private List<CustomerContract> contracts;
+    private Boolean dealed;
+    
+    public Boolean getDealed() {
+		return dealed;
+	}
 
-    public String getContact() {
+	public void setDealed(Boolean dealed) {
+		this.dealed = dealed;
+	}
+
+	public String getContact() {
 		return contact;
 	}
 

@@ -31,6 +31,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupMemberCaches;
@@ -62,6 +63,7 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhEnterpriseAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
@@ -80,6 +82,7 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
@@ -2664,6 +2667,41 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 	}
 
 	@Override
+	public Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId,
+			String namespaceToken, String namespaceType) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TYPE.eq(namespaceType))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TOKEN.eq(namespaceToken))
+			.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, Organization.class);
+		}
+		
+		//组织名字有重复的
+		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS).where(Tables.EH_ORGANIZATIONS.NAME.eq(name))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			List<Organization> organizationList = result.map(r->ConvertHelper.convert(r, Organization.class));
+			if (organizationList.size() > 1) {
+				for (Organization organization : organizationList) {
+					if (OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE && organization.getNamespaceOrganizationToken() == null) {
+						return organization;
+					}
+				}
+			}else if (organizationList.get(0).getNamespaceOrganizationToken() == null) {
+				return organizationList.get(0);
+			} 
+		}
+		
+		return null;
+	}
+
+	@Override
 	public Organization findOrganizationByName(String name, Integer namespaceId) {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		Record r = context.select().from(Tables.EH_ORGANIZATIONS)
@@ -2993,6 +3031,73 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return null;
 	}
-	
-	
+
+	@Override
+	public List<Organization> listOrganizationByNamespaceType(Integer namespaceId, String namespaceType) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATIONS)
+				.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ORGANIZATION_TYPE.eq(namespaceType))
+				.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, Organization.class));
+	}
+
+	@Override
+	public List<OrganizationAddress> listOrganizationAddressByOrganizationId(Long organizationId) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESSES)
+	       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+	       		 .fetch()
+	       		 .map(r->ConvertHelper.convert(r, OrganizationAddress.class));	       		 
+	}
+
+	@Override
+	public List<CommunityAddressMapping> listOrganizationAddressMappingByOrganizationIdAndCommunityId(
+			Long organizationId, Long communityId) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(organizationId)
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId)))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, CommunityAddressMapping.class));
+	}
+
+	@Override
+	public List<EnterpriseAddress> listEnterpriseAddressByOrganization(Long organizationId) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ENTERPRISE_ADDRESSES)
+	       		 .where(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(organizationId))
+	       		 .fetch()
+	       		 .map(r->ConvertHelper.convert(r, EnterpriseAddress.class));
+	}
+
+	@Override
+	public OrganizationAddress findOrganizationAddressByOrganizationIdAndAddressId(Long organizationId,
+			Long addressId) {
+		Record record = dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESSES)
+	       		 .where(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.eq(organizationId))
+	       		 .and(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.eq(addressId))
+	       		 .fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, OrganizationAddress.class);
+		}
+		return null;
+	}
+
+	@Override
+	public List<CommunityAddressMapping> listOrganizationAddressMappingByNamespaceType(Long superOrganizationId,
+			Long communityId, String namespaceType) {
+		return dbProvider.getDslContext(AccessSpec.readOnly()).select().from(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+				.where(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID.eq(superOrganizationId)
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.COMMUNITY_ID.eq(communityId)))
+				.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.NAMESPACE_TYPE.eq(namespaceType))
+				.fetch()
+				.map(r->ConvertHelper.convert(r, CommunityAddressMapping.class));
+	}
+
+	@Override
+	public void deleteOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhOrganizationAddressMappingsDao dao = new EhOrganizationAddressMappingsDao(context.configuration());
+		dao.delete(organizationAddressMapping);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null); 
+	}
+
 }
