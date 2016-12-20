@@ -192,6 +192,12 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		e.setValue(dto.getCarSerieName());
 		entities.add(e);
 		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("颜色");
+		e.setValue(dto.getCarColor());
+		entities.add(e);
+		
 		return entities;
 	}
 
