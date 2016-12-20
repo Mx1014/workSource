@@ -127,6 +127,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowEvaluateItemProvider flowEvaluateItemProvider;
     
+    @Autowired
+    private FlowEvaluateProvider flowEvaluateProvider;
+    
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
     private StringTemplateLoader templateLoader;
@@ -1341,6 +1344,19 @@ public class FlowServiceImpl implements FlowService {
 			}
 		}
 		
+		//step9 copy flow's evaluate
+		List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getFlowMainId(), FlowConstants.FLOW_CONFIG_VER);
+		if(items != null && items.size() > 0) {
+			items.forEach(item -> {
+				item.setId(null);
+				item.setFlowMainId(flow.getFlowMainId());
+				item.setFlowVersion(flow.getFlowVersion());
+			});
+			flowEvaluateItemProvider.createFlowEvaluateItem(items);
+			
+			//TODO support action for evaluate
+		}
+		
 		flow.setStartNode(flowGraph.getNodes().get(0).getFlowNode().getId());
 		flow.setEndNode(flowGraph.getNodes().get(flowGraph.getNodes().size()-1).getFlowNode().getId());
 		flowProvider.updateFlow(flow);
@@ -1886,6 +1902,17 @@ public class FlowServiceImpl implements FlowService {
 		return getFlowCaseDetail(flowCaseId, inUserId, flowUserType, false);
 	}
 	
+	private FlowButtonDTO flowButtonToDTO(Flow snapshotFlow, FlowButton b) {
+		FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
+		
+		FlowStepType stepType = FlowStepType.fromCode(b.getFlowStepType());
+		if(stepType != FlowStepType.APPROVE_STEP && stepType != FlowStepType.TRANSFER_STEP) {
+			btnDTO.setNeedProcessor((byte)0);
+		}
+		
+		return btnDTO;
+	}
+	
 	@Override
 	public FlowCaseDetailDTO getFlowCaseDetail(Long flowCaseId, Long inUserId, FlowUserType flowUserType, boolean checkProcessor) {
 		Long userId = inUserId;
@@ -1894,12 +1921,25 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+		Flow snapshotFlow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		
 		List<FlowCaseEntity> entities = flowListenerManager.onFlowCaseDetailRender(flowCase, flowUserType);
 		
 		FlowCaseDetailDTO dto = ConvertHelper.convert(flowCase, FlowCaseDetailDTO.class);
 		dto.setEntities(entities);
 		if(dto.getStatus().equals(FlowCaseStatus.INVALID.getCode())) {
 			return dto;
+		}
+		
+		//evaluate
+		dto.setIsEvaluate((byte)0);
+		List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCase.getId(), snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
+		if(evas != null && evas.size() > 0) {
+			dto.setEvaluateScore(new Integer(evas.get(0).getStar()));
+		} else {
+			 if(!snapshotFlow.getNeedEvaluate().equals((byte)0)) {
+				 dto.setIsEvaluate((byte)1);
+			 }
 		}
 		
 		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
@@ -1926,10 +1966,10 @@ public class FlowServiceImpl implements FlowService {
 //								&& b.getFlowStepType().equals(FlowStepType.APPROVE_STEP.getCode())) {
 //							isAdd = false;
 //						}
-						
+
 						if(isAdd && b.getStatus().equals(FlowButtonStatus.ENABLED.getCode()) 
 								&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode())) {
-							FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
+							FlowButtonDTO btnDTO = flowButtonToDTO(snapshotFlow, b);
 							btnDTOS.add(btnDTO);
 						}
 					});
@@ -2761,6 +2801,7 @@ public class FlowServiceImpl implements FlowService {
 					item.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
 					item.setName(s);
 					item.setNamespaceId(flow.getNamespaceId());
+					items.add(item);
 				}
 				
 				flowEvaluateItemProvider.createFlowEvaluateItem(items);
@@ -2824,7 +2865,37 @@ public class FlowServiceImpl implements FlowService {
 
 	@Override
 	public FlowEvaluateDTO getEvaluateInfo(Long flowCaseId) {
-		return null;
+		FlowEvaluateDTO dto = new FlowEvaluateDTO();
+		dto.setFlowCaseId(flowCaseId);
+		List<FlowEvaluateResultDTO> results = new ArrayList<FlowEvaluateResultDTO>();
+		dto.setResults(results);
+		
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(flowCaseId);
+		
+		dto.setNamespaceId(flowCase.getNamespaceId());
+		
+		List<FlowEvaluate> evas = flowEvaluateProvider.findEvaluates(flowCaseId, flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		Map<Long, FlowEvaluate> evaMap = new HashMap<Long, FlowEvaluate>();
+		if(evas != null && evas.size() > 0) {
+			evas.forEach(ev -> {
+				evaMap.put(ev.getEvaluateItemId(), ev);
+			});
+		}
+		
+		List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		for(FlowEvaluateItem item: items) {
+			FlowEvaluateResultDTO rltDTO = new FlowEvaluateResultDTO();
+			rltDTO.setEvaluateItemId(item.getId());
+			rltDTO.setName(item.getName());
+			
+			if(evaMap.containsKey(item.getId())) {
+				rltDTO.setStar(evaMap.get(item.getId()).getStar());	
+			}
+			
+		}
+		
+		return dto;
+		
 	}
 	
 }

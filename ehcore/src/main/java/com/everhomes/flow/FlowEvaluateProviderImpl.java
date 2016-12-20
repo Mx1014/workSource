@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -25,6 +26,7 @@ import com.everhomes.server.schema.tables.records.EhFlowEvaluatesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +111,24 @@ public class FlowEvaluateProviderImpl implements FlowEvaluateProvider {
     }
 
     private void prepareObj(FlowEvaluate obj) {
+    	Long l2 = DateHelper.currentGMTTime().getTime();
+    	obj.setCreateTime(new Timestamp(l2));
+    }
+    
+    @Override
+    public List<FlowEvaluate> findEvaluates(Long flowCaseId, Long flowMainId, Integer flowVersion) {
+    	ListingLocator locator = new ListingLocator();
+    	return queryFlowEvaluates(locator, 100, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_CASE_ID.eq(flowCaseId));
+				query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_MAIN_ID.eq(flowMainId));
+				query.addConditions(Tables.EH_FLOW_EVALUATES.FLOW_VERSION.eq(flowVersion));
+				return query;
+			}
+    		
+    	});
     }
 }

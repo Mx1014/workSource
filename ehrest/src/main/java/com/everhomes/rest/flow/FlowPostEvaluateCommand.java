@@ -6,7 +6,8 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul> 在某节点进行评论
+ * <ul> 在某节点进行评论。使用方法：首先通过 searchFlowCase 得到，是否支持评价。支持评价则显示评价按钮。再点按钮，再通过 getEvaluateInfo 拿到评价的信息，比如有多少项评价。
+再通过 postEvaluate 进行多项数据的评价。这个时候，评价会显示在任务跟踪里，如果记录有字段 isEvaluate，则有多项评价，需要显示详情。也调用 getEvaluateInfo 拿到评价的详情。
  * <li>userId: 当前登录用户 ID ，可以不传</li>
  * <li> flowCaseId: 当前 case 的 ID </li>
  * <li> flowNodeId: 当前节点的 ID </li>

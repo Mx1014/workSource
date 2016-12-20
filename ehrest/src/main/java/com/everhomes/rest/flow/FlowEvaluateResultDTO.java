@@ -5,16 +5,14 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>evaluateItemId: itemId</li>
- * <li>flowNodeId: 节点 ID</li>
  * <li>name: 节点名字</li>
- * <li>star: 评分</li>
+ * <li>star: 评分，如果暂时没有评分则为空</li>
  * </ul>
  * @author janson
  *
  */
 public class FlowEvaluateResultDTO {
 	private Long evaluateItemId;
-	private Long flowNodeId;
 	private String name;
 	private Byte star;
 
@@ -25,15 +23,7 @@ public class FlowEvaluateResultDTO {
 	public void setEvaluateItemId(Long evaluateItemId) {
 		this.evaluateItemId = evaluateItemId;
 	}
-
-	public Long getFlowNodeId() {
-		return flowNodeId;
-	}
-
-	public void setFlowNodeId(Long flowNodeId) {
-		this.flowNodeId = flowNodeId;
-	}
-
+	
 	public String getName() {
 		return name;
 	}

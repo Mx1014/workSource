@@ -24,6 +24,7 @@ import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DisableFlowButtonCommand;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
 import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
@@ -49,6 +50,7 @@ import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
@@ -106,6 +108,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     
     @Autowired
     private UserProvider userProvider;
+    
+    @Autowired
+    private FlowEvaluateItemProvider flowEvaluateItemProvider;
     
     private User testUser1;
     private User testUser2;
@@ -281,8 +286,26 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	disCmd.setFlowButtonId(flowButton3.getId());
     	flowService.disableFlowButton(disCmd);
     	
+    	//evaluate support
+    	UpdateFlowEvaluateCommand evaluateCmd = new UpdateFlowEvaluateCommand();
+    	evaluateCmd.setEvaluateStart(node2.getId());
+    	evaluateCmd.setEvaluateEnd(node3.getId());
+    	evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
+    	evaluateCmd.setNeedEvaluate((byte)1);
+    	evaluateCmd.setFlowId(flowDTO.getId());
+    	List<String> items = new ArrayList<String>();
+    	items.add("test item1");
+    	items.add("test item2");
+    	evaluateCmd.setItems(items);
+    	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
+    	Assert.assertTrue(evaDTO.getItems().size() == 2);
+    	
     	Boolean ok = flowService.enableFlow(flowDTO.getId());
     	Assert.assertTrue(ok);
+    	
+    	Flow snapshotFlow = flowService.getEnabledFlow(namespaceId, moduleId, flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+    	List<FlowEvaluateItem> evaItems = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(snapshotFlow.getFlowMainId(), snapshotFlow.getFlowVersion());
+    	Assert.assertTrue(evaItems.size() == 2);
     }
     
     @Test
@@ -301,6 +324,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(node1.getProcessorButtons().size() == 5);
     	Assert.assertTrue(node1.getMessageAction() != null);
     	Assert.assertTrue(node1.getTrackApproveEnter() != null);
+    	Assert.assertTrue(flowGraph.getFlow().getNeedEvaluate().equals((byte)1));
     	
     	for(FlowGraphButton btn : node1.getProcessorButtons()) {
     		if(btn.getFlowButton().getFlowStepType().equals(FlowStepType.APPROVE_STEP.getCode())) {
@@ -1092,5 +1116,36 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	FlowVariableResponse resp = flowService.listFlowVariables(cmd);
     	Assert.assertTrue(resp.getDtos() != null && resp.getDtos().get(0).getLabel() != null);
+    }
+    
+    @Test
+    public void testEvaluateCreate() {
+    	Long userId = testUser1.getId();
+    	setTestContext(userId);
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	FlowGraph flowGraph = flowService.getFlowGraph(flow.getFlowMainId(), 0);
+    	
+    	UpdateFlowEvaluateCommand evaluateCmd = new UpdateFlowEvaluateCommand();
+    	evaluateCmd.setEvaluateStart(flowGraph.getNodes().get(1).getFlowNode().getId());
+    	evaluateCmd.setEvaluateEnd(flowGraph.getNodes().get(2).getFlowNode().getId());
+    	evaluateCmd.setEvaluateStep(FlowStepType.APPROVE_STEP.getCode());
+    	evaluateCmd.setNeedEvaluate((byte)1);
+    	evaluateCmd.setFlowId(flowGraph.getFlow().getId());
+    	List<String> items = new ArrayList<String>();
+    	items.add("test item1");
+    	items.add("test item2");
+    	evaluateCmd.setItems(items);
+    	
+    	FlowEvaluateDetailDTO evaDTO = flowService.updateFlowEvaluate(evaluateCmd);
+    	Assert.assertTrue(evaDTO.getEvaluateStart().equals(flowGraph.getNodes().get(1).getFlowNode().getId()));
+    	Assert.assertTrue(evaDTO.getEvaluateEnd().equals(flowGraph.getNodes().get(2).getFlowNode().getId()));
+    	Assert.assertTrue(evaDTO.getItems().size() == 2);
+    	
+    	
     }
 }
