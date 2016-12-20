@@ -36,7 +36,6 @@ import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 
 @Component
 public class ParkingFlowModuleListener implements FlowModuleListener {
@@ -193,6 +192,12 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		e.setValue(dto.getCarSerieName());
 		entities.add(e);
 		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("颜色");
+		e.setValue(dto.getCarColor());
+		entities.add(e);
+		
 		return entities;
 	}
 
@@ -223,7 +228,9 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		FlowCase flowCase = ctx.getFlowCase();
 
 		String stepType = ctx.getStepType().getCode();
-		String param = flowNode.getParams();
+		String params = flowNode.getParams();
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
 		
 		Long flowId = flowNode.getFlowMainId();
 		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
@@ -231,14 +238,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		String tag1 = flow.getStringTag1();
 		
 		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
+		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if("AUDITING".equals(param)) {
+			if("AUDITING".equals(nodeType)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 					parkingCardRequest.setAuditSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 			}
-			else if("QUEUEING".equals(param)) {
+			else if("QUEUEING".equals(nodeType)) {
 				
 				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
@@ -268,7 +275,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
-			}else if("PROCESSING".equals(param)) {
+			}else if("PROCESSING".equals(nodeType)) {
 				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
@@ -276,7 +283,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			if("SUCCEED".equals(param)) {
+			if("SUCCEED".equals(nodeType)) {
 				parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
 				parkingCardRequest.setOpenCardTime(new Timestamp(now));
 				parkingProvider.updateParkingCardRequest(parkingCardRequest);
@@ -293,6 +300,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCreating(Flow flow) {
 		// TODO Auto-generated method stub
-	//Added by Janson	
+		if("申请排队模式".equals(flow.getFlowName()))
+			flow.setStringTag1("1");
+		else if("半自动化模式".equals(flow.getFlowName()))
+			flow.setStringTag1("2");
+		else if("智能模式".equals(flow.getFlowName()))
+			flow.setStringTag1("3");
+		else
+			flow.setStringTag1("1");
+
 	}
 }

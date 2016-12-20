@@ -9,6 +9,7 @@ public class CustomerBuilding {
     private String completeDate;
     private String joininDate;
     private String floorCount;
+    private Boolean dealed;
 
     public CustomerBuilding() {
 		super();
@@ -28,6 +29,14 @@ public class CustomerBuilding {
 		this.completeDate = completeDate;
 		this.joininDate = joininDate;
 		this.floorCount = floorCount;
+	}
+
+	public Boolean getDealed() {
+		return dealed;
+	}
+
+	public void setDealed(Boolean dealed) {
+		this.dealed = dealed;
 	}
 
 	public String getBuildingName() {

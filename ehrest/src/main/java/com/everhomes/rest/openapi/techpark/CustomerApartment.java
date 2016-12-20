@@ -12,6 +12,7 @@ public class CustomerApartment {
 	private Double innerArea;
 	private String layout;
 	private Byte livingStatus;
+	private Boolean dealed;
 
 	public CustomerApartment() {
 		super();
@@ -21,6 +22,14 @@ public class CustomerApartment {
 		super();
 		this.buildingName = buildingName;
 		this.apartmentName = apartmentName;
+	}
+
+	public Boolean getDealed() {
+		return dealed;
+	}
+
+	public void setDealed(Boolean dealed) {
+		this.dealed = dealed;
 	}
 
 	public String getBuildingName() {
