@@ -2821,5 +2821,10 @@ public class FlowServiceImpl implements FlowService {
 		
 		return getFlowEvaluate(flow);
 	}
+
+	@Override
+	public FlowEvaluateDTO getEvaluateInfo(Long flowCaseId) {
+		return null;
+	}
 	
 }

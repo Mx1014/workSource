@@ -151,6 +151,20 @@ public class FlowController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /flow/getEvaluateInfo</b>
+     * <p> 对节点进行评价 </p>
+     * @return 返回评价信息
+     */
+    @RequestMapping("getEvaluateInfo")
+    @RestReturn(value=FlowEvaluateDTO.class)
+    public RestResponse getEvaluateInfo(@Valid GetFlowCaseDetailByIdCommand cmd) {
+        RestResponse response = new RestResponse(flowService.getEvaluateInfo(cmd.getFlowCaseId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /flow/listModules</b>
      * <p> 对节点进行评价 </p>
      * @return 返回评价信息

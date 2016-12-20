@@ -426,6 +426,8 @@ public interface FlowService {
 	FlowEvaluateDetailDTO updateFlowEvaluate(UpdateFlowEvaluateCommand cmd);
 
 	FlowEvaluateDetailDTO getFlowEvaluate(Long flowId);
+
+	FlowEvaluateDTO getEvaluateInfo(Long flowCaseId);
 	
 	//TODO 日志信息分类：
 	
