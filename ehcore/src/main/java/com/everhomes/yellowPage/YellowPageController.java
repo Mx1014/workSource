@@ -351,7 +351,7 @@ public class YellowPageController  extends ControllerBase {
 
     /**
      * <b>URL: /yellowPage/searchOneselfRequestInfo</b>
-     * <p> 搜索申请信息-app</p>
+     * <p> 搜索自己的申请信息-app</p>
      */
     @RequestMapping("searchOneselfRequestInfo")
     @RestReturn(value = SearchRequestInfoResponse.class)
@@ -363,6 +363,22 @@ public class YellowPageController  extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /yellowPage/searchOrgRequestInfo</b>
+     * <p> 搜索企业申请信息</p>
+     */
+    @RequestMapping("searchOrgRequestInfo")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse searchOrgRequestInfo(@Valid SearchOrgRequestInfoCommand cmd) {
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchOrgRequestInfo(cmd);
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
     /**
    	 * <b>URL: /yellowPage/syncSARequestInfo</b>
    	 * <p> 同步申请信息</p>

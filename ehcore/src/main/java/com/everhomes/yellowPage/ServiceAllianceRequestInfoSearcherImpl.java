@@ -8,7 +8,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.rest.yellowPage.SearchOneselfRequestInfoCommand;
+import com.everhomes.rest.yellowPage.*;
 import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -37,9 +37,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.wifi.WifiOwnerType;
-import com.everhomes.rest.yellowPage.RequestInfoDTO;
-import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -354,6 +351,42 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 
         FilterBuilder fb = FilterBuilders.termFilter("type", cmd.getType());
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("creatorUid", UserContext.current().getUser().getId()));
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("ServiceAllianceRequestInfoSearcherImpl query builder ："+builder);
+
+        SearchResponse rsp = builder.execute().actionGet();
+        SearchRequestInfoResponse response = new SearchRequestInfoResponse();
+        List<RequestInfoDTO> dtos = getDTOs(rsp);
+
+        if(dtos.size() > pageSize){
+            response.setNextPageAnchor(anchor+1);
+            dtos.remove(dtos.size() - 1);
+        }
+
+        response.setDtos(dtos);
+
+        return response;
+    }
+
+    @Override
+    public SearchRequestInfoResponse searchOrgRequestInfo(SearchOrgRequestInfoCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+        QueryBuilder qb = null;
+
+        FilterBuilder fb = FilterBuilders.termFilter("creatorOrganizationId", cmd.getOrgId());
 
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
