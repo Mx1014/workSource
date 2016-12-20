@@ -124,6 +124,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     FlowUserSelectionService flowUserSelectionService;
     
+    @Autowired
+    private FlowEvaluateItemProvider flowEvaluateItemProvider;
+    
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
     private StringTemplateLoader templateLoader;
@@ -246,6 +249,8 @@ public class FlowServiceImpl implements FlowService {
 		}
 		switch(entity) {
 		case FLOW:
+			return flowProvider.getFlowById(entityId);
+		case FLOW_EVALUATE:
 			return flowProvider.getFlowById(entityId);
 		case FLOW_NODE:
 			FlowNode flowNode = flowNodeProvider.getFlowNodeById(entityId);
@@ -377,7 +382,7 @@ public class FlowServiceImpl implements FlowService {
 		if(flow == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
 		}
-		
+
 		flowProvider.flowMarkUpdated(flow);;
 	}
 	
@@ -2663,6 +2668,158 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		flowUserSelectionProvider.createFlowUserSelections(objs);
+	}
+	
+	private FlowAction createEvaluateAction(Flow flow, Integer flowVer, FlowActionInfo actionInfo
+			, String actionType, String actionStepType, String flowStepType) {
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flow.getId(), FlowEntityType.FLOW_EVALUATE.getCode()
+				, actionType, actionStepType, flowStepType);
+		
+		CreateFlowUserSelectionCommand selectionCmd = actionInfo.getUserSelections();
+		boolean configUser = false;
+		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
+			configUser = true;
+		}
+		
+		if(action == null) {
+			action = new FlowAction();
+			action.setFlowMainId(flow.getFlowMainId());
+			action.setFlowVersion(flowVer);
+			action.setActionStepType(actionStepType);
+			action.setActionType(actionType);
+			action.setBelongTo(flow.getId());
+			action.setBelongEntity(FlowEntityType.FLOW_EVALUATE.getCode());
+			action.setNamespaceId(flow.getNamespaceId());
+			action.setFlowStepType(flowStepType);
+
+			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
+			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
+			action.setTrackerApplier(actionInfo.getTrackerApplier());
+			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			action.setRenderText(actionInfo.getRenderText());
+			flowActionProvider.createFlowAction(action);
+			
+		} else {
+			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
+			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
+			action.setTrackerApplier(actionInfo.getTrackerApplier());
+			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			action.setRenderText(actionInfo.getRenderText());
+			flowActionProvider.updateFlowAction(action);
+			
+			//delete all old selections
+			if(configUser) {
+				flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
+			}
+		}
+		
+		if(configUser) {
+			List<FlowSingleUserSelectionCommand> seles = selectionCmd.getSelections();
+			for(FlowSingleUserSelectionCommand selCmd : seles) {
+				FlowUserSelection userSel = new FlowUserSelection(); 
+				userSel.setBelongTo(action.getId());
+				userSel.setBelongEntity(FlowEntityType.FLOW_ACTION.getCode());
+				userSel.setBelongType(FlowUserType.PROCESSOR.getCode());
+				userSel.setFlowMainId(action.getFlowMainId());
+				userSel.setFlowVersion(action.getFlowVersion());
+				userSel.setNamespaceId(action.getNamespaceId());
+				createUserSelection(userSel, selCmd);
+			}
+		}
+		
+		return action;
+	}
+
+	@Override
+	public FlowEvaluateDetailDTO updateFlowEvaluate(UpdateFlowEvaluateCommand cmd) {
+		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
+		if(flow == null || !flow.getFlowMainId().equals(0l)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
+		}
+		
+		flow.setEvaluateStart(cmd.getEvaluateStart());
+		flow.setEvaluateEnd(cmd.getEvaluateEnd());
+		flow.setEvaluateStep(cmd.getEvaluateStep());
+		flow.setEvaluateStep(cmd.getEvaluateStep());
+		flow.setNeedEvaluate(cmd.getNeedEvaluate());
+		
+		this.dbProvider.execute(status -> {
+			flowMarkUpdated(flow);
+			
+			if(cmd.getItems() != null && cmd.getItems().size() > 0) {
+				List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+				if(items != null && items.size() > 0) {
+					flowEvaluateItemProvider.deleteFlowEvaluateItem(items);
+				}
+				
+				items = new ArrayList<FlowEvaluateItem>();
+				for(String s : cmd.getItems()) {
+					FlowEvaluateItem item = new FlowEvaluateItem();
+					item.setFlowMainId(flow.getId());
+					item.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
+					item.setName(s);
+					item.setNamespaceId(flow.getNamespaceId());
+				}
+				
+				flowEvaluateItemProvider.createFlowEvaluateItem(items);
+			}
+			
+			if(cmd.getMessageAction() != null) {
+				createEvaluateAction(flow, FlowConstants.FLOW_CONFIG_VER, cmd.getMessageAction()
+						, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_NONE.getCode(), FlowStepType.EVALUATE_STEP.getCode());	
+			}
+			if(cmd.getSmsAction() != null) {
+				createEvaluateAction(flow, FlowConstants.FLOW_CONFIG_VER, cmd.getMessageAction()
+						, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_NONE.getCode(), FlowStepType.EVALUATE_STEP.getCode());				
+			}
+			
+			return null;
+		});
+
+		return getFlowEvaluate(flow);
+	}
+	
+	private FlowEvaluateDetailDTO getFlowEvaluate(Flow flow) {
+		FlowEvaluateDetailDTO dto = new FlowEvaluateDetailDTO();
+		dto.setEvaluateEnd(flow.getEvaluateEnd());
+		dto.setEvaluateStart(flow.getEvaluateStart());
+		dto.setEvaluateStep(flow.getEvaluateStep());
+		dto.setFlowId(flow.getId());
+		dto.setNeedEvaluate(flow.getNeedEvaluate());
+		dto.setItems(new ArrayList<String>());
+	
+		FlowAction action = flowActionProvider.findFlowActionByBelong(flow.getId(), FlowEntityType.FLOW_EVALUATE.getCode()
+				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_NONE.getCode(), null);
+		if(action != null) {
+			dto.setMessageAction(actionToDTO(action));
+		}
+		
+		action = flowActionProvider.findFlowActionByBelong(flow.getId(), FlowEntityType.FLOW_EVALUATE.getCode()
+				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_NONE.getCode(), null);
+		if(action != null) {
+			dto.setMessageAction(actionToDTO(action));
+		}
+		
+		List<FlowEvaluateItem> items = flowEvaluateItemProvider.findFlowEvaluateItemsByFlowId(flow.getId(), FlowConstants.FLOW_CONFIG_VER);
+		if(items != null && items.size() > 0) {
+			items.forEach(item -> {
+				dto.getItems().add(item.getName());
+			});
+		}
+		
+		return dto;
+	}
+
+	@Override
+	public FlowEvaluateDetailDTO getFlowEvaluate(Long flowId) {
+		Flow flow = flowProvider.getFlowById(flowId);
+		if(flow == null || !flow.getFlowMainId().equals(0l)) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
+		}
+		
+		return getFlowEvaluate(flow);
 	}
 	
 }

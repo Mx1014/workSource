@@ -18,6 +18,7 @@ import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
+import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowModuleDTO;
@@ -48,6 +49,7 @@ import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
@@ -420,6 +422,10 @@ public interface FlowService {
 			List<FlowUserSelection> selections, int loopCnt);
 
 	void clearFlowGraphCache(Long flowId);
+
+	FlowEvaluateDetailDTO updateFlowEvaluate(UpdateFlowEvaluateCommand cmd);
+
+	FlowEvaluateDetailDTO getFlowEvaluate(Long flowId);
 	
 	//TODO 日志信息分类：
 	
