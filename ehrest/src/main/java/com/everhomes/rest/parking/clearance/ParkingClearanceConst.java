@@ -5,7 +5,7 @@ package com.everhomes.rest.parking.clearance;
  */
 public interface ParkingClearanceConst {
 
-    Long MODULE_ID = 41500L;// 模块id
+    Long MODULE_ID = 20900L;// 模块id
 
     Long APPLY_PRIVILEGE_ID = 10056L;// 处理车辆放行权限id
     Long PROCESS_PRIVILEGE_ID = 10057L;// 处理车辆放行权限id

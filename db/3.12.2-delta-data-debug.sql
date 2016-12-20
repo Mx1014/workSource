@@ -176,3 +176,12 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 VALUES ((@max_id := @max_id + 1), 'community', '240111044331055835', '清华信息港停车场1', 'BOSIGAO', '', '1', '2', '1025', '2016-03-31 17:07:20', '1', '0', '0', '1', '1', '1', '999984');
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `is_support_recharge`, `namespace_id`)
 VALUES ((@max_id := @max_id + 1), 'community', '240111044331055835', '清华信息港停车场2', 'BOSIGAO', '', '1', '2', '1025', '2016-03-31 17:07:20', '1', '0', '0', '1', '1', '1', '999984');
+
+--
+-- 修改车辆放行的模块id   add by xq.tian  2016/12/20
+--
+DELETE FROM `eh_service_modules` WHERE `id` = '41500';
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
+VALUES ('20900', '车辆放行', '20000', '/20000/20900', '0', '2', '2', '0', UTC_TIMESTAMP());
+
+UPDATE `eh_service_module_privileges` SET `module_id` = '20900' WHERE `module_id` = '41500';

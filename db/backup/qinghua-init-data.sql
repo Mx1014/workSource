@@ -2346,3 +2346,12 @@ VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), '999984', '0', '0', '0
 SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance', '10003', 'zh_CN', '用户已添加');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parameters.error', '10001', 'zh_CN', '参数长度超过限制');
+
+--
+-- 修改车辆放行的模块id   add by xq.tian  2016/12/20
+--
+DELETE FROM `eh_service_modules` WHERE `id` = '41500';
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
+VALUES ('20900', '车辆放行', '20000', '/20000/20900', '0', '2', '2', '0', UTC_TIMESTAMP());
+
+UPDATE `eh_service_module_privileges` SET `module_id` = '20900' WHERE `module_id` = '41500';
