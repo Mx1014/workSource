@@ -49,7 +49,9 @@ public enum EntityType {
     RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName()),
     PARKING_CARD_REQUEST(EhParkingCardRequests.class.getSimpleName()),
     PARKING_LOT(EhParkingLots.class.getSimpleName()),
-    PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName());
+    PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
+    ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName());
+
     private String code;
     
     private EntityType(String code) {

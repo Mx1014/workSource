@@ -1,12 +1,43 @@
 package com.everhomes.techpark.expansion;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.stream.Collectors;
-
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.db.DbProvider;
+import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.enterprise.EnterpriseAttachment;
+import com.everhomes.enterprise.EnterpriseCommunityMap;
+import com.everhomes.enterprise.EnterpriseProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowService;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
+import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
+import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
+import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowServiceErrorCode;
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -15,61 +46,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
 
-import com.everhomes.community.Building;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.enterprise.EnterpriseAddress;
-import com.everhomes.enterprise.EnterpriseAttachment;
-import com.everhomes.enterprise.EnterpriseCommunityMap;
-import com.everhomes.enterprise.EnterpriseProvider;
-import com.everhomes.entity.EntityType;
-import com.everhomes.group.Group;
-import com.everhomes.group.GroupProvider;
-import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.listing.ListingLocator;
-import com.everhomes.listing.ListingQueryBuilderCallback;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
-import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
-import com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO;
-import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
-import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryDTO;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyRenewCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
-import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
-import com.everhomes.rest.techpark.expansion.LeasePromotionType;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
-import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
@@ -101,8 +83,20 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	
 	@Autowired
 	private UserProvider userProvider;
-	
-	@Override
+
+    @Autowired
+    private FlowService flowService;
+
+    @Autowired
+    private DbProvider dbProvider;
+
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+
+    @Autowired
+    private LocaleStringService localeStringService;
+
+    @Override
 	public ListEnterpriseDetailResponse listEnterpriseDetails(
 			ListEnterpriseDetailCommand cmd) {
 		
@@ -268,9 +262,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
-		enterpriseApplyEntryProvider.createApplyEntry(request);
-		
-		// 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
+
+        dbProvider.execute(status -> {
+            enterpriseApplyEntryProvider.createApplyEntry(request);
+            this.createFlowCase(request);
+            return true;
+        });
+
+        // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
 //		LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
 //		LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
 //		String phoneNumber = null;
@@ -339,7 +338,38 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		return true;
 	}
-	/**
+
+    private void createFlowCase(EnterpriseOpRequest request) {
+        Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), 111L, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+        if (flow != null) {
+            CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
+            flowCaseCmd.setApplyUserId(request.getApplyUserId());
+            flowCaseCmd.setFlowMainId(flow.getFlowMainId());
+            flowCaseCmd.setFlowVersion(flow.getFlowVersion());
+            flowCaseCmd.setReferId(request.getId());
+            flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
+            // flowCase摘要内容
+            flowCaseCmd.setContent(this.getBriefContent(request));
+
+            flowService.createFlowCase(flowCaseCmd);
+        } else {
+            LOGGER.error("There is no workflow enabled.");
+            throw errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "There is no workflow enabled.");
+        }
+    }
+
+    private String getBriefContent(EnterpriseOpRequest request) {
+        String locale = UserContext.current().getUser().getLocale();
+        Map<String, Object> map = new HashMap<>();
+        String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE, request.getApplyType() + "", locale, "");
+        map.put("applyType", applyType);
+        map.put("areaSize", request.getAreaSize());
+
+        return localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE,
+                ExpansionLocalStringCode.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
+    }
+
+    /**
 	 * 用户{userName}（手机号：{userPhone}）于{applyTime}提交了预约{applyType}申请：
  	 * 参观位置：{location}
  	 * 面积需求：{area}
@@ -373,7 +403,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		EnterpriseOpRequest request = enterpriseApplyEntryProvider.getEnterpriseOpRequestByBuildIdAndUserId(cmd.getId(), UserContext.current().getUser().getId());
 		
 		if(null == request){
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+			throw errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"You have not applied for admission");
 		}
@@ -532,7 +562,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if(LeasePromotionStatus.RENTAL.getCode() == cmd.getStatus()){
 			if(LeasePromotionStatus.RENTING.getCode() != leasePromotion.getStatus()){
 				LOGGER.error("Status can not be modified. cause:data status ="+ leasePromotion.getStatus());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Status can not be modified.");
 			}
 		}
@@ -548,7 +578,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if(ApplyEntryStatus.RESIDED_IN.getCode() == cmd.getStatus()){
 			if(ApplyEntryStatus.PROCESSING.getCode() != request.getStatus()){
 				LOGGER.error("Status can not be modified. cause:data status ="+ request.getStatus());
-				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+				throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 						"Status can not be modified.");
 			}
 		}
