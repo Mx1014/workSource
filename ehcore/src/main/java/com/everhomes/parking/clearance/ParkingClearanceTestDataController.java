@@ -74,7 +74,7 @@ public class ParkingClearanceTestDataController extends ControllerBase {
 
     private User testUser1;
     private Integer namespaceId = 999984;// 999984
-    private Long moduleId = 41500L;
+    private Long moduleId = 20900L;
     private Long orgId = 1008218L;// 1008218L
     private List<Long> parkingLotIds;
 

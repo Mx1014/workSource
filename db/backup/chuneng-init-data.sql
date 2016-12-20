@@ -801,6 +801,8 @@ update eh_launch_pad_items set action_data = '{"url":"https://biz.zuolin.com/zl-
 item_label = '送水', item_name= '送水'
 where id in (10641, 10645) and namespace_id = 999990;	
 	
+-- 修改主页banners图
+update eh_banners set poster_path='cs://1/image/aW1hZ2UvTVRwak4yUmpNV1V4TkdOaE56Vm1aR05oWmpReFlqTm1OalF6WVROall6TmpNZw',`order`=9 where namespace_id = 999990 and id in (11920,11919);
 	
 	
 	
