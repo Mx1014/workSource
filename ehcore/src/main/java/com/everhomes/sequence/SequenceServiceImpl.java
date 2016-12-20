@@ -1169,7 +1169,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhLaunchAdvertisements.class, Tables.EH_LAUNCH_ADVERTISEMENTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_LAUNCH_ADVERTISEMENTS.ID.max()).from(Tables.EH_LAUNCH_ADVERTISEMENTS).fetchOne().value1();
         });
-    }
+        
+        syncTableSequence(null, EhTechparkSyncdataBackup.class, Tables.EH_TECHPARK_SYNCDATA_BACKUP.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_TECHPARK_SYNCDATA_BACKUP.ID.max()).from(Tables.EH_TECHPARK_SYNCDATA_BACKUP).fetchOne().value1();
+        });    }
 
     @SuppressWarnings("rawtypes")
     private void syncTableSequence(Class keytableCls, Class pojoClass, String tableName, SequenceQueryCallback callback) {
