@@ -60,7 +60,8 @@ public class FlowGraphMessageAction extends FlowGraphAction {
 		if(timeoutAtTick == null) {
 			timeoutAtTick = 0l;
 		}
-		Long timeoutTick = DateHelper.currentGMTTime().getTime() + timeoutAtTick * 60*1000l;
+//		Long timeoutTick = DateHelper.currentGMTTime().getTime() + timeoutAtTick * 60*1000l;
+		Long timeoutTick = System.currentTimeMillis() + timeoutAtTick * 60 * 1000l;
 		ft.setTimeoutTick(new Timestamp(timeoutTick));
 		
 		ctx.getTimeouts().add(ft);
