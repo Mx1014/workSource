@@ -10,7 +10,7 @@ import java.util.List;
  * <ul>
  * <li>projectId: 项目id</li>
  * <li>projectType: 项目类型 </li>
- * <li>projectType: 项目名称</li>
+ * <li>projectName: 项目名称</li>
  * <li>parentId: 父级Id</li>
  * <li>projects: 子集，参考{@link com.everhomes.rest.acl.ProjectDTO}</li>
  * </ul>

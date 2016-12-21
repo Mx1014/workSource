@@ -9,6 +9,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
 import com.everhomes.rest.community.admin.*;
 import org.slf4j.Logger;
@@ -333,6 +334,7 @@ public class CommunityController extends ControllerBase {
 
     }
 
+
     /**
      * <b>URL: /community/updateCommunity</b>
      * <p>更新小区信息</p>
@@ -346,4 +348,58 @@ public class CommunityController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+
+    /**
+     * <b>URL: /community/listChildProjects</b>
+     * <p>查询小区的子项目</p>
+     */
+    @RequestMapping("listChildProjects")
+    @RestReturn(value=ProjectDTO.class, collection = true)
+    public RestResponse listChildProjects(ListChildProjectCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/createChildProjects</b>
+     * <p>创建小区的子项目</p>
+     */
+    @RequestMapping("createChildProjects")
+    @RestReturn(value=String.class)
+    public RestResponse createChildProjects(CreateChildProjectCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/updateChildProjects</b>
+     * <p>修改小区的子项目</p>
+     */
+    @RequestMapping("updateChildProjects")
+    @RestReturn(value=String.class)
+    public RestResponse updateChildProjects(UpdateChildProjectCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /community/deleteChildProjects</b>
+     * <p>删除小区的子项目</p>
+     */
+    @RequestMapping("deleteChildProjects")
+    @RestReturn(value=String.class)
+    public RestResponse deleteChildProjects(DeleteChildProjectCommand cmd) {
+        RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }
