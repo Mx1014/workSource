@@ -24,11 +24,14 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rentalv2.AmorpmFlag;
 import com.everhomes.rest.rentalv2.BillAttachmentDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
@@ -59,6 +62,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	private UserProvider userProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	@Autowired
+	private OrganizationService organizationService;
 	@Autowired
 	LocaleStringService localeStringService;
 
@@ -153,20 +158,14 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
-				"organization", RentalNotificationTemplateCode.locale, ""));
-		List<OrganizationMember> orgMembers = this.organizationProvider
-				.listOrganizationMembers(user.getId());
-
-		for (OrganizationMember member : orgMembers) {
-			if (member.getStatus().equals(OrganizationMemberStatus.ACTIVE.getCode())) {
-				Organization org = this.organizationProvider.findOrganizationById(member
-						.getOrganizationId());
-				if (StringUtils.isNotBlank(e.getKey()))
-					e.setValue(e.getKey() + "、" + org.getName());
-				else
-					e.setValue(org.getName());
-
-			}
+				"organization", RentalNotificationTemplateCode.locale, "")); 
+		List<OrganizationSimpleDTO>  organizaiotnDTOs =this.organizationService.listUserRelateOrgs(new ListUserRelatedOrganizationsCommand(),user);
+		 
+		for(OrganizationSimpleDTO org : organizaiotnDTOs ){ 
+			if (StringUtils.isNotBlank(e.getValue()))
+				e.setValue(e.getValue() + "、" + org.getName());
+			else
+				e.setValue(org.getName());	 
 		}
 		entities.add(e);
 

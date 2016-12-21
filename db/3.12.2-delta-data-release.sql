@@ -462,3 +462,6 @@ INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `de
 -- Added by Janson 20161220
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
 ( 'flow', 10006, 'zh_CN', '用户评价：${score}分', '用户评价：${score}分');
+
+-- 要上线的app版本 by sfyan 20161221
+update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
