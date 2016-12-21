@@ -1570,7 +1570,14 @@ public class FlowServiceImpl implements FlowService {
 				, ft.getBelongEntity(), FlowUserType.PROCESSOR.getCode());
 		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_ACTION, flowAction.getId(), selections);
 		String dataStr = parseActionTemplate(ctx, ft.getBelongTo(), flowAction.getRenderText());
+		
+		if(LOGGER.isDebugEnabled())
+			LOGGER.debug("flowtimeout tick message, text={}, size={}", dataStr, users.size());
+		
 		for(Long userId : users) {
+			
+			LOGGER.debug("flowtimeout tick message, text={}, userId={}", dataStr, userId);
+			
 			MessageDTO messageDto = new MessageDTO();
 			messageDto.setAppId(AppConstants.APPID_MESSAGING);
 			messageDto.setSenderUid(User.SYSTEM_UID);
