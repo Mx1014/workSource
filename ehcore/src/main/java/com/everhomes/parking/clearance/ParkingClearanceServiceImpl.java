@@ -313,10 +313,16 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         log.setApplyTime(Timestamp.from(Instant.now()));
         log.setOperatorId(currUserId());
 
-        long logId = clearanceLogProvider.createClearanceLog(log);
-        log.setId(logId);
-
-        this.createFlowCase(log);
+        boolean success = dbProvider.execute(status -> {
+            long logId = clearanceLogProvider.createClearanceLog(log);
+            log.setId(logId);
+            this.createFlowCase(log);
+            return true;
+        });
+        if (!success) {
+            LOGGER.error("some error.");
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "some error.");
+        }
         return toClearanceLogDTO(log);
     }
 
