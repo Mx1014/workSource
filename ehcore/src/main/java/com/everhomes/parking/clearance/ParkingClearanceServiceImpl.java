@@ -172,6 +172,18 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 cmd.getOrganizationId(),
                 APPLY_PRIVILEGE_ID
         );
+        // 上面的权限检查会放过超级管理员, 但是需求是不放过
+        checkUserNotInOperatorList(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT);
+    }
+
+    private void checkUserNotInOperatorList(Long parkingLotId, ParkingClearanceOperatorType operatorType) {
+        ParkingClearanceOperator applicant = clearanceOperatorProvider
+                .findByParkingLotIdAndUid(parkingLotId, currUserId(), operatorType.getCode());
+        if (applicant == null) {
+            LOGGER.error("Current user is not in operator list");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Current user is not in operator list");
+        }
     }
 
     // 给用户添加权限
@@ -360,15 +372,19 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         // checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         ActionType actionType = ActionType.fromCode(cmd.getActionType());
-        long privilegeId = -1;
-        // 没有权限时的提示消息
-        String message = null;
+
+        ParkingClearanceOperatorType operatorType = ParkingClearanceOperatorType.APPLICANT;// 需要检查的operatorType
+        long privilegeId = -1; // 需要检查的权限id
+        String message = null;// 没有权限时的提示消息
+
         if (actionType == ActionType.PARKING_CLEARANCE) {
+            operatorType = ParkingClearanceOperatorType.APPLICANT;
             privilegeId = APPLY_PRIVILEGE_ID;
             message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_MESSAGE_CODE, currLocale(), "");
         } else if (actionType == ActionType.PARKING_CLEARANCE_TASK){
             privilegeId = PROCESS_PRIVILEGE_ID;
+            operatorType = ParkingClearanceOperatorType.PROCESSOR;
             message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_TASK_MESSAGE_CODE, currLocale(), "");
         }
@@ -381,6 +397,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 try {
                     userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
                             cmd.getOrganizationId(), privilegeId);
+
+                    // 上面的权限检查会放过超级管理员, 但是需求是不放过
+                    checkUserNotInOperatorList(parkingLot.getId(), operatorType);
+
                     status = CheckAuthorityStatus.SUCCESS;
                     message = null;
                     break;// 只要有一个停车场的权限就放行

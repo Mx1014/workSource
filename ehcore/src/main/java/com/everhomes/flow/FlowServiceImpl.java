@@ -130,6 +130,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowEvaluateProvider flowEvaluateProvider;
     
+    @Autowired
+    private FlowScriptProvider flowScriptProvider;
+    
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
     private StringTemplateLoader templateLoader;
@@ -260,7 +263,7 @@ public class FlowServiceImpl implements FlowService {
 			if(flowNode == null) {
 				return null;
 			}
-			if(null == flowNode.getFlowMainId() || flowNode.getFlowMainId().equals(0l)) {
+			if(flowNode.getFlowMainId().equals(0l)) {
 				return null;
 			}
 			return getFlowByEntity(flowNode.getFlowMainId(), FlowEntityType.FLOW, ++loop);
@@ -269,7 +272,7 @@ public class FlowServiceImpl implements FlowService {
 			if(flowButton == null) {
 				return null;
 			}
-			if(null == flowButton.getFlowMainId() || flowButton.getFlowMainId().equals(0l)) {
+			if(flowButton.getFlowMainId().equals(0l)) {
 				Flow flow = getFlowByEntity(flowButton.getFlowNodeId(), FlowEntityType.FLOW_NODE, ++loop);
 				if(flow != null) {
 					flowButton.setFlowMainId(flow.getTopId());
@@ -287,7 +290,7 @@ public class FlowServiceImpl implements FlowService {
 				return null;
 			}
 			
-			if(flowAction.getFlowMainId() == null || flowAction.getFlowMainId().equals(0l)) {
+			if(flowAction.getFlowMainId().equals(0l)) {
 				Flow flow = getFlowByEntity(flowAction.getBelongTo(), FlowEntityType.fromCode(flowAction.getBelongEntity()), ++loop);
 				if(flow != null) {
 					flowAction.setFlowMainId(flow.getTopId());
@@ -303,12 +306,14 @@ public class FlowServiceImpl implements FlowService {
 			if(flowSel == null) {
 				return null;
 			}
-			if(flowSel.getFlowMainId() == null || flowSel.getFlowMainId().equals(0l)) {
+			if(flowSel.getFlowMainId().equals(0l)) {
 				Flow flow = getFlowByEntity(flowSel.getBelongTo(), FlowEntityType.fromCode(flowSel.getBelongEntity()), ++loop);
 				if(flow != null) {
 					flowSel.setFlowMainId(flow.getTopId());
 					flowUserSelectionProvider.updateFlowUserSelection(flowSel);
 				}
+			} else {
+				return getFlowByEntity(flowSel.getFlowMainId(), FlowEntityType.FLOW, ++loop);
 			}
 			
 		default:
@@ -621,6 +626,10 @@ public class FlowServiceImpl implements FlowService {
 	
 	private FlowActionDTO actionToDTO(FlowAction action) {
 		FlowActionDTO actionDTO = ConvertHelper.convert(action, FlowActionDTO.class);
+		if(actionDTO.getStatus() != null && actionDTO.getStatus().equals(FlowActionStatus.ENABLED.getCode())) {
+			actionDTO.setEnabled((byte)1);
+		}
+		
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(action.getId()
 				, FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
 		if(selections != null) {
@@ -700,16 +709,27 @@ public class FlowServiceImpl implements FlowService {
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
 			action.setTrackerApplier(actionInfo.getTrackerApplier());
 			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
-			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			
+			if(actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
+				action.setStatus(FlowActionStatus.ENABLED.getCode());	
+			} else {
+				action.setStatus(FlowActionStatus.DISABLED.getCode());
+			}
+			
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.createFlowAction(action);
 			
 		} else {
+			if(actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
+				action.setStatus(FlowActionStatus.ENABLED.getCode());	
+			} else {
+				action.setStatus(FlowActionStatus.DISABLED.getCode());
+			}
+			
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
 			action.setTrackerApplier(actionInfo.getTrackerApplier());
 			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
-			action.setStatus(FlowActionStatus.ENABLED.getCode());
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
 			
@@ -819,6 +839,7 @@ public class FlowServiceImpl implements FlowService {
 				sel.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
 				sel.setSelectType(sCmd.getFlowUserSelectionType());
 				sel.setStatus(FlowStatusType.VALID.getCode());
+				sel.setNamespaceId(UserContext.getCurrentNamespaceId());
 				updateFlowUserName(sel);
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
@@ -2504,14 +2525,17 @@ public class FlowServiceImpl implements FlowService {
 	
 	private List<String> getAllParams(String renderText) {
 		List<String> params = new ArrayList<>();
-        Matcher m = pParam.matcher(renderText);
-        while(m.find()) {
-//        	LOGGER.info("param=" + m.group(1));
-        	if(m.groupCount() > 0) {
-        		params.add(m.group(1));
-        	}
-        }
-        
+		try {
+			  Matcher m = pParam.matcher(renderText);
+		        while(m.find()) {
+		        	if(m.groupCount() > 0) {
+		        		params.add(m.group(1));
+		        	}
+		        }	
+		} catch(Exception ex) {
+			//TODO log ?
+		}
+      
         return params;
 	}
 	
@@ -2991,6 +3015,23 @@ public class FlowServiceImpl implements FlowService {
 		
 		return dto;
 		
+	}
+
+	@Override
+	public ListScriptsResponse listScripts(ListScriptsCommand cmd) {
+		ListScriptsResponse resp = new ListScriptsResponse();
+		List<FlowScriptDTO> scripts = new ArrayList<>();
+		resp.setScripts(scripts);
+		
+		List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(111l, null);
+		if(scs != null && scs.size() > 0) {
+			scs.forEach(s->{
+				FlowScriptDTO dto = ConvertHelper.convert(scs, FlowScriptDTO.class);
+				scripts.add(dto);
+			});
+		}
+		
+		return resp;
 	}
 	
 }

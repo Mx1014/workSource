@@ -44,6 +44,8 @@ import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.ListScriptsCommand;
+import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
@@ -492,6 +494,20 @@ public class FlowAdminController extends ControllerBase {
     @RestReturn(value=FlowEvaluateDetailDTO.class)
     public RestResponse getFlowEvaluate(@Valid FlowIdCommand cmd) {
         RestResponse response = new RestResponse(flowService.getFlowEvaluate(cmd.getFlowId()));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/flow/listScripts</b>
+     * <p> 获取工作流的评分信息 </p>
+     * @return
+     */
+    @RequestMapping("listScripts")
+    @RestReturn(value=ListScriptsResponse.class)
+    public RestResponse getFlowEvaluate(@Valid ListScriptsCommand cmd) {
+        RestResponse response = new RestResponse(flowService.listScripts(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
