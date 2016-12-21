@@ -1,5 +1,7 @@
 package com.everhomes.flow;
 
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
@@ -41,6 +43,8 @@ import freemarker.template.Template;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.support.TransactionCallback;
@@ -133,7 +137,11 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowScriptProvider flowScriptProvider;
     
+    @Autowired
+    BigCollectionProvider bigCollectionProvider;
+    
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
+    private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
     private StringTemplateLoader templateLoader;
     private Configuration templateConfig;
@@ -1061,6 +1069,24 @@ public class FlowServiceImpl implements FlowService {
 		
 		return dto;
 	}
+	
+	private void updateFlowVersion(Flow flow) {//TODO better for version increment
+		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flow.getId());
+		if(snapshotFlow != null) {
+			clearSnapshotGraph(snapshotFlow);
+			if(snapshotFlow.getFlowVersion() > flow.getFlowVersion()) {
+				flow.setFlowVersion(snapshotFlow.getFlowVersion() + 1);
+			}
+		}
+		
+        String key = String.format("flow:%d", flow.getId());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Long ver = redisTemplate.opsForValue().increment(key, flow.getFlowVersion());
+        if(ver == null || ver < flow.getFlowVersion()) {
+        	redisTemplate.opsForValue().set(key, String.valueOf(flow.getFlowVersion()));
+        }
+	}
 
 	@Override
 	public Boolean enableFlow(Long flowId) {
@@ -1079,14 +1105,7 @@ public class FlowServiceImpl implements FlowService {
 			return true;
 		}
 		
-		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flowId);
-		if(snapshotFlow != null) {
-			clearSnapshotGraph(snapshotFlow);
-			if(snapshotFlow.getFlowVersion() > flow.getFlowVersion()) {
-				flow.setFlowVersion(snapshotFlow.getFlowVersion() + 1);
-			}
-		}
-		
+		updateFlowVersion(flow);
 		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
 		flowNodes.sort((n1, n2) -> {
@@ -1480,7 +1499,7 @@ public class FlowServiceImpl implements FlowService {
 		int i = 0;
 		for(FlowNode fn : flowNodes) {
 			if(!fn.getNodeLevel().equals(i)) {
-				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error");	
+				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_LEVEL_ERR, "node_level error flowId=" + flowId + " ");	
 			}
 			
 			if(fn.getNodeName().equals("START")) {
