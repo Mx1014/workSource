@@ -2035,6 +2035,7 @@ public class FlowServiceImpl implements FlowService {
 				
 				if(flowCase.getStepCount().equals(eventLog.getStepCount())) {
 					nodeLogDTO.setIsCurrentNode((byte)1);
+					dto.setCurrNodeParams(currNode.getParams());
 					
 					FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
 							, currNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), flowUserType.getCode());
