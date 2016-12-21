@@ -50,12 +50,9 @@ public enum EntityType {
     PARKING_CARD_REQUEST(EhParkingCardRequests.class.getSimpleName()),
     PARKING_LOT(EhParkingLots.class.getSimpleName()),
     PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
-<<<<<<< HEAD
-    ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName());
-
-=======
+    ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
     PM_TASK(EhPmTasks.class.getSimpleName());
->>>>>>> bd4e5d4ca2dd41f356098bc22180a13deaf97699
+
     private String code;
     
     private EntityType(String code) {
