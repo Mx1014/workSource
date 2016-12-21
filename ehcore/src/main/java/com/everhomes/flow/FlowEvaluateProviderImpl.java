@@ -131,4 +131,17 @@ public class FlowEvaluateProviderImpl implements FlowEvaluateProvider {
     		
     	});
     }
+    
+    @Override
+    public void createFlowEvaluate(List<FlowEvaluate> objs) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEvaluates.class));
+    	for(FlowEvaluate obj : objs) {
+            long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowEvaluates.class));
+            obj.setId(id);
+            prepareObj(obj);
+    	}
+    	
+    	EhFlowEvaluatesDao dao = new EhFlowEvaluatesDao(context.configuration());
+    	dao.insert(objs.toArray(new FlowEvaluate[objs.size()]));
+    }
 }

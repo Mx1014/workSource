@@ -21,4 +21,6 @@ public interface FlowEvaluateProvider {
 	List<FlowEvaluate> findEvaluates(Long flowCaseId, Long flowMainId,
 			Integer flowVersion);
 
+	void createFlowEvaluate(List<FlowEvaluate> objs);
+
 }

@@ -335,7 +335,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("updateFlowNodeTracker")
     @RestReturn(value=FlowNodeDetailDTO.class)
-    public RestResponse updateFlowNodeReminder(@Valid UpdateFlowNodeTrackerCommand cmd) {
+    public RestResponse updateFlowNodeTracker(@Valid UpdateFlowNodeTrackerCommand cmd) {
         RestResponse response = new RestResponse(flowService.updateFlowNodeTracker(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

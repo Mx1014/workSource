@@ -19,6 +19,7 @@ public class FlowPostEvaluateCommand {
 	private Long     userId;
 	private Long     flowCaseId;
 	private Long flowNodeId;
+	private Long stepCount;
 	
 	@ItemType(FlowEvaluateItemStar.class)
 	List<FlowEvaluateItemStar> stars;
@@ -47,6 +48,12 @@ public class FlowPostEvaluateCommand {
 	}
 	public void setStars(List<FlowEvaluateItemStar> stars) {
 		this.stars = stars;
+	}
+	public Long getStepCount() {
+		return stepCount;
+	}
+	public void setStepCount(Long stepCount) {
+		this.stepCount = stepCount;
 	}
 	@Override
     public String toString() {
