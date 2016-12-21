@@ -21,6 +21,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStepType;
@@ -563,5 +564,13 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ListScriptsCommand cmd = new ListScriptsCommand();
     	ListScriptsResponse resp = flowService.listScripts(cmd);
     	Assert.assertTrue(resp.getScripts().size() > 0);
+    }
+    
+    @Test
+    public void testDelUserSelection() {
+    	Long id = 4365l;
+    	DeleteFlowUserSelectionCommand cmd = new DeleteFlowUserSelectionCommand();
+    	cmd.setUserSelectionId(id);
+    	flowService.deleteUserSelection(cmd);
     }
 }

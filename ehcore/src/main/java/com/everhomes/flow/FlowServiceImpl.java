@@ -263,8 +263,8 @@ public class FlowServiceImpl implements FlowService {
 			if(flowNode == null) {
 				return null;
 			}
-			if(null == flowNode.getFlowMainId() || flowNode.getFlowMainId().equals(0l)) {
-				return flowProvider.getFlowById(entityId);
+			if(flowNode.getFlowMainId().equals(0l)) {
+				return null;
 			}
 			return getFlowByEntity(flowNode.getFlowMainId(), FlowEntityType.FLOW, ++loop);
 		case FLOW_BUTTON:
@@ -272,7 +272,7 @@ public class FlowServiceImpl implements FlowService {
 			if(flowButton == null) {
 				return null;
 			}
-			if(null == flowButton.getFlowMainId() || flowButton.getFlowMainId().equals(0l)) {
+			if(flowButton.getFlowMainId().equals(0l)) {
 				Flow flow = getFlowByEntity(flowButton.getFlowNodeId(), FlowEntityType.FLOW_NODE, ++loop);
 				if(flow != null) {
 					flowButton.setFlowMainId(flow.getTopId());
@@ -290,7 +290,7 @@ public class FlowServiceImpl implements FlowService {
 				return null;
 			}
 			
-			if(flowAction.getFlowMainId() == null || flowAction.getFlowMainId().equals(0l)) {
+			if(flowAction.getFlowMainId().equals(0l)) {
 				Flow flow = getFlowByEntity(flowAction.getBelongTo(), FlowEntityType.fromCode(flowAction.getBelongEntity()), ++loop);
 				if(flow != null) {
 					flowAction.setFlowMainId(flow.getTopId());
@@ -306,12 +306,14 @@ public class FlowServiceImpl implements FlowService {
 			if(flowSel == null) {
 				return null;
 			}
-			if(flowSel.getFlowMainId() == null || flowSel.getFlowMainId().equals(0l)) {
+			if(flowSel.getFlowMainId().equals(0l)) {
 				Flow flow = getFlowByEntity(flowSel.getBelongTo(), FlowEntityType.fromCode(flowSel.getBelongEntity()), ++loop);
 				if(flow != null) {
 					flowSel.setFlowMainId(flow.getTopId());
 					flowUserSelectionProvider.updateFlowUserSelection(flowSel);
 				}
+			} else {
+				return getFlowByEntity(flowSel.getFlowMainId(), FlowEntityType.FLOW, ++loop);
 			}
 			
 		default:
