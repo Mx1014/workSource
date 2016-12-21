@@ -2503,14 +2503,17 @@ public class FlowServiceImpl implements FlowService {
 	
 	private List<String> getAllParams(String renderText) {
 		List<String> params = new ArrayList<>();
-        Matcher m = pParam.matcher(renderText);
-        while(m.find()) {
-//        	LOGGER.info("param=" + m.group(1));
-        	if(m.groupCount() > 0) {
-        		params.add(m.group(1));
-        	}
-        }
-        
+		try {
+			  Matcher m = pParam.matcher(renderText);
+		        while(m.find()) {
+		        	if(m.groupCount() > 0) {
+		        		params.add(m.group(1));
+		        	}
+		        }	
+		} catch(Exception ex) {
+			//TODO log ?
+		}
+      
         return params;
 	}
 	
