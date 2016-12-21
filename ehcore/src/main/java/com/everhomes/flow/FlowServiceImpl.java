@@ -2378,12 +2378,23 @@ public class FlowServiceImpl implements FlowService {
 	
 	
 	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
-		return resolvUserSelections(ctx, entityType, entityId, selections, 1);
+		// Remove dup users
+		List<Long> tmps = resolvUserSelections(ctx, entityType, entityId, selections, 1);
+		List<Long> rlts = new ArrayList<>();
+		Map<Long, Long> maps = new HashMap<Long, Long>();
+		for(Long l : tmps) {
+			if(!maps.containsKey(l)) {
+				maps.put(l, 1l);	
+				rlts.add(l);
+			}
+			
+		}
+		
+		return rlts;
 	}
 	
 	@Override
 	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
-		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
 		if(selections == null || loopCnt >= 5) {
 			return users;
