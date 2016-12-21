@@ -229,7 +229,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         if (flowCase != null) {
             dto.setFlowCaseId(flowCase.getId());
         }
-        dto.setModuleId(MODULE_ID);
         return dto;
     }
 
