@@ -261,7 +261,7 @@ public class FlowServiceImpl implements FlowService {
 				return null;
 			}
 			if(null == flowNode.getFlowMainId() || flowNode.getFlowMainId().equals(0l)) {
-				return null;
+				return flowProvider.getFlowById(entityId);
 			}
 			return getFlowByEntity(flowNode.getFlowMainId(), FlowEntityType.FLOW, ++loop);
 		case FLOW_BUTTON:
@@ -2985,6 +2985,15 @@ public class FlowServiceImpl implements FlowService {
 		
 		return dto;
 		
+	}
+
+	@Override
+	public ListScriptsResponse listScripts(ListScriptsCommand cmd) {
+		ListScriptsResponse resp = new ListScriptsResponse();
+		List<FlowScriptDTO> scripts = new ArrayList<>();
+		resp.setScripts(scripts);
+		
+		return resp;
 	}
 	
 }
