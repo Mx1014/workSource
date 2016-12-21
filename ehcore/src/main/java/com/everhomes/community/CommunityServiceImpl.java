@@ -9,6 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.community.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.Condition;
@@ -71,33 +73,6 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.BuildingServiceErrorCode;
-import com.everhomes.rest.community.BuildingStatus;
-import com.everhomes.rest.community.CommunityGeoPointDTO;
-import com.everhomes.rest.community.CommunityNotificationTemplateCode;
-import com.everhomes.rest.community.CommunityServiceErrorCode;
-import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
-import com.everhomes.rest.community.CreateResourceCategoryCommand;
-import com.everhomes.rest.community.GetBuildingCommand;
-import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
-import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.community.GetCommunityByUuidCommand;
-import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
-import com.everhomes.rest.community.ListBuildingCommand;
-import com.everhomes.rest.community.ListBuildingCommandResponse;
-import com.everhomes.rest.community.ListCommunitesByStatusCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
-import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
-import com.everhomes.rest.community.ListResourceCategoryCommand;
-import com.everhomes.rest.community.ResourceCategoryAssignmentDTO;
-import com.everhomes.rest.community.ResourceCategoryDTO;
-import com.everhomes.rest.community.ResourceCategoryErrorCode;
-import com.everhomes.rest.community.ResourceCategoryStatus;
-import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.ComOrganizationMemberDTO;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
@@ -2526,21 +2501,25 @@ public class CommunityServiceImpl implements CommunityService {
 		String name = cmd.getName();
 		checkResourceCategoryName(name);
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		
+
+		if(null == cmd.getType()){
+			cmd.setType(ResourceCategoryType.CATEGORY.getCode());
+		}
+
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		Long parentId = cmd.getParentId();
 		ResourceCategory category = null;
 		ResourceCategory parentCategory = null;
 		if(null == parentId || parentId == 0){
 			
-			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name);
+			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, 0L, name, cmd.getType());
 			checkResourceCategoryExsit(category);
 			category = new ResourceCategory();
 			category.setParentId(0L);
 		}else{
 			parentCategory = communityProvider.findResourceCategoryById(parentId);
 			checkResourceCategoryIsNull(parentCategory);
-			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, parentId, name);
+			category = communityProvider.findResourceCategoryByParentIdAndName(ownerId, ownerType, parentId, name,cmd.getType());
 			checkResourceCategoryExsit(category);
 			category = new ResourceCategory();
 			category.setPath(parentCategory.getPath());
@@ -2604,7 +2583,7 @@ public class CommunityServiceImpl implements CommunityService {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"ResourceType cannot be null.");
         }
-		
+
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
 		ResourceCategoryAssignment rca = communityProvider.findResourceCategoryAssignment(cmd.getResourceId(), cmd.getResourceType(), 
 				namespaceId);
@@ -2742,7 +2721,8 @@ public class CommunityServiceImpl implements CommunityService {
 		
 		return response;
 	}
-	
+
+
 	@Override
 	public List<ResourceCategoryDTO> listResourceCategories(ListResourceCategoryCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
@@ -2756,7 +2736,7 @@ public class CommunityServiceImpl implements CommunityService {
 //			path = resourceCategory.getPath();
 //		}
 		
-		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null)
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getParentId(), null, ResourceCategoryType.CATEGORY.getCode())
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
 				
@@ -2830,7 +2810,7 @@ public class CommunityServiceImpl implements CommunityService {
 			path = resourceCategory.getPath();
 		}
 		
-		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, path)
+		List<ResourceCategoryDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), null, path, ResourceCategoryType.CATEGORY.getCode())
 			.stream().map(r -> {
 				ResourceCategoryDTO dto = ConvertHelper.convert(r, ResourceCategoryDTO.class);
 				
@@ -2845,5 +2825,112 @@ public class CommunityServiceImpl implements CommunityService {
 		}
 		
 		return result;
+	}
+
+	@Override
+	public List<ProjectDTO> listChildProjects(ListChildProjectCommand cmd){
+		List<ProjectDTO> dtos = new ArrayList<>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<ResourceCategory> categorys = communityProvider.listResourceCategory(cmd.getProjectId(), cmd.getProjectType(),0L, null, ResourceCategoryType.OBJECT.getCode());
+		for (ResourceCategory category: categorys) {
+			ProjectDTO dto = new ProjectDTO();
+			dto.setProjectName(category.getName());
+			dto.setProjectId(category.getId());
+			dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+			List<ResourceCategoryAssignment> buildingCategorys = communityProvider.listResourceCategoryAssignment(category.getId(), namespaceId);
+			List<ProjectDTO> buildingProjects = new ArrayList<>();
+			for (ResourceCategoryAssignment buildingCategory: buildingCategorys) {
+				if(EntityType.fromCode(buildingCategory.getResourceType()) == EntityType.BUILDING){
+					Building building = communityProvider.findBuildingById(buildingCategory.getResourceId());
+					if(null != building){
+						ProjectDTO buildingProject = new ProjectDTO();
+						buildingProject.setProjectId(building.getId());
+						buildingProject.setProjectName(building.getName());
+						buildingProject.setProjectType(EntityType.BUILDING.getCode());
+						buildingProjects.add(buildingProject);
+					}
+				}
+			}
+			dto.setProjects(buildingProjects);
+			dtos.add(dto);
+
+		}
+
+		return dtos;
+	}
+
+	@Override
+	public void createChildProject(CreateChildProjectCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+		ResourceCategory project = new ResourceCategory();
+		project.setCreatorUid(user.getId());
+		project.setNamespaceId(namespaceId);
+		project.setStatus(ResourceCategoryStatus.ACTIVE.getCode());
+		project.setName(cmd.getName());
+		project.setOwnerId(cmd.getProjectId());
+		project.setOwnerType(cmd.getProjectType());
+		project.setParentId(0L);
+		project.setType(ResourceCategoryType.OBJECT.getCode());
+		this.dbProvider.execute((TransactionStatus status) ->  {
+			communityProvider.createResourceCategory(project);
+			if(null != cmd.getBuildingIds() && cmd.getBuildingIds().size() > 0){
+				for (Long buildingId: cmd.getBuildingIds()) {
+					ResourceCategoryAssignment projectAssignment = new ResourceCategoryAssignment();
+					projectAssignment.setNamespaceId(namespaceId);
+					projectAssignment.setCreatorUid(user.getId());
+					projectAssignment.setResourceCategryId(project.getId());
+					projectAssignment.setResourceId(buildingId);
+					projectAssignment.setResourceType(EntityType.BUILDING.getCode());
+					communityProvider.createResourceCategoryAssignment(projectAssignment);
+				}
+			}
+			return null;
+		});
+	}
+
+	@Override
+	public void updateChildProject(UpdateChildProjectCommand cmd){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+		ResourceCategory project = communityProvider.findResourceCategoryById(cmd.getId());
+		if(null != project){
+			this.dbProvider.execute((TransactionStatus status) ->  {
+				project.setName(cmd.getName());
+				project.setUpdateTime(new Timestamp(System.currentTimeMillis()));
+				communityProvider.updateResourceCategory(project);
+
+				List<ResourceCategoryAssignment> bulidingCategorys = communityProvider.listResourceCategoryAssignment(project.getId(),namespaceId);
+				for (ResourceCategoryAssignment bulidingCategory: bulidingCategorys) {
+					communityProvider.deleteResourceCategoryAssignmentById(bulidingCategory.getId());
+				}
+
+				if(null != cmd.getBuildingIds() && cmd.getBuildingIds().size() > 0){
+					for (Long buildingId: cmd.getBuildingIds()) {
+						ResourceCategoryAssignment projectAssignment = new ResourceCategoryAssignment();
+						projectAssignment.setNamespaceId(namespaceId);
+						projectAssignment.setCreatorUid(user.getId());
+						projectAssignment.setResourceCategryId(project.getId());
+						projectAssignment.setResourceId(buildingId);
+						projectAssignment.setResourceType(EntityType.BUILDING.getCode());
+						communityProvider.createResourceCategoryAssignment(projectAssignment);
+					}
+				}
+				return null;
+			});
+		}
+	}
+
+	@Override
+	public void deleteChildProject(DeleteChildProjectCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		this.dbProvider.execute((TransactionStatus status) -> {
+			communityProvider.deleteResourceCategoryById(cmd.getId());
+			List<ResourceCategoryAssignment> bulidingCategorys = communityProvider.listResourceCategoryAssignment(cmd.getId(), namespaceId);
+			for (ResourceCategoryAssignment bulidingCategory : bulidingCategorys) {
+				communityProvider.deleteResourceCategoryAssignmentById(bulidingCategory.getId());
+			}
+			return null;
+		});
 	}
 }

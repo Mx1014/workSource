@@ -3,27 +3,11 @@ package com.everhomes.community;
 
 import java.util.List;
 
+import com.everhomes.rest.acl.ProjectDTO;
+import com.everhomes.rest.community.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.community.BuildingDTO;
-import com.everhomes.rest.community.CreateResourceCategoryAssignmentCommand;
-import com.everhomes.rest.community.CreateResourceCategoryCommand;
-import com.everhomes.rest.community.GetBuildingCommand;
-import com.everhomes.rest.community.GetCommunitiesByIdsCommand;
-import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
-import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.community.GetCommunityByUuidCommand;
-import com.everhomes.rest.community.GetNearbyCommunitiesByIdCommand;
-import com.everhomes.rest.community.ListBuildingCommand;
-import com.everhomes.rest.community.ListBuildingCommandResponse;
-import com.everhomes.rest.community.ListCommunitesByStatusCommand;
-import com.everhomes.rest.community.ListCommunitesByStatusCommandResponse;
-import com.everhomes.rest.community.ListCommunitiesByCategoryCommand;
-import com.everhomes.rest.community.ListCommunitiesByKeywordCommandResponse;
-import com.everhomes.rest.community.ListResourceCategoryCommand;
-import com.everhomes.rest.community.ResourceCategoryDTO;
-import com.everhomes.rest.community.UpdateCommunityRequestStatusCommand;
 import com.everhomes.rest.community.admin.ApproveCommunityAdminCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressCommand;
 import com.everhomes.rest.community.admin.CommunityAuthUserAddressResponse;
@@ -156,4 +140,12 @@ public interface CommunityService {
 	List<ResourceCategoryDTO> listTreeResourceCategories(ListResourceCategoryCommand cmd);
 	
 	List<ResourceCategoryDTO> listTreeResourceCategoryAssignments(ListResourceCategoryCommand cmd);
+
+	List<ProjectDTO> listChildProjects(ListChildProjectCommand cmd);
+
+	void createChildProject(CreateChildProjectCommand cmd);
+
+	void updateChildProject(UpdateChildProjectCommand cmd);
+
+	void deleteChildProject(DeleteChildProjectCommand cmd);
 }

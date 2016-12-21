@@ -357,19 +357,20 @@ public class CommunityController extends ControllerBase {
     @RequestMapping("listChildProjects")
     @RestReturn(value=ProjectDTO.class, collection = true)
     public RestResponse listChildProjects(ListChildProjectCommand cmd) {
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(communityService.listChildProjects(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
     }
 
     /**
-     * <b>URL: /community/createChildProjects</b>
+     * <b>URL: /community/createChildProject</b>
      * <p>创建小区的子项目</p>
      */
-    @RequestMapping("createChildProjects")
+    @RequestMapping("createChildProject")
     @RestReturn(value=String.class)
-    public RestResponse createChildProjects(CreateChildProjectCommand cmd) {
+    public RestResponse createChildProject(CreateChildProjectCommand cmd) {
+        communityService.createChildProject(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -377,12 +378,13 @@ public class CommunityController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /community/updateChildProjects</b>
+     * <b>URL: /community/updateChildProject</b>
      * <p>修改小区的子项目</p>
      */
-    @RequestMapping("updateChildProjects")
+    @RequestMapping("updateChildProject")
     @RestReturn(value=String.class)
-    public RestResponse updateChildProjects(UpdateChildProjectCommand cmd) {
+    public RestResponse updateChildProject(UpdateChildProjectCommand cmd) {
+        communityService.updateChildProject(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -390,12 +392,13 @@ public class CommunityController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /community/deleteChildProjects</b>
+     * <b>URL: /community/deleteChildProject</b>
      * <p>删除小区的子项目</p>
      */
-    @RequestMapping("deleteChildProjects")
+    @RequestMapping("deleteChildProject")
     @RestReturn(value=String.class)
-    public RestResponse deleteChildProjects(DeleteChildProjectCommand cmd) {
+    public RestResponse deleteChildProject(DeleteChildProjectCommand cmd) {
+        communityService.deleteChildProject(cmd);
         RestResponse response =  new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
