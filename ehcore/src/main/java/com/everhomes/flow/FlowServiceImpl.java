@@ -1615,7 +1615,7 @@ public class FlowServiceImpl implements FlowService {
 		if(dto.getRemindTick() != null && dto.getRemindTick() > 0
 				&& dto.getRemindCount() != null && dto.getRemindCount() > 0) {
 			dto.setRemindCount(dto.getRemindCount()-1);
-			dto.setTimeoutAtTick(dto.getRemindTick());
+//			dto.setTimeoutAtTick(dto.getRemindTick());
 			ft.setId(null);
 			ft.setJson(dto.toString());
 			Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60*1000l;
