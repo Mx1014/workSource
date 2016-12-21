@@ -287,7 +287,8 @@ public class FlowProviderImpl implements FlowProvider {
 				}
 				query.addConditions(Tables.EH_FLOWS.OWNER_ID.eq(ownerId));	
 				query.addConditions(Tables.EH_FLOWS.OWNER_TYPE.eq(ownerType));	
-				query.addConditions(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode()));
+				query.addConditions( Tables.EH_FLOWS.STATUS.eq(FlowStatusType.RUNNING.getCode())
+						.or(Tables.EH_FLOWS.STATUS.eq(FlowStatusType.CONFIG.getCode())) );
 				query.addConditions(Tables.EH_FLOWS.FLOW_MAIN_ID.eq(0l));
 				query.addOrderBy(Tables.EH_FLOWS.RUN_TIME.desc());
 				

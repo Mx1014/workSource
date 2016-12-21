@@ -415,7 +415,7 @@ DELETE FROM eh_web_menu_scopes WHERE menu_id IN (40750) AND owner_type = 'EhName
 
 -- 资源预订工作流模板，add by wh, 20161219
 SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
 
 -- 资源预订工作流中文，added by wh ,2016-12-19
@@ -431,7 +431,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'content', 'zh_CN', '显示内容');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'license', 'zh_CN', '车牌');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'remark', 'zh_CN', '备注');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'attachment', 'zh_CN', '附件'); 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'attachment', 'zh_CN', '附件');
 
 -- 资源预订新增工作流菜单  add by sw 20161220
 INSERT INTO `eh_web_menus` VALUES ('40450', '工作流设置', '40400', NULL, 'react:/working-flow/flow-list/resource-reservation/40400', '0', '2', '/40000/40400/40450', 'park', '475', 40800);
@@ -441,4 +441,27 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40450, '', 'EhNamespaces', 1000000, 2);
 
+	
+	
+-- 要上线的app版本 by sfyan 20161220
+SET @app_version_id = (SELECT MAX(id) FROM `eh_app_version`);
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','0','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','0','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','1000000','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','1000000','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','999988','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','999988','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','999983','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','999983','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','999984','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','999984','2097156','2016-12-01 14:57:56');
 
+
+
+
+-- Added by Janson 20161220
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10006, 'zh_CN', '用户评价：${score}分', '用户评价：${score}分');
+
+-- 要上线的app版本 by sfyan 20161221
+update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
