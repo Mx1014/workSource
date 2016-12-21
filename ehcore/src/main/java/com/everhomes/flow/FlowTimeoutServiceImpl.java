@@ -55,7 +55,7 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
     	
     	if(ft.getId() > 0) {
     		final Job job = new Job(FlowTimeoutAction.class.getName(), new Object[]{String.valueOf(ft.getId()) });
-    		if(ft.getTimeoutTick().getTime() > (DateHelper.currentGMTTime().getTime()+10l) ) {
+    		if(ft.getTimeoutTick().getTime() > (System.currentTimeMillis()+10l) ) {
     			jesqueClientFactory.getClientPool().delayedEnqueue(queueDelay, job, ft.getTimeoutTick().getTime());	
     		} else {
     			jesqueClientFactory.getClientPool().enqueue(queueNoDelay, job);

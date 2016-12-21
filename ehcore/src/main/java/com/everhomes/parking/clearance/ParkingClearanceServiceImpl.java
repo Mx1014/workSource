@@ -93,6 +93,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private FlowService flowService;
 
     @Autowired
+    private FlowCaseProvider flowCaseProvider;
+
+    @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Autowired
@@ -222,6 +225,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     ParkingLocalStringCode.NONE_CODE, currLocale(), "");
             dto.setRemarks(remarksNoneValue);
         }
+        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(log.getId(), EntityType.PARKING_CLEARANCE_LOG.getCode(), MODULE_ID);
+        if (flowCase != null) {
+            dto.setFlowCaseId(flowCase.getId());
+        }
         return dto;
     }
 
@@ -306,12 +313,16 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         log.setApplyTime(Timestamp.from(Instant.now()));
         log.setOperatorId(currUserId());
 
-        long logId = clearanceLogProvider.createClearanceLog(log);
-        log.setId(logId);
-
-        Long flowCaseId = this.createFlowCase(log);
-        // log.setFlowCaseId(flowCaseId);
-
+        boolean success = dbProvider.execute(status -> {
+            long logId = clearanceLogProvider.createClearanceLog(log);
+            log.setId(logId);
+            this.createFlowCase(log);
+            return true;
+        });
+        if (!success) {
+            LOGGER.error("some error.");
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "some error.");
+        }
         return toClearanceLogDTO(log);
     }
 
@@ -610,9 +621,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             map.put("identifierToken", userIdentifier.getIdentifierToken());
             detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
                     ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR, currLocale(), map, "");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("The processor detail json is: {}", detailJson);
+            }
         } else {
             detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
                     ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT, currLocale(), map, "");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("The applicant detail json is: {}", detailJson);
+            }
         }
         return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
     }

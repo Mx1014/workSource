@@ -1634,7 +1634,7 @@ public class FlowServiceImpl implements FlowService {
 		if(dto.getRemindTick() != null && dto.getRemindTick() > 0
 				&& dto.getRemindCount() != null && dto.getRemindCount() > 0) {
 			dto.setRemindCount(dto.getRemindCount()-1);
-			dto.setTimeoutAtTick(dto.getRemindTick());
+//			dto.setTimeoutAtTick(dto.getRemindTick());
 			ft.setId(null);
 			ft.setJson(dto.toString());
 			Long timeoutTick = DateHelper.currentGMTTime().getTime() + dto.getRemindTick() * 60*1000l;
@@ -2054,6 +2054,7 @@ public class FlowServiceImpl implements FlowService {
 				
 				if(flowCase.getStepCount().equals(eventLog.getStepCount())) {
 					nodeLogDTO.setIsCurrentNode((byte)1);
+					dto.setCurrNodeParams(currNode.getParams());
 					
 					FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
 							, currNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), flowUserType.getCode());
