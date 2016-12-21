@@ -93,6 +93,9 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private FlowService flowService;
 
     @Autowired
+    private FlowCaseProvider flowCaseProvider;
+
+    @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Autowired
@@ -222,6 +225,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     ParkingLocalStringCode.NONE_CODE, currLocale(), "");
             dto.setRemarks(remarksNoneValue);
         }
+        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(log.getId(), EntityType.PARKING_CLEARANCE_LOG.getCode(), MODULE_ID);
+        if (flowCase != null) {
+            dto.setFlowCaseId(flowCase.getId());
+        }
         return dto;
     }
 
@@ -309,9 +316,7 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         long logId = clearanceLogProvider.createClearanceLog(log);
         log.setId(logId);
 
-        Long flowCaseId = this.createFlowCase(log);
-        // log.setFlowCaseId(flowCaseId);
-
+        this.createFlowCase(log);
         return toClearanceLogDTO(log);
     }
 

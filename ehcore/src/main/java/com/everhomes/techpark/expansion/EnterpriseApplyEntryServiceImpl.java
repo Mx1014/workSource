@@ -351,11 +351,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             flowCaseCmd.setContent(this.getBriefContent(request));
 
             flowService.createFlowCase(flowCaseCmd);
+        } else {
+            LOGGER.error("There is no expansion workflow enabled for ownerId: {}", request.getCommunityId());
+            // throw errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "There is no workflow enabled.");
         }
-        // else {
-        //     LOGGER.error("There is no workflow enabled.");
-        //     throw errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "There is no workflow enabled.");
-        // }
     }
 
     private String getBriefContent(EnterpriseOpRequest request) {
