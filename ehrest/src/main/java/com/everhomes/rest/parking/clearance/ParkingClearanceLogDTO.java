@@ -9,7 +9,6 @@ import java.sql.Timestamp;
  * <ul>
  *     <li>id: id</li>
  *     <li>flowCaseId: 工作流caseId</li>
- *     <li>moduleId: 模块id</li>
  *     <li>applicant: 申请人</li>
  *     <li>identifierToken: 申请人手机号</li>
  *     <li>plateNumber: 车牌号</li>
@@ -23,7 +22,6 @@ public class ParkingClearanceLogDTO {
 
     private Long id;
     private Long flowCaseId;
-    private Long moduleId;
     private String applicant;
     private String identifierToken;
     private String plateNumber;
@@ -78,14 +76,6 @@ public class ParkingClearanceLogDTO {
 
     public void setApplyTime(Timestamp applyTime) {
         this.applyTime = applyTime;
-    }
-
-    public Long getModuleId() {
-        return moduleId;
-    }
-
-    public void setModuleId(Long moduleId) {
-        this.moduleId = moduleId;
     }
 
     public Timestamp getClearanceTime() {
