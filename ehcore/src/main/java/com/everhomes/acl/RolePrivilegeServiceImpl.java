@@ -1575,6 +1575,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					}else{
 						dto.setResourceName(community.getName());
 					}
+				}else if(EntityType.RESOURCE_CATEGORY == EntityType.fromCode(assignment.getOwnerType())){
+					ResourceCategory category = communityProvider.findResourceCategoryById(assignment.getId());
+					if(null == category){
+						LOGGER.debug("resource category is null...");
+					}else{
+						if(EntityType.COMMUNITY == EntityType.fromCode(category.getOwnerType())){
+							Community community = communityProvider.findCommunityById(dto.getResourceId());
+							if(null == community){
+								LOGGER.debug("community is null...");
+							}else{
+								dto.setResourceName(community.getName() + "-" + category.getName());
+							}
+						}
+					}
 				}
 				dto.setServiceModules(new ArrayList<>());
 				if(0L == assignment.getModuleId()){
