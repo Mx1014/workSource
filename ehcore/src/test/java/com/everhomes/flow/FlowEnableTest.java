@@ -559,6 +559,13 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(dto.getNodes().get(1).getLogs().size() == 1);
     	Assert.assertTrue(dto.getNodes().get(1).getIsCurrentNode().equals((byte)1));
     	Assert.assertTrue(dto.getEntities().size() > 0);
+
+    	setTestContext(testUser3.getId());
+    	dto = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.SUPERVISOR);
+    	Assert.assertTrue(dto.getNodes().size() == 5);
+    	Assert.assertTrue(dto.getNodes().get(1).getLogs().size() == 1);
+    	Assert.assertTrue(dto.getNodes().get(1).getIsCurrentNode().equals((byte)1));
+    	Assert.assertTrue(dto.getEntities().size() > 0);
     }
     
     @Test
