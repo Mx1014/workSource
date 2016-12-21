@@ -2169,6 +2169,7 @@ public class FlowServiceImpl implements FlowService {
 			stepDTO.setFlowCaseId(flowCase.getId());
 			stepDTO.setFlowMainId(flowCase.getFlowMainId());
 			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
 			if(cmd.getStepCount() == null) {
 				cmd.setStepCount(flowCase.getStepCount());
 			}
@@ -2970,9 +2971,10 @@ public class FlowServiceImpl implements FlowService {
 			if(evaMap.containsKey(item.getId())) {
 				rltDTO.setStar(evaMap.get(item.getId()).getStar());	
 			}
-			
+			results.add(rltDTO);
 		}
 		
+		dto.setHasResults((byte)0);
 		if(items.size() == evaMap.size()) {
 			dto.setHasResults((byte)1);
 		}
