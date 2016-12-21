@@ -862,7 +862,7 @@ public class FlowServiceImpl implements FlowService {
 		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
 		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
 		resp.setSelections(selections);
-		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
 		if(seles != null && seles.size() > 0) {
 			seles.stream().forEach((sel) -> {
 				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
@@ -1375,7 +1375,7 @@ public class FlowServiceImpl implements FlowService {
 		
 		//step8 copy flow's supervisor
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flow.getFlowMainId()
-				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), 0);
 		if(selections != null && selections.size() > 0) {
 			for(FlowUserSelection sel: selections) {
 				sel.setBelongTo(flow.getFlowMainId());
