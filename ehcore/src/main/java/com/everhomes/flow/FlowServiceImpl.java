@@ -1815,7 +1815,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 	}
 	
-	private void updateCaseDTO(FlowCase flowCase, FlowNode flowNode, FlowCaseDTO dto) {
+	private void updateCaseDTO(FlowCase flowCase, FlowNode flowNode, FlowCaseDTO dto, int type) {
 		dto.setAllowApplierUpdate(flowNode.getAllowApplierUpdate());
 		dto.setCurrNodeParams(flowNode.getParams());
 		dto.setFlowNodeName(flowNode.getNodeName());
@@ -1841,7 +1841,7 @@ public class FlowServiceImpl implements FlowService {
 		if(evas != null && evas.size() > 0) {
 			dto.setEvaluateScore(new Integer(evas.get(0).getStar()));
 		} else {
-			 if(!snapshotFlow.getNeedEvaluate().equals((byte)0) 
+			 if(1 == type && !snapshotFlow.getNeedEvaluate().equals((byte)0) 
 					 && flowNode.getNodeLevel() >= snapshotFlow.getEvaluateStart() 
 					 && flowNode.getNodeLevel() <= snapshotFlow.getEvaluateEnd() ) {
 				 dto.setNeedEvaluate((byte)1);
@@ -1870,14 +1870,15 @@ public class FlowServiceImpl implements FlowService {
 		
 		List<FlowCaseDetail> details = null;
 		
+		int type = 0;
 		if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.APPLIER.getCode())) {
-//			type = 1;
+			type = 1;
 			details = flowCaseProvider.findApplierFlowCases(locator, count, cmd);
 		} else if(cmd.getFlowCaseSearchType().equals(FlowCaseSearchType.ADMIN.getCode())) {
-//			type = 2;
+			type = 2;
 			details = flowCaseProvider.findAdminFlowCases(locator, count, cmd);
 		} else {
-//			type = 3;
+			type = 3;
 			details = flowEventLogProvider.findProcessorFlowCases(locator, count, cmd);
 			
 		}
@@ -1888,7 +1889,7 @@ public class FlowServiceImpl implements FlowService {
 				FlowCaseDTO dto = ConvertHelper.convert(detail, FlowCaseDTO.class);
 				FlowNode flowNode = flowNodeProvider.getFlowNodeById(dto.getCurrentNodeId());
 				if(flowNode != null) {
-					updateCaseDTO(detail, flowNode, dto);	
+					updateCaseDTO(detail, flowNode, dto, type);	
 				}
 				dtos.add(dto);
 			}	
@@ -2026,12 +2027,12 @@ public class FlowServiceImpl implements FlowService {
 				if(trackerLogs != null) {
 					trackerLogs.forEach((t)-> {
 						FlowEventLogDTO eventDTO = ConvertHelper.convert(t, FlowEventLogDTO.class);
+						if(FlowStepType.EVALUATE_STEP.getCode().equals(t.getButtonFiredStep())) {
+							eventDTO.setIsEvaluate((byte)1);
+						}
 						if(eventDTO.getLogContent() != null) {
 							String dateStr = sdf1.format(new Date(eventDTO.getCreateTime().getTime()));
 							eventDTO.setLogContent(dateStr + " " + eventDTO.getLogContent());
-						}
-						if(FlowStepType.EVALUATE_STEP.getCode().equals(t.getButtonFiredStep())) {
-							eventDTO.setIsEvaluate((byte)1);
 						}
 						nodeLogDTO.getLogs().add(eventDTO);			
 					});
@@ -2161,6 +2162,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		tracker.setTrackerApplier(1l);
 		tracker.setTrackerProcessor(1l);	
+		flowEventLogProvider.createFlowEventLog(tracker);
 		
 		if(snapshotFlow.getEvaluateStep() != null 
 				&& snapshotFlow.getEvaluateStep().equals(FlowStepType.APPROVE_STEP.getCode())) {

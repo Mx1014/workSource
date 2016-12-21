@@ -1175,7 +1175,7 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	Assert.assertTrue(flowButton != null);
     	
     	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
-    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.APPLIER.getCode());
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
     	
@@ -1217,6 +1217,9 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	evaInfo = flowService.getEvaluateInfo(flowCaseId);
     	Assert.assertTrue(evaInfo.getHasResults() > 0);
+    	
+    	FlowCaseDetailDTO detailDTO = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
+    	Assert.assertTrue(detailDTO.getNodes().size() == 5);
     	
     }
 }
