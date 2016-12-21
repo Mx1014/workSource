@@ -27,7 +27,6 @@ import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.server.schema.Tables;
@@ -352,10 +351,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             flowCaseCmd.setContent(this.getBriefContent(request));
 
             flowService.createFlowCase(flowCaseCmd);
-        } else {
-            LOGGER.error("There is no workflow enabled.");
-            throw errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "There is no workflow enabled.");
         }
+        // else {
+        //     LOGGER.error("There is no workflow enabled.");
+        //     throw errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "There is no workflow enabled.");
+        // }
     }
 
     private String getBriefContent(EnterpriseOpRequest request) {
