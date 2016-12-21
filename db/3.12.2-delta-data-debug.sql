@@ -150,7 +150,7 @@ INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`)
 
 -- 资源预订工作流模板，add by wh, 20161219
 SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
 
 -- 资源预订工作流中文，added by wh ,2016-12-19
@@ -176,3 +176,10 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 VALUES ((@max_id := @max_id + 1), 'community', '240111044331055835', '清华信息港停车场1', 'BOSIGAO', '', '1', '2', '1025', '2016-03-31 17:07:20', '1', '0', '0', '1', '1', '1', '999984');
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `is_support_recharge`, `namespace_id`)
 VALUES ((@max_id := @max_id + 1), 'community', '240111044331055835', '清华信息港停车场2', 'BOSIGAO', '', '1', '2', '1025', '2016-03-31 17:07:20', '1', '0', '0', '1', '1', '1', '999984');
+
+-- scripts support, by Janson 20161221
+SET @id := (SELECT MAX(id) FROM eh_flow_scripts);
+INSERT INTO `eh_flow_scripts`(`id`,`namespace_id`,`owner_id`,`owner_type`,`module_id`,`module_type`,`name`,`script_type`,`script_cls`,`flow_step_type`,`step_type`)
+VALUES ((@id := @id+1), '0', '11', 'ENTERPRISE', '111', 'any-module', 'test-dummpy', 'prototype', 'com.everhomes.flow.FlowScriptFireDummy', 'approve_step', 'step_enter'
+);
+

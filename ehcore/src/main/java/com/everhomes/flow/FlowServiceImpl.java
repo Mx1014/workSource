@@ -130,6 +130,9 @@ public class FlowServiceImpl implements FlowService {
     @Autowired
     private FlowEvaluateProvider flowEvaluateProvider;
     
+    @Autowired
+    private FlowScriptProvider flowScriptProvider;
+    
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     
     private StringTemplateLoader templateLoader;
@@ -2992,6 +2995,14 @@ public class FlowServiceImpl implements FlowService {
 		ListScriptsResponse resp = new ListScriptsResponse();
 		List<FlowScriptDTO> scripts = new ArrayList<>();
 		resp.setScripts(scripts);
+		
+		List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(111l, null);
+		if(scs != null && scs.size() > 0) {
+			scs.forEach(s->{
+				FlowScriptDTO dto = ConvertHelper.convert(scs, FlowScriptDTO.class);
+				scripts.add(dto);
+			});
+		}
 		
 		return resp;
 	}
