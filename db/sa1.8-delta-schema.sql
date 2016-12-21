@@ -35,17 +35,10 @@ CREATE TABLE `eh_service_alliance_invest_requests` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
-ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `display_destination` TINYINT DEFAULT '0' COMMENT '0: both, 1: client only, 2: browner only';
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `display_destination` TINYINT DEFAULT '0' COMMENT '0: both, 1: client only, 2: browser only';
 
-CREATE TABLE `eh_service_alliance_attachments` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `service_alliance_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'owner id',
-  `name` VARCHAR(128),
-  `file_size` INTEGER NOT NULL DEFAULT '0',
-  `content_type` VARCHAR(32) DEFAULT NULL COMMENT 'attachment object content type',
-  `content_uri` VARCHAR(1024) DEFAULT NULL COMMENT 'attachment object link info on storage',
-  `download_count` INTEGER NOT NULL DEFAULT '0',
-  `creator_uid` BIGINT NOT NULL DEFAULT '0',
-  `create_time` DATETIME NOT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `attachment_type` TINYINT DEFAULT '0' COMMENT '0: banner; 1: file attachment';
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `name` VARCHAR(128);
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `file_size` INTEGER NOT NULL DEFAULT '0';
+ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `download_count` INTEGER NOT NULL DEFAULT '0';
+

@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li> parentId: 父id</li>
  *  <li> logoUrl: 类型logo的url地址</li>
  *  <li> displayMode: 显示类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode}</li>
+ *  <li> displayDestination: 展示端 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination}</li>
  * </ul>
  */
 public class UpdateServiceAllianceCategoryCommand {
@@ -28,7 +29,17 @@ public class UpdateServiceAllianceCategoryCommand {
 	private String logoUrl;
 
     private Byte displayMode;
-	
+
+	private Byte displayDestination;
+
+	public Byte getDisplayDestination() {
+		return displayDestination;
+	}
+
+	public void setDisplayDestination(Byte displayDestination) {
+		this.displayDestination = displayDestination;
+	}
+
 	public Long getCategoryId() {
 		return categoryId;
 	}

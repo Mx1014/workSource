@@ -46,6 +46,14 @@ public class ServiceAlliances extends EhServiceAlliances {
     	NewServiceAllianceCustomField.TEMPLATETYPE.setStringValue(this, templateType);
     }
 
+	public Long getJumpType() {
+		return NewServiceAllianceCustomField.JUMPTYPE.getIntegralValue(this);
+	}
+
+	public void setJumpType(Long jumpType) {
+		NewServiceAllianceCustomField.JUMPTYPE.setIntegralValue(this, jumpType);
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

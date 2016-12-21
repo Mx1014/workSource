@@ -31,6 +31,7 @@ import com.everhomes.util.StringHelper;
  *  <li>type:类型  </li>
  *  <li>email: 邮箱地址</li>
  *  <li>templateType : 模板类型</li>
+ *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -79,6 +80,8 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String templateType;
 	
 	private String email;
+
+	private Long jumpType;
 	
 	public Long getId() {
 		return id;
@@ -254,6 +257,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setEmail(String email) {
 		this.email = email;
+	}
+
+	public Long getJumpType() {
+		return jumpType;
+	}
+
+	public void setJumpType(Long jumpType) {
+		this.jumpType = jumpType;
 	}
 
 	@Override
