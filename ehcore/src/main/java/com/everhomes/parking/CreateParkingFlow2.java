@@ -93,12 +93,12 @@ public class CreateParkingFlow2 {
 		//support auto step
 		UpdateFlowNodeCommand updateFlowCmd = new UpdateFlowNodeCommand();
 		updateFlowCmd.setFlowNodeId(node1.getId());
-		updateFlowCmd.setParams("{\"nodeType\":\"QUEUEING\"}");
+		updateFlowCmd.setParams("{\"nodeType\":\"AUDITING\"}");
 		flowService.updateFlowNode(updateFlowCmd);
 
 		UpdateFlowNodeCommand updateFlowCmd2 = new UpdateFlowNodeCommand();
 		updateFlowCmd2.setFlowNodeId(node2.getId());
-		updateFlowCmd2.setParams("{\"nodeType\":\"PROCESSING\"}");
+		updateFlowCmd2.setParams("{\"nodeType\":\"QUEUEING\"}");
 		flowService.updateFlowNode(updateFlowCmd2);
 
 		UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
@@ -194,7 +194,7 @@ public class CreateParkingFlow2 {
 		flowService.updateFlowButton(buttonCmd);
 
 		FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node3.getId(), FlowConstants.FLOW_CONFIG_VER
-				, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
+				, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.APPLIER.getCode());
 		flowButton3.setStatus(FlowButtonStatus.ENABLED.getCode());
 		flowButtonProvider.updateFlowButton(flowButton3);
 
