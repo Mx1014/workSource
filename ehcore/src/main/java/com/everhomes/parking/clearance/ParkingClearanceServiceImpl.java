@@ -621,9 +621,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             map.put("identifierToken", userIdentifier.getIdentifierToken());
             detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
                     ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR, currLocale(), map, "");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("The processor detail json is: {}", detailJson);
+            }
         } else {
             detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
                     ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT, currLocale(), map, "");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("The applicant detail json is: {}", detailJson);
+            }
         }
         return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
     }
