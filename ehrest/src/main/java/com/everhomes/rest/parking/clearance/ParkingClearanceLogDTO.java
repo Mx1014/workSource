@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 /**
  * <ul>
  *     <li>id: id</li>
+ *     <li>flowCaseId: 工作流caseId</li>
  *     <li>applicant: 申请人</li>
  *     <li>identifierToken: 申请人手机号</li>
  *     <li>plateNumber: 车牌号</li>
@@ -20,6 +21,7 @@ import java.sql.Timestamp;
 public class ParkingClearanceLogDTO {
 
     private Long id;
+    private Long flowCaseId;
     private String applicant;
     private String identifierToken;
     private String plateNumber;
@@ -50,6 +52,14 @@ public class ParkingClearanceLogDTO {
 
     public void setIdentifierToken(String identifierToken) {
         this.identifierToken = identifierToken;
+    }
+
+    public Long getFlowCaseId() {
+        return flowCaseId;
+    }
+
+    public void setFlowCaseId(Long flowCaseId) {
+        this.flowCaseId = flowCaseId;
     }
 
     public String getPlateNumber() {
