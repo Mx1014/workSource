@@ -17,6 +17,7 @@ import com.everhomes.discover.ItemType;
 public class FlowEvaluateDTO {
     private Integer     namespaceId;
     private Long     flowCaseId;
+    private Byte hasResults;
 
     @ItemType(FlowEvaluateResultDTO.class)
     List<FlowEvaluateResultDTO> results;
@@ -43,6 +44,14 @@ public class FlowEvaluateDTO {
 
 	public void setResults(List<FlowEvaluateResultDTO> results) {
 		this.results = results;
+	}
+
+	public Byte getHasResults() {
+		return hasResults;
+	}
+
+	public void setHasResults(Byte hasResults) {
+		this.hasResults = hasResults;
 	}
 
 	@Override

@@ -2346,3 +2346,40 @@ VALUES ((@launch_pad_item_id := @launch_pad_item_id + 1), '999984', '0', '0', '0
 SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parking.clearance', '10003', 'zh_CN', '用户已添加');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'parameters.error', '10001', 'zh_CN', '参数长度超过限制');
+
+
+--  图片修改
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwaE16azVaREE0WmpkaFltRmhOVFJrTW1ZMU56WTFZVEJrTTJOa1lqRmlPQQ"  where namespace_id=999984 and item_label="云服务";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwallXRTNNamcwTWpjMU1UaGpOMk14TURrNFlqSXpOamxtT0RRd09XWm1OUQ"  where namespace_id=999984 and item_label="产品测试";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvNVlUaG1abVl3WlRObU5qRTJNVGhqTXpJd05XTTBZVFEwT0RGaE4ySXpPQQ"  where namespace_id=999984 and item_label="人力咨询";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvNE16UTFaakZtWlRBeE5ETmhZVEkxT0ROa1pEVXdNall5WkRObU0yUmlOQQ"  where namespace_id=999984 and item_label="会议室预约";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMk5tWm1PVEl5TVRoak56WTNabU13T0RFMk9UWTFZVEl6TURjeFpURmpZZw"  where namespace_id=999984 and item_label="供应链";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwa1lqZzJNRFkyTmpBeE5EVXlNR0V4TXpJM05ERTRNV1EzTVRSallqZzJZdw"  where namespace_id=999984 and item_label="保洁服务";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwaU9UWmtZVEprT1dKa1pEUXpaRGs0TVdFd05tRTNaakppT0RFeVlqWmtZZw"  where namespace_id=999984 and item_label="停车充值";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwbE9UWTBObU0xTjJFM09HWXpNak5tT0RWalpUTXhOV0ptT0dJMVpHWXlNdw"  where namespace_id=999984 and item_label="车辆放行";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwaVpUVmhZV1ppTlRnM016UXlZMkZtWkdGbFpEUmlORFk1WTJWbVpEVXlZZw"  where namespace_id=999984 and item_label="双创服务";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvd1pqaGxOVEl4WldZMlpUbGpNRGs1TURsallUQTFNR0kzWVdZME5UTmxPUQ"  where namespace_id=999984 and item_label="园区入驻";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvd01qa3haREZpTURVMU5UQmxZbUppWXpnMFpUZzNPV1psTW1aalptUTFNQQ"  where namespace_id=999984 and item_label="国际合作";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwak9HSmxabUl5T0RkbU9HRTBNMk0xWkRjNE1HTXpOak13TURCak9XSm1Ndw"  where namespace_id=999984 and item_label="我有项目";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvME4ySmlaamN3WkdGaU1qSmpOREkyTlRVNVpEWmtOamN5Wm1Fd1lUZzJPUQ"  where namespace_id=999984 and item_label="我要投资";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvM016QTBPV05oTnpJME1XWmlPV0V3WXpKaVpXUXlZVFV5WmpNeVl6WTJNZw"  where namespace_id=999984 and item_label="我要融资";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvNVpXUTJOalUzT1dRNU16SmxOMkl3TVRSa09XVXpOV1EzT1RVeE16WXlPQQ"  where namespace_id=999984 and item_label="打卡考勤";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvellqSm1PV1V6WVRObE16VXdaalE1TXpJelpqQXlNV0kyWmpOaU9UTmtOdw"  where namespace_id=999984 and item_label="投诉建议";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvME9UTXdOV0kzTURJNU9XWXdPV0UxWkRZMk5HWmxOalppT0RNd1ptRmpOZw"  where namespace_id=999984 and item_label="星空孵化";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwbU1qQTJPVEJoWlRZek1XUTFZV1kxWlRkbE56Y3daV1poTXpZek1qTTFZUQ"  where namespace_id=999984 and item_label="更多";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwak1UVmxOR0l6WldVM016ZzBZVEEyWkRnek0yUmhZekUzTURWaVlqazBZZw"  where namespace_id=999984 and item_label="水木之家";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvNU56ZGhNRGc1WmpObU9UVmhOak14TXpneE5Ea3dORGMyT1dFd01EWTFNdw"  where namespace_id=999984 and item_label="法律服务";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwa05XWmhOell4WVdFMVpUUTRaamRoWVRWa1pqazBZMlUwWm1VMll6RmtaQQ"  where namespace_id=999984 and item_label="物业报修";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvM016RmxZV1l5WXprMVlqQXpZalZtTURNM1pXSmlPV014WmpCak56UXpPUQ"  where namespace_id=999984 and item_label="知识产权";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwbFl6UmtZamd5WVRjMk1URXdPRFZoTkRCbE56UTVZekE1TldVMk16ZGtaZw"  where namespace_id=999984 and item_label="研发平台";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwbFptRm1NREl6WkdFM05tUmtZalZoTkRkaU9EWTJNREpoT0dKa1lXUm1aZw"  where namespace_id=999984 and item_label="福利管家";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvNVlUa3hOVEprWkRFeVpEaGxOVFpqTURjNE9EQXpNR1k0TnpoaVlqSTRZZw"  where namespace_id=999984 and item_label="科技成果";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwaU1EY3haVEJoT0dFek5ERm1aamc0WWpWa01HVTFNRFprWldGa01UUTRPQQ"  where namespace_id=999984 and item_label="资金扶持";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwa016RTVZekExWldSbFlUTTNOelE1TVRjMVkyWTJZbVkzTnpSbE5ERXhNUQ"  where namespace_id=999984 and item_label="科技金融";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMU1XUmtNV1kyWWpFMFltRXhOMkkwWkRBek5ESTRZekl3WkRBMU5UbGpNUQ"  where namespace_id=999984 and item_label="紫荆汇";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvM01UUXlNRGhrTVdFeU5UWXdZMlZrTWpBNE1EUXlZVGt5TkRZMU4yWXdNdw"  where namespace_id=999984 and item_label="维修服务";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwall6ZGxZVFUxWVRNNE1HWTBabUkzWlRrMk9UZGlOek13WldWbFl6ZGhZUQ"  where namespace_id=999984 and item_label="绿植租摆";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvd05EVTBNMkprTkRGaE9XSTNaVEZtTmpWaVl6bGtPVGt3WlRsaU9EQTJOUQ"  where namespace_id=999984 and item_label="财税咨询";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMU5XUTFOV1JpWVdFNU5qVTBPVGxsWlRoa1l6ZGlNREZpWldVMVpUTXpNUQ"  where namespace_id=999984 and item_label="载物咨询";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwbU1ERm1ObUV6TW1KbVlUZzRZMkUwWkRsa1lUSmtaRFkyWVRjek1XTTFPUQ"  where namespace_id=999984 and item_label="通讯录";
+update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMk5UTmpOalprWldSak1EZzVaVEkzTmpCbE1URXdNRFUwT1RCaVlXSTROUQ"  where namespace_id=999984 and item_label="钥匙圈"; 
