@@ -626,6 +626,10 @@ public class FlowServiceImpl implements FlowService {
 	
 	private FlowActionDTO actionToDTO(FlowAction action) {
 		FlowActionDTO actionDTO = ConvertHelper.convert(action, FlowActionDTO.class);
+		if(actionDTO.getStatus() != null && actionDTO.getStatus().equals(FlowActionStatus.ENABLED.getCode())) {
+			actionDTO.setEnabled((byte)1);
+		}
+		
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(action.getId()
 				, FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
 		if(selections != null) {
@@ -705,16 +709,27 @@ public class FlowServiceImpl implements FlowService {
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
 			action.setTrackerApplier(actionInfo.getTrackerApplier());
 			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
-			action.setStatus(FlowActionStatus.ENABLED.getCode());
+			
+			if(actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
+				action.setStatus(FlowActionStatus.ENABLED.getCode());	
+			} else {
+				action.setStatus(FlowActionStatus.DISABLED.getCode());
+			}
+			
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.createFlowAction(action);
 			
 		} else {
+			if(actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
+				action.setStatus(FlowActionStatus.ENABLED.getCode());	
+			} else {
+				action.setStatus(FlowActionStatus.DISABLED.getCode());
+			}
+			
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
 			action.setTrackerApplier(actionInfo.getTrackerApplier());
 			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
-			action.setStatus(FlowActionStatus.ENABLED.getCode());
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
 			
