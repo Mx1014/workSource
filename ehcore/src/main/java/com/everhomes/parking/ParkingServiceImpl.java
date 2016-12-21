@@ -248,9 +248,6 @@ public class ParkingServiceImpl implements ParkingService {
     	List<ParkingLotDTO> parkingLotList = list.stream().map(r -> {
     		ParkingLotDTO dto = ConvertHelper.convert(r, ParkingLotDTO.class);
     		
-    		BigDecimal amount = parkingProvider.countParkingStatistics(r.getOwnerType(), r.getOwnerId(), r.getId());
-    		dto.setTotalAmount(amount);
-    		
         	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
         			FlowModuleType.NO_MODULE.getCode(), r.getId(), FlowOwnerType.PARKING.getCode());
         	
@@ -275,18 +272,22 @@ public class ParkingServiceImpl implements ParkingService {
     	Timestamp startDate = getBeginOfDay(now);
     	Timestamp endDate = getEndOfDay(now);
     	
-		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_STATISTICS.getCode()).enter(()-> {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.PARKING_STATISTICS.getCode()).tryEnter(()-> {
 			
 			List<ParkingStatistic> list = parkingProvider.listParkingStatistics(null, null, null, startDate);
 			if(list.size() != 0)
-				return null;
+				return ;
 	    	List<ParkingLot> lots = parkingProvider.listParkingLots(null, null);
 	    	
 	    	lots.forEach(l -> {
 	    		List<ParkingRechargeOrder> orders = parkingProvider.searchParkingRechargeOrders(l.getOwnerType(), l.getOwnerId(), l.getId(), 
 	    				null, null, null, startDate, endDate, null, null, null, null);
 	    		BigDecimal totalAmount = new BigDecimal(0);
-	    		orders.forEach(o -> totalAmount.add(o.getPrice()));
+	    		for(ParkingRechargeOrder o: orders) {
+	    			if(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode() == o.getRechargeStatus()) {
+	    				totalAmount = totalAmount.add(o.getPrice());
+	    			}
+	    		}
 	    		
 	    		ParkingStatistic parkingStatistic = new ParkingStatistic();
 	    		parkingStatistic.setNamespaceId(l.getNamespaceId());
@@ -300,7 +301,6 @@ public class ParkingServiceImpl implements ParkingService {
 	    		parkingProvider.createParkingStatistic(parkingStatistic);
 	    	});
 	    	
-			return null;
         });
 		
 	}
@@ -700,6 +700,7 @@ public class ParkingServiceImpl implements ParkingService {
 	
 	@Override
 	public ListParkingRechargeOrdersResponse searchParkingRechargeOrders(SearchParkingRechargeOrdersCommand cmd){
+		
 		ListParkingRechargeOrdersResponse response = new ListParkingRechargeOrdersResponse();
 		checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 		Timestamp startDate = null;
@@ -723,6 +724,11 @@ public class ParkingServiceImpl implements ParkingService {
         		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
         	}
     	}
+    	
+    	BigDecimal totalAmount = parkingProvider.countParkingRechargeOrders(cmd.getOwnerType(),
+				cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber(), cmd.getPlateOwnerName(),
+				cmd.getPayerPhone(), startDate, endDate, cmd.getRechargeType(), cmd.getPaidType());
+    	response.setTotalAmount(totalAmount);
     	
 		return response;
 	}

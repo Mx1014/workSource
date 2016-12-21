@@ -36,6 +36,10 @@ public interface ParkingProvider {
     		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate,Timestamp endDate,
     		Byte rechargeType, String paidType, Long pageAnchor, Integer pageSize);
     
+    BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
+    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+    		Byte rechargeType, String paidType);
+    
     void createParkingRechargeOrder(ParkingRechargeOrder parkingRechargeOrder);
     
     void deleteParkingRechargeRate(ParkingRechargeRate parkingRechargeRate);
@@ -83,7 +87,7 @@ public interface ParkingProvider {
     
     List<ParkingStatistic> listParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp dateStr);
     
-    BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId);
+    BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp startDate, Timestamp endDate);
     
     ParkingCarSerie findParkingCarSerie(Long id);
     
