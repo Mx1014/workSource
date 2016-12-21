@@ -47,6 +47,8 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.ListScriptsCommand;
+import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
@@ -554,5 +556,12 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	Long flowNodeId = 311l;
     	ListFlowButtonResponse resp = flowService.listFlowNodeButtons(flowNodeId);
     	Assert.assertTrue(resp.getProcessorButtons().size() > 0);
+    }
+    
+    @Test
+    public void testScripts() {
+    	ListScriptsCommand cmd = new ListScriptsCommand();
+    	ListScriptsResponse resp = flowService.listScripts(cmd);
+    	Assert.assertTrue(resp.getScripts().size() > 0);
     }
 }
