@@ -818,6 +818,7 @@ public class FlowServiceImpl implements FlowService {
 				sel.setFlowVersion(FlowConstants.FLOW_CONFIG_VER);
 				sel.setSelectType(sCmd.getFlowUserSelectionType());
 				sel.setStatus(FlowStatusType.VALID.getCode());
+				sel.setNamespaceId(UserContext.getCurrentNamespaceId());
 				updateFlowUserName(sel);
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
