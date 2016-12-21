@@ -1,12 +1,15 @@
 // @formatter:off
 package com.everhomes.techpark.expansion;
 
+import com.everhomes.community.Building;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.*;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
@@ -37,6 +40,9 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Autowired
     private FlowService flowService;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
@@ -96,6 +102,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
                     applyEntry.getApplyType() + "", locale, "");
             map.put("applyType", applyType);
             map.put("areaSize", applyEntry.getAreaSize());
+            this.processSourceName(applyEntry);
             map.put("sourceType", applyEntry.getSourceName());
             map.put("description", applyEntry.getDescription());
 
@@ -103,6 +110,20 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             return (FlowCaseEntityList)StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
         }
         return new ArrayList<>();
+    }
+
+    private void processSourceName(EnterpriseOpRequest applyEntry) {
+        applyEntry.setSourceName("");
+        if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
+            Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
+            if(null != building)
+                applyEntry.setSourceName(building.getName());
+        } else if (ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType()) ||
+                ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())) {
+            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
+            if (null != leasePromotion)
+                applyEntry.setSourceName(leasePromotion.getSubject());
+        }
     }
 
     @Override

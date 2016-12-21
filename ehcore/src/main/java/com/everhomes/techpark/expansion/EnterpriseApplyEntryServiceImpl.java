@@ -340,7 +340,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
     private void createFlowCase(EnterpriseOpRequest request) {
-        Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), 111L, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+        Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
         if (flow != null) {
             CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
             flowCaseCmd.setApplyUserId(request.getApplyUserId());
@@ -361,7 +361,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     private String getBriefContent(EnterpriseOpRequest request) {
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
-        String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE, request.getApplyType() + "", locale, "");
+        String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, request.getApplyType() + "", locale, "");
         map.put("applyType", applyType);
         map.put("areaSize", request.getAreaSize());
 

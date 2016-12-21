@@ -12,6 +12,7 @@ import com.everhomes.rest.techpark.expansion.InitTestFlowDataCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserService;
+import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -75,7 +76,7 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
             initFlowData(cmd);
         } catch (Exception e) {
             e.printStackTrace();
-            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()));
+            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()).toString());
         }
         return response;
     }
@@ -85,7 +86,7 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
      * <b>URL: /techpark/entry/test/listData</b>
      */
     @RequestMapping("listData")
-    @RestReturn(value = Flow.class, collection = true)
+    @RestReturn(value = String.class)
     public RestResponse listData(InitTestFlowDataCommand cmd) {
         RestResponse response = new RestResponse();
         try {
@@ -94,10 +95,10 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
                 query.addConditions(Tables.EH_FLOWS.FLOW_NAME.eq(flowName));
                 return query;
             });
-            response.setResponseObject(flows);
+            response.setResponseObject(StringHelper.toJsonString(flows));
         } catch (Exception e) {
             e.printStackTrace();
-            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()));
+            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()).toString());
         }
         return response;
     }
@@ -125,7 +126,7 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
             }
         } catch (Exception e) {
             e.printStackTrace();
-            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()));
+            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()).toString());
         }
         return response;
     }
@@ -153,7 +154,10 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
         if (cmd.getOrganizationId() != null) {
             this.orgId = cmd.getOrganizationId();
         }
-        init();
+        dbProvider.execute(status -> {
+            init();
+            return true;
+        });
     }
 
     private void createFlow(Long communityId) {

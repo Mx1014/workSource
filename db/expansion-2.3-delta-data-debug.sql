@@ -3,9 +3,9 @@
 --
 SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '1', 'zh_CN', '园区入驻工作流摘要内容', '[{"key":"申请类型","value":"${applyType}","entityType":"list"},{"key":"面积需求","value":"${areaSize}","entityType":"list"}]', '0');
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '1', 'zh_CN', '园区入驻工作流摘要内容', '申请类型: ${applyType}\n面积需求: ${areaSize} 平米', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '2', 'zh_CN', '园区入驻工作流详情内容', '[{"key":"发起人","value":"${applyUserName}","entityType":"list"},{"key":"联系电话","value":"${contactPhone}","entityType":"list"},{"key":"企业","value":"${enterpriseName}","entityType":"list"},{"key":"申请类型","value":"${applyType}","entityType":"list"},{"key":"面积需求","value":"${areaSize}","entityType":"list"},{"key":"申请来源","value":"${sourceType}","entityType":"list"},{"key":"备注","value":"${description}","entityType":"multi_line"}]', '0');
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '2', 'zh_CN', '园区入驻工作流详情内容', '[{"key":"发起人","value":"${applyUserName}","entityType":"list"},{"key":"联系电话","value":"${contactPhone}","entityType":"list"},{"key":"企业","value":"${enterpriseName}","entityType":"list"},{"key":"申请类型","value":"${applyType}","entityType":"list"},{"key":"面积需求","value":"${areaSize} 平米","entityType":"list"},{"key":"申请来源","value":"${sourceType}","entityType":"list"},{"key":"备注","value":"${description}","entityType":"multi_line"}]', '0');
 
 SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)

@@ -1889,6 +1889,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     }
     
 	private void sendMessageToUser(Long userId, String content) {
+		if(null == userId)
+			return;
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
@@ -3252,8 +3254,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void onOrderSuccess(RentalOrder order) {
 		//加工作流
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
-		Long ownerId = order.getCommunityId();
-		String ownerType = FlowOwnerType.COMMUNITY.getCode();
+		Long ownerId = order.getResourceTypeId();
+		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
     	Flow flow = flowService.getEnabledFlow(namespaceId, Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
     	if(null!=flow){
 	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
@@ -3262,6 +3264,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	    	cmd.setFlowVersion(flow.getFlowVersion());
 	    	cmd.setReferId(order.getId());
 	    	cmd.setReferType(REFER_TYPE);
+	    	cmd.setProjectId(order.getCommunityId());
+	    	cmd.setProjectType(EntityType.COMMUNITY.getCode());
+	    	
 	
 	    	Map<String, String> map = new HashMap<String, String>();  
 	        map.put("resourceName", order.getResourceName());

@@ -4,12 +4,12 @@ package com.everhomes.rest.acl;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
-import java.util.List;
 
 /**
  * <ul>
  * <li>organizationId: 机构id</li>
  * <li>moduleId: 业务模块id</li>
+ * <li>keywords: 关键字</li>
  * </ul>
  */
 public class ListServiceModuleAdministratorsCommand {
@@ -26,6 +26,8 @@ public class ListServiceModuleAdministratorsCommand {
     @NotNull
     private Long moduleId;
 
+    private String keywords;
+
     public Long getOrganizationId() {
         return organizationId;
     }
@@ -40,6 +42,14 @@ public class ListServiceModuleAdministratorsCommand {
 
     public void setModuleId(Long moduleId) {
         this.moduleId = moduleId;
+    }
+
+    public String getKeywords() {
+        return keywords;
+    }
+
+    public void setKeywords(String keywords) {
+        this.keywords = keywords;
     }
 
     public String getOwnerType() {
