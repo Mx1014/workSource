@@ -22,6 +22,7 @@ public class FlowNodeDetailDTO {
     private Integer     flowVersion;
     private Integer     nodeLevel;
     private String     nodeName;
+    private String params;
     
 	@ItemType(FlowUserSelectionDTO.class)
 	List<FlowUserSelectionDTO> processors;
@@ -143,6 +144,14 @@ public class FlowNodeDetailDTO {
 
 	public void setProcessButtons(List<FlowButtonDetailDTO> processButtons) {
 		this.processButtons = processButtons;
+	}
+
+	public String getParams() {
+		return params;
+	}
+
+	public void setParams(String params) {
+		this.params = params;
 	}
 
 	@Override
