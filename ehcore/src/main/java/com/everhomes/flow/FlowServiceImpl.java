@@ -2017,6 +2017,7 @@ public class FlowServiceImpl implements FlowService {
 					});
 			}
 			
+			dto.setButtons(btnDTOS);
 		} else if(flowUserType == FlowUserType.APPLIER) {
 			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
 			buttons.stream().forEach((b)->{
@@ -2025,11 +2026,9 @@ public class FlowServiceImpl implements FlowService {
 					btnDTOS.add(btnDTO);
 				}
 			});
-			
-		} else {
-			return dto;
-		}
-		dto.setButtons(btnDTOS);
+		
+			dto.setButtons(btnDTOS);
+		}//SUPERVISOR at last
 		
 		//got all nodes tracker logs
 		List<FlowEventLog> stepLogs = flowEventLogProvider.findStepEventLogs(flowCaseId);
