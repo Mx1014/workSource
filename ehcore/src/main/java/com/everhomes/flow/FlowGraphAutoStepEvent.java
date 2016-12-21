@@ -62,6 +62,7 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 			break;
 		case APPROVE_STEP:
 			next = null;
+			//TODO use id from graph
 	    	FlowButton flowBtn = flowButtonProvider.findFlowButtonByStepType(stepDTO.getFlowNodeId()
 	    			, stepDTO.getFlowVersion(), nextStep.getCode(), FlowUserType.PROCESSOR.getCode());
 			

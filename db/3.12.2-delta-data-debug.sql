@@ -150,7 +150,7 @@ INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`)
 
 -- 资源预订工作流模板，add by wh, 20161219
 SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
 
 -- 资源预订工作流中文，added by wh ,2016-12-19
@@ -204,3 +204,10 @@ VALUES (40130, '工作流设置', 40100, NULL, 'react:/working-flow/flow-list/re
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 1000000, 2);
+
+-- scripts support, by Janson 20161221
+SET @id := (SELECT MAX(id) FROM eh_flow_scripts);
+INSERT INTO `eh_flow_scripts`(`id`,`namespace_id`,`owner_id`,`owner_type`,`module_id`,`module_type`,`name`,`script_type`,`script_cls`,`flow_step_type`,`step_type`)
+VALUES ((@id := @id+1), '0', '11', 'ENTERPRISE', '111', 'any-module', 'test-dummpy', 'prototype', 'com.everhomes.flow.FlowScriptFireDummy', 'approve_step', 'step_enter'
+);
+

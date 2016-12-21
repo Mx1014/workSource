@@ -122,7 +122,7 @@ public class PmtaskTechparkHandler {
 	}
 	
 	public String post(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://113.108.41.29:8099" + type);
+		HttpPost httpPost = new HttpPost("http://oa.ssipc.com.cn:8890/oa/" + type);
 		StringBuilder result = new StringBuilder();
 		
         String key = "F7A0B971B199FD2A52468575";

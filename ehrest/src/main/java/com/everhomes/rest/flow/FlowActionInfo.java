@@ -3,6 +3,7 @@ package com.everhomes.rest.flow;
 import com.everhomes.util.StringHelper;
 
 public class FlowActionInfo {
+	private Byte enable;
 	private Long reminderAfterMinute;
 	private Long reminderTickMinute;
 	private Long trackerApplier;
@@ -57,6 +58,14 @@ public class FlowActionInfo {
 
 	public void setUserSelections(CreateFlowUserSelectionCommand userSelections) {
 		this.userSelections = userSelections;
+	}
+
+	public Byte getEnable() {
+		return enable;
+	}
+
+	public void setEnable(Byte enable) {
+		this.enable = enable;
 	}
 
 	@Override

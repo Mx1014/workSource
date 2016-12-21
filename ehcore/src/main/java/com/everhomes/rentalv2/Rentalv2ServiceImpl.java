@@ -340,10 +340,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private AppProvider appProvider;
-	private Integer namespaceId;
-	private Integer namespaceId2;
-	private String phoneNumber;
+	private AppProvider appProvider; 
 	
 	 
 
@@ -3256,7 +3253,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = order.getResourceTypeId();
 		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
-    	Flow flow = flowService.getEnabledFlow(namespaceId, Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+    	Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+    	LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
+    	LOGGER.debug("\n flow is "+flow);
     	if(null!=flow){
 	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
 	    	cmd.setApplyUserId(order.getRentalUid());
@@ -3280,7 +3279,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
 			
 	    	cmd.setContent(contentString);
-	    	
+	    	LOGGER.debug("cmd = \n"+cmd);
 	    	FlowCase flowCase = flowService.createFlowCase(cmd);
     	}
 		//发消息给管理员
