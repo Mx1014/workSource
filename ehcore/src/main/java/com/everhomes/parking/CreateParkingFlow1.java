@@ -322,9 +322,7 @@ public class CreateParkingFlow1 {
     	List<Long> users = new ArrayList<>();
     	//add two test users
     	String u1 = "13632650699";
-    	String u2 = "15307935896";
     	testUser1 = userService.findUserByIndentifier(namespaceId, u1);
-    	testUser2 = userService.findUserByIndentifier(namespaceId, u2);
     	users.add(testUser1.getId());
     	users.add(testUser2.getId());
 
@@ -444,7 +442,7 @@ public class CreateParkingFlow1 {
     	buttonCmd11.setDescription("驳回");
     	buttonCmd11.setFlowButtonId(flowButton11.getId());
     	buttonCmd11.setNeedProcessor((byte)0);
-    	buttonCmd11.setNeedSubject((byte)0);
+    	buttonCmd11.setNeedSubject((byte)1);
     	buttonAction = createUserActionInfo("您的停车月卡申请审核未通过，请前往查看详情");
     	buttonCmd11.setMessageAction(buttonAction);
     	updateTargetVarAction2(buttonAction);
@@ -479,7 +477,7 @@ public class CreateParkingFlow1 {
     	buttonCmd.setDescription("取消资格");
     	buttonCmd.setFlowButtonId(flowButton21.getId());
     	buttonCmd.setNeedProcessor((byte)0);
-    	buttonCmd.setNeedSubject((byte)0);
+    	buttonCmd.setNeedSubject((byte)1);
     	
     	buttonAction = createUserActionInfo("您的停车月卡申请审核未通过，请前往查看详情");
     	updateTargetVarAction2(buttonAction);
