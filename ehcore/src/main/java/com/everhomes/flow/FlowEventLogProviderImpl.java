@@ -145,7 +145,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
     	
     	if(locator.getAnchor() == null) {
-    		locator.setAnchor(cmd.getAnchor());
+    		locator.setAnchor(cmd.getPageAnchor());
     	}
 
         FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());

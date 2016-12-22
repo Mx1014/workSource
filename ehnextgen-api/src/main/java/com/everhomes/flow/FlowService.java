@@ -42,6 +42,7 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowModulesCommand;
 import com.everhomes.rest.flow.ListFlowModulesResponse;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
 import com.everhomes.rest.flow.ListScriptsCommand;
 import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
@@ -434,7 +435,7 @@ public interface FlowService {
 
 	ListScriptsResponse listScripts(ListScriptsCommand cmd);
 
-	FlowSMSTemplateResponse listSMSTemplates(ListScriptsCommand cmd);
+	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
 	
 	//TODO 日志信息分类：
 	

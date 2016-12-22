@@ -25,6 +25,7 @@ public class FlowNodeDetailDTO {
     private String autoStepType;
     private Byte allowApplierUpdate;
     private Integer autoStepMinute;
+    private Byte allowTimeoutAction;
     
 	@ItemType(FlowUserSelectionDTO.class)
 	List<FlowUserSelectionDTO> processors;
@@ -170,6 +171,14 @@ public class FlowNodeDetailDTO {
 
 	public void setParams(String params) {
 		this.params = params;
+	}
+
+	public Byte getAllowTimeoutAction() {
+		return allowTimeoutAction;
+	}
+
+	public void setAllowTimeoutAction(Byte allowTimeoutAction) {
+		this.allowTimeoutAction = allowTimeoutAction;
 	}
 
 	@Override

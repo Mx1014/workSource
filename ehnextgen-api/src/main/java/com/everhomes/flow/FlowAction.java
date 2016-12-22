@@ -56,6 +56,14 @@ public class FlowAction extends EhFlowActions {
 		FlowActionCustomField.ALLOW_TIMEOUT_ACTION.setIntegralValue(this, allowTimeoutAction); 
 	}
 
+	public Long getTemplateId() {
+		return FlowActionCustomField.TEMPLATE_ID.getIntegralValue(this);
+	}
+
+	public void setTemplateId(Long templateId) {
+		FlowActionCustomField.TEMPLATE_ID.setIntegralValue(this, templateId);
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -8,6 +8,7 @@ public class FlowActionInfo {
 	private Long reminderTickMinute;
 	private Long trackerApplier;
 	private Long trackerProcessor;
+	private Long templateId;
 	private String renderText;
 	
 	CreateFlowUserSelectionCommand userSelections;
@@ -66,6 +67,14 @@ public class FlowActionInfo {
 
 	public void setEnabled(Byte enabled) {
 		this.enabled = enabled;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
 	}
 
 	@Override

@@ -45,6 +45,7 @@ import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
 import com.everhomes.rest.flow.ListScriptsCommand;
 import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
@@ -521,7 +522,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listSMSTemplates")
     @RestReturn(value=FlowSMSTemplateResponse.class)
-    public RestResponse listSMSTemplates(@Valid ListScriptsCommand cmd) {
+    public RestResponse listSMSTemplates(@Valid ListSMSTemplateCommand cmd) {
         RestResponse response = new RestResponse(flowService.listSMSTemplates(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

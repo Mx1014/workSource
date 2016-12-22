@@ -8,6 +8,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModule;
@@ -139,6 +141,9 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
+    
+    @Autowired
+    LocaleTemplateProvider localeTemplateProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -3100,14 +3105,43 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowSMSTemplateResponse listSMSTemplates(ListScriptsCommand cmd) {
+	public FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd) {
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
 		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
 		if(entityType == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
 		}
 		
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getAnchor());
+		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		
 		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
-		return null;
+		FlowModuleDTO module = this.getModuleById(flow.getModuleId());
+		String scope = "flow:" + module.getDisplayName() + "%";
+		
+      User user = UserContext.current().getUser();
+      String locale = Locale.SIMPLIFIED_CHINESE.toString();
+      if(user != null) {
+        	locale = user.getLocale();
+        }
+        
+      FlowSMSTemplateResponse resp = new FlowSMSTemplateResponse();
+      List<FlowSMSTemplateDTO> dtos = new ArrayList<FlowSMSTemplateDTO>();
+      resp.setDtos(dtos);
+      
+		List<LocaleTemplate> templates = localeTemplateProvider.listLocaleTemplatesByScope(locator, cmd.getNamespaceId(), scope, locale, cmd.getKeyword(), count);
+		resp.setNextPageAnchor(locator.getAnchor());
+		if(templates != null) {
+			templates.forEach(t -> {
+				dtos.add(ConvertHelper.convert(t, FlowSMSTemplateDTO.class));
+			});
+		}
+		
+		return resp;
 	}
 	
 }
