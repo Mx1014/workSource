@@ -1,5 +1,7 @@
 package com.everhomes.rest.community;
 
+import com.everhomes.discover.ItemType;
+
 import javax.validation.constraints.NotNull;
 import java.util.List;
 
@@ -18,6 +20,7 @@ public class UpdateChildProjectCommand {
 	@NotNull
 	private String name;
 
+	@ItemType(Long.class)
 	private List<Long> buildingIds;
 
 	public Long getId() {
