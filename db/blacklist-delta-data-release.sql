@@ -44,9 +44,10 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10090, 30600, '黑名单管理', 1, 1, '黑名单管理 管理员权限', 361);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10090, 1001, 0, 1, NOW());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10090, 1001,'EhAclRoles', 0, 1, NOW());
 
-SET @eh_service_module_scopes = (SELECT MAX(id) FROM `eh_service_module_scopes`);
-INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
-	VALUES ((@eh_service_module_scopes := @eh_service_module_scopes + 1), '0', '30600', '', 'EhNamespaces', '0', NULL, '2');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
