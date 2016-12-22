@@ -1193,25 +1193,31 @@ public class FlowServiceImpl implements FlowService {
 //		}
 		
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		flow.setUpdateTime(now);
+		
 		boolean isOk = true;
 		try {
 			dbProvider.execute((s)->{				
 				doSnapshot(flowGraph);
-				
-				//running now
-				flow.setId(flow.getFlowMainId());
-				flow.setFlowMainId(0l);
-				flow.setUpdateTime(now);
-				flow.setRunTime(now);
-				flow.setStatus(FlowStatusType.RUNNING.getCode());
-				flowProvider.updateFlow(flow);
-				
 				return true;
 			});
 			
 		} catch(Exception ex) {
 			isOk = false;
 			LOGGER.error("do snapshot error", ex);
+		}
+		
+		if(flow.getFlowMainId().equals(0l)) {
+			isOk = false;
+		}
+		
+		if(isOk) {
+			//running now
+			flow.setId(flow.getFlowMainId());
+			flow.setFlowMainId(0l);
+			flow.setRunTime(now);
+			flow.setStatus(FlowStatusType.RUNNING.getCode());
+			flowProvider.updateFlow(flow);
 		}
 		
 		return isOk;
