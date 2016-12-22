@@ -135,8 +135,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	//储能月卡车没有 归属地区分
-    	plateNumber = plateNumber.substring(1, plateNumber.length());
+    	
     	KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
@@ -166,7 +165,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			
 			parkingCardDTO.setPlateOwnerName(user.getNickName());
-			parkingCardDTO.setPlateNumber(card.getPlateNo());
+			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
 //			parkingCardDTO.setFreeAmount(new BigDecimal(card.getFreeMoney()));
 //			parkingCardDTO.setIsSupportOnlinePaid(isSupportOnlinePaid);
@@ -384,6 +383,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		KetuoCard card = null;
 		JSONObject param = new JSONObject();
 		
+		//储能月卡车没有 归属地区分
+    	plateNumber = plateNumber.substring(1, plateNumber.length());
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_CARD);
         
@@ -406,7 +407,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		//月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-//		plateNumber = plateNumber.substring(1, plateNumber.length());
+
 		KetuoCard card = getCard(plateNumber);
 		
 		if(null == card) {
@@ -435,36 +436,11 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 					order.setMonthCount(new BigDecimal(count -1) );
 					order.setPrice(new BigDecimal(order.getPrice().intValue()*100 - payMoney));
 					if(rechargeMonthlyCard(order)) {
-						User user = UserContext.current().getUser();
-				    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), order.getOwnerType(), 
-				    			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
-				    			null, null, null, null);
-				    	ParkingCardRequest parkingCardRequest = null;
-				    	for(ParkingCardRequest p: list) {
-				    		Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
-				    		String tag1 = flow.getStringTag1();
-				    		if(null == tag1) {
-				    			LOGGER.error("Flow tag is null, flow={}", flow);
-				    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-				    					"Flow tag is null.");
-				    		}
-				    		if(ParkingRequestFlowType.INTELLIGENT.getCode() == Integer.valueOf(tag1)) {
-				    			parkingCardRequest = p;
-				    		}
-				    	}
-				    	if(null != parkingCardRequest) {
-				    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
-				    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-				    		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
-				    		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
-				    		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
-				    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-				    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-				    		stepDTO.setStepCount(flowCase.getStepCount());
-				    		flowService.processAutoStep(stepDTO);
-				    	}
+						updateFlowStatus(order);
 			    		return true;
 					}
+				}else {
+					updateFlowStatus(order);
 				}
 				return true;
 			}
@@ -503,9 +479,43 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		
     }
 	
+	private void updateFlowStatus(ParkingRechargeOrder order) {
+		User user = UserContext.current().getUser();
+    	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), order.getOwnerType(), 
+    			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
+    			null, null, null, null);
+    	ParkingCardRequest parkingCardRequest = null;
+    	for(ParkingCardRequest p: list) {
+    		Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
+    		String tag1 = flow.getStringTag1();
+    		if(null == tag1) {
+    			LOGGER.error("Flow tag is null, flow={}", flow);
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    					"Flow tag is null.");
+    		}
+    		if(ParkingRequestFlowType.INTELLIGENT.getCode() == Integer.valueOf(tag1)) {
+    			parkingCardRequest = p;
+    			break;
+    		}
+    	}
+    	if(null != parkingCardRequest) {
+    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+    		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+    		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
+    		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
+    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+    		stepDTO.setStepCount(flowCase.getStepCount());
+    		flowService.processAutoStep(stepDTO);
+    	}
+	}
+	
 	private boolean addMonthCard(String plateNo, Integer money){
 
 		JSONObject param = new JSONObject();
+		plateNo = plateNo.substring(1, plateNo.length());
+
 		param.put("plateNo", plateNo);
 		param.put("money", money);
 		String json = post(param, ADD_MONTH_CARD);
@@ -660,8 +670,6 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-//		plateNumber = plateNumber.substring(1, plateNumber.length());
-//		order.setPlateNumber(plateNumber);
 
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
