@@ -554,6 +554,12 @@ public class ParkingServiceImpl implements ParkingService {
 	@Override
 	public CommonOrderDTO createParkingRechargeOrder(CreateParkingRechargeOrderCommand cmd){
 		
+		if(null == cmd.getMonthCount() || cmd.getMonthCount() ==0) {
+			LOGGER.error("Invalid MonthCount, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Invalid MonthCount.");
+		}
+		
 		return createParkingOrder(cmd, ParkingRechargeType.MONTHLY.getCode());
 	}
 	
@@ -579,22 +585,6 @@ public class ParkingServiceImpl implements ParkingService {
     	ParkingVendorHandler handler = getParkingVendorHandler(vendor);
     	
     	ParkingRechargeOrder parkingRechargeOrder = new ParkingRechargeOrder();
-    	if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
-    		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
-			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
-				LOGGER.error("Overdue fees, cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
-						"Overdue fees");
-			}
-			parkingRechargeOrder.setPrice(cmd.getPrice());
-			parkingRechargeOrder.setOrderToken(dto.getOrderToken());
-		}
-    	//查询rate
-    	else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
-    		parkingRechargeOrder.setRateToken(cmd.getRateToken());
-    		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
-    	}
-    	
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
@@ -623,6 +613,22 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
 //		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getExpiredTime(), cmd.getMonthCount()));
 //		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getExpiredTime(), 1));
+		
+		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
+    		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
+			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
+				LOGGER.error("Overdue fees, cmd={}", cmd);
+				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
+						"Overdue fees");
+			}
+			parkingRechargeOrder.setPrice(cmd.getPrice());
+			parkingRechargeOrder.setOrderToken(dto.getOrderToken());
+		}
+    	//查询rate
+    	else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
+    		parkingRechargeOrder.setRateToken(cmd.getRateToken());
+    		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+    	}
 		
 		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);	
 		
@@ -1274,14 +1280,14 @@ public class ParkingServiceImpl implements ParkingService {
 		String host =  configProvider.getValue(UserContext.getCurrentNamespaceId(), "home.url", "");
 
 		if(null != parkingFlow) {
-			GetSignatureCommandResponse result = userService.getSignature();
-			StringBuilder sb = new StringBuilder();
-			sb.append("&id=").append(result.getId());
-			sb.append("&signature=").append(result.getSignature());
-			sb.append("&appKey=").append(result.getAppKey());
-			sb.append("&timeStamp=").append(result.getTimeStamp());
-			sb.append("&randomNum=").append(result.getRandomNum());
-			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId() + sb.toString());
+//			GetSignatureCommandResponse result = userService.getSignature();
+//			StringBuilder sb = new StringBuilder();
+//			sb.append("&id=").append(result.getId());
+//			sb.append("&signature=").append(result.getSignature());
+//			sb.append("&appKey=").append(result.getAppKey());
+//			sb.append("&timeStamp=").append(result.getTimeStamp());
+//			sb.append("&randomNum=").append(result.getRandomNum());
+			dto.setCardAgreementUrl(host + "/web/lib/html/park_payment_review.html?configId=" + parkingFlow.getId());
 
 		}
 		return dto;

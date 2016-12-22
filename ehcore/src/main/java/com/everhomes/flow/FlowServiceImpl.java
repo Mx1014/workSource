@@ -1120,6 +1120,14 @@ public class FlowServiceImpl implements FlowService {
 	public Boolean enableFlow(Long flowId) {
 		final FlowGraph flowGraph = new FlowGraph();
 		Flow flow = flowProvider.getFlowById(flowId);
+		
+		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+		if(enabledFlow != null && !enabledFlow.getId().equals(flowId)
+				&& enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
+			flowProvider.updateFlow(enabledFlow);
+		}
+		
 		if(flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
 			//restart it
 			flow.setStatus(FlowStatusType.RUNNING.getCode());
@@ -1133,11 +1141,6 @@ public class FlowServiceImpl implements FlowService {
 			return true;
 		}
 		
-		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
-		if(enabledFlow != null && enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
-			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
-			flowProvider.updateFlow(enabledFlow);
-		}
 		
 		updateFlowVersion(flow);
 		
@@ -1193,23 +1196,31 @@ public class FlowServiceImpl implements FlowService {
 //		}
 		
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+		flow.setUpdateTime(now);
+		
 		boolean isOk = true;
 		try {
 			dbProvider.execute((s)->{				
 				doSnapshot(flowGraph);
-				
-				//running now
-				flow.setUpdateTime(now);
-				flow.setRunTime(now);
-				flow.setStatus(FlowStatusType.RUNNING.getCode());
-				flowProvider.updateFlow(flow);
-				
 				return true;
 			});
 			
 		} catch(Exception ex) {
 			isOk = false;
 			LOGGER.error("do snapshot error", ex);
+		}
+		
+		if(flow.getFlowMainId().equals(0l)) {
+			isOk = false;
+		}
+		
+		if(isOk) {
+			//running now
+			flow.setId(flow.getFlowMainId());
+			flow.setFlowMainId(0l);
+			flow.setRunTime(now);
+			flow.setStatus(FlowStatusType.RUNNING.getCode());
+			flowProvider.updateFlow(flow);
 		}
 		
 		return isOk;
