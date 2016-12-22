@@ -58,6 +58,7 @@ import com.everhomes.rest.parking.ListCardTypeResponse;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
 import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="Parking controller", site="parking")
 @RestController
@@ -357,6 +358,7 @@ public class ParkingController extends ControllerBase {
      * <b>URL: /parking/getParkingRequestCardAgreement</b>
      * <p>获取申请月卡参数</p>
      */
+    @RequireAuthentication(false)
     @RequestMapping("getParkingRequestCardAgreement")
     @RestReturn(value=ParkingRequestCardAgreementDTO.class)
     public RestResponse getParkingRequestCardAgreement(GetParkingRequestCardAgreementCommand cmd) {
