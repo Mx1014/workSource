@@ -9,6 +9,8 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.yellowPage.JumpModuleDTO;
+import com.everhomes.rest.yellowPage.ServiceAllianceAttachmentType;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.rest.yellowPage.YellowPageType;
 import com.everhomes.sequence.SequenceProvider;
@@ -438,7 +440,12 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
         query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.in(sa.getId()));
         query.fetch().map((EhServiceAllianceAttachmentsRecord record) -> {
-        	 sa.getAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
+			if(ServiceAllianceAttachmentType.BANNER.equals(ServiceAllianceAttachmentType.fromCode(record.getAttachmentType()))) {
+				sa.getAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
+			} else if(ServiceAllianceAttachmentType.FILE_ATTACHMENT.equals(ServiceAllianceAttachmentType.fromCode(record.getAttachmentType()))) {
+				sa.getFileAttachments().add(ConvertHelper.convert(record, ServiceAllianceAttachment.class));
+			}
+
              return null;
          });
 		
@@ -862,12 +869,20 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public void createInvestRequests(ServiceAllianceInvestRequests request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceInvestRequests.class));
+		request.setId(id);
 
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		EhServiceAllianceInvestRequestsDao dao = new EhServiceAllianceInvestRequestsDao(context.configuration());
+		dao.insert(request);
 	}
 
 	@Override
 	public ServiceAllianceInvestRequests findInvestRequests(Long id) {
-		return null;
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceInvestRequestsDao dao = new EhServiceAllianceInvestRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceInvestRequests.class);
 	}
 
 	@Override
@@ -902,5 +917,21 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		});
 
 		return requests;
+	}
+
+	@Override
+	public List<JumpModuleDTO> jumpModules(Integer namespaceId) {
+		List<JumpModuleDTO> modules = new ArrayList<>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceAllianceJumpModuleRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE);
+		query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.NAMESPACE_ID.eq(namespaceId));
+
+		query.fetch().map((r) -> {
+			modules.add(ConvertHelper.convert(r, JumpModuleDTO.class));
+			return null;
+		});
+
+		return modules;
 	}
 }

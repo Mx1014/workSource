@@ -711,7 +711,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 			
 			this.yellowPageProvider.createServiceAlliances(serviceAlliance);
-			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId());
+			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.BANNER.getCode());
+			createServiceAllianceAttachments(cmd.getFileAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
 		} else {
 			ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			if(sa.getLatitude() != null && sa.getLongitude() != null) {
@@ -723,7 +724,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			
 			this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
 			this.yellowPageProvider.deleteServiceAllianceAttachmentsByOwnerId(serviceAlliance.getId());
-			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId());
+			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.BANNER.getCode());
+			createServiceAllianceAttachments(cmd.getFileAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
 		}
 //		YellowPage yp = null;
 //		ServiceAlliance serviceAlliance =  ConvertHelper.convert(cmd ,ServiceAlliance.class);
@@ -763,7 +765,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 	}
 	
 	private void createServiceAllianceAttachments(
-			List<ServiceAllianceAttachmentDTO> attachments,Long ownerId) {
+			List<ServiceAllianceAttachmentDTO> attachments,Long ownerId, Byte attachmentType) {
 		if(null == attachments)
 			return;
 		for (ServiceAllianceAttachmentDTO dto:attachments ){
@@ -771,7 +773,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 				continue;
 			ServiceAllianceAttachment attachment =  ConvertHelper.convert(dto,ServiceAllianceAttachment.class);
 			attachment.setOwnerId(ownerId);
-			attachment.setContentType(PostContentType.IMAGE.getCode());
+//			attachment.setContentType(PostContentType.IMAGE.getCode());
+			attachment.setAttachmentType(attachmentType);
 			this.yellowPageProvider.createServiceAllianceAttachments(attachment);
 		}
 	}
@@ -781,6 +784,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 		 
 		populateServiceAllianceUrl(sa);
 		populateServiceAllianceAttachements(sa,sa.getAttachments());
+		populateServiceAllianceAttachements(sa,sa.getFileAttachments());
 	 
 		
 	}
@@ -980,7 +984,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public List<JumpModuleDTO> listJumpModules() {
-		return null;
+		//没配的返回零域的，配了的返回自己域空间的
+		List<JumpModuleDTO> modules = yellowPageProvider.jumpModules(UserContext.getCurrentNamespaceId());
+		if(modules == null || modules.size() == 0) {
+			modules = yellowPageProvider.jumpModules(0);
+		}
+
+		return modules;
 	}
 
 }

@@ -24,7 +24,8 @@ import com.everhomes.util.StringHelper;
  *  <li>contactName: 负责人</li>
  *  <li>contactMobile: 手机号</li>
  *  <li>categoryId: 所属服务联盟类型id</li>
- *  <li>attachments: 附件</li>
+ *  <li>attachments: banners</li>
+ *  <li>fileAttachments: 附件</li>
  *  <li>serviceUrl: 服务链接</li>
  *  <li>discount: 优惠 0：否 1：是</li>
  *  <li>discountDesc: 优惠信息</li>
@@ -69,6 +70,9 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	
 	@ItemType(ServiceAllianceAttachmentDTO.class)
 	private List<ServiceAllianceAttachmentDTO> attachments;
+
+	@ItemType(ServiceAllianceAttachmentDTO.class)
+	private List<ServiceAllianceAttachmentDTO> fileAttachments;
 	
 	private Long discount;
 	
@@ -212,6 +216,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setAttachments(List<ServiceAllianceAttachmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+
+	public List<ServiceAllianceAttachmentDTO> getFileAttachments() {
+		return fileAttachments;
+	}
+
+	public void setFileAttachments(List<ServiceAllianceAttachmentDTO> fileAttachments) {
+		this.fileAttachments = fileAttachments;
 	}
 
 	public Long getDiscount() {

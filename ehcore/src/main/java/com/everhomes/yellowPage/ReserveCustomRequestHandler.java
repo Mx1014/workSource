@@ -103,6 +103,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		LOGGER.info("ReserveCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createReservationRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+		requestInfo.setTemplateType(cmd.getTemplateType());
 		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());

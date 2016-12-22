@@ -93,6 +93,7 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		request.setCategoryId(cmd.getCategoryId());
 		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());
 		request.setServiceAllianceId(cmd.getServiceAllianceId());
+		request.setTemplateType(cmd.getTemplateType());
 	  
 		User user = UserContext.current().getUser();
 		request.setCreatorUid(user.getId());

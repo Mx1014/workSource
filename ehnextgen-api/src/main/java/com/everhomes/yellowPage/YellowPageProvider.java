@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.yellowPage.JumpModuleDTO;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -92,4 +93,5 @@ public interface YellowPageProvider {
 	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
 
 
+	List<JumpModuleDTO> jumpModules(Integer namespaceId);
 }

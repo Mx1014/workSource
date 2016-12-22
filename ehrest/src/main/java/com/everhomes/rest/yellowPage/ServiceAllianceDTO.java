@@ -27,7 +27,8 @@ import java.util.List;
  *  <li>contactMobile: 手机号</li>
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>serviceType: 所属服务联盟的子类别名称</li>
- *  <li>attachments: 附件</li>
+ *  <li>attachments: banners</li>
+ *  <li>fileAttachments: 附件</li>
  *  <li>serviceUrl: 服务链接</li>
  *  <li>discount: 优惠 0：否 1：是</li>
  *  <li>discountDesc: 优惠信息</li>
