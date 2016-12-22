@@ -494,3 +494,8 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 -- 要上线的app版本 by sfyan 20161221
 update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
+
+--
+-- 修改没有权限时的提示语  add by xq.tian  2016/12/21
+--
+UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');

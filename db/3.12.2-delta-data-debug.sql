@@ -215,3 +215,8 @@ INSERT INTO `eh_flow_scripts`(`id`,`namespace_id`,`owner_id`,`owner_type`,`modul
 VALUES ((@id := @id+1), '0', '11', 'ENTERPRISE', '111', 'any-module', 'test-dummpy', 'prototype', 'com.everhomes.flow.FlowScriptFireDummy', 'approve_step', 'step_enter'
 );
 
+--
+-- 修改没有权限时的提示语  add by xq.tian  2016/12/21
+--
+UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');
+

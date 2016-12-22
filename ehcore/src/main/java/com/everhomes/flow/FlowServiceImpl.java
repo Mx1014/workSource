@@ -862,7 +862,7 @@ public class FlowServiceImpl implements FlowService {
 		ListFlowUserSelectionResponse resp = new ListFlowUserSelectionResponse();
 		List<FlowUserSelectionDTO> selections = new ArrayList<FlowUserSelectionDTO>();
 		resp.setSelections(selections);
-		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType());
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(cmd.getBelongTo(), cmd.getFlowEntityType(), cmd.getFlowUserType(), 0);
 		if(seles != null && seles.size() > 0) {
 			seles.stream().forEach((sel) -> {
 				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
@@ -1375,7 +1375,7 @@ public class FlowServiceImpl implements FlowService {
 		
 		//step8 copy flow's supervisor
 		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(flow.getFlowMainId()
-				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), 0);
 		if(selections != null && selections.size() > 0) {
 			for(FlowUserSelection sel: selections) {
 				sel.setBelongTo(flow.getFlowMainId());
@@ -2378,12 +2378,23 @@ public class FlowServiceImpl implements FlowService {
 	
 	
 	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
-		return resolvUserSelections(ctx, entityType, entityId, selections, 1);
+		// Remove dup users
+		List<Long> tmps = resolvUserSelections(ctx, entityType, entityId, selections, 1);
+		List<Long> rlts = new ArrayList<>();
+		Map<Long, Long> maps = new HashMap<Long, Long>();
+		for(Long l : tmps) {
+			if(!maps.containsKey(l)) {
+				maps.put(l, 1l);	
+				rlts.add(l);
+			}
+			
+		}
+		
+		return rlts;
 	}
 	
 	@Override
 	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
-		//TODO remove dup users
 		List<Long> users = new ArrayList<Long>();
 		if(selections == null || loopCnt >= 5) {
 			return users;
