@@ -631,11 +631,14 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 LOGGER.debug("The processor detail json is: {}", detailJson);
             }
         }
-        flowCase.setCustomObject(detailJson);
-        if (LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Flow case custom object is: {}", flowCase.getCustomObject());
-        }
+        flowCase.setCustomObject(this.buildCustomObjectStr(map, log.getCreateTime().getTime()));
         return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
+    }
+
+    private String buildCustomObjectStr(Map<String, Object> map, Long createTime) {
+        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), createTime, "yyyy-MM-dd");
+        map.put("createTime", dateStr);
+        return StringHelper.toJsonString(map);
     }
 
     private Object defaultIfNull(Object obj, Object defaultValue) {
