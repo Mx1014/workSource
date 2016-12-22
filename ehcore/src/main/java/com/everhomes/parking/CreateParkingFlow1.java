@@ -390,6 +390,9 @@ public class CreateParkingFlow1 {
     	UpdateFlowNodeCommand updateFlowCmd2 = new UpdateFlowNodeCommand();
     	updateFlowCmd2.setFlowNodeId(node2.getId());
     	updateFlowCmd2.setParams("{\"nodeType\":\"PROCESSING\"}");
+    	updateFlowCmd2.setAutoStepMinute(5);
+    	updateFlowCmd2.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+    	updateFlowCmd2.setAllowTimeoutAction((byte)1);
     	flowService.updateFlowNode(updateFlowCmd2);
     	
     	UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
