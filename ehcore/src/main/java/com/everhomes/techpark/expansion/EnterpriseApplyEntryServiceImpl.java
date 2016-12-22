@@ -269,30 +269,35 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
-//		LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
-//		LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
-//		String phoneNumber = null;
-//		if(rentType != null) {
-//			switch(rentType) {
-//			case ORDINARY:
-//				phoneNumber = lp.getContactPhone();
-//				break;
-//			case BUILDING:
-//				Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
-//				UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
-//				if(null != identifier)
-//					phoneNumber = identifier.getIdentifierToken();
-//				break;
-//			default:
-//				break;
-//				
-//			}
-//		} 
-//		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
-//        sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-//                lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
+		// LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+		// LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
+		// String phoneNumber = null;
+		// if(rentType != null) {
+		// 	switch(rentType) {
+		// 	case ORDINARY:
+		// 		phoneNumber = lp.getContactPhone();
+		// 		break;
+		// 	case BUILDING:
+		// 		Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
+		// 		UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
+		// 		if(null != identifier)
+		// 			phoneNumber = identifier.getIdentifierToken();
+		// 		break;
+		// 	default:
+		// 		break;
+        //
+		// 	}
+		// }
+		// SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+        // sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
+        //         lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
+
+        //////
+        // 对接工作流后就不需要在这里发送短信了, 移到工作流中配置  add by xq.tian  2016/12/22
+        //////
+
         // 根据apply type来区分
-        String phoneNumber = null;
+        /*String phoneNumber = null;
         String location = null;
         ApplyEntryApplyType applyType = ApplyEntryApplyType.fromType(cmd.getApplyType());
         if(applyType != null && cmd.getSourceId() != null) {
@@ -300,7 +305,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			  Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
 			  if(building != null) {
 			  	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
-			
+
 			      if(null != member) {
 			          phoneNumber = member.getContactToken();
 			      }
@@ -312,18 +317,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			  }
 
 	  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
-	  		
+
             switch(applyType) {
             case APPLY:
-            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
     	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
                 break;
             case RENEW:
-            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
     	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"续租");
                 break;
             case EXPANSION:
-            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
+            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
     	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
                 break;
             default:
@@ -333,7 +338,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                 break;
             }
 
-        }
+        }*/
 
 		return true;
 	}

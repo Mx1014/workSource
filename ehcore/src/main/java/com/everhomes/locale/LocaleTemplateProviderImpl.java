@@ -120,6 +120,10 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
         	cond = cond.and(Tables.EH_LOCALE_TEMPLATES.ID.lt(locator.getAnchor()));
         }
         
+        if(keyword != null) {
+        	cond = cond.and(Tables.EH_LOCALE_TEMPLATES.DESCRIPTION.like("%"+keyword+"%").or(Tables.EH_LOCALE_TEMPLATES.TEXT.like("%"+keyword+"%")));
+        }
+        
         List<LocaleTemplate> objs = context.select().from(Tables.EH_LOCALE_TEMPLATES)
             .where(cond).limit(count).fetch().map((r)->{
             	return ConvertHelper.convert(r, LocaleTemplate.class);
