@@ -209,8 +209,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			e.setKey(this.localeStringService.getLocalizedString(RentalNotificationTemplateCode.FLOW_SCOPE,
 					"item", RentalNotificationTemplateCode.locale, ""));
 			for (RentalItemsOrder item : ribs) {
-				if (StringUtils.isNotBlank(e.getKey()))
-					e.setValue(e.getKey() + "\n" + item.getItemName() + "*" + item.getRentalCount());
+				if (StringUtils.isNotBlank(e.getValue()))
+					e.setValue(e.getValue() + "\n" + item.getItemName() + "*" + item.getRentalCount());
 				else
 					e.setValue(item.getItemName() + "*" + item.getRentalCount());
 			}
