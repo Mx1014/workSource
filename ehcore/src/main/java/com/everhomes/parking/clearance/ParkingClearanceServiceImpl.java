@@ -630,7 +630,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("The processor detail json is: {}", detailJson);
             }
-            flowCase.setCustomObject(StringHelper.toJsonString(map));
+        }
+        flowCase.setCustomObject(detailJson);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Flow case custom object is: {}", flowCase.getCustomObject());
         }
         return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
     }
