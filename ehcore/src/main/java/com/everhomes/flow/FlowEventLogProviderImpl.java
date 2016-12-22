@@ -202,7 +202,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	});
 		
         if(objs.size() >= count) {
-            locator.setAnchor(objs.get(objs.size() - 1).getId());
+            locator.setAnchor(objs.get(objs.size() - 1).getEventLogId());
         } else {
             locator.setAnchor(null);
         }
