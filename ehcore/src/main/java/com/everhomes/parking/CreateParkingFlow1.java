@@ -324,7 +324,6 @@ public class CreateParkingFlow1 {
     	String u1 = "13632650699";
     	testUser1 = userService.findUserByIndentifier(namespaceId, u1);
     	users.add(testUser1.getId());
-    	users.add(testUser2.getId());
 
     	return users;
     }
