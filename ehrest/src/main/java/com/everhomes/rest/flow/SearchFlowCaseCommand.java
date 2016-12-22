@@ -28,7 +28,7 @@ public class SearchFlowCaseCommand {
 	private String ownerType;
 	private String keyword;
 	private Integer pageSize;
-	private Long anchor;
+	private Long pageAnchor;
 	private Byte flowCaseSearchType;
 	private Long projectId;
 	private String projectType;
@@ -59,12 +59,12 @@ public class SearchFlowCaseCommand {
 		this.pageSize = pageSize;
 	}
 
-	public Long getAnchor() {
-		return anchor;
+	public Long getPageAnchor() {
+		return pageAnchor;
 	}
 
-	public void setAnchor(Long anchor) {
-		this.anchor = anchor;
+	public void setPageAnchor(Long pageAnchor) {
+		this.pageAnchor = pageAnchor;
 	}
 
 	public Integer getNamespaceId() {

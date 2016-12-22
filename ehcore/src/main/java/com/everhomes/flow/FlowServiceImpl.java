@@ -8,6 +8,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModule;
@@ -22,11 +24,13 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.parking.ParkingFlowConstant;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -35,6 +39,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -139,6 +144,12 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
+    
+    @Autowired
+    LocaleTemplateProvider localeTemplateProvider;
+    
+    @Autowired
+    private SmsProvider smsProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -713,10 +724,18 @@ public class FlowServiceImpl implements FlowService {
 			action.setNamespaceId(flowNode.getNamespaceId());
 			action.setFlowStepType(flowStepType);
 
-			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
-			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
-			action.setTrackerApplier(actionInfo.getTrackerApplier());
-			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			if(actionInfo.getReminderTickMinute() != null) {
+				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
+			}
+			if(actionInfo.getReminderAfterMinute() != null) {
+				action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());	
+			}
+			if(actionInfo.getTrackerApplier() != null) {
+				action.setTrackerApplier(actionInfo.getTrackerApplier());	
+			}
+			if(actionInfo.getTrackerProcessor() != null) {
+				action.setTrackerProcessor(actionInfo.getTrackerProcessor());	
+			}
 			
 			if(actionInfo.getEnabled() == null || actionInfo.getEnabled() > 0) {
 				action.setStatus(FlowActionStatus.ENABLED.getCode());	
@@ -734,10 +753,19 @@ public class FlowServiceImpl implements FlowService {
 				action.setStatus(FlowActionStatus.DISABLED.getCode());
 			}
 			
-			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
-			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
-			action.setTrackerApplier(actionInfo.getTrackerApplier());
-			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			if(actionInfo.getReminderTickMinute() != null) {
+				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
+			}
+			if(actionInfo.getReminderAfterMinute() != null) {
+				action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());	
+			}
+			if(actionInfo.getTrackerApplier() != null) {
+				action.setTrackerApplier(actionInfo.getTrackerApplier());	
+			}
+			if(actionInfo.getTrackerProcessor() != null) {
+				action.setTrackerProcessor(actionInfo.getTrackerProcessor());	
+			}
+			
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
 			
@@ -793,14 +821,14 @@ public class FlowServiceImpl implements FlowService {
 		
 		if(cmd.getRejectTracker() != null) {
 			dbProvider.execute((a) -> {
-				return createNodeAction(flowNode, cmd.getEnterTracker(), FlowActionType.TRACK.getCode()
+				return createNodeAction(flowNode, cmd.getRejectTracker(), FlowActionType.TRACK.getCode()
 						, FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.REJECT_STEP.getCode());
 			});
 		}
 		
 		if(cmd.getTransferTracker() != null) {
 			dbProvider.execute((a) -> {
-				return createNodeAction(flowNode, cmd.getEnterTracker(), FlowActionType.TRACK.getCode()
+				return createNodeAction(flowNode, cmd.getTransferTracker(), FlowActionType.TRACK.getCode()
 						, FlowActionStepType.STEP_LEAVE.getCode(), FlowStepType.TRANSFER_STEP.getCode());
 			});			
 		}
@@ -2873,19 +2901,37 @@ public class FlowServiceImpl implements FlowService {
 			action.setNamespaceId(flow.getNamespaceId());
 			action.setFlowStepType(flowStepType);
 
-			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
-			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
-			action.setTrackerApplier(actionInfo.getTrackerApplier());
-			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			if(actionInfo.getReminderTickMinute() != null) {
+				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
+			}
+			if(actionInfo.getReminderAfterMinute() != null) {
+				action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());	
+			}
+			if(actionInfo.getTrackerApplier() != null) {
+				action.setTrackerApplier(actionInfo.getTrackerApplier());	
+			}
+			if(actionInfo.getTrackerProcessor() != null) {
+				action.setTrackerProcessor(actionInfo.getTrackerProcessor());	
+			}
+			
 			action.setStatus(FlowActionStatus.ENABLED.getCode());
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.createFlowAction(action);
 			
 		} else {
-			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
-			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
-			action.setTrackerApplier(actionInfo.getTrackerApplier());
-			action.setTrackerProcessor(actionInfo.getTrackerProcessor());
+			if(actionInfo.getReminderTickMinute() != null) {
+				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
+			}
+			if(actionInfo.getReminderAfterMinute() != null) {
+				action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());	
+			}
+			if(actionInfo.getTrackerApplier() != null) {
+				action.setTrackerApplier(actionInfo.getTrackerApplier());	
+			}
+			if(actionInfo.getTrackerProcessor() != null) {
+				action.setTrackerProcessor(actionInfo.getTrackerProcessor());	
+			}
+			
 			action.setStatus(FlowActionStatus.ENABLED.getCode());
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
@@ -2956,7 +3002,7 @@ public class FlowServiceImpl implements FlowService {
 						, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_NONE.getCode(), FlowStepType.EVALUATE_STEP.getCode());	
 			}
 			if(cmd.getSmsAction() != null) {
-				createEvaluateAction(flow, FlowConstants.FLOW_CONFIG_VER, cmd.getMessageAction()
+				createEvaluateAction(flow, FlowConstants.FLOW_CONFIG_VER, cmd.getSmsAction()
 						, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_NONE.getCode(), FlowStepType.EVALUATE_STEP.getCode());				
 			}
 			
@@ -3062,6 +3108,57 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return resp;
+	}
+
+	@Override
+	public FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd) {
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
+		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
+		if(entityType == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
+		}
+		
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getAnchor());
+		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		
+		FlowSMSTemplateResponse resp = new FlowSMSTemplateResponse();
+		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
+		if(flow == null) {
+			return resp;
+		}
+		
+		String scope = "flow:" + String.valueOf(flow.getModuleId()) + "%";
+		
+      User user = UserContext.current().getUser();
+      String locale = Locale.SIMPLIFIED_CHINESE.toString();
+      if(user != null) {
+        	locale = user.getLocale();
+        }
+        
+      List<FlowSMSTemplateDTO> dtos = new ArrayList<FlowSMSTemplateDTO>();
+      resp.setDtos(dtos);
+      
+		List<LocaleTemplate> templates = localeTemplateProvider.listLocaleTemplatesByScope(locator, cmd.getNamespaceId(), scope, locale, cmd.getKeyword(), count);
+		resp.setNextPageAnchor(locator.getAnchor());
+		if(templates != null) {
+			templates.forEach(t -> {
+				dtos.add(ConvertHelper.convert(t, FlowSMSTemplateDTO.class));
+			});
+		}
+		
+		return resp;
+	}
+	
+	private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
+	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 	}
 	
 }
