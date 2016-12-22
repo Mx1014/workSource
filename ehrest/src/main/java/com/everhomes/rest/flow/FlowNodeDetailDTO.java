@@ -15,7 +15,6 @@ public class FlowNodeDetailDTO {
 	 private Long     id;
     private Byte     status;
     private String     description;
-    private Integer     autoStepHour;
     private Long     flowMainId;
     private Timestamp     createTime;
     private Integer     namespaceId;
@@ -23,6 +22,9 @@ public class FlowNodeDetailDTO {
     private Integer     nodeLevel;
     private String     nodeName;
     private String params;
+    private String autoStepType;
+    private Byte allowApplierUpdate;
+    private Integer autoStepMinute;
     
 	@ItemType(FlowUserSelectionDTO.class)
 	List<FlowUserSelectionDTO> processors;
@@ -46,6 +48,30 @@ public class FlowNodeDetailDTO {
 		return status;
 	}
 
+	public String getAutoStepType() {
+		return autoStepType;
+	}
+
+	public void setAutoStepType(String autoStepType) {
+		this.autoStepType = autoStepType;
+	}
+
+	public Byte getAllowApplierUpdate() {
+		return allowApplierUpdate;
+	}
+
+	public void setAllowApplierUpdate(Byte allowApplierUpdate) {
+		this.allowApplierUpdate = allowApplierUpdate;
+	}
+
+	public Integer getAutoStepMinute() {
+		return autoStepMinute;
+	}
+
+	public void setAutoStepMinute(Integer autoStepMinute) {
+		this.autoStepMinute = autoStepMinute;
+	}
+
 	public void setStatus(Byte status) {
 		this.status = status;
 	}
@@ -57,15 +83,7 @@ public class FlowNodeDetailDTO {
 	public void setDescription(String description) {
 		this.description = description;
 	}
-
-	public Integer getAutoStepHour() {
-		return autoStepHour;
-	}
-
-	public void setAutoStepHour(Integer autoStepHour) {
-		this.autoStepHour = autoStepHour;
-	}
-
+	
 	public Long getFlowMainId() {
 		return flowMainId;
 	}

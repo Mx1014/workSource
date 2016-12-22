@@ -5,8 +5,10 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.parking.ParkingLot;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.techpark.expansion.InitTestFlowDataCommand;
@@ -134,10 +136,10 @@ public class ParkingClearanceTestDataController extends ControllerBase {
     public void init() {
         testUser1 = userService.findUserByIndentifier(namespaceId, u1);
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        List<Long> parkingLotIds = context.select(Tables.EH_PARKING_LOTS.ID).from(Tables.EH_PARKING_LOTS)
-                .where(Tables.EH_PARKING_LOTS.NAMESPACE_ID.eq(namespaceId)).fetchInto(Long.class);
-        if (parkingLotIds != null) {
-            parkingLotIds.forEach(this::flowData);
+        List<ParkingLot> parkingLots = context.select().from(Tables.EH_PARKING_LOTS)
+                .where(Tables.EH_PARKING_LOTS.NAMESPACE_ID.eq(namespaceId)).fetchInto(ParkingLot.class);
+        if (parkingLots != null) {
+            parkingLots.forEach(this::flowData);
         }
     }
 
@@ -160,7 +162,7 @@ public class ParkingClearanceTestDataController extends ControllerBase {
         });
     }
 
-    private void flowData(Long parkingLotId) {
+    private void flowData(ParkingLot parkingLot) {
 
         Flow flow = flowProvider.findFlowByName(namespaceId, moduleId, null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
         if(flow != null) {
@@ -173,8 +175,10 @@ public class ParkingClearanceTestDataController extends ControllerBase {
         flowCmd.setModuleId(moduleId);
         flowCmd.setNamespaceId(namespaceId);
         flowCmd.setOrgId(orgId);
-        flowCmd.setOwnerId(parkingLotId);
+        flowCmd.setOwnerId(parkingLot.getId());
         flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
+        flowCmd.setProjectType(EntityType.COMMUNITY.getCode());
+        flowCmd.setProjectId(parkingLot.getOwnerId());
         FlowDTO flowDTO = flowService.createFlow(flowCmd);
 
         CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
@@ -349,29 +353,6 @@ public class ParkingClearanceTestDataController extends ControllerBase {
 
         return action;
     }
-
-    /*private FlowActionInfo createApplierActionInfo(String text, Long orgId) {
-        FlowActionInfo action = new FlowActionInfo();
-        action.setRenderText(text);
-
-        CreateFlowUserSelectionCommand seleCmd = new CreateFlowUserSelectionCommand();
-        seleCmd.setFlowEntityType(FlowEntityType.FLOW_ACTION.getCode());
-        seleCmd.setFlowUserType(FlowUserType.APPLIER.getCode());
-
-        List<FlowSingleUserSelectionCommand> sels = new ArrayList<>();
-        List<Long> users = this.getOrgUsers(orgId);
-        for(Long u : users) {
-            FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
-            singCmd.setSourceIdA(u);
-            singCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
-            singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
-            sels.add(singCmd);
-        }
-        seleCmd.setSelections(sels);
-        action.setUserSelections(seleCmd);
-
-        return action;
-    }*/
 
     private List<Long> getOrgUsers(Long id) {
         List<Long> users = new ArrayList<>();
