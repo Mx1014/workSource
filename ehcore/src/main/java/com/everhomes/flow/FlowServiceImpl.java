@@ -24,11 +24,13 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.parking.ParkingFlowConstant;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -37,6 +39,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -144,6 +147,9 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     LocaleTemplateProvider localeTemplateProvider;
+    
+    @Autowired
+    private SmsProvider smsProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -3119,9 +3125,13 @@ public class FlowServiceImpl implements FlowService {
 		locator.setAnchor(cmd.getAnchor());
 		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		
+		FlowSMSTemplateResponse resp = new FlowSMSTemplateResponse();
 		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
-		FlowModuleDTO module = this.getModuleById(flow.getModuleId());
-		String scope = "flow:" + module.getDisplayName() + "%";
+		if(flow == null) {
+			return resp;
+		}
+		
+		String scope = "flow:" + String.valueOf(flow.getModuleId()) + "%";
 		
       User user = UserContext.current().getUser();
       String locale = Locale.SIMPLIFIED_CHINESE.toString();
@@ -3129,7 +3139,6 @@ public class FlowServiceImpl implements FlowService {
         	locale = user.getLocale();
         }
         
-      FlowSMSTemplateResponse resp = new FlowSMSTemplateResponse();
       List<FlowSMSTemplateDTO> dtos = new ArrayList<FlowSMSTemplateDTO>();
       resp.setDtos(dtos);
       
@@ -3142,6 +3151,14 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return resp;
+	}
+	
+	private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
+	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 	}
 	
 }
