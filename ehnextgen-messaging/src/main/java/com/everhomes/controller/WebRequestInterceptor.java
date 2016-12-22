@@ -495,6 +495,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 					appKey,URLEncoder.encode(signature,"UTF-8"));
 			Clients ci = new Clients();
 			String responseString = ci.restCall("GET", param, null, null, null);
+			
+			LOGGER.error("getBizUserInfo the response of getUserInfoById , responseString={}", responseString);
+
 			Gson gson = new Gson();
 			CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>(){}.getType());
 			UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
@@ -506,7 +509,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			return userInfo;
 		}
 		catch(Exception e){
-			LOGGER.error("getUserInfo method error.e="+e.getMessage());
+			LOGGER.error("getUserInfo method error", e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
 					"getUserInfo method error.");
 		}

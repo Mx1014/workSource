@@ -486,7 +486,15 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	cmd.setPageSize(3);
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    	
+    	cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	cmd.setPageSize(3);
+    	cmd.setPageAnchor(resp.getNextPageAnchor());
+    	resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
     	
     	SearchFlowCaseCommand cmd2 = new SearchFlowCaseCommand();
