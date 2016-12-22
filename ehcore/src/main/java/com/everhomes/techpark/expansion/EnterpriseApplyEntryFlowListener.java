@@ -15,6 +15,8 @@ import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -28,6 +30,8 @@ import java.util.Map;
  */
 @Component
 public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(EnterpriseApplyEntryFlowListener.class);
 
     @Autowired
     private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
@@ -95,21 +99,27 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             String locale = UserContext.current().getUser().getLocale();
             Map<String, Object> map = new HashMap<>();
 
-            map.put("applyUserName", applyEntry.getApplyUserName());
-            map.put("contactPhone", applyEntry.getApplyContact());
-            map.put("enterpriseName", applyEntry.getEnterpriseName());
+            map.put("applyUserName", defaultIfNull(applyEntry.getApplyUserName(), ""));
+            map.put("contactPhone", defaultIfNull(applyEntry.getApplyContact(), ""));
+            map.put("enterpriseName", defaultIfNull(applyEntry.getEnterpriseName(), ""));
             String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE,
                     applyEntry.getApplyType() + "", locale, "");
-            map.put("applyType", applyType);
-            map.put("areaSize", applyEntry.getAreaSize());
+            map.put("applyType", defaultIfNull(applyType, ""));
+            map.put("areaSize", defaultIfNull(applyEntry.getAreaSize(), ""));
             this.processSourceName(applyEntry);
-            map.put("sourceType", applyEntry.getSourceName());
-            map.put("description", applyEntry.getDescription());
+            map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
+            map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
 
             String jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
-            return (FlowCaseEntityList)StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
+            return (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
+        } else {
+            LOGGER.warn("Not found EhEnterpriseOpRequests instance for flowCase: {}", StringHelper.toJsonString(flowCase));
         }
         return new ArrayList<>();
+    }
+
+    private Object defaultIfNull(Object obj, Object defaultValue) {
+        return obj != null ? obj : defaultValue;
     }
 
     private void processSourceName(EnterpriseOpRequest applyEntry) {
