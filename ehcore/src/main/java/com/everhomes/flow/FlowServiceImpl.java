@@ -1133,6 +1133,12 @@ public class FlowServiceImpl implements FlowService {
 			return true;
 		}
 		
+		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+		if(enabledFlow != null && enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
+			flowProvider.updateFlow(enabledFlow);
+		}
+		
 		updateFlowVersion(flow);
 		
 		List<FlowNode> flowNodes = flowNodeProvider.findFlowNodesByFlowId(flowId, FlowConstants.FLOW_CONFIG_VER);
@@ -1180,65 +1186,31 @@ public class FlowServiceImpl implements FlowService {
 		flowGraph.getNodes().add(end);
 //		flowGraph.saveIds();
 		
-		//now all the graph is collected, do snapshot
-		Flow flowNew = flowProvider.getFlowById(flowId);
-		if(!flowNew.getUpdateTime().equals(flow.getUpdateTime())) {
-			//the flow is updated, retry
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONFIG_BUSY, "flow has changed, retry");
-		}
+		//TODO busy check ???
+//		if(!flowNew.getUpdateTime().equals(flow.getUpdateTime())) {
+//			//the flow is updated, retry
+//			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONFIG_BUSY, "flow has changed, retry");
+//		}
 		
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-		flowNew.setUpdateTime(now);
-		flowNew.setStatus(FlowStatusType.SNAPSHOT.getCode());
-		flowProvider.updateFlow(flowNew);
-		
 		boolean isOk = true;
 		try {
-			dbProvider.execute((s)->{
+			dbProvider.execute((s)->{				
 				doSnapshot(flowGraph);
+				
+				//running now
+				flow.setUpdateTime(now);
+				flow.setRunTime(now);
+				flow.setStatus(FlowStatusType.RUNNING.getCode());
+				flowProvider.updateFlow(flow);
+				
 				return true;
 			});
-			
-			//running now
-			now = new Timestamp(DateHelper.currentGMTTime().getTime());
-			flowNew.setUpdateTime(now);
-			flowNew.setRunTime(now);
-			flowNew.setStatus(FlowStatusType.RUNNING.getCode());
-			flowProvider.updateFlow(flowNew);
 			
 		} catch(Exception ex) {
 			isOk = false;
 			LOGGER.error("do snapshot error", ex);
 		}
-		
-		if(isOk) {
-			//TODO need this?
-			if(flowGraph.getFlow().getId().equals(flowNew.getId())) {
-				isOk = false;
-			} else {
-				Flow snapFlow = flowProvider.getFlowById(flowGraph.getFlow().getId());
-				if(snapFlow == null) {
-					isOk = false;
-				}	
-			}
-		}
-		
-		if(!isOk) {
-			//change back to config
-			now = new Timestamp(DateHelper.currentGMTTime().getTime());
-			flowNew.setUpdateTime(now);
-			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
-			flowProvider.updateFlow(flowNew);			
-		}
-//		else { //TODO save graph right now ?
-//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
-//			graphMap.put(fmt, flowGraph);
-//		}
-		
-//		else {
-//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
-//			graphMap.put(fmt, flowGraph);
-//		}
 		
 		return isOk;
 	}
@@ -2966,11 +2938,11 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
 		}
 		
-		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
-		FlowNode node2 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateEnd());
+//		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
+//		FlowNode node2 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateEnd());
 		
-		flow.setEvaluateStart(new Long(node1.getNodeLevel()));
-		flow.setEvaluateEnd(new Long(node2.getNodeLevel()));
+		flow.setEvaluateStart(cmd.getEvaluateStart());
+		flow.setEvaluateEnd(cmd.getEvaluateEnd());
 		flow.setEvaluateStep(cmd.getEvaluateStep());
 		flow.setEvaluateStep(cmd.getEvaluateStep());
 		flow.setNeedEvaluate(cmd.getNeedEvaluate());
