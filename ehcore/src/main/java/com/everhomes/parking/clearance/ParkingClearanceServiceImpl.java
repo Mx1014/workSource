@@ -36,7 +36,6 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +46,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -632,7 +630,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("The processor detail json is: {}", detailJson);
             }
-            // flowCase.setCustomObject(StringHelper.toJsonString(this.buildCustomObject()));
+        }
+        flowCase.setCustomObject(detailJson);
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Flow case custom object is: {}", flowCase.getCustomObject());
         }
         return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
     }
