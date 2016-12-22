@@ -318,7 +318,7 @@ public class ParkingClearanceTestDataController extends ControllerBase {
         flowService.createFlowUserSelection(seleCmd);
     }
 
-    private void updateNodeReminder(FlowNodeDTO dto, Long orgId) {
+    /*private void updateNodeReminder(FlowNodeDTO dto, Long orgId) {
         UpdateFlowNodeReminderCommand remindCmd = new UpdateFlowNodeReminderCommand();
         remindCmd.setFlowNodeId(dto.getId());
         FlowActionInfo action = createActionInfo("您收到一条车辆放行任务", orgId);
@@ -329,7 +329,7 @@ public class ParkingClearanceTestDataController extends ControllerBase {
         // action.setReminderTickMinute(0L);
         // remindCmd.setTickMessageAction(action);
         flowService.updateFlowNodeReminder(remindCmd);
-    }
+    }*/
 
     private FlowActionInfo createActionInfo(String text, Long orgId) {
         FlowActionInfo action = new FlowActionInfo();

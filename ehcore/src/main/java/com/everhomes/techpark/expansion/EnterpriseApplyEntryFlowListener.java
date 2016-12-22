@@ -10,7 +10,6 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
 import com.everhomes.user.UserContext;
@@ -65,7 +64,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-        ApplyEntryStatus status = null;
+        // 不用做什么
+        /*ApplyEntryStatus status = null;
         switch (ctx.getStepType()) {
             case APPROVE_STEP:
                 status = ApplyEntryStatus.RESIDED_IN;
@@ -79,7 +79,7 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
         }
         if (status != null) {
             enterpriseApplyEntryProvider.updateApplyEntryStatus(ctx.getFlowCase().getReferId(), status.getCode());
-        }
+        }*/
     }
 
     @Override
