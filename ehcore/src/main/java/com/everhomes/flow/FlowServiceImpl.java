@@ -810,14 +810,14 @@ public class FlowServiceImpl implements FlowService {
 		
 		if(cmd.getRejectTracker() != null) {
 			dbProvider.execute((a) -> {
-				return createNodeAction(flowNode, cmd.getEnterTracker(), FlowActionType.TRACK.getCode()
+				return createNodeAction(flowNode, cmd.getRejectTracker(), FlowActionType.TRACK.getCode()
 						, FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.REJECT_STEP.getCode());
 			});
 		}
 		
 		if(cmd.getTransferTracker() != null) {
 			dbProvider.execute((a) -> {
-				return createNodeAction(flowNode, cmd.getEnterTracker(), FlowActionType.TRACK.getCode()
+				return createNodeAction(flowNode, cmd.getTransferTracker(), FlowActionType.TRACK.getCode()
 						, FlowActionStepType.STEP_LEAVE.getCode(), FlowStepType.TRANSFER_STEP.getCode());
 			});			
 		}
@@ -2991,7 +2991,7 @@ public class FlowServiceImpl implements FlowService {
 						, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_NONE.getCode(), FlowStepType.EVALUATE_STEP.getCode());	
 			}
 			if(cmd.getSmsAction() != null) {
-				createEvaluateAction(flow, FlowConstants.FLOW_CONFIG_VER, cmd.getMessageAction()
+				createEvaluateAction(flow, FlowConstants.FLOW_CONFIG_VER, cmd.getSmsAction()
 						, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_NONE.getCode(), FlowStepType.EVALUATE_STEP.getCode());				
 			}
 			
