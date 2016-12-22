@@ -499,3 +499,9 @@ update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
 -- 修改没有权限时的提示语  add by xq.tian  2016/12/21
 --
 UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');
+
+
+-- 左邻的http的链接 改成https by sfyan 20161222   建议备份一下表
+update `eh_launch_pad_items` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+update `eh_banners` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+update `eh_configurations` set `value` = replace(`value`,'http', 'https')  where `value` like '%zuolin%' and  `value` like '%http:%' and `value` like '%.html%';

@@ -575,19 +575,20 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public void onFlowButtonFired(FlowCaseState ctx) {
         String params = ctx.getCurrentNode().getFlowNode().getParams();
         Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
+        ParkingClearanceLogStatus status = null;
         if (map != null) {
-            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(((String) map.get("status")));
-            if (status == ParkingClearanceLogStatus.PROCESSING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
-                Long logId = ctx.getFlowCase().getReferId();
-                coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-                    ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-                    if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
-                        log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
-                        clearanceLogProvider.updateClearanceLog(log);
-                    }
-                    return null;
-                });
-            }
+            status = ParkingClearanceLogStatus.valueOf(((String) map.get("status")));
+        }
+        if (status == ParkingClearanceLogStatus.PROCESSING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
+            Long logId = ctx.getFlowCase().getReferId();
+            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
+                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
+                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
+                    log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
+                    clearanceLogProvider.updateClearanceLog(log);
+                }
+                return null;
+            });
         }
     }
 
@@ -647,7 +648,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     
 	@Override
 	public void onFlowCreating(Flow flow) {
-		// TODO Auto-generated method stub
-	//Added by Janson	
+	    // Added by Janson
 	}
 }
