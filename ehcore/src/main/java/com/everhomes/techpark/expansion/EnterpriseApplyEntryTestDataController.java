@@ -4,6 +4,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.RestResponse;
@@ -174,6 +175,8 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
         flowCmd.setOrgId(orgId);
         flowCmd.setOwnerId(communityId);
         flowCmd.setOwnerType(FlowOwnerType.COMMUNITY.getCode());
+        flowCmd.setProjectId(communityId);
+        flowCmd.setProjectType(EntityType.COMMUNITY.getCode());
         FlowDTO flowDTO = flowService.createFlow(flowCmd);
 
         CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();

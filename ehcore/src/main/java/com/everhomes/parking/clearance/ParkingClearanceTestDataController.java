@@ -5,14 +5,17 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.*;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.parking.ParkingLot;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.group.GetClubPlaceholderNameCommand;
+import com.everhomes.rest.techpark.expansion.InitTestFlowDataCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.User;
 import com.everhomes.user.UserService;
+import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -61,13 +64,63 @@ public class ParkingClearanceTestDataController extends ControllerBase {
      */
     @RequestMapping("initData")
     @RestReturn(String.class)
-    public RestResponse initData(GetClubPlaceholderNameCommand cmd) {
+    public RestResponse initData(InitTestFlowDataCommand cmd) {
         RestResponse response = new RestResponse();
         try {
-            initFlowData(cmd.getNamespaceId());
+            initFlowData(cmd);
         } catch (Exception e) {
             e.printStackTrace();
             response.setResponseObject(e);
+        }
+        return response;
+    }
+
+    /**
+     * <p>获取初始化工作流数据</p>
+     * <b>URL: /clearance/test/listData</b>
+     */
+    @RequestMapping("listData")
+    @RestReturn(value = String.class)
+    public RestResponse listData(InitTestFlowDataCommand cmd) {
+        RestResponse response = new RestResponse();
+        try {
+            List<Flow> flows = flowProvider.queryFlows(new ListingLocator(), 1000, (locator, query) -> {
+                query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                query.addConditions(Tables.EH_FLOWS.FLOW_NAME.eq(flowName));
+                return query;
+            });
+            response.setResponseObject(StringHelper.toJsonString(flows));
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()).toString());
+        }
+        return response;
+    }
+
+    /**
+     * <p>删除初始化工作流数据</p>
+     * <b>URL: /clearance/test/deleteData</b>
+     */
+    @RequestMapping("deleteData")
+    @RestReturn(String.class)
+    public RestResponse deleteData(InitTestFlowDataCommand cmd) {
+        RestResponse response = new RestResponse();
+        try {
+            List<Flow> flows = flowProvider.queryFlows(new ListingLocator(), 1000, (locator, query) -> {
+                query.addConditions(Tables.EH_FLOWS.NAMESPACE_ID.eq(cmd.getNamespaceId()));
+                query.addConditions(Tables.EH_FLOWS.FLOW_NAME.eq(flowName));
+                return query;
+            });
+            if (flows != null) {
+                for (Flow flow : flows) {
+                    flowProvider.deleteFlow(flow);
+                }
+            } else {
+                response.setErrorDescription("Flows list is empty!");
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+            response.setResponseObject(Arrays.asList(e.getMessage(), e.getStackTrace()).toString());
         }
         return response;
     }
@@ -76,29 +129,40 @@ public class ParkingClearanceTestDataController extends ControllerBase {
     private Integer namespaceId = 999984;// 999984
     private Long moduleId = 20900L;
     private Long orgId = 1008218L;// 1008218L
-    private List<Long> parkingLotIds;
+    private String flowName = "车辆放行工作流";
+    private String u1 = "13600161256";
+
 
     public void init() {
-        String u1 = "13600161256";
         testUser1 = userService.findUserByIndentifier(namespaceId, u1);
-
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-        parkingLotIds = context.select(Tables.EH_PARKING_LOTS.ID).from(Tables.EH_PARKING_LOTS)
-                .where(Tables.EH_PARKING_LOTS.NAMESPACE_ID.eq(namespaceId)).fetchInto(Long.class);
-    }
-
-    private void initFlowData(Integer namespaceId){
-        if (namespaceId != null) {
-            this.namespaceId = namespaceId;
-        }
-        init();
-        if (parkingLotIds != null) {
-            parkingLotIds.forEach(this::flowData);
+        List<ParkingLot> parkingLots = context.select().from(Tables.EH_PARKING_LOTS)
+                .where(Tables.EH_PARKING_LOTS.NAMESPACE_ID.eq(namespaceId)).fetchInto(ParkingLot.class);
+        if (parkingLots != null) {
+            parkingLots.forEach(this::flowData);
         }
     }
 
-    private void flowData(Long parkingLotId) {
-        String flowName = "车辆放行工作流";
+    private void initFlowData(InitTestFlowDataCommand cmd){
+        if (cmd.getNamespaceId() != null) {
+            this.namespaceId = cmd.getNamespaceId();
+        }
+        if (cmd.getIdentifierToken() != null) {
+            this.u1 = cmd.getIdentifierToken();
+        }
+        if (cmd.getModuleId() != null) {
+            this.moduleId = cmd.getModuleId();
+        }
+        if (cmd.getOrganizationId() != null) {
+            this.orgId = cmd.getOrganizationId();
+        }
+        dbProvider.execute(status -> {
+            init();
+            return true;
+        });
+    }
+
+    private void flowData(ParkingLot parkingLot) {
 
         Flow flow = flowProvider.findFlowByName(namespaceId, moduleId, null, orgId, FlowOwnerType.PARKING.getCode(), flowName);
         if(flow != null) {
@@ -111,8 +175,10 @@ public class ParkingClearanceTestDataController extends ControllerBase {
         flowCmd.setModuleId(moduleId);
         flowCmd.setNamespaceId(namespaceId);
         flowCmd.setOrgId(orgId);
-        flowCmd.setOwnerId(parkingLotId);
+        flowCmd.setOwnerId(parkingLot.getId());
         flowCmd.setOwnerType(FlowOwnerType.PARKING.getCode());
+        flowCmd.setProjectType(EntityType.COMMUNITY.getCode());
+        flowCmd.setProjectId(parkingLot.getOwnerId());
         FlowDTO flowDTO = flowService.createFlow(flowCmd);
 
         CreateFlowNodeCommand nodeCmd = new CreateFlowNodeCommand();
@@ -287,29 +353,6 @@ public class ParkingClearanceTestDataController extends ControllerBase {
 
         return action;
     }
-
-    /*private FlowActionInfo createApplierActionInfo(String text, Long orgId) {
-        FlowActionInfo action = new FlowActionInfo();
-        action.setRenderText(text);
-
-        CreateFlowUserSelectionCommand seleCmd = new CreateFlowUserSelectionCommand();
-        seleCmd.setFlowEntityType(FlowEntityType.FLOW_ACTION.getCode());
-        seleCmd.setFlowUserType(FlowUserType.APPLIER.getCode());
-
-        List<FlowSingleUserSelectionCommand> sels = new ArrayList<>();
-        List<Long> users = this.getOrgUsers(orgId);
-        for(Long u : users) {
-            FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
-            singCmd.setSourceIdA(u);
-            singCmd.setFlowUserSelectionType(FlowUserSelectionType.DEPARTMENT.getCode());
-            singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
-            sels.add(singCmd);
-        }
-        seleCmd.setSelections(sels);
-        action.setUserSelections(seleCmd);
-
-        return action;
-    }*/
 
     private List<Long> getOrgUsers(Long id) {
         List<Long> users = new ArrayList<>();

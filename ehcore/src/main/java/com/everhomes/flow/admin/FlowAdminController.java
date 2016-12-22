@@ -30,6 +30,7 @@ import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
@@ -508,6 +509,20 @@ public class FlowAdminController extends ControllerBase {
     @RestReturn(value=ListScriptsResponse.class)
     public RestResponse getFlowEvaluate(@Valid ListScriptsCommand cmd) {
         RestResponse response = new RestResponse(flowService.listScripts(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/flow/listSMSTemplates</b>
+     * <p> 获取工作流的评分信息 </p>
+     * @return
+     */
+    @RequestMapping("listSMSTemplates")
+    @RestReturn(value=FlowSMSTemplateResponse.class)
+    public RestResponse listSMSTemplates(@Valid ListScriptsCommand cmd) {
+        RestResponse response = new RestResponse(flowService.listSMSTemplates(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

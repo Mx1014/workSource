@@ -484,9 +484,18 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 1000000, 2);
 
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10020, 40130, '招租管理', 1, 1, '招租管理 工作流设置 全部权限', 419);
+
 -- Added by Janson 20161220
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
 ( 'flow', 10006, 'zh_CN', '用户评价：${score}分', '用户评价：${score}分');
 
 -- 要上线的app版本 by sfyan 20161221
 update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
+
+--
+-- 修改没有权限时的提示语  add by xq.tian  2016/12/21
+--
+UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');

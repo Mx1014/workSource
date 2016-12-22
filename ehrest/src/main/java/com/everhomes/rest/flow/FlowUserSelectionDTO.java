@@ -153,6 +153,14 @@ public class FlowUserSelectionDTO {
 		this.selectionName = selectionName;
 	}
 
+	public String getFlowUserSelectionType() {
+		return selectType;
+	}
+
+	public void setFlowUserSelectionType(String flowUserSelectionType) {
+		this.selectType = flowUserSelectionType;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
