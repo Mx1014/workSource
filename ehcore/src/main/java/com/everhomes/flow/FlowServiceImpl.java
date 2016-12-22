@@ -1199,6 +1199,8 @@ public class FlowServiceImpl implements FlowService {
 				doSnapshot(flowGraph);
 				
 				//running now
+				flow.setId(flow.getFlowMainId());
+				flow.setFlowMainId(0l);
 				flow.setUpdateTime(now);
 				flow.setRunTime(now);
 				flow.setStatus(FlowStatusType.RUNNING.getCode());
