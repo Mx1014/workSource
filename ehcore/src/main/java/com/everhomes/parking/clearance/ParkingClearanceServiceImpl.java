@@ -602,39 +602,42 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         Map<String, Object> map = new HashMap<>();
         String detailJson;
 
-        map.put("parkingLotName", parkingLot != null ? parkingLot.getName() : "");
-        map.put("plateNumber", log.getPlateNumber());
+        map.put("parkingLotName", defaultIfNull(parkingLot.getName(), ""));
+        map.put("plateNumber", defaultIfNull(log.getPlateNumber(), ""));
         String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
-        map.put("clearanceTime", dateStr);
+        map.put("clearanceTime", defaultIfNull(dateStr, ""));
         // 如果remarks为空，显示 "无"
         if (log.getRemarks() == null) {
             String remarksNoneValue = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.NONE_CODE, currLocale(), "");
-            map.put("remarks", remarksNoneValue);
+            map.put("remarks", defaultIfNull(remarksNoneValue, ""));
         } else {
             map.put("remarks", log.getRemarks());
         }
 
-        // 处理人员可以看到申请人的相关信息
-        if (flowUserType == FlowUserType.PROCESSOR) {
-            map.put("applicant", applicant.getNickName());
-            map.put("identifierToken", userIdentifier.getIdentifierToken());
-            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
-                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR, currLocale(), map, "");
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("The processor detail json is: {}", detailJson);
-            }
-
-            // flowCase.setCustomObject(StringHelper.toJsonString(this.buildCustomObject()));
-
-        } else {
+        if (flowUserType == FlowUserType.APPLIER) {
             detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
                     ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT, currLocale(), map, "");
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("The applicant detail json is: {}", detailJson);
             }
         }
+        // 处理人员可以看到申请人的相关信息
+        else {
+            map.put("applicant", defaultIfNull(applicant.getNickName(), ""));
+            map.put("identifierToken", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
+            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
+                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR, currLocale(), map, "");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("The processor detail json is: {}", detailJson);
+            }
+            // flowCase.setCustomObject(StringHelper.toJsonString(this.buildCustomObject()));
+        }
         return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
+    }
+
+    private Object defaultIfNull(Object obj, Object defaultValue) {
+        return obj != null ? obj : defaultValue;
     }
 
     @Override

@@ -174,8 +174,10 @@ public class CreateParkingFlow1 {
     	UpdateFlowNodeReminderCommand remindCmd = new UpdateFlowNodeReminderCommand();
     	remindCmd.setFlowNodeId(dto.getId());
     	FlowActionInfo action = createUserActionInfo("您的停车月卡申请已审核通过，请前往查看详情（逾期未办理将取消资格）");
+    	updateTargetVarAction2(action);
     	remindCmd.setMessageAction(action);
     	action = createUserActionInfo("您的停车月卡申请已审核通过，请前往查看详情（逾期未办理将取消资格）");
+    	updateTargetVarAction2(action);
     	action.setReminderAfterMinute(4l);
     	action.setReminderTickMinute(2l);
     	remindCmd.setTickMessageAction(action);
@@ -388,6 +390,9 @@ public class CreateParkingFlow1 {
     	UpdateFlowNodeCommand updateFlowCmd2 = new UpdateFlowNodeCommand();
     	updateFlowCmd2.setFlowNodeId(node2.getId());
     	updateFlowCmd2.setParams("{\"nodeType\":\"PROCESSING\"}");
+    	updateFlowCmd2.setAutoStepMinute(5);
+    	updateFlowCmd2.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+    	updateFlowCmd2.setAllowTimeoutAction((byte)1);
     	flowService.updateFlowNode(updateFlowCmd2);
     	
     	UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
@@ -423,7 +428,7 @@ public class CreateParkingFlow1 {
     	buttonCmd.setNeedProcessor((byte)0);
     	buttonCmd.setNeedSubject((byte)0);
     	
-    	FlowActionInfo buttonAction = createUserActionInfo("排队成功，请尽快携带资料前往管理处办理月卡");
+    	FlowActionInfo buttonAction = createUserActionInfo("您的停车月卡申请已审核通过，请前往查看详情（逾期未办理将取消资格）");
     	buttonCmd.setMessageAction(buttonAction);
     	updateTargetVarAction2(buttonAction);
     	flowService.updateFlowButton(buttonCmd);
