@@ -713,7 +713,7 @@ public class FlowServiceImpl implements FlowService {
 			action.setNamespaceId(flowNode.getNamespaceId());
 			action.setFlowStepType(flowStepType);
 
-			if(actionInfo.getReminderAfterMinute() != null) {
+			if(actionInfo.getReminderTickMinute() != null) {
 				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
 			}
 			if(actionInfo.getReminderAfterMinute() != null) {
@@ -742,7 +742,7 @@ public class FlowServiceImpl implements FlowService {
 				action.setStatus(FlowActionStatus.DISABLED.getCode());
 			}
 			
-			if(actionInfo.getReminderAfterMinute() != null) {
+			if(actionInfo.getReminderTickMinute() != null) {
 				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
 			}
 			if(actionInfo.getReminderAfterMinute() != null) {
@@ -2890,7 +2890,7 @@ public class FlowServiceImpl implements FlowService {
 			action.setNamespaceId(flow.getNamespaceId());
 			action.setFlowStepType(flowStepType);
 
-			if(actionInfo.getReminderAfterMinute() != null) {
+			if(actionInfo.getReminderTickMinute() != null) {
 				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
 			}
 			if(actionInfo.getReminderAfterMinute() != null) {
@@ -2908,7 +2908,7 @@ public class FlowServiceImpl implements FlowService {
 			flowActionProvider.createFlowAction(action);
 			
 		} else {
-			if(actionInfo.getReminderAfterMinute() != null) {
+			if(actionInfo.getReminderTickMinute() != null) {
 				action.setReminderTickMinute(actionInfo.getReminderTickMinute());	
 			}
 			if(actionInfo.getReminderAfterMinute() != null) {
