@@ -307,9 +307,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		FlowStepType fromStep = ctx.getStepType();
 		FlowGraphNode curr = ctx.getCurrentNode();
 		
-		if(curr.getFlowNode().getNodeLevel() > 1) {
-			ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
-		}
+//		if(curr.getFlowNode().getNodeLevel() > 1) {
+//			ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
+//		}
 		ctx.getFlowCase().setCurrentNodeId(curr.getFlowNode().getId());
 		boolean logStep = false;
 		
