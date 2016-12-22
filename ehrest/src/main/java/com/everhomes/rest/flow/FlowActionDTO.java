@@ -24,6 +24,7 @@ public class FlowActionDTO {
     private Long trackerProcessor;
     private Long trackerApplier;
     private Long allowTimeoutAction;
+    private Long templateId;
     private Byte enabled;
     
 	@ItemType(FlowUserSelectionDTO.class)
@@ -171,6 +172,14 @@ public class FlowActionDTO {
 
 	public void setEnabled(Byte enabled) {
 		this.enabled = enabled;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
 	}
 
 	@Override
