@@ -40,6 +40,8 @@ public class FlowCaseDetailDTO {
 	private Byte allowApplierUpdate;
 	private String customObject;
 	private String currNodeParams;
+	private Long stepCount;
+	private Long rejectCount;
     
     @ItemType(FlowCaseEntity.class)
     private List<FlowCaseEntity> entities;
@@ -271,6 +273,22 @@ public class FlowCaseDetailDTO {
 
 	public void setCurrNodeParams(String currNodeParams) {
 		this.currNodeParams = currNodeParams;
+	}
+
+	public Long getStepCount() {
+		return stepCount;
+	}
+
+	public void setStepCount(Long stepCount) {
+		this.stepCount = stepCount;
+	}
+
+	public Long getRejectCount() {
+		return rejectCount;
+	}
+
+	public void setRejectCount(Long rejectCount) {
+		this.rejectCount = rejectCount;
 	}
 
 	@Override
