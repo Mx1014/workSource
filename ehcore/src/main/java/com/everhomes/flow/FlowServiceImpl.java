@@ -1120,6 +1120,14 @@ public class FlowServiceImpl implements FlowService {
 	public Boolean enableFlow(Long flowId) {
 		final FlowGraph flowGraph = new FlowGraph();
 		Flow flow = flowProvider.getFlowById(flowId);
+		
+		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+		if(enabledFlow != null && !enabledFlow.getId().equals(flowId)
+				&& enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
+			flowProvider.updateFlow(enabledFlow);
+		}
+		
 		if(flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
 			//restart it
 			flow.setStatus(FlowStatusType.RUNNING.getCode());
@@ -1133,11 +1141,6 @@ public class FlowServiceImpl implements FlowService {
 			return true;
 		}
 		
-		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
-		if(enabledFlow != null && enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
-			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
-			flowProvider.updateFlow(enabledFlow);
-		}
 		
 		updateFlowVersion(flow);
 		
