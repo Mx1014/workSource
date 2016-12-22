@@ -36,11 +36,20 @@ CREATE TABLE `eh_service_alliance_invest_requests` (
 
 
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `display_destination` TINYINT DEFAULT '0' COMMENT '0: both, 1: client only, 2: browser only';
+ALTER TABLE `eh_service_alliances` ADD COLUMN `module_url` VARCHAR(256);
 
 ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `attachment_type` TINYINT DEFAULT '0' COMMENT '0: banner; 1: file attachment';
 ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `name` VARCHAR(128);
 ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `file_size` INTEGER NOT NULL DEFAULT '0';
 ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `download_count` INTEGER NOT NULL DEFAULT '0';
+
+CREATE TABLE `eh_service_alliance_jump_module` (
+  `id` BIGINT NOT NULL,
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
+  `module_name` VARCHAR(128) NOT NULL DEFAULT '',
+  `module_url` VARCHAR(256) NOT NULL DEFAULT '',
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- merge from flow-delta-schema.sql by lqs 20161214
 -- eh_flows

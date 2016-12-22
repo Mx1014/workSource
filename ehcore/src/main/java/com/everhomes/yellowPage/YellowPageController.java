@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
- 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/yellowPage")
@@ -316,6 +317,22 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;
+    }
+
+    /**
+     * <b>URL: /yellowPage/listJumpModules</b>
+     * <p> 获取跳转模块列表</p>
+     */
+    @RequestMapping("listJumpModules")
+    @RestReturn(value = JumpModuleDTO.class, collection = true)
+    public RestResponse listJumpModules() {
+
+        List<JumpModuleDTO> resp = this.yellowPageService.listJumpModules();
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
     }
     
     /**

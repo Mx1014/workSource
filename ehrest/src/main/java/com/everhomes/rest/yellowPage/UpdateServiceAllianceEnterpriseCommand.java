@@ -32,6 +32,7 @@ import com.everhomes.util.StringHelper;
  *  <li>email: 邮箱地址</li>
  *  <li>templateType : 模板类型</li>
  *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
+ *  <li>moduleUrl : 跳转模块路径</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -82,6 +83,8 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String email;
 
 	private Long jumpType;
+
+	private String moduleUrl;
 	
 	public Long getId() {
 		return id;
@@ -265,6 +268,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setJumpType(Long jumpType) {
 		this.jumpType = jumpType;
+	}
+
+	public String getModuleUrl() {
+		return moduleUrl;
+	}
+
+	public void setModuleUrl(String moduleUrl) {
+		this.moduleUrl = moduleUrl;
 	}
 
 	@Override

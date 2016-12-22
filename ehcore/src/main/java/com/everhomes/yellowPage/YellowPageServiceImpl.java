@@ -345,6 +345,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			category.setNamespaceId(namespaceId);
 			category.setStatus((byte)2);
             category.setDisplayMode(cmd.getDisplayMode());
+			category.setDisplayDestination(cmd.getDisplayDestination());
             /*if(null == parent) {
 				category.setParentId(0L);
 				category.setPath(cmd.getName());
@@ -367,6 +368,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			category.setPath(parent.getName() + "/" + cmd.getName());
 			category.setLogoUrl(cmd.getLogoUrl());
             category.setDisplayMode(cmd.getDisplayMode());
+			category.setDisplayDestination(cmd.getDisplayDestination());
             yellowPageProvider.updateCategory(category);
 
             if (!Objects.equals(category.getName(), cmd.getName())) {
@@ -936,8 +938,14 @@ public class YellowPageServiceImpl implements YellowPageService {
     @Override
     public List<ServiceAllianceCategoryDTO> listServiceAllianceCategories(ListServiceAllianceCategoriesCommand cmd) {
         Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<Byte> displayDestination = new ArrayList<>();
+		if(cmd.getDestination() != null) {
+			displayDestination.add(cmd.getDestination());
+			displayDestination.add(ServiceAllianceCategoryDisplayDestination.BOTH.getCode());
+		}
+
         List<ServiceAllianceCategories> entityResultList = this.yellowPageProvider.listChildCategories(cmd.getOwnerType(), cmd.getOwnerId(),namespaceId,
-                cmd.getParentId(), CategoryAdminStatus.ACTIVE);
+                cmd.getParentId(), CategoryAdminStatus.ACTIVE, displayDestination);
         return entityResultList.stream().map(r -> {
             ServiceAllianceCategoryDTO dto = ConvertHelper.convert(r, ServiceAllianceCategoryDTO.class);
             String locale = UserContext.current().getUser().getLocale();
@@ -953,15 +961,26 @@ public class YellowPageServiceImpl implements YellowPageService {
         ServiceAllianceDisplayModeDTO displayModeDTO = new ServiceAllianceDisplayModeDTO();
         displayModeDTO.setDisplayMode(ServiceAllianceCategoryDisplayMode.LIST.getCode());
 
+		List<Byte> displayDestination = new ArrayList<>();
+		if(cmd.getDestination() != null) {
+			displayDestination.add(cmd.getDestination());
+			displayDestination.add(ServiceAllianceCategoryDisplayDestination.BOTH.getCode());
+		}
+
         ServiceAllianceCategories parentCategory = this.yellowPageProvider.findCategoryById(cmd.getParentId());
         if (parentCategory != null) {
             List<ServiceAllianceCategories> childCategories = this.yellowPageProvider.listChildCategories(null, null,
-                    UserContext.getCurrentNamespaceId(), parentCategory.getId(), CategoryAdminStatus.ACTIVE);
+                    UserContext.getCurrentNamespaceId(), parentCategory.getId(), CategoryAdminStatus.ACTIVE, displayDestination);
             if (childCategories != null && childCategories.size() > 0) {
                 displayModeDTO.setDisplayMode(childCategories.get(0).getDisplayMode());
             }
         }
         return displayModeDTO;
     }
+
+	@Override
+	public List<JumpModuleDTO> listJumpModules() {
+		return null;
+	}
 
 }

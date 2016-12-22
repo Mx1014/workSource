@@ -31,11 +31,13 @@ import java.util.List;
  *  <li>serviceUrl: 服务链接</li>
  *  <li>discount: 优惠 0：否 1：是</li>
  *  <li>discountDesc: 优惠信息</li>
- *  <li>templateType : 模板类型</li>
+ *  <li>templateType : 模板类型or模块类型</li>
  *  <li>templateName: 模板名称</li>
  *  <li>buttonTitle: 按钮名称</li>
  *  <li>email: 邮箱地址</li>
  *  <li>detailUrl: 服务详情页面URL</li>
+ *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
+ *  <li>moduleUrl : 跳转模块路径</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -78,6 +80,9 @@ public class ServiceAllianceDTO {
 	
 	@ItemType(ServiceAllianceAttachmentDTO.class)
 	private List<ServiceAllianceAttachmentDTO> attachments;
+
+	@ItemType(ServiceAllianceAttachmentDTO.class)
+	private List<ServiceAllianceAttachmentDTO> fileAttachments;
 	
 	private Long discount;
 	
@@ -97,6 +102,10 @@ public class ServiceAllianceDTO {
 	private String email;
 
     private String detailUrl;
+
+	private Long jumpType;
+
+	private String moduleUrl;
 	
 	public Long getId() {
 		return id;
@@ -277,6 +286,31 @@ public class ServiceAllianceDTO {
 	public void setEmail(String email) {
 		this.email = email;
 	}
+
+	public List<ServiceAllianceAttachmentDTO> getFileAttachments() {
+		return fileAttachments;
+	}
+
+	public void setFileAttachments(List<ServiceAllianceAttachmentDTO> fileAttachments) {
+		this.fileAttachments = fileAttachments;
+	}
+
+	public Long getJumpType() {
+		return jumpType;
+	}
+
+	public void setJumpType(Long jumpType) {
+		this.jumpType = jumpType;
+	}
+
+	public String getModuleUrl() {
+		return moduleUrl;
+	}
+
+	public void setModuleUrl(String moduleUrl) {
+		this.moduleUrl = moduleUrl;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

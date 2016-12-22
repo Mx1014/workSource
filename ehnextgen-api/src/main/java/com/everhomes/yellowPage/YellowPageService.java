@@ -48,4 +48,7 @@ public interface YellowPageService {
      * (用于客户端服务联盟类型displayType配置为list时获取displayMode使用)
      */
     ServiceAllianceDisplayModeDTO getServiceAllianceDisplayMode(GetServiceAllianceDisplayModeCommand cmd);
+
+
+	List<JumpModuleDTO> listJumpModules();
 }

@@ -461,7 +461,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
 	@Override
 	public List<ServiceAllianceCategories> listChildCategories(
-			String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status) {
+			String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         List<ServiceAllianceCategories> result = new ArrayList<ServiceAllianceCategories>();
         
@@ -483,7 +483,11 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 
     	if (!StringUtils.isEmpty(ownerType) )
     		condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
-    	
+
+		if(displayDestination != null && displayDestination.size() > 0) {
+			condition = condition.and(Tables.EH_SERVICE_ALLIANCE_CATEGORIES.DISPLAY_DESTINATION.in(displayDestination));
+		}
+
         if(condition != null) {
         	query.addConditions(condition);
         }
