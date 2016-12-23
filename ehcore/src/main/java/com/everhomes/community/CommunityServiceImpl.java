@@ -2876,7 +2876,11 @@ public class CommunityServiceImpl implements CommunityService {
 			communityProvider.createResourceCategory(project);
 			if(null != cmd.getBuildingIds() && cmd.getBuildingIds().size() > 0){
 				for (Long buildingId: cmd.getBuildingIds()) {
-					ResourceCategoryAssignment projectAssignment = new ResourceCategoryAssignment();
+					ResourceCategoryAssignment  projectAssignment = communityProvider.findResourceCategoryAssignment(buildingId, EntityType.BUILDING.getCode(), namespaceId);
+					if(null != projectAssignment){
+						communityProvider.deleteResourceCategoryAssignmentById(projectAssignment.getId());
+					}
+					projectAssignment = new ResourceCategoryAssignment();
 					projectAssignment.setNamespaceId(namespaceId);
 					projectAssignment.setCreatorUid(user.getId());
 					projectAssignment.setResourceCategryId(project.getId());
@@ -2907,7 +2911,11 @@ public class CommunityServiceImpl implements CommunityService {
 
 				if(null != cmd.getBuildingIds() && cmd.getBuildingIds().size() > 0){
 					for (Long buildingId: cmd.getBuildingIds()) {
-						ResourceCategoryAssignment projectAssignment = new ResourceCategoryAssignment();
+						ResourceCategoryAssignment  projectAssignment = communityProvider.findResourceCategoryAssignment(buildingId, EntityType.BUILDING.getCode(), namespaceId);
+						if(null != projectAssignment){
+							communityProvider.deleteResourceCategoryAssignmentById(projectAssignment.getId());
+						}
+						projectAssignment = new ResourceCategoryAssignment();
 						projectAssignment.setNamespaceId(namespaceId);
 						projectAssignment.setCreatorUid(user.getId());
 						projectAssignment.setResourceCategryId(project.getId());
