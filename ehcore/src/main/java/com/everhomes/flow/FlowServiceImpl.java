@@ -3088,7 +3088,20 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowScriptDTO> scripts = new ArrayList<>();
 		resp.setScripts(scripts);
 		
-		List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(111l, null);
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
+		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
+		if(entityType == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
+		}
+		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
+		if(flow == null) {
+			return resp;
+		}
+		
+		List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(flow.getModuleId(), flow.getModuleType());
 		if(scs != null && scs.size() > 0) {
 			scs.forEach(s->{
 				FlowScriptDTO dto = ConvertHelper.convert(scs, FlowScriptDTO.class);

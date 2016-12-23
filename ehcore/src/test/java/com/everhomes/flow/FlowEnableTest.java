@@ -53,6 +53,8 @@ import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.ListSMSTemplateCommand;
+import com.everhomes.rest.flow.ListScriptsCommand;
+import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
@@ -1267,5 +1269,11 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	cmd.setNamespaceId(0);
     	FlowSMSTemplateResponse resp = flowService.listSMSTemplates(cmd);
     	Assert.assertTrue(resp.getDtos().size() > 0);
+    	
+    	ListScriptsCommand sc = new ListScriptsCommand();
+    	sc.setEntityId(flow.getFlowMainId());
+    	sc.setEntityType(FlowEntityType.FLOW.getCode());
+    	ListScriptsResponse scResp = flowService.listScripts(sc);
+    	Assert.assertTrue(scResp.getScripts().size() > 0);
     }
 }
