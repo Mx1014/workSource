@@ -21,6 +21,7 @@ import org.springframework.web.bind.annotation.RestController;
 
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -155,9 +156,11 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
         FlowNodeDTO node1 = createFlowNode(flowDTO.getId(), "待处理", 1);
         FlowNodeDTO node2 = createFlowNode(flowDTO.getId(), "处理中", 2);
         FlowNodeDTO node3 = createFlowNode(flowDTO.getId(), "已联系", 3);
-        FlowNodeDTO node4 = createFlowNode(flowDTO.getId(), "已完成", 4);
+        FlowNodeDTO node4 = createFlowNode(flowDTO.getId(), "已处理", 4);
 
         updateFlowNode(node4);
+
+        updateFlowEvaluate(flowDTO);
 
         addNodeProcessor(node1);
         addNodeProcessor(node2);
@@ -165,7 +168,7 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
         addNodeProcessor(node4);
 
         FlowActionInfo reminderActionInfo = createReminderProcessorActionInfo("您有一条园区入驻任务需要处理, 申请人:${applierName}");
-        FlowActionInfo promptActionInfo = createPromptApplierActionInfo("您的园区入驻任务有新的进展了,处理人:${currProcessor}");
+        FlowActionInfo promptActionInfo   = createPromptApplierActionInfo("您的园区入驻任务有新的进展了,处理人:${currProcessor}");
         FlowActionInfo completeActionInfo = createPromptApplierActionInfo("您的园区入驻任务已完成,处理人:${currProcessor}");
 
         FlowButton node1ApproveStepButton   = createButton(node1, "受理", FlowStepType.APPROVE_STEP, FlowUserType.PROCESSOR, promptActionInfo,  1);
@@ -205,6 +208,17 @@ public class EnterpriseApplyEntryTestDataController extends ControllerBase {
         }
 
         flowService.enableFlow(flowDTO.getId());
+    }
+
+    private void updateFlowEvaluate(FlowDTO flowDTO) {
+        UpdateFlowEvaluateCommand cmd = new UpdateFlowEvaluateCommand();
+        cmd.setNeedEvaluate((byte)1);
+        cmd.setFlowId(flowDTO.getId());
+        cmd.setEvaluateStart(4L);
+        cmd.setEvaluateEnd(4L);
+        cmd.setEvaluateStep(FlowStepType.NO_STEP.getCode());
+        cmd.setItems(Collections.singletonList("入驻评价"));
+        flowService.updateFlowEvaluate(cmd);
     }
 
     private FlowButton createButton(FlowNodeDTO node1, String buttonName, FlowStepType stepType, FlowUserType userType, FlowActionInfo actionInfo, int needSubject) {

@@ -153,7 +153,7 @@ public class ParkingClearanceTestDataController extends ControllerBase {
     private void flowData(ParkingLot parkingLot) {
         FlowDTO flowDTO = createFlow(parkingLot);
 
-        FlowNodeDTO node1 = createFlowNode(flowDTO.getId(), "待处理", "{\"code\":1, \"status\":\"PROCESSING\"}", 1);
+        FlowNodeDTO node1 = createFlowNode(flowDTO.getId(), "待处理", "{\"node\":\"PENDING\"}", 1);
         FlowNodeDTO node2 = createFlowNode(flowDTO.getId(), "处理中", null, 2);
         FlowNodeDTO node3 = createFlowNode(flowDTO.getId(), "处理完成", null, 3);
 
@@ -163,16 +163,13 @@ public class ParkingClearanceTestDataController extends ControllerBase {
         addNodeProcessor(node2);
         addNodeProcessor(node3);
 
-        FlowActionInfo promptActionInfo = createPromptApplierActionInfo("您的车辆放行任务已被处理, 处理人${currProcessor}");
+        FlowActionInfo promptActionInfo   = createPromptApplierActionInfo("您的车辆放行任务已被处理, 处理人${currProcessor}");
         FlowActionInfo completeActionInfo = createPromptApplierActionInfo("您的车辆放行任务已完成, 处理人${currProcessor}");
-        FlowActionInfo reminderActionInfo = createReminderProcessorActionInfo("您有一条车辆放行任务需要处理, 申请人:${applierName}");
 
         FlowButton node1ApproveStepButton   = createButton(node1, "受理", FlowStepType.APPROVE_STEP, FlowUserType.PROCESSOR, promptActionInfo, 1);
-        FlowButton node1ApplierRemindButton = createButton(node1, "催办", FlowStepType.REMINDER_STEP, FlowUserType.APPLIER, reminderActionInfo, 0);
         FlowButton node1ApplierAbortButton  = createButton(node1, "取消", FlowStepType.ABSORT_STEP, FlowUserType.APPLIER, null, 1);
 
         FlowButton node2ApproveStepButton   = createButton(node2, "完成", FlowStepType.APPROVE_STEP, FlowUserType.PROCESSOR, completeActionInfo, 1);
-        FlowButton node2ApplierRemindButton = createButton(node2, "催办", FlowStepType.REMINDER_STEP, FlowUserType.APPLIER, reminderActionInfo, 0);
         FlowButton node2ApplierAbortButton  = createButton(node2, "取消", FlowStepType.ABSORT_STEP, FlowUserType.APPLIER, null, 1);
 
         List<FlowButton> flowButtons = flowButtonProvider.queryFlowButtons(new ListingLocator(), 100, (locator, query) -> {
@@ -182,10 +179,8 @@ public class ParkingClearanceTestDataController extends ControllerBase {
 
         List<Long> needButtonIdList = Arrays.asList(
                 node1ApplierAbortButton.getId(),
-                node1ApplierRemindButton.getId(),
                 node1ApproveStepButton.getId(),
                 node2ApplierAbortButton.getId(),
-                node2ApplierRemindButton.getId(),
                 node2ApproveStepButton.getId()
         );
 
@@ -276,25 +271,6 @@ public class ParkingClearanceTestDataController extends ControllerBase {
         }
         seleCmd.setSelections(sels);
         flowService.createFlowUserSelection(seleCmd);
-    }
-
-    private FlowActionInfo createReminderProcessorActionInfo(String text) {
-        FlowActionInfo action = new FlowActionInfo();
-        action.setRenderText(text);
-
-        CreateFlowUserSelectionCommand seleCmd = new CreateFlowUserSelectionCommand();
-        seleCmd.setFlowEntityType(FlowEntityType.FLOW_BUTTON.getCode());
-        seleCmd.setFlowUserType(FlowUserType.APPLIER.getCode());
-
-        List<FlowSingleUserSelectionCommand> sels = new ArrayList<>();
-        FlowSingleUserSelectionCommand singCmd = new FlowSingleUserSelectionCommand();
-        singCmd.setSourceIdA(2002L);
-        singCmd.setFlowUserSelectionType(FlowUserSelectionType.VARIABLE.getCode());
-        singCmd.setSourceTypeA(FlowUserSourceType.SOURCE_VARIABLE.getCode());
-        sels.add(singCmd);
-        seleCmd.setSelections(sels);
-        action.setUserSelections(seleCmd);
-        return action;
     }
 
     private FlowActionInfo createPromptApplierActionInfo(String text) {
