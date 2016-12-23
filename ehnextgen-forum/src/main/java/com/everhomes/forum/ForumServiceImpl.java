@@ -218,6 +218,9 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        //黑名单权限校验 by sfyan20161213
+        checkBlacklist(null, null, cmd.getContentCategory(), cmd.getForumId());
+
     	//报名人数限制必须在1到10000之间，add by tt, 20161013
     	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getMaxQuantity()!= null) {
 			if (cmd.getMaxQuantity() < 1) {
@@ -3809,6 +3812,9 @@ public class ForumServiceImpl implements ForumService {
             privilegeId = PrivilegeConstants.BLACKLIST_PROPERTY_POST;
         }else if(-1 == categoryId || 1 == categoryId || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == categoryId|| CategoryConstants.CATEGORY_ID_TOPIC_POLLING == categoryId){
             privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
+        }else{
+            privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
+
         }
 
 
@@ -3827,8 +3833,7 @@ public class ForumServiceImpl implements ForumService {
 
     @Override
     public PostDTO createTopicByScene(NewTopicBySceneCommand cmd) {
-        //黑名单权限校验 by sfyan20161213
-        checkBlacklist(null, null, cmd.getContentCategory(), cmd.getForumId());
+
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         SceneTokenDTO sceneToken = userService.checkSceneToken(userId, cmd.getSceneToken());
