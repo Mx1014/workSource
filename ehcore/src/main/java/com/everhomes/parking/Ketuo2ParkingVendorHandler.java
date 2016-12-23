@@ -167,8 +167,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setPlateOwnerName(user.getNickName());
 			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
-//			parkingCardDTO.setFreeAmount(new BigDecimal(card.getFreeMoney()));
-//			parkingCardDTO.setIsSupportOnlinePaid(isSupportOnlinePaid);
+			parkingCardDTO.setFreeAmount(card.getFreeMoney() / 100 + "元/月");
+			parkingCardDTO.setIsSupportOnlinePaid(card.getIsAllow().byteValue());
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
 			List<KetuoCardType> types = getCardType();
