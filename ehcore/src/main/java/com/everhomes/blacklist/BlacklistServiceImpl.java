@@ -192,7 +192,7 @@ public class BlacklistServiceImpl implements BlacklistService{
 			return null;
 		});
 		// 加入黑名单发消息
-		this.sendMessageToUser(user, BlacklistNotificationTemplateCode.JOIN_USER_BLACKLIST, new HashMap<>(), BlacklistNotificationTemplateCode.SCOPE, "由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系客服。");
+		this.sendMessageToUser(user, BlacklistNotificationTemplateCode.JOIN_USER_BLACKLIST, new HashMap<>(), BlacklistNotificationTemplateCode.SCOPE, "由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系左邻客服。");
 	}
 
 	@Override
@@ -267,7 +267,7 @@ public class BlacklistServiceImpl implements BlacklistService{
 				if(null != userBlacklist){
 					User user = userProvider.findUserById(userBlacklist.getOwnerUid());
 					if(null != user){
-						this.sendMessageToUser(user, BlacklistNotificationTemplateCode.RELIEVE_USER_BLACKLIST, new HashMap<>(), BlacklistNotificationTemplateCode.SCOPE, "您的禁言已被解除，可继续使用各大板块的发言功能。如有疑问，请联系客服。");
+						this.sendMessageToUser(user, BlacklistNotificationTemplateCode.RELIEVE_USER_BLACKLIST, new HashMap<>(), BlacklistNotificationTemplateCode.SCOPE, "您的禁言已被解除，可继续使用各大板块的发言功能。如有疑问，请联系左邻客服。");
 					}
 				}
 			}
