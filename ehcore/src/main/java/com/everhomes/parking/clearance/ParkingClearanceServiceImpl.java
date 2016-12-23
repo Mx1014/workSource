@@ -8,18 +8,20 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.*;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.module.ServiceModule;
-import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
-import com.everhomes.rest.flow.*;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -35,7 +37,6 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -61,7 +62,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  * Created by xq.tian on 2016/12/2.
  */
 @Service
-public class ParkingClearanceServiceImpl implements ParkingClearanceService, FlowModuleListener {
+public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingClearanceServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -100,9 +101,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private LocaleStringService localeStringService;
 
     @Autowired
-    private ServiceModuleProvider serviceModuleProvider;
-
-    @Autowired
     private LocaleTemplateService localeTemplateService;
 
     @Autowired
@@ -118,7 +116,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
 
         if (cmd.getUserIds() != null && cmd.getUserIds().size() > 0) {
             int alreadyInsertUserCount = 0;
@@ -398,7 +395,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_TASK_MESSAGE_CODE, currLocale(), "");
         }
 
-        List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
+        List<ParkingLot> parkingLots = new ArrayList<>();
+        if (cmd.getParkingLotId() != null) {
+            ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+            if (parkingLot != null) {
+                parkingLots.add(parkingLot);
+            }
+        } else {
+            parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
+        }
 
         CheckAuthorityStatus status = CheckAuthorityStatus.FAILURE;
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
@@ -510,148 +515,4 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             });
         }*/
     }
-
-    @Override
-    public FlowModuleInfo initModule() {
-        FlowModuleInfo moduleInfo = new FlowModuleInfo();
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Autowired ServiceModuleProvider instance is {}", serviceModuleProvider);
-        }
-        ServiceModule module = serviceModuleProvider.findServiceModuleById(MODULE_ID);
-        moduleInfo.setModuleName(module.getName());
-        moduleInfo.setModuleId(MODULE_ID);
-        return moduleInfo;
-    }
-
-    @Override
-    public void onFlowCaseStart(FlowCaseState ctx) {
-
-    }
-
-    @Override
-    public void onFlowCaseAbsorted(FlowCaseState ctx) {
-        Long logId = ctx.getFlowCase().getReferId();
-        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
-                log.setStatus(ParkingClearanceLogStatus.CANCELLED.getCode());
-                clearanceLogProvider.updateClearanceLog(log);
-            }
-            return null;
-        });
-    }
-
-    @Override
-    public void onFlowCaseStateChanged(FlowCaseState ctx) {
-
-    }
-
-    @Override
-    public void onFlowCaseEnd(FlowCaseState ctx) {
-        Long logId = ctx.getFlowCase().getReferId();
-        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PROCESSING) {
-                log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
-                clearanceLogProvider.updateClearanceLog(log);
-            }
-            return null;
-        });
-    }
-
-    @Override
-    public void onFlowCaseActionFired(FlowCaseState ctx) {
-
-    }
-
-    @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
-        return flowCase.getContent();
-    }
-
-    @Override
-    public void onFlowButtonFired(FlowCaseState ctx) {
-        String params = ctx.getCurrentNode().getFlowNode().getParams();
-        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
-        ParkingClearanceLogStatus status = null;
-        if (map != null) {
-            status = ParkingClearanceLogStatus.valueOf(((String) map.get("status")));
-        }
-        if (status == ParkingClearanceLogStatus.PROCESSING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
-            Long logId = ctx.getFlowCase().getReferId();
-            coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-                ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-                if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
-                    log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
-                    clearanceLogProvider.updateClearanceLog(log);
-                }
-                return null;
-            });
-        }
-    }
-
-    @Override
-    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-        ParkingClearanceLog log = clearanceLogProvider.findById(flowCase.getReferId());
-
-        User applicant = this.findUserById(log.getApplicantId());
-        UserIdentifier userIdentifier = this.findUserIdentifierByUserId(applicant.getId());
-        ParkingLot parkingLot = parkingProvider.findParkingLotById(log.getParkingLotId());
-
-        Map<String, Object> map = new HashMap<>();
-        String detailJson;
-
-        map.put("parkingLotName", defaultIfNull(parkingLot.getName(), ""));
-        map.put("plateNumber", defaultIfNull(log.getPlateNumber(), ""));
-        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
-        map.put("clearanceTime", defaultIfNull(dateStr, ""));
-        // 如果remarks为空，显示 "无"
-        if (log.getRemarks() == null) {
-            String remarksNoneValue = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
-                    ParkingLocalStringCode.NONE_CODE, currLocale(), "");
-            map.put("remarks", defaultIfNull(remarksNoneValue, ""));
-        } else {
-            map.put("remarks", log.getRemarks());
-        }
-
-        if (flowUserType == FlowUserType.APPLIER) {
-            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
-                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT, currLocale(), map, "");
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("The applicant detail json is: {}", detailJson);
-            }
-        }
-        // 处理人员可以看到申请人的相关信息
-        else {
-            map.put("applicant", defaultIfNull(applicant.getNickName(), ""));
-            map.put("identifierToken", defaultIfNull(userIdentifier.getIdentifierToken(), ""));
-            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
-                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR, currLocale(), map, "");
-            if (LOGGER.isDebugEnabled()) {
-                LOGGER.debug("The processor detail json is: {}", detailJson);
-            }
-        }
-        flowCase.setCustomObject(this.buildCustomObjectStr(map, log.getCreateTime().getTime()));
-        return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
-    }
-
-    private String buildCustomObjectStr(Map<String, Object> map, Long createTime) {
-        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), createTime, "yyyy-MM-dd");
-        map.put("createTime", dateStr);
-        return StringHelper.toJsonString(map);
-    }
-
-    private Object defaultIfNull(Object obj, Object defaultValue) {
-        return obj != null ? obj : defaultValue;
-    }
-
-    @Override
-    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-        return null;
-    }
-    
-	@Override
-	public void onFlowCreating(Flow flow) {
-	    // Added by Janson
-	}
 }
