@@ -220,6 +220,11 @@ VALUES ((@id := @id+1), '0', '11', 'ENTERPRISE', '111', 'any-module', 'test-dumm
 --
 UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');
 
---- 短信测试
+--- 短信测试 Janson 20161223
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
 ( 'flow:40800', 10001, 'zh_CN', '您的验证码是${vcode}', '验证码短信测试');
+
+-- Janson 20161223
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10001, 'zh_CN', '您的验证码是${vcode}', '验证码短信测试');
+
