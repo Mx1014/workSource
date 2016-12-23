@@ -432,6 +432,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 
 			if(addMonthCard(order.getPlateNumber(), payMoney)) {
 				Integer count = order.getMonthCount().intValue();
+				
+		    	LOGGER.debug("Parking addMonthCard,count={}", count);
+
 				if(count > 1) {
 					order.setMonthCount(new BigDecimal(count -1) );
 					order.setPrice(new BigDecimal(order.getPrice().intValue()*100 - payMoney));
@@ -484,6 +487,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), order.getOwnerType(), 
     			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
     			null, null, null, null);
+    	
+    	LOGGER.debug("ParkingCardRequest list size={}", list.size());
     	ParkingCardRequest parkingCardRequest = null;
     	for(ParkingCardRequest p: list) {
     		Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
