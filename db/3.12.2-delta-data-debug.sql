@@ -226,9 +226,71 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 
 -- Janson 20161223
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
-(1000000, 'flow:40800', 10001, 'zh_CN', '您的验证码是${vcode}', '验证码短信测试');
+(1000000, 'flow:40800', 10001, 'zh_CN', '您的验证码是${vcode} 1', '验证码短信测试1');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10002, 'zh_CN', '您的验证码是${vcode} 2', '验证码短信测试2');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10003, 'zh_CN', '您的验证码是${vcode} 3', '验证码短信测试3');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10004, 'zh_CN', '您的验证码是${vcode} 4', '验证码短信测试4');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10005, 'zh_CN', '您的验证码是${vcode} 5', '验证码短信测试5');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10006, 'zh_CN', '您的验证码是${vcode} 6', '验证码短信测试6');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10007, 'zh_CN', '您的验证码是${vcode} 7', '验证码短信测试7');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10008, 'zh_CN', '您的验证码是${vcode} 8', '验证码短信测试8');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10009, 'zh_CN', '您的验证码是${vcode} 9', '验证码短信测试9');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10010, 'zh_CN', '您的验证码是${vcode} 10', '验证码短信测10');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10011, 'zh_CN', '您的验证码是${vcode} 11', '验证码短信测试11');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10012, 'zh_CN', '您的验证码是${vcode} 12', '验证码短信测试12');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10013, 'zh_CN', '您的验证码是${vcode} 13', '验证码短信测试13');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10014, 'zh_CN', '您的验证码是${vcode} 14', '验证码短信测试14');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10015, 'zh_CN', '您的验证码是${vcode} 15', '验证码短信测试15');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10016, 'zh_CN', '您的验证码是${vcode} 16', '验证码短信测试16');
 
 SET @id := (SELECT MAX(id) FROM eh_flow_scripts);
 INSERT INTO `eh_flow_scripts`(`id`,`namespace_id`,`owner_id`,`owner_type`,`module_id`,`module_type`,`name`,`script_type`,`script_cls`,`flow_step_type`,`step_type`)
 VALUES ((@id := @id+1), '1000000', '1000001', 'PARKING', '40800', 'any-module', 'test-dummpy', 'prototype', 'com.everhomes.flow.FlowScriptFireDummy', 'approve_step', 'step_enter'
 );
+
+-- sms tests
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10002, 'zh_CN', '您的验证码是${vcode} 2', '验证码短信测试2');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10003, 'zh_CN', '您的验证码是${vcode} 3', '验证码短信测试3');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10004, 'zh_CN', '您的验证码是${vcode} 4', '验证码短信测试4');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10005, 'zh_CN', '您的验证码是${vcode} 5', '验证码短信测试5');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10006, 'zh_CN', '您的验证码是${vcode} 6', '验证码短信测试6');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10007, 'zh_CN', '您的验证码是${vcode} 7', '验证码短信测试7');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10008, 'zh_CN', '您的验证码是${vcode} 8', '验证码短信测试8');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10009, 'zh_CN', '您的验证码是${vcode} 9', '验证码短信测试9');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10010, 'zh_CN', '您的验证码是${vcode} 10', '验证码短信测10');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10011, 'zh_CN', '您的验证码是${vcode} 11', '验证码短信测试11');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10012, 'zh_CN', '您的验证码是${vcode} 12', '验证码短信测试12');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10013, 'zh_CN', '您的验证码是${vcode} 13', '验证码短信测试13');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10014, 'zh_CN', '您的验证码是${vcode} 14', '验证码短信测试14');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10015, 'zh_CN', '您的验证码是${vcode} 15', '验证码短信测试15');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10016, 'zh_CN', '您的验证码是${vcode} 16', '验证码短信测试16');
