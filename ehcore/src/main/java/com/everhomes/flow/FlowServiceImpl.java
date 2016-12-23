@@ -876,6 +876,9 @@ public class FlowServiceImpl implements FlowService {
 				sel.setSelectType(sCmd.getFlowUserSelectionType());
 				sel.setStatus(FlowStatusType.VALID.getCode());
 				sel.setNamespaceId(UserContext.getCurrentNamespaceId());
+				if(sel.getOrganizationId() == null) {
+					sel.setOrganizationId(flow.getOrganizationId());
+				}
 				updateFlowUserName(sel);
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
@@ -1120,6 +1123,14 @@ public class FlowServiceImpl implements FlowService {
 	public Boolean enableFlow(Long flowId) {
 		final FlowGraph flowGraph = new FlowGraph();
 		Flow flow = flowProvider.getFlowById(flowId);
+		
+		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+		if(enabledFlow != null && !enabledFlow.getId().equals(flowId)
+				&& enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
+			flowProvider.updateFlow(enabledFlow);
+		}
+		
 		if(flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
 			//restart it
 			flow.setStatus(FlowStatusType.RUNNING.getCode());
@@ -1133,11 +1144,6 @@ public class FlowServiceImpl implements FlowService {
 			return true;
 		}
 		
-		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
-		if(enabledFlow != null && enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
-			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
-			flowProvider.updateFlow(enabledFlow);
-		}
 		
 		updateFlowVersion(flow);
 		
@@ -2440,7 +2446,7 @@ public class FlowServiceImpl implements FlowService {
 				}
 				
 				Long departmentId = parentOrgId;
-				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
+				if(FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeA())) {
 					if(null != sel.getSourceIdA()) {
 						departmentId = sel.getSourceIdA();	
 					}
@@ -2932,6 +2938,9 @@ public class FlowServiceImpl implements FlowService {
 				userSel.setFlowMainId(action.getFlowMainId());
 				userSel.setFlowVersion(action.getFlowVersion());
 				userSel.setNamespaceId(action.getNamespaceId());
+				if(userSel.getOrganizationId() == null) {
+					userSel.setOrganizationId(flow.getOrganizationId());	
+				}
 				createUserSelection(userSel, selCmd);
 			}
 		}

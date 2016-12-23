@@ -205,6 +205,14 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowSUS.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
     	List<FlowSingleUserSelectionCommand> flowSUSS = new ArrayList<>();
     	flowSUSS.add(flowSUS);
+    	
+    	//manager tests
+    	flowSUS = new FlowSingleUserSelectionCommand();
+    	flowSUS.setFlowUserSelectionType(FlowUserSelectionType.MANAGER.getCode());
+    	flowSUS.setSourceIdA(300044l);
+    	flowSUS.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
+    	flowSUSS.add(flowSUS);
+    	
     	flowSel.setSelections(flowSUSS);
     	flowService.createFlowUserSelection(flowSel);
     	
