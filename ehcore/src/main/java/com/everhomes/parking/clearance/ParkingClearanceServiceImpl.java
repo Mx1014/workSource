@@ -395,7 +395,15 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService {
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_TASK_MESSAGE_CODE, currLocale(), "");
         }
 
-        List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
+        List<ParkingLot> parkingLots = new ArrayList<>();
+        if (cmd.getParkingLotId() != null) {
+            ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+            if (parkingLot != null) {
+                parkingLots.add(parkingLot);
+            }
+        } else {
+            parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
+        }
 
         CheckAuthorityStatus status = CheckAuthorityStatus.FAILURE;
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
