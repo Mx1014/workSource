@@ -30,7 +30,7 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_
 	
 -- 错误提示语配置
 UPDATE `eh_locale_strings` SET `text` = '您权限不足' WHERE `scope` = 'general' AND `code` = '505';
-INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'blacklist', '600000', 'zh_CN', '您已被管理员禁止了此操作。');	
+INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'blacklist', '600000', 'zh_CN', '由于您已被禁言，不能正常使用该功能。');	
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'blacklist', '600020', 'zh_CN', '未查询到符合条件的对象，请查证。');	
 INSERT INTO `eh_locale_strings`(`scope`, `code`,`locale`, `text`) VALUES( 'blacklist', '600010', 'zh_CN', '黑名单已存在。');	
 

@@ -7,9 +7,17 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.acl.RoleConstants;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.blacklist.*;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.User;
@@ -29,7 +37,9 @@ import org.springframework.util.StringUtils;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 
@@ -55,6 +65,12 @@ public class BlacklistServiceImpl implements BlacklistService{
 
 	@Autowired
 	private AclProvider aclProvider;
+
+	@Autowired
+	private MessagingService messagingService;
+
+	@Autowired
+	private LocaleTemplateService localeTemplateService;
 
 	@Override
 	public ListUserBlacklistsResponse listUserBlacklists(ListUserBlacklistsCommand cmd) {
@@ -175,6 +191,8 @@ public class BlacklistServiceImpl implements BlacklistService{
 			rolePrivilegeService.assignmentPrivileges(cmd.getOwnerType(),cmd.getOwnerId(),EntityType.USER.getCode(), userBlacklist.getOwnerUid(), BlacklistErrorCode.SCOPE, cmd.getPrivilegeIds());
 			return null;
 		});
+		// 加入黑名单发消息
+		this.sendMessageToUser(user, BlacklistNotificationTemplateCode.JOIN_USER_BLACKLIST, new HashMap<>(), BlacklistNotificationTemplateCode.SCOPE, "由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系客服。");
 	}
 
 	@Override
@@ -242,6 +260,18 @@ public class BlacklistServiceImpl implements BlacklistService{
 				}
 				return null;
 			});
+
+			// 解除后 发消息
+			for (Long blacklistId: cmd.getBlacklistIds()) {
+				UserBlacklist userBlacklist = blacklistProvider.findUserBlacklistById(blacklistId);
+				if(null != userBlacklist){
+					User user = userProvider.findUserById(userBlacklist.getOwnerUid());
+					if(null != user){
+						this.sendMessageToUser(user, BlacklistNotificationTemplateCode.RELIEVE_USER_BLACKLIST, new HashMap<>(), BlacklistNotificationTemplateCode.SCOPE, "您的禁言已被解除，可继续使用各大板块的发言功能。如有疑问，请联系客服。");
+					}
+				}
+			}
+
 		}
 	}
 
@@ -283,4 +313,21 @@ public class BlacklistServiceImpl implements BlacklistService{
 		return dtos;
 	}
 
+	private void sendMessageToUser(User user, int templateCode, Map<String,Object> map, String scope, String defaultValue) {
+		String message = this.localeTemplateService.getLocaleTemplateString(scope,
+				templateCode, user.getLocale(), map, defaultValue);
+		if(message != null && message.length() != 0) {
+			String channelType = MessageChannelType.USER.getCode();
+			String channelToken = String.valueOf(user.getId());
+			MessageDTO messageDto = new MessageDTO();
+			messageDto.setAppId(AppConstants.APPID_MESSAGING);
+			messageDto.setSenderUid(User.SYSTEM_UID);
+			messageDto.setChannels(new MessageChannel(channelType, channelToken));
+			messageDto.setBodyType(MessageBodyType.NOTIFY.getCode());
+			messageDto.setBody(message);
+			messageDto.setMetaAppId(AppConstants.APPID_DEFAULT);
+			messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, channelType,
+					channelToken, messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		}
+	}
 }
