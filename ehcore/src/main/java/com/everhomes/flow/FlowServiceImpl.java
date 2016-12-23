@@ -3104,7 +3104,7 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(flow.getModuleId(), flow.getModuleType());
 		if(scs != null && scs.size() > 0) {
 			scs.forEach(s->{
-				FlowScriptDTO dto = ConvertHelper.convert(scs, FlowScriptDTO.class);
+				FlowScriptDTO dto = ConvertHelper.convert(s, FlowScriptDTO.class);
 				scripts.add(dto);
 			});
 		}
