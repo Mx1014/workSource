@@ -52,5 +52,5 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
 
-INSERT INTO `eh_locale_templates` (`scope`, `code`,`locale`,`description`, `text`, `namespace_id`) VALUES( 'blacklist.notification', '1', 'zh_CN', '通知用户已经被加入黑名单', '由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系左邻客服。', 0);	
-INSERT INTO `eh_locale_templates` (`scope`, `code`,`locale`,`description`, `text`, `namespace_id`) VALUES( 'blacklist.notification', '2', 'zh_CN', '通知用户已经被解除黑名单', '您的禁言已被解除，可继续使用各大板块的发言功能。如有疑问，请联系左邻客服。', 0);	
+INSERT INTO `eh_locale_templates` (`scope`, `code`,`locale`,`description`, `text`, `namespace_id`) VALUES( 'blacklist.notification', '1', 'zh_CN', '由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系左邻客服4008384688。', 0);	
+INSERT INTO `eh_locale_templates` (`scope`, `code`,`locale`,`description`, `text`, `namespace_id`) VALUES( 'blacklist.notification', '2', 'zh_CN', '您的禁言已被解除，可继续使用各大板块的发言功能。如有疑问，请联系左邻客服4008384688。', 0);	
