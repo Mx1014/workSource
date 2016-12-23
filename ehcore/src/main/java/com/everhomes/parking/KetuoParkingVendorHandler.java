@@ -117,7 +117,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
     	//储能月卡车没有 归属地区分
-    	plateNumber = plateNumber.substring(1, plateNumber.length());
+    	
     	KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
@@ -147,7 +147,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			
 			parkingCardDTO.setPlateOwnerName(user.getNickName());
-			parkingCardDTO.setPlateNumber(card.getPlateNo());
+			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
@@ -362,6 +362,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		KetuoCard card = null;
 		JSONObject param = new JSONObject();
 		
+		plateNumber = plateNumber.substring(1, plateNumber.length());
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_CARD);
         
@@ -384,7 +385,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-//		plateNumber = plateNumber.substring(1, plateNumber.length());
+
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long time = strToLong(oldValidEnd);
@@ -552,8 +553,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-//		plateNumber = plateNumber.substring(1, plateNumber.length());
-//		order.setPlateNumber(plateNumber);
 
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
