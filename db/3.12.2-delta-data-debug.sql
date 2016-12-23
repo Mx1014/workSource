@@ -228,3 +228,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
 (1000000, 'flow:40800', 10001, 'zh_CN', '您的验证码是${vcode}', '验证码短信测试');
 
+SET @id := (SELECT MAX(id) FROM eh_flow_scripts);
+INSERT INTO `eh_flow_scripts`(`id`,`namespace_id`,`owner_id`,`owner_type`,`module_id`,`module_type`,`name`,`script_type`,`script_cls`,`flow_step_type`,`step_type`)
+VALUES ((@id := @id+1), '1000000', '1000001', 'PARKING', '40800', 'any-module', 'test-dummpy', 'prototype', 'com.everhomes.flow.FlowScriptFireDummy', 'approve_step', 'step_enter'
+);
