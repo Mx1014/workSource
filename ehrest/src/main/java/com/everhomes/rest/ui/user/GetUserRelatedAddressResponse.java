@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.organization.OrgAddressDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.util.StringHelper;
@@ -11,15 +12,15 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>familyList: 家庭列表，{@link com.everhomes.rest.family.FamilyDTO}</li>
- *  <li>organizationList: 机构列表，{@link com.everhomes.rest.organization.OrganizationDTO}</li>
+ *  <li>organizationList: 机构列表，{@link com.everhomes.rest.organization.OrgAddressDTO}</li>
  * </ul>
  */
 public class GetUserRelatedAddressResponse {
     @ItemType(FamilyDTO.class)
     private List<FamilyDTO> familyList;
     
-    @ItemType(OrganizationDetailDTO.class)
-    private List<OrganizationDTO> organizationList;
+    @ItemType(OrgAddressDTO.class)
+    private List<OrgAddressDTO> organizationList;
 
     public List<FamilyDTO> getFamilyList() {
         return familyList;
@@ -29,15 +30,15 @@ public class GetUserRelatedAddressResponse {
         this.familyList = familyList;
     }
 
-    public List<OrganizationDTO> getOrganizationList() {
-        return organizationList;
-    }
+    public List<OrgAddressDTO> getOrganizationList() {
+		return organizationList;
+	}
 
-    public void setOrganizationList(List<OrganizationDTO> organizationList) {
-        this.organizationList = organizationList;
-    }
-    
-    @Override
+	public void setOrganizationList(List<OrgAddressDTO> organizationList) {
+		this.organizationList = organizationList;
+	}
+
+	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
