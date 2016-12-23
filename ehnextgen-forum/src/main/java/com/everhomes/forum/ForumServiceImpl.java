@@ -3807,7 +3807,7 @@ public class ForumServiceImpl implements ForumService {
             privilegeId = PrivilegeConstants.BLACKLIST_NOTICE_POST;
         }else if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(categoryId)){
             privilegeId = PrivilegeConstants.BLACKLIST_PROPERTY_POST;
-        }else if(CategoryConstants.CATEGORY_ID_TOPIC_COMMON == -1|| CategoryConstants.CATEGORY_ID_TOPIC_COMMON == categoryId|| CategoryConstants.CATEGORY_ID_TOPIC_POLLING == categoryId){
+        }else if(-1 == categoryId || 1 == categoryId || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == categoryId|| CategoryConstants.CATEGORY_ID_TOPIC_POLLING == categoryId){
             privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
         }
 
