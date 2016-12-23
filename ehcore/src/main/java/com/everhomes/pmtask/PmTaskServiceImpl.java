@@ -20,8 +20,10 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 
 import org.apache.commons.collections.CollectionUtils;
@@ -41,6 +43,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 import com.everhomes.acl.AclProvider;
@@ -100,6 +103,7 @@ import com.everhomes.rest.pmtask.EvaluateScoreDTO;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
 import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
@@ -2217,12 +2221,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 	
 	@Override
-	public GetUserRelatedAddressResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
+	public GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
-		GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
+		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
 
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
 	    if(null != namespaceDetail) {

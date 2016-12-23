@@ -26,6 +26,7 @@ import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
 import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
@@ -379,7 +380,7 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("getUserRelatedAddressesByCommunity")
     @RestReturn(value=GetUserRelatedAddressResponse.class)
     public RestResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
-    	GetUserRelatedAddressResponse resp = pmTaskService.getUserRelatedAddressesByCommunity(cmd);
+    	GetUserRelatedAddressByCommunityResponse resp = pmTaskService.getUserRelatedAddressesByCommunity(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
