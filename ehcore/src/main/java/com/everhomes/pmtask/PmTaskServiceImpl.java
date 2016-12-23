@@ -799,6 +799,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
+
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		String requestorPhone = cmd.getRequestorPhone();
 		String requestorName = cmd.getRequestorName();
 		if(StringUtils.isBlank(requestorPhone)){
