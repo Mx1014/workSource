@@ -2421,12 +2421,13 @@ public class FlowServiceImpl implements FlowService {
 			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
 			} else if(FlowUserSelectionType.POSITION.getCode().equals(sel.getSelectType())) {
+				//sourceA is position, sourceB is department
 				Long parentOrgId = orgId;
 				if(sel.getOrganizationId() != null) {
 					parentOrgId = sel.getOrganizationId();
 				}
 				Long departmentId = parentOrgId;
-				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeB())) {
+				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
 					departmentId = sel.getSourceIdB();
 				}
 				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceIdA())) {
