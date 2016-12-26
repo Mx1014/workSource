@@ -3075,7 +3075,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		dto.setHasResults((byte)0);
-		if(items.size() == evaMap.size()) {
+		if(items.size() != 0 && items.size() == evaMap.size()) {
 			dto.setHasResults((byte)1);
 		}
 		
@@ -3162,6 +3162,34 @@ public class FlowServiceImpl implements FlowService {
 	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
 	    String templateLocale = UserContext.current().getUser().getLocale();
 	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+	}
+
+	@Override
+	public FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId) {
+		FlowCaseState ctx = new FlowCaseState();
+		FlowGraph graph = new FlowGraph();
+		Flow flow = flowProvider.getFlowById(flowId);
+		graph.setFlow(flow);
+		ctx.setFlowGraph(graph);
+		
+		List<FlowUserSelection> sels = new ArrayList<>();
+		FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(selectionUserId);
+		sels.add(sel);
+		
+		List<Long> users = resolvUserSelections(ctx, null, null, sels);
+		
+		FlowResolveUsersResponse resp = new FlowResolveUsersResponse();
+		List<UserInfo> infos = new ArrayList<>();
+		resp.setUsers(infos);
+		
+		if(users != null && users.size() > 0) {
+			users.forEach((u)-> {
+				UserInfo ui = userService.getUserSnapshotInfoWithPhone(u);
+				infos.add(ConvertHelper.convert(ui, UserInfo.class));
+			});
+		}
+		
+		return resp;
 	}
 	
 }
