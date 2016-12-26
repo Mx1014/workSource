@@ -38,6 +38,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.RequestTemplateDTO;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
@@ -228,14 +229,18 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
+	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
 		SettleRequests request = yellowPageProvider.findSettleRequests(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
 		}
 		
-		return fieldList;
+		GetRequestInfoResponse response = new GetRequestInfoResponse();
+		response.setDtos(fieldList);
+		response.setCreateTime(request.getCreateTime());
+
+		return response;
 	}
 	
 	//硬转，纯体力

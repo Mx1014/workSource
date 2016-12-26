@@ -28,6 +28,7 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -211,14 +212,17 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
+	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
 		ServiceAllianceApartmentRequests request = yellowPageProvider.findApartmentRequests(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
 		}
+		GetRequestInfoResponse response = new GetRequestInfoResponse();
+		response.setDtos(fieldList);
+		response.setCreateTime(request.getCreateTime());
 		
-		return fieldList;
+		return response;
 	}
 
 

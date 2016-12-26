@@ -41,6 +41,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.videoconf.ConfServiceErrorCode;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
@@ -225,7 +226,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
+	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
 
 		ServiceAllianceRequests request = yellowPageProvider.findServiceAllianceRequests(id);
 		
@@ -235,7 +236,11 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 			fieldList = toFieldDTOList(request);
 		}
 		
-		return fieldList;
+		GetRequestInfoResponse response = new GetRequestInfoResponse();
+		response.setDtos(fieldList);
+		response.setCreateTime(request.getCreateTime());
+
+		return response;
 	}
 	
 	private void sendEmail(String emailAddress, String categoryName, String content) {

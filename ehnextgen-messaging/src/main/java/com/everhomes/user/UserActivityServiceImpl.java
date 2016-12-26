@@ -115,6 +115,7 @@ import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.version.VersionRequestCommand;
 import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -1205,10 +1206,10 @@ public class UserActivityServiceImpl implements UserActivityService {
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(GetRequestInfoCommand cmd) {
+	public GetRequestInfoResponse getCustomRequestInfo(GetRequestInfoCommand cmd) {
 		CustomRequestHandler handler = getCustomRequestHandler(cmd.getTemplateType());
 		
-		List<RequestFieldDTO> dto = handler.getCustomRequestInfo(cmd.getId());
+		GetRequestInfoResponse dto = handler.getCustomRequestInfo(cmd.getId());
 		return dto;
 	}
 	

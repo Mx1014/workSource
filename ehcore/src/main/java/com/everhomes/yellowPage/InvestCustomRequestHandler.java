@@ -18,12 +18,14 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceInvestRequests;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -204,14 +206,18 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
+	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
 		ServiceAllianceInvestRequests request = yellowPageProvider.findInvestRequests(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
 		}
+		
+		GetRequestInfoResponse response = new GetRequestInfoResponse();
+		response.setDtos(fieldList);
+		response.setCreateTime(request.getCreateTime());
 
-		return fieldList;
+		return response;
 	}
 
 
