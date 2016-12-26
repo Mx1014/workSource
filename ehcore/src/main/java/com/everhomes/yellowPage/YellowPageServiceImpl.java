@@ -578,13 +578,19 @@ public class YellowPageServiceImpl implements YellowPageService {
 				sa.setServiceType(category.getName());
 			}
 			ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
-			if(!StringUtils.isEmpty(dto.getTemplateType())) {
-				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
-				if(template != null) {
-					dto.setTemplateName(template.getName());
-					dto.setButtonTitle(template.getButtonTitle());
+			if(dto.getJumpType() != null) {
+				if(JumpType.TEMPLATE.equals(JumpType.fromCode(dto.getJumpType()))) {
+					RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
+					if(template != null) {
+						dto.setTemplateName(template.getName());
+						dto.setButtonTitle(template.getButtonTitle());
+					}
+				} else if(JumpType.MODULE.equals(JumpType.fromCode(dto.getJumpType()))) {
+					dto.setTemplateName(dto.getTemplateType());
+					dto.setButtonTitle(dto.getTemplateType());
 				}
 			}
+			
 			this.processDetailUrl(dto);
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
