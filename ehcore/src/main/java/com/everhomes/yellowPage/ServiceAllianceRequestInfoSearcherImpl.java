@@ -362,7 +362,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
-
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
+        
         if(LOGGER.isDebugEnabled())
             LOGGER.info("ServiceAllianceRequestInfoSearcherImpl query builder ："+builder);
 
@@ -398,6 +399,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         builder.setSearchType(SearchType.QUERY_THEN_FETCH);
         builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
         builder.setQuery(qb);
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
 
         if(LOGGER.isDebugEnabled())
             LOGGER.info("ServiceAllianceRequestInfoSearcherImpl query builder ："+builder);
