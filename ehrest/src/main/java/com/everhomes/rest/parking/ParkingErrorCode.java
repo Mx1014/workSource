@@ -26,6 +26,7 @@ public interface ParkingErrorCode {
 
     static final int ERROR_FLOW_NODE_PARAM = 10017;  //工作流节点参数错误
 
+    static final int ERROR_RECHARGE_MONTH_COUNT = 10018;  //过期充值月数小于1
 
     // ------------------ 车辆放行 ----------------------
     String SCOPE_CLEARANCE = "parking.clearance";
