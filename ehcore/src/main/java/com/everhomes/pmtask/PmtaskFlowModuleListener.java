@@ -112,30 +112,32 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		FlowCaseEntity e = new FlowCaseEntity();
 		
 		e = new FlowCaseEntity();
-		
-		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
 		e.setKey("服务内容");
 		e.setValue(dto.getContent());
 		entities.add(e);
 		
 		for(PmTaskAttachmentDTO s: dto.getAttachments()) {
+			e = new FlowCaseEntity();
 			e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
 			e.setKey("");
 			e.setValue(s.getContentUrl());
 			entities.add(e);
 		}
 		
+		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("服务地点");
 		e.setValue(dto.getAddress());
 		entities.add(e);
 		
+		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("所属分类");
 		e.setValue(dto.getCategoryName());
 		entities.add(e);
 		
+		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("发起人");
 		e.setValue(dto.getRequestorName());
