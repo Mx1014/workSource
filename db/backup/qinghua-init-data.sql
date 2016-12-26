@@ -2383,3 +2383,13 @@ update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvd05EVTBNMkprT
 update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMU5XUTFOV1JpWVdFNU5qVTBPVGxsWlRoa1l6ZGlNREZpWldVMVpUTXpNUQ"  where namespace_id=999984 and item_label="载物咨询";
 update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwbU1ERm1ObUV6TW1KbVlUZzRZMkUwWkRsa1lUSmtaRFkyWVRjek1XTTFPUQ"  where namespace_id=999984 and item_label="通讯录";
 update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMk5UTmpOalprWldSak1EZzVaVEkzTmpCbE1URXdNRFUwT1RCaVlXSTROUQ"  where namespace_id=999984 and item_label="钥匙圈"; 
+
+
+update eh_launch_pad_items set action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14479281351428699655%3F_k%3Dzlbiz#sign_suffix\"}' where item_label = '水木之家' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '绿植租摆' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '服务维修' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/property_service/index.html?taskCategoryId=205201&hideNavigationBar=1#/my_service#sign_suffix\"}' where item_label = '投诉建议' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '资金扶持' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '停车充值' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '车辆放行' and namespace_id = 999984;
+
