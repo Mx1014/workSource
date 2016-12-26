@@ -69,12 +69,21 @@ public class BuildingProviderImpl implements BuildingProvider {
 			.where(Tables.EH_BUILDINGS.NAME.eq(buildingName))
 			.and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
 			.and(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
-			.and(Tables.EH_BUILDINGS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
 			.fetchOne();
 		if (record != null) {
 			return ConvertHelper.convert(record, Building.class);
 		}
 		return null;
+	}
+
+	@Override
+	public List<Building> listBuildingByNamespaceType(Integer namespaceId, Long communityId, String namespaceType) {
+		return getReadOnlyContext().select().from(Tables.EH_BUILDINGS)
+		.where(Tables.EH_BUILDINGS.NAMESPACE_BUILDING_TYPE.eq(namespaceType))
+		.and(Tables.EH_BUILDINGS.NAMESPACE_ID.eq(namespaceId))
+		.and(Tables.EH_BUILDINGS.COMMUNITY_ID.eq(communityId))
+		.fetch()
+		.map(r->ConvertHelper.convert(r, Building.class));
 	}
 
 	private EhBuildingsDao getReadWriteDao() {

@@ -158,4 +158,6 @@ public interface DoorAccessService {
     DoorUserPermissionDTO deleteQRUserPermission(DeleteQRUserPermissionCommand cmd);
 
     ListQRUserPermissionResponse listQRUserPermissions(ListQRUserPermissionCommand cmd);
+
+	void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId);
 }

@@ -6,42 +6,7 @@ import javax.validation.Valid;
 
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCategoryDTO;
-import com.everhomes.rest.activity.ActivityCheckinCommand;
-import com.everhomes.rest.activity.ActivityConfirmCommand;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListCommand;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityPostCommand;
-import com.everhomes.rest.activity.ActivityRejectCommand;
-import com.everhomes.rest.activity.ActivityShareDetailResponse;
-import com.everhomes.rest.activity.ActivitySignupCommand;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityVideoDTO;
-import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
-import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
-import com.everhomes.rest.activity.GetActivityShareDetailCommand;
-import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.GetVideoCapabilityCommand;
-import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
-import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
-import com.everhomes.rest.activity.ListActivitiesByTagCommand;
-import com.everhomes.rest.activity.ListActivitiesCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListActivityCategoriesCommand;
-import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
-import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
-import com.everhomes.rest.activity.GetActivityWarningCommand;
-import com.everhomes.rest.activity.ActivityWarningResponse;
-import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.SetActivityWarningCommand;
-import com.everhomes.rest.activity.VideoCapabilityResponse;
-import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
+import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
@@ -135,5 +100,27 @@ public interface ActivityService {
 	ListActivitiesReponse listOfficialActivities(QueryOrganizationTopicCommand cmd);
 	
 	List<ActivityCategoryDTO> listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd);
+
+    void setActivityAchievement(SetActivityAchievementCommand cmd);
+
+    GetActivityAchievementResponse getActivityAchievement(GetActivityAchievementCommand cmd);
+
+    void createActivityAttachment(CreateActivityAttachmentCommand cmd);
+
+    void deleteActivityAttachment(DeleteActivityAttachmentCommand cmd);
+
+    ListActivityAttachmentsResponse listActivityAttachments(ListActivityAttachmentsCommand cmd);
+
+    void downloadActivityAttachment(DownloadActivityAttachmentCommand cmd);
+
+    void createActivityGoods(CreateActivityGoodsCommand cmd);
+
+    void updateActivityGoods(UpdateActivityGoodsCommand cmd);
+
+    void deleteActivityGoods(DeleteActivityGoodsCommand cmd);
+
+    ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd);
+
+    ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
 
 }

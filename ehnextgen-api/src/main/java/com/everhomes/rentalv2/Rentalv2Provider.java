@@ -103,6 +103,8 @@ public interface Rentalv2Provider {
 			String vendorType , Integer pageSize, Long startTime, Long endTime,
 			Byte invoiceFlag,Long userId);
 
+	List<RentalOrder> listSuccessRentalBills();
+	
 	List<RentalResource> findRentalSites(Long  resourceTypeId, String keyword, ListingLocator locator,
 			Integer pageSize,List<Byte>  status,List<Long>  siteIds,Long communityId);
  
@@ -262,8 +264,8 @@ public interface Rentalv2Provider {
 
 	String getPriceStringByResourceId(Long rentalSiteId);
 
-
-	void deleteRentalCellsByResourceId(Long rentalSiteId);
+ 
+	void deleteRentalCellsByResourceId(Long rentalSiteId); 
 
  
 

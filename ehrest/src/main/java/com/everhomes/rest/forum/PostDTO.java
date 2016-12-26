@@ -158,7 +158,7 @@ public class PostDTO {
     
     private String groupName;
 
-	public Long getGroupId() {
+    public Long getGroupId() {
 		return groupId;
 	}
 

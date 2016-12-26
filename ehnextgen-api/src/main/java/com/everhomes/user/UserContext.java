@@ -12,6 +12,7 @@ public class UserContext {
     private App callerApp;
     private Integer namespaceId;
     private String version;
+    private String versionRealm;
     
     public UserContext() {
     }
@@ -73,6 +74,14 @@ public class UserContext {
 	    return getCurrentNamespaceId(null);
 	}
 	
+	public static void setCurrentNamespaceId(Integer namespaceId) {
+		current().setNamespaceId(namespaceId);
+	}
+	
+	public static void setCurrentUser(User user) {
+		current().setUser(user);
+	}
+	
 	public static Integer getCurrentNamespaceId(Integer namespaceId){
 		UserContext context = s_userContexts.get();
 		
@@ -96,4 +105,11 @@ public class UserContext {
 		
 	}
 
+    public String getVersionRealm() {
+        return versionRealm;
+    }
+
+    public void setVersionRealm(String versionRealm) {
+        this.versionRealm = versionRealm;
+    }
 }

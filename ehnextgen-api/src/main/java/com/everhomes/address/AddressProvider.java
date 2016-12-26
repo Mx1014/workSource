@@ -39,4 +39,5 @@ public interface AddressProvider {
 
     List<AddressDTO> listAddressByBuildingName(Integer namespaceId, Long communityId, String buildingName);
 	Address findAddressByBuildingApartmentName(Integer namespaceId, Long communityId, String buildingName, String apartmentName);
+	List<Address> listAddressByNamespaceType(Integer namespaceId, Long communityId, String namespaceType);
 }
