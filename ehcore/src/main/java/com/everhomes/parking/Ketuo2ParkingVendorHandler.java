@@ -697,8 +697,10 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
 		String cardType = "2";
+		Integer freeMoney = 0;
 		if(null != cardInfo) {
 			cardType = cardInfo.getCarType();
+			freeMoney = cardInfo.getFreeMoney();
 		}
 		for(KetuoCardRate rate: getCardRule(cardType)) {
 			if(rate.getRuleId().equals(order.getRateToken())) {
@@ -711,7 +713,7 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
-		Integer freeMoney = cardInfo.getFreeMoney();
+
 		order.setPrice(new BigDecimal(order.getPrice().intValue() - (freeMoney / 100 * order.getMonthCount().intValue() )));
 		
 //    	ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
