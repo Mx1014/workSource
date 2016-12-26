@@ -13,7 +13,7 @@ public class UserContext {
     private Integer namespaceId;
     private String version;
     private String versionRealm;
-    private String protocol;
+    private String scheme;
     
     public UserContext() {
     }
@@ -114,11 +114,11 @@ public class UserContext {
         this.versionRealm = versionRealm;
     }
 
-    public String getProtocol() {
-        return protocol;
+    public String getScheme() {
+        return scheme;
     }
 
-    public void setProtocol(String protocol) {
-        this.protocol = protocol;
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
     }
 }
