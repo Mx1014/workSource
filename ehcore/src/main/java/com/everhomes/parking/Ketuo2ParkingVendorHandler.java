@@ -491,6 +491,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 	
 	private void updateFlowStatus(ParkingRechargeOrder order) {
 		User user = UserContext.current().getUser();
+    	LOGGER.debug("ParkingCardRequest pay callback user={}", user);
+
     	List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(user.getId(), order.getOwnerType(), 
     			order.getOwnerId(), order.getParkingLotId(), order.getPlateNumber(), ParkingCardRequestStatus.SUCCEED.getCode(),
     			null, null, null, null);
