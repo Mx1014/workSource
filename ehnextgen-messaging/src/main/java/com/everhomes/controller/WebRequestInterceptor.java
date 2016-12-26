@@ -133,6 +133,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 			Map<String, String> userAgents = getUserAgent(request);
 			setupNamespaceIdContext(userAgents);
 			setupVersionContext(userAgents);
+			setupProtocol(userAgents);
 			if(isProtected(handler)) {
 				LoginToken token = userService.getLoginToken(request);
 				// isValid转移到UserServiceImpl，使得其它地方也可以调（如第三方登录WebRequestWeixinInterceptor） by lqs 20160922
@@ -221,6 +222,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 //
 //		return this.userService.isValidLoginToken(token);
 //	}
+
+	private void setupProtocol(Map<String, String> userAgents) {
+		UserContext context = UserContext.current();
+		context.setProtocol(userAgents.get("protocol"));
+	}
 
 	private void setupVersionContext(Map<String, String> userAgents) {
 		UserContext context = UserContext.current();
@@ -319,6 +325,17 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 					}
 				}
 			}
+		}
+
+		String referer = request.getHeader("Referer");
+		if (referer == null || referer.isEmpty()) {
+			referer = request.getHeader("referer");
+		}
+
+		if(referer.startsWith("https")){
+			map.put("protocol", "https");
+		}else{
+			map.put("protocol", "http");
 		}
 
 		return map;
