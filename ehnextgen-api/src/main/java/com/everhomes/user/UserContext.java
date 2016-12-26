@@ -13,6 +13,7 @@ public class UserContext {
     private Integer namespaceId;
     private String version;
     private String versionRealm;
+    private String scheme;
     
     public UserContext() {
     }
@@ -111,5 +112,13 @@ public class UserContext {
 
     public void setVersionRealm(String versionRealm) {
         this.versionRealm = versionRealm;
+    }
+
+    public String getScheme() {
+        return scheme;
+    }
+
+    public void setScheme(String scheme) {
+        this.scheme = scheme;
     }
 }

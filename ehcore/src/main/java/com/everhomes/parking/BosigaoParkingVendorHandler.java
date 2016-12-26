@@ -107,16 +107,17 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 			String validEnd = card.getValidEnd();
 			Long endTime = strToLong2(validEnd+"235959");
 			long now = System.currentTimeMillis();
+			long cardReserveTime = 0;
 			
-			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-	    		endTime = endTime + cardReserveTime;
+	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
+
 	    	}
-	    	
-			if(endTime < now){
+			
+			if(endTime + cardReserveTime < now){
 				return resultList;
 			}
 			
@@ -420,8 +421,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(rate.getRateName());
-		order.setMonthCount(rate.getMonthCount());
-		order.setPrice(rate.getPrice());
 		
 	}
 

@@ -157,48 +157,6 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
-//		FlowCaseEntity e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("姓名");
-//		e.setValue(dto.getPlateOwnerName());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("手机号");
-//		e.setValue(dto.getPlateOwnerPhone());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("公司");
-//		e.setValue(dto.getPlateOwnerEntperiseName());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("车牌号");
-//		e.setValue(dto.getPlateNumber());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("品牌");
-//		e.setValue(dto.getCarBrand());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("车系");
-//		e.setValue(dto.getCarSerieName());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("颜色");
-//		e.setValue(dto.getCarColor());
-//		entities.add(e);
-		
 		return entities;
 	}
 

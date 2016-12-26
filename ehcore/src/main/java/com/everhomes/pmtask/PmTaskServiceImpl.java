@@ -19,8 +19,12 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +43,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RolePrivilegeService;
@@ -63,10 +69,12 @@ import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceDetail;
 import com.everhomes.namespace.NamespaceResourceProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -77,6 +85,8 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
+import com.everhomes.rest.organization.OrgAddressDTO;
+import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -93,6 +103,7 @@ import com.everhomes.rest.pmtask.EvaluateScoreDTO;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
 import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
@@ -784,7 +795,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = user.getNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
+		String handle = PmTaskHandle.FLOW;
 		
 		if(namespaceId == 999992) 
 			handle = PmTaskHandle.SHEN_YE;
@@ -815,7 +826,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
+		String handle = PmTaskHandle.FLOW;
 		
 		if(namespaceId == 999992) 
 			handle = PmTaskHandle.SHEN_YE;
@@ -2210,12 +2221,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	}
 	
 	@Override
-	public GetUserRelatedAddressResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
+	public GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 		User user = UserContext.current().getUser();
 		Long userId = user.getId();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long communityId = cmd.getOwnerId();
-		GetUserRelatedAddressResponse response = new GetUserRelatedAddressResponse();
+		GetUserRelatedAddressByCommunityResponse response = new GetUserRelatedAddressByCommunityResponse();
 
 	    NamespaceDetail namespaceDetail = namespaceResourceProvider.findNamespaceDetailByNamespaceId(namespaceId);
 	    if(null != namespaceDetail) {
@@ -2223,12 +2234,23 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    	if(type== NamespaceCommunityType.COMMUNITY_COMMERCIAL) {
 	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
 	    		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
-	    		List<OrganizationDTO> organizations = new ArrayList<OrganizationDTO>();
+	    		List<OrgAddressDTO> addressDTOs = new ArrayList<OrgAddressDTO>();
+
 	    		for(OrganizationDTO o: organizationList) {
-	    			if(o.getCommunityId().equals(communityId))
-	    				organizations.add(o);
+	    			if(o.getCommunityId().equals(communityId)) {
+	    				List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(o.getId());
+	    				List<OrgAddressDTO> addresses = organizationAddresses.stream().map( r -> {
+	    					Address address = addressProvider.findAddressById(r.getAddressId());
+	    					OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+	    					dto.setOrganizationId(o.getId());
+	    					dto.setDisplayName(o.getDisplayName());
+	    					return dto;
+	    					}).collect(Collectors.toList());
+	    				
+	    				addressDTOs.addAll(addresses);
+	    			}
 	    		}
-	    		response.setOrganizationList(organizations);
+	    		response.setOrganizationList(addressDTOs);
 	    	}else if(type== NamespaceCommunityType.COMMUNITY_RESIDENTIAL) {
 	    		List<FamilyDTO> familyList = familyService.getUserOwningFamilies();
 	    		List<FamilyDTO> families = new ArrayList<FamilyDTO>();
@@ -2246,14 +2268,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    				families.add(f);
 	    		}
 	    		response.setFamilyList(families);
+	    		
 	    		OrganizationGroupType groupType = OrganizationGroupType.ENTERPRISE;
 	    		List<OrganizationDTO> organizationList = organizationService.listUserRelateOrganizations(namespaceId, userId, groupType);
-	    		List<OrganizationDTO> organizations = new ArrayList<OrganizationDTO>();
+	    		List<OrgAddressDTO> addressDTOs = new ArrayList<OrgAddressDTO>();
 	    		for(OrganizationDTO o: organizationList) {
-	    			if(o.getCommunityId().equals(communityId))
-	    				organizations.add(o);
+	    			if(o.getCommunityId().equals(communityId)) {
+
+	    				List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(o.getId());
+	    				List<OrgAddressDTO> addresses = organizationAddresses.stream().map( r -> {
+	    					Address address = addressProvider.findAddressById(r.getAddressId());
+	    					OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+	    					dto.setOrganizationId(o.getId());
+	    					dto.setDisplayName(o.getDisplayName());
+	    					return dto;
+	    					}).collect(Collectors.toList());
+	    				
+	    				addressDTOs.addAll(addresses);
+	    			}
+	    				
 	    		}
-	    		response.setOrganizationList(organizations);
+	    		response.setOrganizationList(addressDTOs);
 	    	}
 	    }
 	    

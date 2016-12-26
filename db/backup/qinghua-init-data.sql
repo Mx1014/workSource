@@ -15,15 +15,15 @@ insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`
 	values(165,73,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999984, 'sms.default.yzx', 1, 'zh_CN', '验证码-清华信息港', '31143');
+	VALUES(999984, 'sms.default.yzx', 1, 'zh_CN', '验证码-清华信息港', '34268');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999984, 'sms.default.yzx', 4, 'zh_CN', '派单-清华信息港', '31144');
+	VALUES(999984, 'sms.default.yzx', 4, 'zh_CN', '派单-清华信息港', '34577');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
-	VALUES(999984, 'sms.default.yzx', 6, 'zh_CN', '任务2-清华信息港', '31146');
+	VALUES(999984, 'sms.default.yzx', 6, 'zh_CN', '任务2-清华信息港', '34578');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('sms.default.yzx', '11', 'zh_CN', '物业任务-清华信息港', '31157', '999984');
+	VALUES ('sms.default.yzx', '11', 'zh_CN', '物业任务-清华信息港', '34730', '999984');
 INSERT INTO `eh_locale_templates` (`scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-	VALUES ('sms.default.yzx', '10', 'zh_CN', '物业任务2-清华信息港', '30896', '999984');
+	VALUES ('sms.default.yzx', '10', 'zh_CN', '物业任务2-清华信息港', '34731', '999984');
 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
 	VALUES (248953  , UUID(), '9205218', '李叶', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '2',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999984);
@@ -2383,3 +2383,13 @@ update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvd05EVTBNMkprT
 update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMU5XUTFOV1JpWVdFNU5qVTBPVGxsWlRoa1l6ZGlNREZpWldVMVpUTXpNUQ"  where namespace_id=999984 and item_label="载物咨询";
 update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRwbU1ERm1ObUV6TW1KbVlUZzRZMkUwWkRsa1lUSmtaRFkyWVRjek1XTTFPUQ"  where namespace_id=999984 and item_label="通讯录";
 update  eh_launch_pad_items set icon_uri="cs://1/image/aW1hZ2UvTVRvMk5UTmpOalprWldSak1EZzVaVEkzTmpCbE1URXdNRFUwT1RCaVlXSTROUQ"  where namespace_id=999984 and item_label="钥匙圈"; 
+
+
+update eh_launch_pad_items set action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14479281351428699655%3F_k%3Dzlbiz#sign_suffix\"}' where item_label = '水木之家' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '绿植租摆' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '服务维修' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/property_service/index.html?taskCategoryId=205201&hideNavigationBar=1#/my_service#sign_suffix\"}' where item_label = '投诉建议' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '资金扶持' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '停车充值' and namespace_id = 999984;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '车辆放行' and namespace_id = 999984;
+
