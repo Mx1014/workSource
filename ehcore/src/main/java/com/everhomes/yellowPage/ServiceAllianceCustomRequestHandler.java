@@ -228,6 +228,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
 
 		ServiceAllianceRequests request = yellowPageProvider.findServiceAllianceRequests(id);
+		
 //		ServiceAllianceRequestsFields fields = ConvertHelper.convert(request, ServiceAllianceRequestsFields.class);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
@@ -276,139 +277,49 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
 		if(template != null && template.getDtos() != null && template.getDtos().size() > 0) {
+			List<RequestAttachments> attachments =  userActivityProvider.listRequestAttachments(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM, field.getId());
 			EhServiceAllianceRequests request = ConvertHelper.convert(field, EhServiceAllianceRequests.class);
 			Field[] fields = request.getClass().getDeclaredFields();
 			for (FieldDTO fieldDTO : template.getDtos()) {
 				RequestFieldDTO dto = new RequestFieldDTO();
 				dto.setFieldType(fieldDTO.getFieldType());
 				dto.setFieldContentType(fieldDTO.getFieldContentType());
+				dto.setFieldName(fieldDTO.getFieldDisplayName());
 
 				for (Field requestField : fields) {
 					requestField.setAccessible(true);  
 					// 表示为private类型
 					if (requestField.getModifiers() == 2) {
-						if(requestField.getName().equals(fieldDTO.getFieldName())){
-							// 字段值
-							try {
-								dto.setFieldValue(requestField.get(request).toString());
-								break;
-							} catch (IllegalArgumentException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
-							} catch (IllegalAccessException e) {
-								// TODO Auto-generated catch block
-								e.printStackTrace();
+						
+						if(dto.getFieldType().equals(FieldType.BLOB.getCode())) {
+							if(attachments != null && attachments.size() > 0) {
+								for(RequestAttachments attachment : attachments) {
+									dto.setFieldContentType(attachment.getContentType());
+									dto.setFieldName(attachment.getTargetFieldName());
+									dto.setFieldValue(attachment.getContentUri());
+								}
+							}
+							
+						} else {
+							if(requestField.getName().equals(fieldDTO.getFieldName())){
+								// 字段值
+								try {
+									dto.setFieldValue(requestField.get(request).toString());
+									break;
+								} catch (IllegalArgumentException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								} catch (IllegalAccessException e) {
+									// TODO Auto-generated catch block
+									e.printStackTrace();
+								}
 							}
 						}
 					}
 				}
 
-				dto.setFieldName(fieldDTO.getFieldDisplayName());
 				list.add(dto);
 			}
-		}
-		
-//		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
-//		RequestFieldDTO dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getName());
-//		dto.setFieldName("姓名");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getMobile());
-//		dto.setFieldName("手机号");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getOrganizationName());
-//		dto.setFieldName("企业名称");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getCityName());
-//		dto.setFieldName("企业城市");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getIndustry());
-//		dto.setFieldName("企业行业");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getProjectDesc());
-//		dto.setFieldName("项目描述");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getFinancingStage());
-//		dto.setFieldName("融资阶段");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldType(FieldType.DECIMAL.getCode());
-//		if(fields.getFinancingAmount() != null) {
-//			dto.setFieldValue(fields.getFinancingAmount().toString());
-//		}
-//		dto.setFieldName("融资金额（万元）");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//
-//		dto.setFieldType(FieldType.NUMBER.getCode());
-//		if(fields.getTransferShares() != null) {
-//			dto.setFieldValue(fields.getTransferShares().toString());
-//		}
-//		dto.setFieldName("出让股份 %");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldType(FieldType.DATETIME.getCode());
-//		if(fields.getCreateTime() != null) {
-//			dto.setFieldValue(fields.getCreateTime().toString());
-//		}
-//		dto.setFieldName("提交时间");
-//		list.add(dto);
-//		
-		List<RequestAttachments> attachments =  userActivityProvider.listRequestAttachments(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM, field.getId());
-		if(attachments != null && attachments.size() > 0) {
-			for(RequestAttachments attachment : attachments) {
-				RequestFieldDTO dto = new RequestFieldDTO();
-				dto.setFieldType(FieldType.STRING.getCode());
-				dto.setFieldContentType(FieldContentType.TEXT.getCode());
-				
-				dto.setFieldContentType(attachment.getContentType());
-				dto.setFieldType(FieldType.BLOB.getCode());
-				dto.setFieldName(attachment.getTargetFieldName());
-				dto.setFieldValue(attachment.getContentUri());
-				list.add(dto);
-			}
-			                        
 		}
 		
 		return list;
