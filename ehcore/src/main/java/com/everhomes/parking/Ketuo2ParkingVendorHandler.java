@@ -78,6 +78,7 @@ import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
+import com.everhomes.rest.parking.ParkingSupportOnlinePaidStatus;
 import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.user.IdentifierType;
@@ -168,7 +169,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setPlateOwnerName(user.getNickName());
 			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
-			parkingCardDTO.setFreeAmount(card.getFreeMoney() / 100 + "元/月");
+			if(card.getFreeMoney() != 0)
+				parkingCardDTO.setFreeAmount(card.getFreeMoney() / 100 + "元/月");
 			parkingCardDTO.setIsSupportOnlinePaid(card.getIsAllow().byteValue());
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
@@ -453,6 +455,12 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		}else {
 			String oldValidEnd = card.getValidTo();
 			Long time = strToLong(oldValidEnd);
+			long now = System.currentTimeMillis();
+			
+			if(time < now) {
+				time = now;
+			}
+			
 			String validStart = sdf1.format(addDays(time, 1));
 			String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
 			
@@ -488,31 +496,42 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
     			null, null, null, null);
     	
     	LOGGER.debug("ParkingCardRequest list size={}", list.size());
-    	ParkingCardRequest parkingCardRequest = null;
-    	for(ParkingCardRequest p: list) {
-    		Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
-    		String tag1 = flow.getStringTag1();
-    		if(null == tag1) {
-    			LOGGER.error("Flow tag is null, flow={}", flow);
-    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    					"Flow tag is null.");
-    		}
-    		if(ParkingRequestFlowType.INTELLIGENT.getCode() == Integer.valueOf(tag1)) {
-    			parkingCardRequest = p;
-    			break;
-    		}
-    	}
-    	if(null != parkingCardRequest) {
-    		FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
-    		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-    		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
-    		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
-    		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
-    		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-    		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-    		stepDTO.setStepCount(flowCase.getStepCount());
-    		flowService.processAutoStep(stepDTO);
-    	}
+    	dbProvider.execute((TransactionStatus transactionStatus) -> {
+    		ParkingCardRequest parkingCardRequest = null;
+        	for(ParkingCardRequest p: list) {
+        		Flow flow = flowProvider.findSnapshotFlow(p.getFlowId(), p.getFlowVersion());
+        		String tag1 = flow.getStringTag1();
+        		if(null == tag1) {
+        			LOGGER.error("Flow tag is null, flow={}", flow);
+        			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+        					"Flow tag is null.");
+        		}
+        		if(ParkingRequestFlowType.INTELLIGENT.getCode() == Integer.valueOf(tag1)) {
+        			parkingCardRequest = p;
+        			break;
+        		}
+        	}
+        	if(null != parkingCardRequest) {
+    			FlowCase flowCase = flowCaseProvider.getFlowCaseById(parkingCardRequest.getFlowCaseId());
+
+        		
+            		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+            		stepDTO.setFlowCaseId(parkingCardRequest.getFlowCaseId());
+            		stepDTO.setFlowMainId(parkingCardRequest.getFlowId());
+            		stepDTO.setFlowVersion(parkingCardRequest.getFlowVersion());
+            		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+            		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+            		stepDTO.setStepCount(flowCase.getStepCount());
+            		flowService.processAutoStep(stepDTO);
+            		
+            		parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
+        			parkingCardRequest.setOpenCardTime(new Timestamp(System.currentTimeMillis()));
+        			parkingProvider.updateParkingCardRequest(parkingCardRequest);
+        			
+        		
+        	}
+    		return null;
+		});
 	}
 	
 	private boolean addMonthCard(String plateNo, Integer money){
@@ -678,22 +697,38 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
 		String cardType = "2";
+		Integer freeMoney = 0;
 		if(null != cardInfo) {
 			cardType = cardInfo.getCarType();
+			freeMoney = cardInfo.getFreeMoney();
 		}
 		for(KetuoCardRate rate: getCardRule(cardType)) {
 			if(rate.getRuleId().equals(order.getRateToken())) {
 				ketuoCardRate = rate;
 			}
-		}
+		}   
 		if(null == ketuoCardRate) {
 			LOGGER.error("Rate not found, cmd={}", order);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
-		Integer freeMoney = cardInfo.getFreeMoney();
+
 		order.setPrice(new BigDecimal(order.getPrice().intValue() - (freeMoney / 100 * order.getMonthCount().intValue() )));
+		
+//    	ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+//    	if(parkingLot.getRechargeType() == ParkingLotRechargeType.ACTUAL.getCode()) {
+//    		long now = System.currentTimeMillis();
+//    		Calendar calendar = Calendar.getInstance();
+//			calendar.setTimeInMillis(now);
+//			int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+//			int today = calendar.get(Calendar.DAY_OF_MONTH);
+//			BigDecimal unitPrice = new BigDecimal(ketuoCardRate.getRuleMoney());
+//			order.setPrice(unitPrice.multiply(new BigDecimal(order.getMonthCount().intValue()-1))
+//					.add(unitPrice.divide(new BigDecimal(maxDay), RoundingMode.HALF_DOWN).multiply(new BigDecimal(today))) );
+//    	}
+
+		
 	}
 
 	private KetuoTemoFee getTempFee(String plateNumber) {

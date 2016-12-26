@@ -1398,7 +1398,7 @@ public class ParkingServiceImpl implements ParkingService {
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
 	@Override
-	public void getRechargeResult(GetRechargeResultCommand cmd) {
+	public ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd) {
 		ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId());
 
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getOrderId());
@@ -1411,7 +1411,13 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		Byte orderStatus = order.getRechargeStatus();
 		if(orderStatus == ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()) {
-			return;
+			ListParkingCardsCommand listParkingCardsCommand = new ListParkingCardsCommand(); 
+			listParkingCardsCommand.setOwnerId(cmd.getOwnerId());
+			listParkingCardsCommand.setOwnerType(cmd.getOwnerType());
+			listParkingCardsCommand.setParkingLotId(order.getParkingLotId());
+			listParkingCardsCommand.setPlateNumber(order.getPlateNumber());
+			List<ParkingCardDTO> cards = listParkingCards(listParkingCardsCommand);
+			return cards.get(0);
 		}
 		
 		String key = "parking-recharge" + order.getId();
@@ -1452,6 +1458,14 @@ public class ParkingServiceImpl implements ParkingService {
         		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
         				"Get recharge result time out.");
     		}
+    		
+    		ListParkingCardsCommand listParkingCardsCommand = new ListParkingCardsCommand(); 
+			listParkingCardsCommand.setOwnerId(cmd.getOwnerId());
+			listParkingCardsCommand.setOwnerType(cmd.getOwnerType());
+			listParkingCardsCommand.setParkingLotId(order.getParkingLotId());
+			listParkingCardsCommand.setPlateNumber(order.getPlateNumber());
+			List<ParkingCardDTO> cards = listParkingCards(listParkingCardsCommand);
+			return cards.get(0);
 		
 	}
 	
