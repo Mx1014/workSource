@@ -294,9 +294,11 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 						if(dto.getFieldType().equals(FieldType.BLOB.getCode())) {
 							if(attachments != null && attachments.size() > 0) {
 								for(RequestAttachments attachment : attachments) {
-									dto.setFieldContentType(attachment.getContentType());
-									dto.setFieldName(attachment.getTargetFieldName());
-									dto.setFieldValue(attachment.getContentUri());
+									if(attachment.getTargetFieldName().equals(dto.getFieldName())){
+										dto.setFieldContentType(attachment.getContentType());
+										dto.setFieldName(attachment.getTargetFieldName());
+										dto.setFieldValue(attachment.getContentUri());
+									}
 								}
 							}
 							
