@@ -571,9 +571,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
-		order.setMonthCount(new BigDecimal(ketuoCardRate.getRuleAmount()));
-		order.setPrice(new BigDecimal(Integer.parseInt(ketuoCardRate.getRuleMoney()) / 100));
-		
 		
 	}
 

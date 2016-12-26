@@ -614,6 +614,7 @@ public class ParkingServiceImpl implements ParkingService {
 //		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getExpiredTime(), cmd.getMonthCount()));
 //		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getExpiredTime(), 1));
 		
+		parkingRechargeOrder.setPrice(cmd.getPrice());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
 			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
@@ -621,13 +622,13 @@ public class ParkingServiceImpl implements ParkingService {
 				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
 						"Overdue fees");
 			}
-			parkingRechargeOrder.setPrice(cmd.getPrice());
 			parkingRechargeOrder.setOrderToken(dto.getOrderToken());
 		}
     	//查询rate
     	else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
     		parkingRechargeOrder.setRateToken(cmd.getRateToken());
     		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+    		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
     	}
 		
 		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);	

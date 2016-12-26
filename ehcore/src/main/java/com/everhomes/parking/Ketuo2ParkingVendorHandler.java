@@ -403,8 +403,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
         return card;
     }
 	
-	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
+	private boolean rechargeMonthlyCard(ParkingRechargeOrder order1){
 
+		ParkingRechargeOrder order = ConvertHelper.convert(order1, ParkingRechargeOrder.class);
 		JSONObject param = new JSONObject();
 		//月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
@@ -461,15 +462,12 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		    param.put("payMoney", order.getPrice().intValue()*100);
 		    param.put("startTime", validStart);
 		    param.put("endTime", validEnd);
-		    param.put("freeMoney", card.getFreeMoney());
+		    param.put("freeMoney", card.getFreeMoney() * order.getMonthCount().intValue());
 			String json = post(param, RECHARGE);
 	        
 	        if(LOGGER.isDebugEnabled())
 				LOGGER.debug("Result={}, param={}", json, param);
 	        
-//			KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-//			
-//			return entity.isSuccess();
 			JSONObject jsonObject = JSONObject.parseObject(json);
 			Object obj = jsonObject.get("resCode");
 			if(null != obj ) {
@@ -694,10 +692,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
-		order.setMonthCount(new BigDecimal(ketuoCardRate.getRuleAmount()));
-		order.setPrice(new BigDecimal(Integer.parseInt(ketuoCardRate.getRuleMoney()) / 100));
-		
-		
+		Integer freeMoney = cardInfo.getFreeMoney();
+		order.setPrice(new BigDecimal(order.getPrice().intValue() - (freeMoney / 100 * order.getMonthCount().intValue() )));
 	}
 
 	private KetuoTemoFee getTempFee(String plateNumber) {

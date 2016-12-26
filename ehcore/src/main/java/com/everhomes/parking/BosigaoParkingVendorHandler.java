@@ -421,8 +421,6 @@ public class BosigaoParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(rate.getRateName());
-		order.setMonthCount(rate.getMonthCount());
-		order.setPrice(rate.getPrice());
 		
 	}
 

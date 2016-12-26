@@ -41,7 +41,7 @@ public class Test {
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("plateNo", "B830NR");
+		param.put("plateNo", "B99999");
 //		param.put("money", "30000");
 ////		param.put("carType", "2");
 //		param.put("plateNo", "B12347");
