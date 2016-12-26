@@ -341,7 +341,11 @@ public class ContentServerServiceImpl implements ContentServerService {
     public String getContentServer(){
         try {
             ContentServer server = selectContentServer();
-            return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
+            Integer port = 80;
+            if(null != UserContext.current().getProtocol() && UserContext.current().getProtocol().equals("https")){
+                port = server.getPublicPort();
+            }
+            return String.format("%s:%d",server.getPublicAddress(),port);
         } catch (Exception e) {
             LOGGER.error("Failed to find content server", e);
             return null;
