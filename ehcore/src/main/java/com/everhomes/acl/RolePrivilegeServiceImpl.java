@@ -1576,12 +1576,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setResourceName(community.getName());
 					}
 				}else if(EntityType.RESOURCE_CATEGORY == EntityType.fromCode(assignment.getOwnerType())){
-					ResourceCategory category = communityProvider.findResourceCategoryById(assignment.getId());
+					ResourceCategory category = communityProvider.findResourceCategoryById(assignment.getOwnerId());
 					if(null == category){
 						LOGGER.debug("resource category is null...");
 					}else{
 						if(EntityType.COMMUNITY == EntityType.fromCode(category.getOwnerType())){
-							Community community = communityProvider.findCommunityById(dto.getResourceId());
+							Community community = communityProvider.findCommunityById(category.getOwnerId());
 							if(null == community){
 								LOGGER.debug("community is null...");
 							}else{
