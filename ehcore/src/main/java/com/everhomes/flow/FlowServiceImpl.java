@@ -2430,6 +2430,7 @@ public class FlowServiceImpl implements FlowService {
 				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
 					departmentId = sel.getSourceIdB();
 				}
+				LOGGER.error("position selId= " + sel.getId() + " positionId= " + sel.getSourceIdA() + " departmentId= " + departmentId);
 				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceIdA())) {
 					List<Long> tmp = flowUserSelectionService.findUsersByJobPositionId(parentOrgId, sel.getSourceIdA(), departmentId);
 					if(tmp != null) {
