@@ -455,6 +455,12 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 		}else {
 			String oldValidEnd = card.getValidTo();
 			Long time = strToLong(oldValidEnd);
+			long now = System.currentTimeMillis();
+			
+			if(time < now) {
+				time = now;
+			}
+			
 			String validStart = sdf1.format(addDays(time, 1));
 			String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
 			
