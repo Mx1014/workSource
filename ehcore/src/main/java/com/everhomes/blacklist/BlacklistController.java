@@ -53,10 +53,9 @@ public class BlacklistController extends ControllerBase {
      * <p>添加黑名单</p>
      */
     @RequestMapping("addUserBlacklist")
-    @RestReturn(value=String.class)
+    @RestReturn(value=UserBlacklistDTO.class)
     public RestResponse addUserBlacklist(@Valid AddUserBlacklistCommand cmd) {
-        blacklistService.addUserBlacklist(cmd);
-        RestResponse response =  new RestResponse();
+        RestResponse response =  new RestResponse(blacklistService.addUserBlacklist(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -27,7 +27,7 @@ public interface BlacklistService {
      * 添加用户黑名单
      * @param cmd
      */
-    void addUserBlacklist(AddUserBlacklistCommand cmd);
+    UserBlacklistDTO addUserBlacklist(AddUserBlacklistCommand cmd);
 
     /**
      * 编辑用户黑名单

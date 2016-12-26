@@ -79,7 +79,7 @@ public class BlacklistServiceImpl implements BlacklistService{
 		Timestamp startTime = null == cmd.getStartTime() ? null : new Timestamp(cmd.getStartTime());
 		Timestamp endTime = null == cmd.getEndTime() ? null : new Timestamp(cmd.getEndTime());
 		ListingLocator locator = new CrossShardListingLocator();
-		locator.setAnchor(cmd.getAnchor());
+		locator.setAnchor(cmd.getPageAnchor());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		List<UserBlacklist> userBlacklists = blacklistProvider.listUserBlacklists(namespaceId, locator, pageSize, new ListingQueryBuilderCallback() {
 			@Override
@@ -149,7 +149,7 @@ public class BlacklistServiceImpl implements BlacklistService{
 	}
 
 	@Override
-	public void addUserBlacklist(AddUserBlacklistCommand cmd) {
+	public UserBlacklistDTO addUserBlacklist(AddUserBlacklistCommand cmd) {
 
 		User user = userProvider.findUserById(cmd.getUserId());
 
@@ -193,6 +193,11 @@ public class BlacklistServiceImpl implements BlacklistService{
 		});
 		// 加入黑名单发消息
 		this.sendMessageToUser(user, BlacklistNotificationTemplateCode.JOIN_USER_BLACKLIST, new HashMap<>(), BlacklistNotificationTemplateCode.SCOPE, "由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系左邻客服。");
+
+		UserBlacklistDTO dto = ConvertHelper.convert(userBlacklist, UserBlacklistDTO.class);
+		dto.setCreateTime(userBlacklist.getCreateTime().getTime());
+		dto.setUserId(userBlacklist.getOwnerUid());
+		return dto;
 	}
 
 	@Override
