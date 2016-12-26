@@ -627,8 +627,9 @@ public class ParkingServiceImpl implements ParkingService {
     	//查询rate
     	else if(rechargeType.equals(ParkingRechargeType.MONTHLY.getCode())) {
     		parkingRechargeOrder.setRateToken(cmd.getRateToken());
-    		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
     		parkingRechargeOrder.setMonthCount(new BigDecimal(cmd.getMonthCount()));
+    		handler.updateParkingRechargeOrderRate(parkingRechargeOrder);
+    		
     	}
 		
 		parkingProvider.createParkingRechargeOrder(parkingRechargeOrder);	
