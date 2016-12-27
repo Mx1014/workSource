@@ -21,6 +21,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.app.AppConstants;
@@ -137,9 +138,14 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		
 		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		if(serviceOrg != null) {
-			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
-			if(orgContact != null) {
-				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
+//			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
+//			if(orgContact != null) {
+//				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
+//			}
+			
+			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+			if(member != null) {
+				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
 			
 			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
