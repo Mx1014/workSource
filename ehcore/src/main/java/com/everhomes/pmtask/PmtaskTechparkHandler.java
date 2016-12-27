@@ -130,7 +130,7 @@ public class PmtaskTechparkHandler {
 			
 			ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
 			String resourceName = resource.getResourceName();
-			String fileSuffix = resourceName.substring(resourceName.lastIndexOf(","), resourceName.length());
+			String fileSuffix = resourceName.substring(resourceName.lastIndexOf("."), resourceName.length());
 			
 			String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
 			
