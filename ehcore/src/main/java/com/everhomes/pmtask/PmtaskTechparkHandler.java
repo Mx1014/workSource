@@ -4,17 +4,22 @@ import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpGet;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -24,19 +29,22 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.parking.ketuo.EncryptUtil;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 
+import sun.misc.BASE64Encoder;
+
 @Component("pmtaskTechparkHandler")
 public class PmtaskTechparkHandler {
+
+	private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskTechparkHandler.class);
 
 	@Autowired
 	private AddressProvider addressProvider;
@@ -44,9 +52,12 @@ public class PmtaskTechparkHandler {
 	private UserProvider userProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
+	@Autowired
+    private ContentServerService contentServerService;
 	
 	private CloseableHttpClient httpclient = HttpClients.createDefault();
 	private static final String RECHARGE = "/api/pay/CardRecharge";
+	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public void synchronizedData(PmTask task, List<AttachmentDescriptor> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
@@ -108,42 +119,43 @@ public class PmtaskTechparkHandler {
 		form.put("serviceContent", task.getContent());
 		form.put("fileType", "1");
 		form.put("taskUrgencyLevel", "1");
+		form.put("liaisonContent", "");
+		form.put("backDate", dateSF.format(new Date()));
 		formContent.add(form);
 		
 		JSONArray enclosure = new JSONArray();
-		for(AttachmentDescriptor a: attachments) {
+		for(AttachmentDescriptor ad: attachments) {
+			
+			ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
+			String resourceName = resource.getResourceName();
+			String fileSuffix = resourceName.substring(resourceName.lastIndexOf(","), resourceName.length());
+			
+			String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+			
 			JSONObject attachment = new JSONObject();
-			attachment.put("fileName", "1");
-			attachment.put("fileSuffix", "");
-			attachment.put("fileContent", "");
+			attachment.put("fileName", resourceName);
+			attachment.put("fileSuffix", fileSuffix);
+			
+			InputStream in = get(contentUrl);
+			if(null != in)
+				attachment.put("fileContent", getImageStr(in));
+			else
+				continue;
 			enclosure.add(attachment);
 		}
 		
 	}
-	
-	public String post(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://oa.ssipc.com.cn:8890/oa/" + type);
+
+	public String post(JSONObject param) {
+		HttpPost httpPost = new HttpPost("http://oa.ssipc.com.cn:8890/oa/");
 		StringBuilder result = new StringBuilder();
 		
-        String key = "F7A0B971B199FD2A52468575";
-        String iv = "20161124";
-        String user = "ktapi";
-        String pwd = "0306C3";
-        String data = null;
-		try {
-			data = EncryptUtil.getEncString(param, key, iv);
-		} catch (Exception e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Synchronized pmtask data to techpark error.");
-		}
 		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("data", data));
+		nvps.add(new BasicNameValuePair("data", param.toJSONString()));
 		CloseableHttpResponse response = null;
 		InputStream instream = null;
 		try {
 			httpPost.setEntity(new UrlEncodedFormEntity(nvps, "UTF8"));
-			httpPost.addHeader("user", user);
-			httpPost.addHeader("pwd", pwd);
 			response = httpclient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			
@@ -171,4 +183,61 @@ public class PmtaskTechparkHandler {
 		
 		return json;
 	}
+	
+	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+	
+	public String getImageStr(InputStream inputStream) {
+	    byte[] data = null;
+	    try {
+	        data = new byte[inputStream.available()];
+	        inputStream.read(data);
+	        inputStream.close();
+	    } catch (IOException e) {
+	        e.printStackTrace();
+	    }
+	    // 加密
+	    BASE64Encoder encoder = new BASE64Encoder();
+	    return encoder.encode(data);
+	}
+	
+	public InputStream get(String url){
+        CloseableHttpClient httpclient = HttpClients.createDefault();
+        CloseableHttpResponse response = null;
+        try {
+            HttpGet httpGet = new HttpGet(url);
+            
+            response = httpclient.execute(httpGet);
+            
+            System.out.println(response.getStatusLine());
+            HttpEntity entity = response.getEntity();
+            
+            if (entity != null) {
+            	InputStream instream = entity.getContent();
+            	return instream;
+			}
+
+        }catch (Exception e) {
+        	
+		} finally {
+			try {
+				response.close();
+				httpclient.close();
+			} catch (IOException e) {
+				e.printStackTrace();
+			}
+            
+        }
+        return null;
+    }
 }

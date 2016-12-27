@@ -122,6 +122,7 @@ import com.everhomes.rest.parking.ParkingRequestCardAgreementDTO;
 import com.everhomes.rest.parking.ParkingRequestCardConfigDTO;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
+import com.everhomes.rest.parking.ParkingSupportRequestConfigStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
 import com.everhomes.rest.parking.RequestParkingCardCommand;
 import com.everhomes.rest.parking.SearchParkingCardRequestsCommand;
@@ -365,7 +366,8 @@ public class ParkingServiceImpl implements ParkingService {
         			ParkingCardRequestStatus.INACTIVE.getCode(), flowId, null, null);
         	
         	int requestlistSize = requestlist.size();
-        	if(null != parkingFlow && requestlistSize >= parkingFlow.getMaxRequestNum()){
+        	if(null != parkingFlow && parkingFlow.getMaxRequestNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()
+        			&& requestlistSize >= parkingFlow.getMaxRequestNum()){
         		LOGGER.error("The card request is rather than max request num, cmd={}", cmd);
     			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_MAX_REQUEST_NUM,
     					"The card request is rather than max request num.");
@@ -851,21 +853,32 @@ public class ParkingServiceImpl implements ParkingService {
 		ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId);
 		
-		Integer requestedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
+		Integer issuedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
 		
 		Integer totalCount = parkingFlow.getMaxIssueNum();
-		Integer surplusCount = totalCount - requestedCount;
+		Integer surplusCount = totalCount - issuedCount;
+		
+		if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
+			if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
+				if(count > surplusCount) {
+					LOGGER.error("Count is rather than surplusCount.");
+		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
+		    				"Count is rather than surplusCount.");
+				}
+			}else {
+				if(count > surplusCount) {
+					LOGGER.error("Count is rather than surplusCount.");
+		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_SURPLUS_NUM,
+		    				"Count is rather than surplusCount.");
+				}
+			}
+		}
 		
 		if(status == ParkingCardRequestStatus.QUEUEING.getCode()) {
 			Integer quequeCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.QUEUEING.getCode());
 
-			if(count > surplusCount) {
-				LOGGER.error("Count is rather than surplusCount.");
-	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_SURPLUS_NUM,
-	    				"Count is rather than surplusCount.");
-			}
 			if(count > quequeCount) {
 				LOGGER.error("Count is rather than quequeCount.");
 	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD_QUEQUE_NUM,
@@ -874,17 +887,13 @@ public class ParkingServiceImpl implements ParkingService {
 		}else {
 			Integer processingCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 					parkingLot.getId(), flowId, null, ParkingCardRequestStatus.PROCESSING.getCode());
-			if(count > surplusCount) {
-				LOGGER.error("Count is rather than surplusCount.");
-	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_SURPLUS_NUM,
-	    				"Count is rather than surplusCount.");
-			}
 			if(count > processingCount) {
 				LOGGER.error("Count is rather than processingCount.");
 	    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_PROCESS_CARD_QUEQUE_NUM,
 	    				"Count is rather than processingCount.");
 			}
 		}
+		
 		
 		dbProvider.execute((TransactionStatus transactionStatus) -> {
 			Flow flow = flowProvider.findSnapshotFlow(flowId, FlowConstants.FLOW_CONFIG_START);
