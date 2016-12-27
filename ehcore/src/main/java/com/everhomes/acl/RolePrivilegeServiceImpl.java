@@ -98,10 +98,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			privilegeIds.addAll(ids);
 		}
 
-		if(null == privilegeIds){
-			res.setMenus(new ArrayList<WebMenuDTO>());
-			return res;
-		}
 		//根据权限获取所有菜单
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuByPrivilegeIds(privilegeIds, WebMenuPrivilegeShowFlag.MENU_SHOW);
 		
