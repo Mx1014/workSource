@@ -2391,3 +2391,23 @@ update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.
 update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '停车充值' and namespace_id = 999984;
 update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '车辆放行' and namespace_id = 999984;
 
+
+UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 134 where item_label = '水木之家';
+UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 137 where item_label = '服务维修';
+UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 136 where item_label = '绿植租摆';
+UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 135 where item_label = '紫荆汇';
+DELETE from eh_launch_pad_items where item_label = '车辆放行' and scene_type = 'park_tourist' and namespace_id = 999984;
+
+DELETE from eh_web_menu_scopes where menu_id = 50700;
+DELETE from eh_web_menu_scopes where menu_id = 50710;
+DELETE from eh_web_menu_scopes where menu_id = 50720;
+DELETE from eh_web_menu_scopes where menu_id = 50730;
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41000,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41010,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41020,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41030,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41040,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41050,'', 'EhNamespaces', 999984,2);
+INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41060,'', 'EhNamespaces', 999984,2);
