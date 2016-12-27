@@ -126,25 +126,31 @@ public class PmtaskTechparkHandler {
 		formContent.add(form);
 		
 		JSONArray enclosure = new JSONArray();
-		for(AttachmentDescriptor ad: attachments) {
-			
-			ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
-			String resourceName = resource.getResourceName();
-			String fileSuffix = resourceName.substring(resourceName.lastIndexOf("."), resourceName.length());
-			
-			String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-			
-			JSONObject attachment = new JSONObject();
-			attachment.put("fileName", resourceName);
-			attachment.put("fileSuffix", fileSuffix);
-			
-			InputStream in = get(contentUrl);
-			if(null != in)
-				attachment.put("fileContent", getImageStr(in));
-			else
-				continue;
-			enclosure.add(attachment);
+		if(null != attachments) {
+			for(AttachmentDescriptor ad: attachments) {
+				
+				ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
+				String resourceName = resource.getResourceName();
+				String fileSuffix = resourceName.substring(resourceName.lastIndexOf("."), resourceName.length());
+				
+				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+				
+				JSONObject attachment = new JSONObject();
+				attachment.put("fileName", resourceName);
+				attachment.put("fileSuffix", fileSuffix);
+				
+				InputStream in = get(contentUrl);
+				if(null != in)
+					attachment.put("fileContent", getImageStr(in));
+				else
+					continue;
+				enclosure.add(attachment);
+			}
 		}
+		
+		param.put("headContent", headContent);
+		param.put("formContent", formContent);
+		param.put("enclosure", enclosure);
 		
 		String result = port.worflowAppDraft(param.toJSONString());
 		
