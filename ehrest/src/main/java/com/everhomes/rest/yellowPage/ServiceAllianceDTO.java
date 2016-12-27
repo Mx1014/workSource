@@ -4,6 +4,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;
+
 import java.util.List;
 
 /**
@@ -24,6 +25,7 @@ import java.util.List;
  *  <li>latitude: 纬度</li>
  *  <li>geohash:   经纬度的geohash</li>
  *  <li>contactName: 负责人</li>
+ *  <li>contactUid: 负责人id</li>
  *  <li>contactMobile: 手机号</li>
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>serviceType: 所属服务联盟的子类别名称</li>
@@ -72,6 +74,8 @@ public class ServiceAllianceDTO {
 	private String   geohash;
 	
 	private String   contactName;
+	
+	private Long contactUid;
 	
 	private String   contactMobile;
 	
@@ -198,6 +202,12 @@ public class ServiceAllianceDTO {
 	}
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
+	}
+	public Long getContactUid() {
+		return contactUid;
+	}
+	public void setContactUid(Long contactUid) {
+		this.contactUid = contactUid;
 	}
 	public String getContactMobile() {
 		return contactMobile;

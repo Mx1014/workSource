@@ -22,6 +22,7 @@ import com.everhomes.util.StringHelper;
  *  <li>longitude: 经度</li>
  *  <li>latitude: 纬度</li>
  *  <li>contactName: 负责人</li>
+ *  <li>contactUid: 负责人id</li>
  *  <li>contactMobile: 手机号</li>
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>attachments: banners</li>
@@ -63,6 +64,8 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private Double   latitude;
 	
 	private String   contactName;
+	
+	private Long contactUid;
 	
 	private String   contactMobile;
 	
@@ -192,6 +195,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
+	}
+
+	public Long getContactUid() {
+		return contactUid;
+	}
+
+	public void setContactUid(Long contactUid) {
+		this.contactUid = contactUid;
 	}
 
 	public String getContactMobile() {
