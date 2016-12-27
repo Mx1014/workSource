@@ -35,6 +35,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.pmtask.webservice.WorkflowAppDraftWebService;
+import com.everhomes.pmtask.webservice.WorkflowAppDraftWebServicePortType;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
@@ -54,9 +56,9 @@ public class PmtaskTechparkHandler {
 	private OrganizationProvider organizationProvider;
 	@Autowired
     private ContentServerService contentServerService;
-	
-	private CloseableHttpClient httpclient = HttpClients.createDefault();
-	private static final String RECHARGE = "/api/pay/CardRecharge";
+
+	WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
+	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public void synchronizedData(PmTask task, List<AttachmentDescriptor> attachments, Category taskCategory, Category category) {
@@ -144,46 +146,12 @@ public class PmtaskTechparkHandler {
 			enclosure.add(attachment);
 		}
 		
+		String result = port.worflowAppDraft(param.toJSONString());
+		
+        LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);
+
 	}
 
-	public String post(JSONObject param) {
-		HttpPost httpPost = new HttpPost("http://oa.ssipc.com.cn:8890/oa/");
-		StringBuilder result = new StringBuilder();
-		
-		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("data", param.toJSONString()));
-		CloseableHttpResponse response = null;
-		InputStream instream = null;
-		try {
-			httpPost.setEntity(new UrlEncodedFormEntity(nvps, "UTF8"));
-			response = httpclient.execute(httpPost);
-			HttpEntity entity = response.getEntity();
-			
-			if (entity != null) {
-				instream = entity.getContent();
-				BufferedReader reader = null;
-				reader = new BufferedReader(new InputStreamReader(instream,"utf8"));
-				String s;
-            	
-            	while((s = reader.readLine()) != null){
-            		result.append(s);
-				}
-			}
-		} catch (IOException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Synchronized pmtask data to techpark error.");
-		}finally {
-            try {
-            	instream.close();
-				response.close();
-			} catch (IOException e) {
-			}
-        }
-		String json = result.toString();
-		
-		return json;
-	}
-	
 	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
         String url = null;
         if(uri != null && uri.length() > 0) {
