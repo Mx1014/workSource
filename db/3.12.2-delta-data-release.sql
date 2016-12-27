@@ -425,7 +425,7 @@ DELETE FROM eh_web_menu_scopes WHERE menu_id IN (40750) AND owner_type = 'EhName
 -- 资源预订工作流模板，add by wh, 20161219
 SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
+VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}\n使用时间：${useDetail}', 0);
 
 -- 资源预订工作流中文，added by wh ,2016-12-19
 SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
@@ -505,7 +505,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 ( 'flow', 10006, 'zh_CN', '用户评价：${score}分', '用户评价：${score}分');
 
 -- 要上线的app版本 by sfyan 20161221
-update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
+UPDATE `eh_app_version` SET default_order = 3158018.0 WHERE NAME = '3.12.2';
 
 --
 -- 修改没有权限时的提示语  add by xq.tian  2016/12/21
@@ -520,7 +520,7 @@ UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作'
 
 
 -- 增加企业后台的 管理员管理 by sfyan 20161226
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) values('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361',60400);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361',60400);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES (10095, 0, '普通企业管理员管理', '普通企业管理员管理 全部权限', NULL);
 
