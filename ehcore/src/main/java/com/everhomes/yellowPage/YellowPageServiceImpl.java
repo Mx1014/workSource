@@ -564,7 +564,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 		ServiceAllianceListResponse response = new ServiceAllianceListResponse();
 		response.setSkipType((byte) 0);
 
-		ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(cmd.getCategoryId());
+		ServiceAllianceSkipRule rule = yellowPageProvider.getCateorySkipRule(cmd.getType());
+		if(rule != null) {
+			response.setSkipType((byte) 1);
+		}
+		
+		rule = yellowPageProvider.getCateorySkipRule(cmd.getCategoryId());
 		if(rule != null) {
 			response.setSkipType((byte) 1);
 		}
