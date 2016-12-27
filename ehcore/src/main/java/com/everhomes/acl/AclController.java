@@ -263,7 +263,9 @@ public class AclController extends ControllerBase {
     @RestReturn(value=OrganizationContactDTO.class, collection = true)
     public RestResponse listOrganizationAdministrators(@Valid ListServiceModuleAdministratorsCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE);
+        if(!resolver.checkUserPrivilege(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ADMIN_MANAGE)){
+            resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.ENTERPRISE_ADMIN_MANAGE);
+        }
         RestResponse response = new RestResponse(rolePrivilegeService.listOrganizationAdministrators(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
