@@ -344,6 +344,15 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'pa
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10016', 'zh_CN', '发放月卡数量不可大于当前待办理月卡数');
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`)
 	VALUES ('10006', 'community', '240111044331055940', '科兴科学园停车场', 'KETUO2', NULL, '41', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '0');
+SET @eh_configurations := (SELECT MAX(id) FROM eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.url', 'http://220.160.111.114:9090', '科兴停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.key', 'F7A0B971B199FD2A1017CEC5', '科兴停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.user', 'ktapi', '科兴停车充值用户名', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.pwd', '0306A9', '科兴停车充值密码', '0', NULL);
 
 
 -- 更新 资源预订  默认参数 菜单 data_type add by sw 20161215
@@ -483,6 +492,9 @@ VALUES (40130, '工作流设置', 40100, NULL, 'react:/working-flow/flow-list/re
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 1000000, 2);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 999983, 2);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
@@ -499,3 +511,23 @@ update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
 -- 修改没有权限时的提示语  add by xq.tian  2016/12/21
 --
 UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');
+
+
+-- 左邻的http的链接 改成https by sfyan 20161222   建议备份一下表
+-- update `eh_launch_pad_items` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+-- update `eh_banners` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+-- update `eh_configurations` set `value` = replace(`value`,'http', 'https')  where `value` like '%zuolin%' and  `value` like '%http:%' and `value` like '%.html%';
+
+
+-- 增加企业后台的 管理员管理 by sfyan 20161226
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) values('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361',60400);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES (10095, 0, '普通企业管理员管理', '普通企业管理员管理 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10095, 60400, '普通企业管理员管理', 1, 1, '普通企业管理员管理 全部权限', 361);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10095, 1005,'EhAclRoles', 0, 1, NOW());

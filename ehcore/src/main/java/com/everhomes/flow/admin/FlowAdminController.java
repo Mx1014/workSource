@@ -30,6 +30,8 @@ import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowIdCommand;
 import com.everhomes.rest.flow.FlowNodeDTO;
 import com.everhomes.rest.flow.FlowNodeDetailDTO;
+import com.everhomes.rest.flow.FlowResolveUsersCommand;
+import com.everhomes.rest.flow.FlowResolveUsersResponse;
 import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
@@ -45,6 +47,7 @@ import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
 import com.everhomes.rest.flow.ListScriptsCommand;
 import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
@@ -422,7 +425,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("disableFlowButton")
     @RestReturn(value=FlowButtonDTO.class)
-    public RestResponse updateFlowButton(@Valid DisableFlowButtonCommand cmd) {
+    public RestResponse disableFlowButton(@Valid DisableFlowButtonCommand cmd) {
         RestResponse response = new RestResponse(flowService.disableFlowButton(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -521,8 +524,22 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("listSMSTemplates")
     @RestReturn(value=FlowSMSTemplateResponse.class)
-    public RestResponse listSMSTemplates(@Valid ListScriptsCommand cmd) {
+    public RestResponse listSMSTemplates(@Valid ListSMSTemplateCommand cmd) {
         RestResponse response = new RestResponse(flowService.listSMSTemplates(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /admin/flow/resolveUsers</b>
+     * <p> 获取工作流的评分信息 </p>
+     * @return
+     */
+    @RequestMapping("resolveUsers")
+    @RestReturn(value=FlowResolveUsersResponse.class)
+    public RestResponse resolveUsers(@Valid FlowResolveUsersCommand cmd) {
+        RestResponse response = new RestResponse(flowService.resolveSelectionUsers(cmd.getFlowId(), cmd.getSelectionId()));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

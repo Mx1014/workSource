@@ -35,6 +35,7 @@ import com.everhomes.rest.parking.ParkingCardRequestStatus;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
+import com.everhomes.rest.parking.ParkingSupportRequestConfigStatus;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -157,48 +158,6 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
-//		FlowCaseEntity e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("姓名");
-//		e.setValue(dto.getPlateOwnerName());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("手机号");
-//		e.setValue(dto.getPlateOwnerPhone());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("公司");
-//		e.setValue(dto.getPlateOwnerEntperiseName());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("车牌号");
-//		e.setValue(dto.getPlateNumber());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("品牌");
-//		e.setValue(dto.getCarBrand());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("车系");
-//		e.setValue(dto.getCarSerieName());
-//		entities.add(e);
-//		
-//		e = new FlowCaseEntity();
-//		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-//		e.setKey("颜色");
-//		e.setValue(dto.getCarColor());
-//		entities.add(e);
-		
 		return entities;
 	}
 
@@ -257,22 +216,20 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				
 				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
-				Integer requestedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(), 
+				Integer issuedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(), 
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
 						ParkingCardRequestStatus.SUCCEED.getCode(), null);
 				
-				if(null == parkingFlow) {
-					LOGGER.error("surplusCount is 0.");
-		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
-		    				"surplusCount is 0.");
+				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
+					Integer totalCount = parkingFlow.getMaxIssueNum();
+					Integer surplusCount = totalCount - issuedCount;
+					if(surplusCount <= 0) {
+						LOGGER.error("surplusCount is 0.");
+			    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
+			    				"surplusCount is 0.");
+					}
 				}
-				Integer totalCount = parkingFlow.getMaxIssueNum();
-				Integer surplusCount = totalCount - requestedCount;
-				if(surplusCount <= 0) {
-					LOGGER.error("surplusCount is 0.");
-		    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
-		    				"surplusCount is 0.");
-				}
+				
 				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
 					parkingCardRequest.setIssueTime(new Timestamp(now));
@@ -284,6 +241,23 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
 			}else if("PROCESSING".equals(nodeType)) {
+				
+				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
+						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
+				Integer issuedCount = parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(), 
+						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId, 
+						ParkingCardRequestStatus.SUCCEED.getCode(), null);
+				
+				if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
+					Integer totalCount = parkingFlow.getMaxIssueNum();
+					Integer surplusCount = totalCount - issuedCount;
+					if(surplusCount <= 0) {
+						LOGGER.error("surplusCount is 0.");
+			    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_ISSUE_CARD,
+			    				"surplusCount is 0.");
+					}
+				}
+				
 				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));

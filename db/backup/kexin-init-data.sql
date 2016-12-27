@@ -52,16 +52,16 @@ INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `ide
 
 	
 INSERT INTO `eh_groups` (`id`, `uuid`, `name`, `display_name`, `status`, `visible_region_type`, `visible_region_id`,`discriminator`, `private_flag`, `join_policy`, `update_time`, `create_time`, `integral_tag4`, `creator_uid`, `namespace_id`)
-	VALUES(1008250, UUID(), '深圳正中置业有限公司', '深圳正中置业有限公司', 1, 1, 1008900, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 187000, 1, 999983); 
+	VALUES(1008280, UUID(), '深圳正中置业有限公司', '深圳正中置业有限公司', 1, 1, 1008900, 'enterprise',  1, 1, UTC_TIMESTAMP(), UTC_TIMESTAMP(), 187000, 1, 999983); 
 INSERT INTO `eh_forums` (`id`, `uuid`, `namespace_id`, `app_id`, `owner_type`, `owner_id`, `name`, `description`, `post_count`, `modify_seq`, `update_time`, `create_time`) 
-	VALUES(187000, UUID(), 999983, 2, 'EhGroups', 1008250,'深圳正中置业有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());	
+	VALUES(187000, UUID(), 999983, 2, 'EhGroups', 1008280,'深圳正中置业有限公司','','0','0', UTC_TIMESTAMP(), UTC_TIMESTAMP());	
 INSERT INTO `eh_organizations` (`id`, `parent_id`, `organization_type`, `name`, `address_id`, `description`, `path`, `level`, `status`, `group_type`, `namespace_id`, `group_id`) 
-	VALUES(1008900, 0, 'PM', '深圳正中置业有限公司', 0, '', '/1008900', 1, 2, 'ENTERPRISE', 999983, 1008250);
+	VALUES(1008900, 0, 'PM', '深圳正中置业有限公司', 0, '', '/1008900', 1, 2, 'ENTERPRISE', 999983, 1008280);
 INSERT INTO `eh_organization_community_requests` (id, community_id, member_type, member_id, member_status, creator_uid, create_time) 
 	VALUES(1117110, 240111044331055940, 'organization', 1008900, 3, 0, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(2120200, 1008900, 'USER', 241964  , 'manager', '曹秀然', 0, '18718523489', 3, 999983);	
+	VALUES(2120525, 1008900, 'USER', 241964  , 'manager', '曹秀然', 0, '18718523489', 3, 999983);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(13558, 'EhOrganizations', 1008900, 'EhUsers', 241964  , 1001, 1, UTC_TIMESTAMP());
 

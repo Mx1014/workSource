@@ -4,8 +4,8 @@ package com.everhomes.rest.pmtask;
 /**
  * <ul>
  * <li>0: 无效任务</li>
- * <li>1: 未处理</li>
- * <li>2: 处理中</li>
+ * <li>1: 待处理</li>
+ * <li>2: 处理中（分配人员）</li>
  * <li>3: 已完成</li>
  * <li>4: 已关闭</li>
  * <li>5: 已回访</li>

@@ -51,6 +51,10 @@ public class FlowGraphMessageAction extends FlowGraphAction {
 		dto.setTimeoutAtTick(timeoutAtTick);
 		dto.setRemindTick(remindTick);
 		dto.setRemindCount(remindCount);
+
+		if(ctx.getOperator() != null) {
+			dto.setOperatorId(ctx.getOperator().getId());
+		}
 		if(ctx.getNextNode() != null) {
 			dto.setFlowTargetId(ctx.getNextNode().getFlowNode().getId());	
 		}

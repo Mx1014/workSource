@@ -292,7 +292,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 
 			//新建flowcase
 	    	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), FlowConstants.PM_TASK_MODULE, 
-	    			FlowModuleType.NO_MODULE.getCode(), null, FlowOwnerType.PMTASK.getCode());
+	    			FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
 	    	if(null == flow) {
 	    		LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
 	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -325,11 +325,11 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 			return null;
 		});
     	//同步数据到科技园
-//		if(user.getNamespaceId() == 1000000) {
-//			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
-//			Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
-//			handler.synchronizedData(task, cmd.getAttachments(), taskCategory, category);
-//		}
+		if(user.getNamespaceId() == 1000000) {
+			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
+			Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
+			handler.synchronizedData(task, cmd.getAttachments(), taskCategory, category);
+		}
 
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}

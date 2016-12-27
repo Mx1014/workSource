@@ -30,6 +30,7 @@ import com.everhomes.rest.flow.FlowEvaluateItemStar;
 import com.everhomes.rest.flow.FlowEvaluateResultDTO;
 import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
+import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowCaseDetailDTO;
@@ -51,6 +52,9 @@ import com.everhomes.rest.flow.FlowVariableType;
 import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
+import com.everhomes.rest.flow.ListScriptsCommand;
+import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
@@ -203,6 +207,14 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	flowSUS.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
     	List<FlowSingleUserSelectionCommand> flowSUSS = new ArrayList<>();
     	flowSUSS.add(flowSUS);
+    	
+    	//manager tests
+    	flowSUS = new FlowSingleUserSelectionCommand();
+    	flowSUS.setFlowUserSelectionType(FlowUserSelectionType.MANAGER.getCode());
+    	flowSUS.setSourceIdA(300044l);
+    	flowSUS.setSourceTypeA(FlowUserSourceType.SOURCE_DEPARTMENT.getCode());
+    	flowSUSS.add(flowSUS);
+    	
     	flowSel.setSelections(flowSUSS);
     	flowService.createFlowUserSelection(flowSel);
     	
@@ -484,7 +496,15 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	
     	SearchFlowCaseCommand cmd = new SearchFlowCaseCommand();
     	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	cmd.setPageSize(3);
     	SearchFlowCaseResponse resp = flowService.searchFlowCases(cmd);
+    	Assert.assertTrue(resp.getFlowCases().size() > 0);
+    	
+    	cmd = new SearchFlowCaseCommand();
+    	cmd.setFlowCaseSearchType(FlowCaseSearchType.TODO_LIST.getCode());
+    	cmd.setPageSize(3);
+    	cmd.setPageAnchor(resp.getNextPageAnchor());
+    	resp = flowService.searchFlowCases(cmd);
     	Assert.assertTrue(resp.getFlowCases().size() > 0);
     	
     	SearchFlowCaseCommand cmd2 = new SearchFlowCaseCommand();
@@ -1228,5 +1248,32 @@ public class FlowEnableTest  extends LoginAuthTestCase {
     	FlowCaseDetailDTO detailDTO = flowService.getFlowCaseDetail(flowCaseId, userId, FlowUserType.PROCESSOR);
     	Assert.assertTrue(detailDTO.getNodes().size() == 5);
     	
+    }
+    
+    
+    @Test
+    public void testSMSTemplates() {
+    	Long userId = testUser2.getId();
+    	setTestContext(userId);
+    	
+    	testFlowCase();
+    	
+    	String moduleType = FlowModuleType.NO_MODULE.getCode();
+		Long ownerId = orgId;
+		String ownerType = FlowOwnerType.ENTERPRISE.getCode();
+    	Flow flow = flowService.getEnabledFlow(namespaceId, moduleId, moduleType, ownerId, ownerType);
+    	
+    	ListSMSTemplateCommand cmd = new ListSMSTemplateCommand();
+    	cmd.setEntityId(flow.getFlowMainId());
+    	cmd.setEntityType(FlowEntityType.FLOW.getCode());
+    	cmd.setNamespaceId(0);
+    	FlowSMSTemplateResponse resp = flowService.listSMSTemplates(cmd);
+    	Assert.assertTrue(resp.getDtos().size() > 0);
+    	
+    	ListScriptsCommand sc = new ListScriptsCommand();
+    	sc.setEntityId(flow.getFlowMainId());
+    	sc.setEntityType(FlowEntityType.FLOW.getCode());
+    	ListScriptsResponse scResp = flowService.listScripts(sc);
+    	Assert.assertTrue(scResp.getScripts().size() > 0);
     }
 }

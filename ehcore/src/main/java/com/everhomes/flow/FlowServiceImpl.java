@@ -8,6 +8,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.locale.LocaleTemplateProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModule;
@@ -22,11 +24,13 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.news.NewsCommentContentType;
 import com.everhomes.rest.parking.ParkingFlowConstant;
+import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
@@ -35,6 +39,7 @@ import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
@@ -139,6 +144,12 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
+    
+    @Autowired
+    LocaleTemplateProvider localeTemplateProvider;
+    
+    @Autowired
+    private SmsProvider smsProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -865,6 +876,9 @@ public class FlowServiceImpl implements FlowService {
 				sel.setSelectType(sCmd.getFlowUserSelectionType());
 				sel.setStatus(FlowStatusType.VALID.getCode());
 				sel.setNamespaceId(UserContext.getCurrentNamespaceId());
+				if(sel.getOrganizationId() == null) {
+					sel.setOrganizationId(flow.getOrganizationId());
+				}
 				updateFlowUserName(sel);
 				flowUserSelectionProvider.createFlowUserSelection(sel);
 			}
@@ -1109,6 +1123,14 @@ public class FlowServiceImpl implements FlowService {
 	public Boolean enableFlow(Long flowId) {
 		final FlowGraph flowGraph = new FlowGraph();
 		Flow flow = flowProvider.getFlowById(flowId);
+		
+		Flow enabledFlow = flowProvider.getEnabledConfigFlow(flow.getNamespaceId(), flow.getModuleId(), flow.getModuleType(), flow.getOwnerId(), flow.getOwnerType());
+		if(enabledFlow != null && !enabledFlow.getId().equals(flowId)
+				&& enabledFlow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
+			enabledFlow.setStatus(FlowStatusType.STOP.getCode());
+			flowProvider.updateFlow(enabledFlow);
+		}
+		
 		if(flow.getStatus().equals(FlowStatusType.STOP.getCode())) {
 			//restart it
 			flow.setStatus(FlowStatusType.RUNNING.getCode());
@@ -1121,6 +1143,7 @@ public class FlowServiceImpl implements FlowService {
 			//already running
 			return true;
 		}
+		
 		
 		updateFlowVersion(flow);
 		
@@ -1169,65 +1192,39 @@ public class FlowServiceImpl implements FlowService {
 		flowGraph.getNodes().add(end);
 //		flowGraph.saveIds();
 		
-		//now all the graph is collected, do snapshot
-		Flow flowNew = flowProvider.getFlowById(flowId);
-		if(!flowNew.getUpdateTime().equals(flow.getUpdateTime())) {
-			//the flow is updated, retry
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONFIG_BUSY, "flow has changed, retry");
-		}
+		//TODO busy check ???
+//		if(!flowNew.getUpdateTime().equals(flow.getUpdateTime())) {
+//			//the flow is updated, retry
+//			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CONFIG_BUSY, "flow has changed, retry");
+//		}
 		
 		Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-		flowNew.setUpdateTime(now);
-		flowNew.setStatus(FlowStatusType.SNAPSHOT.getCode());
-		flowProvider.updateFlow(flowNew);
+		flow.setUpdateTime(now);
 		
 		boolean isOk = true;
 		try {
-			dbProvider.execute((s)->{
+			dbProvider.execute((s)->{				
 				doSnapshot(flowGraph);
 				return true;
 			});
-			
-			//running now
-			now = new Timestamp(DateHelper.currentGMTTime().getTime());
-			flowNew.setUpdateTime(now);
-			flowNew.setRunTime(now);
-			flowNew.setStatus(FlowStatusType.RUNNING.getCode());
-			flowProvider.updateFlow(flowNew);
 			
 		} catch(Exception ex) {
 			isOk = false;
 			LOGGER.error("do snapshot error", ex);
 		}
 		
+		if(flow.getFlowMainId().equals(0l)) {
+			isOk = false;
+		}
+		
 		if(isOk) {
-			//TODO need this?
-			if(flowGraph.getFlow().getId().equals(flowNew.getId())) {
-				isOk = false;
-			} else {
-				Flow snapFlow = flowProvider.getFlowById(flowGraph.getFlow().getId());
-				if(snapFlow == null) {
-					isOk = false;
-				}	
-			}
+			//running now
+			flow.setId(flow.getFlowMainId());
+			flow.setFlowMainId(0l);
+			flow.setRunTime(now);
+			flow.setStatus(FlowStatusType.RUNNING.getCode());
+			flowProvider.updateFlow(flow);
 		}
-		
-		if(!isOk) {
-			//change back to config
-			now = new Timestamp(DateHelper.currentGMTTime().getTime());
-			flowNew.setUpdateTime(now);
-			flowNew.setStatus(FlowStatusType.CONFIG.getCode());
-			flowProvider.updateFlow(flowNew);			
-		}
-//		else { //TODO save graph right now ?
-//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
-//			graphMap.put(fmt, flowGraph);
-//		}
-		
-//		else {
-//			String fmt = String.format("%d:%d", flowGraph.getFlow().getFlowMainId(), flowGraph.getFlow().getFlowVersion());
-//			graphMap.put(fmt, flowGraph);
-//		}
 		
 		return isOk;
 	}
@@ -2424,15 +2421,17 @@ public class FlowServiceImpl implements FlowService {
 			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
 			} else if(FlowUserSelectionType.POSITION.getCode().equals(sel.getSelectType())) {
+				//sourceA is position, sourceB is department
 				Long parentOrgId = orgId;
 				if(sel.getOrganizationId() != null) {
 					parentOrgId = sel.getOrganizationId();
 				}
 				Long departmentId = parentOrgId;
-				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeB())) {
+				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
 					departmentId = sel.getSourceIdB();
 				}
-				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceIdA())) {
+//				LOGGER.error("position selId= " + sel.getId() + " positionId= " + sel.getSourceIdA() + " departmentId= " + departmentId);
+				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
 					List<Long> tmp = flowUserSelectionService.findUsersByJobPositionId(parentOrgId, sel.getSourceIdA(), departmentId);
 					if(tmp != null) {
 						users.addAll(tmp);	
@@ -2449,7 +2448,7 @@ public class FlowServiceImpl implements FlowService {
 				}
 				
 				Long departmentId = parentOrgId;
-				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
+				if(FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeA())) {
 					if(null != sel.getSourceIdA()) {
 						departmentId = sel.getSourceIdA();	
 					}
@@ -2941,6 +2940,9 @@ public class FlowServiceImpl implements FlowService {
 				userSel.setFlowMainId(action.getFlowMainId());
 				userSel.setFlowVersion(action.getFlowVersion());
 				userSel.setNamespaceId(action.getNamespaceId());
+				if(userSel.getOrganizationId() == null) {
+					userSel.setOrganizationId(flow.getOrganizationId());	
+				}
 				createUserSelection(userSel, selCmd);
 			}
 		}
@@ -2955,11 +2957,11 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
 		}
 		
-		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
-		FlowNode node2 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateEnd());
+//		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
+//		FlowNode node2 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateEnd());
 		
-		flow.setEvaluateStart(new Long(node1.getNodeLevel()));
-		flow.setEvaluateEnd(new Long(node2.getNodeLevel()));
+		flow.setEvaluateStart(cmd.getEvaluateStart());
+		flow.setEvaluateEnd(cmd.getEvaluateEnd());
 		flow.setEvaluateStep(cmd.getEvaluateStep());
 		flow.setEvaluateStep(cmd.getEvaluateStep());
 		flow.setNeedEvaluate(cmd.getNeedEvaluate());
@@ -3074,7 +3076,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		dto.setHasResults((byte)0);
-		if(items.size() == evaMap.size()) {
+		if(items.size() != 0 && items.size() == evaMap.size()) {
 			dto.setHasResults((byte)1);
 		}
 		
@@ -3088,10 +3090,23 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowScriptDTO> scripts = new ArrayList<>();
 		resp.setScripts(scripts);
 		
-		List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(111l, null);
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
+		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
+		if(entityType == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
+		}
+		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
+		if(flow == null) {
+			return resp;
+		}
+		
+		List<FlowScript> scs = flowScriptProvider.findFlowScriptByModuleId(flow.getModuleId(), flow.getModuleType());
 		if(scs != null && scs.size() > 0) {
 			scs.forEach(s->{
-				FlowScriptDTO dto = ConvertHelper.convert(scs, FlowScriptDTO.class);
+				FlowScriptDTO dto = ConvertHelper.convert(s, FlowScriptDTO.class);
 				scripts.add(dto);
 			});
 		}
@@ -3100,14 +3115,82 @@ public class FlowServiceImpl implements FlowService {
 	}
 
 	@Override
-	public FlowSMSTemplateResponse listSMSTemplates(ListScriptsCommand cmd) {
+	public FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd) {
+		if(cmd.getNamespaceId() == null) {
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		}
+		
 		FlowEntityType entityType = FlowEntityType.fromCode(cmd.getEntityType());
 		if(entityType == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "flow params error");	
 		}
 		
+		ListingLocator locator = new ListingLocator();
+		locator.setAnchor(cmd.getAnchor());
+		int count = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		
+		FlowSMSTemplateResponse resp = new FlowSMSTemplateResponse();
 		Flow flow = getFlowByEntity(cmd.getEntityId(), entityType);
-		return null;
+		if(flow == null) {
+			return resp;
+		}
+		
+		String scope = "flow:" + String.valueOf(flow.getModuleId()) + "%";
+		
+      User user = UserContext.current().getUser();
+      String locale = Locale.SIMPLIFIED_CHINESE.toString();
+      if(user != null) {
+        	locale = user.getLocale();
+        }
+        
+      List<FlowSMSTemplateDTO> dtos = new ArrayList<FlowSMSTemplateDTO>();
+      resp.setDtos(dtos);
+      
+		List<LocaleTemplate> templates = localeTemplateProvider.listLocaleTemplatesByScope(locator, cmd.getNamespaceId(), scope, locale, cmd.getKeyword(), count);
+		resp.setNextPageAnchor(locator.getAnchor());
+		if(templates != null) {
+			templates.forEach(t -> {
+				dtos.add(ConvertHelper.convert(t, FlowSMSTemplateDTO.class));
+			});
+		}
+		
+		return resp;
+	}
+	
+	private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
+	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
+	    String templateScope = SmsTemplateCode.SCOPE;
+	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
+	    String templateLocale = UserContext.current().getUser().getLocale();
+	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
+	}
+
+	@Override
+	public FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId) {
+		FlowCaseState ctx = new FlowCaseState();
+		FlowGraph graph = new FlowGraph();
+		Flow flow = flowProvider.getFlowById(flowId);
+		graph.setFlow(flow);
+		ctx.setFlowGraph(graph);
+		
+		List<FlowUserSelection> sels = new ArrayList<>();
+		FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(selectionUserId);
+		sels.add(sel);
+		
+		List<Long> users = resolvUserSelections(ctx, null, null, sels);
+		
+		FlowResolveUsersResponse resp = new FlowResolveUsersResponse();
+		List<UserInfo> infos = new ArrayList<>();
+		resp.setUsers(infos);
+		
+		if(users != null && users.size() > 0) {
+			users.forEach((u)-> {
+				UserInfo ui = userService.getUserSnapshotInfoWithPhone(u);
+				infos.add(ConvertHelper.convert(ui, UserInfo.class));
+			});
+		}
+		
+		return resp;
 	}
 	
 }

@@ -262,35 +262,41 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 
-        dbProvider.execute(status -> {
+        boolean createFlowCaseSuccess = dbProvider.execute(status -> {
             enterpriseApplyEntryProvider.createApplyEntry(request);
-            this.createFlowCase(request);
-            return true;
+            return this.createFlowCase(request);
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
-//		LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
-//		LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
-//		String phoneNumber = null;
-//		if(rentType != null) {
-//			switch(rentType) {
-//			case ORDINARY:
-//				phoneNumber = lp.getContactPhone();
-//				break;
-//			case BUILDING:
-//				Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
-//				UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
-//				if(null != identifier)
-//					phoneNumber = identifier.getIdentifierToken();
-//				break;
-//			default:
-//				break;
-//				
-//			}
-//		} 
-//		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
-//        sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-//                lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
+		// LeasePromotion lp = this.enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+		// LeasePromotionType rentType = LeasePromotionType.fromType(lp.getRentType());
+		// String phoneNumber = null;
+		// if(rentType != null) {
+		// 	switch(rentType) {
+		// 	case ORDINARY:
+		// 		phoneNumber = lp.getContactPhone();
+		// 		break;
+		// 	case BUILDING:
+		// 		Building building = this.communityProvider.findBuildingById(lp.getBuildingId());
+		// 		UserIdentifier identifier = this.userProvider.findClaimedIdentifierByOwnerAndType(building.getManagerUid(), IdentifierType.MOBILE.getCode());
+		// 		if(null != identifier)
+		// 			phoneNumber = identifier.getIdentifierToken();
+		// 		break;
+		// 	default:
+		// 		break;
+        //
+		// 	}
+		// }
+		// SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
+        // sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
+        //         lp.getRentPosition(), cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId());
+
+        // 1.如果创建flowCase成功, 则不在这里发送短信, 移到工作流中配置
+        // 2.如果创建flowCase不成功, 说明没有配置使用工作流, 则保持原来的发短信功能不变   add by xq.tian  2016/12/22
+        if (createFlowCaseSuccess) {
+            return true;
+        }
+
         // 根据apply type来区分
         String phoneNumber = null;
         String location = null;
@@ -300,7 +306,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			  Building building = this.communityProvider.findBuildingById(cmd.getSourceId());
 			  if(building != null) {
 			  	OrganizationMember member = organizationProvider.findOrganizationMemberById(building.getManagerUid());
-			
+
 			      if(null != member) {
 			          phoneNumber = member.getContactToken();
 			      }
@@ -312,33 +318,31 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			  }
 
 	  		SimpleDateFormat datetimeSF = new SimpleDateFormat("MM-dd HH:mm");
-	  		
+
             switch(applyType) {
-            case APPLY:
-            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
-                break;
-            case RENEW:
-            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"续租");
-                break;
-            case EXPANSION:
-            	sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()), 
-    	  				location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
-                break;
-            default:
-                if(LOGGER.isWarnEnabled()) {
-                    LOGGER.warn("Apply entry source type not supported, applyType={}, cmd={}", applyType, cmd);
-                }
-                break;
+                case APPLY:
+                    sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
+                            location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
+                    break;
+                case RENEW:
+                    sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
+                            location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"续租");
+                    break;
+                case EXPANSION:
+                    sendApplyEntrySmsToManager(phoneNumber, cmd.getApplyUserName(),cmd.getContactPhone(), datetimeSF.format(new Date()),
+                            location, cmd.getAreaSize()+"平米", cmd.getEnterpriseName(), cmd.getDescription(), cmd.getNamespaceId(),"看楼");
+                    break;
+                default:
+                    if(LOGGER.isWarnEnabled()) {
+                        LOGGER.warn("Apply entry source type not supported, applyType={}, cmd={}", applyType, cmd);
+                    }
+                    break;
             }
-
         }
-
 		return true;
 	}
 
-    private void createFlowCase(EnterpriseOpRequest request) {
+    private boolean createFlowCase(EnterpriseOpRequest request) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
         if (flow != null) {
             CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
@@ -351,9 +355,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             flowCaseCmd.setContent(this.getBriefContent(request));
 
             flowService.createFlowCase(flowCaseCmd);
+            return true;
         } else {
-            LOGGER.error("There is no expansion workflow enabled for ownerId: {}", request.getCommunityId());
-            // throw errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "There is no workflow enabled.");
+            if(LOGGER.isWarnEnabled()) {
+                LOGGER.warn("There is no expansion workflow enabled for ownerId: {}", request.getCommunityId());
+            }
+            return false;
         }
     }
 

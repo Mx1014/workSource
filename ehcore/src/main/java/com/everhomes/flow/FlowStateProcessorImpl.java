@@ -107,8 +107,20 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
 				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
 			
-	    	User user = userProvider.findUserById(User.SYSTEM_UID);
-	    	UserContext.current().setUser(user);
+	    	User user = null;
+	    	if(stepDTO.getOperatorId() != null) {
+	    		user = userProvider.findUserById(stepDTO.getOperatorId());
+	    		if(UserContext.current().getUser() == null) {
+	    			UserContext.current().setUser(user);
+	    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+	    		}
+	    	} else if(UserContext.current().getUser() != null) {
+	    		user = UserContext.current().getUser();
+	    	} else {
+	    		user = userProvider.findUserById(User.SYSTEM_UID);
+	    		UserContext.current().setUser(user);
+	    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+	    	}
 			
 			ctx.setFlowCase(flowCase);
 			ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
@@ -141,8 +153,21 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	public FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO) {
 		FlowCaseState ctx = new FlowCaseState();
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
-    	User user = userProvider.findUserById(User.SYSTEM_UID);
-    	UserContext.current().setUser(user);
+
+    	User user = null;
+    	if(stepDTO.getOperatorId() != null) {
+    		user = userProvider.findUserById(stepDTO.getOperatorId());
+    		if(UserContext.current().getUser() == null) {
+    			UserContext.current().setUser(user);
+    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+    		}
+    	} else if(UserContext.current().getUser() != null) {
+    		user = UserContext.current().getUser();
+    	} else {
+    		user = userProvider.findUserById(User.SYSTEM_UID);
+    		UserContext.current().setUser(user);
+    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+    	}
     	
     	//Important, never update this to database!!!
     	flowCase.setCurrentNodeId(stepDTO.getFlowNodeId());

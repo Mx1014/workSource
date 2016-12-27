@@ -28,6 +28,7 @@ import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
+import com.everhomes.rest.flow.FlowResolveUsersResponse;
 import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowSubjectDTO;
@@ -42,6 +43,7 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowModulesCommand;
 import com.everhomes.rest.flow.ListFlowModulesResponse;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
 import com.everhomes.rest.flow.ListScriptsCommand;
 import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
@@ -434,7 +436,9 @@ public interface FlowService {
 
 	ListScriptsResponse listScripts(ListScriptsCommand cmd);
 
-	FlowSMSTemplateResponse listSMSTemplates(ListScriptsCommand cmd);
+	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
+
+	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
 	
 	//TODO 日志信息分类：
 	
