@@ -34,11 +34,15 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 	@Override
 	public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		
-		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, EntityType.NAMESPACE.getCode(), 
-				Long.valueOf(namespaceId), ServiceModuleScopeApplyPolicy.REVERT.getCode());
-		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
+
+		if(null == scopes || scopes.size() == 0){
+			scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null,
+					null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+		}
+
 		List<ServiceModule> list = serviceModuleProvider.listServiceModule(cmd.getLevel(), ServiceModuleType.PARK.getCode());
 		if(scopes.size() != 0)
 			list = filterList(list, scopes);
@@ -64,9 +68,13 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		
 		Integer namespaceId = UserContext.current().getUser().getNamespaceId();
-		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, EntityType.NAMESPACE.getCode(), 
-				Long.valueOf(namespaceId), ServiceModuleScopeApplyPolicy.REVERT.getCode());
-		
+		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());
+
+		if(null == scopes || scopes.size() == 0){
+			scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, null,
+					null, ServiceModuleScopeApplyPolicy.REVERT.getCode());
+		}
+
 		List<ServiceModule> list = serviceModuleProvider.listServiceModule(null, ServiceModuleType.PARK.getCode());
 		if(scopes.size() != 0)
 			list = filterList(list, scopes);
