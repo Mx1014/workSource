@@ -484,11 +484,11 @@ public class ParkingController extends ControllerBase {
             * <p>支付后，获取支付结果</p>
             */
     @RequestMapping("getRechargeResult")
-    @RestReturn(value = String.class)
+    @RestReturn(value = ParkingCardDTO.class)
     public RestResponse getRechargeResult(GetRechargeResultCommand cmd) {
 
-        parkingService.getRechargeResult(cmd);
-        RestResponse response = new RestResponse();
+    	ParkingCardDTO dto = parkingService.getRechargeResult(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

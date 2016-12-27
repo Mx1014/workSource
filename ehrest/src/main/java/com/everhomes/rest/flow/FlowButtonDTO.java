@@ -18,6 +18,7 @@ import com.everhomes.discover.ItemType;
 public class FlowButtonDTO {
     private Byte     status;
     private Integer     gotoLevel;
+    private Long gotoNodeId;
     private Long     flowNodeId;
     private Long     flowMainId;
     private Timestamp     createTime;
@@ -168,6 +169,16 @@ public class FlowButtonDTO {
 
 	public void setRemindCount(Integer remindCount) {
 		this.remindCount = remindCount;
+	}
+
+
+	public Long getGotoNodeId() {
+		return gotoNodeId;
+	}
+
+
+	public void setGotoNodeId(Long gotoNodeId) {
+		this.gotoNodeId = gotoNodeId;
 	}
 
 

@@ -21,12 +21,14 @@ import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.flow.FlowCaseEntity;
+import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.GetTaskDetailCommand;
+import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
@@ -107,6 +109,45 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
+		FlowCaseEntity e = new FlowCaseEntity();
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+		e.setKey("服务内容");
+		e.setValue(dto.getContent());
+		entities.add(e);
+		
+		for(PmTaskAttachmentDTO s: dto.getAttachments()) {
+			e = new FlowCaseEntity();
+			e.setEntityType(FlowCaseEntityType.IMAGE.getCode());
+			e.setKey("");
+			e.setValue(s.getContentUrl());
+			entities.add(e);
+		}
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("服务地点");
+		e.setValue(dto.getAddress());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("所属分类");
+		e.setValue(dto.getCategoryName());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("发起人");
+		e.setValue(dto.getRequestorName());
+		entities.add(e);
+		
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("联系电话");
+		e.setValue(dto.getRequestorPhone());
+		entities.add(e);
 		
 		return entities;
 	}

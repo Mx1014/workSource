@@ -28,6 +28,7 @@ import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
+import com.everhomes.rest.flow.FlowResolveUsersResponse;
 import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowSubjectDTO;
@@ -436,6 +437,8 @@ public interface FlowService {
 	ListScriptsResponse listScripts(ListScriptsCommand cmd);
 
 	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
+
+	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
 	
 	//TODO 日志信息分类：
 	

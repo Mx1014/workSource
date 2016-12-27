@@ -127,16 +127,17 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 
 			long expireTime = strToLong(expireDate);
 			long now = System.currentTimeMillis();
+			long cardReserveTime = 0;
 			
-			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-	    		expireTime = expireTime + cardReserveTime;
+	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
+
 	    	}
 			
-			if(expireTime < now){
+			if(expireTime + cardReserveTime < now){
 				return resultList;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
@@ -570,9 +571,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
-		order.setMonthCount(new BigDecimal(ketuoCardRate.getRuleAmount()));
-		order.setPrice(new BigDecimal(Integer.parseInt(ketuoCardRate.getRuleMoney()) / 100));
-		
 		
 	}
 

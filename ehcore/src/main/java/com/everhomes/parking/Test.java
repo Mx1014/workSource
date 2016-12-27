@@ -41,14 +41,17 @@ public class Test {
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("plateNo", "BX082N");
+		param.put("plateNo", "浙A185VK");
 //		param.put("money", "30000");
 ////		param.put("carType", "2");
 //		param.put("plateNo", "B12347");
+//		B5720Z
+//		BX082N
+//		B7DC77
 
-		String json = Test.post(param, GET_CARD);
+		String json = Test.post(param, GET_TEMP_FEE);
         System.out.println(json);
-        
+        System.out.println(new Date(1490975999000L));
 //        JSONObject param2 = new JSONObject();
 //        param2.put("cardId", "528");
 //        param2.put("ruleType", "1");
@@ -72,7 +75,7 @@ public class Test {
 		StringBuilder result = new StringBuilder();
 		
         String key = "F7A0B971B199FD2A1017CEC5";
-        String iv = "20161216";
+        String iv = "20161226";
         String user = "ktapi";
         String pwd = "0306A9";
         String data = null;

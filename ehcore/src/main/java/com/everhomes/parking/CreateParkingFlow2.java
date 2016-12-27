@@ -104,10 +104,15 @@ public class CreateParkingFlow2 {
 		UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
 		updateFlowCmd3.setFlowNodeId(node3.getId());
 		updateFlowCmd3.setParams("{\"nodeType\":\"SUCCEED\"}");
-		updateFlowCmd3.setAutoStepMinute(0);
-    	updateFlowCmd3.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-    	updateFlowCmd3.setAllowTimeoutAction((byte)1);
 		flowService.updateFlowNode(updateFlowCmd3);
+		
+		UpdateFlowNodeCommand updateFlowCmd4 = new UpdateFlowNodeCommand();
+		updateFlowCmd4.setFlowNodeId(node4.getId());
+		updateFlowCmd4.setParams("");
+		updateFlowCmd4.setAutoStepMinute(0);
+		updateFlowCmd4.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		updateFlowCmd4.setAllowTimeoutAction((byte)1);
+		flowService.updateFlowNode(updateFlowCmd4);
 
 		addNodeProcessor(node1, orgId);
 		addNodeProcessor(node2, orgId);

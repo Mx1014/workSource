@@ -223,7 +223,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         }
         if(StringUtils.isNotBlank(plateNumber)) {
         	conditionSb.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
-        	condition2.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
+        	conditionSb.append(" and e1.status != 0");
+        	condition2.append(" and e3.PLATE_NUMBER = '").append(plateNumber).append("'");
         }
         if(!condition2.toString().equals("")){
         	sb.append(condition2.toString());
