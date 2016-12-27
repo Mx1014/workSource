@@ -1403,7 +1403,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		 */
 		List<Long> privilegeIds = new ArrayList<>();
 		privilegeIds.add(PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
-		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), null, privilegeIds);
+		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), new ArrayList<Long>(), privilegeIds);
 
 
 	}
@@ -1433,7 +1433,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		 */
 		List<Long> privilegeIds = new ArrayList<>();
 		privilegeIds.add(PrivilegeConstants.ORGANIZATION_ADMIN);
-		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), null, privilegeIds);
+		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), new ArrayList<Long>(), privilegeIds);
 
 	}
 
