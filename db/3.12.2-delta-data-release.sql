@@ -483,6 +483,9 @@ VALUES (40130, '工作流设置', 40100, NULL, 'react:/working-flow/flow-list/re
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 1000000, 2);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 999983, 2);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
