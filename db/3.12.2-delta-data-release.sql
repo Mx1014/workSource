@@ -344,6 +344,15 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'pa
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10016', 'zh_CN', '发放月卡数量不可大于当前待办理月卡数');
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`)
 	VALUES ('10006', 'community', '240111044331055940', '科兴科学园停车场', 'KETUO2', NULL, '41', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '0');
+SET @eh_configurations := (SELECT MAX(id) FROM eh_configurations);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.url', 'http://220.160.111.114:9090', '科兴停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.key', 'F7A0B971B199FD2A1017CEC5', '科兴停车充值key', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.user', 'ktapi', '科兴停车充值用户名', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.pwd', '0306A9', '科兴停车充值密码', '0', NULL);
 
 
 -- 更新 资源预订  默认参数 菜单 data_type add by sw 20161215
@@ -483,6 +492,9 @@ VALUES (40130, '工作流设置', 40100, NULL, 'react:/working-flow/flow-list/re
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 1000000, 2);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 999983, 2);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
@@ -519,3 +531,11 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10095, 60400, '�
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10095, 1005,'EhAclRoles', 0, 1, NOW());
+
+
+-- 整理业务模块的scope
+UPDATE `eh_service_module_scopes` SET `owner_type` = null, `owner_id` = null  where `owner_type` = 'EhNamespaces';
+
+
+
+
