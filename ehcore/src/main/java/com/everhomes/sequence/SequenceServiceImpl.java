@@ -1175,7 +1175,10 @@ public class SequenceServiceImpl implements SequenceService {
         });
         
         syncTableSequence(null, EhFlowEvaluateItems.class, Tables.EH_FLOW_EVALUATE_ITEMS.getName(), (dbContext) -> {
-            return dbContext.select(Tables.EH_FLOW_EVALUATE_ITEMS.ID.max()).from(Tables.EH_FLOW_EVALUATE_ITEMS).fetchOne().value1();
+        	return dbContext.select(Tables.EH_FLOW_EVALUATE_ITEMS.ID.max()).from(Tables.EH_FLOW_EVALUATE_ITEMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhOrganizationMemberLogs.class, Tables.EH_ORGANIZATION_MEMBER_LOGS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.max()).from(Tables.EH_ORGANIZATION_MEMBER_LOGS).fetchOne().value1();
         });
 
     }
