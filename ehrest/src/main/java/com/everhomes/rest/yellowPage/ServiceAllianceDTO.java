@@ -25,7 +25,7 @@ import java.util.List;
  *  <li>latitude: 纬度</li>
  *  <li>geohash:   经纬度的geohash</li>
  *  <li>contactName: 负责人</li>
- *  <li>contactUid: 负责人id</li>
+ *  <li>contactMemid: 负责人企业通讯录id</li>
  *  <li>contactMobile: 手机号</li>
  *  <li>categoryId: 所属服务联盟类型id</li>
  *  <li>serviceType: 所属服务联盟的子类别名称</li>
@@ -75,7 +75,7 @@ public class ServiceAllianceDTO {
 	
 	private String   contactName;
 	
-	private Long contactUid;
+	private Long contactMemid;
 	
 	private String   contactMobile;
 	
@@ -203,11 +203,11 @@ public class ServiceAllianceDTO {
 	public void setContactName(String contactName) {
 		this.contactName = contactName;
 	}
-	public Long getContactUid() {
-		return contactUid;
+	public Long getContactMemid() {
+		return contactMemid;
 	}
-	public void setContactUid(Long contactUid) {
-		this.contactUid = contactUid;
+	public void setContactMemid(Long contactMemid) {
+		this.contactMemid = contactMemid;
 	}
 	public String getContactMobile() {
 		return contactMobile;

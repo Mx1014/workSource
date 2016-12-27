@@ -37,7 +37,7 @@ CREATE TABLE `eh_service_alliance_invest_requests` (
 
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `display_destination` TINYINT DEFAULT '0' COMMENT '0: both, 1: client only, 2: browser only';
 ALTER TABLE `eh_service_alliances` ADD COLUMN `module_url` VARCHAR(256);
-ALTER TABLE `eh_service_alliances` ADD COLUMN `contact_uid` BIGINT;
+ALTER TABLE `eh_service_alliances` ADD COLUMN `contact_memid` BIGINT;
 
 ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `attachment_type` TINYINT DEFAULT '0' COMMENT '0: banner; 1: file attachment';
 ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `name` VARCHAR(128);
