@@ -6,6 +6,8 @@ public class SurplusCardCountDTO {
 	
 	private Integer totalCount;
 	private Integer surplusCount;
+	private Byte maxIssueNumFlag;
+	
 	public Integer getTotalCount() {
 		return totalCount;
 	}
@@ -19,6 +21,12 @@ public class SurplusCardCountDTO {
 		this.surplusCount = surplusCount;
 	}
 	
+	public Byte getMaxIssueNumFlag() {
+		return maxIssueNumFlag;
+	}
+	public void setMaxIssueNumFlag(Byte maxIssueNumFlag) {
+		this.maxIssueNumFlag = maxIssueNumFlag;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

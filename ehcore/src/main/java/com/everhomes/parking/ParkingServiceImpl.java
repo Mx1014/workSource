@@ -1383,13 +1383,17 @@ public class ParkingServiceImpl implements ParkingService {
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
 		
 		Integer totalCount = 0;
-		if(null != parkingFlow)
+		Byte maxIssueNumFlag = 0;
+		if(null != parkingFlow) {
+			maxIssueNumFlag = parkingFlow.getMaxIssueNumFlag();
 			totalCount = parkingFlow.getMaxIssueNum();
+		}
+			
 		SurplusCardCountDTO dto = new SurplusCardCountDTO();
 		
 		dto.setTotalCount(totalCount);
 		dto.setSurplusCount(totalCount - count);
-		
+		dto.setMaxIssueNumFlag(maxIssueNumFlag);
 		return dto;
 	}
 
