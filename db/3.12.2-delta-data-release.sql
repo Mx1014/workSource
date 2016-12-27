@@ -502,9 +502,9 @@ UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作'
 
 
 -- 左邻的http的链接 改成https by sfyan 20161222   建议备份一下表
-update `eh_launch_pad_items` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
-update `eh_banners` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
-update `eh_configurations` set `value` = replace(`value`,'http', 'https')  where `value` like '%zuolin%' and  `value` like '%http:%' and `value` like '%.html%';
+-- update `eh_launch_pad_items` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+-- update `eh_banners` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+-- update `eh_configurations` set `value` = replace(`value`,'http', 'https')  where `value` like '%zuolin%' and  `value` like '%http:%' and `value` like '%.html%';
 
 
 -- 增加企业后台的 管理员管理 by sfyan 20161226
