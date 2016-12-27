@@ -58,7 +58,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 //			if(s.getParentId() == 0) {
 //				result.add(s);
 //			}
-//		}ServiceModuleScopeApplyPolicy
+//		}
 		
 		return temp;
 	}
