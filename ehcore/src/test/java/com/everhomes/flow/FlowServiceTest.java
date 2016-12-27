@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -22,7 +23,10 @@ import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
 import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowSMSTemplateResponse;
+import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
+import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStepType;
@@ -70,6 +74,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
+import com.everhomes.util.DateHelper;
 
 public class FlowServiceTest extends LoginAuthTestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
@@ -105,6 +110,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     
     @Autowired
     private FlowScriptProvider flowScriptProvider;
+    
+    @Autowired
+    private FlowTimeoutService flowTimeoutService;
     
     @Autowired
     private UserService userService;
@@ -574,6 +582,30 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	DeleteFlowUserSelectionCommand cmd = new DeleteFlowUserSelectionCommand();
     	cmd.setUserSelectionId(id);
     	flowService.deleteUserSelection(cmd);
+    }
+    
+    @Test
+    public void testDelay() {
+    	FlowTimeout ft = new FlowTimeout();
+    	ft.setBelongEntity(FlowEntityType.FLOW.getCode());
+    	ft.setBelongTo(0l);
+    	
+    	FlowTimeoutMessageDTO stepDTO = new FlowTimeoutMessageDTO();
+    	stepDTO.setRemindCount(5l);
+    	ft.setJson(stepDTO.toString());
+    	
+    	Long timeoutTick = DateHelper.currentGMTTime().getTime() + 30*1000l;
+    	ft.setTimeoutTick(new Timestamp(timeoutTick));
+    	ft.setTimeoutType(FlowTimeoutType.MESSAGE_TIMEOUT.getCode());
+    	ft.setStatus(FlowStatusType.VALID.getCode());
+    	flowTimeoutService.pushTimeout(ft);
+    	
+    	try {
+			Thread.currentThread().sleep(100000l);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
     }
 
 }
