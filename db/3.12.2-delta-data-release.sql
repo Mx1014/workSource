@@ -508,7 +508,7 @@ UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作'
 
 
 -- 增加企业后台的 管理员管理 by sfyan 20161226
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) values('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361','');
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) values('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361',60400);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES (10095, 0, '普通企业管理员管理', '普通企业管理员管理 全部权限', NULL);
 
