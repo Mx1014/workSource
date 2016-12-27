@@ -55,7 +55,9 @@ public class FlowCaseDTO {
     private Byte allowApplierUpdate;
     private String flowNodeName;
     private String currNodeParams;
-
+    private Integer rejectCount;
+    private Long stepCount;
+    
 	public Long getId() {
 		return id;
 	}
@@ -270,6 +272,22 @@ public class FlowCaseDTO {
 
 	public void setCurrNodeParams(String currNodeParams) {
 		this.currNodeParams = currNodeParams;
+	}
+
+	public Integer getRejectCount() {
+		return rejectCount;
+	}
+
+	public void setRejectCount(Integer rejectCount) {
+		this.rejectCount = rejectCount;
+	}
+
+	public Long getStepCount() {
+		return stepCount;
+	}
+
+	public void setStepCount(Long stepCount) {
+		this.stepCount = stepCount;
 	}
 
 	@Override

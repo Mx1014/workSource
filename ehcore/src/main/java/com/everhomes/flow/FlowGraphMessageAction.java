@@ -51,6 +51,10 @@ public class FlowGraphMessageAction extends FlowGraphAction {
 		dto.setTimeoutAtTick(timeoutAtTick);
 		dto.setRemindTick(remindTick);
 		dto.setRemindCount(remindCount);
+
+		if(ctx.getOperator() != null) {
+			dto.setOperatorId(ctx.getOperator().getId());
+		}
 		if(ctx.getNextNode() != null) {
 			dto.setFlowTargetId(ctx.getNextNode().getFlowNode().getId());	
 		}
@@ -60,7 +64,8 @@ public class FlowGraphMessageAction extends FlowGraphAction {
 		if(timeoutAtTick == null) {
 			timeoutAtTick = 0l;
 		}
-		Long timeoutTick = DateHelper.currentGMTTime().getTime() + timeoutAtTick * 60*1000l;
+//		Long timeoutTick = DateHelper.currentGMTTime().getTime() + timeoutAtTick * 60*1000l;
+		Long timeoutTick = System.currentTimeMillis() + timeoutAtTick * 60 * 1000l;
 		ft.setTimeoutTick(new Timestamp(timeoutTick));
 		
 		ctx.getTimeouts().add(ft);

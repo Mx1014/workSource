@@ -12,6 +12,7 @@ public class FlowTimeoutMessageDTO {
 	private Long timeoutAtTick;
 	private Long remindTick;
 	private Long remindCount;
+	private Long operatorId;
 
 	public Long getFlowCaseId() {
 		return flowCaseId;
@@ -85,6 +86,14 @@ public class FlowTimeoutMessageDTO {
 		this.flowTargetId = flowTargetId;
 	}
 
+	public Long getOperatorId() {
+		return operatorId;
+	}
+
+	public void setOperatorId(Long operatorId) {
+		this.operatorId = operatorId;
+	}
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

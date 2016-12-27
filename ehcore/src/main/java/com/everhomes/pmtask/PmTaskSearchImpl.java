@@ -83,6 +83,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
         	b.field("taskCategoryId", task.getTaskCategoryId());
             b.field("createTime", task.getCreateTime().getTime());
             b.field("status", task.getStatus());
+            b.field("flowCaseId", task.getFlowCaseId());
             if(null == task.getOrganizationId() || task.getOrganizationId() ==0){
             	LOGGER.debug("Create PmTaskDoc, taskId={}", task.getId());
 				User user = userProvider.findUserById(task.getCreatorUid());
@@ -257,6 +258,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
             doc.setStatus(((Integer)source.get("status")).byteValue());
             doc.setRequestorName((String)source.get("requestorName"));
             doc.setRequestorPhone((String)source.get("requestorPhone"));
+            doc.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
 //            doc.setRegionId(SearchUtils.getLongField(source.get("regionId")));
 //            doc.setNamespaceId(SearchUtils.getLongField(source.get("namespaceId")).intValue());
 //            doc.setCommunityType(SearchUtils.getLongField(source.get("communityType")).byteValue());

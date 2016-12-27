@@ -4,6 +4,7 @@ package com.everhomes.address;
 import java.util.List;
 
 import com.everhomes.rest.address.*;
+
 import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
@@ -51,4 +52,6 @@ public interface AddressService {
     ListNearbyMixCommunitiesCommandResponse listNearbyMixCommunities(ListNearbyMixCommunitiesCommand cmd);
 
     List<AddressDTO> listAddressByBuildingName(ListApartmentByBuildingNameCommand cmd);
+    
+    AddressDTO getApartmentByBuildingApartmentName(GetApartmentByBuildingApartmentNameCommand cmd);
 }

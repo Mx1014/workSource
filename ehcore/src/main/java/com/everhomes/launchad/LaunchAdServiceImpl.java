@@ -34,7 +34,10 @@ public class LaunchAdServiceImpl implements LaunchAdService {
     @Override
     public LaunchAdDTO getLaunchAd() {
         LaunchAd launchAd = launchAdProvider.getLaunchAd(currNamespaceId());
-        return this.toLaunchAdDTO(launchAd);
+        if (launchAd != null) {
+            return this.toLaunchAdDTO(launchAd);
+        }
+        return new LaunchAdDTO();
     }
 
     @Override

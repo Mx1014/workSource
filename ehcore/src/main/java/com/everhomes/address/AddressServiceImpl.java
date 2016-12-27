@@ -54,6 +54,7 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
@@ -65,6 +66,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+
 import java.io.IOException;
 import java.sql.Timestamp;
 import java.util.*;
@@ -1706,4 +1708,13 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     public List<AddressDTO> listAddressByBuildingName(ListApartmentByBuildingNameCommand cmd) {
         return addressProvider.listAddressByBuildingName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), cmd.getBuildingName());
     }
+
+	@Override
+	public AddressDTO getApartmentByBuildingApartmentName(GetApartmentByBuildingApartmentNameCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Address address = addressProvider.findAddressByBuildingApartmentName(namespaceId, cmd.getCommunityId(), 
+				cmd.getBuildingName(), cmd.getApartmentName());
+		return ConvertHelper.convert(address, AddressDTO.class);
+		
+	}
 }

@@ -618,6 +618,12 @@ public class OrganizationServiceImpl implements OrganizationService {
 		if(null == organization){
 			LOGGER.debug("organization is null, id = " + id);
 			return null;
+		}else if(OrganizationGroupType.fromCode(organization.getGroupType()) != OrganizationGroupType.ENTERPRISE){
+			LOGGER.debug("organization not is enterprise, id = " + id);
+			return null;
+		}else if(organization.getParentId() != 0L){
+			LOGGER.debug("organization is children organization, id = " + id);
+			return null;
 		}
 		
 		if(null == org){
@@ -5267,6 +5273,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 				m.setContactName(cmd.getAccountName());
 				m.setTargetType(OrganizationMemberTargetType.USER.getCode());
 				m.setTargetId(userIdentifier.getOwnerUid());
+				m.setNamespaceId(namespaceId);
 				organizationProvider.updateOrganizationMember(m);
 				
 //				userSearcher.feedDoc(m);

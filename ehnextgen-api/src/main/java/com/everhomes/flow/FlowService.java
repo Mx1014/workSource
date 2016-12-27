@@ -18,6 +18,7 @@ import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowDTO;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEvaluateDTO;
+import com.everhomes.rest.flow.FlowEvaluateDetailDTO;
 import com.everhomes.rest.flow.FlowFireButtonCommand;
 import com.everhomes.rest.flow.FlowGraphDetailDTO;
 import com.everhomes.rest.flow.FlowModuleDTO;
@@ -27,6 +28,8 @@ import com.everhomes.rest.flow.FlowNodeDetailDTO;
 import com.everhomes.rest.flow.FlowPostEvaluateCommand;
 import com.everhomes.rest.flow.FlowPostSubjectCommand;
 import com.everhomes.rest.flow.FlowPostSubjectDTO;
+import com.everhomes.rest.flow.FlowResolveUsersResponse;
+import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
@@ -40,6 +43,9 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowModulesCommand;
 import com.everhomes.rest.flow.ListFlowModulesResponse;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
+import com.everhomes.rest.flow.ListScriptsCommand;
+import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
@@ -48,6 +54,7 @@ import com.everhomes.rest.flow.ListFlowUserSelectionCommand;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
+import com.everhomes.rest.flow.UpdateFlowEvaluateCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
@@ -420,6 +427,18 @@ public interface FlowService {
 			List<FlowUserSelection> selections, int loopCnt);
 
 	void clearFlowGraphCache(Long flowId);
+
+	FlowEvaluateDetailDTO updateFlowEvaluate(UpdateFlowEvaluateCommand cmd);
+
+	FlowEvaluateDetailDTO getFlowEvaluate(Long flowId);
+
+	FlowEvaluateDTO getEvaluateInfo(Long flowCaseId);
+
+	ListScriptsResponse listScripts(ListScriptsCommand cmd);
+
+	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
+
+	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
 	
 	//TODO 日志信息分类：
 	

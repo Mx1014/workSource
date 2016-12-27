@@ -24,6 +24,8 @@ public class FlowActionDTO {
     private Long trackerProcessor;
     private Long trackerApplier;
     private Long allowTimeoutAction;
+    private Long templateId;
+    private Byte enabled;
     
 	@ItemType(FlowUserSelectionDTO.class)
 	List<FlowUserSelectionDTO> processors;
@@ -162,6 +164,22 @@ public class FlowActionDTO {
 
 	public void setAllowTimeoutAction(Long allowTimeoutAction) {
 		this.allowTimeoutAction = allowTimeoutAction;
+	}
+
+	public Byte getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Byte enabled) {
+		this.enabled = enabled;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
 	}
 
 	@Override

@@ -3,10 +3,12 @@ package com.everhomes.rest.flow;
 import com.everhomes.util.StringHelper;
 
 public class FlowActionInfo {
+	private Byte enabled;
 	private Long reminderAfterMinute;
 	private Long reminderTickMinute;
 	private Long trackerApplier;
 	private Long trackerProcessor;
+	private Long templateId;
 	private String renderText;
 	
 	CreateFlowUserSelectionCommand userSelections;
@@ -57,6 +59,22 @@ public class FlowActionInfo {
 
 	public void setUserSelections(CreateFlowUserSelectionCommand userSelections) {
 		this.userSelections = userSelections;
+	}
+
+	public Byte getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Byte enabled) {
+		this.enabled = enabled;
+	}
+
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
 	}
 
 	@Override

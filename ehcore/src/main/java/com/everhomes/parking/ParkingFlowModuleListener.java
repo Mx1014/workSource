@@ -5,6 +5,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,7 +37,6 @@ import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
 
 @Component
 public class ParkingFlowModuleListener implements FlowModuleListener {
@@ -157,42 +157,6 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));//StringHelper.toJsonString(dto)
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
-		FlowCaseEntity e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("姓名");
-		e.setValue(dto.getPlateOwnerName());
-		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("手机号");
-		e.setValue(dto.getPlateOwnerPhone());
-		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("公司");
-		e.setValue(dto.getPlateOwnerEntperiseName());
-		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("车牌号");
-		e.setValue(dto.getPlateNumber());
-		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("品牌");
-		e.setValue(dto.getCarBrand());
-		entities.add(e);
-		
-		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.LIST.getCode());
-		e.setKey("车系");
-		e.setValue(dto.getCarSerieName());
-		entities.add(e);
-		
 		return entities;
 	}
 
@@ -223,7 +187,16 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		FlowCase flowCase = ctx.getFlowCase();
 
 		String stepType = ctx.getStepType().getCode();
-		String param = flowNode.getParams();
+		String params = flowNode.getParams();
+		
+		if(StringUtils.isBlank(params)) {
+			LOGGER.error("Invalid flowNode param.");
+    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+    				"Invalid flowNode param.");
+		}
+		
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
 		
 		Long flowId = flowNode.getFlowMainId();
 		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
@@ -231,14 +204,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 		String tag1 = flow.getStringTag1();
 		
 		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, param={}", stepType, tag1, param);
+		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if("AUDITING".equals(param)) {
+			if("AUDITING".equals(nodeType)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
 					parkingCardRequest.setAuditSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 			}
-			else if("QUEUEING".equals(param)) {
+			else if("QUEUEING".equals(nodeType)) {
 				
 				ParkingFlow parkingFlow = parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(), 
 						parkingCardRequest.getOwnerId(), parkingCardRequest.getParkingLotId(), flowId);
@@ -268,7 +241,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
 					parkingProvider.updateParkingCardRequest(parkingCardRequest);
 				}
-			}else if("PROCESSING".equals(param)) {
+			}else if("PROCESSING".equals(nodeType)) {
 				if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1)) {
 					parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
 					parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
@@ -276,7 +249,7 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 				}
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			if("SUCCEED".equals(param)) {
+			if("SUCCEED".equals(nodeType)) {
 				parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
 				parkingCardRequest.setOpenCardTime(new Timestamp(now));
 				parkingProvider.updateParkingCardRequest(parkingCardRequest);
@@ -293,6 +266,14 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCreating(Flow flow) {
 		// TODO Auto-generated method stub
-	//Added by Janson	
+		if("申请排队模式".equals(flow.getFlowName()))
+			flow.setStringTag1("1");
+		else if("半自动化模式".equals(flow.getFlowName()))
+			flow.setStringTag1("2");
+		else if("智能模式".equals(flow.getFlowName()))
+			flow.setStringTag1("3");
+		else
+			flow.setStringTag1("1");
+
 	}
 }

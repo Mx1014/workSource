@@ -340,10 +340,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
-	private AppProvider appProvider;
-	private Integer namespaceId;
-	private Integer namespaceId2;
-	private String phoneNumber;
+	private AppProvider appProvider; 
 	
 	 
 
@@ -1889,6 +1886,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     }
     
 	private void sendMessageToUser(Long userId, String content) {
+		if(null == userId)
+			return;
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
@@ -3252,9 +3251,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void onOrderSuccess(RentalOrder order) {
 		//加工作流
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
-		Long ownerId = order.getCommunityId();
-		String ownerType = FlowOwnerType.COMMUNITY.getCode();
-    	Flow flow = flowService.getEnabledFlow(namespaceId, Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+		Long ownerId = order.getResourceTypeId();
+		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
+    	Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+    	LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
+    	LOGGER.debug("\n flow is "+flow);
     	if(null!=flow){
 	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
 	    	cmd.setApplyUserId(order.getRentalUid());
@@ -3262,6 +3263,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	    	cmd.setFlowVersion(flow.getFlowVersion());
 	    	cmd.setReferId(order.getId());
 	    	cmd.setReferType(REFER_TYPE);
+	    	cmd.setProjectId(order.getCommunityId());
+	    	cmd.setProjectType(EntityType.COMMUNITY.getCode());
+	    	
 	
 	    	Map<String, String> map = new HashMap<String, String>();  
 	        map.put("resourceName", order.getResourceName());
@@ -3275,7 +3279,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
 			
 	    	cmd.setContent(contentString);
-	    	
+	    	LOGGER.debug("cmd = \n"+cmd);
 	    	FlowCase flowCase = flowService.createFlowCase(cmd);
     	}
 		//发消息给管理员

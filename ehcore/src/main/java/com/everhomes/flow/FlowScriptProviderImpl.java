@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -110,6 +111,25 @@ public class FlowScriptProviderImpl implements FlowScriptProvider {
     }
 
     private void prepareObj(FlowScript obj) {
+    }
+    
+    @Override
+    public List<FlowScript>  findFlowScriptByModuleId(Long moduleId, String moduleType) {
+    	ListingLocator locator = new ListingLocator();
+    	return queryFlowScripts(locator, 100, new ListingQueryBuilderCallback() {
+
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_SCRIPTS.MODULE_ID.eq(moduleId));
+				if(moduleType != null) {
+					query.addConditions(Tables.EH_FLOW_SCRIPTS.MODULE_TYPE.eq(moduleType));	
+				}
+				
+				return query;
+			}
+    		
+    	});
     }
 }
 

@@ -1,6 +1,7 @@
 package com.everhomes.flow;
 
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -32,6 +33,7 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 		FlowGraphNode next = ctx.getFlowGraph().getNodes().get(1);
 		ctx.setNextNode(next);
 		ctx.setStepType(FlowStepType.APPROVE_STEP);
+		ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
 		ctx.getFlowCase().setStepCount(ctx.getFlowCase().getStepCount()+1l);
 	}
 

@@ -336,6 +336,7 @@ VALUES((@id := @id+1),'999986','0','0','0','/home','Bizs','SERVICE_HOT_LINE','�
 
 
 -- 停车充值
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10011', 'zh_CN', '抱歉，你申请的月卡数量已到上限');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10012', 'zh_CN', '发放月卡资格数量不可大于当前剩余月卡数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10013', 'zh_CN', '发放月卡资格数量不可大于当前排队数');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'parking', '10014', 'zh_CN', '操作失败，当前无剩余月卡');
@@ -414,7 +415,7 @@ DELETE FROM eh_web_menu_scopes WHERE menu_id IN (40750) AND owner_type = 'EhName
 
 -- 资源预订工作流模板，add by wh, 20161219
 SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
 
 -- 资源预订工作流中文，added by wh ,2016-12-19
@@ -430,4 +431,91 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'content', 'zh_CN', '显示内容');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'license', 'zh_CN', '车牌');
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'remark', 'zh_CN', '备注');
-INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'attachment', 'zh_CN', '附件'); 
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'rental.flow', 'attachment', 'zh_CN', '附件');
+
+-- 资源预订新增工作流菜单  add by sw 20161220
+INSERT INTO `eh_web_menus` VALUES ('40450', '工作流设置', '40400', NULL, 'react:/working-flow/flow-list/resource-reservation/40400', '0', '2', '/40000/40400/40450', 'park', '475', 40800);
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10023', '40450', '资源预订', '1', '1', '资源预订 全部权限', '710');
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40450, '', 'EhNamespaces', 1000000, 2);
+
+	
+	
+-- 要上线的app版本 by sfyan 20161220
+SET @app_version_id = (SELECT MAX(id) FROM `eh_app_version`);
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','0','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','0','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','1000000','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','1000000','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','999988','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','999988','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','999983','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','999983','2097156','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','999984','3156995','2016-12-01 14:57:56');
+INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'ios','3.12.2','','999984','2097156','2016-12-01 14:57:56');
+
+
+--
+-- 园区入驻 2.3  add by xq.tian  2016/12/20
+--
+SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '1', 'zh_CN', '园区入驻工作流摘要内容', '申请类型: ${applyType}\n面积需求: ${areaSize} 平米', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '2', 'zh_CN', '园区入驻工作流详情内容', '[{"key":"发起人","value":"${applyUserName}","entityType":"list"},{"key":"联系电话","value":"${contactPhone}","entityType":"list"},{"key":"企业","value":"${enterpriseName}","entityType":"list"},{"key":"申请类型","value":"${applyType}","entityType":"list"},{"key":"面积需求","value":"${areaSize} 平米","entityType":"list"},{"key":"申请来源","value":"${sourceType}","entityType":"list"},{"key":"备注","value":"${description}","entityType":"multi_line"}]', '0');
+
+SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'expansion.applyType', '1', 'zh_CN', '入驻申请');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'expansion.applyType', '2', 'zh_CN', '扩租申请');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'expansion.applyType', '3', 'zh_CN', '续租申请');
+
+--
+-- 工作流设置菜单
+--
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (40130, '工作流设置', 40100, NULL, 'react:/working-flow/flow-list/rent-manage/40100', 0, 2, '/40000/40100/40130', 'park', 419);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 1000000, 2);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10020, 40130, '招租管理', 1, 1, '招租管理 工作流设置 全部权限', 419);
+
+-- Added by Janson 20161220
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow', 10006, 'zh_CN', '用户评价：${score}分', '用户评价：${score}分');
+
+-- 要上线的app版本 by sfyan 20161221
+update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
+
+--
+-- 修改没有权限时的提示语  add by xq.tian  2016/12/21
+--
+UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');
+
+
+-- 左邻的http的链接 改成https by sfyan 20161222   建议备份一下表
+-- update `eh_launch_pad_items` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+-- update `eh_banners` set `action_data` = replace(`action_data`,'http', 'https') where `action_data` like '%zuolin%' and  `action_data` like '%http:%';
+-- update `eh_configurations` set `value` = replace(`value`,'http', 'https')  where `value` like '%zuolin%' and  `value` like '%http:%' and `value` like '%.html%';
+
+
+-- 增加企业后台的 管理员管理 by sfyan 20161226
+insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) values('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361',60400);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES (10095, 0, '普通企业管理员管理', '普通企业管理员管理 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10095, 60400, '普通企业管理员管理', 1, 1, '普通企业管理员管理 全部权限', 361);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10095, 1005,'EhAclRoles', 0, 1, NOW());

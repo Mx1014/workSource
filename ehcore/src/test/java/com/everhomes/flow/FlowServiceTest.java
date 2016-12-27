@@ -21,6 +21,8 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
+import com.everhomes.rest.flow.FlowSMSTemplateResponse;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStepType;
@@ -47,6 +49,9 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
+import com.everhomes.rest.flow.ListScriptsCommand;
+import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
@@ -555,4 +560,20 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ListFlowButtonResponse resp = flowService.listFlowNodeButtons(flowNodeId);
     	Assert.assertTrue(resp.getProcessorButtons().size() > 0);
     }
+    
+    @Test
+    public void testScripts() {
+    	ListScriptsCommand cmd = new ListScriptsCommand();
+    	ListScriptsResponse resp = flowService.listScripts(cmd);
+    	Assert.assertTrue(resp.getScripts().size() > 0);
+    }
+    
+    @Test
+    public void testDelUserSelection() {
+    	Long id = 4365l;
+    	DeleteFlowUserSelectionCommand cmd = new DeleteFlowUserSelectionCommand();
+    	cmd.setUserSelectionId(id);
+    	flowService.deleteUserSelection(cmd);
+    }
+
 }

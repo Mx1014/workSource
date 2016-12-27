@@ -18,6 +18,7 @@ public class FlowAutoStepDTO {
 	private Long stepCount;
 	private String autoStepType;
 	private Long flowTargetId;
+	private Long operatorId;
 
 	public Long getFlowCaseId() {
 		return flowCaseId;
@@ -73,6 +74,14 @@ public class FlowAutoStepDTO {
 
 	public void setFlowTargetId(Long flowTargetId) {
 		this.flowTargetId = flowTargetId;
+	}
+
+	public Long getOperatorId() {
+		return operatorId;
+	}
+
+	public void setOperatorId(Long operatorId) {
+		this.operatorId = operatorId;
 	}
 
 	@Override

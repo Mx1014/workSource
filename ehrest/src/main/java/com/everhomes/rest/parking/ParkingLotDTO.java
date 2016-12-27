@@ -33,8 +33,6 @@ public class ParkingLotDTO {
     private Integer rechargeMonthCount;
     private Byte rechargeType;
     
-    private BigDecimal totalAmount;
-    
     private Integer flowMode;
     
     public ParkingLotDTO() {
@@ -126,14 +124,6 @@ public class ParkingLotDTO {
 
 	public void setRechargeType(Byte rechargeType) {
 		this.rechargeType = rechargeType;
-	}
-
-	public BigDecimal getTotalAmount() {
-		return totalAmount;
-	}
-
-	public void setTotalAmount(BigDecimal totalAmount) {
-		this.totalAmount = totalAmount;
 	}
 
 	@Override

@@ -18,4 +18,6 @@ public interface FlowScriptProvider {
 	List<FlowScript> queryFlowScripts(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<FlowScript> findFlowScriptByModuleId(Long moduleId, String moduleType);
+
 }

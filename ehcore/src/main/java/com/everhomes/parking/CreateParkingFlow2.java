@@ -93,21 +93,26 @@ public class CreateParkingFlow2 {
 		//support auto step
 		UpdateFlowNodeCommand updateFlowCmd = new UpdateFlowNodeCommand();
 		updateFlowCmd.setFlowNodeId(node1.getId());
-		updateFlowCmd.setParams("{\"nodeType\":\"QUEUEING\"}");
+		updateFlowCmd.setParams("{\"nodeType\":\"AUDITING\"}");
 		flowService.updateFlowNode(updateFlowCmd);
 
 		UpdateFlowNodeCommand updateFlowCmd2 = new UpdateFlowNodeCommand();
 		updateFlowCmd2.setFlowNodeId(node2.getId());
-		updateFlowCmd2.setParams("{\"nodeType\":\"PROCESSING\"}");
+		updateFlowCmd2.setParams("{\"nodeType\":\"QUEUEING\"}");
 		flowService.updateFlowNode(updateFlowCmd2);
 
 		UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
 		updateFlowCmd3.setFlowNodeId(node3.getId());
 		updateFlowCmd3.setParams("{\"nodeType\":\"SUCCEED\"}");
-		updateFlowCmd3.setAutoStepMinute(0);
-    	updateFlowCmd3.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-    	updateFlowCmd3.setAllowTimeoutAction((byte)1);
 		flowService.updateFlowNode(updateFlowCmd3);
+		
+		UpdateFlowNodeCommand updateFlowCmd4 = new UpdateFlowNodeCommand();
+		updateFlowCmd4.setFlowNodeId(node4.getId());
+		updateFlowCmd4.setParams("");
+		updateFlowCmd4.setAutoStepMinute(0);
+		updateFlowCmd4.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		updateFlowCmd4.setAllowTimeoutAction((byte)1);
+		flowService.updateFlowNode(updateFlowCmd4);
 
 		addNodeProcessor(node1, orgId);
 		addNodeProcessor(node2, orgId);
@@ -194,7 +199,7 @@ public class CreateParkingFlow2 {
 		flowService.updateFlowButton(buttonCmd);
 
 		FlowButton flowButton3 = flowButtonProvider.findFlowButtonByStepType(node3.getId(), FlowConstants.FLOW_CONFIG_VER
-				, FlowStepType.REMINDER_STEP.getCode(), FlowUserType.APPLIER.getCode());
+				, FlowStepType.ABSORT_STEP.getCode(), FlowUserType.APPLIER.getCode());
 		flowButton3.setStatus(FlowButtonStatus.ENABLED.getCode());
 		flowButtonProvider.updateFlowButton(flowButton3);
 

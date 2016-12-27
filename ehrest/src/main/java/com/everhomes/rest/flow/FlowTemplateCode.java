@@ -8,4 +8,5 @@ public interface FlowTemplateCode {
 	public static final int ABSORT_STEP = 10003;
 	public static final int TRANSFER_STEP = 10004;
 	public static final int COMMENT_STEP = 10005;
+	public static final int EVALUATE_STEP = 10006;
 }
