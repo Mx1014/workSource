@@ -11,6 +11,7 @@ public class FlowButtonDetailDTO {
     private Integer     gotoLevel;
     private Long     flowNodeId;
     private Long     flowMainId;
+    private Long gotoNodeId;
     private Timestamp     createTime;
     private Integer     namespaceId;
     private String     flowStepType;
@@ -162,6 +163,14 @@ public class FlowButtonDetailDTO {
 
 	public void setDescription(String description) {
 		this.description = description;
+	}
+
+	public Long getGotoNodeId() {
+		return gotoNodeId;
+	}
+
+	public void setGotoNodeId(Long gotoNodeId) {
+		this.gotoNodeId = gotoNodeId;
 	}
 
 	@Override

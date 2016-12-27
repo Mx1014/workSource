@@ -425,7 +425,7 @@ public class FlowAdminController extends ControllerBase {
      */
     @RequestMapping("disableFlowButton")
     @RestReturn(value=FlowButtonDTO.class)
-    public RestResponse updateFlowButton(@Valid DisableFlowButtonCommand cmd) {
+    public RestResponse disableFlowButton(@Valid DisableFlowButtonCommand cmd) {
         RestResponse response = new RestResponse(flowService.disableFlowButton(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
