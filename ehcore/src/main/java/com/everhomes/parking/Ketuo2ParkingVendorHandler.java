@@ -235,9 +235,11 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
         						if(Integer.valueOf(kr.getRuleAmount()) == 1)
         							rate = kr;
         					}
-        					if(parkingLot.getRechargeType() == ParkingLotRechargeType.ALL.getCode())
-        						ketuoCardRate.setRuleMoney(String.valueOf(Integer.valueOf(rate.getRuleMoney()) * rechargeMonthCount));
-            				else {
+        					if(parkingLot.getRechargeType() == ParkingLotRechargeType.ALL.getCode()) {
+        						Integer actualPrice = Integer.valueOf(rate.getRuleMoney()) - freeMoney;
+        						ketuoCardRate.setRuleMoney(String.valueOf(actualPrice * rechargeMonthCount));
+
+        					}else {
             					Calendar calendar = Calendar.getInstance();
             					calendar.setTimeInMillis(now);
             					int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
@@ -514,12 +516,30 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
 			
 			param.put("cardId", card.getCardId());
-			param.put("ruleType", order.getRateToken());
+			param.put("ruleType", CUSTOM.equals(order.getRateToken())?"2":order.getRateToken());
 		    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
 		    param.put("payMoney", order.getPrice().intValue()*100);
 		    param.put("startTime", validStart);
 		    param.put("endTime", validEnd);
-		    param.put("freeMoney", card.getFreeMoney() * order.getMonthCount().intValue());
+		    if(CUSTOM.equals(order.getRateToken())) {
+		    	ParkingLot parkingLot = parkingProvider.findParkingLotById(order.getParkingLotId());
+
+		    	if(parkingLot.getRechargeType() == ParkingLotRechargeType.ALL.getCode()) {
+		    		param.put("freeMoney", card.getFreeMoney() * order.getMonthCount().intValue());
+
+				}else {
+					Calendar calendar = Calendar.getInstance();
+					calendar.setTimeInMillis(now);
+					int maxDay = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+					int today = calendar.get(Calendar.DAY_OF_MONTH);
+					Integer actualPrice = card.getFreeMoney();
+					Integer monthCount = order.getMonthCount().intValue();
+					param.put("freeMoney", actualPrice * (monthCount - 1)
+							+ actualPrice * (maxDay - today + 1) / maxDay);
+				}
+			}else{
+			    param.put("freeMoney", card.getFreeMoney() * order.getMonthCount().intValue());
+			}
 			String json = post(param, RECHARGE);
 	        
 	        if(LOGGER.isDebugEnabled())
@@ -730,9 +750,9 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
 			calendar.set(Calendar.DAY_OF_MONTH, d);
 		}else{
-			calendar.add(Calendar.MONTH, month);
-//			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-//			calendar.set(Calendar.DAY_OF_MONTH, d);
+			calendar.add(Calendar.MONTH, month - 1);
+			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
+			calendar.set(Calendar.DAY_OF_MONTH, d);
 		}
 		
 		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
