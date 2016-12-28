@@ -5552,59 +5552,50 @@ public class OrganizationServiceImpl implements OrganizationService {
 		outer:
 		for (String str : list) {
 			String[] s = str.split("\\|\\|");
-			
+
+			String employeeNoStr = s.length > 0 ? s[0] : "";
+			String departmentStr = s.length > 1 ? s[1] : "";
+			String contactNameStr = s.length > 2 ? s[2] : "";
+			String genderStr = s.length > 3 ? s[3] : "";
+			String contactTokenStr = s.length > 4 ? s[4] : "";
+			String jobPositionStr = s.length > 5 ? s[5] : "";
+			String joblevelStr = s.length > 6 ? s[6] : "";
+
 			if(0 == s.length){
 				LOGGER.debug("Organization member is null. data = " + str);
 				continue outer;
 			}
-			//手机号为空
-			if(StringUtils.isEmpty(s[4])){
+			//手机号、姓名、部门为空
+			if(StringUtils.isEmpty(contactTokenStr) || StringUtils.isEmpty(contactNameStr) || StringUtils.isEmpty(departmentStr)){
 				LOGGER.debug("Organization member contactToken is null. data = " + str);
-				
-				ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
-				d.setDescription("Organization member contactToken is null");
+				ImportOrganizationMemberDTO d = new ImportOrganizationMemberDTO(employeeNoStr, contactNameStr, contactTokenStr, genderStr, departmentStr, jobPositionStr, joblevelStr);
+				d.setDescription("Organization member contactToken or contactName or department is null");
 				errorDataLogs.add(d);
 				continue outer;
 			}
-			if(StringUtils.isEmpty(s[2])){
-				LOGGER.debug("Organization member ContactName is null. data = " + str);
-				ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
-				d.setDescription("Organization member ContactName is null");
-				errorDataLogs.add(d);
-				continue outer;
-			}
-			//部门为空
-			if(StringUtils.isEmpty(s[1])){
-				LOGGER.debug("Organization member depts is null. data = " + str);
-				ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
-				d.setDescription("Organization member depts is null");
-				errorDataLogs.add(d);
-				continue outer;
-			}
-			
+
 			AddOrganizationPersonnelCommand memberCommand = new AddOrganizationPersonnelCommand();
 			
 			memberCommand.setOrganizationId(cmd.getOrganizationId());
-			memberCommand.setContactToken(s[4]);
-			memberCommand.setContactName(s[2]);
-			memberCommand.setEmployeeNo(s[0]);
+			memberCommand.setContactToken(contactTokenStr);
+			memberCommand.setContactName(contactNameStr);
+			memberCommand.setEmployeeNo(employeeNoStr);
 			Byte gender = 0;
-			if(s[3].equals("男")){
+			if(genderStr.equals("男")){
 				gender = 1;
-			}else if(s[3].equals("女")){
+			}else if(genderStr.equals("女")){
 				gender = 2;
 			}
 			memberCommand.setGender(gender);
 			
-			if(!StringUtils.isEmpty(s[1])){
-				String deptStr = s[1];
-				String[] deptStrArr = deptStr.split(",");
+			if(!StringUtils.isEmpty(departmentStr)){
+				String[] deptStrArr = departmentStr.split(",");
 				List<Long> departmentIds = new ArrayList<Long>();
 				for(String deptName: deptStrArr) {
 					Organization dept = deptMap.get(deptName.trim());
 					if(null == dept){
 						LOGGER.debug("Organization member depts is null. data = " + str);
-						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+						ImportOrganizationMemberDTO d = new ImportOrganizationMemberDTO(employeeNoStr, contactNameStr, contactTokenStr, genderStr, departmentStr, jobPositionStr, joblevelStr);
 						d.setDescription("Organization member depts is null");
 						errorDataLogs.add(d);
 						continue outer;
@@ -5614,15 +5605,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 				memberCommand.setDepartmentIds(departmentIds);
 			}
 			
-			if(!StringUtils.isEmpty(s[5])){
-				String jobPositionStr = s[5];
+			if(!StringUtils.isEmpty(jobPositionStr)){
 				String[] jobPositionStrArr = jobPositionStr.split(",");
 				List<Long> jobPositionIds = new ArrayList<Long>();
 				for(String jobPositionName: jobPositionStrArr) {
 					Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
 					if(null == jobPosition){
 						LOGGER.debug("Organization member jobPosition is null. data = " + str);
-						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+						ImportOrganizationMemberDTO d = new ImportOrganizationMemberDTO();
 						d.setDescription("Organization member jobPosition is null");
 						errorDataLogs.add(d);
 						continue outer;
@@ -5632,15 +5622,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 				memberCommand.setJobPositionIds(jobPositionIds);
 			}
 			
-			if(!StringUtils.isEmpty(s[6])){
-				String jobLevelStr = s[6];
-				String[] jobLevelStrArr = jobLevelStr.split(",");
+			if(!StringUtils.isEmpty(joblevelStr)){
+				String[] jobLevelStrArr = joblevelStr.split(",");
 				List<Long> jobLevelIds = new ArrayList<Long>();
 				for(String jobLevelName: jobLevelStrArr) {
 					Organization jobLevel = jobLevelMap.get(jobLevelName);
 					if(null == jobLevel){
 						LOGGER.debug("Organization member jobLevel is null. data = " + str);
-						ImportOrganizationMemberDTO d = convertArrToImportOrganizationMemberDTO(s);
+						ImportOrganizationMemberDTO d = new ImportOrganizationMemberDTO(employeeNoStr, contactNameStr, contactTokenStr, genderStr, departmentStr, jobPositionStr, joblevelStr);
 						d.setDescription("Organization member jobLevel is null");
 						errorDataLogs.add(d);
 						continue outer;
@@ -5659,7 +5648,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 			try {
 				verifyRes = this.verifyPersonnelByPhone(verifyCommand);
 			} catch (Exception e) {
-				LOGGER.debug(e.getMessage() + ". data = " + str);
+				LOGGER.debug(e.getMessage());
+				ImportOrganizationMemberDTO d = new ImportOrganizationMemberDTO(employeeNoStr, contactNameStr, contactTokenStr, genderStr, departmentStr, jobPositionStr, joblevelStr);
+				d.setDescription(e.getMessage());
+				errorDataLogs.add(d);
 				continue outer;
 			}
 			
@@ -5671,19 +5663,6 @@ public class OrganizationServiceImpl implements OrganizationService {
 			this.addOrganizationPersonnel(memberCommand);
 		}
 		return errorDataLogs;
-	}
-	
-	private ImportOrganizationMemberDTO convertArrToImportOrganizationMemberDTO(String[] arr) {
-		ImportOrganizationMemberDTO dto = new ImportOrganizationMemberDTO();
-		dto.setEmployeeNo(arr[0]);
-		dto.setDepartments(arr[1]);
-		dto.setContactName(arr[2]);
-		dto.setGender(arr[3]);
-		dto.setContactToken(arr[4]);
-		dto.setJobPositions(arr[5]);
-		dto.setJobLevels(arr[6]);
-		
-		return dto;
 	}
 	
 	private Map<String, Organization> convertDeptListToStrMap(List<Organization> depts){
@@ -5699,16 +5678,29 @@ public class OrganizationServiceImpl implements OrganizationService {
 		for (Organization dept : depts) {
 			String path = dept.getPath();
 			String[] pathArr = path.split("/");
-			StringBuilder sb = new StringBuilder(); 
-			for(int i=0,length=pathArr.length; i<length; i++) {
-				if(pathArr[i].length() != 0 && i < length-1) {
-					sb.append(temp.get(Long.valueOf(pathArr[i]))).append("-");
+			StringBuilder sb = new StringBuilder();
+			int i = 0;
+			for (String idStr: pathArr) {
+				if(i > 1 && !"".equals(idStr)){
+					Long id = Long.valueOf(idStr);
+					String orgName = temp.get(Long.valueOf(id));
+					if(StringUtils.isEmpty(orgName)){
+						sb = new StringBuilder();
+						break;
+					}
+					if(sb.toString().isEmpty()){
+						sb.append(orgName);
+					}else{
+						sb.append("-").append(orgName);
+					}
 				}
-				if(i == length-1) {
-					sb.append(temp.get(Long.valueOf(pathArr[i])));
-				}
+				i ++;
 			}
-			map.put(sb.toString(), dept);
+
+			if(!sb.toString().isEmpty()){
+				map.put(sb.toString(), dept);
+			}
+
 		}
 		return map;
 	}
@@ -7997,7 +7989,7 @@ System.out.println();
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			organizationMember.setOrganizationId(finalOrganizationId);
-			userSearcher.feedDoc(organizationMember);
+			//userSearcher.feedDoc(organizationMember);
 			
 			// 如果是往公司添加新成员就需要发消息
 			if(organizationMember.isCreate()){
