@@ -888,7 +888,7 @@ ALTER TABLE `eh_settle_requests` ADD COLUMN `string_tag1` VARCHAR(256);
 ALTER TABLE `eh_settle_requests` ADD COLUMN `integral_tag1` BIGINT;
 
 
-DROP TABLE IF EXISTS `eh_service_alliance_invest_requests`;
+-- DROP TABLE IF EXISTS `eh_service_alliance_invest_requests`;
 CREATE TABLE `eh_service_alliance_invest_requests` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
