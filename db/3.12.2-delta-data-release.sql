@@ -589,5 +589,6 @@ SELECT (@menu_scope_id := @menu_scope_id + 1), 60400, '', 'EhNamespaces', id, 2 
 
 -- 更新菜单
 update eh_web_menus set name = '入驻申请' where id = 40120; 
-
-
+-- 储能 工作流设置菜单
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40850, '', 'EhNamespaces', 999990, 2);
