@@ -5,7 +5,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
@@ -178,7 +180,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		TechparkDataType techparkDataType = TechparkDataType.fromCode(dataType);
 		switch (techparkDataType) {
 		case BUILDING:
-			syncAllBuildings(appNamespaceMapping, backupList);
+			//楼栋同步从门牌中提取
+//			syncAllBuildings(appNamespaceMapping, backupList);
 			break;
 		case APARTMENT:
 			syncAllApartments(appNamespaceMapping, backupList);
@@ -201,35 +204,39 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
 			List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
 			List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
-			// 如果两边都有，更新；如果我们有，他们没有，删除；
-			for (Building myBuilding : myBuildingList) {
-				CustomerBuilding customerBuilding = findFromTheirBuildingList(myBuilding, theirBuildingList);
-				if (customerBuilding != null) {
-					updateBuilding(myBuilding, customerBuilding);
-				}else {
-					deleteBuilding(myBuilding);
-				}
-			}
-			// 如果他们有，我们没有，插入
-			// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-			if (theirBuildingList != null) {
-				for (CustomerBuilding customerBuilding : theirBuildingList) {
-					if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
-						continue;
-					}
-					// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-					Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
-					if (building == null) {
-						insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
-					}else {
-						updateBuilding(building, customerBuilding);
-					}
-				}
-			}
+			syncAllBuildings(appNamespaceMapping, myBuildingList, theirBuildingList);
 			return true;
 		});
 	}
 
+	private void syncAllBuildings(AppNamespaceMapping appNamespaceMapping, List<Building> myBuildingList, List<CustomerBuilding> theirBuildingList) {
+		// 如果两边都有，更新；如果我们有，他们没有，删除；
+		for (Building myBuilding : myBuildingList) {
+			CustomerBuilding customerBuilding = findFromTheirBuildingList(myBuilding, theirBuildingList);
+			if (customerBuilding != null) {
+				updateBuilding(myBuilding, customerBuilding);
+			}else {
+				deleteBuilding(myBuilding);
+			}
+		}
+		// 如果他们有，我们没有，插入
+		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+		if (theirBuildingList != null) {
+			for (CustomerBuilding customerBuilding : theirBuildingList) {
+				if ((customerBuilding.getDealed() != null && customerBuilding.getDealed().booleanValue() == true) || StringUtils.isBlank(customerBuilding.getBuildingName())) {
+					continue;
+				}
+				// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+				Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+				if (building == null) {
+					insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+				}else {
+					updateBuilding(building, customerBuilding);
+				}
+			}
+		}
+	}
+	
 	private void insertBuilding(Integer namespaceId, Long communityId, CustomerBuilding customerBuilding) {
 		if (StringUtils.isBlank(customerBuilding.getBuildingName())) {
 			return;
@@ -302,39 +309,60 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	}
 
 	private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		//楼栋的同步按照从门牌中提取来同步
+		//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
+		List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
+		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+		List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
+		List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
 		dbProvider.execute(s->{
-			//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
-			List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
-			List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
-			// 如果两边都有，更新；如果我们有，他们没有，删除；
-			for (Address myApartment : myApartmentList) {
-				CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
-				if (customerApartment != null) {
-					updateAddress(myApartment, customerApartment);
-				}else {
-					deleteAddress(myApartment);
-				}
-			}
-			// 如果他们有，我们没有，插入
-			// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
-			if (theirApartmentList != null) {
-				for (CustomerApartment customerApartment : theirApartmentList) {
-					if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
-						continue;
-					}
-					// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
-					Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-					if (address == null) {
-						insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
-					}else {
-						updateAddress(address, customerApartment);
-					}
-				}
-			}
+			syncAllBuildings(appNamespaceMapping, myBuildingList, theirBuildingList);
+			syncAllApartments(appNamespaceMapping, myApartmentList, theirApartmentList);
 			return true;
 		});
 	}
 
+	private List<CustomerBuilding> fetchBuildingsFromApartments(List<CustomerApartment> theirApartmentList) {
+		Set<CustomerBuilding> buildingSet = new HashSet<>();
+		for (CustomerApartment customerApartment : theirApartmentList) {
+			if (customerApartment.getApartmentName() != null && customerApartment.getApartmentName().contains("-")) {
+				buildingSet.add(new CustomerBuilding(customerApartment.getApartmentName().split("-")[0]));
+			}else {
+				buildingSet.add(new CustomerBuilding(customerApartment.getBuildingName()));
+			}
+		}
+		
+		return new ArrayList<>(buildingSet);
+	}
+
+	private void syncAllApartments(AppNamespaceMapping appNamespaceMapping, List<Address> myApartmentList, List<CustomerApartment> theirApartmentList) {
+		// 如果两边都有，更新；如果我们有，他们没有，删除；
+		for (Address myApartment : myApartmentList) {
+			CustomerApartment customerApartment = findFromTheirApartmentList(myApartment, theirApartmentList);
+			if (customerApartment != null) {
+				updateAddress(myApartment, customerApartment);
+			}else {
+				deleteAddress(myApartment);
+			}
+		}
+		// 如果他们有，我们没有，插入
+		// 因为上面两边都有的都处理过了，所以剩下的就都是他们有我们没有的数据了
+		if (theirApartmentList != null) {
+			for (CustomerApartment customerApartment : theirApartmentList) {
+				if ((customerApartment.getDealed() != null && customerApartment.getDealed().booleanValue() == true) || StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+					continue;
+				}
+				// 这里要注意一下，不一定就是我们系统没有，有可能是我们系统本来就有，但不是他们同步过来的，这部分也是按更新处理
+				Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+				if (address == null) {
+					insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+				}else {
+					updateAddress(address, customerApartment);
+				}
+			}
+		}
+	}
+	
 	private void insertAddress(Integer namespaceId, Long communityId, CustomerApartment customerApartment) {
 		if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
 			return;
@@ -580,7 +608,8 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		TechparkDataType techparkDataType = TechparkDataType.fromCode(dataType);
 		switch (techparkDataType) {
 		case BUILDING:
-			syncPartBuildings(appNamespaceMapping, backupList);
+			//楼栋改成按门牌来同步
+//			syncPartBuildings(appNamespaceMapping, backupList);
 			break;
 		case APARTMENT:
 			syncPartApartments(appNamespaceMapping, backupList);
@@ -601,34 +630,45 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private void syncPartBuildings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
 		dbProvider.execute(s->{
 			List<CustomerBuilding> theirBuildingList = mergeBackupList(backupList, CustomerBuilding.class);
-			for (CustomerBuilding customerBuilding : theirBuildingList) {
-				Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
-				if (building == null) {
-					insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
-				}else {
-					updateBuilding(building, customerBuilding);
-				}
-			}
+			syncPartCustomerBuildings(appNamespaceMapping, theirBuildingList);
 			return true;
 		});
 	}
 
-	private void syncPartApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
-		dbProvider.execute(s->{
-			List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
-			for (CustomerApartment customerApartment : theirApartmentList) {
-				if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
-					continue;
-				}
-				Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
-				if (address == null) {
-					insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
-				}else {
-					updateAddress(address, customerApartment);
-				}
+	private void syncPartCustomerBuildings(AppNamespaceMapping appNamespaceMapping, List<CustomerBuilding> theirBuildingList) {
+		for (CustomerBuilding customerBuilding : theirBuildingList) {
+			Building building = buildingProvider.findBuildingByName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding.getBuildingName());
+			if (building == null) {
+				insertBuilding(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerBuilding);
+			}else {
+				updateBuilding(building, customerBuilding);
 			}
+		}
+	}
+	
+	private void syncPartApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
+		//楼栋改成从门牌中提取来同步
+		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+		List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
+		dbProvider.execute(s->{
+			syncPartCustomerBuildings(appNamespaceMapping, theirBuildingList);
+			syncPartCustomerApartments(appNamespaceMapping, theirApartmentList);
 			return true;
 		});
+	}
+	
+	private void syncPartCustomerApartments(AppNamespaceMapping appNamespaceMapping, List<CustomerApartment> theirApartmentList) {
+		for (CustomerApartment customerApartment : theirApartmentList) {
+			if (StringUtils.isBlank(customerApartment.getBuildingName()) || StringUtils.isBlank(customerApartment.getApartmentName())) {
+				continue;
+			}
+			Address address = addressProvider.findAddressByBuildingApartmentName(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment.getBuildingName(), customerApartment.getApartmentName());
+			if (address == null) {
+				insertAddress(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), customerApartment);
+			}else {
+				updateAddress(address, customerApartment);
+			}
+		}
 	}
 
 	private void syncPartRentings(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
