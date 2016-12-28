@@ -579,8 +579,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 			ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
 			if(dto.getJumpType() != null) {
-				//兼容以前只有模板跳转时jumptype字段为null的情况
-				if(dto.getJumpType() == null || JumpType.TEMPLATE.equals(JumpType.fromCode(dto.getJumpType()))) {
+				
+				if(JumpType.TEMPLATE.equals(JumpType.fromCode(dto.getJumpType()))) {
 					RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
 					if(template != null) {
 						dto.setTemplateName(template.getName());
@@ -590,6 +590,16 @@ public class YellowPageServiceImpl implements YellowPageService {
 					dto.setTemplateName(dto.getTemplateType());
 					dto.setButtonTitle(dto.getTemplateType());
 				}
+			} else {
+				//兼容以前只有模板跳转时jumptype字段为null的情况
+				if(dto.getTemplateType() != null) {
+					RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
+					if(template != null) {
+						dto.setTemplateName(template.getName());
+						dto.setButtonTitle(template.getButtonTitle());
+					}
+				}
+				
 			}
 			
 			this.processDetailUrl(dto);
