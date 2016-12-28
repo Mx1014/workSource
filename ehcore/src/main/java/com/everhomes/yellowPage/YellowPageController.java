@@ -18,7 +18,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.validation.Valid;
- 
+import java.util.List;
+
 
 @RestController
 @RequestMapping("/yellowPage")
@@ -317,6 +318,22 @@ public class YellowPageController  extends ControllerBase {
     	response.setErrorDescription("OK");
     	return response;
     }
+
+    /**
+     * <b>URL: /yellowPage/listJumpModules</b>
+     * <p> 获取跳转模块列表</p>
+     */
+    @RequestMapping("listJumpModules")
+    @RestReturn(value = JumpModuleDTO.class, collection = true)
+    public RestResponse listJumpModules() {
+
+        List<JumpModuleDTO> resp = this.yellowPageService.listJumpModules();
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
     
     /**
 	 * <b>URL: /yellowPage/verifyNotifyTarget</b>
@@ -350,6 +367,36 @@ public class YellowPageController  extends ControllerBase {
     }
 
     /**
+     * <b>URL: /yellowPage/searchOneselfRequestInfo</b>
+     * <p> 搜索自己的申请信息-app</p>
+     */
+    @RequestMapping("searchOneselfRequestInfo")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse searchOneselfRequestInfo(@Valid SearchOneselfRequestInfoCommand cmd) {
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchOneselfRequestInfo(cmd);
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /yellowPage/searchOrgRequestInfo</b>
+     * <p> 搜索企业申请信息</p>
+     */
+    @RequestMapping("searchOrgRequestInfo")
+    @RestReturn(value = SearchRequestInfoResponse.class)
+    public RestResponse searchOrgRequestInfo(@Valid SearchOrgRequestInfoCommand cmd) {
+        SearchRequestInfoResponse resp = this.saRequestInfoSearcher.searchOrgRequestInfo(cmd);
+
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
    	 * <b>URL: /yellowPage/syncSARequestInfo</b>
    	 * <p> 同步申请信息</p>
    	 */
@@ -364,36 +411,5 @@ public class YellowPageController  extends ControllerBase {
        	response.setErrorDescription("OK");
        	return response;
        }
-       
-//    /**
-//     * <b>URL: /yellowPage/syncSettleRequestInfo</b>
-//     * <p> 同步申请信息</p>
-//     */
-//    @RequestMapping("syncSettleRequestInfo")
-//    @RestReturn(value = String.class)
-//    public RestResponse syncSettleRequestInfo() {
-//
-//        this.settleRequestInfoSearcher.syncFromDb();
-//
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
-//
-//    /**
-//     * <b>URL: /yellowPage/syncReserveRequestInfo</b>
-//     * <p> 同步申请信息</p>
-//     */
-//    @RequestMapping("syncReserveRequestInfo")
-//    @RestReturn(value = String.class)
-//    public RestResponse syncReserveRequestInfo() {
-//
-//        this.reserveRequestInfoSearcher.syncFromDb();
-//
-//        RestResponse response = new RestResponse();
-//        response.setErrorCode(ErrorCodes.SUCCESS);
-//        response.setErrorDescription("OK");
-//        return response;
-//    }
+
 }

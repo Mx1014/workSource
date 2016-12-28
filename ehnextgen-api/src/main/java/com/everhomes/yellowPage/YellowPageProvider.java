@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.category.CategoryAdminStatus;
+import com.everhomes.rest.yellowPage.JumpModuleDTO;
 import com.everhomes.util.SortOrder;
 import com.everhomes.util.Tuple;
 
@@ -59,7 +60,7 @@ public interface YellowPageProvider {
 	ServiceAlliances findServiceAllianceById(Long id, String ownerType, Long ownerId);
 	void populateServiceAlliancesAttachment(ServiceAlliances sa);
 	
-	List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status);
+	List<ServiceAllianceCategories> listChildCategories(String ownerType, Long ownerId, Integer namespaceId, Long parentId, CategoryAdminStatus status, List<Byte> displayDestination);
  
 	void createNotifyTarget(ServiceAllianceNotifyTargets target);
 	void updateNotifyTarget(ServiceAllianceNotifyTargets target);
@@ -87,4 +88,10 @@ public interface YellowPageProvider {
 	
 	ServiceAllianceSkipRule getCateorySkipRule(Long categoryId);
 
+	void createInvestRequests(ServiceAllianceInvestRequests request);
+	ServiceAllianceInvestRequests findInvestRequests(Long id);
+	List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize);
+
+
+	List<JumpModuleDTO> jumpModules(Integer namespaceId);
 }

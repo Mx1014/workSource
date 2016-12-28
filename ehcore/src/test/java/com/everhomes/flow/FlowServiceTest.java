@@ -70,6 +70,7 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.sequence.SequenceService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
@@ -116,6 +117,9 @@ public class FlowServiceTest extends LoginAuthTestCase {
     
     @Autowired
     private UserService userService;
+    
+    @Autowired
+    private SequenceService sequenceService;
     
     @Before
     public void setUp() throws Exception {
@@ -606,6 +610,11 @@ public class FlowServiceTest extends LoginAuthTestCase {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
 		}
+    }
+    
+    @Test
+    public void testSynsequence() {
+    	sequenceService.syncSequence();
     }
 
 }

@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 
 
 public interface CustomRequestHandler {
@@ -12,5 +13,5 @@ public interface CustomRequestHandler {
 
 	void addCustomRequest(AddRequestCommand cmd);
 	
-	List<RequestFieldDTO> getCustomRequestInfo(Long id);
+	GetRequestInfoResponse getCustomRequestInfo(Long id);
 }
