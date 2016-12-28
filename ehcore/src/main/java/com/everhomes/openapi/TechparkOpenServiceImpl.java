@@ -471,6 +471,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				customerRental.setName(name.substring(0,64).trim());
 			}
 		}
+		formatBuildingName(theirRentalList);
 		for (Organization myOrganization : myOrganizationList) {
 			CustomerRental customerRental = findFromTheirRentalList(myOrganization, theirRentalList);
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
@@ -524,6 +525,25 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					return true;
 				});
 			});
+		}
+	}
+
+	//楼栋名称改成从门牌中提取
+	private void formatBuildingName(List<CustomerRental> theirRentalList) {
+		for (CustomerRental customerRental : theirRentalList) {
+			List<CustomerContract> customerContractList = customerRental.getContracts();
+			if (customerContractList != null) {
+				for (CustomerContract customerContract : customerContractList) {
+					List<CustomerContractBuilding> customerContractBuildingList = customerContract.getBuildings();
+					if (customerContractBuildingList != null) {
+						for (CustomerContractBuilding customerContractBuilding : customerContractBuildingList) {
+							if (customerContractBuilding.getApartmentName() != null && customerContractBuilding.getApartmentName().contains("-")) {
+								customerContractBuilding.setBuildingName(customerContractBuilding.getApartmentName().split("-")[0]);
+							}
+						}
+					}
+				}
+			}
 		}
 	}
 
@@ -680,6 +700,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				customerRental.setName(name.substring(0,64).trim());
 			}
 		}
+		formatBuildingName(theirRentalList);
 		for (CustomerRental customerRental : theirRentalList) {
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
 			rentalThreadPool.execute(()->{
