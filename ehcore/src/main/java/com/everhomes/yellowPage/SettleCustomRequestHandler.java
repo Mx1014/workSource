@@ -272,7 +272,9 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 						if(requestField.getName().equals(fieldDTO.getFieldName())){
 							// 字段值
 							try {
-								dto.setFieldValue(requestField.get(request).toString());
+								if(requestField.get(request) != null)
+									dto.setFieldValue(requestField.get(request).toString());
+								
 								break;
 							} catch (IllegalArgumentException e) {
 								// TODO Auto-generated catch block
