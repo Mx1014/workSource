@@ -313,6 +313,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		//必须按照namespaceType来查询，否则，有些数据可能本来就是我们系统独有的，不是他们同步过来的，这部分数据不能删除
 		List<Address> myApartmentList = addressProvider.listAddressByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceAddressType.JINDIE.getCode());
 		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+		formatCustomerBuildingName(theirApartmentList);
 		List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
 		List<Building> myBuildingList = buildingProvider.listBuildingByNamespaceType(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), NamespaceBuildingType.JINDIE.getCode());
 		dbProvider.execute(s->{
@@ -322,14 +323,18 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		});
 	}
 
+	private void formatCustomerBuildingName(List<CustomerApartment> theirApartmentList) {
+		for (CustomerApartment customerApartment : theirApartmentList) {
+			if (customerApartment.getApartmentName() != null && customerApartment.getApartmentName().contains("-")) {
+				customerApartment.setBuildingName(customerApartment.getApartmentName().split("-")[0]);
+			}
+		}
+	}
+
 	private List<CustomerBuilding> fetchBuildingsFromApartments(List<CustomerApartment> theirApartmentList) {
 		Set<CustomerBuilding> buildingSet = new HashSet<>();
 		for (CustomerApartment customerApartment : theirApartmentList) {
-			if (customerApartment.getApartmentName() != null && customerApartment.getApartmentName().contains("-")) {
-				buildingSet.add(new CustomerBuilding(customerApartment.getApartmentName().split("-")[0]));
-			}else {
-				buildingSet.add(new CustomerBuilding(customerApartment.getBuildingName()));
-			}
+			buildingSet.add(new CustomerBuilding(customerApartment.getBuildingName()));
 		}
 		
 		return new ArrayList<>(buildingSet);
@@ -669,6 +674,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private void syncPartApartments(AppNamespaceMapping appNamespaceMapping, List<TechparkSyncdataBackup> backupList) {
 		//楼栋改成从门牌中提取来同步
 		List<CustomerApartment> theirApartmentList = mergeBackupList(backupList, CustomerApartment.class);
+		formatCustomerBuildingName(theirApartmentList);
 		List<CustomerBuilding> theirBuildingList = fetchBuildingsFromApartments(theirApartmentList);
 		dbProvider.execute(s->{
 			syncPartCustomerBuildings(appNamespaceMapping, theirBuildingList);
