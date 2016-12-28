@@ -18,8 +18,10 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
 import com.everhomes.rest.address.ClaimAddressCommand;
 import com.everhomes.rest.address.ClaimedAddressInfo;
 import com.everhomes.rest.address.CommunityDTO;
@@ -254,6 +256,20 @@ public class AddressController extends ControllerBase {
             resp.setResponseObject(result);
         }
         
+        resp.setErrorCode(ErrorCodes.SUCCESS);
+        resp.setErrorDescription("OK");
+        return resp;
+    }
+    
+    /**
+     * <b>URL: /address/getApartmentByBuildingApartmentName</b>
+     * <p>查询门牌</p>
+     */
+    @RequestMapping("getApartmentByBuildingApartmentName")
+    @RestReturn(value=String.class)
+    public RestResponse getApartmentByBuildingApartmentName(GetApartmentByBuildingApartmentNameCommand cmd) {
+    	AddressDTO dto = addressService.getApartmentByBuildingApartmentName(cmd);
+        RestResponse resp = new RestResponse(dto);
         resp.setErrorCode(ErrorCodes.SUCCESS);
         resp.setErrorDescription("OK");
         return resp;

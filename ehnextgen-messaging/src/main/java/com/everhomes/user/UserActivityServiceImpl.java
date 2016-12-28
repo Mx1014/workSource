@@ -253,6 +253,8 @@ public class UserActivityServiceImpl implements UserActivityService {
             activity.setUid(user.getId());
         activity.setActivityType(ActivityType.fromString(cmd.getActivityType()).getCode());
         activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
+        activity.setNamespaceId(UserContext.getCurrentNamespaceId());
+        activity.setVersionRealm(UserContext.current().getVersionRealm());
         if (user != null)
         	userActivityProvider.addActivity(activity, user.getId());
         

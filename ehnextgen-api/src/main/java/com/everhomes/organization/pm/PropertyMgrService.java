@@ -22,6 +22,8 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import java.sql.Timestamp;
+import java.util.Date;
 import java.util.List;
 
 public interface PropertyMgrService {
@@ -436,4 +438,16 @@ public interface PropertyMgrService {
      * @param cmd
      */
     void deleteOrganizationOwnerAddressAuthStatus(UpdateOrganizationOwnerAddressAuthTypeCommand cmd);
+
+    /**
+     * 一键推送消息给管理员
+     * 按小区，公司，用户
+     */
+    void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd);
+
+    /**
+     * 一键推送消息给管理员
+     * 按小区，公司，用户
+     */
+    void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd, Timestamp operateTime);
 }

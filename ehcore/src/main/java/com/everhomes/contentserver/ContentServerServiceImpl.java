@@ -208,7 +208,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         
         // 如果uri本身已经是以http开头的完整链接，则不需要解释，直接返回（方便用一些测试链接）  by lqs 20160715
         uri = uri.trim();
-        if(uri.startsWith("http")) {
+        if(uri.startsWith(UserContext.current().getScheme())) {
             return uri;
         }
         
@@ -269,9 +269,14 @@ public class ContentServerServiceImpl implements ContentServerService {
             LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType 
                 + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
         }
-        
-        return String.format("http://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
-                cache.get(serverId).getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId,
+        // https 默认端口443 by sfyan 20161226
+        Integer port = cache.get(serverId).getPublicPort();
+        if(null != UserContext.current().getScheme() && UserContext.current().getScheme().equals("https")){
+            port = 443;
+        }
+
+        return String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
+                UserContext.current().getScheme(), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
                 token, width, height);
     }
 
@@ -341,7 +346,13 @@ public class ContentServerServiceImpl implements ContentServerService {
     public String getContentServer(){
         try {
             ContentServer server = selectContentServer();
-            return String.format("%s:%d",server.getPublicAddress(),server.getPublicPort());
+
+            // https 默认端口443 by sfyan 20161226
+            Integer port = server.getPublicPort();
+            if(null != UserContext.current().getScheme() && UserContext.current().getScheme().equals("https")){
+                port = 443;
+            }
+            return String.format("%s:%d",server.getPublicAddress(),port);
         } catch (Exception e) {
             LOGGER.error("Failed to find content server", e);
             return null;
@@ -370,6 +381,16 @@ public class ContentServerServiceImpl implements ContentServerService {
                 LOGGER.error("Failed to upload file, contentType={}, fileName={}, orgFileName={}", 
                     file.getContentType(), file.getName(), file.getOriginalFilename(), e);
             } finally {
+//                Long size = file.getSize();
+//                if(size < 1000) {
+//                    csFileResponse.setSize(size + "B");
+//                } else if(size > 1024 && size < 1024*1024) {
+//                    csFileResponse.setSize(size/1024.0 + "KB");
+//                } else if(size > 1024*1024 && size < 1024*1024*1024) {
+//                    csFileResponse.setSize(size/(1024.0*1024) + "MB");
+//                } else if(size > 1024*1024*1024) {
+//                    csFileResponse.setSize(size/(1024.0*1024*1024) + "GB");
+//                }
                 if(fileStream != null) {
                     try {
                         fileStream.close();
@@ -393,7 +414,9 @@ public class ContentServerServiceImpl implements ContentServerService {
         
         // 通过文件后缀确定Content server中定义的媒体类型
         String mediaType = ContentMediaHelper.getContentMediaType(fileSuffix);
-        String url = String.format("http://%s/upload/%s?token=%s", contentServerUri, mediaType, token);
+
+        // https 默认端口443 by sfyan 20161226
+        String url = String.format("%s://%s/upload/%s?token=%s",UserContext.current().getScheme(), contentServerUri, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
         
         CloseableHttpResponse response = null;

@@ -1,5 +1,6 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.rest.energy.util.EnumType;
 import com.everhomes.util.StringHelper;
 
 import javax.validation.constraints.NotNull;

@@ -20,18 +20,14 @@ public enum RichTextContentType {
     }
     
     public static RichTextContentType fromCode(String code) {
-    	if(code == null) {
-    		return null;
-    	}
-        
-        if(code.equalsIgnoreCase(RICHTEXT.getCode())) {
-        	return RICHTEXT;
+        if(code != null) {
+            for(RichTextContentType type : RichTextContentType.values()) {
+                if(type.code.equalsIgnoreCase(code)) {
+                    return type;
+                }
+            }
         }
 
-        if(code.equalsIgnoreCase(LINK.getCode())) {
-        	return LINK;
-        }
-        
         return null;
     }
 }

@@ -10,6 +10,7 @@ import com.everhomes.rest.organization.*;
 import org.jooq.Condition;
 
 import com.everhomes.community.Community;
+import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.group.GroupMemberCaches;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
@@ -264,9 +265,26 @@ public interface OrganizationProvider {
 	List<Community> listOrganizationCommunitiesByKeyword(Long orgId, String keyword);
 	Organization findOrganizationByName(String name, Integer namespaceId);
 	Integer getSignupCount(Long organizationId);
-	OrganizationAddress findOrganizationAddress(Long id, Long id2, Long id3);
+	OrganizationAddress findOrganizationAddress(Long organizationId, Long addressId, Long buildingId);
 	void createOrganizationAddressMapping(CommunityAddressMapping addressMapping);
 	void updateOrganizationAddressMapping(CommunityAddressMapping addressMapping);
 	CommunityAddressMapping findOrganizationAddressMapping(Long organizationId, Long communityId, Long addressId);
+	List<OrganizationJobPositionMap> listOrganizationJobPositionMapsByJobPositionId(Long jobPositionId);
+
+	List<OrganizationMember> getOrganizationMemberByOrgIds(List<Long> ids, ListingQueryBuilderCallback queryBuilderCallback);
+
+	OrganizationJobPositionMap getOrganizationJobPositionMapByOrgIdAndJobPostionId(Long organizationId, Long jobPostionId);
+
+	List<Organization> listOrganizationByNamespaceType(Integer namespaceId, String namespaceType);
+	List<OrganizationAddress> listOrganizationAddressByOrganizationId(Long organizationId);
+	List<CommunityAddressMapping> listOrganizationAddressMappingByOrganizationIdAndCommunityId(Long organizationId,
+			Long communityId);
+	List<EnterpriseAddress> listEnterpriseAddressByOrganization(Long organizationId);
+	OrganizationAddress findOrganizationAddressByOrganizationIdAndAddressId(Long organizationId, Long addressId);
+	List<CommunityAddressMapping> listOrganizationAddressMappingByNamespaceType(Long superOrganizationId,
+			Long communityId, String namespaceType);
+	void deleteOrganizationAddressMapping(CommunityAddressMapping organizationAddressMapping);
+	Organization findOrganizationByNameAndNamespaceIdForJindie(String name, Integer namespaceId, String namespaceToken,
+			String namespaceType);
  
 }

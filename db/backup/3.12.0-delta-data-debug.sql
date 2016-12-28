@@ -655,3 +655,12 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.fail','http://core.zuolin.com/mobile/static/email_page/fail.html','email auth verify success','0',NULL);
 INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES(@id:=@id+1,'auth.overtime','http://core.zuolin.com/mobile/static/email_page/overtime.html','email auth verify success','0',NULL);
 
+
+--
+-- 能耗管理菜单调整  add by xq.tian  2016/12/08
+--
+UPDATE `eh_web_menus` SET `sort_num` = '490' WHERE `id` = '49100';
+UPDATE `eh_web_menus` SET `sort_num` = '491' WHERE `id` = '49110';
+UPDATE `eh_web_menus` SET `sort_num` = '492' WHERE `id` = '49120';
+UPDATE `eh_web_menus` SET `sort_num` = '493' WHERE `id` = '49130';
+UPDATE `eh_web_menus` SET `sort_num` = '494' WHERE `id` = '49140';
