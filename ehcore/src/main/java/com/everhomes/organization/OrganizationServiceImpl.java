@@ -5612,7 +5612,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					Organization jobPosition = jobPositionMap.get(jobPositionName.trim());
 					if(null == jobPosition){
 						LOGGER.debug("Organization member jobPosition is null. data = " + str);
-						ImportOrganizationMemberDTO d = new ImportOrganizationMemberDTO();
+						ImportOrganizationMemberDTO d = new ImportOrganizationMemberDTO(employeeNoStr, contactNameStr, contactTokenStr, genderStr, departmentStr, jobPositionStr, joblevelStr);
 						d.setDescription("Organization member jobPosition is null");
 						errorDataLogs.add(d);
 						continue outer;
@@ -8037,7 +8037,7 @@ System.out.println();
 		
 		if(OrganizationMemberTargetType.fromCode(organizationMember.getTargetType()) == OrganizationMemberTargetType.USER){
 			organizationMember.setOrganizationId(finalOrganizationId);
-			//userSearcher.feedDoc(organizationMember);
+			userSearcher.feedDoc(organizationMember);
 			
 			// 如果是往公司添加新成员就需要发消息
 			if(organizationMember.isCreate()){
