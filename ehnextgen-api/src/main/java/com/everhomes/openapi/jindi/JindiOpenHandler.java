@@ -32,7 +32,7 @@ public interface JindiOpenHandler {
 			List<T> resultList = new ArrayList<>();
 			//如果有锚点，则说明上次请求数据未取完，本次继续取当前时间戳的数据
 			if (cmd.getPageAnchor() != null) {
-				List<T> thisList = callback.fetchDataByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				List<T> thisList = callback.fetchDataByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize);
 				resultList.addAll(thisList);
 				//如果当前时间戳还未取完，则直接返回并添加下次锚点
 				if (resultList.size() > pageSize) {
@@ -51,19 +51,19 @@ public interface JindiOpenHandler {
 			//如果没有锚点，或者上述过程未取满或正好取满，则到此处，如果是正好取满，则这里会再取一条，看看有没有多余的数据了
 			if (hasMore == null  && resultList.size() <= pageSize) {
 				pageSize = pageSize - resultList.size();
-				List<T> thisList = callback.fetchDataByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				List<T> thisList = callback.fetchDataByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize);
 				if (thisList.size() > pageSize) {
-					thisList.remove(thisList.size()-1);
-					hasMore = (byte)1;
 					//如果此处数据大于pageSize说明，还有数据
 					if (thisList.size()>=2) {
-						T last = resultList.get(resultList.size()-1);
+						T last = thisList.get(thisList.size()-1);
 						Method getUpdateTimeMethod = last.getClass().getMethod("getUpdateTime");
 						if ( ((Timestamp)getUpdateTimeMethod.invoke(last)).getTime() == ((Timestamp)getUpdateTimeMethod.invoke(thisList.get(thisList.size()-2))).getTime()) {
 							//如果最后两条数据的更新时间一样，说明这个时间戳还没有取完数据，下次还要从这个时间戳开始取，需要设置一下锚点
-							nextPageAnchor = (Long) last.getClass().getMethod("getId").invoke(last);
+							nextPageAnchor = (Long) last.getClass().getMethod("getId").invoke(thisList.get(thisList.size()-2));
 						}
 					}
+					thisList.remove(thisList.size()-1);
+					hasMore = (byte)1;
 				}else {
 					//到这里，说明数据已经取完了
 					//此处无代码，方便说明逻辑
