@@ -908,7 +908,7 @@ CREATE TABLE `eh_service_alliance_invest_requests` (
   `industry` VARCHAR(128),
   `financing_amount` DECIMAL(10,2),
   `invest_period` INTEGER,
-  `annual_yield` DOUBLE,
+  `annual_yield` DECIMAL(10,2),
   `remarks` VARCHAR(1024),
   `create_time` DATETIME,
   

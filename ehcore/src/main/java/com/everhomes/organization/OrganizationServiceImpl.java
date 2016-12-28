@@ -8491,7 +8491,11 @@ System.out.println();
 	    .text(mailText)
 	    .build();
 		try{
-			new Mailer("smtp.mxhichina.com", 25, "zuolin@zuolin.com", "abc123!@#").sendMail(email);
+			String account = configProvider.getValue("mail.smtp.account", "zuolin@zuolin.com");
+			String address = configProvider.getValue("mail.smtp.address", "smtp.mxhichina.com");
+			String passwod = configProvider.getValue("mail.smtp.passwod", "abc123!@#");
+			int port = configProvider.getIntValue("mail.smtp.port", 25);
+			new Mailer(address, port , account , passwod).sendMail(email);
 		}catch (Exception e){
 			LOGGER.error(e.getLocalizedMessage());
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,

@@ -1180,6 +1180,12 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOrganizationMemberLogs.class, Tables.EH_ORGANIZATION_MEMBER_LOGS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_ORGANIZATION_MEMBER_LOGS.ID.max()).from(Tables.EH_ORGANIZATION_MEMBER_LOGS).fetchOne().value1();
         });
+        syncTableSequence(null, EhServiceAllianceJumpModule.class, Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceInvestRequests.class, Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS).fetchOne().value1();
+        });
 
     }
 
