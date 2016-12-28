@@ -856,7 +856,9 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer issuedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
 		
-		Integer totalCount = parkingFlow.getMaxIssueNum();
+		Integer totalCount = 0;
+		if(null != parkingFlow)
+			totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - issuedCount;
 		
 		if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
