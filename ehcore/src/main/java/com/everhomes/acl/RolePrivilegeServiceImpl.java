@@ -1475,12 +1475,26 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 
+
+
 			for (AuthorizationServiceModule authorizationServiceModule: serviceModuleAuthorizations) {
 
 				List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(authorizationServiceModule.getResourceType(), authorizationServiceModule.getResourceId(),cmd.getTargetType(),cmd.getTargetId(), cmd.getOrganizationId());
 				for (ServiceModuleAssignment assignment: assignments) {
 					serviceModuleProvider.deleteServiceModuleAssignmentById(assignment.getId());
 				}
+				ListServiceModulesCommand command = new ListServiceModulesCommand();
+				command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+				command.setOwnerId(cmd.getOrganizationId());
+				command.setLevel(2);
+				List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
+				List<Long> moduleIds = new ArrayList<Long>();
+				for (ServiceModuleDTO module: modules) {
+					moduleIds.add(module.getId());
+				}
+
+				// 删除范围的权限
+				deleteAcls(authorizationServiceModule.getResourceType(), authorizationServiceModule.getResourceId(),cmd.getTargetType(),cmd.getTargetId(), moduleIds, null);
 
 				//业务模块授权
 				if(0 == authorizationServiceModule.getAllModuleFlag()){
@@ -1496,8 +1510,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							assignment.setOwnerId(authorizationServiceModule.getResourceId());
 							assignment.setCreateUid(user.getId());
 							serviceModuleProvider.createServiceModuleAssignment(assignment);
-
-							deleteAcls(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(), moduleId, null);
 
 							/**
 							 * 业务模块权限授权
@@ -1517,17 +1529,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					assignment.setCreateUid(user.getId());
 					serviceModuleProvider.createServiceModuleAssignment(assignment);
 
-					ListServiceModulesCommand command = new ListServiceModulesCommand();
-					command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
-					command.setOwnerId(cmd.getOrganizationId());
-					command.setLevel(2);
-					List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
-					List<Long> moduleIds = new ArrayList<Long>();
-					for (ServiceModuleDTO module: modules) {
-						moduleIds.add(module.getId());
-					}
-
-					deleteAcls(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(), moduleIds, null);
 					/**
 					 * 业务模块权限授权
 					 */
@@ -1710,6 +1711,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
 			List<Long> moduleIds = new ArrayList<>();
+			moduleIds.add(0L);
 			for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
 				List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(webMenuPrivilege.getPrivilegeId(), null);
 				for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
