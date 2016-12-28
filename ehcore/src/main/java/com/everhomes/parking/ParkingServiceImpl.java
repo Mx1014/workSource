@@ -856,7 +856,9 @@ public class ParkingServiceImpl implements ParkingService {
 		Integer issuedCount = parkingProvider.countParkingCardRequest(cmd.getOwnerType(), cmd.getOwnerId(), 
 				parkingLot.getId(), flowId, ParkingCardRequestStatus.SUCCEED.getCode(), null);
 		
-		Integer totalCount = parkingFlow.getMaxIssueNum();
+		Integer totalCount = 0;
+		if(null != parkingFlow)
+			totalCount = parkingFlow.getMaxIssueNum();
 		Integer surplusCount = totalCount - issuedCount;
 		
 		if(null != parkingFlow && parkingFlow.getMaxIssueNumFlag() == ParkingSupportRequestConfigStatus.SUPPORT.getCode()) {
@@ -1479,6 +1481,50 @@ public class ParkingServiceImpl implements ParkingService {
 			listParkingCardsCommand.setPlateNumber(order.getPlateNumber());
 			List<ParkingCardDTO> cards = listParkingCards(listParkingCardsCommand);
 			return cards.get(0);
+		
+	}
+
+	@Override
+	public void synchronizedData(ListParkingCardRequestsCommand cmd) {
+		
+		Integer namesapceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+		
+		String ownerType = FlowOwnerType.PARKING.getCode();
+    	Flow flow = flowService.getEnabledFlow(namesapceId, ParkingFlowConstant.PARKING_RECHARGE_MODULE, 
+    			FlowModuleType.NO_MODULE.getCode(), cmd.getParkingLotId(), ownerType);
+    	
+    	if(null == flow) {
+    		LOGGER.error("Enabled flow not found, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Enabled flow not found.");
+    	}
+    	
+		Long flowId = flow.getFlowMainId();
+		
+		List<ParkingCardRequest> list = parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(), 
+    			cmd.getOwnerId(), cmd.getParkingLotId(), null, (byte)1, null, null, null, null);
+		
+		for(ParkingCardRequest request: list) {
+			//TODO: 新建flowcase
+			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+			createFlowCaseCommand.setApplyUserId(user.getId());
+			createFlowCaseCommand.setFlowMainId(flowId);
+			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+			createFlowCaseCommand.setReferId(request.getId());
+			createFlowCaseCommand.setReferType(EntityType.PARKING_CARD_REQUEST.getCode());
+			createFlowCaseCommand.setContent("车牌号码：" + request.getPlateNumber() + "\n"
+					+ "车主电话：" + request.getPlateOwnerPhone());
+	    	
+	    	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+			
+	    	request.setFlowId(flowCase.getFlowMainId());
+	    	request.setFlowVersion(flowCase.getFlowVersion());
+	    	request.setFlowCaseId(flowCase.getId());
+	    	request.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
+			parkingProvider.updateParkingCardRequest(request);
+		}
+		
 		
 	}
 	

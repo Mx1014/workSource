@@ -410,9 +410,18 @@ public interface OrganizationService {
 
 	List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd);
 
+
 	List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd);
 
+	List<OrganizationManagerDTO> listOrganizationAllManagers(ListOrganizationManagersCommand cmd);
+
+	List<OrganizationManagerDTO> listModuleOrganizationManagers(ListOrganizationByModuleIdCommand cmd);
+
+
 	List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd);
+
+	List<OrganizationContactDTO> listModuleOrganizationContactByJobPositionId(ListModuleOrganizationContactByJobPositionIdCommand cmd);
+
 	List<OrganizationSimpleDTO> listUserRelateOrgs(
 			ListUserRelatedOrganizationsCommand cmd, User user);
 }
