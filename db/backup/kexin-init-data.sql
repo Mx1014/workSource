@@ -12,9 +12,9 @@ INSERT INTO `eh_version_realm` VALUES ('79', 'Android_Kexin', null, UTC_TIMESTAM
 INSERT INTO `eh_version_realm` VALUES ('80', 'iOS_Kexin', null, UTC_TIMESTAMP(), '999983');
 
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	values(205,79,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+	values(207,79,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 insert into `eh_version_upgrade_rules` (`id`, `realm_id`, `matching_lower_bound`, `matching_upper_bound`, `order`, `target_version`, `force_upgrade`, `create_time`) 
-	values(206,80,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
+	values(208,80,'-0.1','1048576','0','1.0.0','0',UTC_TIMESTAMP());
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
 	VALUES(999983, 'sms.default.yzx', 1, 'zh_CN', '验证码-正中会', '34100');
@@ -61,7 +61,7 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 	VALUES(1117110, 240111044331055940, 'organization', 1008900, 3, 0, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(2120525, 1008900, 'USER', 241964  , 'manager', '曹秀然', 0, '18718523489', 3, 999983);	
+	VALUES(2120555, 1008900, 'USER', 241964  , 'manager', '曹秀然', 0, '18718523489', 3, 999983);	
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
 	VALUES(13558, 'EhOrganizations', 1008900, 'EhUsers', 241964  , 1001, 1, UTC_TIMESTAMP());
 
