@@ -545,8 +545,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 -- remove next processor and n processor by Janson
-select * from eh_flow_variables where id=2003;
-select * from eh_flow_variables where id=2004;
+delete from eh_flow_variables where id=2003;
+delete from eh_flow_variables where id=2004;
 
 
 -- merge from sa1.8 by xiongying
