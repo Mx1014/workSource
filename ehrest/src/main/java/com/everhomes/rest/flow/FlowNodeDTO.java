@@ -22,6 +22,9 @@ public class FlowNodeDTO {
     private Byte allowApplierUpdate;
     private Integer autoStepMinute;
     private String params;
+    
+	@ItemType(FlowUserSelectionDTO.class)
+	List<FlowUserSelectionDTO> processors;
 
     public Byte getStatus() {
 		return status;
@@ -133,6 +136,14 @@ public class FlowNodeDTO {
 
 	public void setAllowTimeoutAction(Byte allowTimeoutAction) {
 		this.allowTimeoutAction = allowTimeoutAction;
+	}
+
+	public List<FlowUserSelectionDTO> getProcessors() {
+		return processors;
+	}
+
+	public void setProcessors(List<FlowUserSelectionDTO> processors) {
+		this.processors = processors;
 	}
 
 	@Override

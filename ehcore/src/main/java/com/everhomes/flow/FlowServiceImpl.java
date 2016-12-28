@@ -485,7 +485,16 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowNodeDTO> dtos = new ArrayList<FlowNodeDTO>(); 
 		resp.setFlowNodes(dtos);
 		for(FlowNode fn : flowNodes) {
-			dtos.add(ConvertHelper.convert(fn, FlowNodeDTO.class));
+			FlowNodeDTO dto = ConvertHelper.convert(fn, FlowNodeDTO.class);
+			List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(fn.getId(), FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+			dto.setProcessors(new ArrayList<FlowUserSelectionDTO>());
+			if(selections != null) {
+				selections.stream().forEach((s) -> {
+					dto.getProcessors().add(ConvertHelper.convert(s, FlowUserSelectionDTO.class));
+				});
+			}
+			
+			dtos.add(dto);
 		}
 		
 		return resp;
@@ -2227,7 +2236,8 @@ public class FlowServiceImpl implements FlowService {
 		flowEventLogProvider.createFlowEventLog(tracker);
 		
 		if(snapshotFlow.getEvaluateStep() != null 
-				&& snapshotFlow.getEvaluateStep().equals(FlowStepType.APPROVE_STEP.getCode())) {
+				&& snapshotFlow.getEvaluateStep().equals(FlowStepType.APPROVE_STEP.getCode())
+				&& flowCase.getStatus().equals(FlowCaseStatus.PROCESS.getCode())) {
 			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 			stepDTO.setAutoStepType(snapshotFlow.getEvaluateStep());
 			stepDTO.setFlowCaseId(flowCase.getId());
@@ -2955,6 +2965,10 @@ public class FlowServiceImpl implements FlowService {
 		Flow flow = flowProvider.getFlowById(cmd.getFlowId());
 		if(flow == null || !flow.getFlowMainId().equals(0l)) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
+		}
+		
+		if(cmd.getItems() == null || cmd.getItems().size() == 0) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "items is empty");
 		}
 		
 //		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
