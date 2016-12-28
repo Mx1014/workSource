@@ -795,10 +795,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = user.getNamespaceId();
 		
-		String handle = PmTaskHandle.FLOW;
+		String handle = PmTaskHandle.SHEN_YE;
 		
-		if(namespaceId == 999992) 
-			handle = PmTaskHandle.SHEN_YE;
+//		if(namespaceId == 999992) 
+//			handle = PmTaskHandle.SHEN_YE;
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -826,10 +826,10 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		String handle = PmTaskHandle.FLOW;
+		String handle = PmTaskHandle.SHEN_YE;
 		
-		if(namespaceId == 999992) 
-			handle = PmTaskHandle.SHEN_YE;
+//		if(namespaceId == 999992) 
+//			handle = PmTaskHandle.SHEN_YE;
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
