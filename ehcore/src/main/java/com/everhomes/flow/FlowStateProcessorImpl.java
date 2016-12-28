@@ -134,9 +134,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			}
 			ctx.setCurrentNode(node);
 			
-			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
+			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());//current user
 			ctx.setOperator(userInfo);
 			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
+			event.setFiredUserId(user.getId());
 			ctx.setCurrentEvent(event);
 			
 			FlowStepType stepType = FlowStepType.fromCode(stepDTO.getAutoStepType());
@@ -190,7 +191,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ctx.setNextNode(targetNode);
 		}
 		
-		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());
 		ctx.setOperator(userInfo);
 //		FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 		ctx.setCurrentEvent(null);
@@ -521,14 +522,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	//variable support
 	@Override
 	public UserInfo getApplier(FlowCaseState ctx, String variable) {
-		String key = "applier-caseid:" + ctx.getFlowCase().getId().toString();
-		UserInfo userInfo = (UserInfo)ctx.getExtra().get(key);
-		if(userInfo == null) {
-			userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
-			if(userInfo != null) {
-				ctx.getExtra().put(key, userInfo);
-			}
-		}
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
 		return userInfo;
 	}
 	

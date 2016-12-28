@@ -35,8 +35,8 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
 	@Autowired
 	FlowService flowService;
     
-    private String queueDelay = "flowdelays";
-    private String queueNoDelay = "flownodelays";
+    private String queueDelay = "flowdelays2";
+    private String queueNoDelay = "flownodelays2";
     
     private void setup() {
         workerPoolFactory.getWorkerPool().addQueue(queueDelay);
