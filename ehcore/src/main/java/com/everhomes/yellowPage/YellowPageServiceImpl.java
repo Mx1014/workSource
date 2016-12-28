@@ -579,9 +579,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 			ServiceAllianceDTO dto = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
 			if(dto.getJumpType() != null) {
-				//兼容以前只有模板跳转时jumptype字段默认为0的情况
-				if(JumpType.TEMPLATE.equals(JumpType.fromCode(dto.getJumpType()))
-						|| JumpType.NONE.equals(JumpType.fromCode(dto.getJumpType()))) {
+				//兼容以前只有模板跳转时jumptype字段为null的情况
+				if(dto.getJumpType() == null || JumpType.TEMPLATE.equals(JumpType.fromCode(dto.getJumpType()))) {
 					RequestTemplates template = userActivityProvider.getCustomRequestTemplate(dto.getTemplateType());
 					if(template != null) {
 						dto.setTemplateName(template.getName());
