@@ -16,6 +16,7 @@ public class ServiceAllianceRequestInfo {
     private String creatorMobile;
     private Long creatorOrganizationId;
     private Long serviceAllianceId;
+    private Long creatorUid;
     private Timestamp createTime;
 
     public Long getId() {
@@ -88,6 +89,14 @@ public class ServiceAllianceRequestInfo {
 
     public void setServiceAllianceId(Long serviceAllianceId) {
         this.serviceAllianceId = serviceAllianceId;
+    }
+
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
     }
 
     public Timestamp getCreateTime() {

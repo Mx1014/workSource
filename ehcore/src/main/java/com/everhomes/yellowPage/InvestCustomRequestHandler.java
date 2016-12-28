@@ -1,28 +1,16 @@
 package com.everhomes.yellowPage;
 
 import java.lang.reflect.Field;
-import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
-import com.everhomes.util.ConvertHelper;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
-import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -30,40 +18,32 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
-import com.everhomes.rest.user.AddRequestCommand;
-import com.everhomes.rest.user.FieldContentType;
-import com.everhomes.rest.user.FieldDTO;
-import com.everhomes.rest.user.FieldType;
-import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.RequestFieldDTO;
-import com.everhomes.rest.user.RequestTemplateDTO;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
-import com.everhomes.search.SettleRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
-import com.everhomes.server.schema.tables.pojos.EhSettleRequests;
-import com.everhomes.user.CustomRequestConstants;
-import com.everhomes.user.CustomRequestHandler;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceInvestRequests;
+import com.everhomes.user.*;
+import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 
-@Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.SETTLE_REQUEST_CUSTOM)
-public class SettleCustomRequestHandler implements CustomRequestHandler {
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
 
-	private static final Logger LOGGER=LoggerFactory.getLogger(SettleCustomRequestHandler.class);
+import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+
+@Component(CustomRequestHandler.CUSTOM_REQUEST_OBJ_RESOLVER_PREFIX + CustomRequestConstants.INVEST_REQUEST_CUSTOM)
+public class InvestCustomRequestHandler implements CustomRequestHandler {
+
+private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomRequestHandler.class);
 	
 	@Autowired
 	private UserProvider userProvider;
-	
-	@Autowired
-	private UserActivityProvider userActivityProvider;
 	
 	@Autowired
 	private YellowPageProvider yellowPageProvider;
@@ -82,11 +62,12 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 
 	@Autowired
 	private UserActivityService userActivityService;
-	
+
+
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
-		SettleRequests request = GsonUtil.fromJson(cmd.getRequestJson(), SettleRequests.class);
-		
+		ServiceAllianceInvestRequests request = GsonUtil.fromJson(cmd.getRequestJson(), ServiceAllianceInvestRequests.class);
+
 		request.setNamespaceId(UserContext.getCurrentNamespaceId());
 
 		request.setOwnerType(cmd.getOwnerType());
@@ -96,48 +77,48 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());
 		request.setServiceAllianceId(cmd.getServiceAllianceId());
 		request.setTemplateType(cmd.getTemplateType());
-	  
+
 		User user = UserContext.current().getUser();
 		request.setCreatorUid(user.getId());
 		request.setCreatorName(user.getNickName());
 		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		if(identifier != null)
 			request.setCreatorMobile(identifier.getIdentifierToken());
-		
-		LOGGER.info("SettleCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createSettleRequests(request);
+
+		LOGGER.info("InvestCustomRequestHandler addCustomRequest request:" + request);
+		yellowPageProvider.createInvestRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		saRequestInfoSearcher.feedDoc(requestInfo);
-		
+
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
-		
+
 		String creatorName = (request.getCreatorName() == null) ? "" : request.getCreatorName();
 		String creatorMobile = (request.getCreatorMobile() == null) ? "" : request.getCreatorMobile();
 		String categoryName = "";
 		if(category != null) {
 			categoryName = (category.getName() == null) ? "" : category.getName();
-		} 
+		}
 		//推送消息
 		//给服务公司留的手机号推消息
 		String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
 		String locale = "zh_CN";
-		
+
 		Map<String, Object> notifyMap = new HashMap<String, Object>();
 		notifyMap.put("categoryName", categoryName);
 		notifyMap.put("creatorName", creatorName);
 		notifyMap.put("creatorMobile", creatorMobile);
 		notifyMap.put("note", getNote(request));
 		Organization org = organizationProvider.findOrganizationById(request.getCreatorOrganizationId());
-        String creatorOrganization = "";
+		String creatorOrganization = "";
 		if(org != null) {
 			creatorOrganization = org.getName();
 		}
 		notifyMap.put("creatorOrganization", creatorOrganization);
-		
+
 		int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ORG;
 		String notifyTextForOrg = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
-		
+
 		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		if(serviceOrg != null) {
 //			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
@@ -149,16 +130,16 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 			if(member != null) {
 				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
-			
+
 			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
-			
+
 		}
-		
+
 		//发消息给服务联盟机构管理员
 		code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_NOTIFY_ADMIN;
 		String notifyTextForAdmin = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 		CrossShardListingLocator locator = new CrossShardListingLocator();
-		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(), 
+		List<ServiceAllianceNotifyTargets> targets = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.MOBILE.getCode(),
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(targets != null && targets.size() > 0) {
 			for(ServiceAllianceNotifyTargets target : targets) {
@@ -167,12 +148,12 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 					if(contact != null)
 						sendMessageToUser(contact.getOwnerUid(), notifyTextForAdmin);
 				}
-				
+
 			}
 		}
-		
+
 		//发邮件给服务联盟机构管理员
-		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(), 
+		List<ServiceAllianceNotifyTargets> emails = yellowPageProvider.listNotifyTargets(request.getOwnerType(), request.getOwnerId(), ContactType.EMAIL.getCode(),
 				request.getType(), locator, Integer.MAX_VALUE);
 		if(emails != null && emails.size() > 0) {
 			for(ServiceAllianceNotifyTargets email : emails) {
@@ -183,60 +164,56 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 		}
 
 	}
-	
 
-	private String getNote(SettleRequests request) {
+
+	private String getNote(ServiceAllianceInvestRequests request) {
+
 		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
 		if(fieldList != null && fieldList.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
 				sb.append(field.getFieldName() + ":" + field.getFieldValue() + "\n");
 			}
-			
+
 			return sb.toString();
 		}
-		
-//		String name = (request.getName() == null) ? "" : request.getName();
-//		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
-//		String organizationName = (request.getOrganizationName() == null) ? "" : request.getOrganizationName();
-//		
-//		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "企业名称:" + organizationName + "\n" ;
+
 		return null;
 	}
-	
+
 	private void sendMessageToUser(Long userId, String content) {
 		MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        
-        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		messageDto.setAppId(AppConstants.APPID_MESSAGING);
+		messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBody(content);
+		messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+		messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+				userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
-	
+
 	private void sendEmail(String emailAddress, String categoryName, String content) {
 		if(!StringUtils.isNullOrEmpty(emailAddress)) {
 			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
-	        MailHandler handler = PlatformContext.getComponent(handlerName);
-	        
-	        String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
+			MailHandler handler = PlatformContext.getComponent(handlerName);
+
+			String scope = ServiceAllianceRequestNotificationTemplateCode.SCOPE;
 			String locale = "zh_CN";
 			int code = ServiceAllianceRequestNotificationTemplateCode.REQUEST_MAIL_SUBJECT;
 			Map<String, Object> notifyMap = new HashMap<String, Object>();
 			notifyMap.put("categoryName", categoryName);
 			String subject = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
-			
-	        handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, subject, content);
+
+			handler.sendMail(UserContext.getCurrentNamespaceId(), null,emailAddress, subject, content);
 		}
 	}
 
 	@Override
 	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
-		SettleRequests request = yellowPageProvider.findSettleRequests(id);
+		ServiceAllianceInvestRequests request = yellowPageProvider.findInvestRequests(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
@@ -248,25 +225,25 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 
 		return response;
 	}
-	
-	//硬转，纯体力
-	private List<RequestFieldDTO> toFieldDTOList(SettleRequests field) {
-		
+
+
+	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceInvestRequests field) {
 		GetCustomRequestTemplateCommand command = new GetCustomRequestTemplateCommand();
 		command.setTemplateType(field.getTemplateType());
 		RequestTemplateDTO template = userActivityService.getCustomRequestTemplate(command);
 
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
 		if(template != null && template.getDtos() != null && template.getDtos().size() > 0) {
-			EhSettleRequests request = ConvertHelper.convert(field, EhSettleRequests.class);
+			EhServiceAllianceInvestRequests request = ConvertHelper.convert(field, EhServiceAllianceInvestRequests.class);
 			Field[] fields = request.getClass().getDeclaredFields();
 			for (FieldDTO fieldDTO : template.getDtos()) {
 				RequestFieldDTO dto = new RequestFieldDTO();
 				dto.setFieldType(fieldDTO.getFieldType());
 				dto.setFieldContentType(fieldDTO.getFieldContentType());
+				dto.setFieldName(fieldDTO.getFieldDisplayName());
 
 				for (Field requestField : fields) {
-					requestField.setAccessible(true);  
+					requestField.setAccessible(true);
 					// 表示为private类型
 					if (requestField.getModifiers() == 2) {
 						if(requestField.getName().equals(fieldDTO.getFieldName())){
@@ -287,36 +264,11 @@ public class SettleCustomRequestHandler implements CustomRequestHandler {
 					}
 				}
 
-				dto.setFieldName(fieldDTO.getFieldDisplayName());
 				list.add(dto);
 			}
 		}
-		
-//		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
-//		RequestFieldDTO dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getName());
-//		dto.setFieldName("姓名");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getMobile());
-//		dto.setFieldName("手机号");
-//		list.add(dto);
-//		
-//		dto = new RequestFieldDTO();
-//		dto.setFieldType(FieldType.STRING.getCode());
-//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-//		
-//		dto.setFieldValue(fields.getOrganizationName());
-//		dto.setFieldName("企业名称");
-//		list.add(dto);
-		
+
+
 		return list;
 	}
 
