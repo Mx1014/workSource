@@ -16,7 +16,7 @@ public class FlowVaribleCurrProcessorPhoneResolver implements FlowVariableTextRe
 		if(userInfo == null || userInfo.getPhones() == null || userInfo.getPhones().size() == 0) {
 			return "error";//TODO use error ?
 		}
-		return userInfo.getNickName();
+		return userInfo.getPhones().get(0);
 	}
 
 }

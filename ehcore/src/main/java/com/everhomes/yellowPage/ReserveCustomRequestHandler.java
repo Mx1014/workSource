@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -8,6 +9,7 @@ import java.util.Map;
 
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.util.ConvertHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +21,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.app.AppConstants;
@@ -29,16 +32,23 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.AddRequestCommand;
 import com.everhomes.rest.user.FieldContentType;
+import com.everhomes.rest.user.FieldDTO;
 import com.everhomes.rest.user.FieldType;
+import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.user.RequestTemplateDTO;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ReserveRequestInfoSearcher;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceReservationRequests;
 import com.everhomes.user.CustomRequestConstants;
 import com.everhomes.user.CustomRequestHandler;
 import com.everhomes.user.User;
 import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserActivityService;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
@@ -68,6 +78,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
+
+	@Autowired
+	private UserActivityService userActivityService;
 	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -92,6 +105,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		LOGGER.info("ReserveCustomRequestHandler addCustomRequest request:" + request);
 		yellowPageProvider.createReservationRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+		requestInfo.setTemplateType(cmd.getTemplateType());
 		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
@@ -124,9 +138,14 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		
 		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		if(serviceOrg != null) {
-			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
-			if(orgContact != null) {
-				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
+//			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
+//			if(orgContact != null) {
+//				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
+//			}
+			
+			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+			if(member != null) {
+				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
 			
 			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
@@ -166,20 +185,30 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 
 	private String getNote(ReservationRequests request) {
 		
-		String reserveType = (request.getReserveType() == null) ? "" : request.getReserveType();
-		String reserveOrganization = (request.getReserveOrganization() == null) ? "" : request.getReserveOrganization();
-		String reserveTime = (request.getReserveTime() == null) ? "" : request.getReserveTime();
-		String contact = (request.getContact() == null) ? "" : request.getContact();
-		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
-		String remarks = (request.getRemarks() == null) ? "" : request.getRemarks();
-		if(StringUtils.isNullOrEmpty(request.getReserveType())) {
-			String note = "预约机构:" + reserveOrganization + "\n" + "预约时间:" + reserveTime
-					 + "\n" + "联系人:" + contact + "\n" + "联系电话:" + mobile + "\n" + "备注:" + remarks + "\n";
-			return note;
+		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
+		if(fieldList != null && fieldList.size() > 0) {
+			StringBuilder sb = new StringBuilder();
+			for(RequestFieldDTO field : fieldList) {
+				sb.append(field.getFieldName() + ":" + field.getFieldValue() + "\n");
+			}
+			
+			return sb.toString();
 		}
-		String note = "预约类型:" + reserveType + "\n" + "预约机构:" + reserveOrganization + "\n" + "预约时间:" + reserveTime
-				 + "\n" + "联系人:" + contact + "\n" + "联系电话:" + mobile + "\n" + "备注:" + remarks + "\n";
-		return note;
+		
+//		String reserveType = (request.getReserveType() == null) ? "" : request.getReserveType();
+//		String reserveOrganization = (request.getReserveOrganization() == null) ? "" : request.getReserveOrganization();
+//		String reserveTime = (request.getReserveTime() == null) ? "" : request.getReserveTime();
+//		String contact = (request.getContact() == null) ? "" : request.getContact();
+//		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
+//		String remarks = (request.getRemarks() == null) ? "" : request.getRemarks();
+//		if(StringUtils.isNullOrEmpty(request.getReserveType())) {
+//			String note = "预约机构:" + reserveOrganization + "\n" + "预约时间:" + reserveTime
+//					 + "\n" + "联系人:" + contact + "\n" + "联系电话:" + mobile + "\n" + "备注:" + remarks + "\n";
+//			return note;
+//		}
+//		String note = "预约类型:" + reserveType + "\n" + "预约机构:" + reserveOrganization + "\n" + "预约时间:" + reserveTime
+//				 + "\n" + "联系人:" + contact + "\n" + "联系电话:" + mobile + "\n" + "备注:" + remarks + "\n";
+		return null;
 	}
 	
 	private void sendMessageToUser(Long userId, String content) {
@@ -213,70 +242,116 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
+	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
 		ReservationRequests request = yellowPageProvider.findReservationRequests(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
 		}
 		
-		return fieldList;
+		GetRequestInfoResponse response = new GetRequestInfoResponse();
+		response.setDtos(fieldList);
+		response.setCreateTime(request.getCreateTime());
+
+		return response;
+		
 	}
 	
 	//硬转，纯体力
-	private List<RequestFieldDTO> toFieldDTOList(ReservationRequests fields) {
+	private List<RequestFieldDTO> toFieldDTOList(ReservationRequests field) {
+		
+		GetCustomRequestTemplateCommand command = new GetCustomRequestTemplateCommand();
+		command.setTemplateType(field.getTemplateType());
+		RequestTemplateDTO template = userActivityService.getCustomRequestTemplate(command);
+
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
-		
-		RequestFieldDTO dto = null;
-		
-		if(!StringUtils.isNullOrEmpty(fields.getReserveType())) {
-			dto = new RequestFieldDTO();
-			dto.setFieldType(FieldType.STRING.getCode());
-			dto.setFieldContentType(FieldContentType.TEXT.getCode());
-			dto.setFieldValue(fields.getReserveType());
-			dto.setFieldName("预约类型");
-			list.add(dto);
+		if(template != null && template.getDtos() != null && template.getDtos().size() > 0) {
+			EhServiceAllianceReservationRequests request = ConvertHelper.convert(field, EhServiceAllianceReservationRequests.class);
+			Field[] fields = request.getClass().getDeclaredFields();
+			for (FieldDTO fieldDTO : template.getDtos()) {
+				RequestFieldDTO dto = new RequestFieldDTO();
+				dto.setFieldType(fieldDTO.getFieldType());
+				dto.setFieldContentType(fieldDTO.getFieldContentType());
+
+				for (Field requestField : fields) {
+					requestField.setAccessible(true);  
+					// 表示为private类型
+					if (requestField.getModifiers() == 2) {
+						if(requestField.getName().equals(fieldDTO.getFieldName())){
+							// 字段值
+							try {
+								if(requestField.get(request) != null)
+									dto.setFieldValue(requestField.get(request).toString());
+								
+								break;
+							} catch (IllegalArgumentException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+
+				dto.setFieldName(fieldDTO.getFieldDisplayName());
+				list.add(dto);
+			}
 		}
 		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getReserveOrganization());
-		dto.setFieldName("预约机构");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getReserveTime());
-		dto.setFieldName("预约时间");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getContact());
-		dto.setFieldName("联系人");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getMobile());
-		dto.setFieldName("联系电话");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getRemarks());
-		dto.setFieldName("备注");
-		list.add(dto);
+//		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
+//		
+//		RequestFieldDTO dto = null;
+//		
+//		if(!StringUtils.isNullOrEmpty(fields.getReserveType())) {
+//			dto = new RequestFieldDTO();
+//			dto.setFieldType(FieldType.STRING.getCode());
+//			dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//			dto.setFieldValue(fields.getReserveType());
+//			dto.setFieldName("预约类型");
+//			list.add(dto);
+//		}
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getReserveOrganization());
+//		dto.setFieldName("预约机构");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getReserveTime());
+//		dto.setFieldName("预约时间");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getContact());
+//		dto.setFieldName("联系人");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getMobile());
+//		dto.setFieldName("联系电话");
+//		list.add(dto);
+//		
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//		
+//		dto.setFieldValue(fields.getRemarks());
+//		dto.setFieldName("备注");
+//		list.add(dto);
 		
 		return list;
 	}

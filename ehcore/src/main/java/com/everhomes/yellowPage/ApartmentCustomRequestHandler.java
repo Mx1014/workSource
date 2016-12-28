@@ -1,9 +1,13 @@
 package com.everhomes.yellowPage;
 
+import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+
+import com.everhomes.rest.user.*;
+import com.everhomes.user.*;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,6 +20,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.pm.pay.GsonUtil;
 import com.everhomes.rest.app.AppConstants;
@@ -24,23 +29,12 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
-import com.everhomes.rest.user.AddRequestCommand;
-import com.everhomes.rest.user.FieldContentType;
-import com.everhomes.rest.user.FieldType;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.RequestFieldDTO;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ApartmentRequestInfoSearcher;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.search.SettleRequestInfoSearcher;
-import com.everhomes.user.CustomRequestConstants;
-import com.everhomes.user.CustomRequestHandler;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
 import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
 
@@ -51,9 +45,6 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	
 	@Autowired
 	private UserProvider userProvider;
-	
-	@Autowired
-	private UserActivityProvider userActivityProvider;
 	
 	@Autowired
 	private YellowPageProvider yellowPageProvider;
@@ -69,6 +60,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	
 	@Autowired
 	private ServiceAllianceRequestInfoSearcher saRequestInfoSearcher;
+
+	@Autowired
+	private UserActivityService userActivityService;
 	
 	@Override
 	public void addCustomRequest(AddRequestCommand cmd) {
@@ -82,6 +76,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		request.setCategoryId(cmd.getCategoryId());
 		request.setCreatorOrganizationId(cmd.getCreatorOrganizationId());
 		request.setServiceAllianceId(cmd.getServiceAllianceId());
+		request.setTemplateType(cmd.getTemplateType());
 	  
 		User user = UserContext.current().getUser();
 		request.setCreatorUid(user.getId());
@@ -126,11 +121,14 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		
 		ServiceAlliances serviceOrg = yellowPageProvider.findServiceAllianceById(request.getServiceAllianceId(), request.getOwnerType(), request.getOwnerId());
 		if(serviceOrg != null) {
-			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
-			if(orgContact != null) {
-				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
+//			UserIdentifier orgContact = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), serviceOrg.getContactMobile());
+//			if(orgContact != null) {
+//				sendMessageToUser(orgContact.getOwnerUid(), notifyTextForOrg);
+//			}
+			OrganizationMember member = organizationProvider.findOrganizationMemberById(serviceOrg.getContactMemid());
+			if(member != null) {
+				sendMessageToUser(member.getTargetId(), notifyTextForOrg);
 			}
-			
 			sendEmail(serviceOrg.getEmail(), categoryName, notifyTextForOrg);
 			
 		}
@@ -167,13 +165,24 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	
 
 	private String getNote(ServiceAllianceApartmentRequests request) {
-		String name = (request.getName() == null) ? "" : request.getName();
-		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
-		String organizationName = (request.getOrganizationName() == null) ? "" : request.getOrganizationName();
-		Double areaSize = (request.getAreaSize() == null) ? 0.0 : request.getAreaSize();
 		
-		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "公司:" + organizationName + "\n" + "面积需求:" + areaSize + "\n";
-		return note;
+		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
+		if(fieldList != null && fieldList.size() > 0) {
+			StringBuilder sb = new StringBuilder();
+			for(RequestFieldDTO field : fieldList) {
+				sb.append(field.getFieldName() + ":" + field.getFieldValue() + "\n");
+			}
+			
+			return sb.toString();
+		}
+		
+//		String name = (request.getName() == null) ? "" : request.getName();
+//		String mobile = (request.getMobile() == null) ? "" : request.getMobile();
+//		String organizationName = (request.getOrganizationName() == null) ? "" : request.getOrganizationName();
+//		Double areaSize = (request.getAreaSize() == null) ? 0.0 : request.getAreaSize();
+//		
+//		String note = "姓名:" + name + "\n" + "手机号:" + mobile + "\n" + "公司:" + organizationName + "\n" + "面积需求:" + areaSize + "\n";
+		return null;
 	}
 	
 	private void sendMessageToUser(Long userId, String content) {
@@ -207,51 +216,95 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	}
 
 	@Override
-	public List<RequestFieldDTO> getCustomRequestInfo(Long id) {
+	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
 		ServiceAllianceApartmentRequests request = yellowPageProvider.findApartmentRequests(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
 		}
+		GetRequestInfoResponse response = new GetRequestInfoResponse();
+		response.setDtos(fieldList);
+		response.setCreateTime(request.getCreateTime());
 		
-		return fieldList;
+		return response;
 	}
+
+
+
 	
-	//硬转，纯体力
-	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceApartmentRequests fields) {
+	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceApartmentRequests field) {
+		GetCustomRequestTemplateCommand command = new GetCustomRequestTemplateCommand();
+		command.setTemplateType(field.getTemplateType());
+		RequestTemplateDTO template = userActivityService.getCustomRequestTemplate(command);
+
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
-		RequestFieldDTO dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getName());
-		dto.setFieldName("姓名");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getMobile());
-		dto.setFieldName("手机号");
-		list.add(dto);
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.STRING.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		dto.setFieldValue(fields.getOrganizationName());
-		dto.setFieldName("公司");
-		
-		dto = new RequestFieldDTO();
-		dto.setFieldType(FieldType.NUMBER.getCode());
-		dto.setFieldContentType(FieldContentType.TEXT.getCode());
-		
-		if(fields.getAreaSize() != null) {
-			dto.setFieldValue(fields.getAreaSize().toString());
+		if(template != null && template.getDtos() != null && template.getDtos().size() > 0) {
+			EhServiceAllianceApartmentRequests request = ConvertHelper.convert(field, EhServiceAllianceApartmentRequests.class);
+			Field[] fields = request.getClass().getDeclaredFields();
+			for (FieldDTO fieldDTO : template.getDtos()) {
+				RequestFieldDTO dto = new RequestFieldDTO();
+				dto.setFieldType(fieldDTO.getFieldType());
+				dto.setFieldContentType(fieldDTO.getFieldContentType());
+
+				for (Field requestField : fields) {
+					requestField.setAccessible(true);  
+					// 表示为private类型
+					if (requestField.getModifiers() == 2) {
+						if(requestField.getName().equals(fieldDTO.getFieldName())){
+							// 字段值
+							try {
+								if(requestField.get(request) != null)
+									dto.setFieldValue(requestField.get(request).toString());
+								
+								break;
+							} catch (IllegalArgumentException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							} catch (IllegalAccessException e) {
+								// TODO Auto-generated catch block
+								e.printStackTrace();
+							}
+						}
+					}
+				}
+
+				dto.setFieldName(fieldDTO.getFieldDisplayName());
+				list.add(dto);
+			}
 		}
-		dto.setFieldName("面积需求");
-		list.add(dto);
+
+//		RequestFieldDTO dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//
+//		dto.setFieldValue(fields.getName());
+//		dto.setFieldName("姓名");
+//		list.add(dto);
+//
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//
+//		dto.setFieldValue(fields.getMobile());
+//		dto.setFieldName("手机号");
+//		list.add(dto);
+//
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.STRING.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//
+//		dto.setFieldValue(fields.getOrganizationName());
+//		dto.setFieldName("公司");
+//
+//		dto = new RequestFieldDTO();
+//		dto.setFieldType(FieldType.NUMBER.getCode());
+//		dto.setFieldContentType(FieldContentType.TEXT.getCode());
+//
+//		if(fields.getAreaSize() != null) {
+//			dto.setFieldValue(fields.getAreaSize().toString());
+//		}
+//		dto.setFieldName("面积需求");
+//		list.add(dto);
 		
 		return list;
 	}

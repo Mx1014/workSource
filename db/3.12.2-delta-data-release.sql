@@ -345,13 +345,13 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ( 'pa
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`)
 	VALUES ('10006', 'community', '240111044331055940', '科兴科学园停车场', 'KETUO2', NULL, '41', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '0');
 SET @eh_configurations := (SELECT MAX(id) FROM eh_configurations);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.url', 'http://220.160.111.114:9090', '科兴停车充值key', '0', NULL);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.key', 'F7A0B971B199FD2A1017CEC5', '科兴停车充值key', '0', NULL);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.user', 'ktapi', '科兴停车充值用户名', '0', NULL);
-INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ((@eh_configurations := @eh_configurations+1), 'parking.kexing.pwd', '0306A9', '科兴停车充值密码', '0', NULL);
 
 
@@ -425,7 +425,7 @@ DELETE FROM eh_web_menu_scopes WHERE menu_id IN (40750) AND owner_type = 'EhName
 -- 资源预订工作流模板，add by wh, 20161219
 SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
+VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}\n使用时间：${useDetail}', 0);
 
 -- 资源预订工作流中文，added by wh ,2016-12-19
 SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
@@ -450,8 +450,8 @@ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40450, '', 'EhNamespaces', 1000000, 2);
 
-	
-	
+
+
 -- 要上线的app版本 by sfyan 20161220
 SET @app_version_id = (SELECT MAX(id) FROM `eh_app_version`);
 INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','0','3156995','2016-12-01 14:57:56');
@@ -505,7 +505,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 ( 'flow', 10006, 'zh_CN', '用户评价：${score}分', '用户评价：${score}分');
 
 -- 要上线的app版本 by sfyan 20161221
-update `eh_app_version` set default_order = 3158018.0 where name = '3.12.2';
+UPDATE `eh_app_version` SET default_order = 3158018.0 WHERE NAME = '3.12.2';
 
 --
 -- 修改没有权限时的提示语  add by xq.tian  2016/12/21
@@ -520,7 +520,7 @@ UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作'
 
 
 -- 增加企业后台的 管理员管理 by sfyan 20161226
-insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) values('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361',60400);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES('60400','管理员管理','60000',NULL,'react:/other-admin-management/admin','0','2','/60000/60400','park','361',60400);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES (10095, 0, '普通企业管理员管理', '普通企业管理员管理 全部权限', NULL);
 
@@ -531,3 +531,50 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10095, 60400, '�
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10095, 1005,'EhAclRoles', 0, 1, NOW());
+
+
+-- 整理业务模块的scope
+UPDATE `eh_service_module_scopes` SET `owner_type` = null, `owner_id` = null  where `owner_type` = 'EhNamespaces';
+
+-- 科技园添加服务广场任务管理 add by sw 20161227
+SET @eh_launch_pad_items = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '1000000', '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRveE4yVmxOak0wWkdReU9UY3dPVGMzTlRrM05UWmxOV1U1TVRneFltTTVaZw', '1', '1', '56', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '1', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '1000000', '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRveE4yVmxOak0wWkdReU9UY3dPVGMzTlRrM05UWmxOV1U1TVRneFltTTVaZw', '1', '1', '56', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);
+
+
+-- remove next processor and n processor by Janson
+select * from eh_flow_variables where id=2003;
+select * from eh_flow_variables where id=2004;
+
+
+-- merge from sa1.8 by xiongying
+update eh_settle_requests set template_type = 'Settle';
+update eh_service_alliance_requests set template_type = 'ServiceAlliance';
+update eh_service_alliance_apartment_requests set template_type = 'Apartment';
+
+SET @eh_request_templates = (SELECT MAX(id) FROM `eh_request_templates`);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'Invest', '我要投资', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"financingAmount","fieldDisplayName":"意向投资金额（万元）","fieldType":"decimal","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"industry","fieldDisplayName":"投资行业","fieldType":"string","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"investPeriod","fieldDisplayName":"投资年限","fieldType":"number","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"annualYield","fieldDisplayName":"预期年化收益（%）","fieldType":"decimal","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'ServiceAllianceFinancing', '我要融资', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"financingAmount","fieldDisplayName":"意向融资金额（万元）","fieldType":"decimal","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"projectDesc","fieldDisplayName":"担保物","fieldType":"string","fieldContentType":"text","fieldDesc":"选填","requiredFlag":"0"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'ServiceAllianceProjcet', '我有项目', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"projectDesc","fieldDisplayName":"项目名称","fieldType":"string","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"transferShares","fieldDisplayName":"意向出让股份比例（%）","fieldType":"number","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"financingAmount","fieldDisplayName":"融资金额（万元）","fieldType":"decimal","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'ServiceAllianceTech', '科技成果', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"financingAmount","fieldDisplayName":"拟投资金额（百万元）","fieldType":"decimal","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+    
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'SettleIncubator', '星空孵化器', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"stringTag1","fieldDisplayName":"项目名称","fieldType":"string","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"integralTag1","fieldDisplayName":"意向工位数","fieldType":"number","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'SettleResearchPlat', '研发平台', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"stringTag1","fieldDisplayName":"项目名称","fieldType":"string","fieldContentType":"text","fieldDesc":"","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'SettleProfessionalService', '专业服务', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"stringTag1","fieldDisplayName":"企业需求","fieldType":"string","fieldContentType":"text","fieldDesc":"（必填）请输入您的需求","requiredFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'SettleConsultationCooperation', '载物微咨询和国际合作', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
+    VALUES ((@eh_request_templates := @eh_request_templates + 1), 'SettleFundSupport', '资金扶持', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
+
+    
+update eh_service_alliances set integral_tag1 = '1' where string_tag2 in(select template_type from eh_request_templates);

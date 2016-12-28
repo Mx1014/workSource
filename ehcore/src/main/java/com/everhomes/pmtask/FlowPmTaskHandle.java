@@ -327,7 +327,9 @@ public class FlowPmTaskHandle implements PmTaskHandle {
     	//同步数据到科技园
 		if(user.getNamespaceId() == 1000000) {
 			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
-			Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
+			Category category = null;
+			if(null != cmd.getCategoryId())
+				category = categoryProvider.findCategoryById(cmd.getCategoryId());
 			handler.synchronizedData(task, cmd.getAttachments(), taskCategory, category);
 		}
 

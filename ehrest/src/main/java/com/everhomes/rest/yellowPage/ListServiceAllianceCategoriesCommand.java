@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li> parentId: 父id</li>
  *  <li> ownerType: 拥有者类型：现在是community</li>
  *  <li> ownerId: 拥有者ID</li>
+ *  <li> destination: 输出终端 1：客户端 2：浏览器</li>
  * </ul>
  */
 public class ListServiceAllianceCategoriesCommand {
@@ -16,6 +17,16 @@ public class ListServiceAllianceCategoriesCommand {
 	private String ownerType;
 	
 	private Long ownerId;
+
+	private Byte destination;
+
+	public Byte getDestination() {
+		return destination;
+	}
+
+	public void setDestination(Byte destination) {
+		this.destination = destination;
+	}
 
 	public Long getParentId() {
 		return parentId;

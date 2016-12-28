@@ -14,6 +14,7 @@ import com.everhomes.util.RuntimeErrorException;
 
 public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	FlowAutoStepDTO stepDTO;
+	private Long firedUserId;
 	private FlowEventLogProvider flowEventLogProvider;
 	private FlowButtonProvider flowButtonProvider;
 	
@@ -22,6 +23,7 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	}
 	
 	public FlowGraphAutoStepEvent(FlowAutoStepDTO o) {
+		firedUserId = User.SYSTEM_UID;
 		this.stepDTO = o;
 		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
 		flowButtonProvider = PlatformContext.getComponent(FlowButtonProvider.class);
@@ -36,9 +38,13 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 		return FlowEventType.STEP_TIMEOUT;
 	}
 
+	public void setFiredUserId(Long firedUserId) {
+		this.firedUserId = firedUserId;
+	}
+
 	@Override
 	public Long getFiredUserId() {
-		return User.SYSTEM_UID;
+		return this.firedUserId;
 	}
 
 	@Override

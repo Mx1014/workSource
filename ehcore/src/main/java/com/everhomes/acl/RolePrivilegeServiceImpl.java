@@ -76,6 +76,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Autowired
 	private ConfigurationProvider configProvider;
 
+	@Autowired
+	private ServiceModuleService serviceModuleService;
+
 	
 	@Override
 	public ListWebMenuResponse listWebMenu(ListWebMenuCommand cmd) {
@@ -1265,27 +1268,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
-	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
-
-		List<ServiceModulePrivilege> serviceModulePrivileges = null;
-		if(0L == moduleId){
-			List<ServiceModuleScope> moduleScopes = serviceModuleProvider.listServiceModuleScopes(UserContext.getCurrentNamespaceId(), null, null, null);
-			List<Long> moduleIds = new ArrayList<>();
-			for (ServiceModuleScope moduleScope:moduleScopes) {
-				moduleIds.add(moduleScope.getModuleId());
-			}
-			serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, privilegeType);
-		}else{
-			serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, privilegeType);
-		}
-
-
+	private void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, List<Long> moduleIds, ServiceModulePrivilegeType privilegeType){
+		List<ServiceModulePrivilege> serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, privilegeType);
 		List<Long> privilegeIds = new ArrayList<>();
 		for (ServiceModulePrivilege serviceModulePrivilege: serviceModulePrivileges) {
 			privilegeIds.add(serviceModulePrivilege.getPrivilegeId());
 		}
 
 		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, privilegeIds);
+	}
+
+	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
+		List<Long> moduleIds = new ArrayList<>();
+		moduleIds.add(moduleId);
+		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType);
 	}
 
 
@@ -1407,7 +1403,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		 */
 		List<Long> privilegeIds = new ArrayList<>();
 		privilegeIds.add(PrivilegeConstants.ORGANIZATION_SUPER_ADMIN);
-		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), null, privilegeIds);
+		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), new ArrayList<Long>(), privilegeIds);
 
 
 	}
@@ -1437,7 +1433,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		 */
 		List<Long> privilegeIds = new ArrayList<>();
 		privilegeIds.add(PrivilegeConstants.ORGANIZATION_ADMIN);
-		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), null, privilegeIds);
+		deleteAcls(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), cmd.getUserId(), new ArrayList<Long>(), privilegeIds);
 
 	}
 
@@ -1479,12 +1475,26 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		dbProvider.execute((TransactionStatus status) -> {
 
+
+
 			for (AuthorizationServiceModule authorizationServiceModule: serviceModuleAuthorizations) {
 
 				List<ServiceModuleAssignment> assignments = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(authorizationServiceModule.getResourceType(), authorizationServiceModule.getResourceId(),cmd.getTargetType(),cmd.getTargetId(), cmd.getOrganizationId());
 				for (ServiceModuleAssignment assignment: assignments) {
 					serviceModuleProvider.deleteServiceModuleAssignmentById(assignment.getId());
 				}
+				ListServiceModulesCommand command = new ListServiceModulesCommand();
+				command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+				command.setOwnerId(cmd.getOrganizationId());
+				command.setLevel(2);
+				List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
+				List<Long> moduleIds = new ArrayList<Long>();
+				for (ServiceModuleDTO module: modules) {
+					moduleIds.add(module.getId());
+				}
+
+				// 删除范围的权限
+				deleteAcls(authorizationServiceModule.getResourceType(), authorizationServiceModule.getResourceId(),cmd.getTargetType(),cmd.getTargetId(), moduleIds, null);
 
 				//业务模块授权
 				if(0 == authorizationServiceModule.getAllModuleFlag()){
@@ -1522,7 +1532,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					/**
 					 * 业务模块权限授权
 					 */
-					this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
+					this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
 				}
 
 
@@ -1701,6 +1711,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
 			List<Long> moduleIds = new ArrayList<>();
+			moduleIds.add(0L);
 			for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
 				List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(webMenuPrivilege.getPrivilegeId(), null);
 				for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
@@ -1836,10 +1847,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	 * @param targetType
 	 * @param targetId
      */
-	@Override
-	public void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds){
-		if(null != moduleId){
-			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.SUPER);
+	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, List<Long> privilegeIds){
+		if(null != moduleIds && moduleIds.size() > 0){
+			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, ServiceModulePrivilegeType.SUPER);
 			if(null == privilegeIds){
 				privilegeIds = new ArrayList<>();
 			}
@@ -1863,9 +1873,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 	}
 
+	@Override
+	public void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds){
+		List<Long> moduleIds = new ArrayList<>();
+		moduleIds.add(moduleId);
+		this.deleteAcls(resourceType, resourceId, targetType, targetId, moduleIds, privilegeIds);
+	}
+
 
 	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId){
-		deleteAcls(resourceType, resourceId, targetType, targetId, null, null);
+		deleteAcls(resourceType, resourceId, targetType, targetId, new ArrayList<Long>(), null);
 	}
 
 	/**
