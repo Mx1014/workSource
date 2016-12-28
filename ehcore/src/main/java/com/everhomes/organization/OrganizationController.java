@@ -1261,10 +1261,10 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /org/listOrganizationAllManagers</b>
+	 * <b>URL: /org/listModuleOrganizationManagers</b>
 	 * <p>获取模块负责机构的经理人员</p>
 	 */
-	@RequestMapping("listOrganizationAllManagers")
+	@RequestMapping("listModuleOrganizationManagers")
 	@RestReturn(value=OrganizationManagerDTO.class, collection = true)
 	public RestResponse listModuleOrganizationManagers(ListOrganizationByModuleIdCommand cmd){
 		RestResponse res = new RestResponse(organizationService.listModuleOrganizationManagers(cmd));
