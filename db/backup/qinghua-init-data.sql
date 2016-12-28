@@ -2417,3 +2417,11 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41040,'', 'EhNamespaces', 999984,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41050,'', 'EhNamespaces', 999984,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41060,'', 'EhNamespaces', 999984,2);
+
+
+-- 放行任务不放在首页，位于更多车辆放行右边
+update eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvd05UVXdPREUyTUdWaE1tUXdZMkU1WW1NNFlqSmpabVk1TVRBek56RTRZdw', display_flag=0,service_categry_id=5, id = 112972 where   item_label  = "放行任务";
+
+update eh_launch_pad_items set action_type=57 where   item_label  = "车辆放行";
+-- 删除门禁
+delete from eh_launch_pad_items where item_label = "北环门禁";
