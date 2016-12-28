@@ -2070,7 +2070,7 @@ public class QualityServiceImpl implements QualityService {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId(); 
 		
-		List<OrganizationDTO> groupDtos = organizationService.listUserRelateOrganizations(namespaceId, user.getId(), OrganizationGroupType.GROUP);
+		List<OrganizationDTO> groupDtos = organizationService.listUserRelateOrganizations(namespaceId, user.getId(), OrganizationGroupType.DEPARTMENT);
 		
 		return groupDtos;
 	}
