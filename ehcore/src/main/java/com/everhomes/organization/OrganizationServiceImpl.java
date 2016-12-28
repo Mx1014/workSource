@@ -8497,7 +8497,8 @@ System.out.println();
 			int port = configProvider.getIntValue("mail.smtp.port", 25);
 			new Mailer(address, port , account , passwod).sendMail(email);
 		}catch (Exception e){
-			LOGGER.error(e.getLocalizedMessage());
+			LOGGER.error(e.getMessage());
+			LOGGER.error(e.getStackTrace());
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
 					"send email error");
 		}
