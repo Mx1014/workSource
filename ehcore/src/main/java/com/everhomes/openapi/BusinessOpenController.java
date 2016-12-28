@@ -53,7 +53,10 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.openapi.BizMessageType;
 import com.everhomes.rest.openapi.BusinessMessageCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
 import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
@@ -688,5 +691,28 @@ public class BusinessOpenController extends ControllerBase {
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;
+    }
+
+	/**
+	 * 
+	 * <p>创建电商拼单group</p>
+	 * <b>URL: /openapi/createBusinessGroup</b>
+	 */
+    @RequestMapping("createBusinessGroup")
+    @RestReturn(value=CreateBusinessGroupResponse.class)
+    public RestResponse createBusinessGroup(CreateBusinessGroupCommand cmd){
+    	return new RestResponse(businessService.createBusinessGroup(cmd));
+    }
+    
+	/**
+	 * 
+	 * <p>加入电商拼单group</p>
+	 * <b>URL: /openapi/joinBusinessGroup</b>
+	 */
+    @RequestMapping("joinBusinessGroup")
+    @RestReturn(value=String.class)
+    public RestResponse joinBusinessGroup(JoinBusinessGroupCommand cmd){
+    	businessService.joinBusinessGroup(cmd);
+    	return new RestResponse();
     }
 }

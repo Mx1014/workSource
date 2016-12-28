@@ -6,6 +6,7 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
@@ -39,6 +40,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
+import com.everhomes.group.GroupService;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
@@ -110,6 +112,9 @@ import com.everhomes.rest.launchpad.ItemDisplayFlag;
 import com.everhomes.rest.launchpad.ItemGroup;
 import com.everhomes.rest.launchpad.ItemTargetType;
 import com.everhomes.rest.launchpad.ScaleType;
+import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
+import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
 import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
@@ -202,6 +207,9 @@ public class BusinessServiceImpl implements BusinessService {
 	
 	@Autowired
 	private NamespaceProvider namespaceProvider;
+	
+	@Autowired
+	private GroupService groupService;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -2156,4 +2164,52 @@ public class BusinessServiceImpl implements BusinessService {
 					"password is null");
 		}
 	}
+
+	@Override
+	public CreateBusinessGroupResponse createBusinessGroup(CreateBusinessGroupCommand cmd) {
+		if (cmd.getUserId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"userId cannot be null");
+		}
+		
+		User user = userProvider.findUserById(cmd.getUserId());
+		if (user == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist user");
+		}
+		
+		UserContext userContext = UserContext.current();
+		userContext.setUser(user);
+		userContext.setNamespaceId(user.getNamespaceId());
+		
+		String groupName = cmd.getGroupName();
+		if (StringUtils.isBlank(groupName)) {
+			groupName = "group-"+UUID.randomUUID().toString();
+		}
+		
+		return new CreateBusinessGroupResponse(groupService.createBusinessGroup(groupName));
+	}
+
+	@Override
+	public void joinBusinessGroup(JoinBusinessGroupCommand cmd) {
+		if (cmd.getUserId() == null || cmd.getGroupId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"userId or groupId cannot be null");
+		}
+		
+		User user = userProvider.findUserById(cmd.getUserId());
+		if (user == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"not exist user");
+		}
+		
+		UserContext userContext = UserContext.current();
+		userContext.setUser(user);
+		userContext.setNamespaceId(user.getNamespaceId());
+		
+		groupService.joinBusinessGroup(cmd.getGroupId());
+	}
+	
+	
+	
 }

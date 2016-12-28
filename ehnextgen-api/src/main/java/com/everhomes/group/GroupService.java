@@ -80,6 +80,7 @@ import com.everhomes.rest.group.UpdateGroupCategoryCommand;
 import com.everhomes.rest.group.UpdateGroupCategoryResponse;
 import com.everhomes.rest.group.UpdateGroupCommand;
 import com.everhomes.rest.group.UpdateGroupMemberCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
 
 public interface GroupService {
@@ -229,5 +230,7 @@ public interface GroupService {
 	GetRemainBroadcastCountResponse getRemainBroadcastCount(GetRemainBroadcastCountCommand cmd);
 	GetShareInfoResponse getShareInfo(GetShareInfoCommand cmd);
 	void cancelGroupRequest(CancelGroupRequestCommand cmd);
+	GroupDTO createBusinessGroup(String groupName);
+	void joinBusinessGroup(Long groupId);
 
 }
