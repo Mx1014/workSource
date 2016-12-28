@@ -239,7 +239,7 @@ INSERT INTO `eh_web_menus` VALUES ('40000', '运营服务', '0', 'fa fa-comment'
 
 INSERT INTO `eh_web_menus` VALUES ('40100', '招租管理', '40000', null, null, '1', '2', '/40000/40100', 'park', '410');
 INSERT INTO `eh_web_menus` VALUES ('40110', '招租管理', '40100', null, 'rent_manage', '0', '2', '/40000/40100/40110', 'park', '412');
-INSERT INTO `eh_web_menus` VALUES ('40120', '入住申请', '40100', null, 'enter_apply', '0', '2', '/40000/40100/40120', 'park', '414');
+INSERT INTO `eh_web_menus` VALUES ('40120', '入驻申请', '40100', null, 'enter_apply', '0', '2', '/40000/40100/40120', 'park', '414');
 
 INSERT INTO `eh_web_menus` VALUES ('40200', '工位预订', '40000', null, null, '1', '2', '/40000/40200', 'park', '420');
 INSERT INTO `eh_web_menus` VALUES ('40210', '空间管理', '40200', null, 'project_management', '0', '2', '/40000/40200/40210', 'park', '424');

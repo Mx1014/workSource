@@ -519,4 +519,19 @@ public class ParkingController extends ControllerBase {
 	public void exportParkingRechageOrders(SearchParkingRechargeOrdersCommand cmd,HttpServletResponse response ) {
 		parkingService.exportParkingRechageOrders(cmd, response );
 	}
+	
+	/**
+     * <b>URL: /parking/synchronizedData</b>
+     * <p>同步申请月卡数据</p>
+     */
+    @RequestMapping("synchronizedData")
+    @RestReturn(value = String.class)
+    public RestResponse synchronizedData(ListParkingCardRequestsCommand cmd) {
+        
+    	parkingService.synchronizedData(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

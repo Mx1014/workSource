@@ -1215,8 +1215,20 @@ public class OrganizationController extends ControllerBase {
 	@RequestMapping("listOrganizationContactByJobPositionId")
 	@RestReturn(value=OrganizationContactDTO.class, collection = true)
 	public RestResponse listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd){
-
 		RestResponse res = new RestResponse(organizationService.listOrganizationContactByJobPositionId(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listModuleOrganizationContactByJobPositionId</b>
+	 * <p>获取通用岗位业务责任部门人员</p>
+	 */
+	@RequestMapping("listModuleOrganizationContactByJobPositionId")
+	@RestReturn(value=OrganizationContactDTO.class, collection = true)
+	public RestResponse listModuleOrganizationContactByJobPositionId(ListModuleOrganizationContactByJobPositionIdCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listModuleOrganizationContactByJobPositionId(cmd));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
@@ -1230,6 +1242,32 @@ public class OrganizationController extends ControllerBase {
 	@RestReturn(value=OrganizationManagerDTO.class, collection = true)
 	public RestResponse listOrganizationManagers(ListOrganizationManagersCommand cmd){
 		RestResponse res = new RestResponse(organizationService.listOrganizationManagers(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listOrganizationAllManagers</b>
+	 * <p>获取机构所有经理人员</p>
+	 */
+	@RequestMapping("listOrganizationAllManagers")
+	@RestReturn(value=OrganizationManagerDTO.class, collection = true)
+	public RestResponse listOrganizationAllManagers(ListOrganizationManagersCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationAllManagers(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
+	 * <b>URL: /org/listModuleOrganizationManagers</b>
+	 * <p>获取模块负责机构的经理人员</p>
+	 */
+	@RequestMapping("listModuleOrganizationManagers")
+	@RestReturn(value=OrganizationManagerDTO.class, collection = true)
+	public RestResponse listModuleOrganizationManagers(ListOrganizationByModuleIdCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listModuleOrganizationManagers(cmd));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;
