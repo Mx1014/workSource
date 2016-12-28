@@ -2055,6 +2055,16 @@ public class FlowServiceImpl implements FlowService {
 		
 		//got all nodes tracker logs
 		List<FlowEventLog> stepLogs = flowEventLogProvider.findStepEventLogs(flowCaseId);
+//		if(stepLogs != null) {
+//			FlowNode fn = nodes.get(nodes.size()-1);
+//			FlowEventLog fe = new FlowEventLog();
+//			fe.setFlowNodeId(fn.getId());
+//			fe.setFlowCaseId(flowCase.getId());
+//			fe.setFlowMainId(flowCase.getFlowMainId());
+//			fe.setFlowVersion(flowCase.getFlowVersion());
+//			fe.setLogType(FlowLogType.STEP_TRACKER.getCode());
+//			stepLogs.add(fe);
+//		}
 		List<FlowNodeLogDTO> nodeDTOS = new ArrayList<>();
 		dto.setNodes(nodeDTOS);
 
@@ -2091,23 +2101,8 @@ public class FlowServiceImpl implements FlowService {
 				}
 				
 				nodeDTOS.add(nodeLogDTO);
-
-				SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd HH:mm");
-				List<FlowEventLog> trackerLogs = flowEventLogProvider.findEventLogsByNodeId(currNode.getId()
-						, flowCase.getId(), eventLog.getStepCount(), flowUserType);
-				if(trackerLogs != null) {
-					trackerLogs.forEach((t)-> {
-						FlowEventLogDTO eventDTO = ConvertHelper.convert(t, FlowEventLogDTO.class);
-						if(FlowStepType.EVALUATE_STEP.getCode().equals(t.getButtonFiredStep())) {
-							eventDTO.setIsEvaluate((byte)1);
-						}
-						if(eventDTO.getLogContent() != null) {
-							String dateStr = sdf1.format(new Date(eventDTO.getCreateTime().getTime()));
-							eventDTO.setLogContent(dateStr + " " + eventDTO.getLogContent());
-						}
-						nodeLogDTO.getLogs().add(eventDTO);			
-					});
-				}
+				
+				getFlowNodeLogDTO(flowCase, flowUserType, currNode, eventLog.getStepCount(), nodeLogDTO);
 			}
 		}
 		
@@ -2125,10 +2120,34 @@ public class FlowServiceImpl implements FlowService {
 			logDTO = new FlowNodeLogDTO();
 			logDTO.setNodeLevel(nodes.size());
 			logDTO.setNodeName(buttonDefName(UserContext.getCurrentNamespaceId(), FlowStepType.END_STEP));
+			if(!flowCase.getStatus().equals(FlowCaseStatus.PROCESS.getCode())) {
+				getFlowNodeLogDTO(flowCase, flowUserType, nodes.get(nodes.size()-1), flowCase.getStepCount(), logDTO);
+				logDTO.setIsCurrentNode((byte)1);
+			}
+			
 			nodeDTOS.add(logDTO);
 		}
 		
 		return dto;
+	}
+	
+	private void getFlowNodeLogDTO(FlowCase flowCase, FlowUserType flowUserType, FlowNode currNode, Long stepCount, FlowNodeLogDTO nodeLogDTO) {
+		SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd HH:mm");
+		List<FlowEventLog> trackerLogs = flowEventLogProvider.findEventLogsByNodeId(currNode.getId()
+				, flowCase.getId(), stepCount, flowUserType);
+		if(trackerLogs != null) {
+			trackerLogs.forEach((t)-> {
+				FlowEventLogDTO eventDTO = ConvertHelper.convert(t, FlowEventLogDTO.class);
+				if(FlowStepType.EVALUATE_STEP.getCode().equals(t.getButtonFiredStep())) {
+					eventDTO.setIsEvaluate((byte)1);
+				}
+				if(eventDTO.getLogContent() != null) {
+					String dateStr = sdf1.format(new Date(eventDTO.getCreateTime().getTime()));
+					eventDTO.setLogContent(dateStr + " " + eventDTO.getLogContent());
+				}
+				nodeLogDTO.getLogs().add(eventDTO);			
+			});
+		}
 	}
 
 	@Override
