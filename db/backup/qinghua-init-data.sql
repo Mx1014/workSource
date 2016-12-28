@@ -2428,4 +2428,4 @@ delete from eh_launch_pad_items where item_label = "北环门禁";
 
 
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`) 
-	VALUES ('10007', 'community', '240111044331055940', '清华信息港停车场', '', NULL, '1200', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '1');
+	VALUES ('10007', 'community', '240111044331055835', '清华信息港停车场', '', NULL, '1200', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '1');
