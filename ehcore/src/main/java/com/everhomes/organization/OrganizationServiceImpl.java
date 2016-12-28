@@ -6178,20 +6178,68 @@ System.out.println();
 		return this.getOrganizationManagers(cmd.getOrganizationId());
 	}
 
+	@Override
+	public List<OrganizationManagerDTO> listOrganizationAllManagers(ListOrganizationManagersCommand cmd) {
+		checkOrganization(cmd.getOrganizationId());
+		List<String> types = new ArrayList<>();
+		types.add(OrganizationGroupType.GROUP.getCode());
+		types.add(OrganizationGroupType.DEPARTMENT.getCode());
+		List<Organization> organizations = organizationProvider.listOrganizationByGroupTypes(cmd.getOrganizationId(), types);
+		List<Long> organizationIds = new ArrayList<>();
+		for (Organization organization: organizations) {
+			organizationIds.add(organization.getId());
+		}
+		return this.getOrganizationManagers(organizationIds);
+	}
+
+	@Override
+	public List<OrganizationManagerDTO> listModuleOrganizationManagers(ListOrganizationByModuleIdCommand cmd) {
+		List<OrganizationDTO> organizations = listOrganizationsByModuleId(cmd);
+		List<Long> organizationIds = new ArrayList<>();
+		for (OrganizationDTO organization: organizations) {
+			organizationIds.add(organization.getId());
+		}
+		return this.getOrganizationManagers(organizationIds);
+	}
+
 	/**
 	 * 获取机构经理
 	 * @param organizationId
 	 * @return
-     */
+	 */
 	private List<OrganizationManagerDTO> getOrganizationManagers(Long organizationId){
+		List<Long> organizationIds = new ArrayList<>();
+		organizationIds.add(organizationId);
+		return this.getOrganizationManagers(organizationIds);
+	}
+
+	/**
+	 * 获取机构集合经理
+	 * @param organizationIds
+	 * @return
+     */
+	private List<OrganizationManagerDTO> getOrganizationManagers(List<Long> organizationIds){
 		List<OrganizationManagerDTO>  dtos = new ArrayList<>();
 		//机构经理
 		List<String> types = new ArrayList<>();
 		types.add(OrganizationGroupType.MANAGER.getCode());
-		List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organizationId, types);
-		if(0 < managerGroups.size()){
-			List<OrganizationMember> members = organizationProvider.listOrganizationPersonnels(null,managerGroups.get(0).getId(),OrganizationMemberStatus.ACTIVE, null);
+		List<Long> managerGroupIds = new ArrayList<>();
+		for (Long organizationId: organizationIds ) {
+			List<Organization> managerGroups = organizationProvider.listOrganizationByGroupTypes(organizationId, types);
+			if(0 < managerGroups.size()){
+				managerGroupIds.add(managerGroups.get(0).getId());
+			}
+		}
 
+		if(0 < managerGroupIds.size()){
+			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(managerGroupIds, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+					return query;
+				}
+			});
 			for (OrganizationMember member: members) {
 				OrganizationManagerDTO managerDTO = ConvertHelper.convert(member, OrganizationManagerDTO.class);
 				managerDTO.setMemberId(member.getId());
@@ -8679,26 +8727,74 @@ System.out.println();
 	@Override
 	public List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd) {
 		Organization organization = checkOrganization(cmd.getOrganizationId());
-		List<Long> organizationIds = new ArrayList<>();
+		List<OrganizationMember> members = null;
 		if(OrganizationGroupType.fromCode(organization.getGroupType()) == OrganizationGroupType.ENTERPRISE){
-			List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(cmd.getJobPositionId());
+			members = listOrganizationContactByJobPositionId(organization.getId(), cmd.getJobPositionId());
+		}else{
+			List<Long> organizationIds = new ArrayList<>();
+			organizationIds.add(organization.getId());
+			members = listOrganizationContactByJobPositionId(organizationIds, cmd.getJobPositionId());
+		}
+
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
+		if(null == members || members.size() == 0){
+			return new ArrayList<>();
+		}
+
+		for (OrganizationMember member: members) {
+			dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
+		}
+		return dtos;
+	}
+
+
+	@Override
+	public List<OrganizationContactDTO> listModuleOrganizationContactByJobPositionId(ListModuleOrganizationContactByJobPositionIdCommand cmd) {
+		List<OrganizationDTO> organizations = listOrganizationsByModuleId(ConvertHelper.convert(cmd, ListOrganizationByModuleIdCommand.class));
+		List<Long> organizationIds = new ArrayList<>();
+		for (OrganizationDTO organization: organizations) {
+			organizationIds.add(organization.getId());
+		}
+		List<OrganizationMember> members = listOrganizationContactByJobPositionId(organizationIds, cmd.getJobPositionId());
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
+		for (OrganizationMember member: members) {
+			dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
+		}
+		return dtos;
+	}
+
+	private List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, Long jobPositionId){
+		return listOrganizationContactByJobPositionId(enterpriseId, null, jobPositionId);
+	}
+
+	private List<OrganizationMember> listOrganizationContactByJobPositionId(List<Long> organizationIds, Long jobPositionId){
+		return listOrganizationContactByJobPositionId(null, organizationIds, jobPositionId);
+	}
+
+	private List<OrganizationMember> listOrganizationContactByJobPositionId(Long enterpriseId, List<Long> organizationIds, Long jobPositionId){
+		List<Long> jobPositionIds = new ArrayList<>();
+		if(null != enterpriseId){
+			List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMapsByJobPositionId(jobPositionId);
 			for (OrganizationJobPositionMap map: maps) {
-				organizationIds.add(map.getOrganizationId());
+				jobPositionIds.add(map.getOrganizationId());
 			}
 		}else{
 			List<String> groupTypes = new ArrayList<>();
 			groupTypes.add(OrganizationGroupType.JOB_POSITION.getCode());
-			List<Organization> jobPositions = organizationProvider.listOrganizationByGroupTypes(cmd.getOrganizationId(), groupTypes);
+			List<Organization> jobPositions = new ArrayList<>();
+			for (Long organizationid: organizationIds) {
+				jobPositions.addAll(organizationProvider.listOrganizationByGroupTypes(organizationid, groupTypes));
+			}
+
 			for (Organization jobPosition: jobPositions) {
-				if(null != organizationProvider.getOrganizationJobPositionMapByOrgIdAndJobPostionId(jobPosition.getId(),cmd.getJobPositionId())){
-					organizationIds.add(jobPosition.getId());
+				if(null != organizationProvider.getOrganizationJobPositionMapByOrgIdAndJobPostionId(jobPosition.getId(),jobPositionId)){
+					jobPositionIds.add(jobPosition.getId());
 				}
 			}
 		}
 
-		List<OrganizationContactDTO> dtos = new ArrayList<>();
-		if(organizationIds.size() > 0){
-			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(organizationIds, new ListingQueryBuilderCallback() {
+		if(organizationIds.size() > 0) {
+			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(jobPositionIds, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
 					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
@@ -8706,13 +8802,9 @@ System.out.println();
 					return query;
 				}
 			});
-
-			for (OrganizationMember member: members) {
-				dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
-			}
+			return members;
 		}
-
-		return dtos;
+		return new ArrayList<>();
 	}
 }
 
