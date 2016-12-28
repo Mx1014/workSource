@@ -2392,10 +2392,16 @@ update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.
 update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '车辆放行' and namespace_id = 999984;
 
 
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 134 where item_label = '水木之家';
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 137 where item_label = '服务维修';
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 136 where item_label = '绿植租摆';
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 135 where item_label = '紫荆汇';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '水木之家';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '服务维修';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '绿植租摆';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '紫荆汇';
+
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828292658152925777%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '水木之家';
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828296650914172669%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '服务维修';
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828295497182208491%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '绿植租摆';
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828293251069258160%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '紫荆汇';
+
 DELETE from eh_launch_pad_items where item_label = '车辆放行' and scene_type = 'park_tourist' and namespace_id = 999984;
 
 DELETE from eh_web_menu_scopes where menu_id = 50700;
