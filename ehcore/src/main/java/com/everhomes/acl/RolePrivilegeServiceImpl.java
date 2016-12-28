@@ -1711,6 +1711,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
 			List<Long> moduleIds = new ArrayList<>();
+			moduleIds.add(0L);
 			for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
 				List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(webMenuPrivilege.getPrivilegeId(), null);
 				for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {

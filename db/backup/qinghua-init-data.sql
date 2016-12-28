@@ -2392,10 +2392,16 @@ update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.
 update eh_launch_pad_items set action_data = '{\"url\":\"http://zijing.lihekefu.com/mobile/static/coming_soon/index.html\"}' where item_label = '车辆放行' and namespace_id = 999984;
 
 
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 134 where item_label = '水木之家';
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 137 where item_label = '服务维修';
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 136 where item_label = '绿植租摆';
-UPDATE eh_launch_pad_items set target_type = 'biz', target_id = 135 where item_label = '紫荆汇';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '水木之家';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '服务维修';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '绿植租摆';
+UPDATE eh_launch_pad_items set target_type = NULl, target_id = NULl where item_label = '紫荆汇';
+
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828292658152925777%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '水木之家';
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828296650914172669%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '服务维修';
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828295497182208491%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '绿植租摆';
+UPDATE eh_launch_pad_items set action_type = 14, action_data = '{\"url\":\"https://biz.lihekefu.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.lihekefu.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdetails%2F14828293251069258160%3F_k%3Dzlbiz#sign_suffix"}' where item_label = '紫荆汇';
+
 DELETE from eh_launch_pad_items where item_label = '车辆放行' and scene_type = 'park_tourist' and namespace_id = 999984;
 
 DELETE from eh_web_menu_scopes where menu_id = 50700;
@@ -2411,3 +2417,15 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41040,'', 'EhNamespaces', 999984,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41050,'', 'EhNamespaces', 999984,2);
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),41060,'', 'EhNamespaces', 999984,2);
+
+
+-- 放行任务不放在首页，位于更多车辆放行右边
+update eh_launch_pad_items set icon_uri='cs://1/image/aW1hZ2UvTVRvd05UVXdPREUyTUdWaE1tUXdZMkU1WW1NNFlqSmpabVk1TVRBek56RTRZdw', display_flag=0,service_categry_id=5, id = 112972 where   item_label  = "放行任务";
+
+update eh_launch_pad_items set action_type=57 where   item_label  = "车辆放行";
+-- 删除门禁
+delete from eh_launch_pad_items where item_label = "北环门禁";
+
+
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`) 
+	VALUES ('10007', 'community', '240111044331055835', '清华信息港停车场', '', NULL, '1200', '2', '1025', '2016-12-16 17:07:20', '2', '0', '0', '2', '2', '0', '1');
