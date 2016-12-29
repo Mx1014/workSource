@@ -1,3 +1,5 @@
+-- general forms support
+DROP TABLE IF EXISTS `eh_general_forms`;
 CREATE TABLE `eh_general_forms` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -11,7 +13,7 @@ CREATE TABLE `eh_general_forms` (
   `form_name` VARCHAR(64) NOT NULL,
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
-  `template_type` VARCHAR(256) NOT NULL COMMENT 'the type of template text',
+  `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
   `template_text` TEXT,
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
@@ -47,5 +49,35 @@ CREATE TABLE `eh_general_approvals` (
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
 
+  `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
+  `update_time` DATETIME NOT NULL COMMENT 'last update time',
+  `create_time` DATETIME NOT NULL COMMENT 'record create time',
+
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+-- the values of form from request
+DROP TABLE IF EXISTS `eh_general_approval_vals`;
+CREATE TABLE `eh_general_approval_vals` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  `request_id` BIGINT NOT NULL,
+  `approval_id` BIGINT NOT NULL,
+  `form_origin_id` BIGINT NOT NULL,
+  `form_version` BIGINT NOT NULL,
+  `field_name` VARCHAR(128),
+  `field_type` VARCHAR(128),
+  `data_source_type` VARCHAR(128),
+  `val_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: invalid, 1: request_root, 2: request_item',
+
+  `field_str1` VARCHAR(128),
+  `field_str2` VARCHAR(128),
+  `field_str3` TEXT,
+  `field_int1` BIGINT NOT NULL DEFAULT 0,
+  `field_int2` BIGINT NOT NULL DEFAULT 0,
+  `field_int3` BIGINT NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
