@@ -12,6 +12,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdResponse;
+import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 
 @RestDoc(value="General approval controller", site="core")
 @RestController
@@ -39,7 +40,7 @@ public class GeneralApprovalController extends ControllerBase {
      */
     @RequestMapping("postApprovalForm")
     @RestReturn(value=GetTemplateByApprovalIdResponse.class)
-    public RestResponse postApprovalForm(@Valid GetTemplateByApprovalIdCommand cmd) {
+    public RestResponse postApprovalForm(@Valid PostApprovalFormCommand cmd) {
     	RestResponse response = new RestResponse();
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
