@@ -97,12 +97,17 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 				b.field("requestorName", task.getRequestorName());
 	            b.field("requestorPhone", task.getRequestorPhone());
 			}
-			Address address = addressProvider.findAddressById(task.getAddressId());
-			if(null != address) {
-				b.field("buildingName", address.getBuildingName());
-			}else {
-				b.field("buildingName", "");
-			}
+            
+            if(null != task.getAddressId()) {
+            	Address address = addressProvider.findAddressById(task.getAddressId());
+    			if(null != address) {
+    				b.field("buildingName", address.getBuildingName());
+    			}else {
+    				b.field("buildingName", "");
+    			}
+            }else {
+            	b.field("buildingName", "");
+            }
             
             b.endObject();
             return b;
