@@ -218,7 +218,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		SearchTasksResponse response = new SearchTasksResponse();
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), pageSize);
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
+				cmd.getPageAnchor(), pageSize);
 		int listSize = list.size();
 		if(listSize > 0){
     		response.setRequests(list.stream().map(t -> {
@@ -249,8 +250,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 				dto.setAddress(address.getAddress());
 		}else {
 			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
+			Address address = addressProvider.findAddressById(task.getAddressId());
+			
+			String addr = "";
 			if(null != organization)
-				dto.setAddress(organization.getName());
+				addr = organization.getName();
+			if(null != address) 
+				addr = addr + address.getAddress();
+			
+			dto.setAddress(addr);
 		}
 	}
 	
@@ -797,8 +805,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		String handle = PmTaskHandle.SHEN_YE;
 		
-//		if(namespaceId == 999992) 
-//			handle = PmTaskHandle.SHEN_YE;
+		if(namespaceId == 1000000) 
+			handle = PmTaskHandle.FLOW;
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -828,8 +836,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		String handle = PmTaskHandle.SHEN_YE;
 		
-//		if(namespaceId == 999992) 
-//			handle = PmTaskHandle.SHEN_YE;
+		if(namespaceId == 1000000) 
+			handle = PmTaskHandle.FLOW;
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -1008,7 +1016,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(null == cmd.getPageSize())
 			cmd.setPageSize(100000);
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
-				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getPageAnchor(), cmd.getPageSize());
 		
 		
 		Workbook wb = null;
@@ -2244,6 +2252,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    					OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
 	    					dto.setOrganizationId(o.getId());
 	    					dto.setDisplayName(o.getDisplayName());
+	    					dto.setAddressId(address.getId());
 	    					return dto;
 	    					}).collect(Collectors.toList());
 	    				
@@ -2281,6 +2290,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    					OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
 	    					dto.setOrganizationId(o.getId());
 	    					dto.setDisplayName(o.getDisplayName());
+	    					dto.setAddressId(address.getId());
 	    					return dto;
 	    					}).collect(Collectors.toList());
 	    				
