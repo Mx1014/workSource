@@ -245,11 +245,12 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		    				"Invalid addressOrgId parameter.");
 				}
 				task.setAddressOrgId(cmd.getAddressOrgId());
-				List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getAddressOrgId());
-				int size = addresses.size();
-				if(size != 0) {
-					task.setAddressId(addresses.get(0).getAddressId());
-				}
+				task.setAddressId(cmd.getAddressId());
+//				List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getAddressOrgId());
+//				int size = addresses.size();
+//				if(size != 0) {
+//					task.setAddressId(addresses.get(0).getAddressId());
+//				}
 			}else {
 				task.setAddressId(cmd.getAddressId());
 			}

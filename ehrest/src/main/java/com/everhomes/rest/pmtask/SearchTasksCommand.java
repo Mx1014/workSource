@@ -23,6 +23,7 @@ public class SearchTasksCommand {
 	private Long taskCategoryId;
 	private Byte status;
 	private String keyword;
+	private String buildingName;
 	private Long pageAnchor;
 	private Integer pageSize;
 	
@@ -92,5 +93,11 @@ public class SearchTasksCommand {
 	}
 	public void setAddressId(Long addressId) {
 		this.addressId = addressId;
+	}
+	public String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 }
