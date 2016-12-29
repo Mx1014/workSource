@@ -12,13 +12,14 @@ import com.everhomes.util.StringHelper;
  * <li>projectType: 项目类型</li>
  * <li>formOriginId: 表单 ID</li>
  * <li>formVersion: 表单当前版本信息</li>
- * <li>formFields: 表单控件数据</li>
+ * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
+ * <li>values: form表单对应的值信息 {@link com.everhomes.rest.general_approval.PostApprovalFormItem}</li>
  * </ul>
  * @author janson
  *
  */
 public class GetTemplateByApprovalIdResponse {
-	private Long id;
+	private Long approvalId;
 	private Integer namespaceId;
 	private Long ownerId;
 	private String ownerType;
@@ -35,13 +36,24 @@ public class GetTemplateByApprovalIdResponse {
 	
 	@ItemType(GeneralFormFieldDTO.class)
 	List<GeneralFormFieldDTO> formFields;
+	
+	@ItemType(PostApprovalFormItem.class)
+	List<PostApprovalFormItem> values;
 
-	public Long getId() {
-		return id;
+	public Long getApprovalId() {
+		return approvalId;
 	}
 
-	public void setId(Long id) {
-		this.id = id;
+	public void setApprovalId(Long approvalId) {
+		this.approvalId = approvalId;
+	}
+
+	public List<PostApprovalFormItem> getValues() {
+		return values;
+	}
+
+	public void setValues(List<PostApprovalFormItem> values) {
+		this.values = values;
 	}
 
 	public Integer getNamespaceId() {
