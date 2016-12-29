@@ -378,7 +378,7 @@ public class PmTaskController extends ControllerBase {
      * <p>根据园区/小区 获取用户相关的地址列表</p>
      */
     @RequestMapping("getUserRelatedAddressesByCommunity")
-    @RestReturn(value=GetUserRelatedAddressResponse.class)
+    @RestReturn(value=GetUserRelatedAddressByCommunityResponse.class)
     public RestResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
     	GetUserRelatedAddressByCommunityResponse resp = pmTaskService.getUserRelatedAddressesByCommunity(cmd);
         RestResponse response = new RestResponse(resp);
