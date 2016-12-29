@@ -24,6 +24,7 @@ public class GeneralFormFieldDTO {
 	private String fieldDesc;
 	private Byte requiredFlag;
 	private Byte dynamicFlag; 
+	private Byte enableFlag;
 	private String dataSourceType;
 	private String limitType;
 	private String fieldExtra;
@@ -106,6 +107,14 @@ public class GeneralFormFieldDTO {
 
 	public void setLimitType(String limitType) {
 		this.limitType = limitType;
+	}
+
+	public Byte getEnableFlag() {
+		return enableFlag;
+	}
+
+	public void setEnableFlag(Byte enableFlag) {
+		this.enableFlag = enableFlag;
 	}
 
 	@Override
