@@ -8412,6 +8412,7 @@ System.out.println();
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();
 
+		String account = configProvider.getValue("mail.smtp.account", "zuolin@zuolin.com");
 		String locale = "zh_CN";
 		map.put("nickName", UserContext.current().getUser().getNickName());
 		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
@@ -8424,13 +8425,12 @@ System.out.println();
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
 				VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件"); 
 		Email email = new EmailBuilder()
-	    .from(appName, "zuolin@zuolin.com")
+	    .from(appName,account)
 	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
 	    .subject(mailSubject)
 	    .text(mailText)
 	    .build();
 		try{
-			String account = configProvider.getValue("mail.smtp.account", "zuolin@zuolin.com");
 			String address = configProvider.getValue("mail.smtp.address", "smtp.mxhichina.com");
 			String passwod = configProvider.getValue("mail.smtp.passwod", "abc123!@#");
 			int port = configProvider.getIntValue("mail.smtp.port", 25);
