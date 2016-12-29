@@ -11,7 +11,10 @@ import com.everhomes.util.StringHelper;
  * <li>fieldExtra: 不同的字段类型，还有额外的数据信息</li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>
+ * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link com.everhomes.rest.general_approval.GeneralFormDataVisibleType}</li>
+ * <li>validatorType: 校验方式 {@link com.everhomes.rest.general_approval.GeneralFormValidatorType}</li>
  * <li>dataSourceType: 数据源类型 {@link com.everhomes.rest.general_approval.GeneralFormDataSourceType}</li>
+ * <li>renderType: 渲染类型，{@link com.everhomes.rest.general_approval.GeneralFormRenderType}</li>
  * </ul>
  * @author janson
  *
@@ -24,9 +27,10 @@ public class GeneralFormFieldDTO {
 	private String fieldDesc;
 	private Byte requiredFlag;
 	private Byte dynamicFlag; 
-	private Byte enableFlag;
+	private String visibleType;
+	private String renderType;
 	private String dataSourceType;
-	private String limitType;
+	private String validatorType;
 	private String fieldExtra;
 
 	public String getFieldName() {
@@ -101,20 +105,28 @@ public class GeneralFormFieldDTO {
 		this.fieldExtra = fieldExtra;
 	}
 
-	public String getLimitType() {
-		return limitType;
+	public String getValidatorType() {
+		return validatorType;
 	}
 
-	public void setLimitType(String limitType) {
-		this.limitType = limitType;
+	public void setValidatorType(String validatorType) {
+		this.validatorType = validatorType;
 	}
 
-	public Byte getEnableFlag() {
-		return enableFlag;
+	public String getVisibleType() {
+		return visibleType;
 	}
 
-	public void setEnableFlag(Byte enableFlag) {
-		this.enableFlag = enableFlag;
+	public void setVisibleType(String visibleType) {
+		this.visibleType = visibleType;
+	}
+
+	public String getRenderType() {
+		return renderType;
+	}
+
+	public void setRenderType(String renderType) {
+		this.renderType = renderType;
 	}
 
 	@Override
