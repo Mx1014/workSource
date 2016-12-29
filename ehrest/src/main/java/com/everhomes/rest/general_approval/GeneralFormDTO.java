@@ -1,20 +1,26 @@
 package com.everhomes.rest.general_approval;
 
-import com.everhomes.util.StringHelper;
-import java.util.List;
-import java.sql.Timestamp;
-
 import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
+import java.sql.Timestamp;
+import java.util.List;
 
 /**
  * <ul>
- * <li></li>
+ * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
+ * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
+ * <li>organizationId: 属于的公司 ID</li>
+ * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
+ * <li>formVersion: 当前版本信息</li>
+ * <li>templateType: 模板数据类型。未来表单可能同样的控件有不同的表达方式，则可以用这个类型区分 {@link com.everhomes.rest.general_approval.GeneralFormTemplateType}</li>
+ * <li>formName: 表单名字</li>
+ * <li>formFields: 表单控件数据 {@link com.everhomes.rest.general_approval.GeneralFormFieldDTO}</li>
  * </ul>
  * @author janson
  *
  */
 public class GeneralFormDTO {
-    private Long     id;
     private Long     ownerId;
     private String     ownerType;
     private Long     moduleId;
@@ -23,20 +29,15 @@ public class GeneralFormDTO {
     private Long     formOriginId;
     private Long     formVersion;
     private Timestamp     updateTime;
-    private String     templateText;
     private Integer     namespaceId;
     private String     formName;
     private Byte     status;
     private String     templateType;
+    private String     templateText;
     private Timestamp     createTime;
-
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
+    
+    @ItemType(GeneralFormFieldDTO.class)
+    List<GeneralFormFieldDTO> formFields;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -148,6 +149,14 @@ public class GeneralFormDTO {
 
 	public void setCreateTime(Timestamp createTime) {
 		this.createTime = createTime;
+	}
+
+	public List<GeneralFormFieldDTO> getFormFields() {
+		return formFields;
+	}
+
+	public void setFormFields(List<GeneralFormFieldDTO> formFields) {
+		this.formFields = formFields;
 	}
 
 	@Override

@@ -15,6 +15,9 @@ import com.everhomes.util.StringHelper;
 public class PostApprovalFormFileValue {
 	@ItemType(String.class)
 	private List<String> uris;
+	
+	@ItemType(String.class)
+	private List<String> urls;
 
 	public List<String> getUris() {
 		return uris;
