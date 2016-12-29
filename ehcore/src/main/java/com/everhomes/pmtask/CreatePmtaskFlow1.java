@@ -402,7 +402,7 @@ public class CreatePmtaskFlow1 {
     	flowService.updateFlowNode(updateFlowCmd2);
     	
     	UpdateFlowNodeCommand updateFlowCmd3 = new UpdateFlowNodeCommand();
-    	updateFlowCmd3.setFlowNodeId(node2.getId());
+    	updateFlowCmd3.setFlowNodeId(node3.getId());
     	updateFlowCmd3.setParams("{\"nodeType\":\"PROCESSING\"}");
     	updateFlowCmd3.setAutoStepMinute(5);
     	updateFlowCmd3.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
@@ -434,6 +434,7 @@ public class CreatePmtaskFlow1 {
     	FlowButton flowButton12 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.TRANSFER_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	flowButton12.setStatus(FlowButtonStatus.ENABLED.getCode());
+    	flowButton12.setButtonName("转交");
     	flowButtonProvider.updateFlowButton(flowButton12);
     	//受理
     	FlowButton flowButton1 = flowButtonProvider.findFlowButtonByStepType(node1.getId(), FlowConstants.FLOW_CONFIG_VER
@@ -474,6 +475,7 @@ public class CreatePmtaskFlow1 {
     	FlowButton flowButton22 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER
     			, FlowStepType.TRANSFER_STEP.getCode(), FlowUserType.PROCESSOR.getCode());
     	flowButton22.setStatus(FlowButtonStatus.ENABLED.getCode());
+    	flowButton22.setButtonName("转交");
     	flowButtonProvider.updateFlowButton(flowButton22);
     	
     	FlowButton flowButton2 = flowButtonProvider.findFlowButtonByStepType(node2.getId(), FlowConstants.FLOW_CONFIG_VER

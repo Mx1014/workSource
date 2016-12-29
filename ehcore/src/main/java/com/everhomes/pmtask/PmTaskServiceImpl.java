@@ -944,7 +944,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
 		List<Category> list = null;
-		if(null != cmd.getTaskCategoryId() && (null == cmd.getParentId() || cmd.getParentId() ==0)) {
+		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && (null == cmd.getParentId() || cmd.getParentId() == 0L)) {
 			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
 			list = new ArrayList<Category>();
 			list.add(category);
