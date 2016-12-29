@@ -1284,7 +1284,17 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	public void assignmentPrivileges(String ownerType, Long ownerId,String targetType, Long targetId, String scope, Long moduleId, ServiceModulePrivilegeType privilegeType){
 		List<Long> moduleIds = new ArrayList<>();
-		moduleIds.add(moduleId);
+
+		if(0L == moduleId){
+			ListServiceModulesCommand command = new ListServiceModulesCommand();
+			command.setLevel(2);
+			List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
+			for (ServiceModuleDTO module: modules) {
+				moduleIds.add(module.getId());
+			}
+		}else{
+			moduleIds.add(moduleId);
+		}
 		this.assignmentPrivileges(ownerType, ownerId, targetType, targetId, scope, moduleIds, privilegeType);
 	}
 
@@ -1679,7 +1689,16 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			/**
 			 * 权限删除
 			 */
-			this.deleteAcls(cmd.getResourceType(), cmd.getResourceId(), EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId());
+			ListServiceModulesCommand command = new ListServiceModulesCommand();
+			command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+			command.setOwnerId(cmd.getOrganizationId());
+			command.setLevel(2);
+			List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
+			List<Long> moduleIds = new ArrayList<Long>();
+			for (ServiceModuleDTO module: modules) {
+				moduleIds.add(module.getId());
+			}
+			deleteAcls(cmd.getResourceType(), cmd.getResourceId(),EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(), moduleIds, null);
 
 			int pageSize = PaginationConfigHelper.getPageSize(configProvider, 100000);
 			CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -1699,8 +1718,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					/**
 					 * 权限删除
 					 */
-					this.deleteAcls(cmd.getResourceType(), cmd.getResourceId(), EntityType.USER.getCode(),member.getTargetId());
-				}
+					deleteAcls(cmd.getResourceType(), cmd.getResourceId(),EntityType.ORGANIZATIONS.getCode(),cmd.getOrganizationId(), moduleIds, null);				}
 			}
 			return null;
 		});
