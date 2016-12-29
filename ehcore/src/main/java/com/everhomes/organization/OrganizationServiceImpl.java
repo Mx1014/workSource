@@ -8429,18 +8429,22 @@ System.out.println();
 	    .subject(mailSubject)
 	    .text(mailText)
 	    .build();
-//		try{
+		try{
 			String account = configProvider.getValue("mail.smtp.account", "zuolin@zuolin.com");
 			String address = configProvider.getValue("mail.smtp.address", "smtp.mxhichina.com");
 			String passwod = configProvider.getValue("mail.smtp.passwod", "abc123!@#");
 			int port = configProvider.getIntValue("mail.smtp.port", 25);
+			LOGGER.debug("SEND MESSAGE +_\n"+email.toString()+"\n mailer : new Mailer("+address+", "+port+" , "+account+" , "+passwod + ") ");
 			new Mailer(address, port , account , passwod).sendMail(email);
-//		}catch (Exception e){
-//			LOGGER.error(e.getMessage());
-//			// LOGGER.error(e.getStackTrace());
-//			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
-//					"send email error");
-//		}
+		}catch (Exception e){
+			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++");
+			LOGGER.error(e.getMessage());
+			
+			e.printStackTrace();
+			// LOGGER.error(e.getStackTrace());
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
+					"send email error");
+		}
 		
 	}
 
