@@ -31,7 +31,12 @@ public class GeneralApprovalController extends ControllerBase {
     	
     	return response;
     }
-    
+
+    /**
+     * <b>URL: /general_approval/postApprovalForm</b>
+     * <p> 提交数据，并获取表单的信息 </p>
+     * @return GetTemplateByApprovalIdResponse 表单的数据信息
+     */
     @RequestMapping("postApprovalForm")
     @RestReturn(value=GetTemplateByApprovalIdResponse.class)
     public RestResponse postApprovalForm(@Valid GetTemplateByApprovalIdCommand cmd) {
