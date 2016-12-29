@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import com.everhomes.activity.ActivityAttachment;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -933,5 +934,39 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		});
 
 		return modules;
+	}
+
+
+	@Override
+	public List<ServiceAllianceAttachment> listAttachments(
+			CrossShardListingLocator locator, int count, Long ownerId) {
+		List<ServiceAllianceAttachment> attachments = new ArrayList<ServiceAllianceAttachment>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivityAttachments.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhServiceAllianceAttachmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.gt(locator.getAnchor()));
+
+            query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.OWNER_ID.eq(ownerId));
+            query.addConditions(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ATTACHMENT_TYPE.eq(ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode()));
+
+            query.addOrderBy(Tables.EH_SERVICE_ALLIANCE_ATTACHMENTS.ID.asc());
+            query.addLimit(count - attachments.size());
+
+            query.fetch().map((r) -> {
+                attachments.add(ConvertHelper.convert(r, ServiceAllianceAttachment.class));
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        return attachments;
 	}
 }

@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import com.everhomes.activity.ActivityAttachment;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.category.CategoryProvider;
@@ -10,6 +11,8 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.activity.ActivityAttachmentDTO;
+import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.forum.PostContentType;
@@ -1035,8 +1038,35 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 	@Override
 	public ListAttachmentsResponse listAttachments(ListAttachmentsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
+        if(cmd.getPageSize()==null){
+            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+            cmd.setPageSize(value);
+        }
+
+        ListAttachmentsResponse response = new ListAttachmentsResponse();
+        List<ServiceAllianceAttachment> attachments = yellowPageProvider.listAttachments(locator, cmd.getPageSize() + 1, cmd.getOwnerId());
+        if(attachments != null && attachments.size() > 0) {
+            if(attachments.size() > cmd.getPageSize()) {
+                attachments.remove(attachments.size() - 1);
+                response.setNextPageAnchor(attachments.get(attachments.size() - 1).getId());
+            }
+
+            List<AttachmentDTO> dtos = attachments.stream().map((r) -> {
+            	AttachmentDTO dto = ConvertHelper.convert(r, AttachmentDTO.class);
+                String contentUrl = contentServerService.parserUri(dto.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                User creator = userProvider.findUserById(dto.getCreatorUid());
+                if(creator != null) {
+                    dto.setCreatorName(creator.getNickName());
+                }
+                dto.setContentUrl(contentUrl);
+                return dto;
+            }).collect(Collectors.toList());
+            response.setAttachments(dtos);
+        }
+
+        return response;
 	}
 
 }
