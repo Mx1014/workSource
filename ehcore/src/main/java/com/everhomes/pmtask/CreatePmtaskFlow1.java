@@ -416,7 +416,7 @@ public class CreatePmtaskFlow1 {
     	updateFlowCmd4.setAutoStepMinute(0);
     	updateFlowCmd4.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
     	updateFlowCmd4.setAllowTimeoutAction((byte)1);
-    	flowService.updateFlowNode(updateFlowCmd3);
+    	flowService.updateFlowNode(updateFlowCmd4);
     	
     	addNodeProcessor(node1, orgId);
     	addNodeProcessor(node2, orgId);
