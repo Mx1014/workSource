@@ -2923,7 +2923,7 @@ public class CommunityServiceImpl implements CommunityService {
 			communityProvider.createResourceCategoryAssignment(projectAssignment);
 
 			for (ServiceModuleAssignment sma: smas) {
-				rolePrivilegeService.assignmentPrivileges(projectAssignment.getResourceType(),projectAssignment.getResourceId(), sma.getTargetType(),sma.getTargetId(),"M" + sma.getModuleId(), sma.getModuleId(),ServiceModulePrivilegeType.SUPER);
+				rolePrivilegeService.assignmentPrivileges(projectAssignment.getResourceType(),projectAssignment.getResourceId(), sma.getTargetType(),sma.getTargetId(),"M" + sma.getModuleId() + "." + sma.getOwnerType() + sma.getOwnerId(), sma.getModuleId(),ServiceModulePrivilegeType.SUPER);
 			}
 
 		}

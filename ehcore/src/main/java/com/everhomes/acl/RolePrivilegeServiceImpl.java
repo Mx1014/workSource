@@ -1526,7 +1526,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
 								List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
 								for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
-									this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + moduleId, moduleId,ServiceModulePrivilegeType.SUPER);
+									this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + moduleId + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleId,ServiceModulePrivilegeType.SUPER);
 								}
 							}else{
 								this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + moduleId, moduleId,ServiceModulePrivilegeType.SUPER);
@@ -1554,7 +1554,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
 						List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
 						for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
-							this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
+							this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleIds,ServiceModulePrivilegeType.SUPER);
 						}
 					}else{
 						this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
@@ -1909,7 +1909,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			acls = aclProvider.getAcl(new QueryBuilder() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(resourceType + resourceId + ".%"));
+					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%." + resourceType + resourceId));
 					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
 					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(targetId));
 					return null;
