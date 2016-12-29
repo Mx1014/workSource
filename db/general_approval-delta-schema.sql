@@ -45,6 +45,7 @@ CREATE TABLE `eh_general_approvals` (
   `module_type` VARCHAR(64) NOT NULL,
   `project_id` BIGINT NOT NULL DEFAULT 0,
   `project_type` VARCHAR(64),
+  `flow_case_id` BIGINT NOT NULL DEFAULT 0,
 
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
