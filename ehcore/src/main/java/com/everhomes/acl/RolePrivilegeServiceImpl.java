@@ -6,6 +6,7 @@ import com.everhomes.community.ResourceCategory;
 import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.db.QueryBuilder;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.module.*;
@@ -30,6 +31,8 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -1881,8 +1884,24 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				privilegeIds.add(privilege.getPrivilegeId());
 			}
 		}
-		AclRoleDescriptor descriptor = new AclRoleDescriptor(targetType, targetId);
-		List<Acl> acls = aclProvider.getResourceAclByRole(resourceType,resourceId, descriptor);
+
+
+		List<Acl> acls = null;
+		if(EntityType.fromCode(resourceType) == EntityType.RESOURCE_CATEGORY){
+			acls = aclProvider.getAcl(new QueryBuilder() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
+					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(resourceType + resourceId + ".%"));
+					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
+					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(targetId));
+					return null;
+				}
+			});
+		}else{
+			AclRoleDescriptor descriptor = new AclRoleDescriptor(targetType, targetId);
+			acls = aclProvider.getResourceAclByRole(resourceType, resourceId, descriptor);
+		}
+
 		if(null != acls){
 			for (Acl acl :acls) {
 				if(null == privilegeIds){

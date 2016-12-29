@@ -9,6 +9,10 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.acl.*;
+import com.everhomes.module.ServiceModuleAssignment;
+import com.everhomes.module.ServiceModulePrivilegeType;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rest.acl.ProjectDTO;
 import com.everhomes.rest.community.*;
 import org.apache.commons.lang.StringUtils;
@@ -21,9 +25,6 @@ import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.RoleAssignment;
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
@@ -191,8 +192,6 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private CommunitySearcher communitySearcher;
 	@Autowired
-    private RolePrivilegeService rolePrivilegeService;
-	@Autowired
 	private ContentServerService contentServerService;
 
     @Autowired
@@ -203,14 +202,9 @@ public class CommunityServiceImpl implements CommunityService {
 	@Autowired
 	private OrganizationService organizationService;
 	
-	@Autowired
-	private EnterpriseContactProvider enterpriseContactProvider;
-	
+
 	@Autowired
 	private GroupProvider groupProvider;
-	
-	@Autowired
-	private EnterpriseProvider enterpriseProvider;
 	
 	@Autowired
 	private AddressProvider addressProvider;
@@ -241,6 +235,12 @@ public class CommunityServiceImpl implements CommunityService {
 	
 	@Autowired
 	private UserWithoutConfAccountSearcher userSearcher;
+
+	@Autowired
+	private ServiceModuleProvider serviceModuleProvider;
+
+	@Autowired
+	private  RolePrivilegeService rolePrivilegeService;
 
 	@Override
 	public ListCommunitesByStatusCommandResponse listCommunitiesByStatus(ListCommunitesByStatusCommand cmd) {
@@ -2872,22 +2872,11 @@ public class CommunityServiceImpl implements CommunityService {
 		project.setOwnerType(cmd.getProjectType());
 		project.setParentId(0L);
 		project.setType(ResourceCategoryType.OBJECT.getCode());
+
 		this.dbProvider.execute((TransactionStatus status) ->  {
 			communityProvider.createResourceCategory(project);
 			if(null != cmd.getBuildingIds() && cmd.getBuildingIds().size() > 0){
-				for (Long buildingId: cmd.getBuildingIds()) {
-					ResourceCategoryAssignment  projectAssignment = communityProvider.findResourceCategoryAssignment(buildingId, EntityType.BUILDING.getCode(), namespaceId);
-					if(null != projectAssignment){
-						communityProvider.deleteResourceCategoryAssignmentById(projectAssignment.getId());
-					}
-					projectAssignment = new ResourceCategoryAssignment();
-					projectAssignment.setNamespaceId(namespaceId);
-					projectAssignment.setCreatorUid(user.getId());
-					projectAssignment.setResourceCategryId(project.getId());
-					projectAssignment.setResourceId(buildingId);
-					projectAssignment.setResourceType(EntityType.BUILDING.getCode());
-					communityProvider.createResourceCategoryAssignment(projectAssignment);
-				}
+				this.addResourceCategoryAssignment(cmd.getBuildingIds(), project.getId());
 			}
 			return null;
 		});
@@ -2895,8 +2884,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	@Override
 	public void updateChildProject(UpdateChildProjectCommand cmd){
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		User user = UserContext.current().getUser();
 		ResourceCategory project = communityProvider.findResourceCategoryById(cmd.getId());
 		if(null != project){
 			this.dbProvider.execute((TransactionStatus status) ->  {
@@ -2904,28 +2891,53 @@ public class CommunityServiceImpl implements CommunityService {
 				project.setUpdateTime(new Timestamp(System.currentTimeMillis()));
 				communityProvider.updateResourceCategory(project);
 
-				List<ResourceCategoryAssignment> bulidingCategorys = communityProvider.listResourceCategoryAssignment(project.getId(),namespaceId);
-				for (ResourceCategoryAssignment bulidingCategory: bulidingCategorys) {
-					communityProvider.deleteResourceCategoryAssignmentById(bulidingCategory.getId());
-				}
-
 				if(null != cmd.getBuildingIds() && cmd.getBuildingIds().size() > 0){
-					for (Long buildingId: cmd.getBuildingIds()) {
-						ResourceCategoryAssignment  projectAssignment = communityProvider.findResourceCategoryAssignment(buildingId, EntityType.BUILDING.getCode(), namespaceId);
-						if(null != projectAssignment){
-							communityProvider.deleteResourceCategoryAssignmentById(projectAssignment.getId());
-						}
-						projectAssignment = new ResourceCategoryAssignment();
-						projectAssignment.setNamespaceId(namespaceId);
-						projectAssignment.setCreatorUid(user.getId());
-						projectAssignment.setResourceCategryId(project.getId());
-						projectAssignment.setResourceId(buildingId);
-						projectAssignment.setResourceType(EntityType.BUILDING.getCode());
-						communityProvider.createResourceCategoryAssignment(projectAssignment);
-					}
+					this.addResourceCategoryAssignment(cmd.getBuildingIds(), project.getId());
 				}
 				return null;
 			});
+		}
+	}
+
+	private void addResourceCategoryAssignment(List<Long> buildingIds, Long categoryId){
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<ResourceCategoryAssignment> bulidingCategorys = communityProvider.listResourceCategoryAssignment(categoryId,namespaceId);
+
+		for (ResourceCategoryAssignment bulidingCategory: bulidingCategorys) {
+			deleleteResourceCategoryAssignmentById(bulidingCategory.getId(), bulidingCategory.getResourceCategryId(), bulidingCategory.getResourceId());
+		}
+
+		List<ServiceModuleAssignment> smas = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(EntityType.RESOURCE_CATEGORY.getCode(), categoryId, null, null, null);
+
+		for (Long buildingId: buildingIds) {
+			ResourceCategoryAssignment  projectAssignment = communityProvider.findResourceCategoryAssignment(buildingId, EntityType.BUILDING.getCode(), namespaceId);
+			if(null != projectAssignment){
+				deleleteResourceCategoryAssignmentById(projectAssignment.getId(), projectAssignment.getResourceCategryId(), projectAssignment.getResourceId());
+			}
+			projectAssignment = new ResourceCategoryAssignment();
+			projectAssignment.setNamespaceId(namespaceId);
+			projectAssignment.setCreatorUid(UserContext.current().getUser().getId());
+			projectAssignment.setResourceCategryId(categoryId);
+			projectAssignment.setResourceId(buildingId);
+			projectAssignment.setResourceType(EntityType.BUILDING.getCode());
+			communityProvider.createResourceCategoryAssignment(projectAssignment);
+
+			for (ServiceModuleAssignment sma: smas) {
+				rolePrivilegeService.assignmentPrivileges(projectAssignment.getResourceType(),projectAssignment.getResourceId(), sma.getTargetType(),sma.getTargetId(),"M" + sma.getModuleId(), sma.getModuleId(),ServiceModulePrivilegeType.SUPER);
+			}
+
+		}
+	}
+
+	private void deleleteResourceCategoryAssignmentById(Long id, Long categoryId, Long buildingId){
+		communityProvider.deleteResourceCategoryAssignmentById(id);
+		List<ServiceModuleAssignment> moduleAssignments = serviceModuleProvider.listResourceAssignmentGroupByTargets(EntityType.RESOURCE_CATEGORY.getCode(), categoryId, null);
+		for (ServiceModuleAssignment moduleAssignment: moduleAssignments) {
+			AclRoleDescriptor aclRoleDescriptor = new AclRoleDescriptor(moduleAssignment.getTargetType(), moduleAssignment.getTargetId());
+			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.BUILDING.getCode(), buildingId, aclRoleDescriptor);
+			for (Acl acl: acls) {
+				aclProvider.deleteAcl(acl.getId());
+			}
 		}
 	}
 
@@ -2936,7 +2948,7 @@ public class CommunityServiceImpl implements CommunityService {
 			communityProvider.deleteResourceCategoryById(cmd.getId());
 			List<ResourceCategoryAssignment> bulidingCategorys = communityProvider.listResourceCategoryAssignment(cmd.getId(), namespaceId);
 			for (ResourceCategoryAssignment bulidingCategory : bulidingCategorys) {
-				communityProvider.deleteResourceCategoryAssignmentById(bulidingCategory.getId());
+				deleleteResourceCategoryAssignmentById(bulidingCategory.getId(), bulidingCategory.getResourceCategryId(), bulidingCategory.getResourceId());
 			}
 			return null;
 		});
