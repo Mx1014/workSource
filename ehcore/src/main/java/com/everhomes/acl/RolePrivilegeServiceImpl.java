@@ -1287,7 +1287,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		if(0L == moduleId){
 			ListServiceModulesCommand command = new ListServiceModulesCommand();
-			command.setLevel(2);
 			List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
 			for (ServiceModuleDTO module: modules) {
 				moduleIds.add(module.getId());
@@ -1498,7 +1497,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				ListServiceModulesCommand command = new ListServiceModulesCommand();
 				command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 				command.setOwnerId(cmd.getOrganizationId());
-				command.setLevel(2);
 				List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
 				List<Long> moduleIds = new ArrayList<Long>();
 				for (ServiceModuleDTO module: modules) {
@@ -1692,7 +1690,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			ListServiceModulesCommand command = new ListServiceModulesCommand();
 			command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
 			command.setOwnerId(cmd.getOrganizationId());
-			command.setLevel(2);
 			List<ServiceModuleDTO> modules = serviceModuleService.listServiceModules(command);
 			List<Long> moduleIds = new ArrayList<Long>();
 			for (ServiceModuleDTO module: modules) {
