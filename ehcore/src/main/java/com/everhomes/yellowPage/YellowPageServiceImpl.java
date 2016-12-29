@@ -1033,4 +1033,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 		return modules;
 	}
 
+	@Override
+	public ListAttachmentsResponse listAttachments(ListAttachmentsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
 }
