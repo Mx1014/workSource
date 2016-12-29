@@ -223,7 +223,8 @@ public class ParkingProviderImpl implements ParkingProvider {
         }
         if(StringUtils.isNotBlank(plateNumber)) {
         	conditionSb.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
-        	condition2.append(" and e1.PLATE_NUMBER = '").append(plateNumber).append("'");
+        	conditionSb.append(" and e1.status != 0");
+        	condition2.append(" and e3.PLATE_NUMBER = '").append(plateNumber).append("'");
         }
         if(!condition2.toString().equals("")){
         	sb.append(condition2.toString());
@@ -398,6 +399,47 @@ public class ParkingProviderImpl implements ParkingProvider {
         	query.addLimit(pageSize);
         
     	return query.fetch().map(r -> ConvertHelper.convert(r, ParkingRechargeOrder.class));
+    }
+    
+    @Override
+    public BigDecimal countParkingRechargeOrders(String ownerType, Long ownerId, Long parkingLotId,
+    		String plateNumber, String plateOwnerName, String payerPhone, Timestamp startDate, Timestamp endDate,
+    		Byte rechargeType, String paidType) {
+    	
+    	final BigDecimal[] count = new BigDecimal[1];
+		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingRechargeOrders.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                	
+                    SelectJoinStep<Record1<BigDecimal>> query = context.select(Tables.EH_PARKING_RECHARGE_ORDERS.PRICE.sum())
+                    		.from(Tables.EH_PARKING_RECHARGE_ORDERS);
+                    
+                    Condition condition = Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_TYPE.eq(ownerType);
+                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.OWNER_ID.eq(ownerId));
+                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PARKING_LOT_ID.eq(parkingLotId));
+                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.IS_DELETE.eq(IsOrderDelete.NOTDELETED.getCode()));
+                    condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_STATUS.eq(ParkingRechargeOrderRechargeStatus.RECHARGED.getCode()));
+                    
+                    if(StringUtils.isNotBlank(plateNumber))
+                    	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_NUMBER.eq(plateNumber));
+                    if(StringUtils.isNotBlank(plateOwnerName))
+                    	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PLATE_OWNER_NAME.eq(plateOwnerName));
+                    if(StringUtils.isNotBlank(payerPhone))
+                    	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAYER_PHONE.eq(payerPhone));
+                    if(StringUtils.isNotBlank(paidType))
+                    	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.PAID_TYPE.eq(paidType));
+                    if(null != rechargeType)
+                    	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.RECHARGE_TYPE.eq(rechargeType));
+                    if(null != startDate)
+                    	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.gt(startDate));
+                    if(null != endDate)
+                    	condition = condition.and(Tables.EH_PARKING_RECHARGE_ORDERS.CREATE_TIME.lt(endDate));
+                    
+                	count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
+                	
+                    return true;
+                });
+		return count[0];
+    	
     }
     
     @Override
@@ -713,7 +755,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 	}
 	
 	@Override
-	public BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId) {
+	public BigDecimal countParkingStatistics(String ownerType, Long ownerId, Long parkingLotId, Timestamp startDate, Timestamp endDate) {
         //DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhPmTasks.class));
         final BigDecimal[] count = new BigDecimal[1];
 		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhParkingStatistics.class), null, 
@@ -725,7 +767,11 @@ public class ParkingProviderImpl implements ParkingProvider {
                 	condition = Tables.EH_PARKING_STATISTICS.OWNER_ID.equal(ownerId);
                 	if(null != parkingLotId)
                     	condition = condition.and(Tables.EH_PARKING_STATISTICS.PARKING_LOT_ID.eq(parkingLotId));
-
+                	if(null != startDate)
+                    	condition = condition.and(Tables.EH_PARKING_STATISTICS.DATE_STR.ge(startDate));
+                	if(null != endDate)
+                    	condition = condition.and(Tables.EH_PARKING_STATISTICS.DATE_STR.le(endDate));
+                	
                     count[0] = query.where(condition).fetchOneInto(BigDecimal.class);
                     return true;
                 });

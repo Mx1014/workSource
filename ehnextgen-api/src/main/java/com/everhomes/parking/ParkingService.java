@@ -111,5 +111,7 @@ public interface ParkingService {
     
     ParkingRequestCardAgreementDTO getParkingRequestCardAgreement(GetParkingRequestCardAgreementCommand cmd);
     
-    void getRechargeResult(GetRechargeResultCommand cmd);
+    ParkingCardDTO getRechargeResult(GetRechargeResultCommand cmd);
+    
+    void synchronizedData(ListParkingCardRequestsCommand cmd);
 }

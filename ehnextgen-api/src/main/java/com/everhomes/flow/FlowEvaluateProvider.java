@@ -18,4 +18,9 @@ public interface FlowEvaluateProvider {
 	List<FlowEvaluate> queryFlowEvaluates(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<FlowEvaluate> findEvaluates(Long flowCaseId, Long flowMainId,
+			Integer flowVersion);
+
+	void createFlowEvaluate(List<FlowEvaluate> objs);
+
 }

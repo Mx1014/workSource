@@ -2,7 +2,7 @@ package com.everhomes.rest.flow;
 
 /**
  * <ul>
- * <li>NODE_TRACKER: 节点的日志信息，包括评论</li>
+ * <li>NODE_TRACKER: 节点的跟踪日志信息，包括评论</li>
  * <li>STEP_TRACKER: 节点的跳转信息</li>
  * </ul>
  * @author janson

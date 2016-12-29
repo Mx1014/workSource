@@ -34,6 +34,7 @@ import com.everhomes.rest.user.SyncBehaviorCommand;
 import com.everhomes.rest.user.SyncInsAppsCommand;
 import com.everhomes.rest.user.SyncLocationCommand;
 import com.everhomes.rest.user.SyncUserContactCommand;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.Tuple;
 
 public interface UserActivityService {
@@ -90,7 +91,7 @@ public interface UserActivityService {
 	RequestTemplateDTO getCustomRequestTemplate(@Valid GetCustomRequestTemplateCommand cmd);
 	List<RequestTemplateDTO> getCustomRequestTemplateByNamespace();
 	void addCustomRequest(@Valid AddRequestCommand cmd);
-	List<RequestFieldDTO> getCustomRequestInfo(@Valid GetRequestInfoCommand cmd);
+	GetRequestInfoResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd);
 
 	ListActiveStatResponse listActiveStat(ListActiveStatCommand cmd);
 

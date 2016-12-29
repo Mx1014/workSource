@@ -1,7 +1,10 @@
 package com.everhomes.locale;
 
+import java.util.List;
+
 import javax.annotation.PostConstruct;
 
+import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.cache.annotation.CacheEvict;
@@ -15,6 +18,7 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -100,5 +104,37 @@ public class LocaleTemplateProviderImpl implements LocaleTemplateProvider {
         EhLocaleTemplatesDao dao = new EhLocaleTemplatesDao(context.configuration());
         dao.insert(template);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhLocaleTemplates.class, template.getId());
+    }
+    
+    /**
+     * added by Janson 20161227
+     */
+    @Override
+    public List<LocaleTemplate> listLocaleTemplatesByScope(ListingLocator locator, Integer namespaceId, String scope, String locale, String keyword,  int count) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        Condition cond = Tables.EH_LOCALE_TEMPLATES.SCOPE.like(scope)
+        						.and(Tables.EH_LOCALE_TEMPLATES.LOCALE.like(locale))
+        						.and(Tables.EH_LOCALE_TEMPLATES.NAMESPACE_ID.eq(namespaceId));
+        
+        if(locator.getAnchor() != null) {
+        	cond = cond.and(Tables.EH_LOCALE_TEMPLATES.ID.lt(locator.getAnchor()));
+        }
+        
+        if(keyword != null) {
+        	cond = cond.and(Tables.EH_LOCALE_TEMPLATES.DESCRIPTION.like("%"+keyword+"%").or(Tables.EH_LOCALE_TEMPLATES.TEXT.like("%"+keyword+"%")));
+        }
+        
+        List<LocaleTemplate> objs = context.select().from(Tables.EH_LOCALE_TEMPLATES)
+            .where(cond).limit(count).fetch().map((r)->{
+            	return ConvertHelper.convert(r, LocaleTemplate.class);
+            });
+        
+        if(objs.size() >= count) {
+            locator.setAnchor(objs.get(objs.size() - 1).getId());
+        } else {
+            locator.setAnchor(null);
+        }
+        
+        return objs;
     }
 }

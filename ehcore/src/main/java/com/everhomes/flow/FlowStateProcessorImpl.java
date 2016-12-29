@@ -107,8 +107,20 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		if(flowCase.getStepCount().equals(stepDTO.getStepCount()) 
 				&& stepDTO.getFlowNodeId().equals(flowCase.getCurrentNodeId())) {
 			
-	    	User user = userProvider.findUserById(User.SYSTEM_UID);
-	    	UserContext.current().setUser(user);
+	    	User user = null;
+	    	if(stepDTO.getOperatorId() != null) {
+	    		user = userProvider.findUserById(stepDTO.getOperatorId());
+	    		if(UserContext.current().getUser() == null) {
+	    			UserContext.current().setUser(user);
+	    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+	    		}
+	    	} else if(UserContext.current().getUser() != null) {
+	    		user = UserContext.current().getUser();
+	    	} else {
+	    		user = userProvider.findUserById(User.SYSTEM_UID);
+	    		UserContext.current().setUser(user);
+	    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+	    	}
 			
 			ctx.setFlowCase(flowCase);
 			ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
@@ -122,9 +134,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			}
 			ctx.setCurrentNode(node);
 			
-			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
+			UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());//current user
 			ctx.setOperator(userInfo);
 			FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
+			event.setFiredUserId(user.getId());
 			ctx.setCurrentEvent(event);
 			
 			FlowStepType stepType = FlowStepType.fromCode(stepDTO.getAutoStepType());
@@ -141,8 +154,21 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	public FlowCaseState prepareNoStep(FlowAutoStepDTO stepDTO) {
 		FlowCaseState ctx = new FlowCaseState();
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(stepDTO.getFlowCaseId());
-    	User user = userProvider.findUserById(User.SYSTEM_UID);
-    	UserContext.current().setUser(user);
+
+    	User user = null;
+    	if(stepDTO.getOperatorId() != null) {
+    		user = userProvider.findUserById(stepDTO.getOperatorId());
+    		if(UserContext.current().getUser() == null) {
+    			UserContext.current().setUser(user);
+    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+    		}
+    	} else if(UserContext.current().getUser() != null) {
+    		user = UserContext.current().getUser();
+    	} else {
+    		user = userProvider.findUserById(User.SYSTEM_UID);
+    		UserContext.current().setUser(user);
+    		UserContext.current().setNamespaceId(flowCase.getNamespaceId());
+    	}
     	
     	//Important, never update this to database!!!
     	flowCase.setCurrentNodeId(stepDTO.getFlowNodeId());
@@ -165,7 +191,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ctx.setNextNode(targetNode);
 		}
 		
-		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(User.SYSTEM_UID);
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(user.getId());
 		ctx.setOperator(userInfo);
 //		FlowGraphAutoStepEvent event = new FlowGraphAutoStepEvent(stepDTO);
 		ctx.setCurrentEvent(null);
@@ -184,6 +210,11 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 				|| flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_CASE_NOEXISTS, "flowcase noexists, flowCaseId=" + flowCase);
 		}
+		
+		if(cmd.getStepCount() != null && !cmd.getStepCount().equals(flowCase.getStepCount())) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "step busy");
+		}
+		
 		ctx.setFlowCase(flowCase);
 		ctx.setModule(flowListenerManager.getModule(flowCase.getModuleName()));
 		ctx.setOperator(logonUser);
@@ -302,9 +333,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		FlowStepType fromStep = ctx.getStepType();
 		FlowGraphNode curr = ctx.getCurrentNode();
 		
-		if(curr.getFlowNode().getNodeLevel() > 1) {
-			ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
-		}
+//		if(curr.getFlowNode().getNodeLevel() > 1) {
+//			ctx.getFlowCase().setStatus(FlowCaseStatus.PROCESS.getCode());
+//		}
 		ctx.getFlowCase().setCurrentNodeId(curr.getFlowNode().getId());
 		boolean logStep = false;
 		
@@ -491,14 +522,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	//variable support
 	@Override
 	public UserInfo getApplier(FlowCaseState ctx, String variable) {
-		String key = "applier-caseid:" + ctx.getFlowCase().getId().toString();
-		UserInfo userInfo = (UserInfo)ctx.getExtra().get(key);
-		if(userInfo == null) {
-			userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
-			if(userInfo != null) {
-				ctx.getExtra().put(key, userInfo);
-			}
-		}
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(ctx.getFlowCase().getApplyUserId());
 		return userInfo;
 	}
 	

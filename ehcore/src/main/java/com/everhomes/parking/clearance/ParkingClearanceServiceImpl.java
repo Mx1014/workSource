@@ -8,18 +8,20 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.*;
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseProvider;
+import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.module.ServiceModule;
-import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.parking.ParkingLot;
 import com.everhomes.parking.ParkingProvider;
 import com.everhomes.rest.energy.util.ParamErrorCodes;
-import com.everhomes.rest.flow.*;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.launchpad.ActionType;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
@@ -35,8 +37,6 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +47,6 @@ import javax.validation.Validation;
 import javax.validation.Validator;
 import javax.validation.constraints.Size;
 import javax.validation.metadata.ConstraintDescriptor;
-
 import java.sql.Timestamp;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -63,7 +62,7 @@ import static com.everhomes.util.RuntimeErrorException.errorWith;
  * Created by xq.tian on 2016/12/2.
  */
 @Service
-public class ParkingClearanceServiceImpl implements ParkingClearanceService, FlowModuleListener {
+public class ParkingClearanceServiceImpl implements ParkingClearanceService {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingClearanceServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
@@ -93,13 +92,13 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     private FlowService flowService;
 
     @Autowired
+    private FlowCaseProvider flowCaseProvider;
+
+    @Autowired
     private ConfigurationProvider configurationProvider;
 
     @Autowired
     private LocaleStringService localeStringService;
-
-    @Autowired
-    private ServiceModuleProvider serviceModuleProvider;
 
     @Autowired
     private LocaleTemplateService localeTemplateService;
@@ -117,7 +116,6 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
     public void createClearanceOperator(CreateClearanceOperatorCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-
 
         if (cmd.getUserIds() != null && cmd.getUserIds().size() > 0) {
             int alreadyInsertUserCount = 0;
@@ -172,6 +170,18 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 cmd.getOrganizationId(),
                 APPLY_PRIVILEGE_ID
         );
+        // 上面的权限检查会放过超级管理员, 但是需求是不放过
+        checkUserNotInOperatorList(cmd.getParkingLotId(), ParkingClearanceOperatorType.APPLICANT);
+    }
+
+    private void checkUserNotInOperatorList(Long parkingLotId, ParkingClearanceOperatorType operatorType) {
+        ParkingClearanceOperator applicant = clearanceOperatorProvider
+                .findByParkingLotIdAndUid(parkingLotId, currUserId(), operatorType.getCode());
+        if (applicant == null) {
+            LOGGER.error("Current user is not in operator list");
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
+                    "Current user is not in operator list");
+        }
     }
 
     // 给用户添加权限
@@ -209,6 +219,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             String remarksNoneValue = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.NONE_CODE, currLocale(), "");
             dto.setRemarks(remarksNoneValue);
+        }
+        FlowCase flowCase = flowCaseProvider.findFlowCaseByReferId(log.getId(), EntityType.PARKING_CLEARANCE_LOG.getCode(), MODULE_ID);
+        if (flowCase != null) {
+            dto.setFlowCaseId(flowCase.getId());
         }
         return dto;
     }
@@ -294,12 +308,16 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         log.setApplyTime(Timestamp.from(Instant.now()));
         log.setOperatorId(currUserId());
 
-        long logId = clearanceLogProvider.createClearanceLog(log);
-        log.setId(logId);
-
-        Long flowCaseId = this.createFlowCase(log);
-        // log.setFlowCaseId(flowCaseId);
-
+        boolean success = dbProvider.execute(status -> {
+            long logId = clearanceLogProvider.createClearanceLog(log);
+            log.setId(logId);
+            this.createFlowCase(log);
+            return true;
+        });
+        if (!success) {
+            LOGGER.error("some error.");
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, "some error.");
+        }
         return toClearanceLogDTO(log);
     }
 
@@ -360,20 +378,32 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
         // checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
         ActionType actionType = ActionType.fromCode(cmd.getActionType());
-        long privilegeId = -1;
-        // 没有权限时的提示消息
-        String message = null;
+
+        ParkingClearanceOperatorType operatorType = ParkingClearanceOperatorType.APPLICANT;// 需要检查的operatorType
+        long privilegeId = -1; // 需要检查的权限id
+        String message = null;// 没有权限时的提示消息
+
         if (actionType == ActionType.PARKING_CLEARANCE) {
+            operatorType = ParkingClearanceOperatorType.APPLICANT;
             privilegeId = APPLY_PRIVILEGE_ID;
             message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_MESSAGE_CODE, currLocale(), "");
         } else if (actionType == ActionType.PARKING_CLEARANCE_TASK){
             privilegeId = PROCESS_PRIVILEGE_ID;
+            operatorType = ParkingClearanceOperatorType.PROCESSOR;
             message = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
                     ParkingLocalStringCode.INSUFFICIENT_PRIVILEGE_CLEARANCE_TASK_MESSAGE_CODE, currLocale(), "");
         }
 
-        List<ParkingLot> parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
+        List<ParkingLot> parkingLots = new ArrayList<>();
+        if (cmd.getParkingLotId() != null) {
+            ParkingLot parkingLot = parkingProvider.findParkingLotById(cmd.getParkingLotId());
+            if (parkingLot != null) {
+                parkingLots.add(parkingLot);
+            }
+        } else {
+            parkingLots = parkingProvider.listParkingLots(ParkingOwnerType.COMMUNITY.getCode(), cmd.getCommunityId());
+        }
 
         CheckAuthorityStatus status = CheckAuthorityStatus.FAILURE;
         if (privilegeId > 0 && parkingLots != null && parkingLots.size() > 0) {
@@ -381,6 +411,10 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
                 try {
                     userPrivilegeMgr.checkUserAuthority(currUserId(), EntityType.PARKING_LOT.getCode(), parkingLot.getId(),
                             cmd.getOrganizationId(), privilegeId);
+
+                    // 上面的权限检查会放过超级管理员, 但是需求是不放过
+                    checkUserNotInOperatorList(parkingLot.getId(), operatorType);
+
                     status = CheckAuthorityStatus.SUCCESS;
                     message = null;
                     break;// 只要有一个停车场的权限就放行
@@ -481,130 +515,4 @@ public class ParkingClearanceServiceImpl implements ParkingClearanceService, Flo
             });
         }*/
     }
-
-    @Override
-    public FlowModuleInfo initModule() {
-        FlowModuleInfo moduleInfo = new FlowModuleInfo();
-        if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("Autowired ServiceModuleProvider instance is {}", serviceModuleProvider);
-        }
-        ServiceModule module = serviceModuleProvider.findServiceModuleById(MODULE_ID);
-        moduleInfo.setModuleName(module.getName());
-        moduleInfo.setModuleId(MODULE_ID);
-        return moduleInfo;
-    }
-
-    @Override
-    public void onFlowCaseStart(FlowCaseState ctx) {
-
-    }
-
-    @Override
-    public void onFlowCaseAbsorted(FlowCaseState ctx) {
-        Long logId = ctx.getFlowCase().getReferId();
-        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) != ParkingClearanceLogStatus.COMPLETED) {
-                log.setStatus(ParkingClearanceLogStatus.CANCELLED.getCode());
-                clearanceLogProvider.updateClearanceLog(log);
-            }
-            return null;
-        });
-    }
-
-    @Override
-    public void onFlowCaseStateChanged(FlowCaseState ctx) {
-
-    }
-
-    @Override
-    public void onFlowCaseEnd(FlowCaseState ctx) {
-        Long logId = ctx.getFlowCase().getReferId();
-        coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-            ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-            if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PROCESSING) {
-                log.setStatus(ParkingClearanceLogStatus.COMPLETED.getCode());
-                clearanceLogProvider.updateClearanceLog(log);
-            }
-            return null;
-        });
-    }
-
-    @Override
-    public void onFlowCaseActionFired(FlowCaseState ctx) {
-
-    }
-
-    @Override
-    public String onFlowCaseBriefRender(FlowCase flowCase) {
-        return flowCase.getContent();
-    }
-
-    @Override
-    public void onFlowButtonFired(FlowCaseState ctx) {
-        String params = ctx.getCurrentNode().getFlowNode().getParams();
-        Map map = (Map)StringHelper.fromJsonString(params, HashMap.class);
-        if (map != null) {
-            ParkingClearanceLogStatus status = ParkingClearanceLogStatus.valueOf(((String) map.get("status")));
-            if (status == ParkingClearanceLogStatus.PROCESSING && ctx.getStepType() == FlowStepType.APPROVE_STEP) {
-                Long logId = ctx.getFlowCase().getReferId();
-                coordinationProvider.getNamedLock(CoordinationLocks.PARKING_CLEARANCE_LOG.getCode() + logId).enter(() -> {
-                    ParkingClearanceLog log = clearanceLogProvider.findById(logId);
-                    if (ParkingClearanceLogStatus.fromCode(log.getStatus()) == ParkingClearanceLogStatus.PENDING) {
-                        log.setStatus(ParkingClearanceLogStatus.PROCESSING.getCode());
-                        clearanceLogProvider.updateClearanceLog(log);
-                    }
-                    return null;
-                });
-            }
-        }
-    }
-
-    @Override
-    public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
-        ParkingClearanceLog log = clearanceLogProvider.findById(flowCase.getReferId());
-
-        User applicant = this.findUserById(log.getApplicantId());
-        UserIdentifier userIdentifier = this.findUserIdentifierByUserId(applicant.getId());
-        ParkingLot parkingLot = parkingProvider.findParkingLotById(log.getParkingLotId());
-
-        Map<String, Object> map = new HashMap<>();
-        String detailJson;
-
-        map.put("parkingLotName", parkingLot != null ? parkingLot.getName() : "");
-        map.put("plateNumber", log.getPlateNumber());
-        String dateStr = DateHelper.getDateDisplayString(TimeZone.getDefault(), log.getClearanceTime().getTime(), "yyyy-MM-dd");
-        map.put("clearanceTime", dateStr);
-        // 如果remarks为空，显示 "无"
-        if (log.getRemarks() == null) {
-            String remarksNoneValue = localeStringService.getLocalizedString(ParkingLocalStringCode.SCOPE_STRING,
-                    ParkingLocalStringCode.NONE_CODE, currLocale(), "");
-            map.put("remarks", remarksNoneValue);
-        } else {
-            map.put("remarks", log.getRemarks());
-        }
-
-        // 处理人员可以看到申请人的相关信息
-        if (flowUserType == FlowUserType.PROCESSOR) {
-            map.put("applicant", applicant.getNickName());
-            map.put("identifierToken", userIdentifier.getIdentifierToken());
-            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
-                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_PROCESSOR, currLocale(), map, "");
-        } else {
-            detailJson = localeTemplateService.getLocaleTemplateString(ParkingLocalStringCode.SCOPE_TEMPLATE,
-                    ParkingLocalStringCode.CLEARANCE_FLOW_CASE_DETAIL_CONTENT_APPLICANT, currLocale(), map, "");
-        }
-        return (FlowCaseEntityList) StringHelper.fromJsonString(detailJson, FlowCaseEntityList.class);
-    }
-
-    @Override
-    public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-        return null;
-    }
-    
-	@Override
-	public void onFlowCreating(Flow flow) {
-		// TODO Auto-generated method stub
-	//Added by Janson	
-	}
 }

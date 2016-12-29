@@ -107,9 +107,9 @@ VALUES ((@menu_scope_id := @menu_scope_id + 1), 20930, '', 'EhNamespaces', 99998
 --
 SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '1', 'zh_CN', '停车放行申请人看到的内容', '[{"key":"停车场名","value":"${parkingLotName}","entityType":"list"},{"key":"车牌号码","value":"${plateNumber}","entityType":"list"},{"key":"预计来访时间","value":"${clearanceTime}","entityType":"list"},{"key":"备注","value":"${remarks}","entityType":"text"}]', '0');
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '1', 'zh_CN', '停车放行申请人看到的内容', '[{"key":"停车场名","value":"${parkingLotName}","entityType":"list"},{"key":"车牌号码","value":"${plateNumber}","entityType":"list"},{"key":"预计来访时间","value":"${clearanceTime}","entityType":"list"},{"key":"备注","value":"${remarks}","entityType":"multi_line"}]', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
-VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '2', 'zh_CN', '停车放行处理人看到的内容', '[{"key":"停车场名","value":"${parkingLotName}","entityType":"list"},{"key":"申请人","value":"${applicant}","entityType":"list"},{"key":"手机号","value":"${identifierToken}","entityType":"list"},{"key":"车牌号码","value":"${plateNumber}","entityType":"list"},{"key":"预计来访时间","value":"${clearanceTime}","entityType":"list"},{"key":"备注","value":"${remarks}","entityType":"text"}]', '0');
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '2', 'zh_CN', '停车放行处理人看到的内容', '[{"key":"停车场名","value":"${parkingLotName}","entityType":"list"},{"key":"申请人","value":"${applicant}","entityType":"list"},{"key":"手机号","value":"${identifierToken}","entityType":"list"},{"key":"车牌号码","value":"${plateNumber}","entityType":"list"},{"key":"预计来访时间","value":"${clearanceTime}","entityType":"list"},{"key":"备注","value":"${remarks}","entityType":"multi_line"}]', '0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
 VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'parking.clearance', '3', 'zh_CN', '工作流摘要内容', '车牌号码：${plateNumber}\n来访时间：${clearanceTime}', '0');
 
@@ -150,8 +150,8 @@ INSERT INTO `eh_configurations` (`namespace_id`, `name`, `value`, `description`)
 
 -- 资源预订工作流模板，add by wh, 20161219
 SET @id := (SELECT MAX(id) FROM `eh_locale_templates`);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) 
-VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}使用时间：${useDetail}', 0);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES (@id:=@id+1, 'rental.flow', 1, 'zh_CN', '工作流列表内容', '资源名称：${resourceName}\n使用时间：${useDetail}', 0);
 
 -- 资源预订工作流中文，added by wh ,2016-12-19
 SET @id = (SELECT MAX(id) FROM `eh_locale_strings`);
@@ -176,3 +176,121 @@ INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_n
 VALUES ((@max_id := @max_id + 1), 'community', '240111044331055835', '清华信息港停车场1', 'BOSIGAO', '', '1', '2', '1025', '2016-03-31 17:07:20', '1', '0', '0', '1', '1', '1', '999984');
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `is_support_recharge`, `namespace_id`)
 VALUES ((@max_id := @max_id + 1), 'community', '240111044331055835', '清华信息港停车场2', 'BOSIGAO', '', '1', '2', '1025', '2016-03-31 17:07:20', '1', '0', '0', '1', '1', '1', '999984');
+
+
+--
+-- 园区入驻 2.3  add by xq.tian  2016/12/20
+--
+SET @eh_locale_templates = (SELECT MAX(id) FROM `eh_locale_templates`);
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '1', 'zh_CN', '园区入驻工作流摘要内容', '申请类型: ${applyType}\n面积需求: ${areaSize} 平米', '0');
+INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`)
+VALUES ((@eh_locale_templates := @eh_locale_templates + 1), 'expansion', '2', 'zh_CN', '园区入驻工作流详情内容', '[{"key":"发起人","value":"${applyUserName}","entityType":"list"},{"key":"联系电话","value":"${contactPhone}","entityType":"list"},{"key":"企业","value":"${enterpriseName}","entityType":"list"},{"key":"申请类型","value":"${applyType}","entityType":"list"},{"key":"面积需求","value":"${areaSize} 平米","entityType":"list"},{"key":"申请来源","value":"${sourceType}","entityType":"list"},{"key":"备注","value":"${description}","entityType":"multi_line"}]', '0');
+
+SET @eh_locale_strings = (SELECT MAX(id) FROM `eh_locale_strings`);
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'expansion.applyType', '1', 'zh_CN', '入驻申请');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'expansion.applyType', '2', 'zh_CN', '扩租申请');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
+VALUES ((@eh_locale_strings := @eh_locale_strings + 1), 'expansion.applyType', '3', 'zh_CN', '续租申请');
+
+--
+-- 工作流设置菜单
+--
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (40130, '工作流设置', 40100, NULL, 'react:/working-flow/flow-list/rent-manage/40100', 0, 2, '/40000/40100/40130', 'park', 419);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 1000000, 2);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10020, 40130, '招租管理', 1, 1, '招租管理 工作流设置 全部权限', 419);
+
+-- scripts support, by Janson 20161221
+SET @id := (SELECT MAX(id) FROM eh_flow_scripts);
+INSERT INTO `eh_flow_scripts`(`id`,`namespace_id`,`owner_id`,`owner_type`,`module_id`,`module_type`,`name`,`script_type`,`script_cls`,`flow_step_type`,`step_type`)
+VALUES ((@id := @id+1), '0', '11', 'ENTERPRISE', '111', 'any-module', 'test-dummpy', 'prototype', 'com.everhomes.flow.FlowScriptFireDummy', 'approve_step', 'step_enter'
+);
+
+--
+-- 修改没有权限时的提示语  add by xq.tian  2016/12/21
+--
+UPDATE `eh_locale_strings` SET `text`='对不起,您没有权限执行此操作' WHERE (`scope`='general' AND `code`='505');
+
+--- 短信测试 Janson 20161223
+INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
+( 'flow:40800', 10001, 'zh_CN', '您的验证码是${vcode}', '验证码短信测试');
+
+-- Janson 20161223
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10001, 'zh_CN', '您的验证码是${vcode} 1', '验证码短信测试1');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10002, 'zh_CN', '您的验证码是${vcode} 2', '验证码短信测试2');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10003, 'zh_CN', '您的验证码是${vcode} 3', '验证码短信测试3');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10004, 'zh_CN', '您的验证码是${vcode} 4', '验证码短信测试4');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10005, 'zh_CN', '您的验证码是${vcode} 5', '验证码短信测试5');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10006, 'zh_CN', '您的验证码是${vcode} 6', '验证码短信测试6');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10007, 'zh_CN', '您的验证码是${vcode} 7', '验证码短信测试7');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10008, 'zh_CN', '您的验证码是${vcode} 8', '验证码短信测试8');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10009, 'zh_CN', '您的验证码是${vcode} 9', '验证码短信测试9');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10010, 'zh_CN', '您的验证码是${vcode} 10', '验证码短信测10');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10011, 'zh_CN', '您的验证码是${vcode} 11', '验证码短信测试11');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10012, 'zh_CN', '您的验证码是${vcode} 12', '验证码短信测试12');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10013, 'zh_CN', '您的验证码是${vcode} 13', '验证码短信测试13');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10014, 'zh_CN', '您的验证码是${vcode} 14', '验证码短信测试14');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10015, 'zh_CN', '您的验证码是${vcode} 15', '验证码短信测试15');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10016, 'zh_CN', '您的验证码是${vcode} 16', '验证码短信测试16');
+
+SET @id := (SELECT MAX(id) FROM eh_flow_scripts);
+INSERT INTO `eh_flow_scripts`(`id`,`namespace_id`,`owner_id`,`owner_type`,`module_id`,`module_type`,`name`,`script_type`,`script_cls`,`flow_step_type`,`step_type`)
+VALUES ((@id := @id+1), '1000000', '1000001', 'PARKING', '40800', 'any-module', 'test-dummpy', 'prototype', 'com.everhomes.flow.FlowScriptFireDummy', 'approve_step', 'step_enter'
+);
+
+-- sms tests
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10002, 'zh_CN', '您的验证码是${vcode} 2', '验证码短信测试2');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10003, 'zh_CN', '您的验证码是${vcode} 3', '验证码短信测试3');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10004, 'zh_CN', '您的验证码是${vcode} 4', '验证码短信测试4');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10005, 'zh_CN', '您的验证码是${vcode} 5', '验证码短信测试5');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10006, 'zh_CN', '您的验证码是${vcode} 6', '验证码短信测试6');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10007, 'zh_CN', '您的验证码是${vcode} 7', '验证码短信测试7');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10008, 'zh_CN', '您的验证码是${vcode} 8', '验证码短信测试8');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10009, 'zh_CN', '您的验证码是${vcode} 9', '验证码短信测试9');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10010, 'zh_CN', '您的验证码是${vcode} 10', '验证码短信测10');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10011, 'zh_CN', '您的验证码是${vcode} 11', '验证码短信测试11');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10012, 'zh_CN', '您的验证码是${vcode} 12', '验证码短信测试12');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10013, 'zh_CN', '您的验证码是${vcode} 13', '验证码短信测试13');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10014, 'zh_CN', '您的验证码是${vcode} 14', '验证码短信测试14');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10015, 'zh_CN', '您的验证码是${vcode} 15', '验证码短信测试15');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) VALUES
+(1000000, 'flow:40800', 10016, 'zh_CN', '您的验证码是${vcode} 16', '验证码短信测试16');

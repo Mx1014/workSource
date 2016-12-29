@@ -117,7 +117,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
     	//储能月卡车没有 归属地区分
-    	plateNumber = plateNumber.substring(1, plateNumber.length());
+    	
     	KetuoCard card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
@@ -127,16 +127,17 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 
 			long expireTime = strToLong(expireDate);
 			long now = System.currentTimeMillis();
+			long cardReserveTime = 0;
 			
-			ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
+	    	ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingLotId);
 	    	Byte isSupportRecharge = parkingLot.getIsSupportRecharge();
 	    	if(ParkingSupportRechargeStatus.SUPPORT.getCode() == isSupportRecharge)	{
 	    		Integer cardReserveDay = parkingLot.getCardReserveDays();
-	    		long cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
-	    		expireTime = expireTime + cardReserveTime;
+	    		cardReserveTime = cardReserveDay * 24 * 60 * 60 * 1000L;
+
 	    	}
 			
-			if(expireTime < now){
+			if(expireTime + cardReserveTime < now){
 				return resultList;
 			}
 			parkingCardDTO.setOwnerType(ParkingOwnerType.COMMUNITY.getCode());
@@ -147,7 +148,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			
 			parkingCardDTO.setPlateOwnerName(user.getNickName());
-			parkingCardDTO.setPlateNumber(card.getPlateNo());
+			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
@@ -362,6 +363,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		KetuoCard card = null;
 		JSONObject param = new JSONObject();
 		
+		plateNumber = plateNumber.substring(1, plateNumber.length());
 		param.put("plateNo", plateNumber);
 		String json = post(param, GET_CARD);
         
@@ -384,7 +386,7 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-//		plateNumber = plateNumber.substring(1, plateNumber.length());
+
 		KetuoCard card = getCard(plateNumber);
 		String oldValidEnd = card.getValidTo();
 		Long time = strToLong(oldValidEnd);
@@ -552,8 +554,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
-//		plateNumber = plateNumber.substring(1, plateNumber.length());
-//		order.setPlateNumber(plateNumber);
 
 		KetuoCard cardInfo = getCard(plateNumber);
 		KetuoCardRate ketuoCardRate = null;
@@ -571,9 +571,6 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 					"Rate not found.");
 		}
 		order.setRateName(ketuoCardRate.getRuleName());
-		order.setMonthCount(new BigDecimal(ketuoCardRate.getRuleAmount()));
-		order.setPrice(new BigDecimal(Integer.parseInt(ketuoCardRate.getRuleMoney()) / 100));
-		
 		
 	}
 

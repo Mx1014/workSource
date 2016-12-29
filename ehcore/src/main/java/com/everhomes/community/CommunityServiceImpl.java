@@ -324,7 +324,7 @@ public class CommunityServiceImpl implements CommunityService {
 		community.setAreaId(cmd.getAreaId());
 		community.setCityId(cmd.getCityId());
 		community.setOperatorUid(userId);
-		community.setStatus(CommunityAdminStatus.CONFIRMING.getCode());
+		community.setStatus(CommunityAdminStatus.ACTIVE.getCode());
 		community.setAreaName(area.getName());
 		community.setCityName(city.getName());
 		community.setAreaSize(cmd.getAreaSize());

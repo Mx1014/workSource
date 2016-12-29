@@ -1,6 +1,7 @@
 package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
+
 import java.util.List;
 import java.sql.Timestamp;
 
@@ -9,7 +10,6 @@ import com.everhomes.discover.ItemType;
 public class FlowNodeDTO {
     private Byte     status;
     private String     description;
-    private Integer     autoStepHour;
     private Long     flowMainId;
     private Timestamp     createTime;
     private Integer     namespaceId;
@@ -18,7 +18,13 @@ public class FlowNodeDTO {
     private Long     id;
     private String     nodeName;
     private Byte allowTimeoutAction;
+    private String autoStepType;
+    private Byte allowApplierUpdate;
+    private Integer autoStepMinute;
     private String params;
+    
+	@ItemType(FlowUserSelectionDTO.class)
+	List<FlowUserSelectionDTO> processors;
 
     public Byte getStatus() {
 		return status;
@@ -36,12 +42,28 @@ public class FlowNodeDTO {
 		this.description = description;
 	}
 
-	public Integer getAutoStepHour() {
-		return autoStepHour;
+	public String getAutoStepType() {
+		return autoStepType;
 	}
 
-	public void setAutoStepHour(Integer autoStepHour) {
-		this.autoStepHour = autoStepHour;
+	public void setAutoStepType(String autoStepType) {
+		this.autoStepType = autoStepType;
+	}
+
+	public Byte getAllowApplierUpdate() {
+		return allowApplierUpdate;
+	}
+
+	public void setAllowApplierUpdate(Byte allowApplierUpdate) {
+		this.allowApplierUpdate = allowApplierUpdate;
+	}
+
+	public Integer getAutoStepMinute() {
+		return autoStepMinute;
+	}
+
+	public void setAutoStepMinute(Integer autoStepMinute) {
+		this.autoStepMinute = autoStepMinute;
 	}
 
 	public Long getFlowMainId() {
@@ -114,6 +136,14 @@ public class FlowNodeDTO {
 
 	public void setAllowTimeoutAction(Byte allowTimeoutAction) {
 		this.allowTimeoutAction = allowTimeoutAction;
+	}
+
+	public List<FlowUserSelectionDTO> getProcessors() {
+		return processors;
+	}
+
+	public void setProcessors(List<FlowUserSelectionDTO> processors) {
+		this.processors = processors;
 	}
 
 	@Override

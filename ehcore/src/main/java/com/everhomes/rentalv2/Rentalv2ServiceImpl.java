@@ -3254,6 +3254,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Long ownerId = order.getResourceTypeId();
 		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
     	Flow flow = flowService.getEnabledFlow(order.getNamespaceId(), Rentalv2Controller.moduleId, moduleType, ownerId, ownerType);
+    	LOGGER.debug("parames : " +order.getNamespaceId()+"*"+ Rentalv2Controller.moduleId+"*"+ moduleType+"*"+ ownerId+"*"+ ownerType );
+    	LOGGER.debug("\n flow is "+flow);
     	if(null!=flow){
 	    	CreateFlowCaseCommand cmd = new CreateFlowCaseCommand();
 	    	cmd.setApplyUserId(order.getRentalUid());
@@ -3277,7 +3279,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
 			
 	    	cmd.setContent(contentString);
-	    	
+	    	LOGGER.debug("cmd = \n"+cmd);
 	    	FlowCase flowCase = flowService.createFlowCase(cmd);
     	}
 		//发消息给管理员

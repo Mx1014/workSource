@@ -1,5 +1,6 @@
 package com.everhomes.flow;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -21,6 +22,11 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.CreateFlowCommand;
 import com.everhomes.rest.flow.CreateFlowNodeCommand;
 import com.everhomes.rest.flow.CreateFlowUserSelectionCommand;
+import com.everhomes.rest.flow.DeleteFlowUserSelectionCommand;
+import com.everhomes.rest.flow.FlowAutoStepDTO;
+import com.everhomes.rest.flow.FlowSMSTemplateResponse;
+import com.everhomes.rest.flow.FlowTimeoutMessageDTO;
+import com.everhomes.rest.flow.FlowTimeoutType;
 import com.everhomes.rest.flow.FlowUserSourceType;
 import com.everhomes.rest.flow.FlowActionInfo;
 import com.everhomes.rest.flow.FlowActionStepType;
@@ -47,6 +53,9 @@ import com.everhomes.rest.flow.ListFlowBriefResponse;
 import com.everhomes.rest.flow.ListFlowButtonResponse;
 import com.everhomes.rest.flow.ListFlowCommand;
 import com.everhomes.rest.flow.ListFlowVariablesCommand;
+import com.everhomes.rest.flow.ListSMSTemplateCommand;
+import com.everhomes.rest.flow.ListScriptsCommand;
+import com.everhomes.rest.flow.ListScriptsResponse;
 import com.everhomes.rest.flow.UpdateFlowButtonCommand;
 import com.everhomes.rest.flow.UpdateFlowNameCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeCommand;
@@ -61,10 +70,12 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.VisibleFlag;
+import com.everhomes.sequence.SequenceService;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserService;
 import com.everhomes.user.base.LoginAuthTestCase;
+import com.everhomes.util.DateHelper;
 
 public class FlowServiceTest extends LoginAuthTestCase {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceTest.class);
@@ -102,7 +113,13 @@ public class FlowServiceTest extends LoginAuthTestCase {
     private FlowScriptProvider flowScriptProvider;
     
     @Autowired
+    private FlowTimeoutService flowTimeoutService;
+    
+    @Autowired
     private UserService userService;
+    
+    @Autowired
+    private SequenceService sequenceService;
     
     @Before
     public void setUp() throws Exception {
@@ -555,4 +572,49 @@ public class FlowServiceTest extends LoginAuthTestCase {
     	ListFlowButtonResponse resp = flowService.listFlowNodeButtons(flowNodeId);
     	Assert.assertTrue(resp.getProcessorButtons().size() > 0);
     }
+    
+    @Test
+    public void testScripts() {
+    	ListScriptsCommand cmd = new ListScriptsCommand();
+    	ListScriptsResponse resp = flowService.listScripts(cmd);
+    	Assert.assertTrue(resp.getScripts().size() > 0);
+    }
+    
+    @Test
+    public void testDelUserSelection() {
+    	Long id = 4365l;
+    	DeleteFlowUserSelectionCommand cmd = new DeleteFlowUserSelectionCommand();
+    	cmd.setUserSelectionId(id);
+    	flowService.deleteUserSelection(cmd);
+    }
+    
+    @Test
+    public void testDelay() {
+    	FlowTimeout ft = new FlowTimeout();
+    	ft.setBelongEntity(FlowEntityType.FLOW.getCode());
+    	ft.setBelongTo(0l);
+    	
+    	FlowTimeoutMessageDTO stepDTO = new FlowTimeoutMessageDTO();
+    	stepDTO.setRemindCount(5l);
+    	ft.setJson(stepDTO.toString());
+    	
+    	Long timeoutTick = DateHelper.currentGMTTime().getTime() + 30*1000l;
+    	ft.setTimeoutTick(new Timestamp(timeoutTick));
+    	ft.setTimeoutType(FlowTimeoutType.MESSAGE_TIMEOUT.getCode());
+    	ft.setStatus(FlowStatusType.VALID.getCode());
+    	flowTimeoutService.pushTimeout(ft);
+    	
+    	try {
+			Thread.currentThread().sleep(100000l);
+		} catch (InterruptedException e) {
+			// TODO Auto-generated catch block
+			e.printStackTrace();
+		}
+    }
+    
+    @Test
+    public void testSynsequence() {
+    	sequenceService.syncSequence();
+    }
+
 }

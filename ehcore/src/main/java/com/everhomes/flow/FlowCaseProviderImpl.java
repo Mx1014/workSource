@@ -130,7 +130,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
     	
     	if(locator.getAnchor() == null) {
-    		locator.setAnchor(cmd.getAnchor());
+    		locator.setAnchor(cmd.getPageAnchor());
     	}
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
@@ -190,7 +190,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     			.and(Tables.EH_FLOW_CASES.NAMESPACE_ID.eq(cmd.getNamespaceId()));
     	
     	if(locator.getAnchor() == null) {
-    		locator.setAnchor(cmd.getAnchor());
+    		locator.setAnchor(cmd.getPageAnchor());
     	}
     	
     	FlowCaseSearchType searchType = FlowCaseSearchType.fromCode(cmd.getFlowCaseSearchType());
