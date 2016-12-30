@@ -115,6 +115,8 @@ public class PmtaskTechparkHandler {
 				form.put("chooseStoried", address.getBuildingName());
 			else
 				form.put("chooseStoried", "");
+		}else{
+			form.put("chooseStoried", "");
 		}
 		
 		form.put("serviceType", taskCategory.getName());
