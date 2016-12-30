@@ -1765,6 +1765,12 @@ INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `own
 INSERT INTO `eh_web_menu_scopes`(`id`, `menu_id`,`menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@menu_scope_id := @menu_scope_id + 1),60200,'', 'EhOrganizations', 1002756,2);
 
 
+DELETE from eh_web_menu_scopes where menu_id = 60200 and owner_id = 999990;
+DELETE from eh_web_menu_scopes where menu_id = 41060 and owner_id = 999990;
+DELETE from eh_web_menu_scopes where menu_id = 60200 and owner_id = 999983;
+
+
+
 --  ------------------------------------ 业务模块范围
 delete from eh_service_module_scopes;
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
@@ -1774,3 +1780,4 @@ SET @eh_service_module_scopes = (SELECT MAX(id) FROM `eh_service_module_scopes`)
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
 select (@eh_service_module_scopes := @eh_service_module_scopes + 1), owner_id, menu_id, '', owner_type, owner_id, NULL, '2' from eh_web_menu_scopes where 
 menu_id in (select id from eh_service_modules);
+
