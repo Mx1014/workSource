@@ -8,7 +8,11 @@ import com.everhomes.util.StringHelper;
  * <li>fieldName: 字段名字，对应的 form 表单里面的名字</li>
  * <li>fieldDisplayName: 显示的字段名字</li>
  * <li>fieldDesc: 提示文案</li>
- * <li>fieldExtra: 不同的字段类型，还有额外的数据信息</li>
+ * <li>fieldExtra: 不同的字段类型，还有额外的数据信息。
+ * 文本类型：{@link com.everhomes.rest.general_approval.GeneralFormTextDTO}
+ * 图片类型：{@link com.everhomes.rest.general_approval.GeneralFormImageDTO}
+ * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO.java}
+ * </li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>
  * <li>visibleType: 显示风格，比如：隐藏，只读，可以修改 {@link com.everhomes.rest.general_approval.GeneralFormDataVisibleType}</li>
