@@ -8380,11 +8380,11 @@ System.out.println();
 			return null;
 		}
 		//如果只有一个公司,直接认证
-		if(organizations.size() == 1){
-			ApplyForEnterpriseContactByEmailCommand cmd2 = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
-			cmd2.setOrganizationId(organizations.get(0).getId());
-			applyForEnterpriseContactByEmail(cmd2);
-		}
+//		if(organizations.size() == 1){
+//			ApplyForEnterpriseContactByEmailCommand cmd2 = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
+//			cmd2.setOrganizationId(organizations.get(0).getId());
+//			applyForEnterpriseContactByEmail(cmd2);
+//		}
 		
 		return organizations.stream().map(r->{
 			return ConvertHelper.convert(r, OrganizationDTO.class); 
