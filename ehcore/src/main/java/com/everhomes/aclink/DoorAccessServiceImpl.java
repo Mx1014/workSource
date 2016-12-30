@@ -2756,6 +2756,12 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     public void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId) {
     	ListUserRelatedOrganizationsCommand cmd = new ListUserRelatedOrganizationsCommand();
     	User user = userProvider.findUserById(userId);
+
+        if(null == user){
+            LOGGER.info("user is null orgId=" + orgId + " userId=" + userId);
+            return;
+        }
+
     	List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(cmd, user);
     	if(dtos.isEmpty()) {
     		deleteAllAuths(namespaceId, orgId, userId);
