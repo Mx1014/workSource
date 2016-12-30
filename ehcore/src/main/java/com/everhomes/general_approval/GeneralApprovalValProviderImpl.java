@@ -110,7 +110,7 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
     }
 
     private void prepareObj(GeneralApprovalVal obj) {
-//        Long l2 = DateHelper.currentGMTTime().getTime();
-//        obj.setCreateTime(new Timestamp(l2));
+        Long l2 = DateHelper.currentGMTTime().getTime();
+        obj.setCreateTime(new Timestamp(l2));
     }
 }
