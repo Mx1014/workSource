@@ -5677,7 +5677,7 @@ System.out.println();
 			}
 			
 			if(StringUtils.isEmpty(user.getAvatar())){
-				user.setAvatar(configurationProvider.getValue("user.avatar.undisclosured.url", ""));
+				user.setAvatar(configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"user.avatar.undisclosured.url", ""));
 			}
 			
 			userProvider.updateUser(user);
@@ -8430,10 +8430,10 @@ System.out.println();
 	    .text(mailText)
 	    .build();
 		try{
-			String account = configProvider.getValue("mail.smtp.account", "zuolin@zuolin.com");
-			String address = configProvider.getValue("mail.smtp.address", "smtp.mxhichina.com");
-			String passwod = configProvider.getValue("mail.smtp.passwod", "abc123!@#");
-			int port = configProvider.getIntValue("mail.smtp.port", 25);
+			String account = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.account", "zuolin@zuolin.com");
+			String address = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.address", "smtp.mxhichina.com");
+			String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.passwod", "abc123!@#");
+			int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(),"mail.smtp.port", 25);
 			LOGGER.debug("SEND MESSAGE +_\n"+email.toString()+"\n mailer : new Mailer("+address+", "+port+" , "+account+" , "+passwod + ") ");
 			new Mailer(address, port , account , passwod).sendMail(email);
 		}catch (Exception e){
