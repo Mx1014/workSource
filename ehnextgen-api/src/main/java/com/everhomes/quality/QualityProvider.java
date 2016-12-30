@@ -2,6 +2,7 @@ package com.everhomes.quality;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Set;
 
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.rest.quality.ScoreDTO;
@@ -104,4 +105,7 @@ public interface QualityProvider {
 	void populateRecordItemResult(QualityInspectionTaskRecords record);
 	void createSpecificationItemResults(QualityInspectionSpecificationItemResults result);
 
+	Set<Long> listRecordsTaskIdByOperatorId(Long operatorId, Long maxTaskId);
+	
+	List<QualityInspectionTasks> listTaskByIds(List<Long> taskIds);
 }

@@ -3,6 +3,7 @@ package com.everhomes.quality;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Map;
 
@@ -86,6 +87,9 @@ import java.util.Map;
 
 
 
+
+import java.util.Set;
+
 import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
@@ -100,6 +104,11 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
+
+
+
+
 
 
 import com.everhomes.coordinator.CoordinationLocks;
@@ -1737,6 +1746,41 @@ public class QualityProviderImpl implements QualityProvider {
 		});
         
 		return score;
+	}
+
+	@Override
+	public Set<Long> listRecordsTaskIdByOperatorId(Long operatorId, Long maxTaskId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTaskRecordsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.OPERATOR_ID.eq(operatorId));
+		
+		if(maxTaskId != null && maxTaskId != 0L) {
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.lt(maxTaskId));
+		}
+		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_RECORDS.TASK_ID.desc());
+		 
+		Set<Long> result = new HashSet<Long>();
+		query.fetch().map((r) -> {
+			result.add(r.getTaskId());
+			return null;
+		});
+		
+		return result;
+	}
+
+	@Override
+	public List<QualityInspectionTasks> listTaskByIds(List<Long> taskIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.in(taskIds));
+		
+		List<QualityInspectionTasks> result = new ArrayList<QualityInspectionTasks>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTasks.class));
+			return null;
+		});
+		
+		return result;
 	}
 	
 }

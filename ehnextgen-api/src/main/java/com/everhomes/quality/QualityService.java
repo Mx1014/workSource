@@ -22,6 +22,7 @@ import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
+import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
@@ -92,4 +93,6 @@ public interface QualityService {
 	CountTasksResponse countTasks(CountTasksCommand cmd);
 	
 	QualityInspectionSpecificationDTO getQualitySpecification(GetQualitySpecificationCommand cmd);
+	
+	ListQualityInspectionTasksResponse listOneselfHistoryTasks(ListOneselfHistoryTasksCommand cmd);
 }

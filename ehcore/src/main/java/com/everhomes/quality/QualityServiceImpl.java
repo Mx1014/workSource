@@ -15,6 +15,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -80,6 +81,7 @@ import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
+import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
@@ -2534,6 +2536,53 @@ public class QualityServiceImpl implements QualityService {
 		
 		dto.setChildrens(childDTOs);
 		return dto;
+	}
+
+	@Override
+	public ListQualityInspectionTasksResponse listOneselfHistoryTasks(ListOneselfHistoryTasksCommand cmd) {
+		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
+		
+		Long uId = UserContext.current().getUser().getId();
+		Set<Long> taskIds = qualityProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<Long> taskIdlist = new ArrayList<Long>();
+
+        for(final Long value : taskIds){
+
+        	taskIdlist.add(value);
+
+        }
+
+        Collections.sort(taskIdlist);
+        Collections.reverse(taskIdlist);
+        
+        if(taskIdlist.size() > pageSize) {
+        	taskIdlist.subList(0,pageSize);
+        	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
+        }
+       
+		List<QualityInspectionTasks> tasks = qualityProvider.listTaskByIds(taskIdlist);
+		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+        for(QualityInspectionTasks task : tasks) {
+        	QualityInspectionTaskRecords record = qualityProvider.listLastRecordByTaskId(task.getId());
+        	if(record != null) {
+        		task.setRecord(record);
+            	records.add(task.getRecord());
+        	}
+        	
+        }
+
+		this.qualityProvider.populateRecordAttachments(records);
+		this.qualityProvider.populateRecordItemResults(records);
+
+		for(QualityInspectionTaskRecords record : records) {
+			populateRecordAttachements(record, record.getAttachments());
+		}
+        
+		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
+		response.setTasks(dtoList);
+		return response;
 	}
 
 }

@@ -32,6 +32,7 @@ import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
+import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
@@ -547,6 +548,21 @@ public class QualityController extends ControllerBase {
 	public RestResponse countTasks(CountTasksCommand cmd) {
 		
 		CountTasksResponse tasks = qualityService.countTasks(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/listOneselfHistoryTasks</b>
+	 * <p>个人执行过的历史任务</p>
+	 */
+	@RequestMapping("listOneselfHistoryTasks")
+	@RestReturn(value = ListQualityInspectionTasksResponse.class)
+	public RestResponse listOneselfHistoryTasks(ListOneselfHistoryTasksCommand cmd) {
+		ListQualityInspectionTasksResponse tasks = qualityService.listOneselfHistoryTasks(cmd);
 		
 		RestResponse response = new RestResponse(tasks);
 		response.setErrorCode(ErrorCodes.SUCCESS);
