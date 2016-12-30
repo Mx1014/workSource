@@ -112,7 +112,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		FlowCaseEntity e = new FlowCaseEntity();
 		
 		e = new FlowCaseEntity();
-		e.setEntityType(FlowCaseEntityType.TEXT.getCode());
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
 		e.setKey("服务内容");
 		e.setValue(dto.getContent());
 		entities.add(e);

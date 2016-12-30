@@ -643,7 +643,7 @@ CREATE TABLE `eh_parking_clearance_logs` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 停车充值5.0  merge from parking-delta-schema.sql by sw 20161215
-ALTER TABLE eh_parking_lots ADD COLUMN `recharge_month_count` INT NOT NULL DEFAULT 0 COMMENT 'organization of address';
+ALTER TABLE eh_parking_lots ADD COLUMN `recharge_month_count` INT NOT NUll DEFAULT 0 COMMENT 'organization of address';
 ALTER TABLE eh_parking_lots ADD COLUMN `recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: all month, 2: number of days';
 ALTER TABLE eh_parking_lots ADD COLUMN `is_support_recharge` TINYINT NOT NULL DEFAULT 0 COMMENT 'out date card recharge flag , 1: support recharge , 0: not ';
 ALTER TABLE eh_parking_lots ADD COLUMN `namespace_id` INTEGER NOT NULL DEFAULT 0;
@@ -669,7 +669,7 @@ CREATE TABLE `eh_parking_flow` (
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `parking_lot_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to id of eh_parking_lots',
 
-  `request_month_count` INT NOT NULL DEFAULT 0 COMMENT 'organization of address',
+  `request_month_count` INT NOT NUll DEFAULT 0 COMMENT 'organization of address',
   `request_recharge_type` TINYINT NOT NULL DEFAULT 0 COMMENT '1: all month, 2: number of days',
   `card_request_tip_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '1: support , 0: not ',
   `card_agreement_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '1: support , 0: not ',
@@ -683,7 +683,7 @@ CREATE TABLE `eh_parking_flow` (
 
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_parking_statistics`;
 CREATE TABLE `eh_parking_statistics` (
@@ -699,7 +699,7 @@ CREATE TABLE `eh_parking_statistics` (
   `create_time` DATETIME,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- DROP TABLE IF EXISTS `eh_parking_car_series`;
 CREATE TABLE `eh_parking_car_series`(
@@ -715,7 +715,7 @@ CREATE TABLE `eh_parking_car_series`(
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
 
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 -- DROP TABLE IF EXISTS `eh_parking_attachments`;
@@ -731,7 +731,7 @@ CREATE TABLE `eh_parking_attachments` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- App启动广告   add by xq.tian  2016/11/28
@@ -851,7 +851,7 @@ CREATE TABLE `eh_flow_evaluate_items` (
     `name` VARCHAR(128) NOT NULL,
 
     PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 科技园同步数据备份表，add by tt, 20161212
 -- DROP TABLE IF EXISTS `eh_techpark_syncdata_backup`;
@@ -913,7 +913,7 @@ CREATE TABLE `eh_service_alliance_invest_requests` (
   `create_time` DATETIME,
   
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
 ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `display_destination` TINYINT DEFAULT '0' COMMENT '0: both, 1: client only, 2: browser only';
@@ -927,12 +927,9 @@ ALTER TABLE `eh_service_alliance_attachments` ADD COLUMN `download_count` INTEGE
 
 CREATE TABLE `eh_service_alliance_jump_module` (
   `id` BIGINT NOT NULL,
-  `namespace_id` INT(11) NOT NULL DEFAULT '0',
+  `namespace_id` int(11) NOT NULL DEFAULT '0',
   `module_name` VARCHAR(128) NOT NULL DEFAULT '',
   `module_url` VARCHAR(256) NOT NULL DEFAULT '',
   PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
--- 2016-12-29 by wh  加唯一索引
-ALTER TABLE  `eh_stat_active_users` ADD UNIQUE INDEX `unique` (`stat_date`, `namespace_id`); 
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 

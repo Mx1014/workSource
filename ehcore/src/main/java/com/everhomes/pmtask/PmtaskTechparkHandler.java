@@ -9,6 +9,7 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
@@ -128,15 +129,21 @@ public class PmtaskTechparkHandler {
 		JSONArray enclosure = new JSONArray();
 		if(null != attachments) {
 			for(AttachmentDescriptor ad: attachments) {
-				
+				JSONObject attachment = new JSONObject();
 				ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
 				String resourceName = resource.getResourceName();
-				String fileSuffix = resourceName.substring(resourceName.lastIndexOf("."), resourceName.length());
+				String fileSuffix = "";
+				if(StringUtils.isNotBlank(resourceName)) {
+					int index = resourceName.lastIndexOf(".");
+					if(index != -1)
+						fileSuffix = resourceName.substring(index, resourceName.length());
+
+				}else {
+					attachment.put("fileName", "");
+				}
 				
 				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
 				
-				JSONObject attachment = new JSONObject();
-				attachment.put("fileName", resourceName);
 				attachment.put("fileSuffix", fileSuffix);
 				
 				InputStream in = get(contentUrl);
@@ -152,6 +159,8 @@ public class PmtaskTechparkHandler {
 		param.put("formContent", formContent);
 		param.put("enclosure", enclosure);
 		
+        LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());
+
 		String result = port.worflowAppDraft(param.toJSONString());
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);

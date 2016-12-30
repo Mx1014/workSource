@@ -35,6 +35,7 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModuleAssignment;
 import com.everhomes.module.ServiceModuleProvider;
@@ -86,6 +87,7 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
+import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
@@ -98,6 +100,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -120,6 +123,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -5677,7 +5681,7 @@ System.out.println();
 			}
 			
 			if(StringUtils.isEmpty(user.getAvatar())){
-				user.setAvatar(configurationProvider.getValue("user.avatar.undisclosured.url", ""));
+				user.setAvatar(configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"user.avatar.undisclosured.url", ""));
 			}
 			
 			userProvider.updateUser(user);
@@ -8412,6 +8416,7 @@ System.out.println();
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();
 
+		String account = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.account", "zuolin@zuolin.com");
 		String locale = "zh_CN";
 		map.put("nickName", UserContext.current().getUser().getNickName());
 		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
@@ -8423,20 +8428,28 @@ System.out.println();
 		String mailText = localeTemplateService.getLocaleTemplateString(VerifyMailTemplateCode.SCOPE, VerifyMailTemplateCode.TEXT_CODE, locale, map, "");
 		String mailSubject =this.localeStringService.getLocalizedString(VerifyMailTemplateCode.SCOPE,
 				VerifyMailTemplateCode.SUBJECT_CODE, RentalNotificationTemplateCode.locale, "加入企业验证邮件"); 
-		Email email = new EmailBuilder()
-	    .from(appName, "zuolin@zuolin.com")
-	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
-	    .subject(mailSubject)
-	    .text(mailText)
-	    .build();
-		try{
-			String account = configProvider.getValue("mail.smtp.account", "zuolin@zuolin.com");
-			String address = configProvider.getValue("mail.smtp.address", "smtp.mxhichina.com");
-			String passwod = configProvider.getValue("mail.smtp.passwod", "abc123!@#");
-			int port = configProvider.getIntValue("mail.smtp.port", 25);
-			new Mailer(address, port , account , passwod).sendMail(email);
+//		Email email = new EmailBuilder()
+//	    .from(appName,account)
+//	    .to(UserContext.current().getUser().getNickName(), cmd.getEmail()) 
+//	    .subject(mailSubject)
+//	    .text(mailText)
+//	    .build();
+		try{ 
+			String address = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.address", "smtp.mxhichina.com");
+			String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.passwod", "abc123!@#");
+			int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(),"mail.smtp.port", 25); 
+//			new Mailer(address, port , account , passwod).sendMail(email);
+			//另一种发送方式
+			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+	        MailHandler handler = PlatformContext.getComponent(handlerName);
+	          
+	        handler.sendMail(UserContext.getCurrentNamespaceId(), account,cmd.getEmail(), mailSubject, mailText);
+  
 		}catch (Exception e){
+			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++");
 			LOGGER.error(e.getMessage());
+			
+			e.printStackTrace();
 			// LOGGER.error(e.getStackTrace());
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
 					"send email error");
