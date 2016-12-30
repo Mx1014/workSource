@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>fieldType: 字段类型</li>
+ * <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字</li>
  * <li>fieldValue: 提交的数据</li>
  * <ul>

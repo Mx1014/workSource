@@ -49,6 +49,7 @@ CREATE TABLE `eh_general_approvals` (
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
   `support_type` TINYINT NOT NULL DEFAULT 0 COMMENT 'APP:0, WEB:1, APP_WEB: 2',
+  `approval_name` VARCHAR(128) NOT NULL,
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
   `update_time` DATETIME NOT NULL COMMENT 'last update time',
