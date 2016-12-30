@@ -1,7 +1,14 @@
 package com.everhomes.rest.general_approval;
 
+/**
+ * <ul>
+ * <li>0:APP可用，1: WEB 可用，2: APP 与 WEB 都可用</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum GeneralApprovalSupportType {
-	APP((byte)0), WEB((byte)1), APP_AND_WEB((byte)3);
+	APP((byte)0), WEB((byte)1), APP_AND_WEB((byte)2);
 	private byte code;
     
     public byte getCode() {

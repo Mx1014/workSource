@@ -25,6 +25,7 @@ import com.everhomes.server.schema.tables.records.EhGeneralApprovalValsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
@@ -109,5 +110,7 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
     }
 
     private void prepareObj(GeneralApprovalVal obj) {
+//        Long l2 = DateHelper.currentGMTTime().getTime();
+//        obj.setCreateTime(new Timestamp(l2));
     }
 }

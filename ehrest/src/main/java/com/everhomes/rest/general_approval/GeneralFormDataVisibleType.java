@@ -4,6 +4,13 @@ import org.apache.commons.lang.StringUtils;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>隐藏，只读，可以修改</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public enum GeneralFormDataVisibleType {
 	HIDDEN("HIDDEN"), READONLY("READONLY"), EDITABLE("EDITABLE");
 	

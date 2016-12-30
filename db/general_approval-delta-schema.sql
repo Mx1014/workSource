@@ -80,6 +80,7 @@ CREATE TABLE `eh_general_approval_vals` (
   `field_int1` BIGINT NOT NULL DEFAULT 0,
   `field_int2` BIGINT NOT NULL DEFAULT 0,
   `field_int3` BIGINT NOT NULL DEFAULT 0,
+  `create_time` DATETIME NOT NULL COMMENT 'record create time',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
