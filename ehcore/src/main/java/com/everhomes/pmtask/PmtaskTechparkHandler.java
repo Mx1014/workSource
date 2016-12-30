@@ -137,7 +137,7 @@ public class PmtaskTechparkHandler {
 					int index = resourceName.lastIndexOf(".");
 					if(index != -1)
 						fileSuffix = resourceName.substring(index, resourceName.length());
-
+					attachment.put("fileName", resourceName);
 				}else {
 					attachment.put("fileName", "");
 				}
