@@ -6,6 +6,13 @@ import java.sql.Timestamp;
 
 import com.everhomes.discover.ItemType;
 
+/**
+ * <ul>
+ * <li>supportType: {@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class GeneralApprovalDTO {
     private Byte     status;
     private Timestamp     updateTime;

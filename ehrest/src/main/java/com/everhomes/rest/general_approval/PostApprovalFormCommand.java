@@ -27,6 +27,14 @@ public class PostApprovalFormCommand {
 		this.approvalId = approvalId;
 	}
 
+	public List<PostApprovalFormItem> getValues() {
+		return values;
+	}
+
+	public void setValues(List<PostApprovalFormItem> values) {
+		this.values = values;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
