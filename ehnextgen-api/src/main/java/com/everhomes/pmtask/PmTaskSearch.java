@@ -11,5 +11,5 @@ public interface PmTaskSearch {
 	void syncFromDb();
 	
 	List<PmTaskDTO> searchDocsByType(Byte status, String queryString,Long ownerId, String ownerType, Long categoryId, Long startDate, 
-			Long endDate, Long addressId, Long pageAnchor, Integer pageSize);
+			Long endDate, Long addressId, String buildingName, Long pageAnchor, Integer pageSize);
 }
