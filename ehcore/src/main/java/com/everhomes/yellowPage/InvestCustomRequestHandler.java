@@ -20,6 +20,7 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.rest.yellowPage.JumpType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceInvestRequests;
@@ -89,6 +90,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		yellowPageProvider.createInvestRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
+		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
 		saRequestInfoSearcher.feedDoc(requestInfo);
 
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());

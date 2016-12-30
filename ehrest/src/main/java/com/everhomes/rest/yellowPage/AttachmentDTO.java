@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *     <li>id: 附件id</li>
  *     <li>name: 附件名</li>
  *     <li>fileSize: 附件大小(单位为byte)</li>
  *     <li>contentType: 内容类型，参考{@link com.everhomes.rest.forum.PostContentType}</li>
@@ -19,6 +20,8 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class AttachmentDTO {
+	
+	private Long id;
 	
 	private String name;
 
@@ -37,6 +40,14 @@ public class AttachmentDTO {
     private String creatorName;
 
     private Timestamp createTime;
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
+	}
 
 	public String getName() {
 		return name;
