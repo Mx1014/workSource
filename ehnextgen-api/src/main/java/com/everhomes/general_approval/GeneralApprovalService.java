@@ -13,6 +13,7 @@ import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 
 public interface GeneralApprovalService {
@@ -34,5 +35,7 @@ public interface GeneralApprovalService {
 	GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd);
 
 	GeneralApprovalDTO deleteGeneralApproval(GeneralApprovalIdCommand cmd);
+
+	GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd);
 
 }

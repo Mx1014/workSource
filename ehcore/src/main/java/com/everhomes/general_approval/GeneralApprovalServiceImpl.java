@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
@@ -15,10 +16,16 @@ import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
+import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 @Component
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
-
+	@Autowired
+	private GeneralApprovalValProviderImpl generalApprovalValProviderImpl;
+	@Autowired
+	private GeneralFormProviderImpl generalFormProviderImpl;
+	@Autowired
+	private GeneralApprovalProvider generalApprovalProvider;
 	@Override
 	public GetTemplateByApprovalIdResponse getTemplateByApprovalId(
 			GetTemplateByApprovalIdCommand cmd) {
@@ -35,6 +42,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	@Override
 	public GeneralFormDTO createApprovalForm(CreateApprovalFormCommand cmd) {
 		// TODO Auto-generated method stub
+		 
 		return null;
 	}
 
@@ -70,6 +78,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 	@Override
 	public GeneralApprovalDTO deleteGeneralApproval(GeneralApprovalIdCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

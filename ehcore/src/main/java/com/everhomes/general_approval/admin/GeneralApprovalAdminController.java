@@ -23,6 +23,7 @@ import com.everhomes.rest.general_approval.ListApprovalFormsCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.ListGeneralApprovalResponse;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
+import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
 
 @RestDoc(value="General approval admin controller", site="core")
@@ -33,7 +34,7 @@ public class GeneralApprovalAdminController extends ControllerBase {
 	private GeneralApprovalService generalApprovalService;
     /**
      * <b>URL: /admin/general_approval/createApprovalForm</b>
-     * <p> 创建公司的表单，如果存在 formOriginId 则为修改 </p>
+     * <p> 创建公司的表单  </p>
      * @return
      */
     @RequestMapping("createApprovalForm")
@@ -46,7 +47,22 @@ public class GeneralApprovalAdminController extends ControllerBase {
     	
     	return response;
     }
-    
+    /**
+     * <b>URL: /admin/general_approval/updateApprovalForm</b>
+     * <p> 修改 公司的表单    </p>
+     * @return
+     */
+    @RequestMapping("updateApprovalForm")
+    @RestReturn(value=GeneralFormDTO.class)
+    public RestResponse updateApprovalForm(@Valid UpdateApprovalFormCommand cmd) {
+    	GeneralFormDTO result = generalApprovalService.updateApprovalForm(cmd);
+    	RestResponse response = new RestResponse(result);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	
+    	return response;
+    }
+      
     /**
      * <b>URL: /admin/general_approval/listApprovalForms</b>
      * <p> 获取表单列表 </p>

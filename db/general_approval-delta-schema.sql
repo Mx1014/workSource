@@ -1,4 +1,5 @@
 -- general forms support
+-- 表单
 DROP TABLE IF EXISTS `eh_general_forms`;
 CREATE TABLE `eh_general_forms` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
@@ -14,7 +15,7 @@ CREATE TABLE `eh_general_forms` (
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
   `form_version` BIGINT NOT NULL DEFAULT 0 COMMENT 'the current using version',
   `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
-  `template_text` TEXT,
+  `template_text` TEXT COMMENT 'json 存放表单字段',
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
   `update_time` DATETIME NOT NULL COMMENT 'last update time',
@@ -33,6 +34,7 @@ CREATE TABLE `eh_general_forms` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
 
 CREATE TABLE `eh_general_approvals` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
