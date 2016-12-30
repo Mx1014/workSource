@@ -159,6 +159,8 @@ public class PmtaskTechparkHandler {
 		param.put("formContent", formContent);
 		param.put("enclosure", enclosure);
 		
+        LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());
+
 		String result = port.worflowAppDraft(param.toJSONString());
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);
