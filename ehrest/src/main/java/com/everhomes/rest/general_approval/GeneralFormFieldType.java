@@ -10,12 +10,13 @@ import com.everhomes.util.StringHelper;
  * <li>MULTI_LINE_TEXT: 多行文本</li>
  * <li>IMAGE: 图片</li>
  * <li>FILE: 文件</li>
+ * <li>INTEGER_TEXT:整数文本</li>
  * </ul>
  * @author janson
  *
  */
 public enum GeneralFormFieldType {
-	SINGLE_LINE_TEXT("SINGLE_LINE_TEXT"), MULTI_LINE_TEXT("MULTI_LINE_TEXT"), IMAGE("IMAGE"), FILE("FILE");
+	SINGLE_LINE_TEXT("SINGLE_LINE_TEXT"), MULTI_LINE_TEXT("MULTI_LINE_TEXT"), IMAGE("IMAGE"), FILE("FILE"), INTEGER_TEXT("INTEGER_TEXT");
 	
 	private String code;
 	

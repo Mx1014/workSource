@@ -31,4 +31,12 @@ public class PostApprovalFormFileValue {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public List<String> getUrls() {
+		return urls;
+	}
+
+	public void setUrls(List<String> urls) {
+		this.urls = urls;
+	}
 }

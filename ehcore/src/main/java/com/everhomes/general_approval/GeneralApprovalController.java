@@ -2,6 +2,7 @@ package com.everhomes.general_approval;
 
 import javax.validation.Valid;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -18,6 +19,8 @@ import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 @RestController
 @RequestMapping("/general_approval")
 public class GeneralApprovalController extends ControllerBase {
+	@Autowired
+	private GeneralApprovalService generalApprovalService;
     /**
      * <b>URL: /general_approval/getTemplateByApprovalId</b>
      * <p> 获取表单的信息 </p>
@@ -26,7 +29,8 @@ public class GeneralApprovalController extends ControllerBase {
     @RequestMapping("getTemplateByApprovalId")
     @RestReturn(value=GetTemplateByApprovalIdResponse.class)
     public RestResponse getTemplateByApprovalId(@Valid GetTemplateByApprovalIdCommand cmd) {
-    	RestResponse response = new RestResponse();
+    	GetTemplateByApprovalIdResponse result = generalApprovalService.getTemplateByApprovalId(cmd);
+    	RestResponse response = new RestResponse(result);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	
@@ -41,7 +45,8 @@ public class GeneralApprovalController extends ControllerBase {
     @RequestMapping("postApprovalForm")
     @RestReturn(value=GetTemplateByApprovalIdResponse.class)
     public RestResponse postApprovalForm(@Valid PostApprovalFormCommand cmd) {
-    	RestResponse response = new RestResponse();
+    	GetTemplateByApprovalIdResponse result = generalApprovalService.postApprovalForm(cmd);
+    	RestResponse response = new RestResponse(result);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	
