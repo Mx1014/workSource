@@ -5681,7 +5681,7 @@ System.out.println();
 			}
 			
 			if(StringUtils.isEmpty(user.getAvatar())){
-				user.setAvatar(configurationProvider.getValue("user.avatar.undisclosured.url", ""));
+				user.setAvatar(configurationProvider.getValue(UserContext.getCurrentNamespaceId(),"user.avatar.undisclosured.url", ""));
 			}
 			
 			userProvider.updateUser(user);
@@ -8416,7 +8416,7 @@ System.out.println();
 		//TODO: send email
 		Map<String,Object> map = new HashMap<String, Object>();
 
-		String account = configProvider.getValue("mail.smtp.account", "zuolin@zuolin.com");
+		String account = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.account", "zuolin@zuolin.com");
 		String locale = "zh_CN";
 		map.put("nickName", UserContext.current().getUser().getNickName());
 		Namespace  namespace = namespaceProvider.findNamespaceById(UserContext.getCurrentNamespaceId());
@@ -8434,18 +8434,22 @@ System.out.println();
 //	    .subject(mailSubject)
 //	    .text(mailText)
 //	    .build();
-		try{
-			String address = configProvider.getValue("mail.smtp.address", "smtp.mxhichina.com");
-			String passwod = configProvider.getValue("mail.smtp.passwod", "abc123!@#");
-			int port = configProvider.getIntValue("mail.smtp.port", 25);
+		try{ 
+			String address = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.address", "smtp.mxhichina.com");
+			String passwod = configProvider.getValue(UserContext.getCurrentNamespaceId(),"mail.smtp.passwod", "abc123!@#");
+			int port = configProvider.getIntValue(UserContext.getCurrentNamespaceId(),"mail.smtp.port", 25); 
 //			new Mailer(address, port , account , passwod).sendMail(email);
 			//另一种发送方式
 			String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
 	        MailHandler handler = PlatformContext.getComponent(handlerName);
 	          
 	        handler.sendMail(UserContext.getCurrentNamespaceId(), account,cmd.getEmail(), mailSubject, mailText);
+  
 		}catch (Exception e){
+			LOGGER.debug("had a error in send message !!!!!++++++++++++++++++++++");
 			LOGGER.error(e.getMessage());
+			
+			e.printStackTrace();
 			// LOGGER.error(e.getStackTrace());
 			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_SEND_EMAIL,
 					"send email error");
