@@ -10,3 +10,14 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10091, 30550, '×
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
 VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10091, 1001,'EhAclRoles', 0, 1, NOW());
+
+DELETE FROM `eh_service_module_scopes` WHERE `module_id` in (10000, 20000, 40000);
+SET @service_module_scope_id = (SELECT MAX(id) FROM `eh_service_module_scopes`);
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+SELECT (@service_module_scope_id := @service_module_scope_id + 1), id, 10000, '', NULL, NULL, NULL, '2' FROM `eh_namespaces`; 
+
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+SELECT (@service_module_scope_id := @service_module_scope_id + 1), id, 20000, '', NULL, NULL, NULL, '2' FROM `eh_namespaces`; 
+
+INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
+SELECT (@service_module_scope_id := @service_module_scope_id + 1), id, 40000, '', NULL, NULL, NULL, '2' FROM `eh_namespaces`; 
