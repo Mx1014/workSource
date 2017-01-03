@@ -58,8 +58,6 @@ public class PmtaskTechparkHandler {
 	@Autowired
     private ContentServerService contentServerService;
 
-	WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
-	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public void synchronizedData(PmTask task, List<AttachmentDescriptor> attachments, Category taskCategory, Category category) {
@@ -164,6 +162,8 @@ public class PmtaskTechparkHandler {
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());
 
+        WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
+    	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
 		String result = port.worflowAppDraft(param.toJSONString());
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);
