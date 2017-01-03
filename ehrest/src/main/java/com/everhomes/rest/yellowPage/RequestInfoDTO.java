@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  *  <li>creatorMobile：手机号</li>
  *  <li>creatorOrganization：机构名称</li>
  *  <li>serviceOrganization：服务机构名</li>
+ *  <li>templateType : 模板类型</li>
+ *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  * </ul>
  */
 public class RequestInfoDTO {
@@ -29,6 +31,8 @@ public class RequestInfoDTO {
 	private String createTime;
 
 	private String templateType;
+	
+	private Long jumpType;
 
 
 	public Long getId() {
@@ -85,6 +89,14 @@ public class RequestInfoDTO {
 
 	public void setTemplateType(String templateType) {
 		this.templateType = templateType;
+	}
+
+	public Long getJumpType() {
+		return jumpType;
+	}
+
+	public void setJumpType(Long jumpType) {
+		this.jumpType = jumpType;
 	}
 
 	@Override
