@@ -2,6 +2,13 @@ package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>formOriginId: 原始formid</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class ApprovalFormIdCommand {
 	private Long formOriginId;
 

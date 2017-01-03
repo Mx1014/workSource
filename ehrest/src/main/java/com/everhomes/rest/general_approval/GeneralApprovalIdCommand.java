@@ -1,7 +1,11 @@
 package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ * <li>approvalId : approvalId</li>
+ * </ul>
+ * */
 public class GeneralApprovalIdCommand {
 	private Long approvalId;
 

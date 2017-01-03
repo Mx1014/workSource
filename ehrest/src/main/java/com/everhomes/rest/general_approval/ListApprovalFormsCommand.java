@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  */
 public class ListApprovalFormsCommand {
 	private Long ownerId;
-	private Long ownerType;
+	private String ownerType;
 
 	public Long getOwnerId() {
 		return ownerId;
@@ -21,17 +21,18 @@ public class ListApprovalFormsCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-
-	public Long getOwnerType() {
-		return ownerType;
-	}
-
-	public void setOwnerType(Long ownerType) {
-		this.ownerType = ownerType;
-	}
+ 
 
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getOwnerType() {
+		return ownerType;
+	}
+
+	public void setOwnerType(String ownerType) {
+		this.ownerType = ownerType;
+	}
 }

@@ -4,13 +4,21 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
+ * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
+ * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
+ * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
+ * <li>organizationId: 属于的公司 ID</li>
+ * <li>projectType : </li>
+ * <li>projectId : </li>
  * <li>supportType: APP可用，WEB 可用，APP 与 WEB 都可用 {@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
+ * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
+ * <li>approvalName : 审批名称</li> 
  * </ul>
  * @author janson
  *
  */
-public class CreateGeneralApprovalCommand {
-    private Integer     namespaceId;
+public class CreateGeneralApprovalCommand { 
     private Long     ownerId;
     private String     ownerType;
     private String     moduleType;
@@ -44,14 +52,6 @@ public class CreateGeneralApprovalCommand {
 
 	public void setApprovalName(String approvalName) {
 		this.approvalName = approvalName;
-	}
-
-	public Integer getNamespaceId() {
-		return namespaceId;
-	}
-
-	public void setNamespaceId(Integer namespaceId) {
-		this.namespaceId = namespaceId;
 	}
 
 	public Long getOwnerId() {

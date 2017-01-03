@@ -17,5 +17,10 @@ public interface GeneralFormProvider {
 
 	List<GeneralForm> queryGeneralForms(ListingLocator locator, int count,
 			ListingQueryBuilderCallback queryBuilderCallback);
+ 
+
+	GeneralForm getActiveGeneralFormByOriginId(Long formOriginId);
+
+	void invalidForms(Long formOriginId);
 
 }

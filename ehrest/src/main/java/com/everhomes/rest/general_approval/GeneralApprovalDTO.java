@@ -1,6 +1,7 @@
 package com.everhomes.rest.general_approval;
 
 import com.everhomes.util.StringHelper;
+
 import java.util.List;
 import java.sql.Timestamp;
 
@@ -8,7 +9,17 @@ import com.everhomes.discover.ItemType;
 
 /**
  * <ul>
- * <li>supportType: {@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
+ * <li>id : id</li>
+ * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
+ * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
+ * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
+ * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
+ * <li>organizationId: 属于的公司 ID</li> 
+ * <li>supportType: APP可用，WEB 可用，APP 与 WEB 都可用 {@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
+ * <li>projectType : </li>
+ * <li>projectId : </li>
+ * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
+ * <li>approvalName : 审批名称</li> 
  * </ul>
  * @author janson
  *
@@ -28,6 +39,8 @@ public class GeneralApprovalDTO {
     private String     moduleType;
     private Long     id;
     private Long     moduleId;
+    private Byte supportType;
+    
 
     public Byte getStatus() {
 		return status;
@@ -145,5 +158,13 @@ public class GeneralApprovalDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Byte getSupportType() {
+		return supportType;
+	}
+
+	public void setSupportType(Byte supportType) {
+		this.supportType = supportType;
+	}
 }
 

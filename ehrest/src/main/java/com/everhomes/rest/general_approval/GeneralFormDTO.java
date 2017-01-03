@@ -10,6 +10,8 @@ import java.util.List;
  * <ul>
  * <li>ownerId: 属于的对象 ID，如果所属类型是 EhOrganizations，则 ownerId 等于 organizationId </li>
  * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
+ * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
+ * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
  * <li>organizationId: 属于的公司 ID</li>
  * <li>formOriginId: 原始 formId，如果修改了版本，则原始的数据保留</li>
  * <li>formVersion: 当前版本信息</li>

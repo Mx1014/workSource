@@ -149,10 +149,10 @@ public class GeneralApprovalAdminController extends ControllerBase {
      * @return
      */
     @RequestMapping("deleteGeneralApproval")
-    @RestReturn(value=GeneralApprovalDTO.class)
+    @RestReturn(value=String.class)
     public RestResponse deleteGeneralApproval(@Valid GeneralApprovalIdCommand cmd) {
-    	GeneralApprovalDTO result = generalApprovalService.deleteGeneralApproval(cmd);
-    	RestResponse response = new RestResponse(result);
+    	generalApprovalService.deleteGeneralApproval(cmd);
+    	RestResponse response = new RestResponse();
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	
