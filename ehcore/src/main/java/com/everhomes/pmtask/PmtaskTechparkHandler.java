@@ -64,12 +64,13 @@ public class PmtaskTechparkHandler {
 	
 	public void synchronizedData(PmTask task, List<AttachmentDescriptor> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
+		String content = task.getContent();
 		param.put("fileFlag", "1");
-		param.put("fileTitle", "");
+		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
 		JSONArray headContent = new JSONArray();
 		JSONObject head1 = new JSONObject();
-		JSONObject head2 = new JSONObject();
+//		JSONObject head2 = new JSONObject();
 		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
 			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
 			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getAddressOrgId());
@@ -79,10 +80,10 @@ public class PmtaskTechparkHandler {
 				head1.put("phone", orgMember.getContactToken());
 				head1.put("company", organization.getName());
 				
-				head2.put("userName", orgMember.getContactName());
-				head2.put("userId", orgMember.getTargetId());
-				head2.put("phone", orgMember.getContactToken());
-				head2.put("company", organization.getName());
+//				head2.put("userName", orgMember.getContactName());
+//				head2.put("userId", orgMember.getTargetId());
+//				head2.put("phone", orgMember.getContactToken());
+//				head2.put("company", organization.getName());
 				param.put("submitUserId", orgMember.getContactToken());
 			}else {
 				
@@ -96,16 +97,16 @@ public class PmtaskTechparkHandler {
 				head1.put("phone", orgMember.getContactToken());
 				head1.put("company", organization.getName());
 				
-				head2.put("userName", task.getRequestorName());
-				head2.put("userId", "");
-				head2.put("phone", task.getRequestorPhone());
-				head2.put("company", "");
+//				head2.put("userName", task.getRequestorName());
+//				head2.put("userId", "");
+//				head2.put("phone", task.getRequestorPhone());
+//				head2.put("company", "");
 				param.put("submitUserId", orgMember.getContactToken());
 			}
 		}
 		
 		headContent.add(head1);
-		headContent.add(head2);
+//		headContent.add(head2);
 		
 		JSONArray formContent = new JSONArray();
 		JSONObject form = new JSONObject();
@@ -121,9 +122,9 @@ public class PmtaskTechparkHandler {
 		
 		form.put("serviceType", taskCategory.getName());
 		form.put("serviceClassify", null != category?category.getName():"");
-		form.put("serviceContent", task.getContent());
-		form.put("fileType", "1");
-		form.put("taskUrgencyLevel", "1");
+		form.put("serviceContent", content);
+		form.put("fileType", "物业维修申请流程");
+		form.put("taskUrgencyLevel", "普通");
 		form.put("liaisonContent", "");
 		form.put("backDate", dateSF.format(new Date()));
 		formContent.add(form);
