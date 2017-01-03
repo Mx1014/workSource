@@ -1,36 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.Condition;
-import org.jooq.JoinType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import ch.hsr.geohash.GeoHash;
-import freemarker.template.SimpleDate;
-import net.greghaines.jesque.Job;
-
-import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -55,79 +26,21 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
-import com.everhomes.promotion.OpPromotionConstant;
-import com.everhomes.promotion.OpPromotionScheduleJob;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.activity.ActivityCancelSignupCommand;
-import com.everhomes.rest.activity.ActivityCategoryDTO;
-import com.everhomes.rest.activity.ActivityCheckinCommand;
-import com.everhomes.rest.activity.ActivityConfirmCommand;
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityListCommand;
-import com.everhomes.rest.activity.ActivityListResponse;
-import com.everhomes.rest.activity.ActivityLocalStringCode;
-import com.everhomes.rest.activity.ActivityMemberDTO;
-import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
-import com.everhomes.rest.activity.ActivityPostCommand;
-import com.everhomes.rest.activity.ActivityRejectCommand;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.ActivityShareDetailResponse;
-import com.everhomes.rest.activity.ActivitySignupCommand;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityVideoDTO;
-import com.everhomes.rest.activity.ActivityVideoRoomType;
-import com.everhomes.rest.activity.GeoLocation;
-import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
-import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
-import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.GetVideoCapabilityCommand;
-import com.everhomes.rest.activity.ListActivitiesByLocationCommand;
-import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
-import com.everhomes.rest.activity.ListActivitiesByTagCommand;
-import com.everhomes.rest.activity.ListActivitiesCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListActivityCategoriesCommand;
-import com.everhomes.rest.activity.ListActivityEntryCategoriesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommand;
-import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
-import com.everhomes.rest.activity.ListOrgNearbyActivitiesCommand;
-import com.everhomes.rest.activity.GetActivityWarningCommand;
-import com.everhomes.rest.activity.ActivityWarningResponse;
-import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
-import com.everhomes.rest.activity.SetActivityWarningCommand;
-import com.everhomes.rest.activity.VideoCapabilityResponse;
-import com.everhomes.rest.activity.VideoManufacturerType;
-import com.everhomes.rest.activity.VideoState;
-import com.everhomes.rest.activity.VideoSupportType;
-import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
+import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.forum.AttachmentDTO;
-import com.everhomes.rest.forum.ForumConstants;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PostFavoriteFlag;
-import com.everhomes.rest.forum.PostStatus;
-import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
-import com.everhomes.rest.forum.TopicPublishStatus;
+import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -136,48 +49,39 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.ui.user.ActivityLocationScope;
-import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
-import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserFavoriteDTO;
-import com.everhomes.rest.user.UserFavoriteTargetType;
-import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.ui.activity.ActivityPromotionEntityDTO;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceLocalStringCode;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StatusChecker;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
-import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import net.greghaines.jesque.Job;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -2949,4 +2853,38 @@ public class ActivityServiceImpl implements ActivityService {
             return dto;
         }).collect(Collectors.toList());
 	}
+
+    @Override
+    public ListActivityPromotionEntitiesBySceneReponse listActivityPromotionEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd) {
+        // 官方活动
+        if (OfficialFlag.fromCode(cmd.getPublishPrivilege()) == OfficialFlag.YES) {
+            ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
+            listCmd.setCategoryId(cmd.getCategoryId());
+            listCmd.setSceneToken(cmd.getSceneToken());
+            listCmd.setPageSize(cmd.getPageSize());
+            listCmd.setPageAnchor(cmd.getPageAnchor());
+
+            ListActivitiesReponse reponse = this.listOfficialActivitiesByScene(listCmd);
+
+            List<ActivityPromotionEntityDTO> entities = new ArrayList<>();
+            for (ActivityDTO activityDTO : reponse.getActivities()) {
+                ActivityPromotionEntityDTO entityDTO = new ActivityPromotionEntityDTO();
+                entityDTO.setId(activityDTO.getActivityId());
+                entityDTO.setDescription(activityDTO.getDescription());
+                entityDTO.setPosterUrl(activityDTO.getPosterUrl());
+                entityDTO.setSubject(activityDTO.getSubject());
+                entityDTO.setStartTime(Instant.parse(activityDTO.getStartTime()).toEpochMilli());
+                entityDTO.setTag(activityDTO.getTag());
+                entities.add(entityDTO);
+            }
+
+            ListActivityPromotionEntitiesBySceneReponse promotionReponse = new ListActivityPromotionEntitiesBySceneReponse();
+            promotionReponse.setEntities(entities);
+            return promotionReponse;
+        }
+        // 非官方活动
+        else {
+            return null;
+        }
+    }
 }
