@@ -7,6 +7,7 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -818,6 +819,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 			attachment.setOwnerId(ownerId);
 //			attachment.setContentType(PostContentType.IMAGE.getCode());
 			attachment.setAttachmentType(attachmentType);
+			
+			attachment.setCreatorUid(UserContext.current().getUser().getId());
+	        ContentServerResource resource = contentServerService.findResourceByUri(dto.getContentUri());
+	        Integer size = resource.getResourceSize();
+	        attachment.setFileSize(size);
+	        
 			this.yellowPageProvider.createServiceAllianceAttachments(attachment);
 		}
 	}
