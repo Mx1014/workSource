@@ -9,6 +9,9 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 update eh_launch_pad_items set action_type = 33 where id in(112845, 112875) and namespace_id = 999983;
 update eh_launch_pad_items set action_data = '{"type":155,"parentId":155,"displayType": "list"}' where id in(112845, 112875) and namespace_id = 999983;
 
+
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (1, 999983, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修');
+
 --
 -- 科兴物业缴费2.0  add by xq.tian  2016/12/28
 --
@@ -34,3 +37,4 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 更新费用查询的icon
 --
 UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"http://beta.zuolin.com/property-bill/index.html?hideNavigationBar=1#verify_account#sign_suffix"}' WHERE `namespace_id` = '999983' AND `item_name` = '费用查询';
+
