@@ -126,7 +126,7 @@ public class PmtaskTechparkHandler {
 				JSONObject attachment = new JSONObject();
 				ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
 				String resourceName = resource.getResourceName();
-				String fileSuffix = "";
+				String fileSuffix = "jpg";
 				if(StringUtils.isNotBlank(resourceName)) {
 					int index = resourceName.lastIndexOf(".");
 					if(index != -1)
