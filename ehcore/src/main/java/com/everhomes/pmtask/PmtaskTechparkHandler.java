@@ -1,27 +1,20 @@
 package com.everhomes.pmtask;
 
-import java.io.BufferedReader;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
-import org.apache.http.client.methods.HttpPost;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -32,7 +25,6 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -43,7 +35,6 @@ import com.everhomes.pmtask.webservice.WorkflowAppDraftWebService;
 import com.everhomes.pmtask.webservice.WorkflowAppDraftWebServicePortType;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.RuntimeErrorException;
 
 import sun.misc.BASE64Encoder;
 
@@ -142,8 +133,10 @@ public class PmtaskTechparkHandler {
 				
 				String fileContent = null;
 				try {
-//					fileContent = getURLImage(contentUrl);
 					fileContent = getImageStr(contentUrl);
+//					String fileContent1 = getURLImage(contentUrl);
+//					
+//					System.out.println(fileContent.equals(fileContent1));
 					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
@@ -203,7 +196,7 @@ public class PmtaskTechparkHandler {
         BASE64Encoder encode = new BASE64Encoder();  
         String s = encode.encode(data);  
         return s;  
-    }  
+    }
 	
 	private byte[] readInputStream(InputStream inStream) throws Exception{  
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
@@ -215,24 +208,9 @@ public class PmtaskTechparkHandler {
         }  
         inStream.close();  
         return outStream.toByteArray();  
-    }  
+    } 
 	
-	public String getImageStr(String url) {
-		InputStream inputStream = get(url);
-	    byte[] data = null;
-	    try {
-	        data = new byte[inputStream.available()];
-	        inputStream.read(data);
-	        inputStream.close();
-	    } catch (IOException e) {
-	        e.printStackTrace();
-	    }
-	    // 加密
-	    BASE64Encoder encoder = new BASE64Encoder();
-	    return encoder.encode(data);
-	}
-	
-	public InputStream get(String url){
+	public String getImageStr(String url){
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
         try {
@@ -246,7 +224,23 @@ public class PmtaskTechparkHandler {
             if (entity != null) {
             	InputStream instream = entity.getContent();
             	System.out.println(instream.available());
-            	return instream;
+            	
+            	ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
+
+            	byte[] data = null;
+                byte[] buffer = new byte[1024];  
+                int len = 0;  
+        			while( (len=instream.read(buffer)) != -1 ){  
+        			    outStream.write(buffer, 0, len);  
+        			}
+        		
+                
+                data = outStream.toByteArray();  
+        	    
+        	    // 加密
+        	    BASE64Encoder encoder = new BASE64Encoder();
+        	    return encoder.encode(data);
+            	
 			}
 
         }catch (Exception e) {
