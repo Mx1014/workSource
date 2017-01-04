@@ -8,3 +8,5 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
     
 update eh_launch_pad_items set action_type = 33 where id in(112845, 112875) and namespace_id = 999983;
 update eh_launch_pad_items set action_data = '{"type":155,"parentId":155,"displayType": "list"}' where id in(112845, 112875) and namespace_id = 999983;
+
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (1, 999983, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修');
