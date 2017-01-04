@@ -306,7 +306,8 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		if(timeCompared) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))
-					.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.isNull()));
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.isNull())
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 		}
 		
@@ -1110,6 +1111,8 @@ public class QualityProviderImpl implements QualityProvider {
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.gt(locator.getAnchor()));
 			
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current));
+			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current)
+					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.isNull()));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 			
 			query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASKS.ID.asc());

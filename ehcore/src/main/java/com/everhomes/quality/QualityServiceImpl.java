@@ -43,6 +43,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -1044,7 +1045,7 @@ public class QualityServiceImpl implements QualityService {
 		record.setOperatorId(user.getId());
  
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
-		
+		task.setExecutorId(user.getId());
 		if(cmd.getOperatorType() != null) {
 			task.setOperatorType(cmd.getOperatorType());
 			record.setTargetType(cmd.getOperatorType());
@@ -1310,13 +1311,13 @@ public class QualityServiceImpl implements QualityService {
 				
 				task.setExecutiveGroupId(executiveGroup.getGroupId());
 				
-				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
-																	, executiveGroup.getGroupId());
+//				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
+//																	, executiveGroup.getGroupId());
 //				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
 //														executiveGroup.getGroupId(), OrganizationMemberGroupType.HECHA.getCode());
-				if(member != null) {
-					task.setExecutorType(member.getTargetType());
-					task.setExecutorId(member.getTargetId());
+//				if(members != null) {
+//					task.setExecutorType(member.getTargetType());
+//					task.setExecutorId(member.getTargetId());
 					List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
 					
 					if(timeRanges != null && timeRanges.size() > 0) {
@@ -1341,25 +1342,32 @@ public class QualityServiceImpl implements QualityService {
 								int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
 								String locale = "zh_CN";
 								String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-								sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+								
+								List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null); 
+								if(members != null) {
+									for(OrganizationMember member : members) {
+										sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+									}
+								}
+								
 							});
 						}
 							
 					}
 					
-				} else {
-					LOGGER.error("the group which id="+executiveGroup.getGroupId()+" don't have any hecha member!");
-//					throw RuntimeErrorException
-//							.errorWith(
-//									QualityServiceErrorCode.SCOPE,
-//									QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY,
-//									localeStringService.getLocalizedString(
-//											String.valueOf(QualityServiceErrorCode.SCOPE),
-//											String.valueOf(QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY),
-//											UserContext.current().getUser().getLocale(),
-//											"the group don't have any hecha member!"));
-				
-				}
+//				} else {
+//					LOGGER.error("the group which id="+executiveGroup.getGroupId()+" don't have any hecha member!");
+////					throw RuntimeErrorException
+////							.errorWith(
+////									QualityServiceErrorCode.SCOPE,
+////									QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY,
+////									localeStringService.getLocalizedString(
+////											String.valueOf(QualityServiceErrorCode.SCOPE),
+////											String.valueOf(QualityServiceErrorCode.ERROR_HECHA_MEMBER_EMPTY),
+////											UserContext.current().getUser().getLocale(),
+////											"the group don't have any hecha member!"));
+//				
+//				}
 				
 			}
 		} 
