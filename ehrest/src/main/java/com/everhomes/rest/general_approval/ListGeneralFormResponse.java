@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>forms: 表单列表</li>
+ * <li>forms: 表单列表 {@link com.everhomes.rest.general_approval.GeneralFormDTO}</li>
  * </ul>
  * @author janson
  *

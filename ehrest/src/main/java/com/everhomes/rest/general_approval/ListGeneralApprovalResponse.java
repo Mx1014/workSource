@@ -4,7 +4,11 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
-
+/**
+ * <ul>
+ * <li>dtos : 审批列表{@link com.everhomes.rest.general_approval.GeneralApprovalDTO}</li>
+ * </ul>
+ * */
 public class ListGeneralApprovalResponse {
 	@ItemType(GeneralApprovalDTO.class)
 	List<GeneralApprovalDTO> dtos;

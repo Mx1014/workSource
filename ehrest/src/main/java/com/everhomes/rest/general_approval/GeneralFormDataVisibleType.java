@@ -6,7 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>隐藏，只读，可以修改</li>
+ * <li>"HIDDEN"-隐藏，"READONLY"-只读，"EDITABLE"-可以修改</li>
  * </ul>
  * @author janson
  *

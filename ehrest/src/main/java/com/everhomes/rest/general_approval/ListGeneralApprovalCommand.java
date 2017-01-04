@@ -8,6 +8,8 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 对象类型，默认为 EhOrganizations {@link com.everhomes.entity.EntityType}</li>
  * <li>moduleId: 模块id - 每一个功能模块有自己的id</li>
  * <li>moduleType: 模块类型 默认"any-module" {@link com.everhomes.rest.flow.FlowModuleType}</li>
+ * <li>projectId: projectId</li>
+ * <li>projectType: projectType</li>
  * </ul>
  * @author janson
  *
@@ -17,6 +19,8 @@ public class ListGeneralApprovalCommand {
     private Long     moduleId;
     private Long     ownerId;
     private String     ownerType;
+    private String projectType;
+    private Long projectId;
 
 	public String getModuleType() {
 		return moduleType;
@@ -54,4 +58,20 @@ public class ListGeneralApprovalCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public String getProjectType() {
+		return projectType;
+	}
+
+	public void setProjectType(String projectType) {
+		this.projectType = projectType;
+	}
+
+	public Long getProjectId() {
+		return projectId;
+	}
+
+	public void setProjectId(Long projectId) {
+		this.projectId = projectId;
+	}
 }

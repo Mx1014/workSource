@@ -1,6 +1,7 @@
 package com.everhomes.general_approval;
 
 import java.sql.Timestamp;
+import java.text.Normalizer.Form;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -44,6 +45,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.google.zxing.Result;
 
 @Component
 public class GeneralApprovalServiceImpl implements GeneralApprovalService {
@@ -67,6 +69,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	@Override
 	public GetTemplateByApprovalIdResponse postApprovalForm(PostApprovalFormCommand cmd) {
 		// TODO Auto-generated method stub
+		//使用表单/审批 注意状态 config 
 		return null;
 	}
 
@@ -146,26 +149,71 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 
 	@Override
 	public GeneralApprovalDTO createGeneralApproval(CreateGeneralApprovalCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		// 
+		GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
+		ga.setStatus(GeneralFormStatus.CONFIG.getCode());
+		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd.getFormOriginId() );
+		ga.setFormVersion(form.getFormVersion());
+		this.generalApprovalProvider.createGeneralApproval(ga);
+		
+		return  ConvertHelper.convert(ga, GeneralApprovalDTO.class);
 	}
 
-	@Override
-	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public GeneralApprovalDTO updateGeneralApproval(UpdateGeneralApprovalCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+		if(null != cmd.getSupportType())
+			ga.setSupportType(cmd.getSupportType());
+		if(null != cmd.getFormOriginId())
+			ga.setFormOriginId(cmd.getFormOriginId());
+		if(null != cmd.getApprovalName())
+			ga.setApprovalName(cmd.getApprovalName());
+		this.generalApprovalProvider.updateGeneralApproval(ga);
+		return ConvertHelper.convert(ga, GeneralApprovalDTO.class);
+	}
+	
+	@Override
+	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
+		// 
+		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(null, Integer.MAX_VALUE-1,  new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_ID.eq(cmd.getOwnerId()));
+				query.addConditions(Tables.EH_GENERAL_APPROVALS.OWNER_TYPE.eq(cmd.getOwnerType())); 
+				query.addConditions(Tables.EH_GENERAL_APPROVALS.STATUS.ne(GeneralFormStatus.INVALID.getCode()));
+				query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_ID.eq(cmd.getModuleId()));
+				query.addConditions(Tables.EH_GENERAL_APPROVALS.MODULE_TYPE.eq(cmd.getModuleType()));  
+				query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_ID.eq(cmd.getProjectId()));
+				query.addConditions(Tables.EH_GENERAL_APPROVALS.PROJECT_TYPE.eq(cmd.getProjectType()));  
+				return query;
+			}
+    	});
+			
+		ListGeneralApprovalResponse resp = new ListGeneralApprovalResponse();
+		resp.setDtos(gas.stream().map((r)->{return  processApproval(r);}).collect(Collectors.toList()));
+		return resp;
+	}
+
+
+	private GeneralApprovalDTO processApproval(GeneralApproval r) {
+		GeneralApprovalDTO result = ConvertHelper.convert(r, GeneralApprovalDTO.class);
+		//form name 
+		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(r.getFormOriginId() );
+		result.setFormName(form.getFormName());
+		//flow
+		
+		return result;
 	}
 
 	@Override
-	public GeneralApprovalDTO deleteGeneralApproval(GeneralApprovalIdCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public void deleteGeneralApproval(GeneralApprovalIdCommand cmd) {
+
+		// 删除是状态置为invalid
+		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd.getApprovalId());
+		ga.setStatus(GeneralFormStatus.INVALID.getCode());
+		this.generalApprovalProvider.updateGeneralApproval(ga);
 	}
 
 }

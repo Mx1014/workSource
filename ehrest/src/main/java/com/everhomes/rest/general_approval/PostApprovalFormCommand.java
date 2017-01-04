@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul> 提交表单信息
  * <li>approvalId 具体审批项的 ID </li>
- * <li>values: 审批项中，每项对应的值 </li>
+ * <li>values: 审批项中，每项对应的值{@link com.everhomes.rest.general_approval.PostApprovalFormItem} </li>
  * </ul>
  * @author janson
  *

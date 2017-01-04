@@ -25,21 +25,25 @@ import com.everhomes.discover.ItemType;
  *
  */
 public class GeneralApprovalDTO {
-    private Byte     status;
-    private Timestamp     updateTime;
-    private String     projectType;
-    private Long     organizationId;
-    private Long     projectId;
+	private Long     id;
+	private Integer     namespaceId;
     private String     ownerType;
-    private Timestamp     createTime;
-    private Integer     namespaceId;
-    private Long     formOriginId;
-    private Long     formVersion;
     private Long     ownerId;
     private String     moduleType;
-    private Long     id;
     private Long     moduleId;
+    private String     projectType;
+    private Long     projectId;
+    private Long     organizationId;
     private Byte supportType;
+    private Long     formOriginId;
+    private Long     formVersion;
+    private Byte     status;
+    private String approvalName;
+    private String formName;
+    private String flowName;
+    
+    private Timestamp     createTime;
+    private Timestamp     updateTime;
     
 
     public Byte getStatus() {
@@ -165,6 +169,30 @@ public class GeneralApprovalDTO {
 
 	public void setSupportType(Byte supportType) {
 		this.supportType = supportType;
+	}
+
+	public String getApprovalName() {
+		return approvalName;
+	}
+
+	public void setApprovalName(String approvalName) {
+		this.approvalName = approvalName;
+	}
+
+	public String getFormName() {
+		return formName;
+	}
+
+	public void setFormName(String formName) {
+		this.formName = formName;
+	}
+
+	public String getFlowName() {
+		return flowName;
+	}
+
+	public void setFlowName(String flowName) {
+		this.flowName = flowName;
 	}
 }
 
