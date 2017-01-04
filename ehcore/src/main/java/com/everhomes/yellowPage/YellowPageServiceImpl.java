@@ -6,6 +6,7 @@ import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
@@ -639,10 +640,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 
     private void processDetailUrl(ServiceAllianceDTO dto) {
         try {
-            String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
+            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+            String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
             String name = org.apache.commons.lang.StringUtils.trimToEmpty(dto.getName());
-            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
-            dto.setDetailUrl(url);
+            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+            dto.setDetailUrl(homeUrl + detailUrl);
         } catch (Exception e) {
             e.printStackTrace();
         }

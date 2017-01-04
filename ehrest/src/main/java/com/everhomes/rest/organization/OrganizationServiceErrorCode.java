@@ -40,6 +40,7 @@ public interface OrganizationServiceErrorCode {
     
     static final int ERROR_ASSIGNMENT_EXISTS=400004; //人员角色已存在
     static final int ERROR_MOBILE_NUM = 500003; //手机号错误
+    static final int ERROR_ORG_NOT_EXIST = 500004; // 公司不存在
 
     
     
