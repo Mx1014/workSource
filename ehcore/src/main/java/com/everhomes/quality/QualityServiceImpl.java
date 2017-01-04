@@ -878,7 +878,7 @@ public class QualityServiceImpl implements QualityService {
 //			return r;
 //		});
         
-		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, executeUid);
+		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, user.getId());
         
         return new ListQualityInspectionTasksResponse(nextPageAnchor, dtoList);
 	}
@@ -935,8 +935,8 @@ public class QualityServiceImpl implements QualityService {
 		        r.setCategoryName(getSpecificationNamePath(category.getPath(), category.getOwnerType(), category.getOwnerId()));
 		    }
 			
-		    r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
         	if(executeUid != null) {
+        		r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
         		if(r.getOperatorId() != null && r.getOperatorId().equals(executeUid)) {
         			r.setTaskFlag(QualityTaskType.RECTIFY_TASK.getCode());
         		}
@@ -1882,13 +1882,13 @@ public class QualityServiceImpl implements QualityService {
         			orgIds, QualityGroupType.REVIEW_GROUP.getCode());
         	
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize, ownerId, ownerType, targetId, targetType, 
-            		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
+            		cmd.getTaskType(), null, startDate, endDate, null,
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, standardIds, cmd.getManualFlag());
 
         	
         } else {
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize, ownerId, ownerType, targetId, targetType, 
-        		cmd.getTaskType(), null, startDate, endDate, cmd.getGroupId(),
+        		cmd.getTaskType(), null, startDate, endDate, null,
         		cmd.getExecuteStatus(), cmd.getReviewStatus(), false, null, cmd.getManualFlag());
         }
 
