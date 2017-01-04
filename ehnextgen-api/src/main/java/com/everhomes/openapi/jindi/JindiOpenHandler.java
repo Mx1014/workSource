@@ -7,9 +7,13 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import com.alibaba.fastjson.JSON;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.openapi.jindi.JindiDataResponse;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
 import com.everhomes.rest.openapi.jindi.JindiOpenConstant;
+import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 
 public interface JindiOpenHandler {
@@ -85,7 +89,21 @@ public interface JindiOpenHandler {
 		
 	}
 
-
+	default User getUser(Long userId) {
+		if (userId == null) {
+			return new User();
+		}
+		UserProvider userProvider = PlatformContext.getComponent(UserProvider.class);
+		User user = userProvider.findUserById(userId);
+		if (user == null) {
+			return new User();
+		}
+		List<UserIdentifier> userIdentifierList = userProvider.listUserIdentifiersOfUser(userId);
+		if (userIdentifierList != null && userIdentifierList.size() > 0) {
+			user.setIdentifierToken(userIdentifierList.get(0).getIdentifierToken());
+		}
+		return user;
+	}
 	
 	
 }

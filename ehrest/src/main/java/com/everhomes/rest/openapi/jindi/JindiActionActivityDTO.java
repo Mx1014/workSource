@@ -13,9 +13,18 @@ public class JindiActionActivityDTO extends JindiDataDTO {
 	private Long id;
 	private Long userId;
 	private String userName;
+	private String phone;
 	private String subject;
 	private Timestamp startTime;
 	private Byte status;
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	public String getUserName() {
 		return userName;

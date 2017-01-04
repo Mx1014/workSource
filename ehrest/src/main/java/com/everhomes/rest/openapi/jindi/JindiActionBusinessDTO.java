@@ -14,12 +14,21 @@ public class JindiActionBusinessDTO extends JindiDataDTO {
 	private Long id;
 	private Long userId;
 	private String userName;
+	private String phone;
 	private Long communityId;
 	private String communityName;
 	private String transactionNo;
 	private Timestamp paidTime;
 	private Byte paidChannel;
 	private BigDecimal paidAmount;
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	public String getUserName() {
 		return userName;

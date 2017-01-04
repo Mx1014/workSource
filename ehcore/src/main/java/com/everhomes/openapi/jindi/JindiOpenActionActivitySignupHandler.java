@@ -12,7 +12,6 @@ import com.everhomes.rest.openapi.jindi.JindiActionType;
 import com.everhomes.rest.openapi.jindi.JindiDataType;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
 import com.everhomes.user.User;
-import com.everhomes.user.UserProvider;
 
 /**
  * 
@@ -25,9 +24,6 @@ public class JindiOpenActionActivitySignupHandler implements JindiOpenHandler {
 
 	@Autowired
 	private ActivityProivider activityProivider;
-	
-	@Autowired
-	private UserProvider userProvider;
 	
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
@@ -47,22 +43,16 @@ public class JindiOpenActionActivitySignupHandler implements JindiOpenHandler {
 
 			@Override
 			public Object complementInfo(JindiFetchDataCommand cmd, ActivityRoster src) {
+				User user = getUser(src.getUid());
 				JindiActionActivitySignupDTO data = new JindiActionActivitySignupDTO();
 				data.setId(src.getId());
 				data.setUserId(src.getUid());
-				data.setUserName(getUser(src.getUid()).getNickName());
+				data.setUserName(user.getNickName());
+				data.setPhone(user.getIdentifierToken());
 				data.setActivityId(src.getActivityId());
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getCreateTime());
 				return data;
-			}
-			
-			private User getUser(Long id) {
-				User user = null;
-				if (id == null || (user = userProvider.findUserById(id)) == null) {
-					user = new User();
-				}
-				return user;
 			}
 		});
 	}

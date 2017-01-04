@@ -26,9 +26,6 @@ public class JindiOpenActionStationRentalHandler implements JindiOpenHandler {
 	@Autowired
 	private OfficeCubicleProvider officeCubicleProvider;
 	
-	@Autowired
-	private UserProvider userProvider;
-	
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
 		return superFetchData(cmd, new JindiOpenCallback<OfficeCubicleOrder>() {
@@ -58,14 +55,6 @@ public class JindiOpenActionStationRentalHandler implements JindiOpenHandler {
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getUpdateTime());
 				return data;
-			}
-			
-			private User getUser(Long id) {
-				User user = null;
-				if (id == null || (user = userProvider.findUserById(id)) == null) {
-					user = new User();
-				}
-				return user;
 			}
 		});
 	}

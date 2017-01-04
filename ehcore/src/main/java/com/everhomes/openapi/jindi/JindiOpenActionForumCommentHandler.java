@@ -14,7 +14,6 @@ import com.everhomes.rest.openapi.jindi.JindiActionType;
 import com.everhomes.rest.openapi.jindi.JindiDataType;
 import com.everhomes.rest.openapi.jindi.JindiFetchDataCommand;
 import com.everhomes.user.User;
-import com.everhomes.user.UserProvider;
 
 /**
  * 
@@ -30,9 +29,6 @@ public class JindiOpenActionForumCommentHandler implements JindiOpenHandler {
 	
 	@Autowired
 	private CommunityProvider communityProvider;
-	
-	@Autowired
-	private UserProvider userProvider;
 	
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
@@ -52,11 +48,13 @@ public class JindiOpenActionForumCommentHandler implements JindiOpenHandler {
 
 			@Override
 			public Object complementInfo(JindiFetchDataCommand cmd, Post src) {
+				User user = getUser(src.getCreatorUid());
 				JindiActionForumCommentDTO data = new JindiActionForumCommentDTO();
 				data.setId(src.getId());
 				data.setParentId(src.getParentPostId());
 				data.setUserId(src.getCreatorUid());
-				data.setUserName(getUser(src.getCreatorUid()).getNickName());
+				data.setUserName(user.getNickName());
+				data.setPhone(user.getIdentifierToken());
 				data.setCreateTime(src.getCreateTime());
 				data.setUpdateTime(src.getUpdateTime());
 				data.setContent(src.getContent());
@@ -71,14 +69,6 @@ public class JindiOpenActionForumCommentHandler implements JindiOpenHandler {
 				}
 				
 				return data;
-			}
-
-			private User getUser(Long id) {
-				User user = null;
-				if (id == null || (user = userProvider.findUserById(id)) == null) {
-					user = new User();
-				}
-				return user;
 			}
 		});
 	}

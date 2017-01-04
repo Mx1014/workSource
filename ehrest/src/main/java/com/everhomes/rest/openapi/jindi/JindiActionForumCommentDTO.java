@@ -12,10 +12,19 @@ public class JindiActionForumCommentDTO extends JindiDataDTO {
 	private Long parentId;
 	private Long userId;
 	private String userName;
+	private String phone;
 	private Long communityId;
 	private String communityName;
 	private String content;
 	private Byte status;
+
+	public String getPhone() {
+		return phone;
+	}
+
+	public void setPhone(String phone) {
+		this.phone = phone;
+	}
 
 	public String getUserName() {
 		return userName;

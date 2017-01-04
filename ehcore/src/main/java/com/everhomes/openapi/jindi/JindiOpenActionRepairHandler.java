@@ -4,6 +4,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -49,9 +50,6 @@ public class JindiOpenActionRepairHandler implements JindiOpenHandler {
 	@Autowired
 	private BuildingProvider buildingProvider;
 	
-	@Autowired
-	private UserProvider userProvider;
-	
 	@Override
 	public String fetchData(JindiFetchDataCommand cmd) {
 		return superFetchData(cmd, new JindiOpenCallback<PmTaskLog>() {
@@ -81,10 +79,15 @@ public class JindiOpenActionRepairHandler implements JindiOpenHandler {
 				Address address = getAddress(pmTask.getAddressId());
 				Building building = getBuilding(src.getNamespaceId(), pmTask.getOwnerId(), address.getBuildingName());
 				
+				User user = getUser(pmTask.getCreatorUid());
+				if (StringUtils.isEmpty(user.getNickName())) {
+					user = getUser(src.getOperatorUid());
+				}
 				JindiActionRepairDTO data = new JindiActionRepairDTO();
 				data.setId(src.getId());
 				data.setUserId(pmTask.getCreatorUid());
-				data.setUserName(getUser(pmTask.getCreatorUid()).getNickName());
+				data.setUserName(user.getNickName());
+				data.setPhone(user.getIdentifierToken());
 				data.setCommunityId(community.getId());
 				data.setCommunityName(community.getName());
 				data.setBuildingId(building.getId());
@@ -105,14 +108,6 @@ public class JindiOpenActionRepairHandler implements JindiOpenHandler {
 				data.setUpdateTime(src.getOperatorTime());
 				
 				return data;
-			}
-			
-			private User getUser(Long id) {
-				User user = null;
-				if (id == null || (user = userProvider.findUserById(id)) == null) {
-					user = new User();
-				}
-				return user;
 			}
 
 			//简单做下缓存
