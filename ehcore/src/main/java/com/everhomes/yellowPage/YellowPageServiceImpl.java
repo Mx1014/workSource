@@ -517,7 +517,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 			} else if(JumpType.MODULE.equals(JumpType.fromCode(response.getJumpType()))) {
 				response.setTemplateName(response.getTemplateType());
-				response.setButtonTitle(response.getTemplateType());
+				response.setButtonTitle("我要申请");
 			}
 		} else {
 			//兼容以前只有模板跳转时jumptype字段为null的情况
@@ -633,7 +633,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					}
 				} else if(JumpType.MODULE.equals(JumpType.fromCode(dto.getJumpType()))) {
 					dto.setTemplateName(dto.getTemplateType());
-					dto.setButtonTitle(dto.getTemplateType());
+					dto.setButtonTitle("我要申请");
 				}
 			} else {
 				//兼容以前只有模板跳转时jumptype字段为null的情况
