@@ -507,14 +507,31 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 //		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
 		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
-		if(!StringUtils.isEmpty(response.getTemplateType())) {
-			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
-			if(template != null) {
-				response.setTemplateName(template.getName());
-				response.setButtonTitle(template.getButtonTitle());
+		if(response.getJumpType() != null) {
+			
+			if(JumpType.TEMPLATE.equals(JumpType.fromCode(response.getJumpType()))) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+				if(template != null) {
+					response.setTemplateName(template.getName());
+					response.setButtonTitle(template.getButtonTitle());
+				}
+			} else if(JumpType.MODULE.equals(JumpType.fromCode(response.getJumpType()))) {
+				response.setTemplateName(response.getTemplateType());
+				response.setButtonTitle("我要申请");
+			}
+		} else {
+			//兼容以前只有模板跳转时jumptype字段为null的情况
+			if(response.getTemplateType() != null) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+				if(template != null) {
+					response.setTemplateName(template.getName());
+					response.setButtonTitle(template.getButtonTitle());
+				}
 			}
 			
 		}
+		
+		this.processDetailUrl(response);
 //		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
@@ -616,7 +633,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					}
 				} else if(JumpType.MODULE.equals(JumpType.fromCode(dto.getJumpType()))) {
 					dto.setTemplateName(dto.getTemplateType());
-					dto.setButtonTitle(dto.getTemplateType());
+					dto.setButtonTitle("我要申请");
 				}
 			} else {
 				//兼容以前只有模板跳转时jumptype字段为null的情况
