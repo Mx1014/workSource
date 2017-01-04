@@ -13,8 +13,8 @@ import java.math.BigDecimal;
  */
 public class PmKeXingBillStatDTO {
 
-    private BigDecimal unpaidMonth;
-    private BigDecimal unpaidAmount;
+    private BigDecimal unpaidMonth = BigDecimal.ZERO;
+    private BigDecimal unpaidAmount = BigDecimal.ZERO;
 
     public BigDecimal getUnpaidMonth() {
         return unpaidMonth;
