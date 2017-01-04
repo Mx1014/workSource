@@ -643,7 +643,14 @@ public class YellowPageServiceImpl implements YellowPageService {
             String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
             String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
             String name = org.apache.commons.lang.StringUtils.trimToEmpty(dto.getName());
-            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+            
+            String ownerType = dto.getOwnerType();
+            ownerType = (ownerType  == null) ? "" : ownerType;
+            Long ownerId = dto.getOwnerId();
+            ownerId = (ownerId == null) ? 0 : ownerId;
+            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2), ownerType, ownerId);
+            
+//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
             dto.setDetailUrl(homeUrl + detailUrl);
         } catch (Exception e) {
             e.printStackTrace();
