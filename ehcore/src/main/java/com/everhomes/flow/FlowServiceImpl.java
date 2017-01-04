@@ -2795,7 +2795,7 @@ public class FlowServiceImpl implements FlowService {
 		graphDetail.setSupervisors(selections);
 		
 		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowId
-				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), 0);
 		if(seles != null && seles.size() > 0) {
 			seles.stream().forEach((sel) -> {
 				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
