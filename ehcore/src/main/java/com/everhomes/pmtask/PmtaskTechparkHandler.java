@@ -140,11 +140,11 @@ public class PmtaskTechparkHandler {
 				
 				attachment.put("fileSuffix", fileSuffix);
 				
-//				InputStream in = get(contentUrl);
-//				if(null != in)
 				String fileContent = null;
 				try {
-					fileContent = getURLImage(contentUrl);
+//					fileContent = getURLImage(contentUrl);
+					fileContent = getImageStr(contentUrl);
+					
 				} catch (Exception e) {
 					// TODO Auto-generated catch block
 					e.printStackTrace();
@@ -184,7 +184,7 @@ public class PmtaskTechparkHandler {
         return url;
     }
 	
-	public static String getURLImage(String imageUrl) throws Exception {
+	public String getURLImage(String imageUrl) throws Exception {
 		if(null == imageUrl)
 			return null;
         //new一个URL对象  
@@ -196,7 +196,8 @@ public class PmtaskTechparkHandler {
         //超时响应时间为5秒  
 //        conn.setConnectTimeout(5 * 1000);  
         //通过输入流获取图片数据  
-        InputStream inStream = conn.getInputStream();  
+        InputStream inStream = conn.getInputStream();
+        System.out.println(inStream.available());
         //得到图片的二进制数据，以二进制封装得到数据，具有通用性  
         byte[] data = readInputStream(inStream);  
         BASE64Encoder encode = new BASE64Encoder();  
@@ -204,7 +205,7 @@ public class PmtaskTechparkHandler {
         return s;  
     }  
 	
-	private static byte[] readInputStream(InputStream inStream) throws Exception{  
+	private byte[] readInputStream(InputStream inStream) throws Exception{  
         ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
 
         byte[] buffer = new byte[1024];  
@@ -216,7 +217,8 @@ public class PmtaskTechparkHandler {
         return outStream.toByteArray();  
     }  
 	
-	public String getImageStr(InputStream inputStream) {
+	public String getImageStr(String url) {
+		InputStream inputStream = get(url);
 	    byte[] data = null;
 	    try {
 	        data = new byte[inputStream.available()];
@@ -243,6 +245,7 @@ public class PmtaskTechparkHandler {
             
             if (entity != null) {
             	InputStream instream = entity.getContent();
+            	System.out.println(instream.available());
             	return instream;
 			}
 
