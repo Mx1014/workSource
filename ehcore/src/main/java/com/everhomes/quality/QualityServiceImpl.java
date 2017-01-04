@@ -804,15 +804,30 @@ public class QualityServiceImpl implements QualityService {
         	endDate = new Timestamp(cmd.getEndDate());
         }
 
-        Long currentUid = null;
+//        Long currentUid = null;
+//        boolean timeCompared = false;
+//        if(cmd.getExecuteFlag() != null) {
+//        	timeCompared = true;
+//        	if(cmd.getExecuteFlag() == 1) {
+//	        	currentUid = user.getId();
+//        	}
+//        }
+//        final Long executeUid = currentUid;
         boolean timeCompared = false;
-        if(cmd.getExecuteFlag() != null) {
+        
+        List<Long> executeGroupIds = new ArrayList<Long>();
+        if(cmd.getExecuteFlag() != null && cmd.getExecuteFlag() == 1) {
         	timeCompared = true;
-        	if(cmd.getExecuteFlag() == 1) {
-	        	currentUid = user.getId();
-        	}
-        }
-        final Long executeUid = currentUid;
+        	//获取用户关联机构
+            List<OrganizationDTO> relatedOrgs = organizationService.listUserRelateOrganizations(user.getNamespaceId(), user.getId(), null);
+            if(relatedOrgs != null && relatedOrgs.size() > 0) {
+            	for(OrganizationDTO org : relatedOrgs) {
+            		executeGroupIds.add(org.getId());
+            	}
+            }
+            
+        } 
+        
         List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
         
         if(cmd.getIsReview() != null && cmd.getIsReview() == 1) {
@@ -826,13 +841,13 @@ public class QualityServiceImpl implements QualityService {
         			orgIds, QualityGroupType.REVIEW_GROUP.getCode());
         	
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
-            		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(),
+            		cmd.getTaskType(), null, startDate, endDate, executeGroupIds,
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, standardIds, cmd.getManualFlag());
 
         	
         } else {
         	tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
-        		cmd.getTaskType(), executeUid, startDate, endDate, cmd.getGroupId(),
+        		cmd.getTaskType(), null, startDate, endDate, executeGroupIds,
         		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
         }
         
@@ -920,10 +935,9 @@ public class QualityServiceImpl implements QualityService {
 		        r.setCategoryName(getSpecificationNamePath(category.getPath(), category.getOwnerType(), category.getOwnerId()));
 		    }
 			
+		    r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
         	if(executeUid != null) {
-        		if(r.getExecutorId() != null && r.getExecutorId().equals(executeUid)) {
-        			r.setTaskFlag(QualityTaskType.VERIFY_TASK.getCode());
-        		}else if(r.getOperatorId() != null && r.getOperatorId().equals(executeUid)) {
+        		if(r.getOperatorId() != null && r.getOperatorId().equals(executeUid)) {
         			r.setTaskFlag(QualityTaskType.RECTIFY_TASK.getCode());
         		}
         	}
