@@ -2323,8 +2323,8 @@ public class FlowServiceImpl implements FlowService {
 			}
 			nodeMap.put(node.getId(), node);
 		}
-		if(btn.getFlowNodeId() != null && nodeMap.containsKey(btn.getFlowNodeId())) {
-			nextNode = nodeMap.get(btn.getFlowNodeId());
+		if(btn.getGotoNodeId() != null && nodeMap.containsKey(btn.getGotoNodeId())) {
+			nextNode = nodeMap.get(btn.getGotoNodeId());
 		}
 		if(nextNode == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "next node not exists");
