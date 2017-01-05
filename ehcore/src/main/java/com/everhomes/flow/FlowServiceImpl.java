@@ -1732,6 +1732,7 @@ public class FlowServiceImpl implements FlowService {
 			flowCase.setProjectType(snapshotFlow.getProjectType());
 		}
 		
+    	flowListenerManager.onFlowCaseCreating(flowCase);
 		flowCaseProvider.createFlowCase(flowCase);
 		flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());//get again for default values
 		

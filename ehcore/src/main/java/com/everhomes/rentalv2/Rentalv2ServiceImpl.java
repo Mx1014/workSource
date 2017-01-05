@@ -95,6 +95,7 @@ import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -3229,7 +3230,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		// 客户端生成订单
 		return response;
 	}
-	private static final String REFER_TYPE= "rental.order";
+	private static final String REFER_TYPE= FlowReferType.RENTAL.getCode();
 	@Override
 	public void onOrderCancel(RentalOrder order) {
 		//终止工作流

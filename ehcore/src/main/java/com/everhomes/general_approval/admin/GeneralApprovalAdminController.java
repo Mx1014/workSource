@@ -62,6 +62,22 @@ public class GeneralApprovalAdminController extends ControllerBase {
     	
     	return response;
     }
+
+    /**
+     * <b>URL: /admin/general_approval/getApprovalForm</b>
+     * <p> 获取 公司的表单    </p>
+     * @return
+     */
+    @RequestMapping("getApprovalForm")
+    @RestReturn(value=GeneralFormDTO.class)
+    public RestResponse getApprovalForm(@Valid ApprovalFormIdCommand cmd) {
+    	GeneralFormDTO result = generalApprovalService.getApprovalForm(cmd);
+    	RestResponse response = new RestResponse(result);
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	
+    	return response;
+    }
       
     /**
      * <b>URL: /admin/general_approval/listApprovalForms</b>

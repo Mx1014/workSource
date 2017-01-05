@@ -76,4 +76,6 @@ public interface FlowModuleListener {
 	 * @param ctx
 	 */
 	void onFlowButtonFired(FlowCaseState ctx);
+
+	void onFlowCaseCreating(FlowCase flowCase);
 }

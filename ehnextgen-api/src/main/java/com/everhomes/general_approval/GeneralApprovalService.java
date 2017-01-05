@@ -38,4 +38,6 @@ public interface GeneralApprovalService {
 
 	GeneralFormDTO updateApprovalForm(UpdateApprovalFormCommand cmd);
 
+	GeneralFormDTO getApprovalForm(ApprovalFormIdCommand cmd);
+
 }
