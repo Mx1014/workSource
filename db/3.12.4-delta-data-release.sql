@@ -44,6 +44,11 @@ INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_nam
 
 -- merge project by sfyan 20170105 
 insert into `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) values('30550','子项目管理','30000',NULL,'react:/child-project/project-list/30550','0','2','/30000/30550','park',306,30550);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 30550, '', 'EhNamespaces', 1000000, 2);
+
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES (10091, 0, '子项目管理', '子项目 管理员权限', NULL);
 
