@@ -1,9 +1,12 @@
 package com.everhomes.pmtask;
 
 import java.io.BufferedReader;
+import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
+import java.net.HttpURLConnection;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
@@ -58,18 +61,16 @@ public class PmtaskTechparkHandler {
 	@Autowired
     private ContentServerService contentServerService;
 
-	WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
-	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	public void synchronizedData(PmTask task, List<AttachmentDescriptor> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
+		String content = task.getContent();
 		param.put("fileFlag", "1");
-		param.put("fileTitle", "");
+		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
 		JSONArray headContent = new JSONArray();
 		JSONObject head1 = new JSONObject();
-		JSONObject head2 = new JSONObject();
 		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
 			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
 			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getAddressOrgId());
@@ -79,10 +80,6 @@ public class PmtaskTechparkHandler {
 				head1.put("phone", orgMember.getContactToken());
 				head1.put("company", organization.getName());
 				
-				head2.put("userName", orgMember.getContactName());
-				head2.put("userId", orgMember.getTargetId());
-				head2.put("phone", orgMember.getContactToken());
-				head2.put("company", organization.getName());
 				param.put("submitUserId", orgMember.getContactToken());
 			}else {
 				
@@ -96,16 +93,11 @@ public class PmtaskTechparkHandler {
 				head1.put("phone", orgMember.getContactToken());
 				head1.put("company", organization.getName());
 				
-				head2.put("userName", task.getRequestorName());
-				head2.put("userId", "");
-				head2.put("phone", task.getRequestorPhone());
-				head2.put("company", "");
 				param.put("submitUserId", orgMember.getContactToken());
 			}
 		}
 		
 		headContent.add(head1);
-		headContent.add(head2);
 		
 		JSONArray formContent = new JSONArray();
 		JSONObject form = new JSONObject();
@@ -115,13 +107,15 @@ public class PmtaskTechparkHandler {
 				form.put("chooseStoried", address.getBuildingName());
 			else
 				form.put("chooseStoried", "");
+		}else{
+			form.put("chooseStoried", "");
 		}
 		
 		form.put("serviceType", taskCategory.getName());
 		form.put("serviceClassify", null != category?category.getName():"");
-		form.put("serviceContent", task.getContent());
-		form.put("fileType", "1");
-		form.put("taskUrgencyLevel", "1");
+		form.put("serviceContent", content);
+		form.put("fileType", "物业维修申请流程");
+		form.put("taskUrgencyLevel", "普通");
 		form.put("liaisonContent", "");
 		form.put("backDate", dateSF.format(new Date()));
 		formContent.add(form);
@@ -136,8 +130,8 @@ public class PmtaskTechparkHandler {
 				if(StringUtils.isNotBlank(resourceName)) {
 					int index = resourceName.lastIndexOf(".");
 					if(index != -1)
-						fileSuffix = resourceName.substring(index, resourceName.length());
-
+						fileSuffix = resourceName.substring(index + 1, resourceName.length());
+					attachment.put("fileName", resourceName);
 				}else {
 					attachment.put("fileName", "");
 				}
@@ -146,9 +140,17 @@ public class PmtaskTechparkHandler {
 				
 				attachment.put("fileSuffix", fileSuffix);
 				
-				InputStream in = get(contentUrl);
-				if(null != in)
-					attachment.put("fileContent", getImageStr(in));
+//				InputStream in = get(contentUrl);
+//				if(null != in)
+				String fileContent = null;
+				try {
+					fileContent = getURLImage(contentUrl);
+				} catch (Exception e) {
+					// TODO Auto-generated catch block
+					e.printStackTrace();
+				}
+				if(null != fileContent)
+					attachment.put("fileContent", fileContent);
 				else
 					continue;
 				enclosure.add(attachment);
@@ -161,6 +163,8 @@ public class PmtaskTechparkHandler {
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());
 
+        WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
+    	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
 		String result = port.worflowAppDraft(param.toJSONString());
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);
@@ -179,6 +183,38 @@ public class PmtaskTechparkHandler {
         
         return url;
     }
+	
+	public static String getURLImage(String imageUrl) throws Exception {
+		if(null == imageUrl)
+			return null;
+        //new一个URL对象  
+        URL url = new URL(imageUrl);  
+        //打开链接  
+        HttpURLConnection conn = (HttpURLConnection)url.openConnection();  
+        //设置请求方式为"GET"  
+        conn.setRequestMethod("GET");  
+        //超时响应时间为5秒  
+//        conn.setConnectTimeout(5 * 1000);  
+        //通过输入流获取图片数据  
+        InputStream inStream = conn.getInputStream();  
+        //得到图片的二进制数据，以二进制封装得到数据，具有通用性  
+        byte[] data = readInputStream(inStream);  
+        BASE64Encoder encode = new BASE64Encoder();  
+        String s = encode.encode(data);  
+        return s;  
+    }  
+	
+	private static byte[] readInputStream(InputStream inStream) throws Exception{  
+        ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
+
+        byte[] buffer = new byte[1024];  
+        int len = 0;  
+        while( (len=inStream.read(buffer)) != -1 ){  
+            outStream.write(buffer, 0, len);  
+        }  
+        inStream.close();  
+        return outStream.toByteArray();  
+    }  
 	
 	public String getImageStr(InputStream inputStream) {
 	    byte[] data = null;

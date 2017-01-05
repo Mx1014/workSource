@@ -21,8 +21,10 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -43,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 
@@ -100,6 +103,7 @@ import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.EvaluateScoreDTO;
+import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
@@ -110,6 +114,7 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
+import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
@@ -169,6 +174,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	public static final String CATEGORY_SEPARATOR = "/";
 
+	private static final String HANDLER = "pmtask.handler-";
+	
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
@@ -803,10 +810,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = user.getNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
-		
-		if(namespaceId == 1000000) 
-			handle = PmTaskHandle.FLOW;
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -834,11 +838,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
-		
-		if(namespaceId == 1000000) 
-			handle = PmTaskHandle.FLOW;
-		
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.createTask(cmd, null, requestorName, requestorPhone);
@@ -2444,6 +2445,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"ExportTaskOperatorStatistics is fail.");
 		}
 		
+	}
+
+	@Override   
+	public NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd) {
+		
+		NamespaceHandlerDTO dto = new NamespaceHandlerDTO();
+		
+		if(null == cmd.getNamespaceId())
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		
+		String handler = configProvider.getValue(HANDLER + cmd.getNamespaceId(), PmTaskHandle.SHEN_YE);
+		
+		dto.setHandler(handler);
+		
+		return dto;
 	}
 	
 }
