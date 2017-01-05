@@ -108,4 +108,10 @@ public interface QualityProvider {
 	Set<Long> listRecordsTaskIdByOperatorId(Long operatorId, Long maxTaskId);
 	
 	List<QualityInspectionTasks> listTaskByIds(List<Long> taskIds);
+	
+	void createQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);
+	void updateQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);
+	void deleteQualityInspectionTaskTemplates(Long templateId);
+	List<QualityInspectionTaskTemplates> listQualityInspectionTaskTemplates(ListingLocator locator, int count, Long uid);
+	
 }

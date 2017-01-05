@@ -24,6 +24,7 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteQualityInspectionTaskTemplateCommand;
 import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
@@ -35,6 +36,7 @@ import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
@@ -569,4 +571,38 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /quality/listQualityInspectionTaskTemplates</b>
+	 * <p>获得模板列表</p>
+	 */
+	@RequestMapping("listQualityInspectionTaskTemplates")
+	@RestReturn(value = ListQualityInspectionTasksResponse.class)
+	public RestResponse listQualityInspectionTaskTemplates(ListQualityInspectionTaskTemplatesCommand cmd) {
+		
+		ListQualityInspectionTasksResponse task = qualityService.listQualityInspectionTaskTemplates(cmd);
+		
+		RestResponse response = new RestResponse(task);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/deleteQualityInspectionTaskTemplate</b>
+	 * <p>删除模板</p>
+	 */
+	@RequestMapping("deleteQualityInspectionTaskTemplate")
+	@RestReturn(value = String.class)
+	public RestResponse deleteQualityInspectionTaskTemplate(DeleteQualityInspectionTaskTemplateCommand cmd) {
+		
+		qualityService.deleteQualityInspectionTaskTemplate(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
 }

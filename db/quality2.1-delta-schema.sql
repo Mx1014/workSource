@@ -28,10 +28,11 @@ CREATE TABLE `eh_quality_inspection_task_templates` (
   `create_time` DATETIME DEFAULT NULL,
   `category_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_categories',
   `category_path` VARCHAR(128) DEFAULT NULL COMMENT 'refernece to the path of eh_categories',
-  `create_uid` BIGINT NOT NULL DEFAULT '0',
   `manual_flag` BIGINT NOT NULL DEFAULT '0' COMMENT '0: auto 1:manual',
   `target_id` BIGINT NOT NULL DEFAULT '0',
   `target_type` VARCHAR(32) NOT NULL DEFAULT '',
   `creator_uid` BIGINT NOT NULL DEFAULT '0' COMMENT 'record creator user id',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+alter table `eh_quality_inspection_tasks` drop column `create_uid`;

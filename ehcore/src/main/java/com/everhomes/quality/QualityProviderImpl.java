@@ -112,6 +112,11 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
+
+
+
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -146,6 +151,7 @@ import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardSpecif
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskRecordsDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionTaskTemplatesDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionCategories;
@@ -159,6 +165,7 @@ import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardSpeci
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskRecords;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTaskTemplates;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionEvaluationFactorsRecord;
@@ -171,6 +178,7 @@ import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardSpe
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskRecordsRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionTaskTemplatesRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
@@ -1785,6 +1793,76 @@ public class QualityProviderImpl implements QualityProvider {
 		});
 		
 		return result;
+	}
+
+	@Override
+	public void createQualityInspectionTaskTemplates(
+			QualityInspectionTaskTemplates template) {
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQualityInspectionTaskTemplates.class));
+		
+		template.setId(id);
+        
+		LOGGER.info("createQualityInspectionTaskTemplates: " + template);
+		
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionTaskTemplates.class, id));
+        EhQualityInspectionTaskTemplatesDao dao = new EhQualityInspectionTaskTemplatesDao(context.configuration());
+        dao.insert(template);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhQualityInspectionTaskTemplates.class, null);
+		
+	}
+
+	@Override
+	public void updateQualityInspectionTaskTemplates(
+			QualityInspectionTaskTemplates template) {
+
+		assert(template.getId() != null);
+        
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionTaskTemplates.class, template.getId()));
+        EhQualityInspectionTaskTemplatesDao dao = new EhQualityInspectionTaskTemplatesDao(context.configuration());
+        dao.update(template);
+        
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQualityInspectionTaskTemplates.class, template.getId());		
+		
+	}
+
+	@Override
+	public void deleteQualityInspectionTaskTemplates(Long templateId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhQualityInspectionTaskTemplates.class));
+		EhQualityInspectionTaskTemplatesDao dao = new EhQualityInspectionTaskTemplatesDao(context.configuration());
+		dao.deleteById(templateId);
+		
+	}
+
+	@Override
+	public List<QualityInspectionTaskTemplates> listQualityInspectionTaskTemplates(
+			ListingLocator locator, int count, Long uid) {
+		assert(locator.getEntityId() != 0);
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTaskTemplates.class, locator.getEntityId()));
+		List<QualityInspectionTaskTemplates> templates = new ArrayList<QualityInspectionTaskTemplates>();
+        SelectQuery<EhQualityInspectionTaskTemplatesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES);
+    
+        if(locator.getAnchor() != null) {
+            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES.ID.lt(locator.getAnchor()));
+        }
+        
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES.CREATOR_UID.eq(uid));
+        query.addOrderBy(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES.ID.desc());
+        query.addLimit(count);
+        
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Query task templates by count, sql=" + query.getSQL());
+            LOGGER.debug("Query task templates by count, bindValues=" + query.getBindValues());
+        }
+        
+        query.fetch().map((EhQualityInspectionTaskTemplatesRecord record) -> {
+        	templates.add(ConvertHelper.convert(record, QualityInspectionTaskTemplates.class));
+        	return null;
+        });
+        
+		return templates;
 	}
 	
 }

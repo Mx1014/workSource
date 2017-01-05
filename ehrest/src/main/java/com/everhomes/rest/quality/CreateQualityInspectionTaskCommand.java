@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *  <li>executorId: 执行人uid</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>executiveExpireTime: 任务截止时间</li>
+ *  <li>templateFlag: 是否存为模板 true: 是; false: 否</li>
  * </ul>
  */
 public class CreateQualityInspectionTaskCommand {
@@ -47,10 +48,19 @@ public class CreateQualityInspectionTaskCommand {
 	
 	private Long executorId;
 	
+	private Boolean templateFlag;
+	
+	public Boolean getTemplateFlag() {
+		return templateFlag;
+	}
+
+	public void setTemplateFlag(Boolean templateFlag) {
+		this.templateFlag = templateFlag;
+	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
-
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;

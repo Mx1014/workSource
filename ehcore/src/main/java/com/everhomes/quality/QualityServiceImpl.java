@@ -43,6 +43,7 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
@@ -73,6 +74,7 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteQualityInspectionTaskTemplateCommand;
 import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
@@ -85,6 +87,7 @@ import com.everhomes.rest.quality.ListEvaluationsResponse;
 import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
@@ -2214,6 +2217,11 @@ public class QualityServiceImpl implements QualityService {
 			task.setTaskNumber(taskNum);
 			qualityProvider.createVerificationTasks(task);
 			
+			if(cmd.getTemplateFlag()) {
+				QualityInspectionTaskTemplates template = ConvertHelper.convert(task, QualityInspectionTaskTemplates.class);
+				qualityProvider.createQualityInspectionTaskTemplates(template);
+			}
+			
 		});
 		
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
@@ -2605,6 +2613,45 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
 		response.setTasks(dtoList);
 		return response;
+	}
+
+	@Override
+	public ListQualityInspectionTasksResponse listQualityInspectionTaskTemplates(
+			ListQualityInspectionTaskTemplatesCommand cmd) {
+
+		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
+		
+		Long uId = UserContext.current().getUser().getId();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        
+		List<QualityInspectionTaskTemplates> templates = qualityProvider.listQualityInspectionTaskTemplates(locator, pageSize+1, uId);
+		
+		Long nextPageAnchor = null;
+        if(templates.size() > pageSize) {
+        	templates.remove(templates.size() - 1);
+            nextPageAnchor = templates.get(templates.size() - 1).getId();
+        }
+        response.setNextPageAnchor(nextPageAnchor);
+        
+        if(templates.size() > 0) {
+        	List<QualityInspectionTaskDTO> tasks = templates.stream().map(r -> {
+        		QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);
+        		return dto;
+        	}).collect(Collectors.toList());
+        	
+        	response.setTasks(tasks);
+        }
+        
+		return response;
+	}
+
+	@Override
+	public void deleteQualityInspectionTaskTemplate(
+			DeleteQualityInspectionTaskTemplateCommand cmd) {
+		qualityProvider.deleteQualityInspectionTaskTemplates(cmd.getTemplateId());
+		
 	}
 
 }
