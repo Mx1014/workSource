@@ -38,6 +38,9 @@ import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
 import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
+import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
 import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
@@ -103,4 +106,6 @@ public interface BusinessService {
 	void updateUserOrderCount(UpdateUserOrderCountCommand cmd);
 	List<RegionDTO> listRegion(ListRegionCommand cmd);
 	UserInfo validateUserPass(ValidateUserPassCommand cmd);
+	CreateBusinessGroupResponse createBusinessGroup(CreateBusinessGroupCommand cmd);
+	void joinBusinessGroup(JoinBusinessGroupCommand cmd);
 }
