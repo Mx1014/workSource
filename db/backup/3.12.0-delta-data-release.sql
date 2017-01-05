@@ -709,10 +709,10 @@ ON m.id = t.menu_id
 ) tm JOIN eh_web_menus mm ON tm.menu_id = SUBSTRING_INDEX(SUBSTRING_INDEX(mm.path,'/',3), '/', -1) WHERE mm.id NOT IN (SELECT menu_id FROM eh_web_menu_privileges WHERE privilege_id>=10000);
 
 
-<<<<<<< HEAD:db/3.12.0-delta-data-release.sql
+
 -- 华润oe 原活动默认为白领活动 by xiongying20161209
 update eh_activity_categories set default_flag = 1 where id = 1000000 and namespace_id = 999985;
-=======
+
 -- 更新科技园 停车车主昵称 add by sw 20101206
 update eh_parking_recharge_orders set recharge_type =1 where recharge_type = 0;
 update eh_parking_recharge_orders set plate_owner_name = '陈程伟' where plate_number = '粤BD225W' and create_time > '2016-11-01 00:00:00'; 
@@ -786,4 +786,17 @@ UPDATE `eh_web_menus` SET `sort_num` = '491' WHERE `id` = '49110';
 UPDATE `eh_web_menus` SET `sort_num` = '492' WHERE `id` = '49120';
 UPDATE `eh_web_menus` SET `sort_num` = '493' WHERE `id` = '49130';
 UPDATE `eh_web_menus` SET `sort_num` = '494' WHERE `id` = '49140';
->>>>>>> 8cc7df3542d01e20fa667f3c723ea5eef50d4542:db/backup/3.12.0-delta-data-release.sql
+
+
+-- 储能科兴删除业务授权菜单 add by sfyan 20161230
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 60200 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999990;
+DELETE FROM `eh_web_menu_scopes` WHERE `menu_id` = 60200 AND `owner_type` = 'EhNamespaces' AND `owner_id` = 999983;
+
+-- 深业增加两个item  add by sfyan 20170105
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '请示审批', '请示审批', 'cs://1/image/aW1hZ2UvTVRvMk5USXdNR0ZqWXpnMU5UTXdNemM0WXpKbFltUmpaalJqWVRVeVptVmpOdw', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyFlow?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '请示审批', '请示审批', 'cs://1/image/aW1hZ2UvTVRvMk5USXdNR0ZqWXpnMU5UTXdNemM0WXpKbFltUmpaalJqWVRVeVptVmpOdw', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyFlow?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL);
+
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '企业公告', '企业公告', 'cs://1/image/aW1hZ2UvTVRveU9EZGxPRE15WlRSa09UQmlPRGN6TVRoaFlqTTJObUUyWVdKa1pHTXdaUQ', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyNews?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '企业公告', '企业公告', 'cs://1/image/aW1hZ2UvTVRveU9EZGxPRE15WlRSa09UQmlPRGN6TVRoaFlqTTJObUUyWVdKa1pHTXdaUQ', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyNews?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL);
