@@ -18,4 +18,6 @@ public interface PmTaskErrorCode {
     
     int ERROR_TASK_PROCCESING = 10007;  //该单已被其他人处理，请返回主界面刷新任务
     
+    int ERROR_ENABLE_FLOW = 10008;  //请启用工作流
+    
 }
