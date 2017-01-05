@@ -226,7 +226,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		}
 		GetRequestInfoResponse response = new GetRequestInfoResponse();
 		response.setDtos(fieldList);
-		response.setCreateTime(request.getCreateTime());
+		if(request != null) {
+			response.setCreateTime(request.getCreateTime());
+		}
 		
 		return response;
 	}

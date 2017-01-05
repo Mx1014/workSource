@@ -199,7 +199,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	    			FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
 	    	if(null == flow) {
 	    		LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
 	    				"Enable pmtask flow not found.");
 	    	}
     		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
