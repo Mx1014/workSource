@@ -499,7 +499,7 @@ VALUES ((@menu_scope_id := @menu_scope_id + 1), 40130, '', 'EhNamespaces', 99998
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10020, 40130, '招租管理', 1, 1, '招租管理 工作流设置 全部权限', 419);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10020, 40850, '招租管理', 1, 1, '招租管理 工作流设置 全部权限', 419);
 
 -- Added by Janson 20161220
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
@@ -606,4 +606,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20670, '', 'EhNamespaces', 999992, 2);
 
+	
+update eh_parking_lots set rate_flag = 1 where id = 10001;
 

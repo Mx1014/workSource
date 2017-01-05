@@ -2311,7 +2311,26 @@ public class FlowServiceImpl implements FlowService {
 		if(cmd.getFlowUserType() == null) {
 			cmd.setFlowUserType(FlowUserType.PROCESSOR.getCode());
 		}
-		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowNode.getId(), FlowEntityType.FLOW_NODE.getCode(), cmd.getFlowUserType());
+		FlowNode nextNode = null;
+		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowNode.getFlowMainId(), flowNode.getFlowVersion());
+		Map<Long, FlowNode> nodeMap = new HashMap<Long, FlowNode>();
+		for(int i = 0; i < nodes.size(); i++) {
+			FlowNode node = nodes.get(i);
+			if(flowNode.getId().equals(node.getId())) {
+				if((i+1) < nodes.size()) {
+					nextNode = nodes.get(i+1);
+				}
+			}
+			nodeMap.put(node.getId(), node);
+		}
+		if(btn.getGotoNodeId() != null && nodeMap.containsKey(btn.getGotoNodeId())) {
+			nextNode = nodeMap.get(btn.getGotoNodeId());
+		}
+		if(nextNode == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "next node not exists");
+		}
+		
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(nextNode.getId(), FlowEntityType.FLOW_NODE.getCode(), cmd.getFlowUserType());
 		if(seles != null) {
 			seles.forEach((s) -> {
 				FlowUserSelectionDTO dto = ConvertHelper.convert(s, FlowUserSelectionDTO.class);
@@ -2795,7 +2814,7 @@ public class FlowServiceImpl implements FlowService {
 		graphDetail.setSupervisors(selections);
 		
 		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowId
-				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), 0);
 		if(seles != null && seles.size() > 0) {
 			seles.stream().forEach((sel) -> {
 				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));

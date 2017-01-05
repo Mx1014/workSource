@@ -21,8 +21,10 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -43,6 +45,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
 
 
 
@@ -100,6 +103,7 @@ import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.EvaluateScoreDTO;
+import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
@@ -110,6 +114,7 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
+import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
@@ -169,6 +174,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	public static final String CATEGORY_SEPARATOR = "/";
 
+	private static final String HANDLER = "pmtask.handler-";
+	
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
@@ -218,7 +225,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 		SearchTasksResponse response = new SearchTasksResponse();
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), pageSize);
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
+				cmd.getPageAnchor(), pageSize);
 		int listSize = list.size();
 		if(listSize > 0){
     		response.setRequests(list.stream().map(t -> {
@@ -249,8 +257,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 				dto.setAddress(address.getAddress());
 		}else {
 			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
+			Address address = addressProvider.findAddressById(task.getAddressId());
+			
+			String addr = "";
 			if(null != organization)
-				dto.setAddress(organization.getName());
+				addr = organization.getName();
+			if(null != address) 
+				addr = addr + address.getAddress();
+			
+			dto.setAddress(addr);
 		}
 	}
 	
@@ -795,10 +810,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = user.getNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
-		
-//		if(namespaceId == 999992) 
-//			handle = PmTaskHandle.SHEN_YE;
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -826,11 +838,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
-		
-//		if(namespaceId == 999992) 
-//			handle = PmTaskHandle.SHEN_YE;
-		
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.createTask(cmd, null, requestorName, requestorPhone);
@@ -936,7 +945,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
 		List<Category> list = null;
-		if(null != cmd.getTaskCategoryId() && (null == cmd.getParentId() || cmd.getParentId() ==0)) {
+		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && (null == cmd.getParentId() || cmd.getParentId() == 0L)) {
 			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
 			list = new ArrayList<Category>();
 			list.add(category);
@@ -1008,7 +1017,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(null == cmd.getPageSize())
 			cmd.setPageSize(100000);
 		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTaskCategoryId(), 
-				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getPageAnchor(), cmd.getPageSize());
+				cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), cmd.getPageAnchor(), cmd.getPageSize());
 		
 		
 		Workbook wb = null;
@@ -2244,6 +2253,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    					OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
 	    					dto.setOrganizationId(o.getId());
 	    					dto.setDisplayName(o.getDisplayName());
+	    					dto.setAddressId(address.getId());
 	    					return dto;
 	    					}).collect(Collectors.toList());
 	    				
@@ -2281,6 +2291,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    					OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
 	    					dto.setOrganizationId(o.getId());
 	    					dto.setDisplayName(o.getDisplayName());
+	    					dto.setAddressId(address.getId());
 	    					return dto;
 	    					}).collect(Collectors.toList());
 	    				
@@ -2434,6 +2445,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"ExportTaskOperatorStatistics is fail.");
 		}
 		
+	}
+
+	@Override   
+	public NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd) {
+		
+		NamespaceHandlerDTO dto = new NamespaceHandlerDTO();
+		
+		if(null == cmd.getNamespaceId())
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		
+		String handler = configProvider.getValue(HANDLER + cmd.getNamespaceId(), PmTaskHandle.SHEN_YE);
+		
+		dto.setHandler(handler);
+		
+		return dto;
 	}
 	
 }

@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 public class ServiceAllianceRequestInfo {
 
     private Long id;
+    private Long jumpType;
     private String templateType;
     private String ownerType;
     private Long ownerId;
@@ -27,7 +28,15 @@ public class ServiceAllianceRequestInfo {
         this.id = id;
     }
 
-    public String getTemplateType() {
+    public Long getJumpType() {
+		return jumpType;
+	}
+
+	public void setJumpType(Long jumpType) {
+		this.jumpType = jumpType;
+	}
+
+	public String getTemplateType() {
         return templateType;
     }
 

@@ -51,4 +51,6 @@ public interface YellowPageService {
 
 
 	List<JumpModuleDTO> listJumpModules();
+	
+	ListAttachmentsResponse listAttachments(ListAttachmentsCommand cmd);
 }
