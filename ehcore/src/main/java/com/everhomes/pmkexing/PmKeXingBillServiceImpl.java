@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 @Service
 public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(PmKeXingBillServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PmKeXingBillServiceImpl.class);
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -161,7 +161,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("sdateTo", date.minusMonths(monthOffset).format(DateTimeFormatter.ofPattern("yyyy-MM")));
 
         BillItemList itemList = post(api, params, BillItemList.class);
-        return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset()) : new ListPmKeXingBillsResponse();
+        return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset(), pageSize) : new ListPmKeXingBillsResponse();
     }
 
     private void putLatestSelectedOrganizationToCache(Long organizationId) {
@@ -290,8 +290,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
     private String post(String api, Map<String, String> params) {
         try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Http post params is :{}", params.toString());
+            }
             return HttpUtils.post(api, params, 10, "utf-8");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("Http post error for api: {}", api, e);
             throw RuntimeErrorException.errorWith(PmKeXingBillServiceErrorCode.SCOPE, PmKeXingBillServiceErrorCode.ERROR_HTTP_REQUEST,
                     "Http post error");
@@ -307,7 +310,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         @XmlElement
         private List<BillItem> result = new ArrayList<>();
 
-        ListPmKeXingBillsResponse toPmKeXingBillResponse(Integer pageOffset) {
+        ListPmKeXingBillsResponse toPmKeXingBillResponse(Integer pageOffset, Integer pageSize) {
             ListPmKeXingBillsResponse response = new ListPmKeXingBillsResponse();
 
             Map<String, List<BillItem>> dateBillItemListMap = result.parallelStream().collect(Collectors.groupingBy(BillItem::getBillDate));
@@ -317,7 +320,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
                 response.getBills().add(dto);
             });
 
-            if (result.size() > 0 && result.get(result.size() - 1).hasNextPag > 0) {
+            // 因为对方提供的分页机制有点问题, 所以我们这边只要取到数据就设置有下一页, 直到取不到数据为止
+            if (response.getBills().size() >= pageSize) {
                 response.setNextPageOffset(pageOffset != null ? pageOffset + 1 : 2);
             }
             response.getBills().sort((o1, o2) -> o2.getBillDate().compareTo(o1.getBillDate()));
@@ -350,17 +354,6 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             dateBillItemListMap.forEach((date, itemList) -> dtoArr[0] = this.toPmKeXingBillDTO(date, itemList));
             return dtoArr[0];
         }
-
-        /*List<PmKeXingBillDTO> toPmKeXingBillDTOList() {
-            List<PmKeXingBillDTO> dtoList = new ArrayList<>();
-            Map<String, List<BillItem>> dateBillItemListMap = result.parallelStream().collect(Collectors.groupingBy(BillItem::getBillDate));
-
-            dateBillItemListMap.forEach((date, billItemList) -> {
-                PmKeXingBillDTO dto = this.toPmKeXingBillDTO(date, billItemList);
-                dtoList.add(dto);
-            });
-            return dtoList;
-        }*/
     }
 
     private static String currLocale() {
@@ -393,7 +386,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         }
 
         String getBillDate() {
-            return billDate;
+            return billDate != null ? billDate : "";
         }
 
         BigDecimal getReceivable() {
