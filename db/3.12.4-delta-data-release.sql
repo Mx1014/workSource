@@ -124,10 +124,10 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 80110, '', 'EhNamespaces', 999983, 2);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10120;
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10121;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10120;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10121;
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10122, '0', '企业服务 管理员', '企业服务 业务模块权限', NULL);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10123, '0', '厂房出租 管理员', '厂房出租 业务模块权限', NULL);
@@ -164,14 +164,14 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 	VALUES ('80510', '服务列表', '80500', NULL, 'service_list/154', '0', '2', '/80000/80500/80510', 'park', '820', NULL);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10122;
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10123;
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10124;
-INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
-SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10125;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10122;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10123;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10124;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id = 10125;
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 
