@@ -1985,6 +1985,10 @@ public class FlowServiceImpl implements FlowService {
 		if(stepType != FlowStepType.APPROVE_STEP && stepType != FlowStepType.TRANSFER_STEP) {
 			btnDTO.setNeedProcessor((byte)0);
 		}
+		if(stepType == FlowStepType.TRANSFER_STEP) {
+			/* force use processor */
+			btnDTO.setNeedProcessor((byte)1);
+		}
 		
 		return btnDTO;
 	}
