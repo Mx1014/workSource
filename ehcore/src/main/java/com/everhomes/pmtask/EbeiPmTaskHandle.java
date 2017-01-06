@@ -45,7 +45,9 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
+import com.everhomes.rest.pmtask.EvaluateTaskCommand;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -225,6 +227,34 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		param.put("buildingType", "0");
 		
 		postToEbei(param, CREATE_TASK, null);
+	}
+	
+	private Boolean cancelTask(PmTask task) {
+		
+		JSONObject param = new JSONObject();
+		
+		param.put("orderId", task.getId());
+		
+		postToEbei(param, CANCEL_TASK, null);
+		
+		return false;
+	}
+	
+	private Boolean evaluateTask(PmTask task) {
+		
+		JSONObject param = new JSONObject();
+		
+		param.put("userId", task.getId());
+		param.put("recordId", task.getId());
+		param.put("serviceAttitude", task.getId());
+		param.put("serviceEfficiency", task.getId());
+		param.put("serviceQuality", task.getId());
+		param.put("remark", task.getId());
+		param.put("fileAddrs", task.getId());
+		
+		postToEbei(param, CANCEL_TASK, null);
+		
+		return false;
 	}
 	
 	@Override
@@ -416,5 +446,68 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Invalid ownerType parameter.");
         }
+	}
+	
+	@Override
+	public void cancelTask(CancelTaskCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+			LOGGER.error("Task cannot be canceled. cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be canceled.");
+		}
+		
+		
+		
+		dbProvider.execute((TransactionStatus transactionStatus) -> {
+			User user = UserContext.current().getUser();
+			Timestamp now = new Timestamp(System.currentTimeMillis());
+			task.setStatus(PmTaskStatus.INACTIVE.getCode());
+			task.setDeleteUid(user.getId());
+			task.setDeleteTime(now);
+			pmTaskProvider.updateTask(task);
+			
+			//elasticsearch更新
+			pmTaskSearch.deleteById(task.getId());
+			return null;
+		});
+		
+	}
+	
+	@Override
+	public void evaluateTask(EvaluateTaskCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		checkId(cmd.getId());
+
+		PmTask task = checkPmTask(cmd.getId());
+		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+			LOGGER.error("Task have not been completed, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task have not been completed.");
+		}
+		task.setOperatorStar(cmd.getOperatorStar());
+		task.setStar(cmd.getStar());
+		pmTaskProvider.updateTask(task);
+
+	}
+	
+	private void checkId(Long id){
+		if(null == id) {
+        	LOGGER.error("Invalid id parameter.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Invalid id parameter.");
+        }
+	}
+	
+	private PmTask checkPmTask(Long id){
+		PmTask pmTask = pmTaskProvider.findTaskById(id);
+		if(null == pmTask) {
+        	LOGGER.error("PmTask not found, id={}", id);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"PmTask not found.");
+        }
+		return pmTask;
 	}
 }

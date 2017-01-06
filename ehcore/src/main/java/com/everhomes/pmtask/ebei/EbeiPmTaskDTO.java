@@ -1,6 +1,6 @@
 package com.everhomes.pmtask.ebei;
 
-public class EbeiPmTask {
+public class EbeiPmTaskDTO {
 	
 	private Integer anonymous;
 	private String createdate;

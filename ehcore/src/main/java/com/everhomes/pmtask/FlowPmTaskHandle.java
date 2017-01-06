@@ -45,6 +45,9 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.rest.pmtask.CancelTaskCommand;
+import com.everhomes.rest.pmtask.EvaluateTaskCommand;
+import com.everhomes.rest.pmtask.GetTaskDetailCommand;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -361,6 +364,24 @@ public class FlowPmTaskHandle implements PmTaskHandle {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Invalid ownerType parameter.");
         }
+	}
+
+	@Override
+	public void cancelTask(CancelTaskCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void evaluateTask(EvaluateTaskCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 

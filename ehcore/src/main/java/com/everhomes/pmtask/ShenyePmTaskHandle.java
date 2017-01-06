@@ -9,6 +9,13 @@ import java.util.Map;
 
 
 
+
+
+
+
+
+import java.util.stream.Collectors;
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -17,23 +24,35 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.rest.pmtask.CancelTaskCommand;
+import com.everhomes.rest.pmtask.EvaluateTaskCommand;
+import com.everhomes.rest.pmtask.GetTaskDetailCommand;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
+import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
@@ -75,6 +94,12 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	private SmsProvider smsProvider;
 	@Autowired
 	private MessagingService messagingService;
+	@Autowired
+    private ContentServerService contentServerService;
+	@Autowired
+	private AddressProvider addressProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
@@ -270,5 +295,221 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
     				"Invalid ownerType parameter.");
         }
 	}
+
+	@Override
+	public void evaluateTask(EvaluateTaskCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		checkId(cmd.getId());
+//		if(null == cmd.getStar()){
+//			cmd.setStar((byte)0);
+//		}
+//		if(null == cmd.getOperatorStar()){
+//			cmd.setOperatorStar((byte)0);
+//		}
+		PmTask task = checkPmTask(cmd.getId());
+		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+			LOGGER.error("Task have not been completed, cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task have not been completed.");
+		}
+		task.setOperatorStar(cmd.getOperatorStar());
+		task.setStar(cmd.getStar());
+		pmTaskProvider.updateTask(task);
+
+	}
 	
+	@Override
+	public void cancelTask(CancelTaskCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+			LOGGER.error("Task cannot be canceled. cmd={}", cmd);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"Task cannot be canceled.");
+		}
+		dbProvider.execute((TransactionStatus transactionStatus) -> {
+			User user = UserContext.current().getUser();
+			Timestamp now = new Timestamp(System.currentTimeMillis());
+			task.setStatus(PmTaskStatus.INACTIVE.getCode());
+			task.setDeleteUid(user.getId());
+			task.setDeleteTime(now);
+			pmTaskProvider.updateTask(task);
+			
+			//elasticsearch更新
+			pmTaskSearch.deleteById(task.getId());
+			return null;
+		});
+		
+	}
+	
+	@Override
+	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+		
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+		
+		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
+		
+		setPmTaskDTOAddress(task, dto);
+		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
+			User user = userProvider.findUserById(task.getCreatorUid());
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			dto.setRequestorName(user.getNickName());
+			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
+		}
+		
+		//查询服务类型
+		Category category = categoryProvider.findCategoryById(task.getCategoryId());
+		Category taskCategory = checkCategory(task.getTaskCategoryId());
+		if(null != category)
+			dto.setCategoryName(category.getName());
+    	dto.setTaskCategoryName(taskCategory.getName());
+		
+		//查询图片
+		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
+		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
+			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
+			
+			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
+	                EntityType.USER.getCode(), r.getCreatorUid());
+			attachmentDto.setContentUrl(contentUrl);
+			return attachmentDto;
+		}).collect(Collectors.toList());
+		dto.setAttachments(attachmentDtos);
+		//查询task log
+		List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(dto);
+		dto.setTaskLogs(taskLogDtos);
+		
+		return dto;
+	}
+	
+	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+	
+	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {
+		if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
+			Address address = addressProvider.findAddressById(task.getAddressId());
+			if(null != address) 
+				dto.setAddress(address.getAddress());
+		}else {
+			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
+			Address address = addressProvider.findAddressById(task.getAddressId());
+			
+			String addr = "";
+			if(null != organization)
+				addr = organization.getName();
+			if(null != address) 
+				addr = addr + address.getAddress();
+			
+			dto.setAddress(addr);
+		}
+	}
+	
+	private List<PmTaskLogDTO> listPmTaskLogs(PmTaskDTO task) {
+		
+		List<PmTaskLog> taskLogs = pmTaskProvider.listPmTaskLogs(task.getId(), null);
+		List<PmTaskLogDTO> taskLogDtos = taskLogs.stream().map(r -> {
+			
+			PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+		    String scope = PmTaskNotificationTemplateCode.SCOPE;
+		    String locale = PmTaskNotificationTemplateCode.LOCALE;
+		    
+			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+			    
+				if(null == task.getOrganizationId() || task.getOrganizationId() == 0){
+					setParam(map, task.getCreatorUid(), pmTaskLogDTO);
+				}else{
+					map.put("operatorName", task.getRequestorName());
+				    map.put("operatorPhone", task.getRequestorPhone());
+				}
+				
+				int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+				
+			}else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				User target = userProvider.findUserById(r.getTargetId());
+				UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
+				map.put("targetName", target.getNickName());
+			    map.put("targetPhone", targetIdentifier.getIdentifierToken());
+			    
+			    int code = PmTaskNotificationTemplateCode.PROCESSING_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+				
+			}else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
+				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
+					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
+					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
+			                EntityType.USER.getCode(), r2.getCreatorUid());
+					dto.setContentUrl(contentUrl);
+					return dto;
+				}).collect(Collectors.toList());
+				pmTaskLogDTO.setAttachments(attachmentDtos);
+				
+			}else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+			}else {
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+			}
+			
+			return pmTaskLogDTO;
+		}).collect(Collectors.toList());
+		
+		return taskLogDtos;
+	}
+
+	private void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
+		User user = userProvider.findUserById(userId);
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		map.put("operatorName", user.getNickName());
+		map.put("operatorPhone", userIdentifier.getIdentifierToken());
+		dto.setOperatorName(user.getNickName());
+		dto.setOperatorPhone(userIdentifier.getIdentifierToken());
+	}
+
+	private void checkId(Long id){
+		if(null == id) {
+        	LOGGER.error("Invalid id parameter.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Invalid id parameter.");
+        }
+	}
+	
+	private PmTask checkPmTask(Long id){
+		PmTask pmTask = pmTaskProvider.findTaskById(id);
+		if(null == pmTask) {
+        	LOGGER.error("PmTask not found, id={}", id);
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    				"PmTask not found.");
+        }
+		return pmTask;
+	}
 }

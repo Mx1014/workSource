@@ -352,23 +352,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void evaluateTask(EvaluateTaskCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		checkId(cmd.getId());
-//		if(null == cmd.getStar()){
-//			cmd.setStar((byte)0);
-//		}
-//		if(null == cmd.getOperatorStar()){
-//			cmd.setOperatorStar((byte)0);
-//		}
-		PmTask task = checkPmTask(cmd.getId());
-		if(!task.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-			LOGGER.error("Task have not been completed, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Task have not been completed.");
-		}
-		task.setOperatorStar(cmd.getOperatorStar());
-		task.setStar(cmd.getStar());
-		pmTaskProvider.updateTask(task);
+		
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		
+		handler.evaluateTask(cmd);
 
 	}
 	
@@ -565,27 +556,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public void cancelTask(CancelTaskCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		checkId(cmd.getId());
-		PmTask task = checkPmTask(cmd.getId());
-		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
-			LOGGER.error("Task cannot be canceled. cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Task cannot be canceled.");
-		}
-		dbProvider.execute((TransactionStatus transactionStatus) -> {
-			User user = UserContext.current().getUser();
-			Timestamp now = new Timestamp(System.currentTimeMillis());
-			task.setStatus(PmTaskStatus.INACTIVE.getCode());
-			task.setDeleteUid(user.getId());
-			task.setDeleteTime(now);
-			pmTaskProvider.updateTask(task);
-			
-			//elasticsearch更新
-			pmTaskSearch.deleteById(task.getId());
-			return null;
-		});
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		
+		handler.cancelTask(cmd);
 	}
 	
 	@Override

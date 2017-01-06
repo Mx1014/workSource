@@ -82,7 +82,7 @@ public class EbeiPmTaskHandleTest {
 		param.put("anonymous", "0");
 		param.put("fileAddrs", "");
 		param.put("buildingType", "0");
-		login();
+//		login();
 		postToEbei(param, CREATE_TASK);
 		
 //		listPmtasks();
