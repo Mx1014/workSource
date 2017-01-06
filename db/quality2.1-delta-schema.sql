@@ -36,3 +36,6 @@ CREATE TABLE `eh_quality_inspection_task_templates` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 alter table `eh_quality_inspection_tasks` drop column `create_uid`;
+
+-- 3.12.4
+ALTER TABLE `eh_resource_categories` ADD COLUMN `type` tinyint(4)  DEFAULT '1' COMMENT '1:分类, 2：子项目';
