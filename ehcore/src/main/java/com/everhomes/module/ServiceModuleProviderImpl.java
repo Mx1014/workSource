@@ -202,6 +202,26 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 	}
 
 	@Override
+	public List<ServiceModuleAssignment> listResourceAssignmentGroupByTargets(String ownerType, Long ownerId, Long organizationId) {
+		List<ServiceModuleAssignment> results = new ArrayList<>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType);
+		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(ownerId));
+		if(null != organizationId){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
+		}
+		query.addConditions(cond);
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID);
+		query.addGroupBy(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE);
+		query.fetch().map((r) -> {
+			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));
+			return null;
+		});
+		return results;
+	}
+
+	@Override
 	public List<ServiceModuleAssignment> listServiceModuleAssignmentsByTargetId(String targetType, Long targetId, Long organizationId) {
 		List<ServiceModuleAssignment> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -222,11 +242,18 @@ public class ServiceModuleProviderImpl implements ServiceModuleProvider {
 		List<ServiceModuleAssignment> results = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhServiceModuleAssignmentsRecord> query = context.selectQuery(Tables.EH_SERVICE_MODULE_ASSIGNMENTS);
-		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId);
-		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType));
+		Condition cond = Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_TYPE.eq(ownerType);
 		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.OWNER_ID.eq(ownerId));
-		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
-		cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
+		if(null != organizationId){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.ORGANIZATION_ID.eq(organizationId));
+		}
+
+		if(!org.springframework.util.StringUtils.isEmpty(targetType)){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_TYPE.eq(targetType));
+		}
+		if(null != targetId){
+			cond = cond.and(Tables.EH_SERVICE_MODULE_ASSIGNMENTS.TARGET_ID.eq(targetId));
+		}
 		query.addConditions(cond);
 		query.fetch().map((r) -> {
 			results.add(ConvertHelper.convert(r, ServiceModuleAssignment.class));

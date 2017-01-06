@@ -269,6 +269,7 @@ public class ContentServerServiceImpl implements ContentServerService {
             LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType 
                 + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
         }
+
         // https 默认端口443 by sfyan 20161226
         Integer port = cache.get(serverId).getPublicPort();
         if(null != UserContext.current().getScheme() && UserContext.current().getScheme().equals("https")){

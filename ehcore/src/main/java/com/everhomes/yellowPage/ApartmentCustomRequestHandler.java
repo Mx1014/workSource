@@ -172,7 +172,8 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 		if(fieldList != null && fieldList.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
-				sb.append(field.getFieldName() + ":" + field.getFieldValue() + "\n");
+				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
+				sb.append(field.getFieldName() + ":" + fieldValue + "\n");
 			}
 			
 			return sb.toString();
