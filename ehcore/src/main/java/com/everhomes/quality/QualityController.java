@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.quality.QualityService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.quality.CountScoresCommand;
 import com.everhomes.rest.quality.CountScoresResponse;
@@ -68,6 +71,9 @@ public class QualityController extends ControllerBase {
 
 	@Autowired
 	private QualityService qualityService;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	
 	/**
 	 * <b>URL: /quality/creatQualityStandard</b>
@@ -604,5 +610,20 @@ public class QualityController extends ControllerBase {
 		return response;
 	}
 	
+	/**
+	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
+	 * <p>用户关联项目</p>
+	 */
+	@RequestMapping("listUserRelatedProjectByModuleId")
+	@RestReturn(value = CommunityDTO.class, collection = true)
+	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+		
+		List<CommunityDTO> communitydtos = rolePrivilegeService.listUserRelatedProjectByModuleId(cmd);
+		
+		RestResponse response = new RestResponse(communitydtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }
