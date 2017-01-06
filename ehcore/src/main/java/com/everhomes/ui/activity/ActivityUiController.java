@@ -1,6 +1,5 @@
 package com.everhomes.ui.activity;
 
-import com.everhomes.util.RequireAuthentication;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,6 +15,7 @@ import com.everhomes.rest.ui.activity.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListOfficialActivitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListOfficialActivitiesBySceneReponse;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RequireAuthentication;
 
 @RestDoc(value="ActivityUi controller", site="activityui")
 @RestController
@@ -57,4 +57,5 @@ public class ActivityUiController extends ControllerBase {
        return response;
    }
 
+  
 }

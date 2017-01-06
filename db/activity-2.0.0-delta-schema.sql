@@ -9,4 +9,6 @@ ALTER TABLE `eh_activity_categories` ADD COLUMN `selected_icon_uri` VARCHAR(1024
 ALTER TABLE `eh_activity_categories` ADD COLUMN `show_name` VARCHAR(64) NULL;
 ALTER TABLE `eh_activity_categories` ADD COLUMN `all_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes';
 
+-- 增加选中时的图片，added by tt, 20170106
+ALTER TABLE `eh_launch_pad_items` ADD COLUMN `selected_icon_uri` VARCHAR(1024) NULL DEFAULT NULL;
 

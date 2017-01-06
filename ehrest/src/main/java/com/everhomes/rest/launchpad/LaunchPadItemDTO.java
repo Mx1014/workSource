@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>itemLabel: 显示标签</li>
  * <li>iconUri: 图标uri</li>
  * <li>iconUrl: 图标url</li>
+ * <li>selectedIconUri: 选中图标uri</li>
+ * <li>selectedIconUrl: 选中图标url</li>
  * <li>itemWidth: 图标的宽</li>
  * <li>itemHeight: 图标的高</li>
  * <li>actionType: 动作类型，参考{@link com.everhomes.rest.launchpad.ActionType}</li>
@@ -46,6 +48,8 @@ public class LaunchPadItemDTO {
     private String  itemLabel;
     private String  iconUri;
     private String  iconUrl;
+    private String  selectedIconUri;
+    private String  selectedIconUrl;
     private Integer itemWidth;
     private Integer itemHeight;
     private Byte    actionType;
@@ -60,7 +64,23 @@ public class LaunchPadItemDTO {
     private Byte deleteFlag;
     private Byte editFlag;
 
-    public Long getId() {
+    public String getSelectedIconUri() {
+		return selectedIconUri;
+	}
+
+	public void setSelectedIconUri(String selectedIconUri) {
+		this.selectedIconUri = selectedIconUri;
+	}
+
+	public String getSelectedIconUrl() {
+		return selectedIconUrl;
+	}
+
+	public void setSelectedIconUrl(String selectedIconUrl) {
+		this.selectedIconUrl = selectedIconUrl;
+	}
+
+	public Long getId() {
         return id;
     }
 

@@ -4,33 +4,109 @@ import java.sql.Timestamp;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * 
+ * <ul>
+ * <li>id: id</li>
+ * <li>ownerType: 所属者类型</li>
+ * <li>ownerId: 所属者id</li>
+ * <li>parentId: 父id</li>
+ * <li>name: 名称</li>
+ * <li>path: 路径</li>
+ * <li>defaultOrder: 排序</li>
+ * <li>status: 状态</li>
+ * <li>creatorUid: 创建者</li>
+ * <li>createTime: 创建时间</li>
+ * <li>deleteUid: 删除者</li>
+ * <li>deleteTime: 删除时间</li>
+ * <li>namespaceId: 域空间</li>
+ * <li>enabled: 是否启用，1是0否，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * <li>iconUri: icon地址uri</li>
+ * <li>selectedIconUri: 选中时的icon地址uri</li>
+ * <li>iconUrl: icon地址url</li>
+ * <li>selectedIconUrl: 选中时的icon地址url</li>
+ * <li>showName: 显示名称</li>
+ * <li>allFlag: 是否表示全部，1是0否，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
+ * </ul>
+ */
 public class ActivityCategoryDTO {
 
-	 private Long id;
-	  
-	 private String ownerType;
-	  
-	 private Long ownerId;
-	  
-	 private Long parentId;
+	private Long id;
+	private String ownerType;
+	private Long ownerId;
+	private Long parentId;
+	private String name;
+	private String path;
+	private Integer defaultOrder;
+	private Byte status;
+	private Long creatorUid;
+	private Timestamp createTime;
+	private Long deleteUid;
+	private Timestamp deleteTime;
+	private Integer namespaceId;
+	private Byte enabled;
+	private String iconUri;
+	private String selectedIconUri;
+	private String iconUrl;
+	private String selectedIconUrl;
+	private String showName;
+	private Byte allFlag;
 
-	 private String name;
-	  
-	 private String path;
-	  
-	 private Integer defaultOrder;
-	  
-	 private Byte status;
+	public String getIconUrl() {
+		return iconUrl;
+	}
 
-	 private Long creatorUid;
-	  
-	 private Timestamp createTime;
+	public void setIconUrl(String iconUrl) {
+		this.iconUrl = iconUrl;
+	}
 
-	 private Long deleteUid;
+	public String getSelectedIconUrl() {
+		return selectedIconUrl;
+	}
 
-	 private Timestamp deleteTime;
-	  
-	 private Integer namespaceId;
+	public void setSelectedIconUrl(String selectedIconUrl) {
+		this.selectedIconUrl = selectedIconUrl;
+	}
+
+	public Byte getEnabled() {
+		return enabled;
+	}
+
+	public void setEnabled(Byte enabled) {
+		this.enabled = enabled;
+	}
+
+	public String getIconUri() {
+		return iconUri;
+	}
+
+	public void setIconUri(String iconUri) {
+		this.iconUri = iconUri;
+	}
+
+	public String getSelectedIconUri() {
+		return selectedIconUri;
+	}
+
+	public void setSelectedIconUri(String selectedIconUri) {
+		this.selectedIconUri = selectedIconUri;
+	}
+
+	public String getShowName() {
+		return showName;
+	}
+
+	public void setShowName(String showName) {
+		this.showName = showName;
+	}
+
+	public Byte getAllFlag() {
+		return allFlag;
+	}
+
+	public void setAllFlag(Byte allFlag) {
+		this.allFlag = allFlag;
+	}
 
 	public Long getId() {
 		return id;
@@ -135,9 +211,9 @@ public class ActivityCategoryDTO {
 	public void setNamespaceId(Integer namespaceId) {
 		this.namespaceId = namespaceId;
 	}
-	
+
 	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
+	public String toString() {
+		return StringHelper.toJsonString(this);
+	}
 }

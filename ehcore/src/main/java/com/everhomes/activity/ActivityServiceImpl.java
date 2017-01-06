@@ -12,6 +12,8 @@ import javax.annotation.PostConstruct;
 import com.everhomes.contentserver.ContentServerProvider;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.rest.activity.*;
+import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
+import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
@@ -3132,5 +3134,10 @@ public class ActivityServiceImpl implements ActivityService {
             return dto;
         }
     }
+
+	@Override
+	public ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd) {
+		return null;
+	}
 
 }
