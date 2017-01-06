@@ -1730,6 +1730,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		List<CommunityDTO> communitydtos = new ArrayList<>();
 
+		// 用户的角色以及用户所在部门角色的所有权限
+		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+
+		// 用户在当前机构自身权限
+		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), user.getId()));
+
+		List<ServiceModulePrivilege> serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
+		
+		if(privilegeIds.contains(serviceModulePrivileges.get(0).getPrivilegeId())) {
+			communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+			return communitydtos;
+		}
+		
 		List<Long> moduleIds = new ArrayList<>();
 		moduleIds.add(0L);
 		moduleIds.add(cmd.getModuleId());
