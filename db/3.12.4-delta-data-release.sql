@@ -87,4 +87,130 @@ update eh_request_templates set fields_json = '{"fields":[{"fieldName":"name","f
 update eh_request_templates set fields_json = '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入企业全称","requiredFlag":"1","dynamicFlag":"1"}]}' where id = 2;
 
 
+-- 运营统计菜单配置到科技园 add by sfyan 20170106
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 41300, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes`    (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 41310, '', 'EhNamespaces', 1000000, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 41320, '', 'EhNamespaces', 1000000, 2);
 
+
+-- 科兴新增服务联盟菜单
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES ('80000', '园区服务', '0', 'fa fa-group', NULL, '1', '2', '/80000', 'park', '800', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80100', '服务联盟', '80000', NULL, NULL, '1', '2', '/80000/80100', 'park', '810', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80110', '服务列表', '80100', NULL, 'service_list/155', '0', '2', '/80000/80100/80110', 'park', '820', NULL);
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10120, '0', '园区服务 管理员', '园区服务 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10121, '0', '服务联盟 管理员', '服务联盟 业务模块权限', NULL);
+
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10120', '80000', '园区服务', '1', '1', '园区服务 全部权限', '710');
+
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10121', '80100', '服务联盟', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10121', '80110', '服务联盟', '1', '1', '服务联盟 全部权限', '711');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 80000, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 80100, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 80110, '', 'EhNamespaces', 999983, 2);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10120;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10121;
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10122, '0', '企业服务 管理员', '企业服务 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10123, '0', '厂房出租 管理员', '厂房出租 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10124, '0', '公寓出租 管理员', '公寓出租 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10125, '0', '医疗 管理员', '医疗 业务模块权限', NULL);
+
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10122', '80200', '企业服务', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10122', '80210', '企业服务', '1', '1', '服务联盟 全部权限', '711');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10123', '80300', '厂房出租', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10123', '80310', '厂房出租', '1', '1', '服务联盟 全部权限', '711');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10124', '80400', '公寓出租', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10124', '80410', '公寓出租', '1', '1', '服务联盟 全部权限', '711');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10125', '80500', '医疗', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10125', '80510', '医疗', '1', '1', '服务联盟 全部权限', '711');
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80200', '企业服务', '80000', NULL, NULL, '1', '2', '/80000/80200', 'park', '810', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80210', '服务列表', '80200', NULL, 'service_list/151', '0', '2', '/80000/80200/80210', 'park', '820', NULL);
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80300', '厂房出租', '80000', NULL, NULL, '1', '2', '/80000/80300', 'park', '810', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80310', '服务列表', '80300', NULL, 'service_list/152', '0', '2', '/80000/80300/80310', 'park', '820', NULL);
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80400', '公寓出租', '80000', NULL, NULL, '1', '2', '/80000/80400', 'park', '810', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80410', '服务列表', '80400', NULL, 'service_list/153', '0', '2', '/80000/80400/80410', 'park', '820', NULL);
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80500', '医疗', '80000', NULL, NULL, '1', '2', '/80000/80500', 'park', '810', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80510', '服务列表', '80500', NULL, 'service_list/154', '0', '2', '/80000/80500/80510', 'park', '820', NULL);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10122;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10123;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10124;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`)
+SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now() FROM `eh_acl_privileges` WHERE id = 10125;
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80200, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80210, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80300, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80310, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80400, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80410, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80500, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80510, '', 'EhNamespaces', 999983, 2);
+
+-- 更新菜单datatype
+update eh_web_menus set data_type = 'access_manage/inside' where data_type = 'access_manage_inside' and name = '门禁管理';
+update eh_web_menus set data_type = 'version_manage/inside' where data_type = 'version_manage_inside' and name = '版本管理';
+update eh_web_menus set data_type = 'access_group/inside' where data_type = 'access_group_inside' and name = '门禁分组';
+update eh_web_menus set data_type = 'user_auth/inside' where data_type = 'user_auth_inside' and name = '用户授权';
+update eh_web_menus set data_type = 'visitor_auth/inside' where data_type = 'visitor_auth_inside' and name = '访客授权';
+update eh_web_menus set data_type = 'access_log/inside' where data_type = 'access_log_inside' and name = '门禁日志';
+
+update eh_web_menus set data_type = 'forum_activity/road' where data_type = 'road_show' and name = '路演表演';
+update eh_web_menus set data_type = 'forum_activity/whiteCollar' where data_type = 'white_collar_activity' and name = '白领活动';
+update eh_web_menus set data_type = 'forum_activity/OE' where data_type = 'OE_auditorium' and name = 'OE大讲堂';
+update eh_web_menus set data_type = 'news_management/industry' where data_type = 'industry_dynamics' and name = '行业动态';
+
+-- 物业报修与工作流对接
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('1325', 'pmtask.handler-1000000', 'flow', '', '0', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('1326', 'pmtask.handler-999983', 'flow', '', '0', NULL);
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) 
+	VALUES ( 'pmtask', '10008', 'zh_CN', '请启用工作流！');
+
+	
