@@ -18,4 +18,8 @@ public interface GeneralApprovalValProvider {
 	List<GeneralApprovalVal> queryGeneralApprovalVals(ListingLocator locator,
 			int count, ListingQueryBuilderCallback queryBuilderCallback);
 
+	List<GeneralApprovalVal> queryGeneralApprovalValsByFlowCaseId(Long id);
+
+	GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName);
+
 }

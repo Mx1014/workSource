@@ -38,7 +38,10 @@ import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
+import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
+import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.rest.general_approval.GeneralFormTemplateType;
 import com.everhomes.rest.general_approval.GetTemplateByApprovalIdCommand;
@@ -51,6 +54,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.UpdateGeneralApprovalCommand;
+import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -85,6 +89,15 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 				.getFormOriginId());
 		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
 		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
+		//增加一个隐藏的field 用于存放sourceId
+		GeneralFormFieldDTO sourceIdField = new GeneralFormFieldDTO();
+		sourceIdField.setDataSourceType(GeneralFormDataSourceType.SOURCE_ID.getCode());
+		sourceIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+		sourceIdField.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
+		sourceIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+		sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+		sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+		fieldDTOs.add(sourceIdField);
 		response.setFormFields(fieldDTOs);
 		return response;
 	}
@@ -119,22 +132,10 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			// cmd21.setReferId(null);
 			cmd21.setReferType(FlowReferType.APPROVAL.getCode());
 			cmd21.setProjectId(ga.getProjectId());
-			cmd21.setProjectType(ga.getProjectType());
-			// Map<String, String> map = new HashMap<String, String>();
-			// map.put("resourceName", order.getResourceName());
-			// String useDetail = order.getUseDetail();
-			// if (useDetail.contains("\n")) {
-			// String[] splitUseDetail = useDetail.split("\n");
-			// useDetail = splitUseDetail[0] + "...";
-			// }
-			// map.put("useDetail", useDetail);
-			// String contentString =
-			// localeTemplateService.getLocaleTemplateString(
-			// RentalNotificationTemplateCode.FLOW_SCOPE,
-			// RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT,
-			// RentalNotificationTemplateCode.locale, map, "");
-			//
+			cmd21.setProjectType(ga.getProjectType()); 
+			//把command作为json传到content里，给flowcase的listener进行处理
 			cmd21.setContent(JSON.toJSONString(cmd));
+			
 			FlowCase flowCase = flowService.createFlowCase(cmd21);
 			// 把values 存起来
 			for (PostApprovalFormItem val : cmd.getValues()) {
@@ -209,7 +210,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	@Override
 	public ListGeneralFormResponse listApprovalForms(ListApprovalFormsCommand cmd) {
 
-		List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(null,
+		List<GeneralForm> forms = this.generalFormProvider.queryGeneralForms(new ListingLocator(),
 				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
 					@Override
 					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
@@ -267,7 +268,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	@Override
 	public ListGeneralApprovalResponse listGeneralApproval(ListGeneralApprovalCommand cmd) {
 		//
-		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(null,
+		List<GeneralApproval> gas = this.generalApprovalProvider.queryGeneralApprovals(new ListingLocator(),
 				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
 					@Override
 					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,

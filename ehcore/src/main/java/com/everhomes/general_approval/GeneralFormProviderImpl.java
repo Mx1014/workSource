@@ -150,4 +150,23 @@ public class GeneralFormProviderImpl implements GeneralFormProvider {
 		context.update(Tables.EH_GENERAL_FORMS).set(Tables.EH_GENERAL_FORMS.STATUS,GeneralFormStatus.INVALID.getCode()).
 		where(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.eq(formOriginId)).execute();
 	}
+
+	@Override
+	public GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion) {
+		try {
+			GeneralForm[] result = new GeneralForm[1];
+			DSLContext context = this.dbProvider.getDslContext(AccessSpec
+					.readWriteWith(EhGeneralForms.class));
+
+			result[0] = context.select().from(Tables.EH_GENERAL_FORMS)
+					.where(Tables.EH_GENERAL_FORMS.FORM_ORIGIN_ID.eq(formOriginId)).and(Tables.EH_GENERAL_FORMS.FORM_VERSION.eq(formVersion)).fetchAny().map((r) -> {
+						return ConvertHelper.convert(r, GeneralForm.class);
+					});
+
+			return result[0];
+		} catch (Exception ex) {
+			// fetchAny() maybe return null
+			return null;
+		}
+	}
 }

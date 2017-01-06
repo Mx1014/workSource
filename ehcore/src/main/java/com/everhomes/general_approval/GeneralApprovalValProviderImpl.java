@@ -13,10 +13,12 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.rest.general_approval.GeneralFormStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhGeneralApprovalValsDao;
@@ -91,7 +93,7 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
         if(queryBuilderCallback != null)
             queryBuilderCallback.buildCondition(locator, query);
 
-        if(locator.getAnchor() != null) {
+        if(locator!=null && locator.getAnchor() != null) {
             query.addConditions(Tables.EH_GENERAL_APPROVAL_VALS.ID.gt(locator.getAnchor()));
             }
 
@@ -113,4 +115,37 @@ public class GeneralApprovalValProviderImpl implements GeneralApprovalValProvide
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
     }
+
+	@Override
+	public List<GeneralApprovalVal> queryGeneralApprovalValsByFlowCaseId(Long id) {
+		return queryGeneralApprovalVals(new ListingLocator(),
+				Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+					@Override
+					public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+							SelectQuery<? extends Record> query) {
+						query.addConditions(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(id));  
+						return query;
+					}
+				});
+	}
+	
+	@Override
+	public GeneralApprovalVal getGeneralApprovalByFlowCaseAndName(Long id, String fieldName){
+		try {
+	        GeneralApprovalVal[] result = new GeneralApprovalVal[1];
+	        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhGeneralApprovalVals.class));
+
+	        result[0] = context.select().from(Tables.EH_GENERAL_APPROVAL_VALS)
+	            .where(Tables.EH_GENERAL_APPROVAL_VALS.FLOW_CASE_ID.eq(id)).and(Tables.EH_GENERAL_APPROVAL_VALS.FIELD_NAME.eq(fieldName))
+	            .fetchAny().map((r) -> {
+	                return ConvertHelper.convert(r, GeneralApprovalVal.class);
+	            });
+
+	        return result[0];
+	        } catch (Exception ex) {
+	            //fetchAny() maybe return null
+	            return null;
+	        }
+		
+	}
 }

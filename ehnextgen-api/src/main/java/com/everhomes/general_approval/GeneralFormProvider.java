@@ -23,4 +23,6 @@ public interface GeneralFormProvider {
 
 	void invalidForms(Long formOriginId);
 
+	GeneralForm getActiveGeneralFormByOriginIdAndVersion(Long formOriginId, Long formVersion);
+
 }
