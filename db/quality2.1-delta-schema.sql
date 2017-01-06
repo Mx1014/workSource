@@ -38,7 +38,7 @@ CREATE TABLE `eh_quality_inspection_task_templates` (
 ALTER TABLE `eh_quality_inspection_tasks` DROP COLUMN `create_uid`;
 ALTER TABLE `eh_quality_inspection_tasks` ADD COLUMN `executive_position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions';
 ALTER TABLE `eh_quality_inspection_standard_group_map` ADD COLUMN `position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions';
-
+ALTER TABLE `eh_quality_inspection_task_templates` ADD COLUMN `executive_position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions';
 
 -- 3.12.4
 ALTER TABLE `eh_resource_categories` ADD COLUMN `type` tinyint(4)  DEFAULT '1' COMMENT '1:分类, 2：子项目';

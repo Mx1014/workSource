@@ -365,6 +365,7 @@ public class QualityServiceImpl implements QualityService {
 				 map.setStandardId(standard.getId());
 				 map.setGroupType(group.getGroupType());
 				 map.setGroupId(group.getGroupId());
+				 map.setPositionId(group.getPositionId());
 				 if(group.getInspectorUid() != null)
 					 map.setInspectorUid(group.getInspectorUid());
 				 qualityProvider.createQualityInspectionStandardGroupMap(map);
@@ -961,6 +962,9 @@ public class QualityServiceImpl implements QualityService {
 			} 
         	
         	Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
+        	if(r.getExecutivePositionId() != null) {
+        		//岗位名 然后和组名共同拼成groupname
+        	}
 			if(group != null)
 				dto.setGroupName(group.getName());
         	
@@ -1328,7 +1332,7 @@ public class QualityServiceImpl implements QualityService {
 			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
 				
 				task.setExecutiveGroupId(executiveGroup.getGroupId());
-				
+				task.setExecutivePositionId(executiveGroup.getPositionId());
 //				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
 //																	, executiveGroup.getGroupId());
 //				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
@@ -1686,6 +1690,9 @@ public class QualityServiceImpl implements QualityService {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
 			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+			if(r.getPositionId() != null) {
+				//岗位名+组名共同组成groupname
+			}
 			if(group != null)
 				dto.setGroupName(group.getName());
         	
@@ -2199,6 +2206,7 @@ public class QualityServiceImpl implements QualityService {
 		task.setTaskType((byte) 1);
 		task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		task.setExecutiveGroupId(cmd.getGroup().getGroupId());
+		task.setExecutivePositionId(cmd.getGroup().getPositionId());
 		task.setExecutiveExpireTime(new Timestamp(cmd.getExecutiveExpireTime()));
 		task.setCategoryId(cmd.getSpecificationId());
 		
