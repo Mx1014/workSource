@@ -69,15 +69,43 @@ public class EbeiPmTaskHandleTest {
 	
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
+		
+		param.put("userId", "12");
+		param.put("address", "测试项目东三区凤凰阁第1栋1单元1楼0001");
+		param.put("buildingId", "53327");
+		param.put("linkName", "一碑测试");
+		param.put("linkTel", "18011001100");
+		param.put("serviceId", "193");
+		param.put("type", "1");
+		param.put("remarks", "业主报修水管坏了");
 		param.put("projectId", "240111044331055940");
-		postToEbei(param, null);
-//		login();
+		param.put("anonymous", "0");
+		param.put("fileAddrs", "");
+		param.put("buildingType", "0");
+		login();
+		postToEbei(param, CREATE_TASK);
+		
+//		listPmtasks();
 	}
+	
+	public static void listPmtasks(){
+JSONObject param = new JSONObject();
+		
+		param.put("userId", "12");
+		param.put("buildingId", "53327");
+		param.put("linkName", "一碑测试");
+		param.put("linkTel", "18011001100");
+		param.put("perSize", 10);
+		param.put("pageNum", 1);
+		
+		postToEbei(param,LIST_TASK );
+	}
+	
 	
 	public static String postToEbei(JSONObject param, String type) {
 		CloseableHttpClient httpclient =HttpClients.createDefault();
 
-		HttpPost httpPost = new HttpPost("http://120.24.88.192:13902/ebeitest/rest/crmFeedBackInfoJoin/serviceTypeList");
+		HttpPost httpPost = new HttpPost("http://120.24.88.192:13902/ebeitest" + type);
 		StringBuilder result = new StringBuilder();
 		
         String data = null;
@@ -93,7 +121,7 @@ public class EbeiPmTaskHandleTest {
 
 			httpPost.setEntity(stringEntity);
 			httpPost.setHeader("Content-Type", "application/json");
-//			httpPost.addHeader("EBEI_TOKEN", "Kf3j5uHnxjSst37WgYNIrrR//wVj0l1R0unt1KrrwnXnn5f8zmCcnwSrK0pcON3K\r\n");
+//			httpPost.addHeader("EBEI_TOKEN", "ai5uSTEuD9hItoFqlm8oUWiVyzXbEd0IXDfyRjMEuHz6JtYuTHGlyuCiu7wpvACJ\r\n");
 //			httpPost.addHeader("HTMIMI_USERID", "123456");
 			response = httpclient.execute(httpPost);
 			HttpEntity entity = response.getEntity();

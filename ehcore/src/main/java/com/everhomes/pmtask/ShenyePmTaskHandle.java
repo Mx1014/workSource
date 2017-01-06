@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 
 
+
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -16,24 +17,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.family.FamilyService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.NamespaceResourceProvider;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -71,43 +60,21 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(ShenyePmTaskHandle.class);
 	@Autowired
-	private PmTaskProvider pmTaskProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
 	private CategoryProvider categoryProvider;
 	@Autowired
-    private ContentServerService contentServerService;
+    private DbProvider dbProvider;
+	@Autowired
+	private PmTaskProvider pmTaskProvider;
+	@Autowired
+	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
-	private PmTaskSearch pmTaskSearch;
-	@Autowired
-	private CommunityProvider communityProvider;
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-	@Autowired
-	private OrganizationProvider organizationProvider;
-	@Autowired
-	private MessagingService messagingService;
-	@Autowired
 	private SmsProvider smsProvider;
 	@Autowired
-	private AclProvider aclProvider;
-	@Autowired
-    private DbProvider dbProvider;
-	@Autowired
-    private CoordinationProvider coordinationProvider;
-	@Autowired
-	private OrganizationService organizationService;
-	@Autowired
-	private AddressProvider addressProvider;
-	@Autowired
-    private FamilyService familyService;
-	@Autowired
-	private NamespaceResourceProvider namespaceResourceProvider;
+	private MessagingService messagingService;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
@@ -197,6 +164,7 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 		});
 
 		pmTaskSearch.feedDoc(task);
+		
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 

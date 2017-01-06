@@ -18,21 +18,14 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.address.AddressProvider;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -42,8 +35,6 @@ import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
@@ -85,39 +76,23 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowPmTaskHandle.class);
 	@Autowired
-	private PmTaskProvider pmTaskProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
 	private CategoryProvider categoryProvider;
 	@Autowired
-    private ContentServerService contentServerService;
+    private DbProvider dbProvider;
+	@Autowired
+	private PmTaskProvider pmTaskProvider;
+	@Autowired
+	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
-	private PmTaskSearch pmTaskSearch;
-	@Autowired
-	private CommunityProvider communityProvider;
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-	@Autowired
-	private OrganizationProvider organizationProvider;
+	private SmsProvider smsProvider;
 	@Autowired
 	private MessagingService messagingService;
 	@Autowired
-	private SmsProvider smsProvider;
-	@Autowired
-	private AclProvider aclProvider;
-	@Autowired
-    private DbProvider dbProvider;
-	@Autowired
-    private CoordinationProvider coordinationProvider;
-	@Autowired
-	private OrganizationService organizationService;
-	@Autowired
-	private AddressProvider addressProvider;
+    private ContentServerService contentServerService;
 	@Autowired
 	private FlowService flowService;
     @Autowired
