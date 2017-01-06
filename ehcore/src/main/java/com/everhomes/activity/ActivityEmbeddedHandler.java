@@ -219,6 +219,9 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             if(cmd.getCategoryId() == null) {
             	cmd.setCategoryId(0L);
             }
+            if (cmd.getContentCategoryId() == null) {
+				cmd.setContentCategoryId(0L);
+			}
             
             if(activityService.isPostIdExist(post.getId())){
             	activityService.updatePost(cmd, post.getId());
