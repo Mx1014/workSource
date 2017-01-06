@@ -49,7 +49,7 @@ import java.util.stream.Collectors;
 @Service
 public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(PmKeXingBillServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PmKeXingBillServiceImpl.class);
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -290,8 +290,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
     private String post(String api, Map<String, String> params) {
         try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Http post params is :{}", params.toString());
+            }
             return HttpUtils.post(api, params, 10, "utf-8");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("Http post error for api: {}", api, e);
             throw RuntimeErrorException.errorWith(PmKeXingBillServiceErrorCode.SCOPE, PmKeXingBillServiceErrorCode.ERROR_HTTP_REQUEST,
                     "Http post error");
@@ -351,17 +354,6 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             dateBillItemListMap.forEach((date, itemList) -> dtoArr[0] = this.toPmKeXingBillDTO(date, itemList));
             return dtoArr[0];
         }
-
-        /*List<PmKeXingBillDTO> toPmKeXingBillDTOList() {
-            List<PmKeXingBillDTO> dtoList = new ArrayList<>();
-            Map<String, List<BillItem>> dateBillItemListMap = result.parallelStream().collect(Collectors.groupingBy(BillItem::getBillDate));
-
-            dateBillItemListMap.forEach((date, billItemList) -> {
-                PmKeXingBillDTO dto = this.toPmKeXingBillDTO(date, billItemList);
-                dtoList.add(dto);
-            });
-            return dtoList;
-        }*/
     }
 
     private static String currLocale() {
@@ -394,7 +386,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         }
 
         String getBillDate() {
-            return billDate;
+            return billDate != null ? billDate : "";
         }
 
         BigDecimal getReceivable() {
