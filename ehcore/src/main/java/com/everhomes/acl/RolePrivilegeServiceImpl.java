@@ -29,6 +29,7 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -42,6 +43,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.sql.Timestamp;
@@ -1723,6 +1725,60 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	}
 
 	@Override
+	public List<CommunityDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+		User user = UserContext.current().getUser();
+
+		List<CommunityDTO> communitydtos = new ArrayList<>();
+
+		// 用户的角色以及用户所在部门角色的所有权限
+		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
+
+		// 用户在当前机构自身权限
+		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), user.getId()));
+
+		List<ServiceModulePrivilege> serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
+		
+		if(privilegeIds.contains(serviceModulePrivileges.get(0).getPrivilegeId())) {
+			communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
+			return communitydtos;
+		}
+		
+		List<Long> moduleIds = new ArrayList<>();
+		moduleIds.add(0L);
+		moduleIds.add(cmd.getModuleId());
+
+		// 获取个人的业务模块下的项目
+		List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.USER.getCode(), user.getId(), cmd.getOrganizationId(), moduleIds);
+
+		List<OrganizationDTO> orgDTOs = new ArrayList<>();
+
+		// 没有，则获取个人所在公司节点的业务模块下的项目
+		if(serviceModuleAssignments.size() == 0){
+			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, user.getId(), cmd.getOrganizationId()));
+			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, user.getId(), cmd.getOrganizationId()));
+			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.GROUP, user.getId(), cmd.getOrganizationId()));
+			List<Long> targetIds = new ArrayList<>();
+			for (OrganizationDTO orgDTO: orgDTOs) {
+				targetIds.add(orgDTO.getId());
+			}
+			if(targetIds.size() > 0){
+				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+			}
+		}
+
+		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
+			if(EntityType.fromCode(serviceModuleAssignment.getOwnerType()) == EntityType.COMMUNITY){
+				Community community = communityProvider.findCommunityById(serviceModuleAssignment.getOwnerId());
+				if(null != community){
+					communitydtos.add(ConvertHelper.convert(community, CommunityDTO.class));
+				}
+			}
+		}	
+		
+		return communitydtos;
+	}
+
+	@Override
 	public List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd) {
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1837,7 +1893,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		projects.addAll(entityts);
 		return projects;
 	}
-
 
 	private ProjectDTO getChildCategories(List<ProjectDTO> list, ProjectDTO dto){
 

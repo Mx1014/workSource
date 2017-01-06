@@ -8,6 +8,7 @@ import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -18,13 +19,23 @@ import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.config.ConfigurableBeanFactory;
+import org.springframework.context.annotation.Scope;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
+
+import sun.misc.BASE64Encoder;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -33,16 +44,20 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.webservice.WorkflowAppDraftWebService;
 import com.everhomes.pmtask.webservice.WorkflowAppDraftWebServicePortType;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.rest.forum.AttachmentDescriptor;
+import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
+import com.everhomes.rest.pmtask.PmTaskAttachmentType;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 
-import sun.misc.BASE64Encoder;
-
-@Component("pmtaskTechparkHandler")
-public class PmtaskTechparkHandler {
-
-	private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskTechparkHandler.class);
-
+@Component
+@Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
+public class TechparkSynchronizedAction implements Runnable{
+	
+	private static final Logger LOGGER = LoggerFactory.getLogger(TechparkSynchronizedAction.class);
+	
 	@Autowired
 	private AddressProvider addressProvider;
 	@Autowired
@@ -51,10 +66,45 @@ public class PmtaskTechparkHandler {
 	private OrganizationProvider organizationProvider;
 	@Autowired
     private ContentServerService contentServerService;
-
+	@Autowired
+	private PmTaskProvider pmTaskProvider;
+	@Autowired
+	private CategoryProvider categoryProvider;
+	@Autowired
+    private BigCollectionProvider bigCollectionProvider;
+	
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
-	public void synchronizedData(PmTask task, List<AttachmentDescriptor> attachments, Category taskCategory, Category category) {
+	private Long taskId;
+	
+	public TechparkSynchronizedAction(final String taskId) {
+		this.taskId = Long.valueOf(taskId);
+	}
+	
+	@Override
+	public void run() {
+		User user = UserContext.current().getUser();
+		PmTask task = pmTaskProvider.findTaskById(taskId);
+		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
+		Category category = null;
+		if(null != task.getCategoryId())
+			category = categoryProvider.findCategoryById(task.getCategoryId());
+		
+		//查询图片
+//		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
+//		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
+//			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
+//			
+//			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
+//	                EntityType.USER.getCode(), r.getCreatorUid());
+//			attachmentDto.setContentUrl(contentUrl);
+//			return attachmentDto;
+//		}).collect(Collectors.toList());						
+		
+		synchronizedData(task, /*attachmentDtos,*/ taskCategory, category);
+	}
+
+	public void synchronizedData(PmTask task, /*List<PmTaskAttachmentDTO> attachments,*/ Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
 		param.put("fileFlag", "1");
@@ -112,6 +162,17 @@ public class PmtaskTechparkHandler {
 		formContent.add(form);
 		
 		JSONArray enclosure = new JSONArray();
+		
+		String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+
+        String attachmentJson = valueOperations.get(key);
+        List<AttachmentDescriptor> attachments = JSONObject.parseArray(attachmentJson, AttachmentDescriptor.class);
+        LOGGER.error("Delete TechparkSynchronizedData key, key={}", key);
+        redisTemplate.delete(key);
+		
 		if(null != attachments) {
 			for(AttachmentDescriptor ad: attachments) {
 				JSONObject attachment = new JSONObject();
@@ -127,13 +188,13 @@ public class PmtaskTechparkHandler {
 					attachment.put("fileName", "");
 				}
 				
-				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+//				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
 				
 				attachment.put("fileSuffix", fileSuffix);
 				
 				String fileContent = null;
 				try {
-					fileContent = getImageStr(contentUrl);
+					fileContent = getImageStr(ad.getContentUrl());
 //					String fileContent1 = getURLImage(contentUrl);
 //					
 //					System.out.println(fileContent.equals(fileContent1));
@@ -163,19 +224,8 @@ public class PmtaskTechparkHandler {
         LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);
 
 	}
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
-	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
-        String url = null;
-        if(uri != null && uri.length() > 0) {
-            try{
-                url = contentServerService.parserUri(uri, ownerType, ownerId);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
-            }
-        }
-        
-        return url;
-    }
 	
 	public String getURLImage(String imageUrl) throws Exception {
 		if(null == imageUrl)
@@ -256,4 +306,5 @@ public class PmtaskTechparkHandler {
         }
         return null;
     }
+	
 }

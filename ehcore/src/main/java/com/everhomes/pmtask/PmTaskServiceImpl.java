@@ -22,8 +22,14 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+
+
 
 
 
@@ -45,6 +51,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+
+
 
 
 
@@ -76,6 +85,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -83,6 +93,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -2191,7 +2202,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		checkOrganizationId(cmd.getOrganizationId());
 		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
-		List<CommunityDTO> dtos = listAllChildrenOrganizationCoummunities(cmd.getOrganizationId(), cmd.getKeyword());
+//		List<CommunityDTO> dtos = listAllChildrenOrganizationCoummunities(cmd.getOrganizationId(), cmd.getKeyword());
+		
+		ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
+		listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
+		listUserRelatedProjectByModuleIdCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+		
+		List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+		
 		response.setCommunities(dtos);
 		return response;
 	}
