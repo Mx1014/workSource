@@ -70,3 +70,21 @@ SELECT (@service_module_scope_id := @service_module_scope_id + 1), id, 20000, ''
 
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
 SELECT (@service_module_scope_id := @service_module_scope_id + 1), id, 40000, '', NULL, NULL, NULL, '2' FROM `eh_namespaces`; 
+
+-- 科兴配置发件邮箱
+SET @eh_configurations = (SELECT MAX(id) FROM `eh_configurations`);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations + 1), 'mail.smtp.address', 'smtp.genzon.com.cn', '', '999983', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations + 1), 'mail.smtp.port', '25', '', '999983', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations + 1), 'mail.smtp.account', 'caoxiuran@genzon.com.cn', '', '999983', NULL);
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ((@eh_configurations := @eh_configurations + 1), 'mail.smtp.passwod', '789651q@', '', '999983', NULL);
+
+-- 以前的模板也加上dynamic字段
+update eh_request_templates set fields_json = '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入企业全称","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"cityName","fieldDisplayName":"企业城市","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所在城市","requiredFlag":"1"},{"fieldName":"industry","fieldDisplayName":"企业行业","fieldType":"string","fieldContentType":"text","fieldDesc":"企业所属行业","requiredFlag":"1"},{"fieldName":"financingStage","fieldDisplayName":"融资阶段","fieldType":"string","fieldContentType":"text","fieldDesc":"融资阶段","requiredFlag":"1"},{"fieldName":"financingAmount","fieldDisplayName":"融资金额(万元)","fieldType":"decimal","fieldContentType":"text","fieldDesc":"融资金额（万元）","requiredFlag":"1"},{"fieldName":"transferShares","fieldDisplayName":"出让股份(%)","fieldType":"number","fieldContentType":"text","fieldDesc":"出让股份 %","requiredFlag":"1"},{"fieldName":"projectDesc","fieldDisplayName":"项目描述","fieldType":"string","fieldContentType":"text","fieldDesc":"项目描述","requiredFlag":"1"},{"fieldName":"attachments","fieldDisplayName":"附件图片","fieldType":"blob","fieldContentType":"image","fieldDesc":"","requiredFlag":"0"},{"fieldName":"attachments","fieldDisplayName":"商业计划书","fieldType":"blob","fieldContentType":"file","fieldDesc":"","requiredFlag":"0"}]}' where id = 1;
+update eh_request_templates set fields_json = '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"企业名称","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入企业全称","requiredFlag":"1","dynamicFlag":"1"}]}' where id = 2;
+
+
+
