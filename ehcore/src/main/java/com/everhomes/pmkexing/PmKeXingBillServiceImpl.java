@@ -261,6 +261,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST,
                     "Organization are not exist");
         }
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Current user organization is {}", organization);
+        }
         return organization;
     }
 
