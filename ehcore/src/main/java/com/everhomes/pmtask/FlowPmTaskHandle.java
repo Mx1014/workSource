@@ -244,7 +244,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 
 		if(user.getNamespaceId() == 1000000) {
 			
-			String key = "TechparkSynchronizedData-pmtask" + task.getId();
+			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
 			String value = "[]";
 			
 			List<AttachmentDescriptor> attachments = cmd.getAttachments();
@@ -262,7 +262,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
 	        valueOperations.set(key, value);
 			
-			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
+			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
 			handler.pushToQueque(task.getId());
 		}
 		long end = System.currentTimeMillis();
