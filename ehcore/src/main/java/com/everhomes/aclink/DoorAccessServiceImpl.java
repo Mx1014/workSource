@@ -169,6 +169,7 @@ import com.everhomes.util.Tuple;
 
 import org.apache.commons.codec.binary.Base64;
 import org.apache.commons.httpclient.util.DateUtil;
+import org.springframework.util.StringUtils;
 
 
 @Component
@@ -443,8 +444,25 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+
+        if(!StringUtils.isEmpty(cmd.getKeyword())){
+            List<User> users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+            for (User user: users) {
+
+            }
+        }
+
+
+
         List<AclinkUser> users = userProvider.searchDoorUsers(cmd, locator, pageSize);
+
+
+
+
+
         
         List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
         for(AclinkUser u : users) {
