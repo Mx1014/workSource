@@ -87,7 +87,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
@@ -100,7 +99,6 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.OrgAddressDTO;
-import com.everhomes.rest.organization.OrganizationAddressDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
@@ -166,7 +164,6 @@ import com.everhomes.rest.pmtask.TaskOperatorStatisticsDTO;
 import com.everhomes.rest.pmtask.TaskStatisticsDTO;
 import com.everhomes.rest.pmtask.UpdateTaskCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -672,123 +669,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 	@Override
 	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
 		
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		checkId(cmd.getId());
-		PmTask task = checkPmTask(cmd.getId());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
 		
-		setPmTaskDTOAddress(task, dto);
-		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
-			User user = userProvider.findUserById(task.getCreatorUid());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			dto.setRequestorName(user.getNickName());
-			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
-		}
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
-		//查询服务类型
-		Category category = categoryProvider.findCategoryById(task.getCategoryId());
-		Category taskCategory = checkCategory(task.getTaskCategoryId());
-		if(null != category)
-			dto.setCategoryName(category.getName());
-    	dto.setTaskCategoryName(taskCategory.getName());
-		
-		//查询图片
-		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
-		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
-			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
-			
-			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
-	                EntityType.USER.getCode(), r.getCreatorUid());
-			attachmentDto.setContentUrl(contentUrl);
-			return attachmentDto;
-		}).collect(Collectors.toList());
-		dto.setAttachments(attachmentDtos);
-		//查询task log
-		List<PmTaskLogDTO> taskLogDtos = listPmTaskLogs(dto);
-		dto.setTaskLogs(taskLogDtos);
-		
-		return dto;
+		return handler.getTaskDetail(cmd);
 	}
 
-	private List<PmTaskLogDTO> listPmTaskLogs(PmTaskDTO task) {
-		
-		List<PmTaskLog> taskLogs = pmTaskProvider.listPmTaskLogs(task.getId(), null);
-		List<PmTaskLogDTO> taskLogDtos = taskLogs.stream().map(r -> {
-			
-			PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
-			
-			Map<String, Object> map = new HashMap<String, Object>();
-			
-		    String scope = PmTaskNotificationTemplateCode.SCOPE;
-		    String locale = PmTaskNotificationTemplateCode.LOCALE;
-		    
-			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
-			    
-				if(null == task.getOrganizationId() || task.getOrganizationId() == 0){
-					setParam(map, task.getCreatorUid(), pmTaskLogDTO);
-				}else{
-					map.put("operatorName", task.getRequestorName());
-				    map.put("operatorPhone", task.getRequestorPhone());
-				}
-				
-				int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
-				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-				pmTaskLogDTO.setText(text);
-				
-			}else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
-				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-				User target = userProvider.findUserById(r.getTargetId());
-				UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
-				map.put("targetName", target.getNickName());
-			    map.put("targetPhone", targetIdentifier.getIdentifierToken());
-			    
-			    int code = PmTaskNotificationTemplateCode.PROCESSING_TASK_LOG;
-				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-				pmTaskLogDTO.setText(text);
-				
-			}else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
-				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
-				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-				pmTaskLogDTO.setText(text);
-				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
-				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
-					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
-					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
-			                EntityType.USER.getCode(), r2.getCreatorUid());
-					dto.setContentUrl(contentUrl);
-					return dto;
-				}).collect(Collectors.toList());
-				pmTaskLogDTO.setAttachments(attachmentDtos);
-				
-			}else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
-				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
-				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-				pmTaskLogDTO.setText(text);
-			}else {
-				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
-				int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
-				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-				pmTaskLogDTO.setText(text);
-			}
-			
-			return pmTaskLogDTO;
-		}).collect(Collectors.toList());
-		
-		return taskLogDtos;
-	}
-	
-	private void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
-		User user = userProvider.findUserById(userId);
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-		map.put("operatorName", user.getNickName());
-	    map.put("operatorPhone", userIdentifier.getIdentifierToken());
-	    dto.setOperatorName(user.getNickName());
-	    dto.setOperatorPhone(userIdentifier.getIdentifierToken());
-	}
-	
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
 		
@@ -2191,39 +2080,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return response;
 	}
 
-	private List<CommunityDTO> listAllChildrenOrganizationCoummunities(Long organizationId, String keyword){
-		
-		Organization organization = this.checkOrganization(organizationId);
-		
-		List<String> groupTypes = new ArrayList<String>();
-		groupTypes.add(OrganizationGroupType.GROUP.getCode());
-		groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-		
-		List<Organization> orgs = organizationProvider.listOrganizationByGroupTypes(organization.getPath()+"/%", groupTypes);
-		orgs.add(organization);
-		if(LOGGER.isDebugEnabled())
-        	LOGGER.info("orgs:" + orgs);
-		List<CommunityDTO> dtos = new ArrayList<CommunityDTO>();
-		
-		for (Organization org : orgs) {
-			List<Community> communities = organizationProvider.listOrganizationCommunitiesByKeyword(org.getId(), keyword);
-			if(null != communities && communities.size() != 0)
-				dtos.addAll(communities.stream().map(r -> ConvertHelper.convert(r, CommunityDTO.class)).collect(Collectors.toList()));
-		}
-		
-		return dtos;
-	}
-	
-	private Organization checkOrganization(Long orgId) {
-		Organization org = organizationProvider.findOrganizationById(orgId);
-		if(org == null){
-			LOGGER.error("Unable to find the organization.organizationId=" + orgId);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Unable to find the organization.");
-		}
-		return org;
-	}
-	
 	@Override
 	public GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
 		User user = UserContext.current().getUser();

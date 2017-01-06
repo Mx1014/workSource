@@ -36,6 +36,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiResponseEntity;
 import com.everhomes.pmtask.ebei.EbeiServiceType;
 import com.everhomes.rest.app.AppConstants;
@@ -252,9 +253,25 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		param.put("remark", task.getId());
 		param.put("fileAddrs", task.getId());
 		
-		postToEbei(param, CANCEL_TASK, null);
+		postToEbei(param, EVALUATE, null);
 		
 		return false;
+	}
+	
+	private EbeiPmTaskDTO getTaskDetail(PmTask task) {
+		
+		JSONObject param = new JSONObject();
+		
+		param.put("orderId", task.getId());
+		
+		String json = postToEbei(param, EVALUATE, null);
+		
+		EbeiResponseEntity<EbeiPmTaskDTO> entity = JSONObject.parseObject(json, new TypeReference<EbeiResponseEntity<EbeiPmTaskDTO>>(){});
+		
+		if(entity.isSuccess())
+			return entity.getData();
+		
+		return null;
 	}
 	
 	@Override
