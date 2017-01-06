@@ -108,7 +108,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10120, '0', '园区服务 管理员', '园区服务 业务模块权限', NULL);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10121, '0', '服务联盟 管理员', '服务联盟 业务模块权限', NULL);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10121, '0', '服务联盟-用户版 管理员', '服务联盟 业务模块权限', NULL);
 
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10120', '80000', '园区服务', '1', '1', '园区服务 全部权限', '710');
 
@@ -212,5 +212,17 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 	VALUES ('1326', 'pmtask.handler-999983', 'flow', '', '0', NULL);
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) 
 	VALUES ( 'pmtask', '10008', 'zh_CN', '请启用工作流！');
+
+INSERT INTO `eh_web_menus` VALUES ('40850', '工作流设置', '40800', null, 'react:/working-flow/flow-list', '0', '2', '/40000/40800/40850', 'park', '475');
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10028', '40850', '停车缴费', '1', '1', '停车缴费 全部权限', '710');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40850, '', 'EhNamespaces', 1000000, 2);
+
+delete from eh_web_menu_scopes where menu_id = 20160 and owner_id = 1000000;
+delete from eh_web_menu_scopes where menu_id = 20192 and owner_id = 1000000;
 
 	
