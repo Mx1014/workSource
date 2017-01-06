@@ -3054,6 +3054,10 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public void downloadActivityAttachment(DownloadActivityAttachmentCommand cmd) {
 
+    	if(cmd.getAttachmentId() == null || cmd.getActivityId() == null) {
+    		return ;
+    	}
+    	
         ActivityAttachment attachment = activityProvider.findByActivityAttachmentId(cmd.getAttachmentId());
         if(attachment == null) {
             LOGGER.error("handle activity attachment error ,the activity attachment does not exsit.cmd={}", cmd);

@@ -395,6 +395,21 @@ public class YellowPageController  extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+    
+    /**
+     * <b>URL: /yellowPage/listAttachments</b>
+     * <p> 查询服务机构附件列表 </p>
+     */
+    @RequestMapping("listAttachments")
+    @RestReturn(value = ListAttachmentsResponse.class)
+    public RestResponse listAttachments(ListAttachmentsCommand cmd) {
+    	ListAttachmentsResponse resp = this.yellowPageService.listAttachments(cmd);
+    	
+    	RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
    	 * <b>URL: /yellowPage/syncSARequestInfo</b>

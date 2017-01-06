@@ -9,6 +9,7 @@ import javax.validation.Valid;
 import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
 
@@ -286,4 +287,6 @@ public interface RolePrivilegeService {
 	void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, Long moduleId, List<Long> privilegeIds);
 
 	void createOrganizationAdmin(CreateOrganizationAdminCommand cmd, Integer namespaceId);
+	
+	List<CommunityDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd);
 }
