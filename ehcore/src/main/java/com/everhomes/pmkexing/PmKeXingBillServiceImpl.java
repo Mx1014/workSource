@@ -151,11 +151,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         if (cmd.getBillStatus() != null) {
             params.put("isPay", cmd.getBillStatus()+"");
         }
-        params.put("pageCount", (cmd.getPageOffset() != null ? cmd.getPageOffset() : 1)+"");
-        params.put("pageSize", pageSize+"");
+        params.put("pageCount", "1");
+        params.put("pageSize", "1000");
 
-        LocalDate date = LocalDate.now().plusMonths(10);
-        // LocalDate date = LocalDate.now().plusMonths(10);
+        LocalDate date = LocalDate.now().plusMonths(20);
+        // LocalDate date = LocalDate.now();
         int monthOffset = (cmd.getPageOffset() != null ? cmd.getPageOffset() - 1 : 0) * pageSize;
         params.put("sdateFrom", date.minusMonths(monthOffset + pageSize).format(DateTimeFormatter.ofPattern("yyyy-MM")));
         params.put("sdateTo", date.minusMonths(monthOffset).format(DateTimeFormatter.ofPattern("yyyy-MM")));
