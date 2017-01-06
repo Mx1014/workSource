@@ -74,7 +74,7 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
-import com.everhomes.rest.quality.DeleteQualityInspectionTaskTemplateCommand;
+import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
 import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
@@ -84,10 +84,10 @@ import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
-import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
+import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
-import com.everhomes.rest.quality.ListQualityInspectionTaskTemplatesCommand;
+import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
@@ -1062,6 +1062,7 @@ public class QualityServiceImpl implements QualityService {
 		record.setOperatorId(user.getId());
  
 		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
+		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
 		task.setExecutorId(user.getId());
 		if(cmd.getOperatorType() != null) {
 			task.setOperatorType(cmd.getOperatorType());
@@ -2206,9 +2207,6 @@ public class QualityServiceImpl implements QualityService {
 		//fix bug ： byte to long old:task.setManualFlag((byte) 1);
 		task.setManualFlag(1L);
 		
-		task.setExecutorType(OrganizationMemberTargetType.USER.getCode());
-//		task.setExecutorId(user.getId());
-		task.setExecutorId(cmd.getExecutorId());
 		
 		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
 			Timestamp startTime = new Timestamp(current);
@@ -2219,7 +2217,19 @@ public class QualityServiceImpl implements QualityService {
 			
 			if(cmd.getTemplateFlag()) {
 				QualityInspectionTaskTemplates template = ConvertHelper.convert(task, QualityInspectionTaskTemplates.class);
-				qualityProvider.createQualityInspectionTaskTemplates(template);
+				if(cmd.getTemplateId() != null) {
+					QualityInspectionTaskTemplates exist = qualityProvider.findQualityInspectionTaskTemplateById(cmd.getTemplateId());
+					if(exist != null) {
+						template.setId(cmd.getTemplateId());
+						qualityProvider.updateQualityInspectionTaskTemplates(template);
+					} else {
+						qualityProvider.createQualityInspectionTaskTemplates(template);
+					}
+				} else {
+					qualityProvider.createQualityInspectionTaskTemplates(template);
+				}
+				
+				
 			}
 			
 		});
@@ -2569,7 +2579,7 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public ListQualityInspectionTasksResponse listOneselfHistoryTasks(ListOneselfHistoryTasksCommand cmd) {
+	public ListQualityInspectionTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd) {
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
 		
 		Long uId = UserContext.current().getUser().getId();
@@ -2616,8 +2626,8 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public ListQualityInspectionTasksResponse listQualityInspectionTaskTemplates(
-			ListQualityInspectionTaskTemplatesCommand cmd) {
+	public ListQualityInspectionTasksResponse listUserQualityInspectionTaskTemplates(
+			ListUserQualityInspectionTaskTemplatesCommand cmd) {
 
 		ListQualityInspectionTasksResponse response = new ListQualityInspectionTasksResponse();
 		
@@ -2626,7 +2636,7 @@ public class QualityServiceImpl implements QualityService {
 		CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
         
-		List<QualityInspectionTaskTemplates> templates = qualityProvider.listQualityInspectionTaskTemplates(locator, pageSize+1, uId);
+		List<QualityInspectionTaskTemplates> templates = qualityProvider.listUserQualityInspectionTaskTemplates(locator, pageSize+1, uId);
 		
 		Long nextPageAnchor = null;
         if(templates.size() > pageSize) {
@@ -2648,9 +2658,38 @@ public class QualityServiceImpl implements QualityService {
 	}
 
 	@Override
-	public void deleteQualityInspectionTaskTemplate(
-			DeleteQualityInspectionTaskTemplateCommand cmd) {
-		qualityProvider.deleteQualityInspectionTaskTemplates(cmd.getTemplateId());
+	public void deleteUserQualityInspectionTaskTemplate(
+			DeleteUserQualityInspectionTaskTemplateCommand cmd) {
+		QualityInspectionTaskTemplates template = qualityProvider.findQualityInspectionTaskTemplateById(cmd.getTemplateId());
+		if(template != null) {
+			if(template.getCreatorUid().equals(UserContext.current().getUser().getId())) {
+				qualityProvider.deleteQualityInspectionTaskTemplates(cmd.getTemplateId());
+			} else {
+				LOGGER.info("template creator is " + template.getCreatorUid() + ", not equals to current user " + UserContext.current().getUser().getId() + " !");
+				throw RuntimeErrorException
+				.errorWith(
+						QualityServiceErrorCode.SCOPE,
+						QualityServiceErrorCode.ERROR_TEMPLATE_CREATOR,
+						localeStringService.getLocalizedString(
+								String.valueOf(QualityServiceErrorCode.SCOPE),
+								String.valueOf(QualityServiceErrorCode.ERROR_TEMPLATE_CREATOR),
+								UserContext.current().getUser().getLocale(),
+								"the template creator is not current user!"));
+			}
+			
+		} else {
+			LOGGER.info("template is not exist !");
+			throw RuntimeErrorException
+			.errorWith(
+					QualityServiceErrorCode.SCOPE,
+					QualityServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST,
+					localeStringService.getLocalizedString(
+							String.valueOf(QualityServiceErrorCode.SCOPE),
+							String.valueOf(QualityServiceErrorCode.ERROR_TEMPLATE_NOT_EXIST),
+							UserContext.current().getUser().getLocale(),
+							"the template don't exist!"));
+		}
+		
 		
 	}
 

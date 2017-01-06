@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  * templateId: 模板的主键id
  *
  */
-public class DeleteQualityInspectionTaskTemplateCommand {
+public class DeleteUserQualityInspectionTaskTemplateCommand {
 
 	@NotNull
 	private Long templateId;

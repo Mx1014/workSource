@@ -112,6 +112,7 @@ public interface QualityProvider {
 	void createQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);
 	void updateQualityInspectionTaskTemplates(QualityInspectionTaskTemplates template);
 	void deleteQualityInspectionTaskTemplates(Long templateId);
-	List<QualityInspectionTaskTemplates> listQualityInspectionTaskTemplates(ListingLocator locator, int count, Long uid);
+	QualityInspectionTaskTemplates findQualityInspectionTaskTemplateById(Long templateId);
+	List<QualityInspectionTaskTemplates> listUserQualityInspectionTaskTemplates(ListingLocator locator, int count, Long uid);
 	
 }

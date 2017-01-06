@@ -14,7 +14,7 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
-import com.everhomes.rest.quality.DeleteQualityInspectionTaskTemplateCommand;
+import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
 import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
@@ -23,10 +23,10 @@ import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
-import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
+import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
-import com.everhomes.rest.quality.ListQualityInspectionTaskTemplatesCommand;
+import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
@@ -96,7 +96,7 @@ public interface QualityService {
 	
 	QualityInspectionSpecificationDTO getQualitySpecification(GetQualitySpecificationCommand cmd);
 	
-	ListQualityInspectionTasksResponse listOneselfHistoryTasks(ListOneselfHistoryTasksCommand cmd);
-	ListQualityInspectionTasksResponse listQualityInspectionTaskTemplates(ListQualityInspectionTaskTemplatesCommand cmd);
-	void deleteQualityInspectionTaskTemplate(DeleteQualityInspectionTaskTemplateCommand cmd);
+	ListQualityInspectionTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
+	ListQualityInspectionTasksResponse listUserQualityInspectionTaskTemplates(ListUserQualityInspectionTaskTemplatesCommand cmd);
+	void deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd);
 }

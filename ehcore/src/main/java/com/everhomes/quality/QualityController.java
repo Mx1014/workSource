@@ -24,7 +24,7 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
-import com.everhomes.rest.quality.DeleteQualityInspectionTaskTemplateCommand;
+import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
 import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
@@ -33,10 +33,10 @@ import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
-import com.everhomes.rest.quality.ListOneselfHistoryTasksCommand;
+import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
-import com.everhomes.rest.quality.ListQualityInspectionTaskTemplatesCommand;
+import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
@@ -558,13 +558,13 @@ public class QualityController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /quality/listOneselfHistoryTasks</b>
+	 * <b>URL: /quality/listUserHistoryTasks</b>
 	 * <p>个人执行过的历史任务</p>
 	 */
-	@RequestMapping("listOneselfHistoryTasks")
+	@RequestMapping("listUserHistoryTasks")
 	@RestReturn(value = ListQualityInspectionTasksResponse.class)
-	public RestResponse listOneselfHistoryTasks(ListOneselfHistoryTasksCommand cmd) {
-		ListQualityInspectionTasksResponse tasks = qualityService.listOneselfHistoryTasks(cmd);
+	public RestResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd) {
+		ListQualityInspectionTasksResponse tasks = qualityService.listUserHistoryTasks(cmd);
 		
 		RestResponse response = new RestResponse(tasks);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -573,14 +573,14 @@ public class QualityController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /quality/listQualityInspectionTaskTemplates</b>
-	 * <p>获得模板列表</p>
+	 * <b>URL: /quality/listUserQualityInspectionTaskTemplates</b>
+	 * <p>获得用户模板列表</p>
 	 */
-	@RequestMapping("listQualityInspectionTaskTemplates")
+	@RequestMapping("listUserQualityInspectionTaskTemplates")
 	@RestReturn(value = ListQualityInspectionTasksResponse.class)
-	public RestResponse listQualityInspectionTaskTemplates(ListQualityInspectionTaskTemplatesCommand cmd) {
+	public RestResponse listUserQualityInspectionTaskTemplates(ListUserQualityInspectionTaskTemplatesCommand cmd) {
 		
-		ListQualityInspectionTasksResponse task = qualityService.listQualityInspectionTaskTemplates(cmd);
+		ListQualityInspectionTasksResponse task = qualityService.listUserQualityInspectionTaskTemplates(cmd);
 		
 		RestResponse response = new RestResponse(task);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -589,14 +589,14 @@ public class QualityController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /quality/deleteQualityInspectionTaskTemplate</b>
-	 * <p>删除模板</p>
+	 * <b>URL: /quality/deleteUserQualityInspectionTaskTemplate</b>
+	 * <p>删除用户模板</p>
 	 */
-	@RequestMapping("deleteQualityInspectionTaskTemplate")
+	@RequestMapping("deleteUserQualityInspectionTaskTemplate")
 	@RestReturn(value = String.class)
-	public RestResponse deleteQualityInspectionTaskTemplate(DeleteQualityInspectionTaskTemplateCommand cmd) {
+	public RestResponse deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd) {
 		
-		qualityService.deleteQualityInspectionTaskTemplate(cmd);
+		qualityService.deleteUserQualityInspectionTaskTemplate(cmd);
 		
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

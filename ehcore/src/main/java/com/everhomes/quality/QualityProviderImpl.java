@@ -117,6 +117,8 @@ import org.springframework.stereotype.Component;
 
 
 
+
+
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -1836,7 +1838,7 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTaskTemplates> listQualityInspectionTaskTemplates(
+	public List<QualityInspectionTaskTemplates> listUserQualityInspectionTaskTemplates(
 			ListingLocator locator, int count, Long uid) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTaskTemplates.class, locator.getEntityId()));
@@ -1863,6 +1865,24 @@ public class QualityProviderImpl implements QualityProvider {
         });
         
 		return templates;
+	}
+
+	@Override
+	public QualityInspectionTaskTemplates findQualityInspectionTaskTemplateById(
+			Long templateId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionTaskTemplatesRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES.ID.eq(templateId));
+
+		List<QualityInspectionTaskTemplates> result = new ArrayList<QualityInspectionTaskTemplates>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionTaskTemplates.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		return result.get(0);
 	}
 	
 }

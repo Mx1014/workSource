@@ -1,19 +1,11 @@
 package com.everhomes.rest.quality;
 
-import com.everhomes.util.StringHelper;
+public class ListUserHistoryTasksCommand {
 
-/**
- * <ul>
- *  <li>pageAnchor: 锚点</li>
- *  <li>pageSize: 页面大小</li>
- * </ul>
- */
-public class ListQualityInspectionTaskTemplatesCommand {
-	
 	private Long pageAnchor;
 	
 	private Integer pageSize;
-	
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
@@ -29,10 +21,4 @@ public class ListQualityInspectionTaskTemplatesCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-
-	@Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
 }
