@@ -24,9 +24,20 @@ public enum AssociactionCategoryStyle {
     
     public static AssociactionCategoryStyle fromCode(Byte code) {
     	if (code != null) {
-			for (AssociactionCategoryStyle tabWidgetStyle : AssociactionCategoryStyle.values()) {
-				if (tabWidgetStyle.getCode() == code.byteValue()) {
-					return tabWidgetStyle;
+			for (AssociactionCategoryStyle style : AssociactionCategoryStyle.values()) {
+				if (style.getCode() == code.byteValue()) {
+					return style;
+				}
+			}
+		}
+    	return null;
+    }
+    
+    public static AssociactionCategoryStyle fromCode(String code) {
+    	if (code != null) {
+			for (AssociactionCategoryStyle style : AssociactionCategoryStyle.values()) {
+				if (code.equals(String.valueOf(style.getCode()))) {
+					return style;
 				}
 			}
 		}
