@@ -577,7 +577,7 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
-     * <b>URL: /ui/activity/listActivityCategory</b>
+     * <b>URL: /activity/listActivityCategory</b>
      * <p>列出活动分类</p>
      */
     @RequestMapping("listActivityCategory")

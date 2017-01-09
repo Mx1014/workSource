@@ -72,4 +72,6 @@ public interface ActivityProivider {
     ActivityGoods findActivityGoodsById(Long id);
 
     List<ActivityGoods> listActivityGoods(CrossShardListingLocator locator, int count, Long activityId);
+
+	List<ActivityCategories> listActivityCategory(Integer namespaceId, Long categoryId);
 }

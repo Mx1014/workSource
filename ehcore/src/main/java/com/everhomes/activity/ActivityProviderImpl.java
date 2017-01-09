@@ -35,6 +35,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.server.schema.Tables;
@@ -713,5 +715,23 @@ public class ActivityProviderImpl implements ActivityProivider {
         return goods;
     }
 
+	@Override
+	public List<ActivityCategories> listActivityCategory(Integer namespaceId, Long categoryId) {
+		if (categoryId == null) {
+			categoryId = 0L;
+		}
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class));
+		
+		return context.select()
+			.from(Tables.EH_ACTIVITY_CATEGORIES)
+			.where(Tables.EH_ACTIVITY_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.PARENT_ID.eq(categoryId))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.ENABLED.eq(TrueOrFalseFlag.TRUE.getCode()))
+			.orderBy(Tables.EH_ACTIVITY_CATEGORIES.ALL_FLAG.desc(), Tables.EH_ACTIVITY_CATEGORIES.DEFAULT_ORDER.asc(), Tables.EH_ACTIVITY_CATEGORIES.ID.asc())
+			.fetch()
+			.map(r->ConvertHelper.convert(r, ActivityCategories.class));
+	}
 
+    
 }

@@ -15,6 +15,15 @@ public class ListActivityCategoryReponse {
 	@ItemType(ActivityCategoryDTO.class)
 	private List<ActivityCategoryDTO> activityCategoryList;
 
+	public ListActivityCategoryReponse() {
+		super();
+	}
+
+	public ListActivityCategoryReponse(List<ActivityCategoryDTO> activityCategoryList) {
+		super();
+		this.activityCategoryList = activityCategoryList;
+	}
+
 	public List<ActivityCategoryDTO> getActivityCategoryList() {
 		return activityCategoryList;
 	}

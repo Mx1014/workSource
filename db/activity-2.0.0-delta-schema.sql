@@ -3,7 +3,7 @@ ALTER TABLE `eh_activities` ADD COLUMN `content_category_id` BIGINT NOT NULL DEF
 
 -- 增加一些字段用于主题分类，added by tt, 20170106
 -- 此表对于parent_id为0的表示入口id，否则表示主题分类id
-ALTER TABLE `eh_activity_categories` ADD COLUMN `enabled` TINYINT NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes';
+ALTER TABLE `eh_activity_categories` ADD COLUMN `enabled` TINYINT NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes';
 ALTER TABLE `eh_activity_categories` ADD COLUMN `icon_uri` VARCHAR(1024) NULL;
 ALTER TABLE `eh_activity_categories` ADD COLUMN `selected_icon_uri` VARCHAR(1024) NULL;
 ALTER TABLE `eh_activity_categories` ADD COLUMN `show_name` VARCHAR(64) NULL;
