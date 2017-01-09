@@ -534,7 +534,7 @@ VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10095, 1005,'EhAclRoles'
 
 
 -- 整理业务模块的scope
-UPDATE `eh_service_module_scopes` SET `owner_type` = null, `owner_id` = null  where `owner_type` = 'EhNamespaces';
+UPDATE `eh_service_module_scopes` SET `owner_type` = NULL, `owner_id` = NULL  WHERE `owner_type` = 'EhNamespaces';
 
 -- 科技园添加服务广场任务管理 add by sw 20161227
 SET @eh_launch_pad_items = (SELECT MAX(id) FROM `eh_launch_pad_items`);
@@ -545,14 +545,14 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 -- remove next processor and n processor by Janson
-delete from eh_flow_variables where id=2003;
-delete from eh_flow_variables where id=2004;
+DELETE FROM eh_flow_variables WHERE id=2003;
+DELETE FROM eh_flow_variables WHERE id=2004;
 
 
 -- merge from sa1.8 by xiongying
-update eh_settle_requests set template_type = 'Settle';
-update eh_service_alliance_requests set template_type = 'ServiceAlliance';
-update eh_service_alliance_apartment_requests set template_type = 'Apartment';
+UPDATE eh_settle_requests SET template_type = 'Settle';
+UPDATE eh_service_alliance_requests SET template_type = 'ServiceAlliance';
+UPDATE eh_service_alliance_apartment_requests SET template_type = 'Apartment';
 
 SET @eh_request_templates = (SELECT MAX(id) FROM `eh_request_templates`);
 INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title`, `email_flag`, `msg_flag`, `fields_json`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`) 
@@ -577,7 +577,7 @@ INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title
     VALUES ((@eh_request_templates := @eh_request_templates + 1), 'SettleFundSupport', '资金扶持', '我有意向', '1', '1', '{"fields":[{"fieldName":"name","fieldDisplayName":"姓名","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的姓名","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"mobile","fieldDisplayName":"手机号","fieldType":"number","fieldContentType":"text","fieldDesc":"请输入您的手机号","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"organizationName","fieldDisplayName":"公司","fieldType":"string","fieldContentType":"text","fieldDesc":"请输入您的公司","requiredFlag":"1","dynamicFlag":"1"},{"fieldName":"remarks","fieldDisplayName":"备注","fieldType":"string","fieldContentType":"text","fieldDesc":"（选填）其他说明","requiredFlag":"0"}]}', '1', '1', UTC_TIMESTAMP(), '0', NULL);
 
     
-update eh_service_alliances set integral_tag1 = '1' where string_tag2 in(select template_type from eh_request_templates);
+UPDATE eh_service_alliances SET integral_tag1 = '1' WHERE string_tag2 IN(SELECT template_type FROM eh_request_templates);
 
 
 
@@ -588,7 +588,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 SELECT (@menu_scope_id := @menu_scope_id + 1), 60400, '', 'EhNamespaces', id, 2 FROM `eh_namespaces`;
 
 -- 更新菜单
-update eh_web_menus set name = '入驻申请' where id = 40120; 
+UPDATE eh_web_menus SET NAME = '入驻申请' WHERE id = 40120; 
 -- 储能 工作流设置菜单
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40850, '', 'EhNamespaces', 999990, 2);
@@ -605,3 +605,64 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20670, '', 'EhNamespaces', 999992, 2);
 
+ 
+
+--
+-- 表单管理
+--
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (50900, '表单管理', 50000, NULL, 'react:/form-management/form-list', 1, 2, '/50000/450900', 'park', 590);  
+
+
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
+VALUES (10123, 0, '表单管理', '表单管理 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10123, 50900, '表单管理', 1, 1, '表单管理  全部权限', 590); 
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10123, 1001, 0, 1, NOW());
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50900, '表单管理', 'EhNamespaces', 999983, 2); 
+
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
+VALUES ('50900', '表单管理', '50000', '/50000/450900', '0', '2', '2', '0', UTC_TIMESTAMP());
+
+SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id +1), '50900', '1', '10123', NULL, '0', UTC_TIMESTAMP());
+
+
+
+--
+-- 服务联盟 审批管理菜单
+--
+UPDATE `eh_web_menus` SET NAME = '审批管理' ,data_type =NULL WHERE id = 40540;
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (40541, '审批列表', 40000, NULL, 'react:/approval-management/approval-list/:moduleType/:moduleId', 1, 2, '/40000/40500/40540/40541', 'park', 458);  
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
+VALUES (40542, '申请记录', 40000, NULL, 'apply_record', 1, 2, '/40000/40500/40540/40542', 'park', 459);  
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES((@web_menu_privilege_id := @web_menu_privilege_id + 1),'10024','40541','服务联盟','1','1','服务联盟 全部权限','710');
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES((@web_menu_privilege_id := @web_menu_privilege_id + 1),'10024','40542','服务联盟','1','1','服务联盟 全部权限','710');
+
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 422, 1001, 0, 1, NOW());
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40541, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40542, '', 'EhNamespaces', 999983, 2); 
+ 
+ 
+ 
