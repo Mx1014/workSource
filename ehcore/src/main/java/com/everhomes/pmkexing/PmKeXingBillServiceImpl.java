@@ -158,7 +158,10 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
         LocalDate date = LocalDate.now().plusMonths(20);
         // LocalDate date = LocalDate.now();
-        int monthOffset = (cmd.getPageOffset() != null ? cmd.getPageOffset() - 1 : 0) * pageSize;
+
+        int pageOffset = cmd.getPageOffset() != null ? cmd.getPageOffset() - 1 : 0;
+        int monthOffset = pageOffset * pageSize + pageOffset;
+
         params.put("sdateFrom", date.minusMonths(monthOffset + pageSize).format(DateTimeFormatter.ofPattern("yyyy-MM")));
         params.put("sdateTo", date.minusMonths(monthOffset).format(DateTimeFormatter.ofPattern("yyyy-MM")));
 
