@@ -62,13 +62,13 @@ public class JindiOpenActionRepairHandler implements JindiOpenHandler {
 			@Override
 			public List<PmTaskLog> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return pmTaskProvider.listRepairByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return pmTaskProvider.listRepairByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<PmTaskLog> fetchDataByUpdateTime(Integer namespaceId, Long timestamp,
 					int pageSize) {
-				return pmTaskProvider.listRepairByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return pmTaskProvider.listRepairByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override

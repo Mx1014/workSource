@@ -36,13 +36,13 @@ public class JindiOpenActionSiteRentalHandler implements JindiOpenHandler {
 			@Override
 			public List<RentalOrder> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return rentalv2Provider.listSiteRentalByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return rentalv2Provider.listSiteRentalByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<RentalOrder> fetchDataByUpdateTime(Integer namespaceId, Long timestamp,
 					int pageSize) {
-				return rentalv2Provider.listSiteRentalByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return rentalv2Provider.listSiteRentalByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override

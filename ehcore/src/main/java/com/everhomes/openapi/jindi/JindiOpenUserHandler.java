@@ -24,12 +24,12 @@ public class JindiOpenUserHandler implements JindiOpenHandler {
 			@Override
 			public List<User> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
 					int pageSize) {
-				return userProvider.listUserByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return userProvider.listUserByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<User> fetchDataByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
-				return userProvider.listUserByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return userProvider.listUserByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override

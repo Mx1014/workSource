@@ -32,13 +32,13 @@ public class JindiOpenActionActivityHandler implements JindiOpenHandler {
 			@Override
 			public List<Activity> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return activityProivider.listActivityByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return activityProivider.listActivityByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<Activity> fetchDataByUpdateTime(Integer namespaceId, Long timestamp,
 					int pageSize) {
-				return activityProivider.listActivityByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return activityProivider.listActivityByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override

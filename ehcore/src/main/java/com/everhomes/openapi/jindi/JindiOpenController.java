@@ -23,7 +23,7 @@ public class JindiOpenController extends ControllerBase {
 	@Autowired
 	private JindiOpenService jindiOpenService;
 	
-	@RequireAuthentication(false)
+//	@RequireAuthentication(false)
 	@RequestMapping("/fetchData")
 	@RestReturn(String.class)
 	public RestResponse fetchData(JindiFetchDataCommand cmd) {

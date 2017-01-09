@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>dataType: 数据类型</li>
  * <li>actionType: 行为类型，如果为客户或客房则此值为空</li>
  * <li>subActionType: 行为子类型，暂为空</li>
- * <li>timestamp: 取数据的时间戳</li>
+ * <li>beginTime: 取数据的时间戳</li>
  * <li>pageAnchor: 取数据的锚点，因为如果遇到同一个时间戳一次取不完，需要从此锚点继续取</li>
  * <li>pageSize: 每次取多少条数据</li>
  * </ul>
@@ -20,7 +20,7 @@ public class JindiFetchDataCommand {
 	private String dataType;
 	private String actionType;
 	private String subActionType;
-	private Long timestamp;
+	private Long beginTime;
 	private Long pageAnchor;
 	private Integer pageSize;
 
@@ -56,12 +56,12 @@ public class JindiFetchDataCommand {
 		this.subActionType = subActionType;
 	}
 
-	public Long getTimestamp() {
-		return timestamp;
+	public Long getBeginTime() {
+		return beginTime;
 	}
 
-	public void setTimestamp(Long timestamp) {
-		this.timestamp = timestamp;
+	public void setBeginTime(Long beginTime) {
+		this.beginTime = beginTime;
 	}
 
 	public Long getPageAnchor() {

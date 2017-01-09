@@ -42,13 +42,13 @@ public class JindiOpenCsthomerelHandler implements JindiOpenHandler {
 			@Override
 			public List<CommunityAddressMapping> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return organizationProvider.listCsthomerelByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return organizationProvider.listCsthomerelByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<CommunityAddressMapping> fetchDataByUpdateTime(Integer namespaceId, Long timestamp,
 					int pageSize) {
-				return organizationProvider.listCsthomerelByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return organizationProvider.listCsthomerelByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override

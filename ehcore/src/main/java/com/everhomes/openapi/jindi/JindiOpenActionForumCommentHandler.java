@@ -37,13 +37,13 @@ public class JindiOpenActionForumCommentHandler implements JindiOpenHandler {
 			@Override
 			public List<Post> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return forumProvider.listForumCommentByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return forumProvider.listForumCommentByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<Post> fetchDataByUpdateTime(Integer namespaceId, Long timestamp,
 					int pageSize) {
-				return forumProvider.listForumCommentByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return forumProvider.listForumCommentByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override

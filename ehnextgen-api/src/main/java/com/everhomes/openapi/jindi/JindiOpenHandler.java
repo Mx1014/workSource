@@ -36,7 +36,7 @@ public interface JindiOpenHandler {
 			List<T> resultList = new ArrayList<>();
 			//如果有锚点，则说明上次请求数据未取完，本次继续取当前时间戳的数据
 			if (cmd.getPageAnchor() != null) {
-				List<T> thisList = callback.fetchDataByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize);
+				List<T> thisList = callback.fetchDataByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize);
 				resultList.addAll(thisList);
 				//如果当前时间戳还未取完，则直接返回并添加下次锚点
 				if (resultList.size() > pageSize) {
@@ -55,7 +55,7 @@ public interface JindiOpenHandler {
 			//如果没有锚点，或者上述过程未取满或正好取满，则到此处，如果是正好取满，则这里会再取一条，看看有没有多余的数据了
 			if (hasMore == null  && resultList.size() <= pageSize) {
 				pageSize = pageSize - resultList.size();
-				List<T> thisList = callback.fetchDataByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize);
+				List<T> thisList = callback.fetchDataByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize);
 				if (thisList.size() > pageSize) {
 					//如果此处数据大于pageSize说明，还有数据
 					if (thisList.size()>=2) {

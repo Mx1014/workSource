@@ -30,12 +30,12 @@ public class JindiOpenOrganizationHandler implements JindiOpenHandler {
 			@Override
 			public List<Organization> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return organizationProvider.listOrganizationByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return organizationProvider.listOrganizationByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<Organization> fetchDataByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
-				return organizationProvider.listOrganizationByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return organizationProvider.listOrganizationByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override

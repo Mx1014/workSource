@@ -33,13 +33,13 @@ public class JindiOpenActionStationRentalHandler implements JindiOpenHandler {
 			@Override
 			public List<OfficeCubicleOrder> fetchDataByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
 					Long pageAnchor, int pageSize) {
-				return officeCubicleProvider.listStationByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getTimestamp(), cmd.getPageAnchor(), pageSize+1);
+				return officeCubicleProvider.listStationByUpdateTimeAndAnchor(cmd.getNamespaceId(), cmd.getBeginTime(), cmd.getPageAnchor(), pageSize+1);
 			}
 
 			@Override
 			public List<OfficeCubicleOrder> fetchDataByUpdateTime(Integer namespaceId, Long timestamp,
 					int pageSize) {
-				return officeCubicleProvider.listStationByUpdateTime(cmd.getNamespaceId(), cmd.getTimestamp(), pageSize+1);
+				return officeCubicleProvider.listStationByUpdateTime(cmd.getNamespaceId(), cmd.getBeginTime(), pageSize+1);
 			}
 
 			@Override
