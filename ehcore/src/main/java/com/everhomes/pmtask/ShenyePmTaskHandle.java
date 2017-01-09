@@ -28,6 +28,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -36,8 +37,8 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -46,6 +47,9 @@ import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.EvaluateTaskCommand;
 import com.everhomes.rest.pmtask.GetTaskDetailCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
@@ -100,7 +104,9 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	private AddressProvider addressProvider;
 	@Autowired
 	private OrganizationProvider organizationProvider;
-
+	@Autowired
+    private ConfigurationProvider configProvider;
+	
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
 
@@ -511,5 +517,93 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
     				"PmTask not found.");
         }
 		return pmTask;
+	}
+	
+	@Override
+	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		Integer pageSize = cmd.getPageSize();
+		Long parentId = cmd.getParentId();
+		if(null == parentId){
+			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+			Category ancestor = categoryProvider.findCategoryById(defaultId);
+			parentId = ancestor.getId();
+		}
+		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
+		
+		List<Category> list = null;
+		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && (null == cmd.getParentId() || cmd.getParentId() == 0L)) {
+			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
+			list = new ArrayList<Category>();
+			list.add(category);
+		}else{
+			list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
+					cmd.getPageAnchor(), cmd.getPageSize());
+		}
+				
+		int size = list.size();
+		if(size > 0){
+    		response.setRequests(list.stream().map(r -> {
+    			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
+    			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId, null, r.getPath(),
+    					null, null);
+    			getChildCategories(tempList.stream().map(k -> ConvertHelper.convert(k, CategoryDTO.class))
+    					.collect(Collectors.toList()), dto);
+    			return dto;
+    		}).collect(Collectors.toList()));
+    		if(pageSize != null && size != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(size-1).getId());
+        	}
+    	}
+		
+		return response;
+	}
+	
+	@Override
+	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
+		Integer namespaceId = cmd.getNamespaceId();
+		checkNamespaceId(namespaceId);
+		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
+//		Category ancestor = categoryProvider.findCategoryById(defaultId);
+		
+		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, null, null,
+				null, null);
+		
+		List<CategoryDTO> dtos = categories.stream().map(r -> ConvertHelper.convert(r, CategoryDTO.class))
+				.collect(Collectors.toList());
+		List<CategoryDTO> result = new ArrayList<CategoryDTO>();
+		for(CategoryDTO c: dtos) {
+			if(defaultId.equals(c.getParentId())) {
+				result.add(getChildCategories(dtos, c));
+			}
+		}
+		
+		return result;
+	}
+	
+	private CategoryDTO getChildCategories(List<CategoryDTO> categories, CategoryDTO dto){
+		
+		List<CategoryDTO> children = new ArrayList<CategoryDTO>();
+		
+		for (CategoryDTO categoryDTO : categories) {
+			if(dto.getId().equals(categoryDTO.getParentId())){
+				children.add(getChildCategories(categories, categoryDTO));
+			}
+		}
+		dto.setChildrens(children);
+		
+		return dto;
+	}
+	
+	private void checkNamespaceId(Integer namespaceId){
+		if(namespaceId == null) {
+        	LOGGER.error("Invalid namespaceId parameter.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Invalid namespaceId parameter.");
+        }
 	}
 }

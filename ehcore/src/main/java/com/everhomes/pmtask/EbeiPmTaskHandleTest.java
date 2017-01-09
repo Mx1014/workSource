@@ -37,7 +37,7 @@ public class EbeiPmTaskHandleTest {
 	
 	public static final String CATEGORY_SEPARATOR = "/";
 	
-	private static final String LIST_SERVICE_TYPE = "rest/crmFeedBackInfoJoin/serviceTypeList";
+	private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
 	private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
 	private static final String LIST_TASK = "/rest/crmFeedBackInfoJoin/feedBackOrderList";
 	private static final String GET_TASK_DETAIL = "/rest/crmFeedBackInfoJoin/feedBackOrderDetail";
@@ -52,7 +52,7 @@ public class EbeiPmTaskHandleTest {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EbeiPmTaskHandleTest.class);
 
 	
-	private void listServiceType(String projectId) {
+	private static void listServiceType(String projectId) {
 		JSONObject param = new JSONObject();
 		param.put("projectId", projectId);
 		
@@ -86,6 +86,7 @@ public class EbeiPmTaskHandleTest {
 		postToEbei(param, CREATE_TASK);
 		
 //		listPmtasks();
+//		listServiceType("240111044331055940");
 	}
 	
 	public static void listPmtasks(){

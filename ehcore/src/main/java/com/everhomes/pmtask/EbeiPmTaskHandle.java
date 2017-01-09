@@ -4,6 +4,7 @@ import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -49,6 +50,10 @@ import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.EvaluateTaskCommand;
+import com.everhomes.rest.pmtask.GetTaskDetailCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -74,7 +79,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	
 	public static final String CATEGORY_SEPARATOR = "/";
 	
-	private static final String LIST_SERVICE_TYPE = "rest/crmFeedBackInfoJoin/serviceTypeList";
+	private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
 	private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
 	private static final String LIST_TASK = "/rest/crmFeedBackInfoJoin/feedBackOrderList";
 	private static final String GET_TASK_DETAIL = "/rest/crmFeedBackInfoJoin/feedBackOrderDetail";
@@ -526,5 +531,54 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     				"PmTask not found.");
         }
 		return pmTask;
+	}
+
+	@Override
+	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+		// TODO Auto-generated method stub
+		
+		PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+		EbeiPmTaskDTO ebeiPmTaskDTO = getTaskDetail(task);
+		
+		return null;
+	}
+
+	@Override
+	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
+		
+		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
+		
+		List<CategoryDTO> childrens = listServiceType(projectId);
+		
+		if(null == cmd.getParentId()) {
+			CategoryDTO dto = createCategoryDTO();
+			dto.setChildrens(childrens);
+			
+			response.setRequests(Collections.singletonList(dto));
+		}else {
+			response.setRequests(childrens);
+
+		}
+		
+		return response;
+	}
+
+	@Override
+	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
+		
+		List<CategoryDTO> childrens = listServiceType(projectId);
+		CategoryDTO dto = createCategoryDTO();
+		dto.setChildrens(childrens);
+		
+		return Collections.singletonList(dto);
+	}
+	
+	private CategoryDTO createCategoryDTO() {
+		CategoryDTO dto = new CategoryDTO();
+		dto.setId(0L);
+		dto.setName("物业报修");
+		dto.setParentId(0L);
+		
+		return dto;
 	}
 }

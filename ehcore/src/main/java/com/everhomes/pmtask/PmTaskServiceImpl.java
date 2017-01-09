@@ -809,82 +809,26 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId();
-		checkNamespaceId(namespaceId);
-		//Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		Integer pageSize = cmd.getPageSize();
-		Long parentId = cmd.getParentId();
-		if(null == parentId){
-			Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-			Category ancestor = categoryProvider.findCategoryById(defaultId);
-			parentId = ancestor.getId();
-		}
-		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
-		List<Category> list = null;
-		if(null != cmd.getTaskCategoryId() && cmd.getTaskCategoryId() != 0L && (null == cmd.getParentId() || cmd.getParentId() == 0L)) {
-			Category category = categoryProvider.findCategoryById(cmd.getTaskCategoryId());
-			list = new ArrayList<Category>();
-			list.add(category);
-		}else{
-			list = categoryProvider.listTaskCategories(namespaceId, parentId, cmd.getKeyword(),
-					cmd.getPageAnchor(), cmd.getPageSize());
-		}
-				
-		int size = list.size();
-		if(size > 0){
-    		response.setRequests(list.stream().map(r -> {
-    			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
-    			List<Category> tempList = categoryProvider.listTaskCategories(namespaceId, null, r.getPath(),
-    					null, null);
-    			getChildCategories(tempList.stream().map(k -> ConvertHelper.convert(k, CategoryDTO.class))
-    					.collect(Collectors.toList()), dto);
-    			return dto;
-    		}).collect(Collectors.toList()));
-    		if(pageSize != null && size != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size-1).getId());
-        	}
-    	}
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		return response;
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		
+		return handler.listTaskCategories(cmd);
+		
 	}
 
 	@Override
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
-		Integer namespaceId = cmd.getNamespaceId();
-		checkNamespaceId(namespaceId);
-		Long defaultId = configProvider.getLongValue("pmtask.category.ancestor", 0L);
-//		Category ancestor = categoryProvider.findCategoryById(defaultId);
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, null, null,
-				null, null);
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
 		
-		List<CategoryDTO> dtos = categories.stream().map(r -> ConvertHelper.convert(r, CategoryDTO.class))
-				.collect(Collectors.toList());
-		List<CategoryDTO> result = new ArrayList<CategoryDTO>();
-		for(CategoryDTO c: dtos) {
-			if(defaultId.equals(c.getParentId())) {
-				result.add(getChildCategories(dtos, c));
-			}
-		}
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
-		return result;
-	}
-	
-	private CategoryDTO getChildCategories(List<CategoryDTO> categories, CategoryDTO dto){
-		
-		List<CategoryDTO> children = new ArrayList<CategoryDTO>();
-		
-		for (CategoryDTO categoryDTO : categories) {
-			if(dto.getId().equals(categoryDTO.getParentId())){
-				children.add(getChildCategories(categories, categoryDTO));
-			}
-		}
-		dto.setChildrens(children);
-		
-		return dto;
+		return handler.listAllTaskCategories(cmd);
 	}
 	
 	@Override

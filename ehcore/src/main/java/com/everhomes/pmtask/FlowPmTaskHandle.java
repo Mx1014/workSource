@@ -36,6 +36,7 @@ import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -48,6 +49,9 @@ import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.EvaluateTaskCommand;
 import com.everhomes.rest.pmtask.GetTaskDetailCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -382,6 +386,20 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		
+		return handler.listTaskCategories(cmd);
+	}
+
+	@Override
+	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		
+		return handler.listAllTaskCategories(cmd);
 	}
 
 
