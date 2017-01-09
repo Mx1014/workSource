@@ -228,4 +228,5 @@ delete from eh_web_menu_scopes where menu_id = 20192 and owner_id = 1000000;
 	
 -- -- add by xionging 2017.1.9
 delete from eh_service_alliance_jump_module where id = 1;
-INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (3, 999983, '投诉建议', 'zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=投诉建议');
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (3, 999983, '投诉建议', 'zl://propertyrepair/create?type=user&taskCategoryId=202564&displayName=投诉建议');
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (4, 999983, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=202565&displayName=物业报修');
