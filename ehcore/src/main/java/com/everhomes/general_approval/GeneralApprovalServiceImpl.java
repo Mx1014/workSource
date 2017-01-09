@@ -304,9 +304,14 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 	private GeneralApprovalDTO processApproval(GeneralApproval r) {
 		GeneralApprovalDTO result = ConvertHelper.convert(r, GeneralApprovalDTO.class);
 		// form name
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(r
-				.getFormOriginId());
-		result.setFormName(form.getFormName());
+		if(r.getFormOriginId() != null && !r.getFormOriginId().equals(0l)) {
+			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(r
+					.getFormOriginId());
+			if(form != null) {
+				result.setFormName(form.getFormName());	
+			}	
+		}
+		
 		// flow
 		Flow flow = flowService.getEnabledFlow(r.getNamespaceId(), r.getModuleId(),
 				r.getModuleType(), r.getOwnerId(), r.getOwnerType());
