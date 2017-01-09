@@ -267,7 +267,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		JSONObject param = new JSONObject();
 		
-		param.put("orderId", task.getId());
+		param.put("orderId", task.getStringTag1());
 		
 		String json = postToEbei(param, EVALUATE, null);
 		
@@ -543,6 +543,15 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		return null;
 	}
 
+	private PmTaskDTO convertEbeiPmTask(EbeiPmTaskDTO ebeiPmTask) {
+		
+		PmTaskDTO dto = new PmTaskDTO();
+//		dto.set
+		
+		
+		return dto;
+	}
+	
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
 		
