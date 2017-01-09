@@ -22,7 +22,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -33,6 +35,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -49,6 +52,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPosition;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -63,6 +67,8 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
@@ -962,11 +968,17 @@ public class QualityServiceImpl implements QualityService {
 			} 
         	
         	Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
-        	if(r.getExecutivePositionId() != null) {
-        		//岗位名 然后和组名共同拼成groupname
-        	}
-			if(group != null)
+			
+			if(group != null) {
 				dto.setGroupName(group.getName());
+				if(r.getExecutivePositionId() != null) {
+					//岗位名+组名共同组成groupname
+					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getExecutivePositionId());
+					if(position != null) {
+						dto.setGroupName(group.getName() + "-" + position.getName());
+					}
+				}
+			}
         	
 			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
 
@@ -1365,10 +1377,23 @@ public class QualityServiceImpl implements QualityService {
 								String locale = "zh_CN";
 								String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 								
-								List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null); 
-								if(members != null) {
-									for(OrganizationMember member : members) {
-										sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+								
+								if(executiveGroup.getPositionId() != null) {
+									ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+									command.setOrganizationId(executiveGroup.getGroupId());
+									command.setJobPositionId(executiveGroup.getPositionId());
+									List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+									if(contacts != null && contacts.size() > 0) {
+										for(OrganizationContactDTO contact : contacts) {
+											sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
+										}
+									}
+								} else {
+									List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
+									if(members != null) {
+										for(OrganizationMember member : members) {
+											sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+										}
 									}
 								}
 								
@@ -1394,6 +1419,7 @@ public class QualityServiceImpl implements QualityService {
 			}
 		} 
 	}
+	
 	
 	private String timeToStr(Timestamp time) {
 
@@ -1690,11 +1716,18 @@ public class QualityServiceImpl implements QualityService {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
 			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			if(r.getPositionId() != null) {
-				//岗位名+组名共同组成groupname
-			}
-			if(group != null)
+			
+			if(group != null) {
 				dto.setGroupName(group.getName());
+				if(r.getPositionId() != null) {
+					//岗位名+组名共同组成groupname
+					OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+					if(position != null) {
+						dto.setGroupName(group.getName() + "-" + position.getName());
+					}
+				}
+			}
+				
         	
         	return dto;
         }).collect(Collectors.toList());
@@ -2654,12 +2687,15 @@ public class QualityServiceImpl implements QualityService {
         response.setNextPageAnchor(nextPageAnchor);
         
         if(templates.size() > 0) {
-        	List<QualityInspectionTaskDTO> tasks = templates.stream().map(r -> {
-        		QualityInspectionTaskDTO dto = ConvertHelper.convert(r, QualityInspectionTaskDTO.class);
-        		return dto;
+        	List<QualityInspectionTasks> tasks = templates.stream().map(r -> {
+        		QualityInspectionTasks task = ConvertHelper.convert(r, QualityInspectionTasks.class);
+        		
+        		return task;
         	}).collect(Collectors.toList());
         	
-        	response.setTasks(tasks);
+        	List<QualityInspectionTaskDTO> dtos = convertQualityInspectionTaskToDTO(tasks, null);
+        	
+        	response.setTasks(dtos);
         }
         
 		return response;
