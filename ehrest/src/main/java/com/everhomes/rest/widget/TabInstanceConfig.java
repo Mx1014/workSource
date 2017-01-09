@@ -11,8 +11,6 @@ public class TabInstanceConfig implements Serializable  {
 
 	private String itemGroup;
     
-    private Byte iconFlag;
-    
     private String itemLocation;
 
 	@Override
@@ -26,14 +24,6 @@ public class TabInstanceConfig implements Serializable  {
 
 	public void setItemGroup(String itemGroup) {
 		this.itemGroup = itemGroup;
-	}
-
-	public Byte getIconFlag() {
-		return iconFlag;
-	}
-
-	public void setIconFlag(Byte iconFlag) {
-		this.iconFlag = iconFlag;
 	}
 
 	public String getItemLocation() {

@@ -300,6 +300,7 @@ public class ActivityServiceImpl implements ActivityService {
         
         //add by xiongying, 添加类型id， 20161117
         activity.setCategoryId(cmd.getCategoryId());
+        activity.setContentCategoryId(cmd.getContentCategoryId());
         
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);

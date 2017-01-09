@@ -16,6 +16,8 @@ public class ActivityActionData implements Serializable {
 
 	private static final long serialVersionUID = -5344267251183241788L;
 
+	private Byte scope;
+	
 	private Byte publishPrivilege;
 
 	private Byte livePrivilege;
@@ -23,10 +25,28 @@ public class ActivityActionData implements Serializable {
 	private Byte listStyle;
 
 	private Long categoryId;
+	
+	private Byte style;
 
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Byte getStyle() {
+		return style;
+	}
+
+	public void setStyle(Byte style) {
+		this.style = style;
+	}
+
+	public Byte getScope() {
+		return scope;
+	}
+
+	public void setScope(Byte scope) {
+		this.scope = scope;
 	}
 
 	public Byte getPublishPrivilege() {
