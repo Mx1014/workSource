@@ -123,7 +123,7 @@ JSONObject param = new JSONObject();
 			httpPost.setEntity(stringEntity);
 			httpPost.setHeader("Content-Type", "application/json");
 //			httpPost.addHeader("EBEI_TOKEN", "ai5uSTEuD9hItoFqlm8oUWiVyzXbEd0IXDfyRjMEuHz6JtYuTHGlyuCiu7wpvACJ\r\n");
-//			httpPost.addHeader("HTMIMI_USERID", "123456");
+			httpPost.addHeader("companyServiceCode", "zywyCrmServiceCode");
 			response = httpclient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			
