@@ -157,9 +157,23 @@ public class BusinessController extends ControllerBase {
      * <b>URL: /business/listBusinessPromotionEntities</b>
      */
     @RequestMapping("listBusinessPromotionEntities")
-    @RestReturn(value = BusinessPromotionEntityDTO.class, collection = true)
+    @RestReturn(value = ListBusinessPromotionEntitiesReponse.class)
     public RestResponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd){
-        RestResponse response = new RestResponse(/*businessService.listPromotionEntities(cmd)*/);
+        RestResponse response = new RestResponse(businessService.listBusinessPromotionEntities(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>创建电商运营数据</p>
+     * <b>URL: /business/createBusinessPromotion</b>
+     */
+    @RequestMapping("createBusinessPromotion")
+    @RestReturn(value = String.class)
+    public RestResponse createBusinessPromotion(CreateBusinessPromotionCommand cmd){
+        businessService.createBusinessPromotion(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

@@ -1,30 +1,6 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
-
-import com.everhomes.naming.NameMapper;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.util.DateHelper;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Operator;
-import org.jooq.SelectQuery;
-import org.jooq.Table;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -34,19 +10,40 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.util.RuntimeErrorException;
 import com.mysql.jdbc.StringUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.UUID;
 
 @Component
 public class ActivityProviderImpl implements ActivityProivider {
@@ -430,7 +427,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
 
        if(activities.size()>=count){
-            return activities.subList(0, count);
+            return activities.subList(0, count-1);
         }
         return activities;
     }

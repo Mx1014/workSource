@@ -7,6 +7,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.activity.ListActivitiesReponse;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.activity.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;

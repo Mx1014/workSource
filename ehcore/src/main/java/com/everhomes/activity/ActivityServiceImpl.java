@@ -53,7 +53,9 @@ import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.ui.activity.ActivityPromotionEntityDTO;
+import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
@@ -80,7 +82,8 @@ import javax.annotation.PostConstruct;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.Instant;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -1571,8 +1574,8 @@ public class ActivityServiceImpl implements ActivityService {
         
         CrossShardListingLocator locator=new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int ipageSize = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
         List<Activity> activities=new ArrayList<Activity>();
         
         //查第一页时，一部分为上次查询过后新发的贴 modified by xiongying 20160707
@@ -1594,7 +1597,7 @@ public class ActivityServiceImpl implements ActivityService {
 //
 //		List<Long> ids = getViewedActivityIds();
 		
-        List<Activity> ret = activityProvider.listActivities(locator, ipageSize - activities.size() + 1, condition, false);
+        List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false);
         
 //        if(ret != null && ret.size() > 0) {
 //        	for(Activity act : ret) {
@@ -2175,6 +2178,7 @@ public class ActivityServiceImpl implements ActivityService {
 		cmd.setPageAnchor(command.getPageAnchor());
 		cmd.setPageSize(command.getPageSize());
 		cmd.setCategoryId(command.getCategoryId());
+        cmd.setOrderByCreateTime(command.getOrderByCreateTime());
 		
 		ListActivitiesReponse activities = listOfficialActivities(cmd);
 		
@@ -2923,36 +2927,51 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Override
     public ListActivityPromotionEntitiesBySceneReponse listActivityPromotionEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd) {
-        // 官方活动
+
+        ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
+        listCmd.setCategoryId(cmd.getCategoryId());
+        listCmd.setSceneToken(cmd.getSceneToken());
+        listCmd.setPageSize(cmd.getPageSize());
+        listCmd.setPageAnchor(cmd.getPageAnchor());
+        listCmd.setOrderByCreateTime(Byte.valueOf("1"));
+
+        ListActivitiesReponse activityReponse;
         if (OfficialFlag.fromCode(cmd.getPublishPrivilege()) == OfficialFlag.YES) {
-            ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
-            listCmd.setCategoryId(cmd.getCategoryId());
-            listCmd.setSceneToken(cmd.getSceneToken());
-            listCmd.setPageSize(cmd.getPageSize());
-            listCmd.setPageAnchor(cmd.getPageAnchor());
+            // 官方活动
+            activityReponse = this.listOfficialActivitiesByScene(listCmd);
+        } else {
+            // 非官方活动
+            activityReponse = this.listNearbyActivitiesByScene(listCmd);
+        }
+        ListActivityPromotionEntitiesBySceneReponse promotionReponse = new ListActivityPromotionEntitiesBySceneReponse();
 
-            ListActivitiesReponse reponse = this.listOfficialActivitiesByScene(listCmd);
-
-            List<ActivityPromotionEntityDTO> entities = new ArrayList<>();
-            for (ActivityDTO activityDTO : reponse.getActivities()) {
-                ActivityPromotionEntityDTO entityDTO = new ActivityPromotionEntityDTO();
-                entityDTO.setId(activityDTO.getActivityId());
-                entityDTO.setDescription(activityDTO.getDescription());
-                entityDTO.setPosterUrl(activityDTO.getPosterUrl());
-                entityDTO.setSubject(activityDTO.getSubject());
-                entityDTO.setStartTime(Instant.parse(activityDTO.getStartTime()).toEpochMilli());
-                entityDTO.setTag(activityDTO.getTag());
-                entities.add(entityDTO);
-            }
-
-            ListActivityPromotionEntitiesBySceneReponse promotionReponse = new ListActivityPromotionEntitiesBySceneReponse();
+        if (activityReponse != null && activityReponse.getActivities() != null) {
+            List<ModulePromotionEntityDTO> entities = activityReponse.getActivities().stream()
+                    .map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
             promotionReponse.setEntities(entities);
-            return promotionReponse;
         }
-        // 非官方活动
-        else {
-            return null;
-        }
+        return promotionReponse;
+    }
+
+    private ModulePromotionEntityDTO toModulePromotionEntityDTO(ActivityDTO activityDTO) {
+        ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+        dto.setId(activityDTO.getActivityId());
+        dto.setDescription(activityDTO.getDescription());
+        dto.setPosterUrl(activityDTO.getPosterUrl());
+        dto.setSubject(activityDTO.getTag() + " | " + activityDTO.getSubject());
+
+        Map<String, Long> metadata = new HashMap<>();
+        metadata.put("forumId", activityDTO.getForumId());
+        metadata.put("topicId", activityDTO.getPostId());
+
+        dto.setMetadata(StringHelper.toJsonString(metadata));
+
+        ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO();
+        LocalDateTime startTime = LocalDateTime.parse(activityDTO.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.0"));
+        infoDTO.setInfoType(ModulePromotionInfoType.TEXT.getCode());
+        infoDTO.setContent(startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        dto.setInfoList(Collections.singletonList(infoDTO));
+        return dto;
     }
 
     public void setActivityAchievement(SetActivityAchievementCommand cmd) {

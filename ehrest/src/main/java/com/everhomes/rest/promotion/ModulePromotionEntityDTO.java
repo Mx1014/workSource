@@ -1,28 +1,31 @@
-// @formatter:off
-package com.everhomes.rest.business;
+//@formatter:off
+package com.everhomes.rest.promotion;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
-import java.math.BigDecimal;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * <ul>
- *     <li>id: 商品id</li>
+ *     <li>id: entity id</li>
  *     <li>posterUrl: 封面图url</li>
  *     <li>subject: 标题</li>
  *     <li>description: 内容</li>
- *     <li>commodityUrl: 商品跳转的链接</li>
- *     <li>price: 商品价格</li>
+ *     <li>metadata: 业务所需的其他数据</li>
+ *     <li>infoList: 信息流列表{@link com.everhomes.rest.promotion.ModulePromotionInfoDTO}</li>
  * </ul>
  */
-public class BusinessPromotionEntityDTO {
+public class ModulePromotionEntityDTO {
 
     private Long id;
     private String posterUrl;
     private String subject;
     private String description;
-    private String commodityUrl;
-    private BigDecimal price;
+    private String metadata;
+    @ItemType(ModulePromotionInfoDTO.class)
+    private List<ModulePromotionInfoDTO> infoList = new ArrayList<>();
 
     public Long getId() {
         return id;
@@ -56,20 +59,20 @@ public class BusinessPromotionEntityDTO {
         this.description = description;
     }
 
-    public String getCommodityUrl() {
-        return commodityUrl;
+    public List<ModulePromotionInfoDTO> getInfoList() {
+        return infoList;
     }
 
-    public void setCommodityUrl(String commodityUrl) {
-        this.commodityUrl = commodityUrl;
+    public void setInfoList(List<ModulePromotionInfoDTO> infoList) {
+        this.infoList = infoList;
     }
 
-    public BigDecimal getPrice() {
-        return price;
+    public String getMetadata() {
+        return metadata;
     }
 
-    public void setPrice(BigDecimal price) {
-        this.price = price;
+    public void setMetadata(String metadata) {
+        this.metadata = metadata;
     }
 
     @Override

@@ -1189,6 +1189,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhQualityInspectionStandardSpecificationMap.class, Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP).fetchOne().value1();
         });
+        syncTableSequence(null, EhBusinessPromotions.class, Tables.EH_BUSINESS_PROMOTIONS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_BUSINESS_PROMOTIONS.ID.max()).from(Tables.EH_BUSINESS_PROMOTIONS).fetchOne().value1();
+        });
 
     }
 

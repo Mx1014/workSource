@@ -877,6 +877,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+
+                // 创建一条初始读表记录
+                ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
+                readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
+                readEnergyMeterCmd.setCurrReading(meter.getStartReading());
+                readEnergyMeterCmd.setMeterId(meter.getId());
+                readEnergyMeterCmd.setOrganizationId(cmd.getOrganizationId());
+                readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                this.readEnergyMeter(readEnergyMeterCmd);
                 return true;
             });
             meterList.add(meter);
