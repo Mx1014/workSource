@@ -6,14 +6,13 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -62,6 +61,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
@@ -260,6 +262,16 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             LOGGER.error("Current organization are not exist.");
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST,
                     "Organization are not exist");
+        }
+        if (organization.getCommunityId() == null || organization.getCommunityName() == null) {
+            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+            if (communityRequest != null) {
+                Community community = communityProvider.findCommunityById(communityRequest.getCommunityId());
+                if (community != null) {
+                    organization.setCommunityId(community.getId());
+                    organization.setCommunityName(community.getName());
+                }
+            }
         }
         return organization;
     }
