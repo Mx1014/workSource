@@ -622,8 +622,8 @@ INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `
 VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10123, 50900, '表单管理', 1, 1, '表单管理  全部权限', 590); 
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10123, 1001, 0, 1, NOW());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10123, 1001, 0, 1, NOW(), 'EhAclRoles');
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
@@ -655,8 +655,8 @@ VALUES((@web_menu_privilege_id := @web_menu_privilege_id + 1),'10024','40542','�
 
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
-INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 422, 1001, 0, 1, NOW());
+INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`)
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 422, 1001, 0, 1, NOW(), 'EhAclRoles');
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
