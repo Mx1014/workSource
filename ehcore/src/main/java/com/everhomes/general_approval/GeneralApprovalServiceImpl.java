@@ -122,7 +122,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 					ga.getModuleType(), ga.getOwnerId(), ga.getOwnerType());
 
 			if (null == flow) {
-				// 给他一个默认哑的flow
+				// TODO 给他一个默认哑的flow
 
 			}
 			CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
@@ -242,9 +242,12 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		GeneralApproval ga = ConvertHelper.convert(cmd, GeneralApproval.class);
 		ga.setNamespaceId(UserContext.getCurrentNamespaceId());
 		ga.setStatus(GeneralFormStatus.CONFIG.getCode());
-		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
-				.getFormOriginId());
-		ga.setFormVersion(form.getFormVersion());
+		
+		//新增加审批的时候可能并为设置 formId
+//		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(cmd
+//				.getFormOriginId());
+//		ga.setFormVersion(form.getFormVersion());// 目前这个值并没用到
+		
 		this.generalApprovalProvider.createGeneralApproval(ga);
 
 		return processApproval(ga);

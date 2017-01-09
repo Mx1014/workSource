@@ -47,12 +47,6 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 		}
 	}
 
-	@Override
-	public FlowModuleInfo initModule() {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 	protected PostApprovalFormItem getFormFieldDTO(String string, List<PostApprovalFormItem> values) {
 		for (PostApprovalFormItem val : values) {
 			if (val.getFieldName().equals(string))

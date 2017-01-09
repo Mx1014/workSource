@@ -112,5 +112,6 @@ public class GeneralApprovalProviderImpl implements GeneralApprovalProvider {
     private void prepareObj(GeneralApproval obj) {
         Long l2 = DateHelper.currentGMTTime().getTime();
         obj.setCreateTime(new Timestamp(l2));
+        obj.setUpdateTime(new Timestamp(l2));
     }
 }
