@@ -121,14 +121,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			Flow flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
 					ga.getModuleType(), ga.getOwnerId(), ga.getOwnerType());
 
-			if (null == flow) {
-				// TODO 给他一个默认哑的flow
-
-			}
 			CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
 			cmd21.setApplyUserId(userId);
-			cmd21.setFlowMainId(flow.getFlowMainId());
-			cmd21.setFlowVersion(flow.getFlowVersion());
 			// cmd21.setReferId(null);
 			cmd21.setReferType(FlowReferType.APPROVAL.getCode());
 			cmd21.setProjectId(ga.getProjectId());
@@ -136,7 +130,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			//把command作为json传到content里，给flowcase的listener进行处理
 			cmd21.setContent(JSON.toJSONString(cmd));
 			
-			FlowCase flowCase = flowService.createFlowCase(cmd21);
+			FlowCase flowCase = null;
+			if(null == flow) {
+				// 给他一个默认哑的flow
+				flowCase = flowService.createDumpFlowCase(ga, cmd21);
+			} else {
+				cmd21.setFlowMainId(flow.getFlowMainId());
+				cmd21.setFlowVersion(flow.getFlowVersion());
+				flowCase = flowService.createFlowCase(cmd21);
+			}
+			
 			// 把values 存起来
 			for (PostApprovalFormItem val : cmd.getValues()) {
 				GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);

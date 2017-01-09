@@ -7,6 +7,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
@@ -1738,6 +1739,40 @@ public class FlowServiceImpl implements FlowService {
 		
 		FlowCaseState ctx = flowStateProcessor.prepareStart(userInfo, flowCase);
 		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
+		
+		return flowCase;
+	}
+	
+	@Override
+	public FlowCase createDumpFlowCase(GeneralApproval ga, CreateFlowCaseCommand flowCaseCmd) {
+		FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
+		flowCase.setCurrentNodeId(0l);
+		if(flowCase.getApplyUserId() == null) {
+			flowCase.setApplyUserId(UserContext.current().getUser().getId());	
+		}
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
+		flowCase.setApplierName(userInfo.getNickName());
+		if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+			flowCase.setApplierPhone(userInfo.getPhones().get(0));	
+		}
+		
+		FlowModuleDTO moduleDTO = this.getModuleById(ga.getModuleId());
+		
+		flowCase.setFlowMainId(0l);
+		flowCase.setFlowVersion(0);
+		flowCase.setNamespaceId(ga.getNamespaceId());
+		flowCase.setModuleId(ga.getModuleId());
+		flowCase.setModuleName(moduleDTO.getDisplayName());
+		flowCase.setModuleType(ga.getModuleType());
+		flowCase.setOwnerId(ga.getOwnerId());
+		flowCase.setOwnerType(ga.getOwnerType());
+		flowCase.setCaseType(FlowCaseType.DUMB.getCode());
+		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
+		flowCase.setProjectId(ga.getProjectId());
+		flowCase.setProjectType(ga.getProjectType());
+		
+    	flowListenerManager.onFlowCaseCreating(flowCase);
+		flowCaseProvider.createFlowCase(flowCase);
 		
 		return flowCase;
 	}

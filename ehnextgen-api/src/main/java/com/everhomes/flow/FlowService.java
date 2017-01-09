@@ -3,6 +3,7 @@ package com.everhomes.flow;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.rest.flow.ActionStepType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.CreateFlowCommand;
@@ -439,6 +440,9 @@ public interface FlowService {
 	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
+
+	FlowCase createDumpFlowCase(GeneralApproval ga,
+			CreateFlowCaseCommand flowCaseCmd);
 	
 	//TODO 日志信息分类：
 	
