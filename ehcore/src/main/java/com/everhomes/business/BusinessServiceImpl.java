@@ -51,8 +51,10 @@ import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.address.AddressType;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
@@ -2209,7 +2211,10 @@ public class BusinessServiceImpl implements BusinessService {
 		
 		groupService.joinBusinessGroup(cmd.getGroupId());
 	}
-	
-	
-	
+
+	@Override
+	public Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(
+			ListApartmentFloorCommand cmd) {
+		return addressService.listApartmentFloor(cmd);
+	}
 }
