@@ -2319,7 +2319,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 		                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
 					continue;
 				}
-				if(cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
+				if(null != cmd && cmd.getOrganiztionType() != null && !cmd.getOrganiztionType().equals("")){
 					if(org.getOrganizationType().equals(cmd.getOrganiztionType()) && !org.getGroupType().equals(OrganizationGroupType.DEPARTMENT.getCode())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
 						//物业或业委增加小区Id和小区name信息
@@ -2344,6 +2344,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 						if(org.getOrganizationType().equals(OrganizationType.GARC.getCode()) || org.getOrganizationType().equals(OrganizationType.PM.getCode())){
 							this.addCommunityInfoToUserRelaltedOrgsByOrgId(tempSimpleOrgDTO);
 						}
+						tempSimpleOrgDTO.setContactName(member.getContactName());
+						tempSimpleOrgDTO.setContactToken(member.getContactToken());
 						orgs.add(tempSimpleOrgDTO);
 					}
 					

@@ -23,6 +23,7 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.tools.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -446,35 +447,30 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         locator.setAnchor(cmd.getPageAnchor());
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-
-
+        List<User> users = null;
+        List<AclinkUserDTO> userDTOs = new ArrayList<>();
         if(!StringUtils.isEmpty(cmd.getKeyword())){
-            List<User> users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
-            for (User user: users) {
-
-            }
+            users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+        }else if(null != cmd.getOrganizationId()){
+            users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(),  locator, pageSize);
+        }else{
+            users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(),  locator, pageSize, namespaceId);
         }
 
-
-
-        List<AclinkUser> users = userProvider.searchDoorUsers(cmd, locator, pageSize);
-
-
-
-
-
-        
-        List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
-        for(AclinkUser u : users) {
-            AclinkUserDTO dto = ConvertHelper.convert(u, AclinkUserDTO.class);
-            if(dto.getCompanyId() != null) {
-                Organization org = organizationProvider.findOrganizationById(dto.getCompanyId());    
-                if(org != null) {
-                    dto.setCompany(org.getName());
-                }
+        for (User user: users) {
+            List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
+            AclinkUserDTO dto = ConvertHelper.convert(user, AclinkUserDTO.class);
+            dto.setRegisterTime(user.getCreateTime().getTime());
+            if(null != organizationDTOs && organizationDTOs.size() > 0){
+                OrganizationSimpleDTO organization =  organizationDTOs.get(0);
+                dto.setUserName(organization.getContactName());
+                dto.setCompany(organization.getName());
+                dto.setCompanyId(organization.getId());
+                dto.setPhone(organization.getContactToken());
+                dto.setIsAuth((byte)1);
+            }else{
+                dto.setIsAuth((byte)0);
             }
-            
-            dto.setPhone(u.getIdentifierToken());
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
                 dto.setRightOpen(doorAuth.getRightOpen());
@@ -485,10 +481,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 dto.setRightOpen((byte)0);
                 dto.setRightRemote((byte)0);
                 dto.setRightVisitor((byte)0);
-                }
+            }
             userDTOs.add(dto);
         }
-        
+
         AclinkUserResponse resp = new AclinkUserResponse();
         resp.setUsers(userDTOs);
         resp.setNextPageAnchor(locator.getAnchor());
