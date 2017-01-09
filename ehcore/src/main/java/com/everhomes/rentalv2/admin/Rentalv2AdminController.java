@@ -26,6 +26,7 @@ import com.everhomes.rest.rentalv2.ListRentalBillsCommand;
 import com.everhomes.rest.rentalv2.ListRentalBillsCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillDTO;
 import com.everhomes.rest.rentalv2.UpdateItemAdminCommand;
+import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
 import com.everhomes.rest.rentalv2.admin.CloseResourceTypeCommand;
@@ -38,12 +39,12 @@ import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
 import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
+import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
-import com.everhomes.rest.rentalv2.admin.RefundOrderDTO;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
@@ -215,6 +216,23 @@ public class Rentalv2AdminController extends ControllerBase {
 	@RestReturn(QueryDefaultRuleAdminResponse.class)
 	public RestResponse queryDefaultRule(@Valid QueryDefaultRuleAdminCommand cmd) {
 		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = this.rentalService.queryDefaultRule(cmd);
+		RestResponse response = new RestResponse(queryDefaultRuleAdminResponse);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * 
+	 * <b>URL: /rental/admin/getResourceRule<b>
+	 * <p>
+	 * 查询资源的规则
+	 * </p>
+	 */
+	@RequestMapping("getResourceRule")
+	@RestReturn(QueryDefaultRuleAdminResponse.class)
+	public RestResponse getResourceRule(@Valid GetResourceRuleAdminCommand cmd) {
+		QueryDefaultRuleAdminResponse queryDefaultRuleAdminResponse = this.rentalService.getResourceRule(cmd);
 		RestResponse response = new RestResponse(queryDefaultRuleAdminResponse);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -568,6 +586,39 @@ public class Rentalv2AdminController extends ControllerBase {
 	public RestResponse getRefundUrl(@Valid GetRefundUrlCommand cmd) {
 		String resp = rentalService.getRefundUrl(cmd);
 		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+	/**
+	 * <b>URL: /rental/admin/addCheckOperator</b>
+	 * <p>
+	 * 新增签到的管理员
+	 * </p>
+	 */
+	@RequestMapping("addCheckOperator")
+	@RestReturn(value = String.class)
+	public RestResponse addCheckOperator(@Valid AddCheckOperatorCommand cmd) {
+		rentalService.addCheckOperator(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /rental/admin/deleteCheckOperator</b>
+	 * <p>
+	 * 删除签到的管理员
+	 * </p>
+	 */
+	@RequestMapping("deleteCheckOperator")
+	@RestReturn(value = String.class)
+	public RestResponse deleteCheckOperator(@Valid AddCheckOperatorCommand cmd) {
+		rentalService.deleteCheckOperator(cmd);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

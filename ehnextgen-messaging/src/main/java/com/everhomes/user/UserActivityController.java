@@ -56,6 +56,7 @@ import com.everhomes.rest.user.SyncInsAppsCommand;
 import com.everhomes.rest.user.SyncLocationCommand;
 import com.everhomes.rest.user.SyncUserContactCommand;
 import com.everhomes.rest.user.UserInvitationsDTO;
+import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
@@ -378,9 +379,9 @@ public class UserActivityController extends ControllerBase {
 	 * <p> 获取申请信息  </p>
 	 */
     @RequestMapping("getCustomRequestInfo")
-    @RestReturn(value = RequestFieldDTO.class, collection = true)
+    @RestReturn(value = GetRequestInfoResponse.class)
     public RestResponse getCustomRequestInfo(@Valid GetRequestInfoCommand cmd) {
-    	List<RequestFieldDTO> dto = this.userActivityService.getCustomRequestInfo(cmd);
+    	GetRequestInfoResponse dto = this.userActivityService.getCustomRequestInfo(cmd);
     	RestResponse response = new RestResponse(dto);
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");

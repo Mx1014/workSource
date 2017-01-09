@@ -70,7 +70,12 @@ public interface PrivilegeConstants {
     //管理员管理
     public static final long ADMIN_MANAGE = 10043L;
 
+    //普通管理员管理
+    public static final long ENTERPRISE_ADMIN_MANAGE = 10095L;
+
     //业务授权
     public static final long SERVICE_AUTHORIZATION = 10044L;
-
+    
+    //11开头是资源预约权限 
+    public static final long RENTAL_CHECK = 1101L; 
 }

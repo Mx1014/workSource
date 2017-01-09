@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 import com.everhomes.acl.*;
+import com.everhomes.module.ServiceModulePrivilege;
+import com.everhomes.module.ServiceModulePrivilegeType;
+import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -11,14 +14,13 @@ import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.serviceModule.ServiceModulePrivilege;
-import com.everhomes.serviceModule.ServiceModulePrivilegeType;
-import com.everhomes.serviceModule.ServiceModuleProvider;
 import com.everhomes.user.*;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+
 
 
 import com.everhomes.bootstrap.PlatformContext;

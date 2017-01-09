@@ -1,6 +1,18 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.util.List;
+import java.util.stream.Collectors;
+
+import javax.validation.Valid;
+
+import com.everhomes.rest.activity.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.util.StringUtils;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.everhomes.acl.AclProvider;
 import com.everhomes.category.Category;
 import com.everhomes.constants.ErrorCodes;
@@ -342,7 +354,7 @@ public class ActivityController extends ControllerBase {
     }
     
     /**
-	 * <b>URL: /yellowPage/listActivityEntryCategories</b> 
+	 * <b>URL: /activity/listActivityEntryCategories</b>
 	 * <p> 列出活动类型 </p>
 	 */
     @RequireAuthentication(false)
@@ -351,4 +363,175 @@ public class ActivityController extends ControllerBase {
 	public RestResponse listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd) {
 		return new RestResponse(activityService.listActivityEntryCategories(cmd));
 	}
+
+    /**
+     * <b>URL: /activity/setActivityAchievement</b>
+     * <p> 设置活动成果 </p>
+     */
+    @RequestMapping("setActivityAchievement")
+    @RestReturn(value = String.class)
+    public RestResponse setActivityAchievement(SetActivityAchievementCommand cmd) {
+        activityService.setActivityAchievement(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/getActivityAchievement</b>
+     * <p> 查询活动成果 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityAchievement")
+    @RestReturn(value = GetActivityAchievementResponse.class)
+    public RestResponse getActivityAchievement(GetActivityAchievementCommand cmd) {
+        GetActivityAchievementResponse achievement = activityService.getActivityAchievement(cmd);
+
+        RestResponse response = new RestResponse(achievement);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/createActivityAttachment</b>
+     * <p> 添加活动附件 </p>
+     */
+    @RequestMapping("createActivityAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse createActivityAttachment(CreateActivityAttachmentCommand cmd) {
+        activityService.createActivityAttachment(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/deleteActivityAttachment</b>
+     * <p> 删除活动附件 </p>
+     */
+    @RequestMapping("deleteActivityAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse deleteActivityAttachment(DeleteActivityAttachmentCommand cmd) {
+        activityService.deleteActivityAttachment(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/listActivityAttachments</b>
+     * <p> 查询活动附件列表 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listActivityAttachments")
+    @RestReturn(value = ListActivityAttachmentsResponse.class)
+    public RestResponse listActivityAttachments(ListActivityAttachmentsCommand cmd) {
+        ListActivityAttachmentsResponse achievement = activityService.listActivityAttachments(cmd);
+
+        RestResponse response = new RestResponse(achievement);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/downloadActivityAttachment</b>
+     * <p> 下载活动附件 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("downloadActivityAttachment")
+    @RestReturn(value = String.class)
+    public RestResponse downloadActivityAttachment(DownloadActivityAttachmentCommand cmd) {
+        activityService.downloadActivityAttachment(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/createActivityGoods</b>
+     * <p> 添加活动物资 </p>
+     */
+    @RequestMapping("createActivityGoods")
+    @RestReturn(value = String.class)
+    public RestResponse createActivityGoods(CreateActivityGoodsCommand cmd) {
+        activityService.createActivityGoods(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/updateActivityGoods</b>
+     * <p> 修改活动物资 </p>
+     */
+    @RequestMapping("updateActivityGoods")
+    @RestReturn(value = String.class)
+    public RestResponse updateActivityGoods(UpdateActivityGoodsCommand cmd) {
+        activityService.updateActivityGoods(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/deleteActivityGoods</b>
+     * <p> 删除活动物资 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("deleteActivityGoods")
+    @RestReturn(value = String.class)
+    public RestResponse deleteActivityGoods(DeleteActivityGoodsCommand cmd) {
+        activityService.deleteActivityGoods(cmd);
+
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/listActivityGoods</b>
+     * <p> 查询活动物资列表 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("listActivityGoods")
+    @RestReturn(value = ListActivityGoodsResponse.class)
+    public RestResponse listActivityGoods(ListActivityGoodsCommand cmd) {
+        ListActivityGoodsResponse goods = activityService.listActivityGoods(cmd);
+
+        RestResponse response = new RestResponse(goods);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /activity/getActivityGoods</b>
+     * <p> 查询活动物资 </p>
+     */
+    @RequireAuthentication(false)
+    @RequestMapping("getActivityGoods")
+    @RestReturn(value = ActivityGoodsDTO.class)
+    public RestResponse getActivityGoods(GetActivityGoodsCommand cmd) {
+        ActivityGoodsDTO goods = activityService.getActivityGoods(cmd);
+
+        RestResponse response = new RestResponse(goods);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }

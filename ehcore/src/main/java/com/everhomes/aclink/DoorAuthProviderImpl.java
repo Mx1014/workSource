@@ -429,4 +429,34 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return resp;
     }
     
+    @Override
+    public List<DoorAuth> queryValidDoorAuths(ListingLocator locator, Long userId, Long ownerId, Byte ownerType, int count) {
+        
+        long now = DateHelper.currentGMTTime().getTime();
+        
+        return queryDoorAuth(locator, count, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+            	if(ownerId != null) {
+            		query.addConditions(Tables.EH_DOOR_AUTH.OWNER_ID.eq(ownerId));
+            		query.addConditions(Tables.EH_DOOR_AUTH.OWNER_TYPE.eq(ownerType));
+            	}
+                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                
+                return query;
+            }
+            
+        });        
+    }
+    
+    @Override
+    public void updateDoorAuth(List<DoorAuth> objs) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuth.class));
+        EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
+        dao.update(objs.toArray(new DoorAuth[objs.size()]));
+    }
+    
 }

@@ -36,6 +36,11 @@ package com.everhomes.rest.launchpad;
  * <li>PM_TASK(51): 物业报修</li>
  * <li>MY_APPROVAL(54): 我的审批</li>
  * <li>NEWS_FLASH(55): 园区快讯新样式</li>
+ * <li>FLOW_TASKS(56): 任务管理</li>
+ * <li>PARKING_CLEARANCE(57): 车辆放行</li>
+ * <li>PARKING_CLEARANCE_TASK(58): 车辆放行任务</li>
+ * <li>CREATE_PMTASK(59): 物业报修（用户版）</li>
+ * <li>ROUTER(60): 路由协议跳转</li>
  * </ul>
  */
 public enum ActionType {
@@ -49,7 +54,8 @@ public enum ActionType {
       ORG_TASK_MANAGERMENT((byte)39),ACLINK((byte)40),NEARBY_ACTIVITIES((byte)41),NEARBY_PUBLIC_CYCLE((byte)42),
       NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
       WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52),
-      ALL_BUTTON((byte)53),MY_APPROVAL((byte) 54),NEWS_FLASH((byte) 55);
+      ALL_BUTTON((byte)53),MY_APPROVAL((byte) 54),NEWS_FLASH((byte) 55), FLOW_TASKS( (byte)56 ), PARKING_CLEARANCE((byte) 57), PARKING_CLEARANCE_TASK((byte) 58),
+      CREATE_PMTASK((byte) 59),ROUTER((byte) 60);
     private byte code;
     
     private ActionType(byte code) {

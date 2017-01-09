@@ -333,7 +333,7 @@ public class BannerProviderImpl implements BannerProvider {
 		    condition = condition.and(EH_BANNERS.SCENE_TYPE.eq(sceneType));
         }
 		if(pageAnchor != null) {
-			condition = condition.and(EH_BANNERS.CREATE_TIME.ge(new Timestamp(pageAnchor)));
+			condition = condition.and(EH_BANNERS.CREATE_TIME.le(new Timestamp(pageAnchor)));
 		}
 		if(applyPolicy != null) {
 			condition = condition.and(EH_BANNERS.APPLY_POLICY.eq(applyPolicy.getCode()));

@@ -6,6 +6,15 @@ public class CustomerContractBuilding {
 	private String buildingName;
 	private String apartmentName;
 	private Double areaSize;
+	private Boolean dealed;
+
+	public Boolean getDealed() {
+		return dealed;
+	}
+
+	public void setDealed(Boolean dealed) {
+		this.dealed = dealed;
+	}
 
 	public String getBuildingName() {
 		return buildingName;

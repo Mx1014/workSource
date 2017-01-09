@@ -10,7 +10,10 @@ import com.everhomes.util.StringHelper;
  * <li>ownerType: 归属的类型，{@link com.everhomes.rest.parking.ParkingOwnerType}</li>
  * <li>ownerId: 归属的ID，如小区ID</li>
  * <li>parkingLotId: 停车场ID</li>
- * <li>count: 天数</li>
+ * <li>isSupportRecharge: 是否支持过期充值</li>
+ * <li>reserveDay: 最多过期天数</li>
+ * <li>rechargeMonthCount: 过期续交时，预交月数</li>
+ * <li>rechargeType: 预交，计费方式 1: 整月，2:实际天数   {@link com.everhomes.rest.parking.ParkingLotRechargeType}</li>
  * </ul>
  */
 public class SetParkingLotConfigCommand {
@@ -21,9 +24,11 @@ public class SetParkingLotConfigCommand {
 	@NotNull
     private Long parkingLotId;
 	@NotNull
+	private Byte isSupportRecharge;
     private Integer reserveDay;
-	private Integer requestNum;
-    
+	private Integer rechargeMonthCount;
+    private Byte rechargeType;
+	
     public SetParkingLotConfigCommand() {
     }
     
@@ -59,12 +64,28 @@ public class SetParkingLotConfigCommand {
 		this.reserveDay = reserveDay;
 	}
 
-	public Integer getRequestNum() {
-		return requestNum;
+	public Integer getRechargeMonthCount() {
+		return rechargeMonthCount;
 	}
 
-	public void setRequestNum(Integer requestNum) {
-		this.requestNum = requestNum;
+	public void setRechargeMonthCount(Integer rechargeMonthCount) {
+		this.rechargeMonthCount = rechargeMonthCount;
+	}
+
+	public Byte getRechargeType() {
+		return rechargeType;
+	}
+
+	public void setRechargeType(Byte rechargeType) {
+		this.rechargeType = rechargeType;
+	}
+
+	public Byte getIsSupportRecharge() {
+		return isSupportRecharge;
+	}
+
+	public void setIsSupportRecharge(Byte isSupportRecharge) {
+		this.isSupportRecharge = isSupportRecharge;
 	}
 
 	@Override

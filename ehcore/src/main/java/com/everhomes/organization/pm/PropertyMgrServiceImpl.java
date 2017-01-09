@@ -2,6 +2,7 @@
 package com.everhomes.organization.pm;
 
 import com.everhomes.acl.Role;
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.address.AddressService;
@@ -37,8 +38,10 @@ import com.everhomes.order.OrderUtil;
 import com.everhomes.organization.*;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.promotion.PromotionService;
+import com.everhomes.pushmessage.*;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -79,9 +82,7 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
-
 import net.greghaines.jesque.Job;
-
 import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
@@ -102,13 +103,14 @@ import javax.validation.ConstraintViolation;
 import javax.validation.Valid;
 import javax.validation.Validation;
 import javax.validation.Validator;
-
 import java.io.*;
 import java.math.BigDecimal;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
 import java.util.*;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -214,6 +216,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Autowired
     private FamilyService familyService;
+
+    @Autowired
+    private PushMessageProvider pushMessageProvider;
+
+    @Autowired
+    private PushMessageResultProvider pushMessageResultProvider;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
     
     private String queueName = "property-mgr-push";
 
@@ -1469,7 +1480,98 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			processCommunityPmOwner(communityId,owners,cmd.getMessage(), cmd.getMessageBodyType(), user);
 	}
 
-	public void sendNoticeToFamilyById(Long familyId,String message){
+    @Override
+    public void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd) {
+        Map<String, Object> args = new HashMap<>();
+        args.put("cmd", cmd);
+        args.put("operateTime", System.currentTimeMillis());
+
+        Job job = new Job(SendNoticeToPmAdminAction.class.getName(), cmd.toString(), System.currentTimeMillis()+"");
+        
+        jesqueClientFactory.getClientPool().enqueue(queueName, job);
+    }
+
+    @Override
+    public void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd, Timestamp operateTime) {
+        List<Long> pmAdminIds = new ArrayList<>();
+
+        if (cmd.getCommunityIds() != null && cmd.getCommunityIds().size() > 0) {
+            for (Long communityId : cmd.getCommunityIds()) {
+                // 拿到小区下的所有企业
+                ListEnterprisesCommand leCmd = new ListEnterprisesCommand();
+                leCmd.setCommunityId(communityId);
+                leCmd.setNamespaceId(currentNamespaceId());
+                leCmd.setPageSize(100000);
+                ListEnterprisesCommandResponse lecResponse = organizationService.listEnterprises(leCmd);
+                if (lecResponse != null && lecResponse.getDtos() != null) {
+                    // 获取企业管理员id列表
+                    List<Long> organizationIds = lecResponse.getDtos().stream().map(OrganizationDetailDTO::getOrganizationId).collect(Collectors.toList());
+                    pmAdminIds = this.getPmAdminIdsByOrganizationIds(organizationIds);
+                }
+            }
+        } else if (cmd.getOrganizationIds() != null && cmd.getOrganizationIds().size() > 0) {
+            // 获取企业管理员id列表
+            pmAdminIds = this.getPmAdminIdsByOrganizationIds(cmd.getOrganizationIds());
+        } else if (cmd.getPmAdminIds() != null && cmd.getPmAdminIds().size() > 0) {
+            pmAdminIds = cmd.getPmAdminIds();
+        }
+
+        if (pmAdminIds.size() > 0) {
+            for (Long userId : pmAdminIds) {
+                long pushCount = 0L;
+                PushMessage message = this.buildPushMessage(cmd, userId, operateTime, pushCount);
+                this.sendNoticeToUserById(userId, message.getContent(), MessageBodyType.TEXT.getCode());
+                this.insertPushMessageResult(message.getId(), userId, ++pushCount);
+            }
+            LOGGER.info("Finished to push message to pm admin, pm admin ids list = {}", pmAdminIds.toString());
+        }
+    }
+
+    // 根据企业获取企业下的所有管理员
+    private List<Long> getPmAdminIdsByOrganizationIds(List<Long> organizationIds) {
+        List<Long> pmAdminIds = new ArrayList<>();
+        for (Long organizationId : organizationIds) {
+            ListServiceModuleAdministratorsCommand loaCmd = new ListServiceModuleAdministratorsCommand();
+            loaCmd.setOrganizationId(organizationId);
+            List<OrganizationContactDTO> contactDTOs = rolePrivilegeService.listOrganizationAdministrators(loaCmd);
+            if (contactDTOs != null && contactDTOs.size() > 0) {
+                pmAdminIds.addAll(contactDTOs.stream().map(OrganizationContactDTO::getTargetId).collect(Collectors.toList()));
+            }
+        }
+        return pmAdminIds;
+    }
+
+    private void insertPushMessageResult(Long messageId, Long userId, Long pushCount) {
+        PushMessageResult result = new PushMessageResult();
+        result.setUserId(userId);
+        result.setMessageId(messageId);
+        result.setSendTime(Timestamp.valueOf(LocalDateTime.now()));
+        UserIdentifier identifier = this.getUserMobileIdentifier(userId);
+        result.setIdentifierToken(identifier != null ? identifier.getIdentifierToken() : null);
+        pushMessageResultProvider.createPushMessageResult(result);
+
+        PushMessage message = pushMessageProvider.getPushMessageById(messageId);
+        message.setFinishTime(Timestamp.valueOf(LocalDateTime.now()));
+        message.setStatus(PushMessageStatus.Finished.getCode());
+        message.setPushCount(pushCount);
+        pushMessageProvider.updatePushMessage(message);
+    }
+
+    private PushMessage buildPushMessage(SendNoticeToPmAdminCommand cmd, Long userId, Timestamp operateTime, Long pushCount) {
+        PushMessage message = new PushMessage();
+        message.setContent(cmd.getMessage());
+        message.setPushCount(pushCount);
+        message.setMessageType(PushMessageType.NORMAL.getCode());
+        message.setTargetType(PushMessageTargetType.USER.getCode());
+        message.setTargetId(userId);
+        message.setCreateTime(operateTime);
+        message.setStartTime(Timestamp.from(Instant.now()));
+        message.setStatus(PushMessageStatus.Processing.getCode());
+        pushMessageProvider.createPushMessage(message);
+        return message;
+    }
+
+    public void sendNoticeToFamilyById(Long familyId,String message){
 		MessageDTO messageDto = new MessageDTO();
 		//messageDto.setAppId(AppConstants.APPID_FAMILY);
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
@@ -1718,6 +1820,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		return null;
 	}
 
+
 	@Override
 	public PropAptStatisticDTO getApartmentStatistics(PropCommunityIdCommand cmd) {
 		PropAptStatisticDTO dto = new PropAptStatisticDTO();
@@ -1747,7 +1850,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setUnsaleCount(unsaleCount);
 		return dto;
 	}
-
 
 	@Override
 	public OrganizationDTO findPropertyOrganization(PropCommunityIdCommand cmd) {
@@ -3250,8 +3352,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	return variables;
 
 	}
-
-	private String getPmPayMessage(CommunityPmBill bill, BigDecimal balance, BigDecimal payAmount){
+    private String getPmPayMessage(CommunityPmBill bill, BigDecimal balance, BigDecimal payAmount){
 		//String str = "您2015年07月物业账单为，本月金额：300.00,往期欠款：200.00，本月实付金额：100.00，应付金额：400.00 ，+ 账单说明。 请尽快使用左邻缴纳物业费。";
 		StringBuilder builder = new StringBuilder();
 		Calendar cal = Calendar.getInstance();
@@ -3280,7 +3381,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		builder.append("请尽快使用左邻缴纳物业费。");
 		return builder.toString();
 	}
-	@Override
+    @Override
 	public GetFamilyStatisticCommandResponse getFamilyStatistic(GetFamilyStatisticCommand cmd) {
 		this.checkFamilyIdIsNull(cmd.getFamilyId());
 		Group family = this.checkFamily(cmd.getFamilyId());
@@ -3304,6 +3405,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		response.setTotalPaidAmount(totalPaidAmount.negate());
 		return response;
 	}
+
+
 	@Override
 	public PmBillsDTO findNewestBillByAddressId(FindNewestBillByAddressIdCommand cmd) {
 		this.checkAddressIdIsNull(cmd.getAddressId());
@@ -3321,7 +3424,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		return billDto;
 	}
-
 
 	private Address checkAddress(Long addressId) {
 		Address address = this.addressProvider.findAddressById(addressId);

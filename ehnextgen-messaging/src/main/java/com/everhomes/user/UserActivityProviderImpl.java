@@ -10,6 +10,7 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.records.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.jooq.Condition;
@@ -62,13 +63,6 @@ import com.everhomes.server.schema.tables.pojos.EhUserPosts;
 import com.everhomes.server.schema.tables.pojos.EhUserProfiles;
 import com.everhomes.server.schema.tables.pojos.EhUserServiceAddresses;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
-import com.everhomes.server.schema.tables.records.EhRequestAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhRequestTemplatesNamespaceMappingRecord;
-import com.everhomes.server.schema.tables.records.EhRequestTemplatesRecord;
-import com.everhomes.server.schema.tables.records.EhSearchTypesRecord;
-import com.everhomes.server.schema.tables.records.EhStatActiveUsersRecord;
-import com.everhomes.server.schema.tables.records.EhUserInvitationsRecord;
-import com.everhomes.server.schema.tables.records.EhUserPostsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
@@ -927,5 +921,29 @@ public class UserActivityProviderImpl implements UserActivityProvider {
         dao.insert(stat);
 	}
 
-
+    @Override
+    public List<UserActivity> listUserActivetys(Condition cond, Integer pageSize, CrossShardListingLocator locator) {
+        pageSize = pageSize + 1;
+        List<UserActivity> results = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhUserActivitiesRecord> query = context.selectQuery(Tables.EH_USER_ACTIVITIES);
+        if(null != cond){
+            query.addConditions(cond);
+        }
+        if(null != locator.getAnchor()){
+            query.addConditions(Tables.EH_USER_ACTIVITIES.ID.lt(locator.getAnchor()));
+        }
+        query.addOrderBy(Tables.EH_USER_ACTIVITIES.ID.desc());
+        query.addLimit(pageSize);
+        query.fetch().map((r) -> {
+            results.add(ConvertHelper.convert(r, UserActivity.class));
+            return null;
+        });
+        locator.setAnchor(null);
+        if(results.size() >= pageSize){
+            results.remove(results.size() - 1);
+            locator.setAnchor(results.get(results.size() - 1).getId());
+        }
+        return results;
+    }
 }

@@ -18,7 +18,7 @@ import com.everhomes.util.StringHelper;
  * <li>categoryName: 分类名称</li>
  * <li>address: 服务地点</li>
  * <li>content: 内容</li>
- * <li>status: 状态 1: 未处理  2: 处理中 3: 已完成  4: 已关闭  5:已回访{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
+ * <li>status: 状态 1: 待处理  2: 处理中 3: 已完成  4: 已关闭  5:已回访{@link com.everhomes.rest.pmtask.PmTaskStatus}</li>
  * <li>star: 评价分数</li>
  * <li>unprocessedTime: 未处理</li>
  * <li>processingTime: 处理中时间</li>
@@ -36,6 +36,7 @@ import com.everhomes.util.StringHelper;
  * <li>revisitContent: 回访内容</li>
  * <li>revisitTime: 回访时间</li>
  * <li>operatorStar: 操作人员评价分数</li>
+ * <li>flowCaseId: 工作流flowCaseId</li>
  * </ul>
  */
 public class PmTaskDTO {
@@ -69,6 +70,10 @@ public class PmTaskDTO {
 	private Timestamp revisitTime;
 	
 	private Byte operatorStar;
+	
+	private Long flowCaseId;
+	
+	private String buildingName;
 	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
@@ -264,5 +269,17 @@ public class PmTaskDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+	public String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 }

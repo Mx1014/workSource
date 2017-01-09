@@ -117,16 +117,32 @@
 		eh_warning_settings | eh_service_alliance_reservation_requests | eh_door_user_permission |
 		eh_resource_categories | eh_resource_category_assignments | eh_organization_job_positions | eh_service_modules | eh_service_module_scopes | eh_service_module_privileges | eh_service_module_assignments | eh_organization_job_position_maps |
 		eh_group_settings | eh_broadcasts |
-        eh_equipment_inspection_equipment_standard_map | eh_equipment_inspection_templates | eh_equipment_inspection_template_item_map | eh_equipment_inspection_items | eh_equipment_inspection_item_results | 
+        eh_equipment_inspection_equipment_standard_map | eh_equipment_inspection_templates | eh_equipment_inspection_template_item_map | eh_equipment_inspection_items | eh_equipment_inspection_item_results |
         eh_organization_member_logs |
 		eh_contracts | eh_contract_building_mappings | eh_app_namespace_mappings |
         eh_activity_categories |
         eh_energy_meters | eh_energy_meter_reading_logs | eh_energy_meter_change_logs | eh_energy_meter_categories | eh_energy_meter_setting_logs | eh_energy_meter_default_settings | eh_energy_meter_formulas | eh_energy_meter_formula_variables |
         eh_energy_date_statistics | eh_energy_month_statistics | eh_energy_count_statistics | eh_energy_yoy_statistics |
+
+		eh_terminal_app_version_cumulatives | eh_terminal_app_version_actives | eh_terminal_day_statistics | eh_terminal_hour_statistics | eh_terminal_app_version_statistics | eh_app_version | eh_terminal_statistics_tasks |
         eh_pm_task_target_statistics |
         eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
+        eh_service_alliance_invest_requests | eh_service_alliance_jump_module |
 
+        eh_parking_clearance_operators | eh_parking_clearance_logs |
+        eh_parking_flow | eh_parking_statistics | eh_parking_car_series | eh_parking_attachments |
+        eh_activity_attachments | eh_activity_goods |
+		eh_flows | eh_flow_stats | eh_flow_nodes | eh_flow_buttons | eh_flow_forms | eh_flow_actions | eh_flow_user_selections | eh_flow_cases | eh_flow_event_logs | eh_flow_variables | eh_flow_evaluates | eh_flow_scripts | eh_flow_attachments | eh_flow_subjects | eh_flow_timeouts | eh_flow_evaluate_items |
+        eh_service_hotlines | eh_service_configurations |
+        eh_launch_advertisements |
+        eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
+		eh_flows | eh_flow_stats | eh_flow_nodes | eh_flow_buttons | eh_flow_forms | eh_flow_actions | eh_flow_user_selections | eh_flow_cases | eh_flow_event_logs | eh_flow_variables | eh_flow_evaluates | eh_flow_scripts | eh_flow_attachments | eh_flow_subjects | eh_flow_timeouts |
+        eh_activity_attachments | eh_activity_goods |
+		eh_flows | eh_flow_stats | eh_flow_nodes | eh_flow_buttons | eh_flow_forms | eh_flow_actions | eh_flow_user_selections | eh_flow_cases | eh_flow_event_logs | eh_flow_variables | eh_flow_evaluates | eh_flow_scripts | eh_flow_attachments | eh_flow_subjects | eh_flow_timeouts | eh_flow_evaluate_items |
+        eh_service_hotlines | eh_service_configurations |
+		eh_techpark_syncdata_backup |         
         </includes>
+
             <!-- All elements that are excluded from your schema
             (A Java regular expression. Use the pipe to separate several expressions).
             Excludes match before includes -->

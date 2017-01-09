@@ -8,6 +8,7 @@ import java.sql.Timestamp;
 public class ServiceAllianceRequestInfo {
 
     private Long id;
+    private Long jumpType;
     private String templateType;
     private String ownerType;
     private Long ownerId;
@@ -16,6 +17,7 @@ public class ServiceAllianceRequestInfo {
     private String creatorMobile;
     private Long creatorOrganizationId;
     private Long serviceAllianceId;
+    private Long creatorUid;
     private Timestamp createTime;
 
     public Long getId() {
@@ -26,7 +28,15 @@ public class ServiceAllianceRequestInfo {
         this.id = id;
     }
 
-    public String getTemplateType() {
+    public Long getJumpType() {
+		return jumpType;
+	}
+
+	public void setJumpType(Long jumpType) {
+		this.jumpType = jumpType;
+	}
+
+	public String getTemplateType() {
         return templateType;
     }
 
@@ -88,6 +98,14 @@ public class ServiceAllianceRequestInfo {
 
     public void setServiceAllianceId(Long serviceAllianceId) {
         this.serviceAllianceId = serviceAllianceId;
+    }
+
+    public Long getCreatorUid() {
+        return creatorUid;
+    }
+
+    public void setCreatorUid(Long creatorUid) {
+        this.creatorUid = creatorUid;
     }
 
     public Timestamp getCreateTime() {

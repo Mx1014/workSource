@@ -10,6 +10,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -851,6 +852,10 @@ public class ActivityServiceImpl implements ActivityService {
         ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
         LOGGER.info("find roster {}",roster);
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+        //活动添加是否有活动附件标识 add by xiongying 20161207
+        boolean existAttachments = activityProvider.existActivityAttachments(activity.getId());
+        dto.setActivityAttachmentFlag(existAttachments);
+
         dto.setActivityId(activity.getId());
         dto.setForumId(post.getForumId());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
@@ -861,6 +866,9 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        String convertStartTime = format.format(activity.getStartTime().getTime());
+//        String convertEndTime = format.format(activity.getEndTime().getTime());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
@@ -980,6 +988,11 @@ public class ActivityServiceImpl implements ActivityService {
                 .current().getUser().getId());
         ActivityListResponse response = new ActivityListResponse();
         ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+
+        //活动添加是否有活动附件标识 add by xiongying 20161207
+        boolean existAttachments = activityProvider.existActivityAttachments(activity.getId());
+        dto.setActivityAttachmentFlag(existAttachments);
+
         dto.setActivityId(activity.getId());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?null:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
@@ -987,6 +1000,9 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
+//        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+//        String convertStartTime = format.format(activity.getStartTime().getTime());
+//        String convertEndTime = format.format(activity.getEndTime().getTime());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
         dto.setGroupId(activity.getGroupId());
@@ -1111,7 +1127,7 @@ public class ActivityServiceImpl implements ActivityService {
         
         int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
         //List<Activity> ret = activityProvider.listActivities(locator, value+1,condtion,Operator.OR, conditions.toArray(new Condition[conditions.size()]));
-        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion);
+        List<Activity> ret = activityProvider.listActivities(locator, value+1, condtion, false);
         List<ActivityDTO> activityDtos = ret.stream().map(activity->{
             Post post = forumProvider.findPostById(activity.getPostId());
             if(post==null){
@@ -1143,7 +1159,8 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setForumId(post.getForumId());
             fixupVideoInfo(dto);//added by janson
             return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
+            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
         if(activityDtos.size()<value){
             locator.setAnchor(null);
         }
@@ -1169,7 +1186,7 @@ public class ActivityServiceImpl implements ActivityService {
        //List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
        //List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
        Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
-       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition).stream().map(activity->{
+       List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false).stream().map(activity->{
           ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
           dto.setActivityId(activity.getId());
           Post post = forumProvider.findPostById(activity.getPostId());
@@ -1200,7 +1217,8 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setForumId(post.getForumId());
           fixupVideoInfo(dto);//added by janson
           return dto;
-       }).collect(Collectors.toList());
+           //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+       }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
        if(result.size()<pageSize)
        {
            locator.setAnchor(null);
@@ -1257,7 +1275,7 @@ public class ActivityServiceImpl implements ActivityService {
 		// List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
 		// List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
 		Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
-		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition).stream().map(activity->{
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false).stream().map(activity->{
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
@@ -1288,8 +1306,9 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setForumId(post.getForumId());
 			fixupVideoInfo(dto);//added by janson
 			return dto;
-       
-		}).collect(Collectors.toList());
+
+            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
        
 		if(result.size()<pageSize){
 			
@@ -1327,7 +1346,7 @@ public class ActivityServiceImpl implements ActivityService {
 		// List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
 		// List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1,null,Operator.OR,conditions.toArray(new Condition[conditions.size()])).stream().map(activity->{
 		Condition condition = buildNearbyActivityCondition(namespaceId, geoHashCodes, null);
-		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition).stream().map(activity->{
+		List<ActivityDTO> result = activityProvider.listActivities(locator, pageSize+1, condition, false).stream().map(activity->{
 			ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
 			dto.setActivityId(activity.getId());
 			Post post = forumProvider.findPostById(activity.getPostId());
@@ -1358,8 +1377,9 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setForumId(post.getForumId());
 			fixupVideoInfo(dto);//added by janson
 			return dto;
-       
-		}).collect(Collectors.toList());
+
+            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
        
 		if(result.size()<pageSize){
 			
@@ -1556,43 +1576,44 @@ public class ActivityServiceImpl implements ActivityService {
         List<Activity> activities=new ArrayList<Activity>();
         
         //查第一页时，一部分为上次查询过后新发的贴 modified by xiongying 20160707
-        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
-        	Timestamp lastViewedTime = null;
-        	String counts = configurationProvider.getValue(ConfigConstants.ACTIVITY_LIST_NUM, "3");
-        	UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(), 
-        								UserProfileContstant.VIEWED_ACTIVITY_NEW);
-	    	
-        	if(profile != null) {
-        		lastViewedTime = new Timestamp(Long.valueOf(profile.getItemValue()));
-        	}
-        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime, condition);
-	    	if(newActivities != null && newActivities.size() > 0) {
-	    		activities.addAll(newActivities);
-	    	}
-        }
-    	
-		List<Long> ids = getViewedActivityIds();
+        //产品1.6需求：去掉查一部分新发的贴的功能 modified by xiongying 20161208
+//        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
+//        	Timestamp lastViewedTime = null;
+//        	String counts = configurationProvider.getValue(ConfigConstants.ACTIVITY_LIST_NUM, "3");
+//        	UserProfile profile = userActivityProvider.findUserProfileBySpecialKey(UserContext.current().getUser().getId(),
+//        								UserProfileContstant.VIEWED_ACTIVITY_NEW);
+//
+//        	if(profile != null) {
+//        		lastViewedTime = new Timestamp(Long.valueOf(profile.getItemValue()));
+//        	}
+//        	List<Activity> newActivities = activityProvider.listNewActivities(locator, Integer.valueOf(counts), lastViewedTime, condition);
+//	    	if(newActivities != null && newActivities.size() > 0) {
+//	    		activities.addAll(newActivities);
+//	    	}
+//        }
+//
+//		List<Long> ids = getViewedActivityIds();
 		
-        List<Activity> ret = activityProvider.listActivities(locator, ipageSize - activities.size() + 1, condition);
+        List<Activity> ret = activityProvider.listActivities(locator, ipageSize - activities.size() + 1, condition, false);
         
-        if(ret != null && ret.size() > 0) {
-        	for(Activity act : ret) {
-        		if(!ids.contains(act.getId())) {
-        			activities.add(act);
-            	}
-        	}
-        }
-        
-        
+//        if(ret != null && ret.size() > 0) {
+//        	for(Activity act : ret) {
+//        		if(!ids.contains(act.getId())) {
+//        			activities.add(act);
+//            	}
+//        	}
+//        }
+
+
+        activities.addAll(ret);
         List<ActivityDTO> activityDtos = activities.stream().map(activity->{
-        	
             Post post = forumProvider.findPostById(activity.getPostId());
-            if(activity.getPosterUri() == null && post != null){
+            if (activity.getPosterUri() == null && post != null) {
                 this.forumProvider.populatePostAttachments(post);
                 List<Attachment> attachmentList = post.getAttachments();
-                if(attachmentList != null && attachmentList.size() != 0){
-                    for(Attachment attachment : attachmentList){
-                        if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+                if (attachmentList != null && attachmentList.size() != 0) {
+                    for (Attachment attachment : attachmentList) {
+                        if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
                             activity.setPosterUri(attachment.getContentUri());
                         break;
                     }
@@ -1602,8 +1623,8 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
             dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+            dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
+            dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
             dto.setProcessStatus(getStatus(activity).getCode());
             dto.setFamilyId(activity.getCreatorFamilyId());
             dto.setStartTime(activity.getStartTime().toString());
@@ -1612,24 +1633,26 @@ public class ActivityServiceImpl implements ActivityService {
 //            dto.setPosterUrl(getActivityPosterUrl(activity));
             String posterUrl = getActivityPosterUrl(activity);
             dto.setPosterUrl(posterUrl);
-            if(post != null) {
+            if (post != null) {
                 dto.setForumId(post.getForumId());
             }
             List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(uid, UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
-            if(favorite == null || favorite.size() == 0) {
-            	dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            if (favorite == null || favorite.size() == 0) {
+                dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
             } else {
-            	dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+                dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
             }
             //add UserActivityStatus by xiongying 20160628
             ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), uid);
             dto.setUserActivityStatus(getActivityStatus(roster).getCode());
             fixupVideoInfo(dto);//added by janson
+
             return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
-        
+            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+
         Long nextPageAnchor = locator.getAnchor();
-        
+
         response = new ListActivitiesReponse(nextPageAnchor, activityDtos);
         return response;
 	}
@@ -2250,8 +2273,12 @@ public class ActivityServiceImpl implements ActivityService {
         // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
         CrossShardListingLocator locator = new CrossShardListingLocator(ForumConstants.SYSTEM_FORUM);
         locator.setAnchor(cmd.getPageAnchor());
-        
-        List<ActivityDTO> dtos = this.getOrgActivities(locator, pageSize, condition, cmd.getPublishStatus());
+
+        Boolean orderByCreateTime = false;
+        if(cmd.getOrderByCreateTime() != null && cmd.getOrderByCreateTime() == 1) {
+            orderByCreateTime = true;
+        }
+        List<ActivityDTO> dtos = this.getOrgActivities(locator, pageSize, condition, cmd.getPublishStatus(), orderByCreateTime);
         if(LOGGER.isInfoEnabled()) {
             long endTime = System.currentTimeMillis();
             LOGGER.info("Query offical activities, userId=" + operatorId + ", size=" + dtos.size() 
@@ -2262,7 +2289,7 @@ public class ActivityServiceImpl implements ActivityService {
         return response;
 	}
 	
-	private List<ActivityDTO> getOrgActivities(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus){
+	private List<ActivityDTO> getOrgActivities(CrossShardListingLocator locator,Integer pageSize, Condition condition, String publishStatus, Boolean orderByCreateTime){
     	User user = UserContext.current().getUser();
     	
     	Timestamp timestemp = new Timestamp(DateHelper.currentGMTTime().getTime());
@@ -2282,42 +2309,82 @@ public class ActivityServiceImpl implements ActivityService {
         if(TopicPublishStatus.fromCode(publishStatus) == TopicPublishStatus.EXPIRED){
         	condition = condition.and(Tables.EH_ACTIVITIES.END_TIME.lt(timestemp));
         }
-        
-        List<Activity> activities = this.activityProvider.listActivities(locator, pageSize + 1, condition);
 
-        List<ActivityDTO> activityDtos = activities.stream().map(activity->{
-            Post post = forumProvider.findPostById(activity.getPostId());
-            if(post==null){
-                return null;
-            }
-            if(activity.getPosterUri()==null){
-            	this.forumProvider.populatePostAttachments(post);
-            	List<Attachment> attachmentList = post.getAttachments();
-            	if(attachmentList != null && attachmentList.size() != 0){
-            		for(Attachment attachment : attachmentList){
-            			if(PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
-            				activity.setPosterUri(attachment.getContentUri());
-            			break;
-            		}
-            	}
-            }
-            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-            dto.setActivityId(activity.getId());
-            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-            dto.setProcessStatus(getStatus(activity).getCode());
-            dto.setFamilyId(activity.getCreatorFamilyId());
-            dto.setStartTime(activity.getStartTime().toString());
-            dto.setStopTime(activity.getEndTime().toString());
-            dto.setGroupId(activity.getGroupId());
-            dto.setPosterUrl(getActivityPosterUrl(activity));
-            fixupVideoInfo(dto);
-            return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
-        
-        return activityDtos;
+        if(orderByCreateTime == null) {
+            orderByCreateTime = false;
+        }
+        List<Activity> activities = this.activityProvider.listActivities(locator, pageSize + 1, condition, orderByCreateTime);
+
+        if(orderByCreateTime) {
+            List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
+                Post post = forumProvider.findPostById(activity.getPostId());
+                if (post == null) {
+                    return null;
+                }
+                if (activity.getPosterUri() == null) {
+                    this.forumProvider.populatePostAttachments(post);
+                    List<Attachment> attachmentList = post.getAttachments();
+                    if (attachmentList != null && attachmentList.size() != 0) {
+                        for (Attachment attachment : attachmentList) {
+                            if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+                                activity.setPosterUri(attachment.getContentUri());
+                            break;
+                        }
+                    }
+                }
+                ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+                dto.setActivityId(activity.getId());
+                dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+                dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+                dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
+                dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
+                dto.setProcessStatus(getStatus(activity).getCode());
+                dto.setFamilyId(activity.getCreatorFamilyId());
+                dto.setStartTime(activity.getStartTime().toString());
+                dto.setStopTime(activity.getEndTime().toString());
+                dto.setGroupId(activity.getGroupId());
+                dto.setPosterUrl(getActivityPosterUrl(activity));
+                fixupVideoInfo(dto);
+                return dto;
+            }).filter(r -> r != null).collect(Collectors.toList());
+
+            return activityDtos;
+        } else {
+            List<ActivityDTO> activityDtos = activities.stream().map(activity -> {
+                Post post = forumProvider.findPostById(activity.getPostId());
+                if (post == null) {
+                    return null;
+                }
+                if (activity.getPosterUri() == null) {
+                    this.forumProvider.populatePostAttachments(post);
+                    List<Attachment> attachmentList = post.getAttachments();
+                    if (attachmentList != null && attachmentList.size() != 0) {
+                        for (Attachment attachment : attachmentList) {
+                            if (PostContentType.IMAGE.getCode().equals(attachment.getContentType()))
+                                activity.setPosterUri(attachment.getContentUri());
+                            break;
+                        }
+                    }
+                }
+                ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+                dto.setActivityId(activity.getId());
+                dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+                dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+                dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
+                dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
+                dto.setProcessStatus(getStatus(activity).getCode());
+                dto.setFamilyId(activity.getCreatorFamilyId());
+                dto.setStartTime(activity.getStartTime().toString());
+                dto.setStopTime(activity.getEndTime().toString());
+                dto.setGroupId(activity.getGroupId());
+                dto.setPosterUrl(getActivityPosterUrl(activity));
+                fixupVideoInfo(dto);
+                return dto;
+                //全部查速度太慢，先把查出的部分排序 by xiongying20161208
+            }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+
+            return activityDtos;
+        }
     }
 
 	private void processOfficalActivitySceneToken(Long userId, SceneTokenDTO sceneTokenDTO, QueryOrganizationTopicCommand cmd) {
@@ -2885,6 +2952,173 @@ public class ActivityServiceImpl implements ActivityService {
         // 非官方活动
         else {
             return null;
+        }
+    }
+
+    public void setActivityAchievement(SetActivityAchievementCommand cmd) {
+
+        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+        }
+
+        activity.setAchievement(cmd.getAchievement());
+        activity.setAchievementType(cmd.getAchievementType());
+        activity.setAchievementRichtextUrl(cmd.getAchievementRichtextUrl());
+        activityProvider.updateActivity(activity);
+    }
+
+    @Override
+    public GetActivityAchievementResponse getActivityAchievement(GetActivityAchievementCommand cmd) {
+        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+        }
+
+        String achievement = activity.getAchievement();
+        String achievementType = activity.getAchievementType();
+
+        GetActivityAchievementResponse response = new GetActivityAchievementResponse();
+        response.setAchievement(achievement);
+        response.setAchievementType(achievementType);
+        return response;
+    }
+
+    @Override
+    public void createActivityAttachment(CreateActivityAttachmentCommand cmd) {
+        ActivityAttachment attachment = ConvertHelper.convert(cmd, ActivityAttachment.class);
+        attachment.setCreatorUid(UserContext.current().getUser().getId());
+        ContentServerResource resource = contentServerService.findResourceByUri(cmd.getContentUri());
+        Integer size = resource.getResourceSize();
+        attachment.setFileSize(size);
+        activityProvider.createActivityAttachment(attachment);
+    }
+
+    @Override
+    public void deleteActivityAttachment(DeleteActivityAttachmentCommand cmd) {
+        activityProvider.deleteActivityAttachment(cmd.getAttachmentId());
+    }
+
+    @Override
+    public ListActivityAttachmentsResponse listActivityAttachments(ListActivityAttachmentsCommand cmd) {
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
+        if(cmd.getPageSize()==null){
+            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+            cmd.setPageSize(value);
+        }
+
+        ListActivityAttachmentsResponse response = new ListActivityAttachmentsResponse();
+        List<ActivityAttachment> attachments = activityProvider.listActivityAttachments(locator, cmd.getPageSize() + 1, cmd.getActivityId());
+        if(attachments != null && attachments.size() > 0) {
+            if(attachments.size() > cmd.getPageSize()) {
+                attachments.remove(attachments.size() - 1);
+                response.setNextPageAnchor(attachments.get(attachments.size() - 1).getId());
+            }
+
+            List<ActivityAttachmentDTO> dtos = attachments.stream().map((r) -> {
+                ActivityAttachmentDTO dto = ConvertHelper.convert(r, ActivityAttachmentDTO.class);
+                String contentUrl = contentServerService.parserUri(dto.getContentUri(), EntityType.ACTIVITY.getCode(), dto.getActivityId());
+                User creator = userProvider.findUserById(dto.getCreatorUid());
+                if(creator != null) {
+                    dto.setCreatorName(creator.getNickName());
+                }
+                dto.setContentUrl(contentUrl);
+                return dto;
+            }).collect(Collectors.toList());
+            response.setAttachments(dtos);
+        }
+
+        return response;
+    }
+
+    @Override
+    public void downloadActivityAttachment(DownloadActivityAttachmentCommand cmd) {
+
+    	if(cmd.getAttachmentId() == null || cmd.getActivityId() == null) {
+    		return ;
+    	}
+    	
+        ActivityAttachment attachment = activityProvider.findByActivityAttachmentId(cmd.getAttachmentId());
+        if(attachment == null) {
+            LOGGER.error("handle activity attachment error ,the activity attachment does not exsit.cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ATTACHMENT_ID, "invalid activity attachment id " + cmd.getAttachmentId());
+        }
+
+        attachment.setDownloadCount(attachment.getDownloadCount() + 1);
+        activityProvider.updateActivityAttachment(attachment);
+    }
+
+    @Override
+    public void createActivityGoods(CreateActivityGoodsCommand cmd) {
+        ActivityGoods goods = ConvertHelper.convert(cmd, ActivityGoods.class);
+        goods.setCreatorUid(UserContext.current().getUser().getId());
+        activityProvider.createActivityGoods(goods);
+    }
+
+    @Override
+    public void updateActivityGoods(UpdateActivityGoodsCommand cmd) {
+        ActivityGoods goods = activityProvider.findActivityGoodsById(cmd.getId());
+        if(goods == null) {
+            LOGGER.error("handle activity goods error ,the activity goods does not exsit.cmd={}", cmd);
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_GOODS_ID, "invalid activity goods id " + cmd.getId());
+        }
+
+        goods.setName(cmd.getName());
+        goods.setPrice(cmd.getPrice());
+        goods.setQuantity(cmd.getQuantity());
+        goods.setTotalPrice(cmd.getTotalPrice());
+        goods.setHandlers(cmd.getHandlers());
+
+        activityProvider.updateActivityGoods(goods);
+    }
+
+    @Override
+    public void deleteActivityGoods(DeleteActivityGoodsCommand cmd) {
+        activityProvider.deleteActivityGoods(cmd.getGoodId());
+    }
+
+    @Override
+    public ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd) {
+        CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
+        if(cmd.getPageSize()==null){
+            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+            cmd.setPageSize(value);
+        }
+
+        ListActivityGoodsResponse response = new ListActivityGoodsResponse();
+        List<ActivityGoods> goods = activityProvider.listActivityGoods(locator, cmd.getPageSize() + 1, cmd.getActivityId());
+        if(goods != null && goods.size() > 0) {
+            if(goods.size() > cmd.getPageSize()) {
+                goods.remove(goods.size() - 1);
+                response.setNextPageAnchor(goods.get(goods.size() - 1).getId());
+            }
+
+            List<ActivityGoodsDTO> dtos = goods.stream().map((r) -> {
+                ActivityGoodsDTO dto = ConvertHelper.convert(r, ActivityGoodsDTO.class);
+                return dto;
+            }).collect(Collectors.toList());
+            response.setGoods(dtos);
+        }
+
+        return response;
+    }
+
+    @Override
+    public ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd) {
+        ActivityGoods goods = activityProvider.findActivityGoodsById(cmd.getGoodId());
+        if(goods == null) {
+            return null;
+        } else {
+            ActivityGoodsDTO dto = ConvertHelper.convert(goods, ActivityGoodsDTO.class);
+            return dto;
         }
     }
 }

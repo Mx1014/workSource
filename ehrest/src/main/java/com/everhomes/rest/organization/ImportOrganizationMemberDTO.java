@@ -4,6 +4,20 @@ import com.everhomes.util.StringHelper;
 
 public class ImportOrganizationMemberDTO {
 
+
+	public ImportOrganizationMemberDTO(){
+		super();
+	}
+	public ImportOrganizationMemberDTO(String employeeNo, String contactName, String contactToken, String gender, String departments, String jobPositions, String jobLevels) {
+		this.employeeNo = employeeNo;
+		this.contactName = contactName;
+		this.contactToken = contactToken;
+		this.gender = gender;
+		this.departments = departments;
+		this.jobPositions = jobPositions;
+		this.jobLevels = jobLevels;
+	}
+
 	private String employeeNo;
 	private String contactName;
 	private String contactToken;

@@ -105,4 +105,26 @@ public interface ActivityService {
      * 根据场景获取活动运营数据
      */
     ListActivityPromotionEntitiesBySceneReponse listActivityPromotionEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd);
+
+    void setActivityAchievement(SetActivityAchievementCommand cmd);
+
+    GetActivityAchievementResponse getActivityAchievement(GetActivityAchievementCommand cmd);
+
+    void createActivityAttachment(CreateActivityAttachmentCommand cmd);
+
+    void deleteActivityAttachment(DeleteActivityAttachmentCommand cmd);
+
+    ListActivityAttachmentsResponse listActivityAttachments(ListActivityAttachmentsCommand cmd);
+
+    void downloadActivityAttachment(DownloadActivityAttachmentCommand cmd);
+
+    void createActivityGoods(CreateActivityGoodsCommand cmd);
+
+    void updateActivityGoods(UpdateActivityGoodsCommand cmd);
+
+    void deleteActivityGoods(DeleteActivityGoodsCommand cmd);
+
+    ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd);
+
+    ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
 }

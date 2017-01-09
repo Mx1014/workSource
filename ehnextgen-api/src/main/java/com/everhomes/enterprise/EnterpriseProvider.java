@@ -60,4 +60,5 @@ public interface EnterpriseProvider {
     void deleteEnterpriseAddressById(Long id);
     
     EnterpriseDetail findEnterpriseDetailByEnterpriseId(Long enterpriseId);
+	public EnterpriseAddress findEnterpriseAddressByEnterpriseIdAndAddressId(Long enterpriseId, Long addressId);
 }

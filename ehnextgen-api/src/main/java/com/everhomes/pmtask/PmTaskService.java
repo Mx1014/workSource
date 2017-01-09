@@ -11,15 +11,18 @@ import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
+import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
 import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
+import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
@@ -109,11 +112,13 @@ public interface PmTaskService {
 	
 	ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
 	
-	GetUserRelatedAddressResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd);
+	GetUserRelatedAddressByCommunityResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd);
 	
 	SearchTaskOperatorStatisticsResponse searchTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd);
 	
 	void exportTaskOperatorStatistics(SearchTaskOperatorStatisticsCommand cmd, HttpServletResponse resp);
 	
 	void createTaskTargetStatistics();
+	
+	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
 }
