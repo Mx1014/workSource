@@ -235,7 +235,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("companyName", organization.getName());
         params.put("pageCount", "1");
         params.put("pageSize", "1000");
-        params.put("sdate", cmd.getDateStr());// 不传查所有
+        params.put("sdateFrom", cmd.getDateStr());
+        params.put("sdateTo", cmd.getDateStr());
 
         BillItemList itemList = post(api, params, BillItemList.class);
         if (itemList != null && itemList.result.size() > 0) {
