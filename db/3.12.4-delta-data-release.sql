@@ -192,6 +192,38 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80510, '', 'EhNamespaces', 999983, 2);
 
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80120', '我的申请', '80100', NULL, 'apply_list/155', '0', '2', '/80000/80100/80120', 'park', '820', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80220', '我的申请', '80200', NULL, 'apply_list/151', '0', '2', '/80000/80200/80220', 'park', '820', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80320', '我的申请', '80300', NULL, 'apply_list/152', '0', '2', '/80000/80300/80320', 'park', '820', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80420', '我的申请', '80400', NULL, 'apply_list/153', '0', '2', '/80000/80400/80420', 'park', '820', NULL);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('80520', '我的申请', '80500', NULL, 'apply_list/154', '0', '2', '/80000/80500/80520', 'park', '820', NULL);
+
+SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10121', '80120', '服务联盟', '1', '1', '服务联盟 全部权限', '711');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10122', '80220', '企业服务', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10123', '80320', '厂房出租', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10124', '80420', '公寓出租', '1', '1', '服务联盟 全部权限', '710');
+INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10125', '80520', '医疗', '1', '1', '服务联盟 全部权限', '710');
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80120, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80220, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80320, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80420, '', 'EhNamespaces', 999983, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80520, '', 'EhNamespaces', 999983, 2);
+
+
 -- 更新菜单datatype
 update eh_web_menus set data_type = 'access_manage/inside' where data_type = 'access_manage_inside' and name = '门禁管理';
 update eh_web_menus set data_type = 'version_manage/inside' where data_type = 'version_manage_inside' and name = '版本管理';
@@ -226,3 +258,7 @@ delete from eh_web_menu_scopes where menu_id = 20160 and owner_id = 1000000;
 delete from eh_web_menu_scopes where menu_id = 20192 and owner_id = 1000000;
 
 	
+-- -- add by xionging 2017.1.9
+delete from eh_service_alliance_jump_module where id = 1;
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (3, 999983, '投诉建议', 'zl://propertyrepair/create?type=user&taskCategoryId=202564&displayName=投诉建议');
+INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (4, 999983, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=202565&displayName=物业报修');

@@ -24,8 +24,10 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
@@ -542,6 +544,20 @@ public class BusinessOpenController extends ControllerBase {
         List<BuildingDTO> data = this.businessService.listBuildingsByKeyword(cmd);
         RestResponse response = new RestResponse(data);
         response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /openapi/listApartmentFloor</b>
+     * <p>根据小区Id、楼栋号和关键字查询楼层</p>
+     */
+    @RequestMapping("listApartmentFloor")
+    @RestReturn(value=ApartmentFloorDTO.class, collection=true)
+    public RestResponse listApartmentFloor(@Valid ListApartmentFloorCommand cmd) {
+        Tuple<Integer, List<ApartmentFloorDTO>> data = this.businessService.listApartmentFloor(cmd);
+        RestResponse response = new RestResponse(data.second());
+        response.setErrorCode(data.first());
         response.setErrorDescription("OK");
         return response;
     }
