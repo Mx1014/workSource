@@ -643,7 +643,7 @@ VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id +1
 --
 UPDATE `eh_web_menus` SET NAME = '审批管理' ,data_type =NULL WHERE id = 40540;
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (40541, '审批列表', 40000, NULL, 'react:/approval-management/approval-list/:moduleType/:moduleId', 1, 2, '/40000/40500/40540/40541', 'park', 458);  
+VALUES (40541, '审批列表', 40000, NULL, 'react:/approval-management/approval-list/service-alliance/40500', 1, 2, '/40000/40500/40540/40541', 'park', 458);  
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
 VALUES (40542, '申请记录', 40000, NULL, 'apply_record', 1, 2, '/40000/40500/40540/40542', 'park', 459);  
 
