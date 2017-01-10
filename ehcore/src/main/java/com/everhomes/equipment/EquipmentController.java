@@ -971,9 +971,9 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = EquipmentsDTO.class)
 	public RestResponse getInspectionObjectByQRCode(GetInspectionObjectByQRCodeCommand cmd) {
 		
-//		EquipmentsDTO equipment = equipmentService.findEquipmentByToken(cmd);
+		EquipmentsDTO equipment = equipmentService.getInspectionObjectByQRCode(cmd);
 		
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(equipment);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -1003,9 +1003,9 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = ListEquipmentTasksResponse.class)
 	public RestResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd) {
 		
-//		ListEquipmentTasksResponse tasks = equipmentService.listUserHistoryTasks(cmd);
+		ListEquipmentTasksResponse tasks = equipmentService.listUserHistoryTasks(cmd);
 		
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(tasks);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
