@@ -2086,7 +2086,8 @@ public class FlowServiceImpl implements FlowService {
 		} else if(flowUserType == FlowUserType.APPLIER) {
 			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
 			buttons.stream().forEach((b)->{
-				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
+				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())
+						&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode()) ) {
 					FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
 					btnDTOS.add(btnDTO);
 				}
