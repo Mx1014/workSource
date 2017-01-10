@@ -29,7 +29,7 @@ import org.slf4j.LoggerFactory;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ketuo.EncryptUtil;
-import com.everhomes.pmtask.ebei.EbeiResponseEntity;
+import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.util.RuntimeErrorException;
 
 
@@ -58,7 +58,7 @@ public class EbeiPmTaskHandleTest {
 		
 		String json = postToEbei(param, LIST_SERVICE_TYPE);
 		
-		EbeiResponseEntity entity = JSONObject.parseObject(json, EbeiResponseEntity.class);
+		EbeiJsonEntity entity = JSONObject.parseObject(json, EbeiJsonEntity.class);
 		
 		if(entity.isSuccess()) {
 			Object data = entity.getData();
@@ -80,11 +80,15 @@ public class EbeiPmTaskHandleTest {
 		param.put("remarks", "业主报修水管坏了");
 		param.put("projectId", "240111044331055940");
 		param.put("anonymous", "0");
-		param.put("fileAddrs", "");
+		param.put("fileAddrs", "http://1.jpg,http://2.jpg");
 		param.put("buildingType", "0");
-//		login();
-		postToEbei(param, CREATE_TASK);
 		
+		param.put("orderId", "19f53feb-c382-4f64-b8f8-5052a16da200");
+//		login();
+//		postToEbei(param, CREATE_TASK);
+		
+		
+		postToEbei(param, GET_TASK_DETAIL);
 //		listPmtasks();
 //		listServiceType("240111044331055940");
 	}
@@ -123,7 +127,7 @@ JSONObject param = new JSONObject();
 			httpPost.setEntity(stringEntity);
 			httpPost.setHeader("Content-Type", "application/json");
 //			httpPost.addHeader("EBEI_TOKEN", "ai5uSTEuD9hItoFqlm8oUWiVyzXbEd0IXDfyRjMEuHz6JtYuTHGlyuCiu7wpvACJ\r\n");
-			httpPost.addHeader("companyServiceCode", "zywyCrmServiceCode");
+//			httpPost.addHeader("companyServiceCode", "zywyCrmServiceCode");
 			response = httpclient.execute(httpPost);
 			HttpEntity entity = response.getEntity();
 			

@@ -1,21 +1,16 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.io.BufferedReader;
 import java.io.IOException;
-import java.io.InputStream;
-import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -24,14 +19,11 @@ import javax.annotation.PreDestroy;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
-import org.apache.http.NameValuePair;
-import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
-import org.apache.http.message.BasicNameValuePair;
 import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -43,8 +35,6 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
-import com.bosigao2.rest.Bosigao2CardInfo;
-import com.bosigao2.rest.Bosigao2ResultEntity;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -67,7 +57,6 @@ import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardType;
 import com.everhomes.rest.parking.ParkingLotVendor;
-import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
@@ -154,10 +143,12 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			User user = UserContext.current().getUser();
 			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 			
-			parkingCardDTO.setPlateOwnerName(user.getNickName());
+			String plateOwnerName = card.getUserName();
+			
+			parkingCardDTO.setPlateOwnerName(StringUtils.isNotBlank(plateOwnerName)?plateOwnerName:user.getNickName());
 			parkingCardDTO.setPlateNumber(plateNumber);
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
-			//parkingCardDTO.setStartTime(startTime);
+
 			parkingCardDTO.setEndTime(expireTime);
 			
 			parkingCardDTO.setCardType(card.getCardType());
@@ -275,6 +266,22 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		
 		return ts;
 	}
+    
+    private Long strToLong3(String str) {
+
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+		
+		Long ts = null;
+		try {
+			ts = sdf.parse(str).getTime();
+		} catch (ParseException e) {
+			LOGGER.error("validityPeriod data format is not yyyymmdd.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"validityPeriod data format is not yyyymmdd.");
+		}
+		
+		return ts;
+	}
 	
 //	@Scheduled(cron="0 0 0/2 * * ? ")
 //	@Override
@@ -291,11 +298,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 //			return null;
 //		});
 //	}
-    public static void main(String[] args) {
-		JSONObject param = new JSONObject();
-		param.put("plateNo", "浙A625FF1");
-		postToWanke(param, GET_TEMP_FEE);
-	}
     
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
@@ -354,13 +356,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	private boolean rechargeMonthlyCard(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-		//储能月卡车没有 归属地区分
-		String plateNumber = order.getPlateNumber();
 
-		WankeCardInfo cardInfo = getCard(plateNumber);
-		String oldValidEnd = cardInfo.getExpireDate();
-		Long time = strToLong2(oldValidEnd);
-		
 		param.put("plateNo", order.getPlateNumber());
 		param.put("flag", "2");
 	    param.put("amount", order.getPrice().intValue()*100);
@@ -375,23 +371,23 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			LOGGER.debug("Result={}, param={}", json, param);
         
         WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
-//		
-//		return entity.isSuccess();
-		JSONObject jsonObject = JSONObject.parseObject(json);
-		Object obj = jsonObject.get("errorCode");
-		if(null != obj ) {
-			int resCode = (int) obj;
-			if(resCode == 0)
-				return true;
-			
-		}
-		return false;
+		return entity.isSuccess();
+		
+//		JSONObject jsonObject = JSONObject.parseObject(json);
+//		Object obj = jsonObject.get("errorCode");
+//		if(null != obj ) {
+//			int resCode = (int) obj;
+//			if(resCode == 0)
+//				return true;
+//			
+//		}
+//		return false;
     }
 	
 	private boolean payTempCardFee(ParkingRechargeOrder order){
 
 		JSONObject param = new JSONObject();
-//		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
+
 		param.put("orderNo", order.getOrderToken());
 		param.put("amount", order.getPrice().intValue() * 100);
 	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
@@ -400,18 +396,18 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
-//		
-//		return entity.isSuccess();
-        JSONObject jsonObject = JSONObject.parseObject(json);
-		Object obj = jsonObject.get("errorCode");
-		if(null != obj ) {
-			int resCode = (int) obj;
-			if(resCode == 0)
-				return true;
-			
-		}
-		return false;
+        WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
+		return entity.isSuccess();
+		
+//        JSONObject jsonObject = JSONObject.parseObject(json);
+//		Object obj = jsonObject.get("errorCode");
+//		if(null != obj ) {
+//			int resCode = (Integer) obj;
+//			if(resCode == 0)
+//				return true;
+//			
+//		}
+//		return false;
     }
 
 	private boolean recharge(ParkingRechargeOrder order){
@@ -420,7 +416,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return payTempCardFee(order);
     }
 	
-	public static String postToWanke(JSONObject param, String type) {
+	public String postToWanke(JSONObject param, String type) {
 		HttpPost httpPost = new HttpPost("http://122.224.250.35:7021" + type);
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String json = null;
@@ -434,6 +430,8 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			
 			int status = response.getStatusLine().getStatusCode();
 			
+			if(LOGGER.isDebugEnabled())
+				LOGGER.debug("Data from wanke, status={}, param={}", status, param);
 			if(status == HttpStatus.SC_OK) {
 				HttpEntity entity = response.getEntity();
 				
@@ -459,36 +457,6 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return json;
 	}
 	
-	private Timestamp addDays(Long oldPeriod, int days) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		calendar.add(Calendar.DATE, days);
-		Timestamp time = new Timestamp(calendar.getTimeInMillis());
-		
-		return time;
-	}
-	
-	private Timestamp addMonth(Long oldPeriod, int month) {
-		
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTimeInMillis(oldPeriod);
-		
-		int day = calendar.get(Calendar.DAY_OF_MONTH); 
-		if(day == calendar.getActualMaximum(Calendar.DAY_OF_MONTH)){
-			calendar.add(Calendar.MONTH, month);
-			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}else{
-			calendar.add(Calendar.MONTH, month);
-//			int d = calendar.getActualMaximum(Calendar.DAY_OF_MONTH);
-//			calendar.set(Calendar.DAY_OF_MONTH, d);
-		}
-		
-		Timestamp newPeriod = new Timestamp(calendar.getTimeInMillis());
-		
-		return newPeriod;
-	}
-
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
 		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
@@ -529,12 +497,10 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		if(null == tempFee)
 			return dto;
 		dto.setPlateNumber(plateNumber);
-		dto.setEntryTime(strToLong(tempFee.getEntryTime()));
-		dto.setPayTime(strToLong(tempFee.getPayTime()));
-		dto.setParkingTime(tempFee.getElapsedTime());
-		dto.setDelayTime(tempFee.getDelayTime());
-		dto.setPrice(new BigDecimal(tempFee.getPayable() / 100));
-//		dto.setPrice(new BigDecimal(0.02).setScale(2, RoundingMode.FLOOR));
+		dto.setEntryTime(strToLong3(tempFee.getEntryTime()));
+		dto.setParkingTime(Integer.valueOf(tempFee.getParkingTime()));
+		dto.setDelayTime(Integer.valueOf(tempFee.getDelayTime()));
+		dto.setPrice(new BigDecimal(Integer.valueOf(tempFee.getAmount()) / 100));
 		dto.setOrderToken(tempFee.getOrderNo());
 		return dto;
 	}
@@ -554,5 +520,44 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+	
+	/**
+	 * 获取加密后的字符串
+	 * @param input
+	 * @return
+	 */
+	private String stringMD5(String pw) {
+		try {  
+			// 拿到一个MD5转换器（如果想要SHA1参数换成”SHA1”）  
+			MessageDigest messageDigest =MessageDigest.getInstance("MD5");  
+			// 输入的字符串转换成字节数组  
+			byte[] inputByteArray = pw.getBytes();  
+			// inputByteArray是输入字符串转换得到的字节数组  
+			messageDigest.update(inputByteArray);  
+			// 转换并返回结果，也是字节数组，包含16个元素  
+			byte[] resultByteArray = messageDigest.digest();  
+			// 字符数组转换成字符串返回  
+			return byteArrayToHex(resultByteArray);  
+		} catch (NoSuchAlgorithmException e) {  
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Xianluobo encrypt error");
+		}  
+	}
+
+	private String byteArrayToHex(byte[] byteArray) {  
+       
+		// 首先初始化一个字符数组，用来存放每个16进制字符  
+		char[] hexDigits = {'0','1','2','3','4','5','6','7','8','9', 'A','B','C','D','E','F' };  
+		// new一个字符数组，这个就是用来组成结果字符串的（解释一下：一个byte是八位二进制，也就是2位十六进制字符（2的8次方等于16的2次方））  
+		char[] resultCharArray =new char[byteArray.length * 2];  
+		// 遍历字节数组，通过位运算（位运算效率高），转换成字符放到字符数组中去  
+		int index = 0; 
+		for (byte b : byteArray) {  
+			resultCharArray[index++] = hexDigits[b>>> 4 & 0xf];  
+			resultCharArray[index++] = hexDigits[b& 0xf];  
+		}
+		// 字符数组组合成字符串返回  
+		return new String(resultCharArray);  
 	}
 }

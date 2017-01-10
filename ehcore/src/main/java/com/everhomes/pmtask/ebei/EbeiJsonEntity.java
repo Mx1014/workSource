@@ -1,6 +1,6 @@
 package com.everhomes.pmtask.ebei;
 
-public class EbeiResponseEntity<T> {
+public class EbeiJsonEntity<T> {
 	
 	static final int SUCCESS = 1;
 	static final int SUCCESS_CODE = 200;

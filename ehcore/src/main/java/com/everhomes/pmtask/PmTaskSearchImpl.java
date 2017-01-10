@@ -2,11 +2,9 @@ package com.everhomes.pmtask;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
@@ -33,22 +31,18 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
-import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.pmtask.PmTask;
 import com.everhomes.pmtask.PmTaskProvider;
-import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -74,7 +68,7 @@ public class PmTaskSearchImpl extends AbstractElasticSearch implements PmTaskSea
 	private XContentBuilder createDoc(PmTask task){
         try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
-            if(null != task.getAddressId())
+            
             b.field("address", task.getAddress());
             b.field("addressId", task.getAddressId());
             b.field("namespaceId", task.getNamespaceId());

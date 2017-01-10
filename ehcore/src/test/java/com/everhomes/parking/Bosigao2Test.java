@@ -1,12 +1,14 @@
-package com.bosigao2;
+package com.everhomes.parking;
 
 import java.util.HashMap;
 import java.util.Map;
 
+import com.bosigao2.ParkWebService;
+import com.bosigao2.ParkWebServiceSoap;
 import com.everhomes.util.StringHelper;
 
 
-public class Test {
+public class Bosigao2Test {
 	static ParkWebService service = new ParkWebService();
 	static ParkWebServiceSoap port = service.getParkWebServiceSoap();
 	public static void main(String[] args) {

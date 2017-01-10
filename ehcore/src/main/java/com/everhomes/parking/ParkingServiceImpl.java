@@ -56,6 +56,8 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
@@ -179,6 +181,8 @@ public class ParkingServiceImpl implements ParkingService {
     private UserService userService;
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -575,6 +579,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
+		
 		return createParkingOrder(param, ParkingRechargeType.TEMPORARY.getCode());
 
 	}
@@ -590,6 +595,12 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getPayerEnterpriseId());
+		if(null != organizationMember) {
+			if(null == cmd.getPlateOwnerName())
+				cmd.setPlateOwnerName(organizationMember.getContactName());
+		}
 		
 		parkingRechargeOrder.setRechargeType(rechargeType);
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
@@ -619,11 +630,11 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setPrice(cmd.getPrice());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {
     		ParkingTempFeeDTO dto = handler.getParkingTempFee(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getParkingLotId(), cmd.getPlateNumber());
-			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
-				LOGGER.error("Overdue fees, cmd={}", cmd);
-				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
-						"Overdue fees");
-			}
+//			if(null != dto && null != dto.getPrice() && !dto.getPrice().equals(cmd.getPrice())) {
+//				LOGGER.error("Overdue fees, cmd={}", cmd);
+//				throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_TEMP_FEE,
+//						"Overdue fees");
+//			}
 			parkingRechargeOrder.setOrderToken(dto.getOrderToken());
 		}
     	//查询rate
