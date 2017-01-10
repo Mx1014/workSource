@@ -21,6 +21,7 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
 import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
@@ -31,7 +32,6 @@ import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
 import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
-import com.everhomes.rest.equipment.FindEquipmentByTokenCommand;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.InspectionItemDTO;
 import com.everhomes.rest.equipment.InspectionTemplateDTO;
@@ -53,7 +53,6 @@ import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
-import com.everhomes.rest.equipment.CreatEquipmentStandardCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.SearchEquipmentsResponse;
@@ -964,12 +963,12 @@ public class EquipmentController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /equipment/findInspectionObjectByToken</b>
+	 * <b>URL: /equipment/getInspectionObjectByQRCode</b>
 	 * <p>扫码查看巡检对象</p>
 	 */
-	@RequestMapping("findInspectionObjectByToken")
+	@RequestMapping("getInspectionObjectByQRCode")
 	@RestReturn(value = EquipmentsDTO.class)
-	public RestResponse findEquipmentByToken(FindEquipmentByTokenCommand cmd) {
+	public RestResponse getInspectionObjectByQRCode(GetInspectionObjectByQRCodeCommand cmd) {
 		
 //		EquipmentsDTO equipment = equipmentService.findEquipmentByToken(cmd);
 		
@@ -989,7 +988,7 @@ public class EquipmentController extends ControllerBase {
 		
 		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories();
 		
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(categories);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

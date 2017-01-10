@@ -185,7 +185,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -528,6 +530,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -579,6 +582,7 @@ import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.EquipmentAccessoryMapDTO;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
+import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentQrCodeTokenDTO;
@@ -3467,6 +3471,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		response.setTasks(dtos);
 				
 		return response;
+	}
+
+	@Override
+	public List<EquipmentInspectionCategoryDTO> listEquipmentInspectionCategories() {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }
