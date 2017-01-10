@@ -262,3 +262,16 @@ delete from eh_web_menu_scopes where menu_id = 20192 and owner_id = 1000000;
 delete from eh_service_alliance_jump_module where id = 1;
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (3, 999983, '投诉建议', 'zl://propertyrepair/create?type=user&taskCategoryId=202564&displayName=投诉建议');
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES (4, 999983, '物业报修', 'zl://propertyrepair/create?type=user&taskCategoryId=202565&displayName=物业报修');
+
+-- 科技园更新物业报修 add by sw 2017/01/10
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('20158', '工作流设置', '20155', NULL, 'react:/working-flow/flow-list/property-service/20100', '0', '2', '/20000/20100/20155/20158', 'park', '230', NULL);
+
+delete from eh_web_menu_scopes where menu_id = 20160 and owner_id = 1000000;
+delete from eh_web_menu_scopes where menu_id = 20192 and owner_id = 1000000;
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20158, '', 'EhNamespaces', 1000000, 2);
+
+update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修"}' where namespace_id= 1000000 and item_label = '物业报修';
+
