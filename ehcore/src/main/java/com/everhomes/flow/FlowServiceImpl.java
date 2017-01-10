@@ -2089,6 +2089,11 @@ public class FlowServiceImpl implements FlowService {
 				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())
 						&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode()) ) {
 					FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
+					FlowStepType stepType = FlowStepType.fromCode(b.getFlowStepType());
+					if(stepType == FlowStepType.REMINDER_STEP) {
+						btnDTO.setNeedSubject((byte)0);
+					}
+					
 					btnDTOS.add(btnDTO);
 				}
 			});
