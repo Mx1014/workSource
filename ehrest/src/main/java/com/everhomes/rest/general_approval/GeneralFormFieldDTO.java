@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>fieldDisplayName: 显示的字段名字</li>
  * <li>fieldDesc: 提示文案</li>
  * <li>fieldExtra: 不同的字段类型，还有额外的数据信息。
+ * 数字类型：{@link com.everhomes.rest.general_approval.GeneralFormNumDTO}
  * 文本类型：{@link com.everhomes.rest.general_approval.GeneralFormTextDTO}
  * 图片类型：{@link com.everhomes.rest.general_approval.GeneralFormImageDTO}
  * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO.java}
