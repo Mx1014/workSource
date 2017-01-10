@@ -32,6 +32,7 @@ import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowButtonStatus;
 import com.everhomes.rest.flow.FlowReferType;
+import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
 import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
@@ -133,7 +134,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			FlowCase flowCase = null;
 			if(null == flow) {
 				// 给他一个默认哑的flow
-				flowCase = flowService.createDumpFlowCase(ga, cmd21);
+				GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
+				flowCase = flowService.createDumpFlowCase(gm, cmd21);
 			} else {
 				cmd21.setFlowMainId(flow.getFlowMainId());
 				cmd21.setFlowVersion(flow.getFlowVersion());

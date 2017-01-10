@@ -1746,7 +1746,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
-	public FlowCase createDumpFlowCase(GeneralApproval ga, CreateFlowCaseCommand flowCaseCmd) {
+	public FlowCase createDumpFlowCase(GeneralModuleInfo ga, CreateFlowCaseCommand flowCaseCmd) {
 		FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
 		flowCase.setCurrentNodeId(0l);
 		if(flowCase.getApplyUserId() == null) {
