@@ -13,6 +13,9 @@ import com.everhomes.rest.approval.CreateApprovalCategoryRestResponse;
 import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
 import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
+import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
+import com.everhomes.rest.general_approval.GeneralApprovalDTO;
+import com.everhomes.rest.general_approval.GeneralApprovalSupportType;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
@@ -20,6 +23,7 @@ import com.everhomes.rest.general_approval.ListApprovalFormsCommand;
 import com.everhomes.rest.general_approval.ListGeneralFormResponse;
 import com.everhomes.rest.general_approval.UpdateApprovalFormCommand;
 import com.everhomes.rest.general_approval.admin.General_approvalCreateApprovalFormRestResponse;
+import com.everhomes.rest.general_approval.admin.General_approvalCreateGeneralApprovalRestResponse;
 import com.everhomes.rest.general_approval.admin.General_approvalGetApprovalFormRestResponse;
 import com.everhomes.rest.general_approval.admin.General_approvalListApprovalFormsRestResponse;
 import com.everhomes.rest.general_approval.admin.General_approvalUpdateApprovalFormRestResponse;
@@ -39,8 +43,10 @@ public class GeneralApprovalTest extends BaseLoginAuthTestCase {
 	private static final String DELETEGENERALAPPROVAL_URL = "/admin/general_approval/deleteGeneralApproval";
 
 	private Long moduleId = 40500L;
-	private Long ownerId = 1000750L;
-	private String ownerType = "EhOrganizations";
+	private Long ownerId = 12021L;
+	private String ownerType = "COMMUNITY";
+	private Long projectId = 12021L;
+	private String projectType = "COMMUNITY";
 	private String moduleType = FlowModuleType.NO_MODULE.getCode();
 	private Long organizationId = 1000750L;
 
@@ -111,7 +117,7 @@ public class GeneralApprovalTest extends BaseLoginAuthTestCase {
 		return response.getResponse();
 	}
 
-	public ListGeneralFormResponse listApprovalForm(Long id ){
+	public ListGeneralFormResponse listApprovalForm(){
 
 		ListApprovalFormsCommand cmd = new ListApprovalFormsCommand(); 
 		cmd.setOwnerId(ownerId);
@@ -123,13 +129,38 @@ public class GeneralApprovalTest extends BaseLoginAuthTestCase {
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 		return response.getResponse();
 	}
+	
+	public GeneralApprovalDTO testCreateGeneralApproval(Long formid) {
+		 
+		CreateGeneralApprovalCommand cmd = new CreateGeneralApprovalCommand();
+		cmd.setModuleId(moduleId);
+		cmd.setModuleType(moduleType);
+		cmd.setOrganizationId(organizationId);
+		cmd.setOwnerId(ownerId);
+		cmd.setOwnerType(ownerType);
+		cmd.setProjectType(projectType);
+		cmd.setProjectId(projectId);
+		cmd.setApprovalName("shenpi");
+		cmd.setFormOriginId(formid);
+		cmd.setSupportType(GeneralApprovalSupportType.APP_AND_WEB.getCode());
+		
+		String url = CREATEAPPROVALFORM_URL;
+		General_approvalCreateGeneralApprovalRestResponse response= httpClientService.restPost(url , cmd, General_approvalCreateGeneralApprovalRestResponse.class);
+		assertNotNull(response);
+		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		return response.getResponse();
+	}
+
 	@Test
 	public void test1(){
 		logon();
 		GeneralFormDTO dto1 = testCreateApprovalForm();
 		GeneralFormDTO dto2 = testUpdateApprovalForm(dto1.getFormOriginId());
 		GeneralFormDTO dto3 = testGetApprovalForm(dto1.getFormOriginId());
-		
+		testCreateApprovalForm();
+		testCreateApprovalForm();
+		testCreateApprovalForm();
+		ListGeneralFormResponse listGeneralFormResponse = listApprovalForm();
 		
 	}
 	private DSLContext context() {

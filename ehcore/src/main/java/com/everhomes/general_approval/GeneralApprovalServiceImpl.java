@@ -31,6 +31,7 @@ import com.everhomes.rentalv2.Rentalv2Controller;
 import com.everhomes.rest.approval.ApprovalExceptionContent;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowButtonStatus;
+import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.general_approval.ApprovalFormIdCommand;
@@ -120,7 +121,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 				this.generalFormProvider.updateGeneralForm(form);
 			}
 			Flow flow = flowService.getEnabledFlow(ga.getNamespaceId(), ga.getModuleId(),
-					ga.getModuleType(), ga.getOwnerId(), ga.getOwnerType());
+					ga.getModuleType(), ga.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
 
 			CreateFlowCaseCommand cmd21 = new CreateFlowCaseCommand();
 			cmd21.setApplyUserId(userId);
