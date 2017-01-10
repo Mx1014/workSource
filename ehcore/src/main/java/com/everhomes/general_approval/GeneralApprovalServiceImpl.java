@@ -151,6 +151,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			}
 			
 			GetTemplateByApprovalIdResponse response =  ConvertHelper.convert(ga, GetTemplateByApprovalIdResponse.class);
+			response.setFlowCaseId(flowCase.getId());
 			List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
 			fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 			response.setFormFields(fieldDTOs);
