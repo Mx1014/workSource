@@ -47,4 +47,9 @@ public interface FlowEventLogProvider {
 	 */
 	List<FlowEventLog> findStepEventLogs(Long caseId, Long stepCount);
 
+	/* 获取处理的事件 */
+	FlowEventLog getValidEnterStep(Long userId, FlowCase flowCase);
+
+	void updateFlowEventLogs(List<FlowEventLog> updateLogs);
+
 }

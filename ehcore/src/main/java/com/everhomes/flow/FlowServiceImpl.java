@@ -565,7 +565,9 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.APPLIER.getCode());
 		List<FlowButtonDTO> dtos1 = new ArrayList<FlowButtonDTO>();
 		buttons.stream().forEach((fb) ->{
-			dtos1.add(ConvertHelper.convert(fb, FlowButtonDTO.class));
+			if(!fb.getFlowStepType().equals(FlowStepType.EVALUATE_STEP.getCode())) {
+				dtos1.add(ConvertHelper.convert(fb, FlowButtonDTO.class));	
+			}
 		});
 		
 		List<FlowButtonDTO> dtos2 = new ArrayList<FlowButtonDTO>();
@@ -1744,7 +1746,7 @@ public class FlowServiceImpl implements FlowService {
 	}
 	
 	@Override
-	public FlowCase createDumpFlowCase(GeneralApproval ga, CreateFlowCaseCommand flowCaseCmd) {
+	public FlowCase createDumpFlowCase(GeneralModuleInfo ga, CreateFlowCaseCommand flowCaseCmd) {
 		FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
 		flowCase.setCurrentNodeId(0l);
 		if(flowCase.getApplyUserId() == null) {
@@ -2021,6 +2023,10 @@ public class FlowServiceImpl implements FlowService {
 		if(stepType != FlowStepType.APPROVE_STEP && stepType != FlowStepType.TRANSFER_STEP) {
 			btnDTO.setNeedProcessor((byte)0);
 		}
+		if(stepType == FlowStepType.TRANSFER_STEP) {
+			/* force use processor */
+			btnDTO.setNeedProcessor((byte)1);
+		}
 		
 		return btnDTO;
 	}
@@ -2080,8 +2086,14 @@ public class FlowServiceImpl implements FlowService {
 		} else if(flowUserType == FlowUserType.APPLIER) {
 			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
 			buttons.stream().forEach((b)->{
-				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
+				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())
+						&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode()) ) {
 					FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
+					FlowStepType stepType = FlowStepType.fromCode(b.getFlowStepType());
+					if(stepType == FlowStepType.REMINDER_STEP) {
+						btnDTO.setNeedSubject((byte)0);
+					}
+					
 					btnDTOS.add(btnDTO);
 				}
 			});
@@ -2347,7 +2359,26 @@ public class FlowServiceImpl implements FlowService {
 		if(cmd.getFlowUserType() == null) {
 			cmd.setFlowUserType(FlowUserType.PROCESSOR.getCode());
 		}
-		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowNode.getId(), FlowEntityType.FLOW_NODE.getCode(), cmd.getFlowUserType());
+		FlowNode nextNode = null;
+		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowNode.getFlowMainId(), flowNode.getFlowVersion());
+		Map<Long, FlowNode> nodeMap = new HashMap<Long, FlowNode>();
+		for(int i = 0; i < nodes.size(); i++) {
+			FlowNode node = nodes.get(i);
+			if(flowNode.getId().equals(node.getId())) {
+				if((i+1) < nodes.size()) {
+					nextNode = nodes.get(i+1);
+				}
+			}
+			nodeMap.put(node.getId(), node);
+		}
+		if(btn.getGotoNodeId() != null && nodeMap.containsKey(btn.getGotoNodeId())) {
+			nextNode = nodeMap.get(btn.getGotoNodeId());
+		}
+		if(nextNode == null) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "next node not exists");
+		}
+		
+		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(nextNode.getId(), FlowEntityType.FLOW_NODE.getCode(), cmd.getFlowUserType());
 		if(seles != null) {
 			seles.forEach((s) -> {
 				FlowUserSelectionDTO dto = ConvertHelper.convert(s, FlowUserSelectionDTO.class);
@@ -2623,6 +2654,8 @@ public class FlowServiceImpl implements FlowService {
 				ctx.getFlowCase().setLastStepTime(now);
 				flowCaseProvider.updateFlowCase(ctx.getFlowCase());
 				flowEventLogProvider.createFlowEventLogs(ctx.getLogs());	
+				
+				flowEventLogProvider.updateFlowEventLogs(ctx.getUpdateLogs());
 			} else {
 				throw new FlowStepBusyException("already step by others");
 			}
@@ -2833,7 +2866,7 @@ public class FlowServiceImpl implements FlowService {
 		graphDetail.setSupervisors(selections);
 		
 		List<FlowUserSelection> seles = flowUserSelectionProvider.findSelectionByBelong(flowId
-				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode());
+				, FlowEntityType.FLOW.getCode(), FlowUserType.SUPERVISOR.getCode(), 0);
 		if(seles != null && seles.size() > 0) {
 			seles.stream().forEach((sel) -> {
 				selections.add(ConvertHelper.convert(sel, FlowUserSelectionDTO.class));
