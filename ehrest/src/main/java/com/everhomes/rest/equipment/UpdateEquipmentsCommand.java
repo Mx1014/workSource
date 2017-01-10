@@ -38,6 +38,7 @@ import com.everhomes.util.StringHelper;
  *  <li>remarks: 备注</li>
  *  <li>eqAccessoryMap: 设备备品配件 参考{@link com.everhomes.rest.equipment.EquipmentAccessoryMapDTO}</li>
  *  <li>eqStandardMap: 设备-标准关联 参考{@link com.everhomes.rest.equipment.EquipmentStandardMapDTO}</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
  * </ul>
  */
 public class UpdateEquipmentsCommand {
@@ -102,6 +103,16 @@ public class UpdateEquipmentsCommand {
     private List<EquipmentStandardMapDTO> eqStandardMap;
     
     private String remarks;
+
+    private Long inspectionCategoryId;
+	
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
     
     public Long getId() {
 		return id;

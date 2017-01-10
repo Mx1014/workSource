@@ -21,13 +21,17 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
+import com.everhomes.rest.equipment.CountTasksCommand;
+import com.everhomes.rest.equipment.CountTasksResponse;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
+import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.FindEquipmentByTokenCommand;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.InspectionItemDTO;
 import com.everhomes.rest.equipment.InspectionTemplateDTO;
@@ -39,6 +43,7 @@ import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListTasksByTokenCommand;
+import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -953,6 +958,70 @@ public class EquipmentController extends ControllerBase {
 		ListEquipmentTasksResponse tasks = equipmentService.listTasksByToken(cmd);
 		
 		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/findInspectionObjectByToken</b>
+	 * <p>扫码查看巡检对象</p>
+	 */
+	@RequestMapping("findInspectionObjectByToken")
+	@RestReturn(value = EquipmentsDTO.class)
+	public RestResponse findEquipmentByToken(FindEquipmentByTokenCommand cmd) {
+		
+//		EquipmentsDTO equipment = equipmentService.findEquipmentByToken(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listEquipmentInspectionCategories</b>
+	 * <p>查看巡检对象类型</p>
+	 */
+	@RequestMapping("listEquipmentInspectionCategories")
+	@RestReturn(value = EquipmentInspectionCategoryDTO.class, collection = true)
+	public RestResponse listEquipmentInspectionCategories() {
+		
+//		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories();
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /equipment/listUserHistoryTasks</b>
+	 * <p>个人执行过的历史任务</p>
+	 */
+	@RequestMapping("listUserHistoryTasks")
+	@RestReturn(value = ListEquipmentTasksResponse.class)
+	public RestResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd) {
+		
+//		ListEquipmentTasksResponse tasks = equipmentService.listUserHistoryTasks(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/countTasks</b>
+	 * <p>任务数统计</p>
+	 */
+	@RequestMapping("countTasks")
+	@RestReturn(value = CountTasksResponse.class)
+	public RestResponse countTasks(CountTasksCommand cmd) {
+		
+//		CountTasksResponse tasks = equipmentService.countTasks(cmd);
+		
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

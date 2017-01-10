@@ -7,39 +7,38 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>ownerId: 任务所属组织等的id</li>
- *  <li>ownerType: 任务所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
- *  <li>targetId: 任务所属管理处id</li>
- *  <li>targetType: 任务所属管理处类型</li>
+ *  <li>ownerType: 任务所属组织类型，如enterprise</li>
+ *  <li>targetId: 任务所属项目等的id</li>
+ *  <li>targetType: 任务所属项目类型，如community</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>startTime: 起始月份  </li>
+ *  <li>endTime: 截止月份  </li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
- *  <li>inspectionCategoryId: 巡检对象类型id</li>
  * </ul>
  */
-public class ListEquipmentTasksCommand {
+public class CountTasksCommand {
+
 	@NotNull
 	private Long ownerId;
 	
 	@NotNull
 	private String ownerType;
-
+	
 	private Long targetId;
 	
 	private String targetType;
 	
+	private Long inspectionCategoryId; 
+	
+	private Long startTime;
+	
+	private Long endTime;
+	
 	private Long pageAnchor;
 	
 	private Integer pageSize;
-	
-	private Long inspectionCategoryId;
-	
-	public Long getInspectionCategoryId() {
-		return inspectionCategoryId;
-	}
 
-	public void setInspectionCategoryId(Long inspectionCategoryId) {
-		this.inspectionCategoryId = inspectionCategoryId;
-	}
-	
 	public Long getOwnerId() {
 		return ownerId;
 	}
@@ -72,6 +71,30 @@ public class ListEquipmentTasksCommand {
 		this.targetType = targetType;
 	}
 
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
 	public Long getPageAnchor() {
 		return pageAnchor;
 	}
@@ -87,7 +110,7 @@ public class ListEquipmentTasksCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
