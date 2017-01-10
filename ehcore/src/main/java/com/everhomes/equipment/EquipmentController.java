@@ -987,7 +987,7 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = EquipmentInspectionCategoryDTO.class, collection = true)
 	public RestResponse listEquipmentInspectionCategories() {
 		
-//		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories();
+		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories();
 		
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);

@@ -14,7 +14,9 @@ import com.everhomes.util.StringHelper;
  *  <li>standardName: 标准名称</li>
  *  <li>taskCount: 任务总数</li>
  *  <li>toExecuted: 待巡检数</li>
+ *  <li>needMaintance: 需维修数</li>
  *  <li>inMaintance: 待维修数</li>
+ *  <li>delay: 延误数</li>
  *  <li>completeInspection: 巡检完成数</li>
  *  <li>completeMaintance: 维修完成数</li>
  *  <li>maintanceRate: 维修率</li>
@@ -42,7 +44,11 @@ public class TaskCountDTO {
 	
 	private Long toExecuted;
 	
+	private Long needMaintance;
+	
 	private Long inMaintance;
+	
+	private Long delay;
 	
 	private Long completeInspection;
 	
@@ -160,6 +166,22 @@ public class TaskCountDTO {
 
 	public void setMaintanceRate(Double maintanceRate) {
 		this.maintanceRate = maintanceRate;
+	}
+
+	public Long getNeedMaintance() {
+		return needMaintance;
+	}
+
+	public void setNeedMaintance(Long needMaintance) {
+		this.needMaintance = needMaintance;
+	}
+
+	public Long getDelay() {
+		return delay;
+	}
+
+	public void setDelay(Long delay) {
+		this.delay = delay;
 	}
 
 	@Override
