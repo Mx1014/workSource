@@ -2016,7 +2016,7 @@ public class FlowServiceImpl implements FlowService {
 		return getFlowCaseDetail(flowCaseId, inUserId, flowUserType, false);
 	}
 	
-	private FlowButtonDTO flowButtonToDTO(Flow snapshotFlow, FlowButton b) {
+	private FlowButtonDTO flowButtonToDTO(Flow snapshotFlow,  FlowButton b, Map<Long, FlowNode> nodeMap, int level) {
 		FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
 		
 		FlowStepType stepType = FlowStepType.fromCode(b.getFlowStepType());
@@ -2026,6 +2026,9 @@ public class FlowServiceImpl implements FlowService {
 		if(stepType == FlowStepType.TRANSFER_STEP) {
 			/* force use processor */
 			btnDTO.setNeedProcessor((byte)1);
+		}
+		if(stepType == FlowStepType.APPROVE_STEP && level >= nodeMap.size()-2 ) {
+			btnDTO.setNeedProcessor((byte)0);
 		}
 		
 		return btnDTO;
@@ -2051,9 +2054,20 @@ public class FlowServiceImpl implements FlowService {
 		
 		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		Map<Long, FlowNode> nodeMap = new HashMap<Long, FlowNode>();
+		int level = 0;
 		for(FlowNode node : nodes) {
 			nodeMap.put(node.getId(), node);
+			
+			if(!flowCase.getCurrentNodeId().equals(node.getId())) {
+				level++;
+			}
 		}
+		if(level == nodes.size()) {
+			//not found
+			level = 0;
+		}
+		final Integer nlevel = level;
+		
 		if(nodes.size() < 3) {
 			return dto;
 		}
@@ -2076,7 +2090,7 @@ public class FlowServiceImpl implements FlowService {
 
 						if(isAdd && b.getStatus().equals(FlowButtonStatus.ENABLED.getCode()) 
 								&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode())) {
-							FlowButtonDTO btnDTO = flowButtonToDTO(snapshotFlow, b);
+							FlowButtonDTO btnDTO = flowButtonToDTO(snapshotFlow, b, nodeMap, nlevel);
 							btnDTOS.add(btnDTO);
 						}
 					});
