@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ * <li>NUM_LIMIT: 数字限制</li>
  * <li>TEXT_LIMIT: 字符限制</li>
  * <li>IMAGE_COUNT_SIZE_LIMIT: 限制图片数，以及图片的大小</li>
  * <li>FILE_COUNT_SIZE_LIMIT: 限制文件数，以及文件的大小</li>
@@ -14,7 +15,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 public enum GeneralFormValidatorType {
-	TEXT_LIMIT("TEXT_LIMIT"), IMAGE_COUNT_SIZE_LIMIT("IMAGE_COUNT_SIZE_LIMIT"), FILE_COUNT_SIZE_LIMIT("FILE_COUNT_SIZE_LIMIT");
+	NUM_LIMIT("NUM_LIMIT"),TEXT_LIMIT("TEXT_LIMIT"), IMAGE_COUNT_SIZE_LIMIT("IMAGE_COUNT_SIZE_LIMIT"), FILE_COUNT_SIZE_LIMIT("FILE_COUNT_SIZE_LIMIT");
 	
 	private String code;
 	
