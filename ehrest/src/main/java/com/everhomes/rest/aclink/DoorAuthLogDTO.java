@@ -10,12 +10,12 @@ import java.sql.Timestamp;
  * <li>createUid：操作人用户id</li>
  * <li>createUname：操作人姓名</li>
  * <li>createUtoken：操作人手机号</li>
- * <li>description：操作描述</li>
+ * <li>discription：操作描述</li>
  * </ul>
  */
 public class DoorAuthLogDTO {
 
-    private String description;
+    private String discription;
 
     private Long createTime;
 
@@ -24,12 +24,12 @@ public class DoorAuthLogDTO {
     private String createUtoken;
 
 
-    public String getDescription() {
-        return description;
+    public String getDiscription() {
+        return discription;
     }
 
-    public void setDescription(String description) {
-        this.description = description;
+    public void setDiscription(String discription) {
+        this.discription = discription;
     }
 
     public Long getCreateTime() {

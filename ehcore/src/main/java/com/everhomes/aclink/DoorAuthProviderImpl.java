@@ -683,7 +683,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         locator.setAnchor(null);
         if(logs.size() > pageSize){
             logs.remove(logs.size() - 1);
-            locator.setAnchor(logs.get(logs.size() - 1).getId());
+            locator.setAnchor(logs.get(logs.size() - 1).getCreateTime().getTime());
         }
 
         return logs;

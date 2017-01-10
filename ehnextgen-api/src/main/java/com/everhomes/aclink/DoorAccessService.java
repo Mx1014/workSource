@@ -5,6 +5,8 @@ import java.util.List;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.aclink.*;
 
+import javax.servlet.http.HttpServletResponse;
+
 public interface DoorAccessService {
     public void onDoorMessageTimeout(Long cmdId);
 
@@ -114,5 +116,7 @@ public interface DoorAccessService {
     ListDoorAuthLogResponse listDoorAuthLogs(ListDoorAuthLogCommand cmd);
 
     DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd);
+
+    void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
 
 }

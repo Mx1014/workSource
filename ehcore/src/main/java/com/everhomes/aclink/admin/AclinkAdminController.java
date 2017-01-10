@@ -3,6 +3,7 @@ package com.everhomes.aclink.admin;
 import java.util.ArrayList;
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.aclink.*;
@@ -104,6 +105,20 @@ public class AclinkAdminController extends ControllerBase {
     public RestResponse listAclinkUsers(@Valid ListAclinkUserCommand cmd) {
 //        cmd.setIsOpenAuth((byte)0);
         RestResponse response = new RestResponse(doorAccessService.listAclinkUsers(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/exportAclinkUsersXls</b>
+     * <p>导出門禁授權用戶列表</p>
+     */
+    @RequestMapping("exportAclinkUsersXls")
+    @RestReturn(value=String.class)
+    public RestResponse exportAclinkUsersXls(@Valid ListAclinkUserCommand cmd, HttpServletResponse httpResponse) {
+        doorAccessService.exportAclinkUsersXls(cmd, httpResponse);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
@@ -461,5 +476,7 @@ public class AclinkAdminController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;
-    }       
+    }
+
+
 }

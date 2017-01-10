@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -18,9 +20,17 @@ import javax.crypto.Cipher;
 import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -74,10 +84,6 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -419,6 +425,94 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setUsers(userDTOs);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+
+    @Override
+    public void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response){
+        ByteArrayOutputStream out = null;
+        XSSFWorkbook wb = this.createXSSFWorkbook(cmd);
+        try {
+            out = new ByteArrayOutputStream();
+            wb.write(out);
+            DownloadUtil.download(out, response);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally{
+            try {
+                wb.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
+    }
+
+    /**
+     * 创建excel
+     * @param cmd
+     * @return
+     */
+    private XSSFWorkbook createXSSFWorkbook(ListAclinkUserCommand cmd){
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName = "门禁受权用户列表";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        XSSFRow row1 = sheet.createRow(rowNum ++);
+        row1.setRowStyle(style);
+        int cellN = 0;
+        row1.createCell(cellN ++).setCellValue("用户昵称");
+        row1.createCell(cellN ++).setCellValue("手机号");
+        row1.createCell(cellN ++).setCellValue("注册时间");
+        row1.createCell(cellN ++).setCellValue("认证状态");
+        row1.createCell(cellN ++).setCellValue("开门权限");
+        if(UserContext.getCurrentNamespaceId() != 999990L){
+            row1.createCell(cellN ++).setCellValue("访客授权权限");
+            row1.createCell(cellN ++).setCellValue("远程开门权限");
+        }
+        row1.createCell(cellN ++).setCellValue("真是姓名");
+        row1.createCell(cellN ++).setCellValue("公司");
+        row1.createCell(cellN ++).setCellValue("认证时间");
+
+        cmd.setPageSize(1000);
+        while (true){
+            AclinkUserResponse userRes = this.listAclinkUsers(cmd);
+            for (AclinkUserDTO user: userRes.getUsers()) {
+                cellN = 0;
+                XSSFRow row = sheet.createRow(rowNum ++);
+                row.setRowStyle(style);
+                row.createCell(cellN ++).setCellValue(user.getNickName());
+                row.createCell(cellN ++).setCellValue(user.getPhone());
+                row.createCell(cellN ++).setCellValue(com.everhomes.sms.DateUtil.dateToStr(new Date(user.getRegisterTime()), com.everhomes.sms.DateUtil.DATE_TIME_LINE));
+                row.createCell(cellN ++).setCellValue(user.getIsAuth() > 0 ? "已认证" : "未认证");
+                row.createCell(cellN ++).setCellValue(user.getRightOpen() > 0 ? "已受权" : "未受权");
+                if(UserContext.getCurrentNamespaceId() != 999990L){
+                    row.createCell(cellN ++).setCellValue(user.getRightVisitor() > 0 ? "已受权" : "未受权");
+                    row.createCell(cellN ++).setCellValue(user.getRightRemote() > 0 ? "已受权" : "未受权");
+                }
+                row.createCell(cellN ++).setCellValue(user.getUserName());
+                row.createCell(cellN ++).setCellValue(user.getCompany());
+                row.createCell(cellN ++).setCellValue(null != user.getAuthTime() ? com.everhomes.sms.DateUtil.dateToStr(new Date(user.getRegisterTime()), com.everhomes.sms.DateUtil.DATE_TIME_LINE) : "");
+            }
+
+            if(null == userRes.getNextPageAnchor()){
+                break;
+            }
+            cmd.setPageAnchor(userRes.getNextPageAnchor());
+        }
+
+        return wb;
     }
 
     @Override
