@@ -1,6 +1,6 @@
 -- general forms support
 -- 表单
-DROP TABLE IF EXISTS `eh_general_forms`;
+-- DROP TABLE IF EXISTS `eh_general_forms`;
 CREATE TABLE `eh_general_forms` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -8,8 +8,8 @@ CREATE TABLE `eh_general_forms` (
   `organization_id` BIGINT NOT NULL DEFAULT 0,
   `owner_id` BIGINT NOT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
-  `module_id` BIGINT NOT NULL COMMENT 'the module id',
-  `module_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT COMMENT 'the module id',
+  `module_type` VARCHAR(64) ,
 
   `form_name` VARCHAR(64) NOT NULL,
   `form_origin_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'The id of the original form',
@@ -17,9 +17,9 @@ CREATE TABLE `eh_general_forms` (
   `template_type` VARCHAR(128) NOT NULL COMMENT 'the type of template text',
   `template_text` TEXT COMMENT 'json 存放表单字段',
 
-  `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
-  `update_time` DATETIME NOT NULL COMMENT 'last update time',
-  `create_time` DATETIME NOT NULL COMMENT 'record create time',
+  `status` TINYINT NOT NULL  COMMENT 'invalid, config, running',
+  `update_time` DATETIME COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
 
   `string_tag1` VARCHAR(128),
   `string_tag2` VARCHAR(128),
@@ -44,8 +44,8 @@ CREATE TABLE `eh_general_approvals` (
   `owner_id` BIGINT NOT NULL,
   `owner_type` VARCHAR(64) NOT NULL,
   `organization_id` BIGINT NOT NULL DEFAULT 0,
-  `module_id` BIGINT NOT NULL COMMENT 'the module id',
-  `module_type` VARCHAR(64) NOT NULL,
+  `module_id` BIGINT DEFAULT 0 COMMENT 'the module id',
+  `module_type` VARCHAR(64)  ,
   `project_id` BIGINT NOT NULL DEFAULT 0,
   `project_type` VARCHAR(64),
 
@@ -55,8 +55,8 @@ CREATE TABLE `eh_general_approvals` (
   `approval_name` VARCHAR(128) NOT NULL,
 
   `status` TINYINT NOT NULL COMMENT 'invalid, config, running',
-  `update_time` DATETIME NOT NULL COMMENT 'last update time',
-  `create_time` DATETIME NOT NULL COMMENT 'record create time',
+  `update_time` DATETIME COMMENT 'last update time',
+  `create_time` DATETIME COMMENT 'record create time',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -83,7 +83,7 @@ CREATE TABLE `eh_general_approval_vals` (
   `field_int1` BIGINT NOT NULL DEFAULT 0,
   `field_int2` BIGINT NOT NULL DEFAULT 0,
   `field_int3` BIGINT NOT NULL DEFAULT 0,
-  `create_time` DATETIME NOT NULL COMMENT 'record create time',
+  `create_time` DATETIME COMMENT 'record create time',
 
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;

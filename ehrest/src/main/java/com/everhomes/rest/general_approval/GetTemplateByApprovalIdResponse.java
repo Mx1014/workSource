@@ -31,6 +31,7 @@ public class GetTemplateByApprovalIdResponse {
 	private Long formOriginId;
 	private Long formVersion;
 	private Byte status;
+    private Long flowCaseId;
 	private Timestamp updateTime;
 	private Timestamp createTime;
 	
@@ -172,4 +173,12 @@ public class GetTemplateByApprovalIdResponse {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
 }

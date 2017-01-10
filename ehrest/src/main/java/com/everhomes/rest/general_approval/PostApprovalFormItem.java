@@ -7,6 +7,7 @@ import com.everhomes.util.StringHelper;
  * <li>fieldType: 字段类型 {@link com.everhomes.rest.general_approval.GeneralFormFieldType}</li>
  * <li>fieldName: 字段名字</li>
  * <li>fieldValue: 提交的数据
+ * 数字值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 文本值：{@link com.everhomes.rest.general_approval.PostApprovalFormTextValue}
  * 图片值：{@link com.everhomes.rest.general_approval.PostApprovalFormImageValue}
  * 文件值：{@link com.everhomes.rest.general_approval.PostApprovalFormFileValue.java}
