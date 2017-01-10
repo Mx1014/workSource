@@ -406,6 +406,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 dto.setRightRemote(doorAuth.getRightRemote());
                 dto.setRightVisitor(doorAuth.getRightVisitor());
                 dto.setAuthId(doorAuth.getId());
+                dto.setAuthTime(doorAuth.getCreateTime().getTime());
             } else {
                 dto.setRightOpen((byte)0);
                 dto.setRightRemote((byte)0);
@@ -1404,6 +1405,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getName());
             dto.setPhone(auth.getPhone());
@@ -2181,6 +2183,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
         auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setValidFromMs(
+                System.currentTimeMillis()
+        );
+        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
         
         List<DoorAccess> childs = null;
         

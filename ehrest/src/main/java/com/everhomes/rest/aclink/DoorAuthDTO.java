@@ -29,6 +29,8 @@ public class DoorAuthDTO {
     private String address;
     private String authMethod;
 
+    private Long goFloor;
+
 
     public String getAddress() {
         return address;
@@ -233,6 +235,13 @@ public class DoorAuthDTO {
         this.authMethod = authMethod;
     }
 
+    public Long getGoFloor() {
+        return goFloor;
+    }
+
+    public void setGoFloor(Long goFloor) {
+        this.goFloor = goFloor;
+    }
 
     @Override
     public String toString() {

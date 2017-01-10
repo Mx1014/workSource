@@ -30,6 +30,7 @@ public class AclinkUserDTO {
     private String company;
     private Long registerTime;
     private Byte isAuth;
+    private Long authTime;
     
     public Long getId() {
         return id;
@@ -125,5 +126,13 @@ public class AclinkUserDTO {
 
     public void setIsAuth(Byte isAuth) {
         this.isAuth = isAuth;
+    }
+
+    public Long getAuthTime() {
+        return authTime;
+    }
+
+    public void setAuthTime(Long authTime) {
+        this.authTime = authTime;
     }
 }
