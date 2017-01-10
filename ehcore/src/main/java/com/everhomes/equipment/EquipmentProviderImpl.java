@@ -72,6 +72,7 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplates;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoriesRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoryMapRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionCategoriesRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentParametersRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentStandardMapRecord;
@@ -1457,6 +1458,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		if(result.size()==0)
 			return null;
 		return result.get(0);
+	}
+
+	@Override
+	public List<EquipmentInspectionCategories> listEquipmentInspectionCategories(
+			Long ownerId, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionCategoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
+		 
+		List<EquipmentInspectionCategories> result = new ArrayList<EquipmentInspectionCategories>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, EquipmentInspectionCategories.class));
+			return null;
+		});
+		return result;
 	}
 
 }

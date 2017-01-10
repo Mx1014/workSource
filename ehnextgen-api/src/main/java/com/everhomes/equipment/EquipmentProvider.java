@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 
 
 public interface EquipmentProvider {
@@ -95,4 +96,6 @@ public interface EquipmentProvider {
 	void closeTask(EquipmentInspectionTasks task);
 	
 	EquipmentInspectionEquipments findEquipmentByQrCodeToken(String qrCodeToken);
+	
+	List<EquipmentInspectionCategories> listEquipmentInspectionCategories(Long ownerId, Integer namespaceId);
 }

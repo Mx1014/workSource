@@ -22,6 +22,7 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
+import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
 import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
@@ -984,9 +985,9 @@ public class EquipmentController extends ControllerBase {
 	 */
 	@RequestMapping("listEquipmentInspectionCategories")
 	@RestReturn(value = EquipmentInspectionCategoryDTO.class, collection = true)
-	public RestResponse listEquipmentInspectionCategories() {
+	public RestResponse listEquipmentInspectionCategories(ListEquipmentInspectionCategoriesCommand cmd) {
 		
-		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories();
+		List<EquipmentInspectionCategoryDTO> categories = equipmentService.listEquipmentInspectionCategories(cmd);
 		
 		RestResponse response = new RestResponse(categories);
 		response.setErrorCode(ErrorCodes.SUCCESS);

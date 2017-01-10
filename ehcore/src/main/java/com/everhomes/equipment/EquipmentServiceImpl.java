@@ -186,7 +186,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -531,6 +535,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -607,6 +613,7 @@ import com.everhomes.rest.equipment.InspectionItemResult;
 import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.rest.equipment.InspectionTemplateDTO;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
 import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
 import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
@@ -3474,9 +3481,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public List<EquipmentInspectionCategoryDTO> listEquipmentInspectionCategories() {
-		// TODO Auto-generated method stub
-		return null;
+	public List<EquipmentInspectionCategoryDTO> listEquipmentInspectionCategories(ListEquipmentInspectionCategoriesCommand cmd) {
+		List<EquipmentInspectionCategories> categories = equipmentProvider.listEquipmentInspectionCategories(cmd.getOwnerId(), UserContext.getCurrentNamespaceId());
+		List<EquipmentInspectionCategoryDTO> dtos = new ArrayList<EquipmentInspectionCategoryDTO>();
+		if(categories != null && categories.size() > 0) {
+			dtos = categories.stream().map(r -> {
+				EquipmentInspectionCategoryDTO dto = ConvertHelper.convert(r, EquipmentInspectionCategoryDTO.class);
+				return dto;
+			}).collect(Collectors.toList());
+		}
+		
+		return dtos;
 	}
 
 }

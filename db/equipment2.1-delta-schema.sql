@@ -2,7 +2,7 @@ DROP TABLE IF EXISTS `eh_equipment_inspection_categories`;
 CREATE TABLE `eh_equipment_inspection_categories` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
-  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, community, etc',
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, enterprise, etc',
   `owner_id` BIGINT NOT NULL DEFAULT 0,
   `parent_id` BIGINT NOT NULL DEFAULT 0,
   `name` VARCHAR(64) NOT NULL,
