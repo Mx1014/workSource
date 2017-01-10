@@ -14,6 +14,8 @@ public interface DoorAuthProvider {
 
     Long createDoorAuth(DoorAuth obj);
 
+    Long createDoorAuthLog(DoorAuthLog log);
+
     void updateDoorAuth(DoorAuth obj);
 
     void deleteDoorAuth(DoorAuth obj);
@@ -51,4 +53,8 @@ public interface DoorAuthProvider {
     List<User> listDoorAuthByOrganizationId(Long organizationId, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize);
 
     List<User> listDoorAuthByIsAuth(Byte isAuth, Byte isOpenAuth, Long doorId, CrossShardListingLocator locator, int pageSize, Integer namespaceId);
+
+    List<DoorAuthLog> listDoorAuthLogsByUserId(CrossShardListingLocator locator, int pageSize, Long userId, Long doorId);
+
+    Long countDoorAuthUser(Byte isAuth, Byte isOpenAuth, Long doorId, Integer namespaceId, Byte rightType);
 }

@@ -110,4 +110,9 @@ public interface DoorAccessService {
 	void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId);
 
     ListDoorAuthResponse createAllDoorAuthList(AclinkCreateAllDoorAuthListCommand cmd);
+
+    ListDoorAuthLogResponse listDoorAuthLogs(ListDoorAuthLogCommand cmd);
+
+    DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd);
+
 }

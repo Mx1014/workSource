@@ -334,7 +334,21 @@ public class AclinkAdminController extends ControllerBase {
     @RequestMapping("listDoorAuthLogs")
     @RestReturn(value=ListDoorAuthLogResponse.class)
     public RestResponse listDoorAuthLogs(@Valid ListDoorAuthLogCommand cmd) {
-        RestResponse response = new RestResponse();
+        RestResponse response = new RestResponse(doorAccessService.listDoorAuthLogs(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <b>URL: /admin/aclink/qryDoorAuthStatistics</b>
+     * <p>授权用户统计</p>
+     * @return
+     */
+    @RequestMapping("qryDoorAuthStatistics")
+    @RestReturn(value=DoorAuthStatisticsDTO.class)
+    public RestResponse qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd) {
+        RestResponse response = new RestResponse(doorAccessService.qryDoorAuthStatistics(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

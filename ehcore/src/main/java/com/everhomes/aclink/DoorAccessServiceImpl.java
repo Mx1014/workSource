@@ -20,6 +20,7 @@ import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
 import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.user.IdentifierType;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -375,6 +376,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
 
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         List<User> users = null;
+        if(!StringUtils.isEmpty(cmd.getKeyword())){
+            users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+        }else if(null != cmd.getOrganizationId()){
+            users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
+        }else{
+            users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize, namespaceId);
+        }
+
         List<AclinkUserDTO> userDTOs = new ArrayList<>();
 
         for (User user: users) {
@@ -409,6 +418,53 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setUsers(userDTOs);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+
+    @Override
+    public DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd){
+        DoorAuthStatisticsDTO dto = new DoorAuthStatisticsDTO();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long utn = doorAuthProvider.countDoorAuthUser(null, null, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long autn = doorAuthProvider.countDoorAuthUser(null, (byte)1, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long uautn = doorAuthProvider.countDoorAuthUser(null, (byte)0, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long acutn = doorAuthProvider.countDoorAuthUser((byte)1, (byte)1, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long aucutn = doorAuthProvider.countDoorAuthUser((byte)0, (byte)1, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long uacutn = doorAuthProvider.countDoorAuthUser((byte)1, (byte)0, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long uaucutn = doorAuthProvider.countDoorAuthUser((byte)0, (byte)0, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        dto.setUtn(utn);
+        dto.setAutn(autn);
+        dto.setUautn(uautn);
+        dto.setAcutn(acutn);
+        dto.setAucutn(aucutn);
+        dto.setUacutn(uacutn);
+        dto.setUaucutn(uaucutn);
+        return dto;
+    }
+
+    @Override
+    public ListDoorAuthLogResponse listDoorAuthLogs(ListDoorAuthLogCommand cmd){
+        ListDoorAuthLogResponse res = new ListDoorAuthLogResponse();
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuthLogDTO> dtos = new ArrayList<>();
+        List<DoorAuthLog> logs = doorAuthProvider.listDoorAuthLogsByUserId(locator, pageSize, cmd.getUserId(), cmd.getDoorId());
+        for (DoorAuthLog log: logs) {
+            DoorAuthLogDTO dto = ConvertHelper.convert(log, DoorAuthLogDTO.class);
+            dto.setCreateTime(log.getCreateTime().getTime());
+            User user = userProvider.findUserById(log.getCreateUid());
+            if(null != user){
+                dto.setCreateUname(user.getNickName());
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+                if(null != identifier){
+                    dto.setCreateUtoken(identifier.getIdentifierToken());
+                }
+            }
+            dtos.add(dto);
+        }
+        res.setDtos(dtos);
+        res.setNextPageAnchor(locator.getAnchor());
+        return res;
     }
 
     /**
@@ -522,7 +578,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             rlt.setDoorName(doorAcc.getName());
             rlt.setHardwareId(doorAcc.getHardwareId());
         }
-        
+
+        // 记录操作日志
+        this.createDoorAuthLog(doorAuth);
+
         User tmpUser = new User();
         tmpUser.setId(user.getId());
         tmpUser.setAccountName(user.getAccountName());
@@ -538,6 +597,36 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         return rlt;
     }
+
+    private void createDoorAuthLog(DoorAuth doorAuth){
+        DoorAuthLog log = new DoorAuthLog();
+        log.setDoorId(doorAuth.getDoorId());
+        log.setUserId(doorAuth.getUserId());
+        log.setRightContent(doorAuth.getRightOpen() + "," + doorAuth.getRightVisitor() + "," + doorAuth.getRightRemote());
+        log.setCreateUid(UserContext.current().getUser().getId());
+        String discription = "";
+        if(doorAuth.getRightOpen() > 0){
+            discription += "授权开门权限";
+        }else{
+            discription += "<font color=\"red\">取消授权开门权限</font>";
+        }
+
+        if(doorAuth.getRightVisitor() > 0){
+            discription += "<br>授权访客授权权限";
+        }else{
+            discription += "<br><font color=\"red\">取消授权访客授权权限<font/>";
+        }
+
+        if(doorAuth.getRightRemote() > 0){
+            discription += "<br>授权远程开门权限";
+        }else{
+            discription += "<br><font color=\"red\">取消授权远程开门权限<font/>";
+        }
+
+        log.setDiscription(discription);
+        doorAuthProvider.createDoorAuthLog(log);
+    }
+
     
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthByUser cmd2) {

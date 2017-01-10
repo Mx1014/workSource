@@ -12,11 +12,15 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.server.schema.tables.daos.EhDoorAuthLogsDao;
+import com.everhomes.server.schema.tables.pojos.EhDoorAuthLogs;
 import com.everhomes.server.schema.tables.pojos.EhUsers;
+import com.everhomes.server.schema.tables.records.EhDoorAuthLogsRecord;
 import com.everhomes.user.User;
 import org.jooq.*;
 import org.jooq.impl.DSL;
@@ -25,12 +29,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.rest.aclink.AuthVisitorStasticDTO;
-import com.everhomes.rest.aclink.AuthVisitorStasticResponse;
-import com.everhomes.rest.aclink.AuthVisitorStatisticCommand;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.aclink.DoorAuthStatus;
-import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.daos.EhDoorAuthDao;
@@ -39,7 +37,6 @@ import com.everhomes.server.schema.tables.records.EhDoorAuthRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 @Component
 public class DoorAuthProviderImpl implements DoorAuthProvider {
@@ -63,6 +60,17 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         prepareObj(obj);
         EhDoorAuthDao dao = new EhDoorAuthDao(context.configuration());
         dao.insert(obj);
+        return id;
+    }
+
+    @Override
+    public Long createDoorAuthLog(DoorAuthLog log) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhDoorAuthLogs.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhDoorAuthLogs.class));
+        log.setId(id);
+        log.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        EhDoorAuthLogsDao dao = new EhDoorAuthLogsDao(context.configuration());
+        dao.insert(log);
         return id;
     }
 
@@ -591,6 +599,94 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             locator.setAnchor(users.get(users.size() - 1).getId());
         }
         return users;
+    }
+
+
+    @Override
+    public Long countDoorAuthUser(Byte isAuth, Byte isOpenAuth, Long doorId, Integer namespaceId, Byte rightType){
+
+        List<Long> counts = new ArrayList<>();
+
+        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context, obj)->{
+            Condition cond = Tables.EH_USERS.ID.isNotNull();
+            cond = getIsAuthCond(cond, isAuth);
+
+            if(null != isOpenAuth){
+                if(DoorAuthRightType.fromCode(rightType) == DoorAuthRightType.RIGHT_OPEN){
+                    cond = cond.and(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(isOpenAuth));
+                }else if(DoorAuthRightType.fromCode(rightType) == DoorAuthRightType.RIGHT_VISITOR){
+                    cond = cond.and(Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq(isOpenAuth));
+                }else if(DoorAuthRightType.fromCode(rightType) == DoorAuthRightType.RIGHT_REMOTE){
+                    cond = cond.and(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(isOpenAuth));
+                }
+            }
+
+
+            SelectConditionStep<Record1<Integer>> step = context.selectCount().from(
+                    context.select().from(Tables.EH_USERS)
+                            .where(
+                                    Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId)
+                            ).asTable(Tables.EH_USERS.getName()))
+                    .leftOuterJoin(
+                            context.select().from(Tables.EH_DOOR_AUTH)
+                                    .where(
+                                            Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()))
+                                    .and(
+                                            Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode())
+                                                    .and(
+                                                            Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)))
+                                    .asTable(Tables.EH_DOOR_AUTH.getName()))
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_DOOR_AUTH.USER_ID))
+                    .leftOuterJoin(
+                            context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                                    .where(
+                                            Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                                    .and(
+                                            Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+                                    .asTable(Tables.EH_ORGANIZATION_MEMBERS.getName()))
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
+                    .leftOuterJoin(
+                            context.select().from(Tables.EH_ORGANIZATIONS)
+                                    .where(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+                                    .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
+                                    .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
+                                    .asTable(Tables.EH_ORGANIZATIONS.getName()))
+                    .on(
+                            Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
+                    .where(cond);
+
+            System.out.println("query sql:" + step.getSQL());
+            counts.add(Long.valueOf(step.fetchOne().getValue(0).toString()));
+            return true;
+        });
+
+        return counts.get(0);
+    }
+
+    @Override
+    public List<DoorAuthLog> listDoorAuthLogsByUserId(CrossShardListingLocator locator, int pageSize, Long userId, Long doorId){
+        List<DoorAuthLog> logs = new ArrayList<>();
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhDoorAuthLogsRecord> query = context.selectQuery(Tables.EH_DOOR_AUTH_LOGS);
+        query.addConditions(Tables.EH_DOOR_AUTH_LOGS.USER_ID.eq(userId));
+        query.addConditions(Tables.EH_DOOR_AUTH_LOGS.DOOR_ID.eq(doorId));
+        if(locator.getAnchor() != null ) {
+            query.addConditions(Tables.EH_DOOR_AUTH_LOGS.CREATE_TIME.lt(new Timestamp(locator.getAnchor())));
+        }
+        query.addOrderBy(Tables.EH_DOOR_AUTH_LOGS.CREATE_TIME.desc());
+        query.addLimit(pageSize + 1);
+        query.fetch().map(r -> {
+            logs.add(ConvertHelper.convert(r, DoorAuthLog.class));
+            return null;
+        });
+
+        locator.setAnchor(null);
+        if(logs.size() > pageSize){
+            logs.remove(logs.size() - 1);
+            locator.setAnchor(logs.get(logs.size() - 1).getId());
+        }
+
+        return logs;
     }
 
     private Condition getIsOpenAuthCond(Condition cond, Byte isOpenAuth){
