@@ -19,6 +19,7 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 
+import com.everhomes.rest.aclink.*;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -64,80 +65,6 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.aclink.AclinkConnectingCommand;
-import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
-import com.everhomes.rest.aclink.AclinkDeviceVer;
-import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
-import com.everhomes.rest.aclink.AclinkFirmwareDTO;
-import com.everhomes.rest.aclink.AclinkFirmwareType;
-import com.everhomes.rest.aclink.AclinkLogCreateCommand;
-import com.everhomes.rest.aclink.AclinkLogDTO;
-import com.everhomes.rest.aclink.AclinkLogItem;
-import com.everhomes.rest.aclink.AclinkLogListResponse;
-import com.everhomes.rest.aclink.AclinkMessage;
-import com.everhomes.rest.aclink.AclinkMessageMeta;
-import com.everhomes.rest.aclink.AclinkMgmtCommand;
-import com.everhomes.rest.aclink.AclinkNotificationTemplateCode;
-import com.everhomes.rest.aclink.AclinkQueryLogCommand;
-import com.everhomes.rest.aclink.AclinkQueryLogResponse;
-import com.everhomes.rest.aclink.AclinkServiceErrorCode;
-import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeResponse;
-import com.everhomes.rest.aclink.AclinkUserDTO;
-import com.everhomes.rest.aclink.AclinkUserResponse;
-import com.everhomes.rest.aclink.AclinkWebSocketMessage;
-import com.everhomes.rest.aclink.AesUserKeyDTO;
-import com.everhomes.rest.aclink.AesUserKeyStatus;
-import com.everhomes.rest.aclink.AesUserKeyType;
-import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
-import com.everhomes.rest.aclink.CreateDoorAccessGroup;
-import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
-import com.everhomes.rest.aclink.CreateDoorAuthByUser;
-import com.everhomes.rest.aclink.CreateDoorAuthCommand;
-import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
-import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
-import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
-import com.everhomes.rest.aclink.DataUtil;
-import com.everhomes.rest.aclink.DeleteQRUserPermissionCommand;
-import com.everhomes.rest.aclink.DoorAccessActivedCommand;
-import com.everhomes.rest.aclink.DoorAccessActivingCommand;
-import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
-import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.aclink.DoorAccessLinkStatus;
-import com.everhomes.rest.aclink.DoorAccessOwnerType;
-import com.everhomes.rest.aclink.DoorAccessQRKeyDTO;
-import com.everhomes.rest.aclink.DoorAccessStatus;
-import com.everhomes.rest.aclink.DoorAccessType;
-import com.everhomes.rest.aclink.DoorAuthDTO;
-import com.everhomes.rest.aclink.DoorAuthStatus;
-import com.everhomes.rest.aclink.DoorAuthType;
-import com.everhomes.rest.aclink.DoorLinglingExtraKeyDTO;
-import com.everhomes.rest.aclink.DoorMessage;
-import com.everhomes.rest.aclink.DoorMessageType;
-import com.everhomes.rest.aclink.DoorUserPermissionDTO;
-import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
-import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
-import com.everhomes.rest.aclink.GetShortMessageCommand;
-import com.everhomes.rest.aclink.GetShortMessageResponse;
-import com.everhomes.rest.aclink.GetVisitorCommand;
-import com.everhomes.rest.aclink.GetVisitorResponse;
-import com.everhomes.rest.aclink.ListAclinkUserCommand;
-import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
-import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
-import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
-import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
-import com.everhomes.rest.aclink.ListDoorAuthCommand;
-import com.everhomes.rest.aclink.ListDoorAuthResponse;
-import com.everhomes.rest.aclink.ListQRUserPermissionCommand;
-import com.everhomes.rest.aclink.ListQRUserPermissionResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageResponse;
-import com.everhomes.rest.aclink.SearchDoorAuthCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.group.GroupNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -449,13 +376,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         List<User> users = null;
         List<AclinkUserDTO> userDTOs = new ArrayList<>();
-        if(!StringUtils.isEmpty(cmd.getKeyword())){
-            users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
-        }else if(null != cmd.getOrganizationId()){
-            users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(),  locator, pageSize);
-        }else{
-            users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(),  locator, pageSize, namespaceId);
-        }
 
         for (User user: users) {
             List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
@@ -490,7 +410,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
-    
+
     /**
      * <ul> 授权的静态数据，不同授权对应的真实钥匙需要客户端来取的时候产生。
      * <li></li>
@@ -2438,12 +2358,41 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
         resp.setDtos(dtos);
-        
+
         for(CreateDoorAuthCommand authCmd: cmd.getAuths()) {
             DoorAuthDTO dto = createDoorAuth(authCmd);
             dtos.add(dto);
         }
         
+        return resp;
+    }
+
+
+    @Override
+    public ListDoorAuthResponse createAllDoorAuthList(AclinkCreateAllDoorAuthListCommand cmd) {
+        ListDoorAuthResponse resp = new ListDoorAuthResponse();
+
+        List<DoorAuthDTO> dtos = new ArrayList<>();
+        resp.setDtos(dtos);
+
+        ListAclinkUserCommand userCmd = ConvertHelper.convert(cmd, ListAclinkUserCommand.class);
+        userCmd.setPageSize(1000);
+        while (true){
+            AclinkUserResponse userRes = this.listAclinkUsers(userCmd);
+            for (AclinkUserDTO user: userRes.getUsers()) {
+                CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
+                authCmd.setUserId(user.getId());
+                authCmd.setApproveUserId(UserContext.current().getUser().getId());
+                DoorAuthDTO dto = createDoorAuth(authCmd);
+                dtos.add(dto);
+            }
+
+            if(null == userRes.getNextPageAnchor()){
+                break;
+            }
+            userCmd.setPageAnchor(userRes.getNextPageAnchor());
+        }
+
         return resp;
     }
     

@@ -1754,6 +1754,15 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		
 		return result;
 	}
+
+
+	@Override
+	public List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType) {
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(groupType.getCode());
+		return this.listOrganizationByGroupTypes(parentId, groupTypes);
+	}
+
 	@Override
 	public List<Organization> listOrganizationByGroupTypes(Long parentId, List<String> groupTypes) {
 		return this.listOrganizationByGroupTypes(parentId, groupTypes, null);

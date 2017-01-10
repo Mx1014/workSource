@@ -28,6 +28,8 @@ public class AclinkUserDTO {
     private String buildingName;
     private Long buildingId;
     private String company;
+    private Long registerTime;
+    private Byte isAuth;
     
     public Long getId() {
         return id;
@@ -107,5 +109,21 @@ public class AclinkUserDTO {
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
+    }
+
+    public Long getRegisterTime() {
+        return registerTime;
+    }
+
+    public void setRegisterTime(Long registerTime) {
+        this.registerTime = registerTime;
+    }
+
+    public Byte getIsAuth() {
+        return isAuth;
+    }
+
+    public void setIsAuth(Byte isAuth) {
+        this.isAuth = isAuth;
     }
 }
