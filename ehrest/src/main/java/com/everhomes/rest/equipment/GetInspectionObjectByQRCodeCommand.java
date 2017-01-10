@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
  *  <li>qrCodeToken: 设备二维码token</li>
  * </ul>
  */
-public class FindEquipmentByTokenCommand {
+public class GetInspectionObjectByQRCodeCommand {
 
 	private String qrCodeToken;
 

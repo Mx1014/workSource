@@ -20,3 +20,6 @@ CREATE TABLE `eh_equipment_inspection_categories` (
 ALTER TABLE `eh_equipment_inspection_equipments` ADD COLUMN `inspection_category_id` BIGINT;
 ALTER TABLE `eh_equipment_inspection_standards` ADD COLUMN `inspection_category_id` BIGINT;
 ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `inspection_category_id` BIGINT;
+ALTER TABLE `eh_equipment_inspection_equipments` ADD COLUMN `namespace_id` INTEGER;
+ALTER TABLE `eh_equipment_inspection_standards` ADD COLUMN `namespace_id` INTEGER;
+ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `namespace_id` INTEGER;

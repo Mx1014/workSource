@@ -15,10 +15,6 @@ import com.everhomes.util.StringHelper;
  *  <li>path: 类型路径</li>
  *  <li>defaultOrder: 默认顺序索引</li>
  *  <li>status: 状态，{@link com.everhomes.rest.category.CategoryAdminStatus}</li>
- *  <li>createTime: 创建时间</li>
- *  <li>creatorUid: 创建人id</li>
- *  <li>deletorUid: 删除人id</li>
- *  <li>deleteTime: 删除时间</li>
  * </ul>
  */
 public class EquipmentInspectionCategoryDTO {
@@ -40,14 +36,6 @@ public class EquipmentInspectionCategoryDTO {
 	private Integer defaultOrder;
 	  
 	private Byte status;
-	  
-	private Long creatorUid;
-	  
-	private Timestamp createTime;
-	  
-	private Long deletorUid;
-	  
-	private Timestamp deleteTime;
 
 	public Long getId() {
 		return id;
@@ -121,37 +109,6 @@ public class EquipmentInspectionCategoryDTO {
 		this.status = status;
 	}
 
-	public Long getCreatorUid() {
-		return creatorUid;
-	}
-
-	public void setCreatorUid(Long creatorUid) {
-		this.creatorUid = creatorUid;
-	}
-
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
-	public Long getDeletorUid() {
-		return deletorUid;
-	}
-
-	public void setDeletorUid(Long deletorUid) {
-		this.deletorUid = deletorUid;
-	}
-
-	public Timestamp getDeleteTime() {
-		return deleteTime;
-	}
-
-	public void setDeleteTime(Timestamp deleteTime) {
-		this.deleteTime = deleteTime;
-	}
 	
 	@Override
     public String toString() {

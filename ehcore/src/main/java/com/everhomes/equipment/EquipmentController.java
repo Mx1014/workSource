@@ -21,8 +21,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.equipment.CountTasksCommand;
-import com.everhomes.rest.equipment.CountTasksResponse;
+import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.CreateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.CreateInspectionTemplateCommand;
 import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
@@ -1012,12 +1012,12 @@ public class EquipmentController extends ControllerBase {
 	}
 	
 	/**
-	 * <b>URL: /quality/countTasks</b>
+	 * <b>URL: /quality/statEquipmentTasks</b>
 	 * <p>任务数统计</p>
 	 */
-	@RequestMapping("countTasks")
-	@RestReturn(value = CountTasksResponse.class)
-	public RestResponse countTasks(CountTasksCommand cmd) {
+	@RequestMapping("statEquipmentTasks")
+	@RestReturn(value = StatEquipmentTasksResponse.class)
+	public RestResponse statEquipmentTasks(StatEquipmentTasksCommand cmd) {
 		
 //		CountTasksResponse tasks = equipmentService.countTasks(cmd);
 		

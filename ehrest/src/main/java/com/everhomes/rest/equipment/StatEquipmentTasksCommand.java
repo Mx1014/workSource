@@ -17,7 +17,7 @@ import com.everhomes.util.StringHelper;
  *  <li>pageSize: 页面大小</li>
  * </ul>
  */
-public class CountTasksCommand {
+public class StatEquipmentTasksCommand {
 
 	@NotNull
 	private Long ownerId;

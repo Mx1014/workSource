@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  *  <li>nextPageAnchor: 下一页的锚点</li>
  * </ul>
  */
-public class CountTasksResponse {
+public class StatEquipmentTasksResponse {
 
 	@ItemType(TaskCountDTO.class)
 	private List<TaskCountDTO> tasks;
