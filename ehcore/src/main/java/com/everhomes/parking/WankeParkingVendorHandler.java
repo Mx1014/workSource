@@ -23,13 +23,16 @@ import javax.annotation.PreDestroy;
 
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
 import org.apache.http.message.BasicNameValuePair;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -40,6 +43,8 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
+import com.bosigao2.rest.Bosigao2CardInfo;
+import com.bosigao2.rest.Bosigao2ResultEntity;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -48,12 +53,10 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.parking.ketuo.EncryptUtil;
-import com.everhomes.parking.ketuo.KetuoCard;
-import com.everhomes.parking.ketuo.KetuoCardRate;
-import com.everhomes.parking.ketuo.KetuoCardType;
-import com.everhomes.parking.ketuo.KetuoJsonEntity;
-import com.everhomes.parking.ketuo.KetuoTemoFee;
+import com.everhomes.parking.wanke.WankeCardInfo;
+import com.everhomes.parking.wanke.WankeCardType;
+import com.everhomes.parking.wanke.WankeJsonEntity;
+import com.everhomes.parking.wanke.WankeTemoFee;
 import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
@@ -76,13 +79,14 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(ParkingVendorHandler.PARKING_VENDOR_PREFIX + "WANKE")
 public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	private static final Logger LOGGER = LoggerFactory.getLogger(WankeParkingVendorHandler.class);
 	
-	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+	private SimpleDateFormat sdf1 = new SimpleDateFormat("yyyyMMddHHmmss");
 	private SimpleDateFormat sdf2 = new SimpleDateFormat("yyyyMMdd");
 	
 	private static final String RECHARGE = "/Parking/MouthCardRecharge";
@@ -120,16 +124,15 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     		Long parkingLotId, String plateNumber) {
         
     	List<ParkingCardDTO> resultList = new ArrayList<ParkingCardDTO>();
-    	//储能月卡车没有 归属地区分
     	
-    	KetuoCard card = getCard(plateNumber);
+    	WankeCardInfo card = getCard(plateNumber);
 
         ParkingCardDTO parkingCardDTO = new ParkingCardDTO();
 		if(null != card){
-			String expireDate = card.getValidTo();
+			String expireDate = card.getExpireDate();
 			this.checkExpireDateIsNull(expireDate,plateNumber);
 
-			long expireTime = strToLong(expireDate);
+			long expireTime = strToLong2(expireDate);
 			long now = System.currentTimeMillis();
 			long cardReserveTime = 0;
 			
@@ -156,15 +159,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
-			List<KetuoCardType> types = getCardType();
-			for(KetuoCardType kt: types) {
-				if(card.getCarType().equals(kt.getCarType())) {
-					parkingCardDTO.setCardType(kt.getTypeName());
-					break;
-				}
-			}
-			parkingCardDTO.setCardTypeId(card.getCarType());
-			parkingCardDTO.setCardNumber(card.getCardId().toString());
+			
+			parkingCardDTO.setCardType(card.getCardType());
+			parkingCardDTO.setCardNumber(card.getCardNo());
 			parkingCardDTO.setIsValid(true);
 			
 			resultList.add(parkingCardDTO);
@@ -173,63 +170,27 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
         return resultList;
     }
 
-    @Override
+	@Override
     public List<ParkingRechargeRateDTO> getParkingRechargeRates(String ownerType, Long ownerId, Long parkingLotId,String plateNumber,String cardNo) {
+    	List<ParkingRechargeRate> parkingRechargeRateList = null;
     	List<ParkingRechargeRateDTO> result = null;
-    	List<KetuoCardRate> list = new ArrayList<>();
-		List<KetuoCardType> types = getCardType();
-
     	if(StringUtils.isBlank(plateNumber)) {
-    		for(KetuoCardType k: types) {
-    			for(KetuoCardRate rate: getCardRule(k.getCarType())) {
-    				if(RULE_TYPE.equals(rate.getRuleType())) {
-    					rate.setCarType(k.getCarType());
-    					rate.setTypeName(k.getTypeName());
-    					list.add(rate);
-    				}
-    			}
-    		}
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,null);
+    		
     	}else{
-    		KetuoCard cardInfo = getCard(plateNumber);
-    		if(null != cardInfo) {
-    			String cardType = cardInfo.getCarType();
-    			String typeName = null;
-    			for(KetuoCardType kt: types) {
-					if(cardType.equals(kt.getCarType())) {
-						typeName = kt.getTypeName();
-						break;
-					}
-				}
-    			for(KetuoCardRate rate: getCardRule(cardType)) {
-    				if(RULE_TYPE.equals(rate.getRuleType())) {
-    					rate.setCarType(cardType);
-    					rate.setTypeName(typeName);
-    					list.add(rate);
-    				}
-    			}
-    		}
+    		WankeCardInfo cardInfo = getCard(plateNumber);           
+			
+    		String cardType = cardInfo.getCardType();
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
     	}
-    	result = list.stream().map( r -> {
+		result = parkingRechargeRateList.stream().map(r->{
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
-			dto.setOwnerId(ownerId);
-			dto.setOwnerType(ownerType);
-			dto.setParkingLotId(parkingLotId);
-			dto.setRateToken(r.getRuleId());
-			Map<String, Object> map = new HashMap<String, Object>();
-		    map.put("count", r.getRuleAmount());
-			String scope = ParkingNotificationTemplateCode.SCOPE;
-			int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
-			String locale = "zh_CN";
-			String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-//			dto.setRateName(r.getRuleName());
-			dto.setRateName(rateName);
-//			dto.setCardType(r.getRuleType());
-			dto.setCardType(r.getTypeName());
-			dto.setMonthCount(new BigDecimal(r.getRuleAmount()));
-			dto.setPrice(new BigDecimal(Integer.parseInt(r.getRuleMoney()) / 100));
-			dto.setVendorName(ParkingLotVendor.KETUO.getCode());
+			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
+			dto.setRateToken(r.getId().toString());
+			dto.setVendorName(ParkingLotVendor.WANKE.getCode());
 			return dto;
-		}).collect(Collectors.toList());
+		}
+		).collect(Collectors.toList());
 		
 		return result;
     }
@@ -286,19 +247,34 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		}
 	}
     
-    private long strToLong(String str) {
+//    private long strToLong(String str) {
+//
+//		long ts;
+//		try {
+//			ts = sdf1.parse(str).getTime();
+//		} catch (ParseException e) {
+//			LOGGER.error("data format is not yyyyMMddHHmmss, str={}", str);
+//			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+//					"data format is not yyyyMMddHHmmss.");
+//		}
+//		return ts;
+//	}
+    
+    private Long strToLong2(String str) {
 
-		long ts;
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMddHHmmss");
+		
+		Long ts = null;
 		try {
-			ts = sdf1.parse(str).getTime();
+			ts = sdf.parse(str).getTime();
 		} catch (ParseException e) {
-			LOGGER.error("data format is not yyyyMMddHHmmss, str={}", str);
+			LOGGER.error("validityPeriod data format is not yyyymmdd.");
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"data format is not yyyyMMddHHmmss.");
+					"validityPeriod data format is not yyyymmdd.");
 		}
+		
 		return ts;
 	}
-    
 	
 //	@Scheduled(cron="0 0 0/2 * * ? ")
 //	@Override
@@ -315,28 +291,36 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 //			return null;
 //		});
 //	}
-	
+    public static void main(String[] args) {
+		JSONObject param = new JSONObject();
+		param.put("plateNo", "浙A625FF1");
+		postToWanke(param, GET_TEMP_FEE);
+	}
+    
 	public ListCardTypeResponse listCardType(ListCardTypeCommand cmd) {
     	ListCardTypeResponse ret = new ListCardTypeResponse();
     	
         List<ParkingCardType> resultTypes = new ArrayList<>();
 
-		List<KetuoCardType> list = getCardType();
-		for(KetuoCardType t: list) {
+		List<WankeCardType> list = getCardType();
+		for(WankeCardType t: list) {
+			
 			ParkingCardType parkingCardType = new ParkingCardType();
-			parkingCardType.setTypeId(t.getCarType());
-			parkingCardType.setTypeName(t.getTypeName());
+			parkingCardType.setTypeId(t.getId());
+			parkingCardType.setTypeName(t.getName());
 			resultTypes.add(parkingCardType);
 		}
 		ret.setCardTypes(resultTypes);	
     	return ret;
     }
 	
-	private List<KetuoCardType> getCardType() {
-		List<KetuoCardType> result = new ArrayList<>();
+	private List<WankeCardType> getCardType() {
+		
+		List<WankeCardType> result = new ArrayList<>();
 		JSONObject param = new JSONObject();
-		String json = post(param, GET_TYPES);
-		KetuoJsonEntity<KetuoCardType> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCardType>>(){});
+		String json = postToWanke(param, GET_TYPES);
+		
+		WankeJsonEntity<List<WankeCardType>> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<List<WankeCardType>>>(){});
 
 		if(entity.isSuccess()){
 			if(null != entity.getData())
@@ -346,40 +330,22 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		return result;
 	}
 	
-	private List<KetuoCardRate> getCardRule(String carType) {
-		List<KetuoCardRate> result = new ArrayList<>();
-		JSONObject param = new JSONObject();
-		param.put("carType", carType);
-		String json = post(param, GET_CARd_RULE);
-		
-		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
-		
-		KetuoJsonEntity<KetuoCardRate> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCardRate>>(){});
-		if(entity.isSuccess()){
-			if(null != entity.getData())
-				result = entity.getData();
-		}
-		return result;
-	}
-	
-	private KetuoCard getCard(String plateNumber) {
-		KetuoCard card = null;
+	private WankeCardInfo getCard(String plateNumber) {
+		WankeCardInfo card = null;
 		JSONObject param = new JSONObject();
 		
-		plateNumber = plateNumber.substring(1, plateNumber.length());
 		param.put("plateNo", plateNumber);
-		String json = post(param, GET_CARD);
+		param.put("flag", "2");
+		String json = postToWanke(param, GET_CARD);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-		KetuoJsonEntity<KetuoCard> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoCard>>(){});
+        WankeJsonEntity<WankeCardInfo> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeCardInfo>>(){});
 		if(entity.isSuccess()){
-			List<KetuoCard> list = entity.getData();
-			if(null != list && !list.isEmpty()) {
-				card = list.get(0);
-			}
+			card = entity.getData();
+			if(null != card)
+				card.setExpireDate(card.getExpireDate()+"235959");
 		}
         
         return card;
@@ -391,28 +357,28 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		//储能月卡车没有 归属地区分
 		String plateNumber = order.getPlateNumber();
 
-		KetuoCard card = getCard(plateNumber);
-		String oldValidEnd = card.getValidTo();
-		Long time = strToLong(oldValidEnd);
-		String validStart = sdf1.format(addDays(time, 1));
-		String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
+		WankeCardInfo cardInfo = getCard(plateNumber);
+		String oldValidEnd = cardInfo.getExpireDate();
+		Long time = strToLong2(oldValidEnd);
 		
-		param.put("cardId", Integer.parseInt(order.getCardNumber()));
-		param.put("ruleType", order.getRateToken());
-	    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
-	    param.put("payMoney", order.getPrice().intValue()*100);
-	    param.put("startTime", validStart);
-	    param.put("endTime", validEnd);
-		String json = post(param, RECHARGE);
+		param.put("plateNo", order.getPlateNumber());
+		param.put("flag", "2");
+	    param.put("amount", order.getPrice().intValue()*100);
+	    param.put("payMons", String.valueOf(order.getMonthCount().intValue()));
+	    param.put("chargePaidNo", order.getId());
+	    param.put("payTime", sdf1.format(new Date()));
+	    param.put("sign", "");
+	    
+		String json = postToWanke(param, RECHARGE);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-//		KetuoJsonEntity entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity>(){});
+        WankeJsonEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<Object>>(){});
 //		
 //		return entity.isSuccess();
 		JSONObject jsonObject = JSONObject.parseObject(json);
-		Object obj = jsonObject.get("resCode");
+		Object obj = jsonObject.get("errorCode");
 		if(null != obj ) {
 			int resCode = (int) obj;
 			if(resCode == 0)
@@ -427,11 +393,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		JSONObject param = new JSONObject();
 //		KetuoTemoFee tempFee = getTempFee(order.getPlateNumber());
 		param.put("orderNo", order.getOrderToken());
-//		param.put("amount", order.getPrice().intValue()*100);
 		param.put("amount", order.getPrice().intValue() * 100);
-	    param.put("discount", 0);
-	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?4:5);
-		String json = post(param, PAY_TEMP_FEE);
+	    param.put("payType", VendorType.WEI_XIN.getCode().equals(order.getPaidType())?1:2);
+		String json = postToWanke(param, PAY_TEMP_FEE);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
@@ -440,7 +404,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 //		
 //		return entity.isSuccess();
         JSONObject jsonObject = JSONObject.parseObject(json);
-		Object obj = jsonObject.get("resCode");
+		Object obj = jsonObject.get("errorCode");
 		if(null != obj ) {
 			int resCode = (int) obj;
 			if(resCode == 0)
@@ -449,77 +413,48 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		}
 		return false;
     }
-//	public static void main(String[] args) {
-//		String s= "{\"data\":{\"parkingTime\":109568},\"resCode\":0,\"resMsg\":null}";
-//		JSONObject json = JSONObject.parseObject(s);
-//		Object obj = json.get("resCode");
-//		if(null != obj ) {
-//			int resCode = (int) obj;
-//			if(resCode == 0)
-//				return true;
-//			
-//		}
-//		return false;
-//		
-//	}
+
 	private boolean recharge(ParkingRechargeOrder order){
 		if(order.getRechargeType().equals(ParkingRechargeType.MONTHLY.getCode()))
 			return rechargeMonthlyCard(order);
 		return payTempCardFee(order);
     }
 	
-	public String postToWanke(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost(configProvider.getValue("parking.chuneng.url", "") + type);
-		StringBuilder result = new StringBuilder();
+	public static String postToWanke(JSONObject param, String type) {
+		HttpPost httpPost = new HttpPost("http://122.224.250.35:7021" + type);
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+		String json = null;
 		
-        String key = configProvider.getValue("parking.chuneng.key", "");
-        String iv = sdf2.format(new Date());
-        String user = configProvider.getValue("parking.chuneng.user", "");
-        String pwd = configProvider.getValue("parking.chuneng.pwd", "");
-        String data = null;
-		try {
-			data = EncryptUtil.getEncString(param, key, iv);
-		} catch (Exception e) {
-			LOGGER.error("Parking encrypt param error, param={}, key={}, iv={}", param, key, iv, e);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Parking encrypt param error.");
-		}
-		List <NameValuePair> nvps = new ArrayList <NameValuePair>();
-		nvps.add(new BasicNameValuePair("data", data));
 		CloseableHttpResponse response = null;
-		InputStream instream = null;
+		
 		try {
-			httpPost.setEntity(new UrlEncodedFormEntity(nvps, "UTF8"));
-			httpPost.addHeader("user", user);
-			httpPost.addHeader("pwd", pwd);
+			StringEntity stringEntity = new StringEntity(param.toString(), "utf8");
+			httpPost.setEntity(stringEntity);
 			response = httpclient.execute(httpPost);
-			HttpEntity entity = response.getEntity();
 			
-			if (entity != null) {
-				instream = entity.getContent();
-				BufferedReader reader = null;
-				reader = new BufferedReader(new InputStreamReader(instream,"utf8"));
-				String s;
-            	
-            	while((s = reader.readLine()) != null){
-            		result.append(s);
+			int status = response.getStatusLine().getStatusCode();
+			
+			if(status == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
+				
+				if (entity != null) {
+					json = EntityUtils.toString(entity);
 				}
 			}
+			
 		} catch (IOException e) {
-			LOGGER.error("Parking request error, param={}, key={}, iv={}", param, key, iv, e);
+			LOGGER.error("Parking request error, param={}", param, e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
     				"Parking request error.");
 		}finally {
             try {
-            	instream.close();
 				response.close();
 			} catch (IOException e) {
-				LOGGER.error("Parking close instream, response error, param={}, key={}, iv={}", param, key, iv, e);
+				LOGGER.error("Parking close instream, response error, param={}", param, e);
 			}
         }
-		String json = result.toString();
 		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Data from ketuo, json={}", json);
+			LOGGER.debug("Data from wanke, json={}", json);
 		
 		return json;
 	}
@@ -556,52 +491,39 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 
 	@Override
 	public void updateParkingRechargeOrderRate(ParkingRechargeOrder order) {
-		//储能月卡车没有 归属地区分
-		String plateNumber = order.getPlateNumber();
-
-		KetuoCard cardInfo = getCard(plateNumber);
-		KetuoCardRate ketuoCardRate = null;
-		if(null != cardInfo) {
-			String cardType = cardInfo.getCarType();
-			for(KetuoCardRate rate: getCardRule(cardType)) {
-				if(rate.getRuleId().equals(order.getRateToken())) {
-					ketuoCardRate = rate;
-				}
-			}
-		}
-		if(null == ketuoCardRate) {
+		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(order.getRateToken()));
+		if(null == rate) {
 			LOGGER.error("Rate not found, cmd={}", order);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
 					"Rate not found.");
 		}
-		order.setRateName(ketuoCardRate.getRuleName());
+		order.setRateName(rate.getRateName());
 		
 	}
 
-	private KetuoTemoFee getTempFee(String plateNumber) {
-		KetuoTemoFee tempFee = null;
+	private WankeTemoFee getTempFee(String plateNumber) {
+		WankeTemoFee tempFee = null;
 		JSONObject param = new JSONObject();
 		param.put("plateNo", plateNumber);
-		String json = post(param, GET_TEMP_FEE);
+		
+		String json = postToWanke(param, GET_TEMP_FEE);
         
         if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Result={}, param={}", json, param);
         
-		KetuoJsonEntity<KetuoTemoFee> entity = JSONObject.parseObject(json, new TypeReference<KetuoJsonEntity<KetuoTemoFee>>(){});
+        WankeJsonEntity<WankeTemoFee> entity = JSONObject.parseObject(json, new TypeReference<WankeJsonEntity<WankeTemoFee>>(){});
+        
 		if(entity.isSuccess()){
-			List<KetuoTemoFee> list = entity.getData();
-			if(null != list && !list.isEmpty()) {
-				tempFee = list.get(0);
-			}
+			tempFee = entity.getData();
 		}
         
         return tempFee;
     }
 
 	@Override
-	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
-			Long parkingLotId, String plateNumber) {
-		KetuoTemoFee tempFee = getTempFee(plateNumber);
+	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId, Long parkingLotId, String plateNumber) {
+		
+		WankeTemoFee tempFee = getTempFee(plateNumber);
 		
 		ParkingTempFeeDTO dto = new ParkingTempFeeDTO();
 		if(null == tempFee)
