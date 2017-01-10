@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.records.EhFlowEventLogsRecord;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
@@ -234,6 +235,30 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	return null;
     }
     
+    @Override
+    public FlowEventLog getValidEnterStep(Long userId, FlowCase flowCase) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowEventLog> objs = this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCase.getId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_USER_ID.eq(userId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(flowCase.getStepCount()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(flowCase.getFlowVersion()));
+				
+				return query;
+			}
+    	});  
+    	
+    	if(objs != null && objs.size() > 0) {
+    		return objs.get(0);
+    	}
+    	
+    	return null;
+    }
+    
     private FlowCaseDetail convertRecordTODetail(Record r) {
     	FlowCaseDetail o = new FlowCaseDetail();
     	
@@ -388,5 +413,15 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				return query;
 			}
     	});
+    }
+    
+    @Override
+    public void updateFlowEventLogs(List<FlowEventLog> objs) {
+    	if(objs.size() > 0) {
+    		  DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowEventLogs.class));
+	        EhFlowEventLogsDao dao = new EhFlowEventLogsDao(context.configuration());
+	        dao.update(objs.toArray(new FlowEventLog[objs.size()]));	
+    	}
+       
     }
 }

@@ -4,6 +4,8 @@ package com.everhomes.rest.flow;
  * <ul>
  * <li>NODE_TRACKER: 节点的跟踪日志信息，包括评论</li>
  * <li>STEP_TRACKER: 节点的跳转信息</li>
+ * <li>NODE_ENTER: 确认是否有处理 Case 的权限</li>
+ * <li>BUTTON_FIRED: 是否已经处理过 Case </li>
  * </ul>
  * @author janson
  *
