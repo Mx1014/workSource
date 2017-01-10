@@ -2,6 +2,8 @@ package com.everhomes.pusher;
 
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,8 @@ import com.everhomes.user.UserLogin;
 @Component(PushMessageResolver.PUSH_MESSAGE_RESOLVER_DEFAULT)
 public class DefaultPushMessageResolver implements PushMessageResolver {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPushMessageResolver.class);
+	
     @Autowired
     MessagingService messagingService;
    
@@ -67,6 +71,9 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         	deviceMessage.setTitle(appUrls.getName());
         }
         
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("resolvMessage： appUrls = " + appUrls + " , senderLogin namespaceId is " + senderLogin.getNamespaceId());
+        }
         
         deviceMessage.setBadge(new Integer((int)messagingService.getMessageCountInLoginMessageBox(destLogin)));
         
