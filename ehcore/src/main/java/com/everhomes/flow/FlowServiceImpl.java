@@ -2156,7 +2156,7 @@ public class FlowServiceImpl implements FlowService {
 					
 					FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
 							, currNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), flowUserType.getCode());
-					if(commentBtn != null) {
+					if(commentBtn != null && commentBtn.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
 						nodeLogDTO.setAllowComment((byte)1);
 						nodeLogDTO.setCommentButtonId(commentBtn.getId());
 					}

@@ -53,7 +53,7 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 		}
 		
 		//found fired buttons
-		List<FlowEventLog> logs = flowEventLogProvider.findStepEventLogs(flowCase.getId());
+		List<FlowEventLog> logs = flowEventLogProvider.findStepEventLogs(flowCase.getId(), flowCase.getStepCount());
 		List<Long> users = new ArrayList<Long>();
 		if(logs != null && logs.size() > 0) {
 			for(FlowEventLog log : logs) {
