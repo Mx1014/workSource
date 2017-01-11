@@ -560,21 +560,25 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                                     .asTable(Tables.EH_DOOR_AUTH.getName()))
                     .on(Tables.EH_USERS.ID.eq(Tables.EH_DOOR_AUTH.USER_ID))
                     .leftOuterJoin(
-                            context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
+                            context.select(
+                                    Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID,
+                                    Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE,
+                                    Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN,
+                                    Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME,
+                                    Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID)
+                                    .from(Tables.EH_ORGANIZATION_MEMBERS)
+                                    .leftOuterJoin(Tables.EH_ORGANIZATIONS)
+                                    .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
                                     .where(
                                             Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
                                     .and(
                                             Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
-                                    .asTable(Tables.EH_ORGANIZATION_MEMBERS.getName()))
-                    .on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
-                    .leftOuterJoin(
-                            context.select().from(Tables.EH_ORGANIZATIONS)
-                                    .where(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+                                    .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
                                     .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
                                     .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
-                                    .asTable(Tables.EH_ORGANIZATIONS.getName()))
-                    .on(
-                            Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
+                                    .groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)
+                                    .asTable(Tables.EH_ORGANIZATION_MEMBERS.getName()))
+                    .on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
                     .where(cond).orderBy(Tables.EH_USERS.ID.desc())
                     .limit(pageSize + 1);
 
@@ -621,7 +625,6 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 }
             }
 
-
             SelectConditionStep<Record1<Integer>> step = context.selectCount().from(
                     context.select().from(Tables.EH_USERS)
                             .where(
@@ -637,22 +640,25 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                                                             Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId)))
                                     .asTable(Tables.EH_DOOR_AUTH.getName()))
                     .on(Tables.EH_USERS.ID.eq(Tables.EH_DOOR_AUTH.USER_ID))
-                    .leftOuterJoin(
-                            context.select().from(Tables.EH_ORGANIZATION_MEMBERS)
-                                    .where(
-                                            Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
-                                    .and(
-                                            Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
-                                    .asTable(Tables.EH_ORGANIZATION_MEMBERS.getName()))
+                    .leftOuterJoin(context.select(
+                            Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID,
+                            Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE,
+                            Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN,
+                            Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME,
+                            Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID)
+                            .from(Tables.EH_ORGANIZATION_MEMBERS)
+                            .leftOuterJoin(Tables.EH_ORGANIZATIONS)
+                            .on(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
+                            .where(
+                                    Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+                            .and(
+                                    Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+                            .and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+                            .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
+                            .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
+                            .groupBy(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID)
+                            .asTable(Tables.EH_ORGANIZATION_MEMBERS.getName()))
                     .on(Tables.EH_USERS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID))
-                    .leftOuterJoin(
-                            context.select().from(Tables.EH_ORGANIZATIONS)
-                                    .where(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
-                                    .and(Tables.EH_ORGANIZATIONS.PARENT_ID.eq(0L))
-                                    .and(Tables.EH_ORGANIZATIONS.GROUP_TYPE.eq(OrganizationGroupType.ENTERPRISE.getCode()))
-                                    .asTable(Tables.EH_ORGANIZATIONS.getName()))
-                    .on(
-                            Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
                     .where(cond);
 
             System.out.println("query sql:" + step.getSQL());
