@@ -709,13 +709,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         if(doorAuth.getRightVisitor() > 0){
             discription += "<br>授权访客授权权限";
         }else{
-            discription += "<br><font color=\"red\">取消授权访客授权权限<font/>";
+            discription += "<br><font color=\"red\">取消授权访客授权权限</font>";
         }
 
         if(doorAuth.getRightRemote() > 0){
             discription += "<br>授权远程开门权限";
         }else{
-            discription += "<br><font color=\"red\">取消授权远程开门权限<font/>";
+            discription += "<br><font color=\"red\">取消授权远程开门权限</font>";
         }
 
         log.setDiscription(discription);
