@@ -321,7 +321,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		
 		// flow
 		Flow flow = flowService.getEnabledFlow(r.getNamespaceId(), r.getModuleId(),
-				r.getModuleType(), r.getOwnerId(), r.getOwnerType());
+				r.getModuleType(), r.getId(), FlowOwnerType.GENERAL_APPROVAL.getCode());
+
 		if (null != flow) {
 			result.setFlowName(flow.getFlowName());
 		}
