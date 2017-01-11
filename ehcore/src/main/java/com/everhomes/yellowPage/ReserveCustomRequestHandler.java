@@ -40,6 +40,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.rest.yellowPage.JumpType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ReserveRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
@@ -106,6 +107,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		yellowPageProvider.createReservationRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
+		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
 		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		ServiceAllianceCategories category = yellowPageProvider.findCategoryById(request.getType());
@@ -189,7 +191,8 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		if(fieldList != null && fieldList.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
-				sb.append(field.getFieldName() + ":" + field.getFieldValue() + "\n");
+				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
+				sb.append(field.getFieldName() + ":" + fieldValue + "\n");
 			}
 			
 			return sb.toString();
@@ -251,7 +254,9 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ReserveCustomRequestH
 		
 		GetRequestInfoResponse response = new GetRequestInfoResponse();
 		response.setDtos(fieldList);
-		response.setCreateTime(request.getCreateTime());
+		if(request != null) {
+			response.setCreateTime(request.getCreateTime());
+		}
 
 		return response;
 		

@@ -77,6 +77,12 @@ public interface ConfigConstants {
 	
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
-	public static final String CLUB_SHARE_URL = "club.share.url"; 
-     
+	public static final String CLUB_SHARE_URL = "club.share.url";
+
+    String SERVICE_ALLIANCE_DETAIL_URL = "serviceAlliance.serviceDetail.url";
+    
+    String KEXING_PMBILL_API_HOST = "kexing.pmbill.api.host";
+    String KEXING_PMBILL_API_BILLLIST = "kexing.pmbill.api.billlist";
+    String KEXING_PMBILL_API_BILLCOUNT = "kexing.pmbill.api.billcount";
+
 }

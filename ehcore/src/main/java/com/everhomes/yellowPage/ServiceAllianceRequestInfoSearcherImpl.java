@@ -177,6 +177,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (ServiceAllianceRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance request id:" + request.getId()+"-EhServiceAllianceRequests");
@@ -197,6 +198,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (ServiceAllianceInvestRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.INVEST_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance invest request id:" + request.getId()+"-EhServiceAllianceInvestRequests");
@@ -217,6 +219,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (ServiceAllianceApartmentRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance apartment request id:" + request.getId() + "-EhServiceAllianceApartmentRequests");
@@ -236,6 +239,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (SettleRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.SETTLE_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("settle request id:" + request.getId() + "-EhSettleRequests");
@@ -256,6 +260,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (ReservationRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.RESERVE_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("reserve request id:" + request.getId() + "-" + request.getTemplateType());
@@ -421,6 +426,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
     private XContentBuilder createDoc(ServiceAllianceRequestInfo request){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("jumpType", request.getJumpType());
             b.field("templateType", request.getTemplateType());
             b.field("type", request.getType());
             b.field("ownerType", request.getOwnerType());
@@ -479,6 +485,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                 String day = format.format(time);
             	dto.setCreateTime(day);
             	
+            	dto.setJumpType(SearchUtils.getLongField(source.get("jumpType")));
             	dtos.add(dto);
             }
             catch(Exception ex) {

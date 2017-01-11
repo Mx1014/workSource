@@ -73,6 +73,8 @@ public class PmTaskDTO {
 	
 	private Long flowCaseId;
 	
+	private String buildingName;
+	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
 	
@@ -273,5 +275,11 @@ public class PmTaskDTO {
 	}
 	public void setFlowCaseId(Long flowCaseId) {
 		this.flowCaseId = flowCaseId;
+	}
+	public String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
 	}
 }

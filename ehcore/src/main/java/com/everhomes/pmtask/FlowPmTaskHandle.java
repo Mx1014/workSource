@@ -1,62 +1,40 @@
 package com.everhomes.pmtask;
 
-import java.io.BufferedOutputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
-import org.apache.poi.ss.usermodel.Cell;
-import org.apache.poi.ss.usermodel.CellStyle;
-import org.apache.poi.ss.usermodel.Font;
-import org.apache.poi.ss.usermodel.Row;
-import org.apache.poi.ss.usermodel.Sheet;
-import org.apache.poi.ss.usermodel.Workbook;
-import org.apache.poi.ss.util.CellRangeAddress;
-import org.apache.poi.xssf.usermodel.XSSFDataFormat;
-import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.family.FamilyService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseProvider;
@@ -64,21 +42,9 @@ import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
-import com.everhomes.namespace.NamespaceDetail;
-import com.everhomes.namespace.NamespaceResourceProvider;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationCommunity;
-import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.category.CategoryAdminStatus;
-import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -87,80 +53,24 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.namespace.NamespaceCommunityType;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.parking.ParkingFlowConstant;
-import com.everhomes.rest.pmtask.AssignTaskCommand;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.CategoryStatisticsDTO;
-import com.everhomes.rest.pmtask.CategoryTaskStatisticsDTO;
-import com.everhomes.rest.pmtask.CloseTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
-import com.everhomes.rest.pmtask.EvaluateScoreDTO;
-import com.everhomes.rest.pmtask.GetPrivilegesCommand;
-import com.everhomes.rest.pmtask.GetPrivilegesDTO;
-import com.everhomes.rest.pmtask.GetTaskLogCommand;
-import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
-import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
-import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
-import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
-import com.everhomes.rest.pmtask.DeleteTaskCategoryCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetStatisticsCommand;
-import com.everhomes.rest.pmtask.GetStatisticsResponse;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOperateType;
-import com.everhomes.rest.pmtask.PmTaskOwnerType;
-import com.everhomes.rest.pmtask.PmTaskPrivilege;
-import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.pmtask.PmTaskTargetStatus;
-import com.everhomes.rest.pmtask.PmTaskTargetType;
-import com.everhomes.rest.pmtask.RevisitCommand;
-import com.everhomes.rest.pmtask.SearchTaskCategoryStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskOperatorStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsCommand;
-import com.everhomes.rest.pmtask.SearchTaskStatisticsResponse;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.rest.pmtask.CompleteTaskCommand;
-import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
-import com.everhomes.rest.pmtask.TaskOperatorStatisticsDTO;
-import com.everhomes.rest.pmtask.TaskStatisticsDTO;
-import com.everhomes.rest.pmtask.UpdateTaskCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -214,6 +124,8 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	private FlowProvider flowProvider;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
@@ -245,11 +157,12 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		    				"Invalid addressOrgId parameter.");
 				}
 				task.setAddressOrgId(cmd.getAddressOrgId());
-				List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getAddressOrgId());
-				int size = addresses.size();
-				if(size != 0) {
-					task.setAddressId(addresses.get(0).getAddressId());
-				}
+				task.setAddressId(cmd.getAddressId());
+//				List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getAddressOrgId());
+//				int size = addresses.size();
+//				if(size != 0) {
+//					task.setAddressId(addresses.get(0).getAddressId());
+//				}
 			}else {
 				task.setAddressId(cmd.getAddressId());
 			}
@@ -295,7 +208,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	    			FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
 	    	if(null == flow) {
 	    		LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
 	    				"Enable pmtask flow not found.");
 	    	}
     		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
@@ -304,7 +217,8 @@ public class FlowPmTaskHandle implements PmTaskHandle {
     		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
     		createFlowCaseCommand.setReferId(task.getId());
     		createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
-    		createFlowCaseCommand.setContent("create pmtask");
+//    		createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
+    		createFlowCaseCommand.setContent(task.getContent());
     		createFlowCaseCommand.setProjectId(task.getOwnerId());
     		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
     		
@@ -312,8 +226,6 @@ public class FlowPmTaskHandle implements PmTaskHandle {
         	task.setFlowCaseId(flowCase.getId());
         	pmTaskProvider.updateTask(task);
 			
-			pmTaskSearch.feedDoc(task);
-
 	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
 	    			PmTaskOperateType.EXECUTOR.getCode(), null, null);
 	    	int size = targets.size();
@@ -324,18 +236,55 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	    	}
 			return null;
 		});
+		
+		pmTaskSearch.feedDoc(task);
+		
     	//同步数据到科技园
-		if(user.getNamespaceId() == 1000000) {
-			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
-			Category category = null;
-			if(null != cmd.getCategoryId())
-				category = categoryProvider.findCategoryById(cmd.getCategoryId());
-			handler.synchronizedData(task, cmd.getAttachments(), taskCategory, category);
-		}
+		long start = System.currentTimeMillis();
 
+//		if(user.getNamespaceId() == 1000000) {
+//			
+//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+//			String value = "[]";
+//			
+//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
+//			if(null != attachments) {
+//				attachments.stream().forEach(a -> {
+//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+//					a.setContentUrl(contentUrl);
+//				});
+//				value = JSONObject.toJSONString(attachments);
+//			}
+//			
+//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//	      
+//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//	        valueOperations.set(key, value);
+//			
+//			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
+//			handler.pushToQueque(task.getId());
+//		}
+		long end = System.currentTimeMillis();
+		System.out.println( (end - start) / 1000);
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+	
 	private void sendMessage4CreateTask(List<PmTaskTarget> targets, String requestorName, String requestorPhone,
 			String taskCategoryName, User user) {
 		List<String> phones = new ArrayList<String>();
