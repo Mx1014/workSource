@@ -1,13 +1,5 @@
 package com.everhomes.promotion;
 
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
@@ -16,21 +8,21 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
-import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommand;
-import com.everhomes.rest.organization.ListOrganizationMemberCommandResponse;
-import com.everhomes.rest.organization.ListOrganizationsCommandResponse;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.*;
 import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 @Component
 public class PromotionUserServiceImpl implements PromotionUserService {
@@ -105,7 +97,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         }
         
     }
-    
+
     @Override
     public void listUserByCommunity(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
         ListCommunityUsersCommand cmd = new ListCommunityUsersCommand();
@@ -113,44 +105,48 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         cmd.setCommunityId(id);
         cmd.setNamespaceId(visitor.getPromotion().getNamespaceId());
         cmd.setPageSize(100);
-        
-        Community community = communityProvider.findCommunityById(id);
-        
-        if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL) {
-            CommunityUserAddressResponse resp = communityService.listUserBycommunityId(cmd);
-            
-            while((resp != null) && (resp.getDtos() != null) && (resp.getDtos().size() > 0)) {
-                List<CommunityUserAddressDTO>  dtos = resp.getDtos();
-                for(CommunityUserAddressDTO dto : dtos) {
-                    User user = userProvider.findUserById(dto.getUserId());
-                    
-                    if(user != null) {
-                        callback.userFound(user, visitor);
-                    }
+
+
+        // 之前的代码是如果communityType商业园区的话查询该域空间下的所有user
+        // 但是需求是也需要按照园区区分的，所以把判断语句注释掉       add by xq.tian  2017/01/11
+
+        // Community community = communityProvider.findCommunityById(id);
+
+        // if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL) {
+        CommunityUserAddressResponse resp = communityService.listUserBycommunityId(cmd);
+
+        while((resp != null) && (resp.getDtos() != null) && (resp.getDtos().size() > 0)) {
+            List<CommunityUserAddressDTO>  dtos = resp.getDtos();
+            for(CommunityUserAddressDTO dto : dtos) {
+                User user = userProvider.findUserById(dto.getUserId());
+
+                if(user != null) {
+                    callback.userFound(user, visitor);
                 }
-                
-                //break after first process
-                if(resp.getNextPageAnchor() == null || resp.getDtos() == null || resp.getDtos().size() < cmd.getPageSize()) {
-                    break;
-                }
-                
-                cmd.setPageAnchor(resp.getNextPageAnchor());
-                resp = communityService.listUserBycommunityId(cmd);
-                
             }
-        } else {
-        	//园区
-//        	ListOrganizationsCommand cmd = null;
-//        	ListOrganizationsCommandResponse resp = organizationService.listOrganizations(cmd);
-//        	for(OrganizationDTO dto : resp.getDtos()) {
-//                OpPromotionUserVisitor child = new OpPromotionUserVisitor();
-//                child.setParent(visitor);
-//                child.setValue(dto.getId());
-//                child.setPromotion(visitor.getPromotion());
-//                
-//                listUserByCompany(child, callback);
-//        	}
-        	
+
+            //break after first process
+            if(resp.getNextPageAnchor() == null || resp.getDtos() == null || resp.getDtos().size() < cmd.getPageSize()) {
+                break;
+            }
+
+            cmd.setPageAnchor(resp.getNextPageAnchor());
+            resp = communityService.listUserBycommunityId(cmd);
+
+        }
+        /*} else {
+            // 园区
+            ListOrganizationsCommand cmd = null;
+            ListOrganizationsCommandResponse resp = organizationService.listOrganizations(cmd);
+            for(OrganizationDTO dto : resp.getDtos()) {
+                   OpPromotionUserVisitor child = new OpPromotionUserVisitor();
+                   child.setParent(visitor);
+                   child.setValue(dto.getId());
+                   child.setPromotion(visitor.getPromotion());
+
+                   listUserByCompany(child, callback);
+            }
+
         	if(visitor.getParent() == null) {
         		OpPromotionUserVisitor child = new OpPromotionUserVisitor();
         		child.setParent(visitor);
@@ -158,8 +154,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         		child.setPromotion(visitor.getPromotion());
         		this.listAllUser(visitor, callback);
         	}
-        }
-
+        }*/
     }
     
     @Override
