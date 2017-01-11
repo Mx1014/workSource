@@ -1019,9 +1019,9 @@ public class EquipmentController extends ControllerBase {
 	@RestReturn(value = StatEquipmentTasksResponse.class)
 	public RestResponse statEquipmentTasks(StatEquipmentTasksCommand cmd) {
 		
-//		CountTasksResponse tasks = equipmentService.countTasks(cmd);
+		StatEquipmentTasksResponse stat = equipmentService.statEquipmentTasks(cmd);
 		
-		RestResponse response = new RestResponse();
+		RestResponse response = new RestResponse(stat);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

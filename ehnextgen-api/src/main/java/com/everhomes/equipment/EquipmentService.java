@@ -42,6 +42,8 @@ import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
 import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
+import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
@@ -114,4 +116,6 @@ public interface EquipmentService {
 	EquipmentsDTO getInspectionObjectByQRCode(GetInspectionObjectByQRCodeCommand cmd);
 	
 	ListEquipmentTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
+	
+	StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd);
 }

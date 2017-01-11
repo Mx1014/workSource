@@ -193,7 +193,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -548,6 +552,8 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -651,6 +657,8 @@ import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
 import com.everhomes.rest.equipment.StandardType;
+import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
@@ -3578,6 +3586,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
 //		response.setTasks(dtoList);
 		return response;
+	}
+
+	@Override
+	public StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd) {
+		
+		return null;
 	}
 
 }
