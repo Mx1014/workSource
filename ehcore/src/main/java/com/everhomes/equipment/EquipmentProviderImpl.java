@@ -3,6 +3,7 @@ package com.everhomes.equipment;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
@@ -744,7 +745,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 	@Override
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasks(
-			String ownerType, Long ownerId, List<String> targetType, List<Long> targetId,
+			String ownerType, Long ownerId, Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
 			Integer offset, Integer pageSize) {
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
@@ -763,6 +764,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		if(targetId != null && targetId.size() > 0)
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.in(targetId));
+		
+		if(inspectionCategoryId != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
+		}
+		
 		
 		Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
 		con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
@@ -819,7 +825,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Override
-	public List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, 
+	public List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, Timestamp startDate, Timestamp endDate, 
 			CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus) {
 		List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
 		
@@ -842,7 +848,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
             
             if(taskStatus != null && taskStatus.size() > 0)
             	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.in(taskStatus));
-            	
+            
+            if(startDate != null && !"".equals(startDate)) {
+    			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_START_TIME.ge(startDate));
+    		}
+    		
+    		if(endDate != null && !"".equals(endDate)) {
+    			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endDate));
+    		}
+            
             query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
             query.addLimit(pageSize - tasks.size());
@@ -1474,6 +1488,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			return null;
 		});
 		return result;
+	}
+
+	@Override
+	public Set<Long> listRecordsTaskIdByOperatorId(Long uId, Long pageAnchor) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 
 }

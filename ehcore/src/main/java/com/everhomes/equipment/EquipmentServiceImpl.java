@@ -15,11 +15,14 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
+
 
 
 
@@ -361,6 +364,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -373,6 +377,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -1526,7 +1531,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, null, locator, pageSize, null);
+        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, null, null, null, locator, pageSize, null);
             
             if(tasks.size() > 0) {
                 for(EquipmentInspectionTasks task : tasks) {
@@ -1552,7 +1557,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         standardIds.add(standardId);
         CrossShardListingLocator locator = new CrossShardListingLocator();
         for(;;) {
-        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, standardIds, locator, pageSize, null);
+        	List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(equipmentId, standardIds, null, null, locator, pageSize, null);
             
             if(tasks.size() > 0) {
                 for(EquipmentInspectionTasks task : tasks) {
@@ -2718,6 +2723,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				standard.setOwnerType(cmd.getOwnerType());
 				standard.setOwnerId(cmd.getOwnerId());
+				standard.setInspectionCategoryId(cmd.getInspectionCategoryId());
 				standard.setStatus(EquipmentStandardStatus.NOT_COMPLETED.getCode());
 				
 				standard.setCreatorUid(userId);
@@ -2752,6 +2758,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setOwnerId(cmd.getOwnerId());
 				equipment.setTargetType(cmd.getTargetType());
 				equipment.setTargetId(cmd.getTargetId());
+				equipment.setInspectionCategoryId(cmd.getInspectionCategoryId());
 				equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
 				
 				equipment.setCreatorUid(userId);
@@ -2900,7 +2907,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		if(isAdmin) {
-			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), null, null, offset, pageSize + 1);
+			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), null, null, offset, pageSize + 1);
 		} else {
 			List<OrganizationDTO> groupDtos = listUserRelateDepartment(cmd.getOwnerId());
 			List<String> targetTypes = new ArrayList<String>();
@@ -2912,7 +2919,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 			if(targetIds.size() > 0) {
-				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), targetTypes, targetIds, offset, pageSize + 1);
+				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, offset, pageSize + 1);
 			}
 		}
         if(tasks.size() > pageSize) {
@@ -3142,7 +3149,16 @@ public class EquipmentServiceImpl implements EquipmentService {
         	standardIds = equipmentProvider.listStandardIdsByType(cmd.getTaskType());
         }
         
-		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, locator, pageSize+1, null);
+        Timestamp startTime = null;
+        Timestamp endTime = null;
+        if(cmd.getStartTime() != null) {
+        	startTime = new Timestamp(cmd.getStartTime());
+        }
+        if(cmd.getExpireTime() != null) {
+        	endTime = new Timestamp(cmd.getExpireTime());
+        }
+        
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTasksByEquipmentId(cmd.getEquipmentId(), standardIds, startTime, endTime, locator, pageSize+1, null);
 		
 		if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
@@ -3464,13 +3480,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 	        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 	        taskStatus.add(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
 	        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-			tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
+			tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
 			
 		} else {
 				List<Byte> taskStatus = new ArrayList<Byte>();
 		        taskStatus.add(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
 		        taskStatus.add(EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-				tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, locator, pageSize+1, taskStatus);
+				tasks = equipmentProvider.listTasksByEquipmentId(equipment.getId(), null, null, null, locator, pageSize+1, taskStatus);
 		}
         
 		if(tasks.size() > pageSize) {
@@ -3520,8 +3536,48 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public ListEquipmentTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
+		Long uId = UserContext.current().getUser().getId();
+		Set<Long> taskIds = equipmentProvider.listRecordsTaskIdByOperatorId(uId, cmd.getPageAnchor());
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<Long> taskIdlist = new ArrayList<Long>();
+
+        for(final Long value : taskIds){
+
+        	taskIdlist.add(value);
+
+        }
+
+        Collections.sort(taskIdlist);
+        Collections.reverse(taskIdlist);
+        
+        if(taskIdlist.size() > pageSize) {
+        	taskIdlist.subList(0,pageSize-1);
+        	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
+        }
+       
+//		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTaskByIds(taskIdlist);
+//		List<QualityInspectionTaskRecords> records = new ArrayList<QualityInspectionTaskRecords>();
+//        for(QualityInspectionTasks task : tasks) {
+//        	QualityInspectionTaskRecords record = equipmentProvider.listLastRecordByTaskId(task.getId());
+//        	if(record != null) {
+//        		task.setRecord(record);
+//            	records.add(task.getRecord());
+//        	}
+//        	
+//        }
+//
+//		this.qualityProvider.populateRecordAttachments(records);
+//		this.qualityProvider.populateRecordItemResults(records);
+//
+//		for(QualityInspectionTaskRecords record : records) {
+//			populateRecordAttachements(record, record.getAttachments());
+//		}
+//        
+//		List<QualityInspectionTaskDTO> dtoList = convertQualityInspectionTaskToDTO(tasks, uId);
+//		response.setTasks(dtoList);
+		return response;
 	}
 
 }
