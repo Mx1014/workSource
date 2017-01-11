@@ -78,5 +78,7 @@ public interface ConfigConstants {
 	public static final String CLUB_PLACEHOLDER_NAME = "club.placeholder.name"; 
 	
 	public static final String CLUB_SHARE_URL = "club.share.url"; 
+	
+	public static final String JINDI_SYNC_NAMESPACE = "jindi.sync.namespace"; 
      
 }
