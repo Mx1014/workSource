@@ -228,34 +228,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private NamespaceResourceProvider namespaceResourceProvider;
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-
-		SearchTasksResponse response = new SearchTasksResponse();
-		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
-				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
-				cmd.getPageAnchor(), pageSize);
-		int listSize = list.size();
-		if(listSize > 0){
-    		response.setRequests(list.stream().map(t -> {
-    			PmTask task = pmTaskProvider.findTaskById(t.getId());
-    			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
-    			
-    			Category category = checkCategory(task.getTaskCategoryId());
-    			dto.setTaskCategoryId(category.getId());
-    			dto.setTaskCategoryName(category.getName());
-    			
-    			setPmTaskDTOAddress(task, dto);
-    			return dto;
-    		}).collect(Collectors.toList()));
-    		if(listSize != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
-        	}
-    	}
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		return response;
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+		
+		return handler.searchTasks(cmd);
 	}
 	
 	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {

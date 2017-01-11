@@ -35,6 +35,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
@@ -63,7 +64,10 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -113,6 +117,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private AddressProvider addressProvider;
 	@Autowired
     private ContentServerService contentServerService;
+	@Autowired
+    private ConfigurationProvider configProvider;
 	
 	@PostConstruct
 	public void init() {
@@ -726,4 +732,35 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         
         return url;
     }
+
+	@Override
+	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		SearchTasksResponse response = new SearchTasksResponse();
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
+				cmd.getPageAnchor(), pageSize);
+		int listSize = list.size();
+		if(listSize > 0){
+    		response.setRequests(list.stream().map(t -> {
+//    			PmTask task = pmTaskProvider.findTaskById(t.getId());
+    			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
+    			
+    			CategoryDTO taskCategory = createCategoryDTO();
+    			dto.setTaskCategoryId(taskCategory.getId());
+    			dto.setTaskCategoryName(taskCategory.getName());
+    			
+    			return dto;
+    		}).collect(Collectors.toList()));
+    		if(listSize != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+        	}
+    	}
+		
+		return response;
+	}
 }

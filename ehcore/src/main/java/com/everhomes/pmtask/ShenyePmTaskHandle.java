@@ -61,9 +61,12 @@ import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -605,5 +608,37 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Invalid namespaceId parameter.");
         }
+	}
+
+	@Override
+	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
+		SearchTasksResponse response = new SearchTasksResponse();
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(), 
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(), 
+				cmd.getPageAnchor(), pageSize);
+		int listSize = list.size();
+		if(listSize > 0){
+    		response.setRequests(list.stream().map(t -> {
+    			PmTask task = pmTaskProvider.findTaskById(t.getId());
+    			PmTaskDTO dto = ConvertHelper.convert(t, PmTaskDTO.class);
+    			
+    			Category category = checkCategory(task.getTaskCategoryId());
+    			dto.setTaskCategoryId(category.getId());
+    			dto.setTaskCategoryName(category.getName());
+    			
+    			setPmTaskDTOAddress(task, dto);
+    			return dto;
+    		}).collect(Collectors.toList()));
+    		if(listSize != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(listSize-1).getCreateTime().getTime());
+        	}
+    	}
+		
+		return response;
 	}
 }

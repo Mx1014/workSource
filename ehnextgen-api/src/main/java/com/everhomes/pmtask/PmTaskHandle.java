@@ -11,6 +11,8 @@ import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskDTO;
+import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.SearchTasksResponse;
 
 public interface PmTaskHandle {
 	 String PMTASK_PREFIX = "Pmtask-";
@@ -30,4 +32,6 @@ public interface PmTaskHandle {
 	 ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd);
 	 
 	 List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd);
+	 
+	 SearchTasksResponse searchTasks(SearchTasksCommand cmd);
 }
