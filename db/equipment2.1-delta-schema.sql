@@ -23,3 +23,16 @@ ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `inspection_category_id` 
 ALTER TABLE `eh_equipment_inspection_equipments` ADD COLUMN `namespace_id` INTEGER;
 ALTER TABLE `eh_equipment_inspection_standards` ADD COLUMN `namespace_id` INTEGER;
 ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `namespace_id` INTEGER;
+
+
+DROP TABLE IF EXISTS `eh_equipment_inspection_standard_group_map`;
+CREATE TABLE `eh_equipment_inspection_standard_group_map` (
+  `id` BIGINT NOT NULL COMMENT 'id',
+  `group_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: executive group, 2: review group',
+  `standard_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_standards',
+  `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',
+  `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',
+  `create_time` DATETIME,
+
+  PRIMARY KEY (`id`)
+)ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
