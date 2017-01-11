@@ -1,5 +1,6 @@
 package com.everhomes.general_approval;
 
+import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -8,6 +9,8 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
@@ -28,10 +31,14 @@ import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 
 public abstract class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	protected static List<String> DEFUALT_FIELDS = new ArrayList<String>();
 
+	@Autowired
+	protected ContentServerService contentServerService;
 	@Autowired
 	protected ServiceModuleProvider serviceModuleProvider;
 	@Autowired
@@ -128,31 +135,45 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 					 
 					switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
 					case SINGLE_LINE_TEXT:
-						e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
 						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 						break;
 					case MULTI_LINE_TEXT:
 						e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+						entities.add(e);
 						break;
 					case IMAGE:
 						e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
 						//工作流images怎么传
 						PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormImageValue.class);
+						for(String uriString : imageValue.getUris()){
+							String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+							e.setValue(url);
+							FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+							entities.add(e2);
+						}
 						break;
 					case FILE:
 //						e.setEntityType(FlowCaseEntityType.F.getCode()); 
-						//工作流files怎么传
+						//TODO:工作流需要新增类型file
+						e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
 						PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
+						for(String uriString : fileValue.getUris()){
+							String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+							e.setValue(url);
+							FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+							entities.add(e2);
+						}
 						break;
 					case INTEGER_TEXT:
-						e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
 						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+						entities.add(e);
 						break;
 						
 					}
 					
-					entities.add(e);
 				}
 
 			}
