@@ -70,12 +70,12 @@ public class EbeiPmTaskHandleTest {
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("userId", "12");
+		param.put("userId", "");
 		param.put("address", "测试项目东三区凤凰阁第1栋1单元1楼0001");
-		param.put("buildingId", "53327");
+		param.put("buildingId", "");
 		param.put("linkName", "一碑测试");
 		param.put("linkTel", "18011001100");
-		param.put("serviceId", "193");
+		param.put("serviceId","192");
 		param.put("type", "1");
 		param.put("remarks", "业主报修水管坏了");
 		param.put("projectId", "240111044331055940");
@@ -83,12 +83,13 @@ public class EbeiPmTaskHandleTest {
 		param.put("fileAddrs", "http://1.jpg,http://2.jpg");
 		param.put("buildingType", "0");
 		
-		param.put("orderId", "19f53feb-c382-4f64-b8f8-5052a16da200");
+		
+//		param.put("orderId", "19f53feb-c382-4f64-b8f8-5052a16da200");
 //		login();
-//		postToEbei(param, CREATE_TASK);
+		postToEbei(param, CREATE_TASK);
 		
 		
-		postToEbei(param, GET_TASK_DETAIL);
+//		postToEbei(param, GET_TASK_DETAIL);
 //		listPmtasks();
 //		listServiceType("240111044331055940");
 	}
@@ -96,9 +97,9 @@ public class EbeiPmTaskHandleTest {
 	public static void listPmtasks(){
 JSONObject param = new JSONObject();
 		
-		param.put("userId", "12");
-		param.put("buildingId", "53327");
-		param.put("linkName", "一碑测试");
+		param.put("userId", "");
+		param.put("buildingId", "");
+		param.put("linkName", "");
 		param.put("linkTel", "18011001100");
 		param.put("perSize", 10);
 		param.put("pageNum", 1);
@@ -154,6 +155,7 @@ JSONObject param = new JSONObject();
 			}
         }
 		String json = result.toString();
+		LOGGER.debug("Data from Ebei, param={}", param);
 		if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Data from Ebei, json={}", json);
 		
@@ -207,4 +209,6 @@ JSONObject param = new JSONObject();
 		
 		return json;
 	}
+	
+	
 }

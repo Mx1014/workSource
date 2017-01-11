@@ -135,7 +135,6 @@ import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
 import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -195,6 +194,25 @@ public class ParkingServiceImpl implements ParkingService {
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
         
         List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+        
+        Long organizationId = cmd.getOrganizationId();
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        String plateOwnerName = user.getNickName();
+        
+        if(null != organizationId) {
+        	OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+        	if(null != organizationMember) {
+        		plateOwnerName = organizationMember.getContactName();
+        	}
+        }
+        
+        for(ParkingCardDTO card: cardList) {
+        	
+			if(StringUtils.isBlank(card.getPlateOwnerName())) {
+				card.setPlateOwnerName(plateOwnerName);
+			}
+    	}
         
         return cardList;
     }

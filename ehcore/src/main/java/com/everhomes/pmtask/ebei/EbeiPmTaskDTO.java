@@ -23,7 +23,7 @@ public class EbeiPmTaskDTO {
 	
 	private String filePath;
 	private Float score;
-	private List<EbeiPmtaskLogDTO> logs;
+	private List<EbeiPmtaskLogDTO> scheduleStr;
 	
 	public String getOrderId() {
 		return orderId;
@@ -121,12 +121,12 @@ public class EbeiPmTaskDTO {
 	public void setScore(Float score) {
 		this.score = score;
 	}
-	public List<EbeiPmtaskLogDTO> getLogs() {
-		return logs;
+	public List<EbeiPmtaskLogDTO> getScheduleStr() {
+		return scheduleStr;
 	}
-	public void setLogs(List<EbeiPmtaskLogDTO> logs) {
-		this.logs = logs;
+	public void setScheduleStr(List<EbeiPmtaskLogDTO> scheduleStr) {
+		this.scheduleStr = scheduleStr;
 	}
-	
+
 	
 }

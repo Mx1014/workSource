@@ -7,7 +7,6 @@ import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.Date;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -15,10 +14,9 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
-import org.apache.commons.collections.CollectionUtils;
-import org.apache.commons.httpclient.HttpStatus;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpPost;
 import org.apache.http.entity.StringEntity;
@@ -40,7 +38,6 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.discover.ItemType;
 import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
@@ -50,12 +47,7 @@ import com.everhomes.pmtask.ebei.EbeiTaskResult;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiServiceType;
-import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
@@ -66,17 +58,12 @@ import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
-import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
-import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -84,7 +71,6 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI)
 public class EbeiPmTaskHandle implements PmTaskHandle{
@@ -265,7 +251,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 		
 		param.put("buildingId", "");
-		param.put("serviceId", "");
+		param.put("serviceId", task.getCategoryId());
 		param.put("type", "1");
 		param.put("remarks", task.getContent());
 		param.put("projectId", projectId);
@@ -628,6 +614,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
 		
+		CategoryDTO taskCategory = createCategoryDTO();
+		dto.setTaskCategoryName(taskCategory.getName());
+		dto.setCategoryName(ebeiPmTask.getServiceName());
+		
 		String filePath = ebeiPmTask.getFilePath();
 		if(StringUtils.isNotBlank(filePath)) {
 			String[] filePaths = filePath.split(",");
@@ -641,7 +631,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			dto.setAttachments(attachments);
 		}
 		
-		List<EbeiPmtaskLogDTO> logs = ebeiPmTask.getLogs();
+		List<EbeiPmtaskLogDTO> logs = ebeiPmTask.getScheduleStr();
 		
 		if(null != logs) {
 			List<PmTaskLogDTO> taskLogs = new ArrayList<>();
