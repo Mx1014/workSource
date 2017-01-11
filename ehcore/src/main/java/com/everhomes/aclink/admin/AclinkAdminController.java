@@ -328,6 +328,21 @@ public class AclinkAdminController extends ControllerBase {
     }
 
     /**
+     *
+     * <b>URL: /admin/aclink/checkAllAuthList</b>
+     * <p>校验能不能全部授权</p>
+     * @return
+     */
+    @RequestMapping("checkAllAuthList")
+    @RestReturn(value=String.class)
+    public RestResponse checkAllAuthList() {
+        RestResponse response = new RestResponse(doorAccessService.checkAllDoorAuthList());
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
      * <b>URL: /admin/aclink/searchVisitorDoorAuth</b>
      * <p>获取门禁列表</p>
      * @return 门禁列表

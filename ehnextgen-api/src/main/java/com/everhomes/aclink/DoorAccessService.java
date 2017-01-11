@@ -119,4 +119,6 @@ public interface DoorAccessService {
 
     void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response);
 
+    String checkAllDoorAuthList();
+
 }

@@ -17,8 +17,6 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
 import javax.servlet.http.HttpServletResponse;
 
@@ -26,6 +24,7 @@ import com.everhomes.payment.util.DownloadUtil;
 import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.sms.DateUtil;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -35,7 +34,6 @@ import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.jooq.tools.Convert;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,7 +60,6 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -77,7 +74,6 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.group.GroupNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -103,7 +99,6 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.util.DateUtil;
 import org.springframework.util.StringUtils;
 
 
@@ -206,6 +201,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
     final static String LAST_TICK = "dooraccess:%d:lasttick";
+
+    final static String DOOR_AUTH_ALL_USER = "doorauth:%d:alluser";
+
     final static long TASK_TICK_TIMEOUT = 5*60*1000;
     public final static String Manufacturer = "zuolin001";
     private final static long MAX_KEY_ID = 1024;
@@ -404,7 +402,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 dto.setPhone(organization.getContactToken());
                 dto.setIsAuth((byte)1);
             }else{
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
                 dto.setIsAuth((byte)0);
+                if(null != identifier){
+                    dto.setPhone(identifier.getIdentifierToken());
+                }
             }
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
@@ -453,6 +455,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
      * @return
      */
     private XSSFWorkbook createXSSFWorkbook(ListAclinkUserCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
         XSSFWorkbook wb = new XSSFWorkbook();
         String sheetName = "门禁受权用户列表";
         XSSFSheet sheet = wb.createSheet(sheetName);
@@ -477,7 +481,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         row1.createCell(cellN ++).setCellValue("注册时间");
         row1.createCell(cellN ++).setCellValue("认证状态");
         row1.createCell(cellN ++).setCellValue("开门权限");
-        if(UserContext.getCurrentNamespaceId() != 999990L){
+        if(namespaceId != 999990){
             row1.createCell(cellN ++).setCellValue("访客授权权限");
             row1.createCell(cellN ++).setCellValue("远程开门权限");
         }
@@ -494,16 +498,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 row.setRowStyle(style);
                 row.createCell(cellN ++).setCellValue(user.getNickName());
                 row.createCell(cellN ++).setCellValue(user.getPhone());
-                row.createCell(cellN ++).setCellValue(com.everhomes.sms.DateUtil.dateToStr(new Date(user.getRegisterTime()), com.everhomes.sms.DateUtil.DATE_TIME_LINE));
+                row.createCell(cellN ++).setCellValue(DateUtil.dateToStr(new Date(user.getRegisterTime()), DateUtil.DATE_TIME_LINE));
                 row.createCell(cellN ++).setCellValue(user.getIsAuth() > 0 ? "已认证" : "未认证");
-                row.createCell(cellN ++).setCellValue(user.getRightOpen() > 0 ? "已受权" : "未受权");
-                if(UserContext.getCurrentNamespaceId() != 999990L){
-                    row.createCell(cellN ++).setCellValue(user.getRightVisitor() > 0 ? "已受权" : "未受权");
-                    row.createCell(cellN ++).setCellValue(user.getRightRemote() > 0 ? "已受权" : "未受权");
+                row.createCell(cellN ++).setCellValue(user.getRightOpen() > 0 ? "已授权" : "未授权");
+                if(namespaceId != 999990){
+                    row.createCell(cellN ++).setCellValue(user.getRightVisitor() > 0 ? "已授权" : "未授权");
+                    row.createCell(cellN ++).setCellValue(user.getRightRemote() > 0 ? "已授权" : "未授权");
                 }
                 row.createCell(cellN ++).setCellValue(user.getUserName());
                 row.createCell(cellN ++).setCellValue(user.getCompany());
-                row.createCell(cellN ++).setCellValue(null != user.getAuthTime() ? com.everhomes.sms.DateUtil.dateToStr(new Date(user.getRegisterTime()), com.everhomes.sms.DateUtil.DATE_TIME_LINE) : "");
+                row.createCell(cellN ++).setCellValue(null != user.getAuthTime() ? DateUtil.dateToStr(new Date(user.getRegisterTime()), DateUtil.DATE_TIME_LINE) : "");
             }
 
             if(null == userRes.getNextPageAnchor()){
@@ -2556,6 +2560,13 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         return resp;
     }
 
+    @Override
+    public String checkAllDoorAuthList(){
+        String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        return redisTemplate.opsForValue().get(key).toString();
+    }
 
     @Override
     public ListDoorAuthResponse createAllDoorAuthList(AclinkCreateAllDoorAuthListCommand cmd) {
@@ -2566,6 +2577,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
 
         ListAclinkUserCommand userCmd = ConvertHelper.convert(cmd, ListAclinkUserCommand.class);
         userCmd.setPageSize(1000);
+
+        String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        redisTemplate.opsForValue().set(key, System.currentTimeMillis(), 30, TimeUnit.MINUTES);
         while (true){
             AclinkUserResponse userRes = this.listAclinkUsers(userCmd);
             for (AclinkUserDTO user: userRes.getUsers()) {
@@ -2581,7 +2597,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }
             userCmd.setPageAnchor(userRes.getNextPageAnchor());
         }
-
+        redisTemplate.delete(key);
         return resp;
     }
     
