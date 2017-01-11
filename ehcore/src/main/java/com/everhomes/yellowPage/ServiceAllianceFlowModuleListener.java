@@ -1,5 +1,6 @@
 package com.everhomes.yellowPage;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -25,9 +26,12 @@ import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
+import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.util.DateHelper;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
-
+	@Autowired
+	private ServiceAllianceRequestInfoSearcher serviceAllianceRequestInfoSearcher;
 	private static final long MODULE_ID = 40500;
 			
     @Autowired
@@ -47,6 +51,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 	public void onFlowCaseCreating(FlowCase flowCase) {
 		// 服务联盟的审批拼接工作流 content字符串
 		
+		ServiceAllianceRequestInfo request = new ServiceAllianceRequestInfo();
 		PostApprovalFormCommand cmd = JSONObject.parseObject(flowCase.getContent(), PostApprovalFormCommand.class);
 		StringBuffer contentBuffer = new StringBuffer();
 		GeneralApproval ga = this.generalApprovalProvider.getGeneralApprovalById(cmd
@@ -89,8 +94,20 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			contentBuffer.append("服务机构");
 			contentBuffer.append(" : ");
 			contentBuffer.append(yellowPage.getName());
+			request.setServiceAllianceId(yellowPageId);
+			request.setType(yellowPage.getCategoryId());
 		}
 		flowCase.setContent(contentBuffer.toString());
+		//服务联盟加一个申请
+		request.setJumpType(2L);
+		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		request.setCreatorName(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+		request.setCreatorMobile(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+//		request.setCreatorOrganizationId(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+		request.setOwnerType(flowCase.getOwnerType());
+		request.setOwnerId(flowCase.getOwnerId());
+		request.setFlowCaseId(flowCase.getId());
+		serviceAllianceRequestInfoSearcher.feedDoc(request);
 	}
 
 
