@@ -4,12 +4,9 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
-import javax.validation.constraints.NotNull;
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.quality.QualityInspectionStandardGroupMap;
-import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.TaskCountDTO;
 
 
