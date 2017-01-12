@@ -57,4 +57,8 @@ public interface PmTaskProvider {
 	
 	List<PmTaskTargetStatistic> searchTaskTargetStatistics(Integer namespaceId, Long ownerId, Long taskCategoryId, Long userId, Timestamp dateStr,
 			Long pageAnchor, Integer pageSize);
+
+	List<PmTaskLog> listRepairByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+	List<PmTaskLog> listRepairByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 }
