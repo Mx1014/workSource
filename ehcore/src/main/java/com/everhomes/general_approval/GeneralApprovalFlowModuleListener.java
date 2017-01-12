@@ -142,6 +142,7 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 						case SINGLE_LINE_TEXT:
 							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
 							e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+							entities.add(e);
 							break;
 						case MULTI_LINE_TEXT:
 							e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
