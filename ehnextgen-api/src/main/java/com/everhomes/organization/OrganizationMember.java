@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 public class OrganizationMember extends EhOrganizationMembers implements Comparable<OrganizationMember> {
 	
 	private java.lang.String   nickName;
-	private java.lang.String   avatar;
+	// private java.lang.String   avatar;
 	
 	private String initial;
 	
@@ -33,18 +33,6 @@ public class OrganizationMember extends EhOrganizationMembers implements Compara
 
 	public void setNickName(java.lang.String nickName) {
 		this.nickName = nickName;
-	}
-
-
-
-	public java.lang.String getAvatar() {
-		return avatar;
-	}
-
-
-
-	public void setAvatar(java.lang.String avatar) {
-		this.avatar = avatar;
 	}
 
 
