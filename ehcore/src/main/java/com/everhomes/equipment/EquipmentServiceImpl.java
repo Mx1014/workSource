@@ -205,7 +205,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -401,6 +403,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -3015,7 +3018,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Integer offset = cmd.getPageAnchor().intValue();
         
         List<EquipmentInspectionTasks> tasks = new ArrayList<EquipmentInspectionTasks>();
-      
+        List<String> targetTypes = new ArrayList<String>();
+        List<Long> targetIds = new ArrayList<Long>();
+        targetTypes.add(cmd.getTargetType());
+        targetIds.add(cmd.getTargetId());
+        
         //是否是管理员
         boolean isAdmin = false;
 		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
@@ -3031,20 +3038,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		if(isAdmin) {
-			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), null, null, offset, pageSize + 1);
+			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, offset, pageSize + 1);
 		} else {
 			List<OrganizationDTO> groupDtos = listUserRelateDepartment(cmd.getOwnerId());
-			List<String> targetTypes = new ArrayList<String>();
-			List<Long> targetIds = new ArrayList<Long>();
-			if(groupDtos != null && groupDtos.size() > 0) {
-				for(OrganizationDTO dto : groupDtos) {
-					targetTypes.add(dto.getGroupType());
-					targetIds.add(dto.getId());
-				}
-			}
-			if(targetIds.size() > 0) {
-				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, offset, pageSize + 1);
-			}
+			
+				
+			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, offset, pageSize + 1);
 		}
         if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);

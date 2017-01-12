@@ -242,8 +242,8 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("ownerId", task.getOwnerId());
             b.field("ownerType", task.getOwnerType());
-            b.field("targetId", task.getExecutiveGroupId());
-            b.field("targetType", task.getExecutiveGroupType());
+            b.field("targetId", task.getTargetId());
+            b.field("targetType", task.getTargetType());
             b.field("startTime", task.getExecutiveStartTime());
             b.field("endTime", task.getExecutiveExpireTime());
             b.field("status", task.getStatus());
