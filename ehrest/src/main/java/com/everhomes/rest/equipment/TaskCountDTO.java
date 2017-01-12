@@ -35,7 +35,7 @@ public class TaskCountDTO {
 	
 	private Long standardId;
 	
-	private Long standardName;
+	private String standardName;
 	
 	private Long taskCount;
 	
@@ -101,11 +101,11 @@ public class TaskCountDTO {
 		this.standardId = standardId;
 	}
 
-	public Long getStandardName() {
+	public String getStandardName() {
 		return standardName;
 	}
 
-	public void setStandardName(Long standardName) {
+	public void setStandardName(String standardName) {
 		this.standardName = standardName;
 	}
 

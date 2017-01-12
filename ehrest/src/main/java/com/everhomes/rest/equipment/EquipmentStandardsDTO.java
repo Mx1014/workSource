@@ -262,6 +262,22 @@ public class EquipmentStandardsDTO {
 		this.reviewExpiredDays = reviewExpiredDays;
 	}
 
+	public List<StandardGroupDTO> getExecutiveGroup() {
+		return executiveGroup;
+	}
+
+	public void setExecutiveGroup(List<StandardGroupDTO> executiveGroup) {
+		this.executiveGroup = executiveGroup;
+	}
+
+	public List<StandardGroupDTO> getReviewGroup() {
+		return reviewGroup;
+	}
+
+	public void setReviewGroup(List<StandardGroupDTO> reviewGroup) {
+		this.reviewGroup = reviewGroup;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

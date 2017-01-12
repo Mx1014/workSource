@@ -201,7 +201,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -393,6 +397,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 
 
@@ -923,9 +929,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-//			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-//			if(group != null)
-//				dto.setGroupName(group.getName());
+			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+			if(group != null)
+				dto.setGroupName(group.getName());
         	
         	return dto;
         }).collect(Collectors.toList());
@@ -933,16 +939,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-//			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-//			if(group != null)
-//				dto.setGroupName(group.getName());
+			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+			if(group != null)
+				dto.setGroupName(group.getName());
 			
         	return dto;
         }).collect(Collectors.toList());
 		
 		standardDto.setRepeat(repeatDto);
-//		standardDto.setExecutiveGroup(executiveGroup);
-//		standardDto.setReviewGroup(reviewGroup);
+		standardDto.setExecutiveGroup(executiveGroup);
+		standardDto.setReviewGroup(reviewGroup);
 		
 		return standardDto;
 	}
@@ -959,17 +965,17 @@ public class EquipmentServiceImpl implements EquipmentService {
     		
 			for(StandardGroupDTO group : groupList) {
 				EquipmentInspectionStandardGroupMap map = new EquipmentInspectionStandardGroupMap();
-//				 map.setStandardId(standard.getId());
-//				 map.setGroupType(group.getGroupType());
-//				 map.setGroupId(group.getGroupId());
-//				 map.setPositionId(group.getPositionId());
+				 map.setStandardId(standard.getId());
+				 map.setGroupType(group.getGroupType());
+				 map.setGroupId(group.getGroupId());
+				 map.setPositionId(group.getPositionId());
 				 equipmentProvider.createEquipmentInspectionStandardGroupMap(map);
-//				 if(QualityGroupType.EXECUTIVE_GROUP.equals(map.getGroupType())) {
-//					 executiveGroup.add(map);
-//				 }
-//				 if(QualityGroupType.REVIEW_GROUP.equals(map.getGroupType())) {
-//					 reviewGroup.add(map);
-//				 }
+				 if(QualityGroupType.EXECUTIVE_GROUP.equals(map.getGroupType())) {
+					 executiveGroup.add(map);
+				 }
+				 if(QualityGroupType.REVIEW_GROUP.equals(map.getGroupType())) {
+					 reviewGroup.add(map);
+				 }
 			}
 			
 			standard.setExecutiveGroup(executiveGroup);
@@ -3682,8 +3688,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 				if(community != null) {
 					task.setTargetName(community.getName());
 				}
-//				equipmentName: 设备名称 
-//				standardName: 标准名称 
+
+				EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(task.getEquipmentId());
+				if(equipment != null) {
+					task.setEquipmentName(equipment.getName());
+				}
+				
+				EquipmentInspectionStandards standard = equipmentProvider.findStandardById(task.getStandardId());
+				if(standard != null) {
+					task.setStandardName(standard.getName());
+				}
 				Double maintanceRate =  ((double)(task.getCompleteMaintance() + task.getInMaintance() + task.getNeedMaintance()))/task.getTaskCount();
 				task.setMaintanceRate(maintanceRate);
 				
