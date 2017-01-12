@@ -25,6 +25,7 @@ import com.everhomes.rest.aclink.*;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.DateUtil;
+import com.everhomes.util.*;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -93,10 +94,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
 
 import org.apache.commons.codec.binary.Base64;
 import org.springframework.util.StringUtils;
@@ -2585,26 +2582,32 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        String v = "" + System.currentTimeMillis();
-        redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
-        LOGGER.debug("start door auth. startTime = " + v);
-        while (true){
-            AclinkUserResponse userRes = this.listAclinkUsers(userCmd);
-            for (AclinkUserDTO user: userRes.getUsers()) {
-                CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
-                authCmd.setUserId(user.getId());
-                authCmd.setApproveUserId(UserContext.current().getUser().getId());
-                DoorAuthDTO dto = createDoorAuth(authCmd);
-                dtos.add(dto);
-            }
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                String v = "" + System.currentTimeMillis();
+                redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
+                LOGGER.debug("start door auth. startTime = " + v);
+                while (true){
+                    AclinkUserResponse userRes = listAclinkUsers(userCmd);
+                    for (AclinkUserDTO user: userRes.getUsers()) {
+                        CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
+                        authCmd.setUserId(user.getId());
+                        authCmd.setApproveUserId(UserContext.current().getUser().getId());
+                        DoorAuthDTO dto = createDoorAuth(authCmd);
+                        dtos.add(dto);
+                    }
 
-            if(null == userRes.getNextPageAnchor()){
-                break;
+                    if(null == userRes.getNextPageAnchor()){
+                        break;
+                    }
+                    userCmd.setPageAnchor(userRes.getNextPageAnchor());
+                }
+                redisTemplate.delete(key);
+                LOGGER.debug("end door auth. startTime = " + System.currentTimeMillis());
             }
-            userCmd.setPageAnchor(userRes.getNextPageAnchor());
-        }
-        LOGGER.debug("end door auth. startTime = " + System.currentTimeMillis());
-        redisTemplate.delete(key);
+        });
+
         return resp;
     }
     
