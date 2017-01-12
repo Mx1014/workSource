@@ -195,7 +195,19 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
+
+
 
 
 
@@ -554,6 +566,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
+
+
+
+
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -561,6 +579,8 @@ import com.everhomes.acl.RoleAssignment;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Building;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -579,6 +599,7 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.quality.QualityInspectionCategories;
+import com.everhomes.quality.QualityInspectionStandardGroupMap;
 import com.everhomes.quality.QualityInspectionStandards;
 import com.everhomes.quality.QualityInspectionTaskAttachments;
 import com.everhomes.quality.QualityInspectionTaskRecords;
@@ -656,10 +677,12 @@ import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentStandardRelationsCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
+import com.everhomes.rest.equipment.StandardGroupDTO;
 import com.everhomes.rest.equipment.StandardType;
 import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.Status;
+import com.everhomes.rest.equipment.TaskCountDTO;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
@@ -682,10 +705,12 @@ import com.everhomes.rest.organization.OrganizationMemberDTO;
 import com.everhomes.rest.organization.OrganizationMenuResponse;
 import com.everhomes.rest.organization.OrganizationNaviFlag;
 import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.quality.CountTasksResponse;
 import com.everhomes.rest.quality.EvaluationDTO;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.rest.quality.ProcessType;
+import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionTaskDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
@@ -695,7 +720,6 @@ import com.everhomes.rest.quality.QualityNotificationTemplateCode;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.quality.QualityStandardsDTO;
 import com.everhomes.rest.quality.QualityTaskType;
-import com.everhomes.rest.quality.StandardGroupDTO;
 import com.everhomes.rest.repeat.RepeatExpressionDTO;
 import com.everhomes.rest.repeat.RepeatServiceErrorCode;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
@@ -792,6 +816,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Autowired
 	private UserProvider userProvider;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
@@ -867,17 +894,87 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 		processRepeatSetting(standard);
-		equipmentStandardSearcher.feedDoc(standard);
-		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
 		
-		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(dto.getTemplateId(), dto.getOwnerId(), dto.getOwnerType());
+		List<StandardGroupDTO> groupList = cmd.getGroup();
+		processStandardGroups(groupList, standard);
+		
+		equipmentStandardSearcher.feedDoc(standard);
+		
+		EquipmentStandardsDTO dto = converStandardToDto(standard);
+		return dto;
+	}
+	
+	private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
+		processRepeatSetting(standard);
+		EquipmentStandardsDTO standardDto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
+		RepeatSettingsDTO repeatDto = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
+		
+		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(standardDto.getTemplateId(), standardDto.getOwnerId(), standardDto.getOwnerType());
 		if(template != null) {
-			dto.setTemplateName(template.getName());
+			standardDto.setTemplateName(template.getName());
 		}
 		
-		RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-		dto.setRepeat(rs);
-		return dto;
+		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(), 
+				standard.getOwnerId());
+		if(null != member) {
+			standardDto.setOperatorName(member.getContactName());
+		}
+			
+		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
+        	
+			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
+			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+			if(group != null)
+				dto.setGroupName(group.getName());
+        	
+        	return dto;
+        }).collect(Collectors.toList());
+
+		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
+        	
+			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
+			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+			if(group != null)
+				dto.setGroupName(group.getName());
+			
+        	return dto;
+        }).collect(Collectors.toList());
+		
+		standardDto.setRepeat(repeatDto);
+		standardDto.setExecutiveGroup(executiveGroup);
+		standardDto.setReviewGroup(reviewGroup);
+		
+		return standardDto;
+	}
+	
+	private void processStandardGroups(List<StandardGroupDTO> groupList, EquipmentInspectionStandards standard) {
+        
+        List<EquipmentInspectionStandardGroupMap> executiveGroup = null;
+		List<EquipmentInspectionStandardGroupMap> reviewGroup = null;
+        this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(standard.getId());
+        
+        if(groupList != null && groupList.size() >0) {
+        	executiveGroup = new ArrayList<EquipmentInspectionStandardGroupMap>();
+    		reviewGroup = new ArrayList<EquipmentInspectionStandardGroupMap>();
+    		
+			for(StandardGroupDTO group : groupList) {
+				EquipmentInspectionStandardGroupMap map = new EquipmentInspectionStandardGroupMap();
+				 map.setStandardId(standard.getId());
+				 map.setGroupType(group.getGroupType());
+				 map.setGroupId(group.getGroupId());
+				 map.setPositionId(group.getPositionId());
+				 equipmentProvider.createEquipmentInspectionStandardGroupMap(map);
+				 if(QualityGroupType.EXECUTIVE_GROUP.equals(map.getGroupType())) {
+					 executiveGroup.add(map);
+				 }
+				 if(QualityGroupType.REVIEW_GROUP.equals(map.getGroupType())) {
+					 reviewGroup.add(map);
+				 }
+			}
+			
+			standard.setExecutiveGroup(executiveGroup);
+			standard.setReviewGroup(reviewGroup);
+		}
 	}
 	
 	private void inActiveEquipmentStandardRelations(EquipmentStandardMap map) {
@@ -1051,23 +1148,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//填充执行周期repeat
 		processRepeatSetting(standard);
 		
-		EquipmentStandardsDTO dto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-		if(null != standard.getRepeat()) {
-			RepeatSettingsDTO rs = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-			dto.setRepeat(rs);
-		}
+		EquipmentStandardsDTO dto = converStandardToDto(standard);
 		
-		OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(standard.getOperatorUid(), 
-				standard.getOwnerId());
-		if(null != member) {
-			dto.setOperatorName(member.getContactName());
-		}
-		
-		EquipmentInspectionTemplates template = equipmentProvider.findEquipmentInspectionTemplate(
-				standard.getTemplateId(), standard.getOwnerId(), standard.getOwnerType());
-		if(null != template) {
-			dto.setTemplateName(template.getName());
-		}
 		return dto;
 	}
 	
@@ -2346,16 +2428,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return ts;
 	}
 	
-	private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
-		processRepeatSetting(standard);
-		EquipmentStandardsDTO standardDto = ConvertHelper.convert(standard, EquipmentStandardsDTO.class);
-		RepeatSettingsDTO repeatDto = ConvertHelper.convert(standard.getRepeat(), RepeatSettingsDTO.class);
-		
-		standardDto.setRepeat(repeatDto);
-		
-		return standardDto;
-	} 
-	
 	private EquipmentInspectionTasks verifyEquipmentTask(Long taskId, String ownerType, Long ownerId) {
 		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(taskId, ownerType, ownerId);
 		
@@ -3590,8 +3662,35 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd) {
+		StatEquipmentTasksResponse response = new StatEquipmentTasksResponse();
 		
-		return null;
+		int offset = cmd.getOffset() == null ? 0 : cmd.getOffset();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		
+		List<TaskCountDTO> tasks = equipmentProvider.statEquipmentTasks(cmd.getOwnerId(), cmd.getOwnerType(), 
+				cmd.getTargetId(), cmd.getTargetType(), cmd.getInspectionCategoryId(), cmd.getStartTime(), cmd.getEndTime(),
+				offset, pageSize+1);
+		if(tasks != null && tasks.size() > pageSize) {
+			tasks.remove(tasks.size() - 1);
+			response.setOffset(offset + 1);
+		}
+
+		
+		if(tasks != null) {
+			for(TaskCountDTO task : tasks) {
+				Community community = communityProvider.findCommunityById(task.getTargetId());
+				if(community != null) {
+					task.setTargetName(community.getName());
+				}
+				equipmentName: 设备名称 
+				standardName: 标准名称 
+				Double maintanceRate =  ((double)(task.getCompleteMaintance() + task.getInMaintance() + task.getNeedMaintance()))/task.getTaskCount();
+				task.setMaintanceRate(maintanceRate);
+				
+			}
+		}
+		response.setTasks(tasks);
+		return response;
 	}
 
 }

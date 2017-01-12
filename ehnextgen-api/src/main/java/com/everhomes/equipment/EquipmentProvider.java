@@ -4,9 +4,13 @@ import java.sql.Timestamp;
 import java.util.List;
 import java.util.Set;
 
+import javax.validation.constraints.NotNull;
+
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.quality.QualityInspectionStandardGroupMap;
 import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
+import com.everhomes.rest.equipment.TaskCountDTO;
 
 
 public interface EquipmentProvider {
@@ -102,4 +106,12 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionCategories> listEquipmentInspectionCategories(Long ownerId, Integer namespaceId);
 	
 	Set<Long> listRecordsTaskIdByOperatorId(Long uId, Long pageAnchor);
+	
+	List<TaskCountDTO> statEquipmentTasks(Long ownerId, String ownerType, Long targetId, String targetType, 
+			Long inspectionCategoryId, Long startTime, Long endTime, Integer offset, Integer pageSize);
+	
+	void createEquipmentInspectionStandardGroupMap(EquipmentInspectionStandardGroupMap standardGroup);
+	void deleteEquipmentInspectionStandardGroupMap(Long standardGroupId);
+	void deleteEquipmentInspectionStandardGroupMapByStandardId(Long standardId);
+	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
 }

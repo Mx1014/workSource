@@ -9,7 +9,10 @@ import javax.annotation.PostConstruct;
 
 import org.jooq.Condition;
 import org.jooq.DSLContext;
+import org.jooq.Field;
+import org.jooq.Record;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -34,6 +37,7 @@ import com.everhomes.rest.equipment.EquipmentTaskResult;
 import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
+import com.everhomes.rest.equipment.TaskCountDTO;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
@@ -49,12 +53,14 @@ import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentSta
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionEquipmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemResultsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionItemsDao;
+import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionStandardsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTaskLogsDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTasksDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplateItemMapDao;
 import com.everhomes.server.schema.tables.daos.EhEquipmentInspectionTemplatesDao;
+import com.everhomes.server.schema.tables.daos.EhQualityInspectionStandardGroupMapDao;
 import com.everhomes.server.schema.tables.daos.EhQualityInspectionTasksDao;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessories;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessoryMap;
@@ -64,12 +70,14 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipmentSt
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionEquipments;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItemResults;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionItems;
+import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandardGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskAttachments;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTaskLogs;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplateItemMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplates;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoriesRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoryMapRecord;
@@ -79,12 +87,14 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipment
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentStandardMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionEquipmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionItemResultsRecord;
+import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionStandardsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskAttachmentsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTaskLogsRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTasksRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplateItemMapRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplatesRecord;
+import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.util.ConvertHelper;
@@ -1494,6 +1504,138 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public Set<Long> listRecordsTaskIdByOperatorId(Long uId, Long pageAnchor) {
 		// TODO Auto-generated method stub
 		return null;
+	}
+
+	@Override
+	public void createEquipmentInspectionStandardGroupMap(
+			EquipmentInspectionStandardGroupMap standardGroup) {
+		assert(standardGroup.getStandardId() != null);
+        
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandardGroupMap.class, standardGroup.getStandardId()));
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEquipmentInspectionStandardGroupMap.class));
+        standardGroup.setId(id);
+        standardGroup.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        
+        EhEquipmentInspectionStandardGroupMapDao dao = new EhEquipmentInspectionStandardGroupMapDao(context.configuration());
+        dao.insert(standardGroup);
+        
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhEquipmentInspectionStandardGroupMap.class, null);
+		
+	}
+
+	@Override
+	public void deleteEquipmentInspectionStandardGroupMap(Long standardGroupId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhEquipmentInspectionStandardGroupMap.class));
+		EhEquipmentInspectionStandardGroupMapDao dao = new EhEquipmentInspectionStandardGroupMapDao(context.configuration());
+        dao.deleteById(standardGroupId);
+		
+	}
+
+	@Override
+	public void deleteEquipmentInspectionStandardGroupMapByStandardId(
+			Long standardId) {
+		dbProvider.mapReduce(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class), null, 
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+					query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
+		            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
+		            	deleteEquipmentInspectionStandardGroupMap(record.getId());
+		            	return null;
+					});
+
+					return true;
+				});
+		
+		
+	}
+
+	@Override
+	public List<Long> listEquipmentInspectionStandardGroupMapByGroup(
+			List<Long> groupIds, Byte groupType) {
+		final List<Long> standardIds = new ArrayList<Long>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class));
+ 
+        SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+       
+        if(groupIds != null)
+        	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.in(groupIds));
+        if(groupType != null)
+        	query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
+        
+        query.fetch().map((r) -> {
+        	standardIds.add(r.getStandardId());
+             return null;
+        });
+        
+       
+        return standardIds;
+	}
+
+	@Override
+	public List<TaskCountDTO> statEquipmentTasks(Long ownerId,String ownerType, Long targetId, String targetType,
+			Long inspectionCategoryId, Long startTime, Long endTime, Integer offset, Integer pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		List<TaskCountDTO> dtos = new ArrayList<TaskCountDTO>();
+		
+		
+		final Field<Byte> none = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode()), QualityInspectionTaskResult.NONE.getCode());
+		final Field<Byte> correct = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()), QualityInspectionTaskResult.CORRECT.getCode());
+		final Field<Byte> inspectComplete = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.INSPECT_COMPLETE.getCode()), QualityInspectionTaskResult.INSPECT_COMPLETE.getCode());
+		final Field<Byte> correctComplete = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT_COMPLETE.getCode()), QualityInspectionTaskResult.CORRECT_COMPLETE.getCode());
+		final Field<Byte> inspectDelay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.INSPECT_DELAY.getCode()), QualityInspectionTaskResult.INSPECT_DELAY.getCode());
+		final Field<Byte> correctDelay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT_DELAY.getCode()), QualityInspectionTaskResult.CORRECT_DELAY.getCode());
+		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID, DSL.count().as("taskCount"), 
+				DSL.count(none).as("toExecuted"), DSL.count(correct).as("needMaintance"), DSL.count(inspectComplete).as("inMaintance"), 
+				DSL.count(correctComplete).as("delay"),DSL.count(inspectDelay).as("completeInspection"),DSL.count(correctDelay).as("completeMaintance")};
+		final SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(fields);
+		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASKS);
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+		
+		if(!StringUtils.isNullOrEmpty(targetType)) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
+		}
+		
+		if(targetId != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+		}
+		
+		if(startTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(startTime)));
+		}
+		
+		if(endTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.le(new Timestamp(endTime)));
+		}
+		
+		query.addGroupBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID);
+		query.addLimit(offset, count);
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("countTasks, sql=" + query.getSQL());
+            LOGGER.debug("countTasks, bindValues=" + query.getBindValues());
+        }
+		query.fetch().map((r) -> {
+			TaskCountDTO dto = new TaskCountDTO();
+
+			dto.setTargetId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID));
+			dto.setInspectionCategoryId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID));
+			dto.setEquipmentId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID));
+			dto.setStandardId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID));
+			dto.setTaskCount(r.getValue("taskCount", Long.class));
+			dto.setToExecuted(r.getValue("toExecuted", Long.class));
+			dto.setInCorrection(r.getValue("inCorrection", Long.class));
+			dto.setCompleteInspection(r.getValue("completeInspection", Long.class));
+			dto.setCompleteCorrection(r.getValue("completeCorrection", Long.class));
+			dto.setDelayInspection(r.getValue("delayInspection", Long.class));
+			dto.setDelayCorrection(r.getValue("delayCorrection", Long.class));
+			dtos.add(dto);
+			return null;
+		});
+		
+		return dtos;
 	}
 
 }
