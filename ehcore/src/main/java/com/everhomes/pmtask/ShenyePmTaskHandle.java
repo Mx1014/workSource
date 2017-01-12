@@ -561,6 +561,8 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
     					null, null);
     			getChildCategories(tempList.stream().map(k -> ConvertHelper.convert(k, CategoryDTO.class))
     					.collect(Collectors.toList()), dto);
+    			
+    			dto.setIsSupportDelete((byte)1);
     			return dto;
     		}).collect(Collectors.toList()));
     		if(pageSize != null && size != pageSize){
@@ -583,8 +585,11 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 		List<Category> categories = categoryProvider.listTaskCategories(namespaceId, null, null,
 				null, null);
 		
-		List<CategoryDTO> dtos = categories.stream().map(r -> ConvertHelper.convert(r, CategoryDTO.class))
-				.collect(Collectors.toList());
+		List<CategoryDTO> dtos = categories.stream().map(r -> {
+			CategoryDTO dto = ConvertHelper.convert(r, CategoryDTO.class);
+			dto.setIsSupportDelete((byte)1);
+			return dto;
+		}).collect(Collectors.toList());
 		List<CategoryDTO> result = new ArrayList<CategoryDTO>();
 		for(CategoryDTO c: dtos) {
 			if(defaultId.equals(c.getParentId())) {

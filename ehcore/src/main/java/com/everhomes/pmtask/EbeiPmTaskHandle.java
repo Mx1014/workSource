@@ -33,6 +33,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.alibaba.fastjson.TypeReference;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -48,6 +49,7 @@ import com.everhomes.pmtask.ebei.EbeiTaskResult;
 import com.everhomes.pmtask.ebei.EbeiPmTaskDTO;
 import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiServiceType;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
@@ -64,6 +66,7 @@ import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
+import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
@@ -75,6 +78,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -157,6 +161,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		String parentId = ebeiServiceType.getParentId();
 		dto.setParentId("".equals(parentId)?0:Long.valueOf(parentId));
 		dto.setName(ebeiServiceType.getServiceName());
+		dto.setIsSupportDelete((byte)0);
 		
 		List<EbeiServiceType> types = ebeiServiceType.getItems();
 		if(null != types) {
@@ -233,17 +238,18 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		param.put("userId", "");
 		param.put("address", task.getAddress());
 		
-		if(null == task.getOrganizationId() || task.getOrganizationId() ==0){
-        	LOGGER.debug("Create PmTaskDoc, taskId={}", task.getId());
-			User user = userProvider.findUserById(task.getCreatorUid());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-            param.put("linkName", user.getNickName());
-    		param.put("linkTel", userIdentifier.getIdentifierToken());
-		}else{
-            param.put("linkName", task.getRequestorName());
-    		param.put("linkTel", task.getRequestorPhone());
-		}
-		
+//		if(null == task.getOrganizationId() || task.getOrganizationId() ==0){
+//        	LOGGER.debug("Create PmTaskDoc, taskId={}", task.getId());
+//			User user = userProvider.findUserById(task.getCreatorUid());
+//			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+//            param.put("linkName", user.getNickName());
+//    		param.put("linkTel", userIdentifier.getIdentifierToken());
+//		}else{
+//			param.put("linkName", task.getRequestorName());
+//			param.put("linkTel", task.getRequestorPhone());
+//		}
+		param.put("linkName", task.getRequestorName());
+		param.put("linkTel", task.getRequestorPhone());
 		String fileAddrs = "";
 		if(null != attachments) {
 			StringBuilder sb = new StringBuilder();
@@ -395,9 +401,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
 			if(null != cmd.getOrganizationId()) {
 				task.setOrganizationId(cmd.getOrganizationId());
-				task.setRequestorName(requestorName);
-				task.setRequestorPhone(requestorPhone);
 			}
+			task.setRequestorName(requestorName);
+			task.setRequestorPhone(requestorPhone);
+			
 			task.setCreatorUid(user.getId());
 			task.setNamespaceId(user.getNamespaceId());
 			task.setOwnerId(ownerId);
@@ -734,7 +741,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		dto.setId(0L);
 		dto.setName("物业报修");
 		dto.setParentId(0L);
-		
+		dto.setIsSupportDelete((byte)0);
 		return dto;
 	}
 	
@@ -784,7 +791,39 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
 	@Override
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		User current = UserContext.current().getUser();
+		
+		Byte status = cmd.getStatus();
+		List<PmTask> list = new ArrayList<>();
+		
+			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
+					cmd.getPageAnchor(), cmd.getPageSize());
+		
+		ListUserTasksResponse response = new ListUserTasksResponse();
+		int size = list.size();
+		if(size > 0){
+    		response.setRequests(list.stream().map(r -> {
+    			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
+//    			if(null == r.getOrganizationId() || r.getOrganizationId() ==0 ){
+//    				User user = userProvider.findUserById(r.getCreatorUid());
+//        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+//        			dto.setRequestorName(user.getNickName());
+//        			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
+//    			}
+    			CategoryDTO taskCategory = createCategoryDTO();
+    	    	dto.setTaskCategoryName(taskCategory.getName());
+    			
+    			return dto;
+    		}).collect(Collectors.toList()));
+    		if(size != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+        	}
+    	}
+		
+		return response;
 	}
 }

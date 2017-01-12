@@ -70,30 +70,30 @@ public class EbeiPmTaskHandleTest {
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("userId", "");
-		param.put("address", "测试项目东三区凤凰阁第1栋1单元1楼0001");
-		param.put("buildingId", "");
-		param.put("linkName", "一碑测试");
-		param.put("linkTel", "18011001100");
-		param.put("serviceId","192");
-		param.put("type", "1");
-		param.put("remarks", "业主报修水管坏了");
-		param.put("projectId", "240111044331055940");
-		param.put("anonymous", "0");
-		param.put("fileAddrs", "http://10.1.10.102:5000/image/aW1hZ2UvTVRwaE1HSmlNelUyTURNNE0ySmpObUZtWWpVeE1XVTRZV014WW1Gak9XWTJNZw?ownerType=EhUsers&ownerId=241964&token=7seYNzWeS09VsFkHbMAu3w8GmVrAxz1xictvqVKgHWhVDJOktEwsi8Si7CH4NS3pJ7uosgA3tPL6PNE9lh4u2DeFLZrqgwdD5SHErJrtFjUlaqRpnTcOrzsWasE5J8FG&pxw=1920&pxh=1080");
-		param.put("buildingType", "0");
+//		param.put("userId", "");
+//		param.put("address", "测试项目东三区凤凰阁第1栋1单元1楼0001");
+//		param.put("buildingId", "");
+//		param.put("linkName", "一碑测试");
+//		param.put("linkTel", "18011001100");
+//		param.put("serviceId","192");
+//		param.put("type", "1");
+//		param.put("remarks", "业主报修水管坏了");
+//		param.put("projectId", "240111044331055940");
+//		param.put("anonymous", "0");
+//		param.put("fileAddrs", "http://10.1.10.102:5000/image/aW1hZ2UvTVRwaE1HSmlNelUyTURNNE0ySmpObUZtWWpVeE1XVTRZV014WW1Gak9XWTJNZw?ownerType=EhUsers&ownerId=241964&token=7seYNzWeS09VsFkHbMAu3w8GmVrAxz1xictvqVKgHWhVDJOktEwsi8Si7CH4NS3pJ7uosgA3tPL6PNE9lh4u2DeFLZrqgwdD5SHErJrtFjUlaqRpnTcOrzsWasE5J8FG&pxw=1920&pxh=1080");
+//		param.put("buildingType", "0");
 		
 		
 //		param.put("orderId", "19f53feb-c382-4f64-b8f8-5052a16da200");
-//		param.put("recordId", "6a627936-2f15-47cd-9589-4bc783a0f01f");
-//		param.put("userId", "");
-//		param.put("serviceAttitude", 5);
-//		param.put("serviceEfficiency", 5);
-//		param.put("serviceQuality", 5);
-//		param.put("remark", "");
-//		param.put("fileAddrs", "");
+		param.put("recordId", "6a627936-2f15-47cd-9589-4bc783a0f01f");
+		param.put("userId", "");
+		param.put("serviceAttitude", 5);
+		param.put("serviceEfficiency", 5);
+		param.put("serviceQuality", 5);
+		param.put("remark", "");
+		param.put("fileAddrs", "");
 //		login();
-		postToEbei(param, CREATE_TASK);
+		postToEbei(param, EVALUATE);
 		
 		
 //		postToEbei(param, GET_TASK_DETAIL);
