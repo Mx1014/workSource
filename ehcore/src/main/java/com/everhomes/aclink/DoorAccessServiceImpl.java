@@ -2565,7 +2565,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId());
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        return redisTemplate.opsForValue().get(key).toString();
+        Object v = redisTemplate.opsForValue().get(key);
+        if(null == v){
+            return null;
+        }
+        return v.toString();
     }
 
     @Override
