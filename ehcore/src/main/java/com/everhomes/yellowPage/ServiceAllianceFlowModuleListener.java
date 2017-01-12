@@ -110,7 +110,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setJumpType(2L);
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
 		request.setCreatorName(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		request.setCreatorOrganizationId(Long.valueOf(organizationVal.getFieldValue()));
+		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 		request.setOwnerType(OwnerType.COMMUNITY.getCode());
 		request.setOwnerId(flowCase.getProjectId());
