@@ -684,13 +684,15 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         tmpUser.setNickName(user.getNickName());
         
         //Send messages
+        LOGGER.debug("send message to user tmpUser:{}", tmpUser);
         if(doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING.getCode())
                 || (doorAcc.getDoorType().equals(DoorAccessType.ACLINK_LINGLING_GROUP.getCode()))) {
             sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ACLINK_LINGLING_GROUP.getCode()); 
         } else {
             sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ZLACLINK_WIFI.getCode());    
         }
-        
+
+        LOGGER.debug("end door auth", tmpUser);
         return rlt;
     }
 
@@ -2587,11 +2589,11 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             public void run() {
                 String v = "" + System.currentTimeMillis();
                 redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
-                LOGGER.debug("start door auth. startTime = " + v);
+                LOGGER.debug("start door auth. startTime = {}", v);
                 while (true){
-                    LOGGER.debug("listAclinkUsers. cmd = " + userCmd);
+                    LOGGER.debug("listAclinkUsers. cmd = {}", userCmd);
                     AclinkUserResponse userRes = listAclinkUsers(userCmd);
-                    LOGGER.debug("listAclinkUsers. res = " + userRes);
+                    LOGGER.debug("listAclinkUsers. res = {}", userRes);
                     for (AclinkUserDTO user: userRes.getUsers()) {
                         CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
                         authCmd.setUserId(user.getId());
@@ -2599,14 +2601,14 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                         DoorAuthDTO dto = createDoorAuth(authCmd);
                         dtos.add(dto);
                     }
-                    LOGGER.debug("createDoorAuth. end ");
+                    LOGGER.debug("door auth end dtos = {}", dtos);
                     if(null == userRes.getNextPageAnchor()){
                         break;
                     }
                     userCmd.setPageAnchor(userRes.getNextPageAnchor());
                 }
                 redisTemplate.delete(key);
-                LOGGER.debug("end door auth. endTime = " + System.currentTimeMillis());
+                LOGGER.debug("end door auth. endTime = {}", System.currentTimeMillis());
             }
         });
 
