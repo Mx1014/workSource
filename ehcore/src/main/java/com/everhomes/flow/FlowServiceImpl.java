@@ -1124,7 +1124,7 @@ public class FlowServiceImpl implements FlowService {
         String key = String.format("flow:%d", flow.getId());
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        Long ver = redisTemplate.opsForValue().increment(key, flow.getFlowVersion());
+        Long ver = redisTemplate.opsForValue().increment(key, 1);
         if(ver == null || ver < flow.getFlowVersion()) {
         	redisTemplate.opsForValue().set(key, String.valueOf(flow.getFlowVersion()));
         }
