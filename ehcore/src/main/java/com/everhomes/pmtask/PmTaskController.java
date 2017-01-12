@@ -405,7 +405,7 @@ public class PmTaskController extends ControllerBase {
     
     /**
      * <b>URL: /pmtask/getNamespaceHandler</b>
-     * <p>搜索任务</p>
+     * <p>获取handler</p>
      */
     @RequestMapping("getNamespaceHandler")
     @RestReturn(value=NamespaceHandlerDTO.class)

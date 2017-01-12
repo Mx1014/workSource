@@ -26,6 +26,7 @@ import org.springframework.transaction.TransactionStatus;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -37,12 +38,14 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.EvaluateTaskCommand;
@@ -50,6 +53,8 @@ import com.everhomes.rest.pmtask.GetTaskDetailCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
+import com.everhomes.rest.pmtask.ListUserTasksCommand;
+import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
@@ -59,6 +64,7 @@ import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
 import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOperateType;
+import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
@@ -72,6 +78,7 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
@@ -641,4 +648,88 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 		
 		return response;
 	}
+	
+	@Override
+	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		User current = UserContext.current().getUser();
+		
+		Byte status = cmd.getStatus();
+		List<PmTask> list = new ArrayList<>();
+		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
+				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
+			
+			checkOrganizationId(cmd.getOrganizationId());
+
+	    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+	    	
+	    	if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
+	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTALLTASK)
+	    			){
+	    		
+	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, null,
+	    				cmd.getPageAnchor(), cmd.getPageSize());
+			}else if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
+	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTUSERTASK)
+	    			){
+				
+				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
+				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
+						null, cmd.getPageAnchor(), cmd.getPageSize());
+				else if(status.equals(PmTaskProcessStatus.PROCESSED.getCode()))
+					list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.PROCESSED.getCode(),
+							null, cmd.getPageAnchor(), cmd.getPageSize());
+			}else{
+				returnNoPrivileged(null, current.getId());
+			}
+	    	
+		}else{
+			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
+					cmd.getPageAnchor(), cmd.getPageSize());
+		}
+		
+		ListUserTasksResponse response = new ListUserTasksResponse();
+		int size = list.size();
+		if(size > 0){
+    		response.setRequests(list.stream().map(r -> {
+    			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
+    			if(null == r.getOrganizationId() || r.getOrganizationId() ==0 ){
+    				User user = userProvider.findUserById(r.getCreatorUid());
+        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+        			dto.setRequestorName(user.getNickName());
+        			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
+    			}
+    			Category category = categoryProvider.findCategoryById(r.getCategoryId());
+    			Category taskCategory = checkCategory(r.getTaskCategoryId());
+    			if(null != category)
+    				dto.setCategoryName(category.getName());
+    	    	dto.setTaskCategoryName(taskCategory.getName());
+    			
+    			setPmTaskDTOAddress(r, dto);
+    			return dto;
+    		}).collect(Collectors.toList()));
+    		if(size != pageSize){
+        		response.setNextPageAnchor(null);
+        	}else{
+        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
+        	}
+    	}
+		
+		return response;
+	}
+	
+	private void checkOrganizationId(Long organizationId) {
+		if(null == organizationId) {
+        	LOGGER.error("Invalid organizationId parameter.");
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+    				"Invalid organizationId parameter.");
+        }
+	}
+	
+	private void returnNoPrivileged(List<Long> privileges, Long userId){
+    	LOGGER.error("non-privileged, privileges={}, userId={}", privileges, userId);
+		throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_NO_PRIVILEGED,
+				"non-privileged.");
+    }
 }

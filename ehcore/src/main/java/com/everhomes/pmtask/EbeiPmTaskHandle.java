@@ -57,6 +57,8 @@ import com.everhomes.rest.pmtask.GetTaskDetailCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
+import com.everhomes.rest.pmtask.ListUserTasksCommand;
+import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -778,5 +780,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     	}
 		
 		return response;
+	}
+
+	@Override
+	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

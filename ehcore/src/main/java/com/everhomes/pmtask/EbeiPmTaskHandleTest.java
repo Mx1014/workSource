@@ -85,6 +85,13 @@ public class EbeiPmTaskHandleTest {
 		
 		
 //		param.put("orderId", "19f53feb-c382-4f64-b8f8-5052a16da200");
+//		param.put("recordId", "6a627936-2f15-47cd-9589-4bc783a0f01f");
+//		param.put("userId", "");
+//		param.put("serviceAttitude", 5);
+//		param.put("serviceEfficiency", 5);
+//		param.put("serviceQuality", 5);
+//		param.put("remark", "");
+//		param.put("fileAddrs", "");
 //		login();
 		postToEbei(param, CREATE_TASK);
 		

@@ -55,6 +55,8 @@ import com.everhomes.rest.pmtask.GetTaskDetailCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
+import com.everhomes.rest.pmtask.ListUserTasksCommand;
+import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -413,6 +415,13 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
 		
 		return handler.searchTasks(cmd);
+	}
+
+	@Override
+	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		
+		return handler.listUserTasks(cmd);
 	}
 
 

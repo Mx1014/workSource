@@ -10,6 +10,8 @@ import com.everhomes.rest.pmtask.GetTaskDetailCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
+import com.everhomes.rest.pmtask.ListUserTasksCommand;
+import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
@@ -34,4 +36,6 @@ public interface PmTaskHandle {
 	 List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd);
 	 
 	 SearchTasksResponse searchTasks(SearchTasksCommand cmd);
+	 
+	 ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd);
 }
