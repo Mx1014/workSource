@@ -205,7 +205,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
         }
 		
 		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Data from Ebei, json={}", json);
+			LOGGER.debug("Data from Ebei, param={}, json={}", param, json);
 		
 		return json;
 	}
@@ -275,7 +275,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 				return dto;
 			}
 		}
-		return null;
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				"Request of third failed.");
 	}
 	
 	private Boolean cancelTask(PmTask task) {
@@ -357,7 +358,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
 		User user = UserContext.current().getUser();
 		PmTask task = new PmTask();
-//		dbProvider.execute((TransactionStatus status) -> {
+		dbProvider.execute((TransactionStatus status) -> {
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 
 			task.setAddressType(cmd.getAddressType());
@@ -434,8 +435,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 //	    	if(size > 0){
 //	    		sendMessage4CreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
 //	    	}
-//			return null;
-//		});
+			return null;
+		});
 
 		pmTaskSearch.feedDoc(task);	
 		return ConvertHelper.convert(task, PmTaskDTO.class);
