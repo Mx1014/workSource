@@ -2590,15 +2590,17 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         ExecutorUtil.submit(new Runnable() {
             @Override
             public void run() {
+                UserContext.setCurrentUser(u);
                 String v = "" + System.currentTimeMillis();
                 redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
                 LOGGER.debug("start door auth. startTime = {}", v);
+
                 while (true){
                     LOGGER.debug("listAclinkUsers. cmd = {}", userCmd);
                     AclinkUserResponse userRes = listAclinkUsers(userCmd);
                     LOGGER.debug("listAclinkUsers. res = {}", userRes);
                     for (AclinkUserDTO user: userRes.getUsers()) {
-                        LOGGER.debug("door auth user = {}, UserContext = {}", user, u);
+                        LOGGER.debug("door auth user = {}, UserContext = {}", user, UserContext.current().getUser());
                         CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
                         authCmd.setUserId(user.getId());
                         authCmd.setApproveUserId(u.getId());
