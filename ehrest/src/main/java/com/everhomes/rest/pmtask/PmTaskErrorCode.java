@@ -20,4 +20,6 @@ public interface PmTaskErrorCode {
     
     int ERROR_ENABLE_FLOW = 10008;  //请启用工作流
     
+    int ERROR_USER_PRIVILEGE_EXIST = 10009;  //用户已有该权限，不能重复添加!
+    
 }
