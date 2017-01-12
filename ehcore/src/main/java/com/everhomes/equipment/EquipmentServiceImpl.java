@@ -934,25 +934,32 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standardDto.setOperatorName(member.getContactName());
 		}
 			
-		List<StandardGroupDTO> executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
-        	
-			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			if(group != null)
-				dto.setGroupName(group.getName());
-        	
-        	return dto;
-        }).collect(Collectors.toList());
+		List<StandardGroupDTO> executiveGroup = new ArrayList<StandardGroupDTO>();
+		List<StandardGroupDTO> reviewGroup = new ArrayList<StandardGroupDTO>();
+		if(standard.getExecutiveGroup() != null) {
+			executiveGroup = standard.getExecutiveGroup().stream().map((r) -> {
+	        	
+				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
+				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+				if(group != null)
+					dto.setGroupName(group.getName());
+	        	
+	        	return dto;
+	        }).collect(Collectors.toList());
+		}
+		
 
-		List<StandardGroupDTO> reviewGroup = standard.getReviewGroup().stream().map((r) -> {
-        	
-			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
-			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			if(group != null)
-				dto.setGroupName(group.getName());
-			
-        	return dto;
-        }).collect(Collectors.toList());
+		if(standard.getReviewGroup() != null) {
+			reviewGroup = standard.getReviewGroup().stream().map((r) -> {
+	        	
+				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
+				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
+				if(group != null)
+					dto.setGroupName(group.getName());
+				
+	        	return dto;
+	        }).collect(Collectors.toList());
+		}
 		
 		standardDto.setRepeat(repeatDto);
 		standardDto.setExecutiveGroup(executiveGroup);
