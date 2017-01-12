@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 public enum GeneralFormDataSourceType {
-	USER_NAME("USER_NAME"), USER_PHONE("USER_PHONE"), USER_COMPANY("USER_COMPANY"), SOURCE_ID("SOURCE_ID");
+	USER_NAME("USER_NAME"), USER_PHONE("USER_PHONE"), USER_COMPANY("USER_COMPANY"), SOURCE_ID("SOURCE_ID"), ORGANIZATION_ID("ORGANIZATION_ID");
 	
 	private String code;
 	

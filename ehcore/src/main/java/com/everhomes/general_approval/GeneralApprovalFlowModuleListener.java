@@ -132,7 +132,7 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 					GeneralFormFieldDTO.class);
 			for (GeneralApprovalVal val : vals) {
 				try{
-					if (!DEFUALT_FIELDS.contains(val)) {
+					if (!DEFUALT_FIELDS.contains(val.getFieldName())) {
 						// 不在默认fields的就是自定义字符串，组装这些
 						FlowCaseEntity e = new FlowCaseEntity();
 						GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 

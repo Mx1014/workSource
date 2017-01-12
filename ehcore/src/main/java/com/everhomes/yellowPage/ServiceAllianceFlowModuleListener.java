@@ -28,6 +28,7 @@ import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
@@ -98,23 +99,24 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			contentBuffer.append(yellowPage.getName());
 
 			request.setServiceAllianceId(yellowPageId);
-			request.setType(yellowPage.getCategoryId());
+			request.setType(yellowPage.getParentId());
 			
 		}
 		flowCase.setContent(contentBuffer.toString());
 		
 		//服务联盟加一个申请
-		 
+		PostApprovalFormItem organizationVal = getFormFieldDTO(GeneralFormDataSourceType.ORGANIZATION_ID.getCode(),values);
+		
 		request.setJumpType(2L);
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
 		request.setCreatorName(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		 
+		request.setCreatorOrganizationId(Long.valueOf(organizationVal.getFieldValue()));
 		request.setCreatorMobile(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-//		request.setCreatorOrganizationId(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 		request.setOwnerType(OwnerType.COMMUNITY.getCode());
 		request.setOwnerId(flowCase.getProjectId());
 		request.setFlowCaseId(flowCase.getId());
 		request.setId(flowCase.getId());
+		request.setCreatorUid(UserContext.current().getUser().getId());
 		request.setTemplateType("flowCase");
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
 	}
@@ -180,7 +182,10 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
-		e.setValue(yellowPage.getName());
+		if(null == yellowPage)
+			e.setValue("已删除");
+		else
+			e.setValue(yellowPage.getName());
 		entities.add(e);
 		
 		//后面跟自定义模块--通用父类方法

@@ -100,6 +100,16 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 		sourceIdField.setDynamicFlag(NormalFlag.NEED.getCode());
 		sourceIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
 		fieldDTOs.add(sourceIdField);
+		
+		GeneralFormFieldDTO organizationIdField = new GeneralFormFieldDTO();
+		organizationIdField.setDataSourceType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+		organizationIdField.setFieldType(GeneralFormFieldType.SINGLE_LINE_TEXT.getCode());
+		organizationIdField.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+		organizationIdField.setRequiredFlag(NormalFlag.NEED.getCode());
+		organizationIdField.setDynamicFlag(NormalFlag.NEED.getCode());
+		organizationIdField.setVisibleType(GeneralFormDataVisibleType.HIDDEN.getCode());
+		fieldDTOs.add(organizationIdField);
+		
 		response.setFormFields(fieldDTOs);
 		return response;
 	}
