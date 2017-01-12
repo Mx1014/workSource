@@ -2577,7 +2577,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public ListDoorAuthResponse createAllDoorAuthList(AclinkCreateAllDoorAuthListCommand cmd) {
         ListDoorAuthResponse resp = new ListDoorAuthResponse();
-
+        User u = UserContext.current().getUser();
         List<DoorAuthDTO> dtos = new ArrayList<>();
         resp.setDtos(dtos);
 
@@ -2598,10 +2598,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     AclinkUserResponse userRes = listAclinkUsers(userCmd);
                     LOGGER.debug("listAclinkUsers. res = {}", userRes);
                     for (AclinkUserDTO user: userRes.getUsers()) {
-                        LOGGER.debug("door auth user = {}", user);
+                        LOGGER.debug("door auth user = {}, UserContext = {}", user, u);
                         CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
                         authCmd.setUserId(user.getId());
-                        authCmd.setApproveUserId(UserContext.current().getUser().getId());
+                        authCmd.setApproveUserId(u.getId());
                         LOGGER.debug("door auth authCmd = {}", authCmd);
                         DoorAuthDTO dto = createDoorAuth(authCmd);
                         dtos.add(dto);
