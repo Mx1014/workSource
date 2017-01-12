@@ -58,15 +58,15 @@ public class PmtaskTechparkHandler {
 	@Autowired
     private ContentServerService contentServerService;
 
-	WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
-	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
+	WorkflowAppDraftWebService service = null;//new WorkflowAppDraftWebService();
+	WorkflowAppDraftWebServicePortType port = null;//service.getWorkflowAppDraftWebServiceHttpPort();
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-	
+
 	public void synchronizedData(PmTask task, List<AttachmentDescriptor> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
 		param.put("fileFlag", "1");
 		param.put("fileTitle", "");
-		
+
 		JSONArray headContent = new JSONArray();
 		JSONObject head1 = new JSONObject();
 		JSONObject head2 = new JSONObject();
@@ -78,14 +78,14 @@ public class PmtaskTechparkHandler {
 				head1.put("userId", orgMember.getTargetId());
 				head1.put("phone", orgMember.getContactToken());
 				head1.put("company", organization.getName());
-				
+
 				head2.put("userName", orgMember.getContactName());
 				head2.put("userId", orgMember.getTargetId());
 				head2.put("phone", orgMember.getContactToken());
 				head2.put("company", organization.getName());
 				param.put("submitUserId", orgMember.getContactToken());
 			}else {
-				
+
 			}
 		}else {
 			Organization organization = organizationProvider.findOrganizationById(task.getOrganizationId());
@@ -95,7 +95,7 @@ public class PmtaskTechparkHandler {
 				head1.put("userId", orgMember.getTargetId());
 				head1.put("phone", orgMember.getContactToken());
 				head1.put("company", organization.getName());
-				
+
 				head2.put("userName", task.getRequestorName());
 				head2.put("userId", "");
 				head2.put("phone", task.getRequestorPhone());
@@ -103,10 +103,10 @@ public class PmtaskTechparkHandler {
 				param.put("submitUserId", orgMember.getContactToken());
 			}
 		}
-		
+
 		headContent.add(head1);
 		headContent.add(head2);
-		
+
 		JSONArray formContent = new JSONArray();
 		JSONObject form = new JSONObject();
 		if(null != task.getAddressId()) {
@@ -116,7 +116,7 @@ public class PmtaskTechparkHandler {
 			else
 				form.put("chooseStoried", "");
 		}
-		
+
 		form.put("serviceType", taskCategory.getName());
 		form.put("serviceClassify", null != category?category.getName():"");
 		form.put("serviceContent", task.getContent());
@@ -125,7 +125,7 @@ public class PmtaskTechparkHandler {
 		form.put("liaisonContent", "");
 		form.put("backDate", dateSF.format(new Date()));
 		formContent.add(form);
-		
+
 		JSONArray enclosure = new JSONArray();
 		if(null != attachments) {
 			for(AttachmentDescriptor ad: attachments) {
@@ -141,11 +141,11 @@ public class PmtaskTechparkHandler {
 				}else {
 					attachment.put("fileName", "");
 				}
-				
+
 				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-				
+
 				attachment.put("fileSuffix", fileSuffix);
-				
+
 				InputStream in = get(contentUrl);
 				if(null != in)
 					attachment.put("fileContent", getImageStr(in));
@@ -154,15 +154,15 @@ public class PmtaskTechparkHandler {
 				enclosure.add(attachment);
 			}
 		}
-		
+
 		param.put("headContent", headContent);
 		param.put("formContent", formContent);
 		param.put("enclosure", enclosure);
-		
+
         LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());
 
 		String result = port.worflowAppDraft(param.toJSONString());
-		
+
         LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);
 
 	}
@@ -176,10 +176,10 @@ public class PmtaskTechparkHandler {
                 LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
             }
         }
-        
+
         return url;
     }
-	
+
 	public String getImageStr(InputStream inputStream) {
 	    byte[] data = null;
 	    try {
@@ -193,25 +193,25 @@ public class PmtaskTechparkHandler {
 	    BASE64Encoder encoder = new BASE64Encoder();
 	    return encoder.encode(data);
 	}
-	
+
 	public InputStream get(String url){
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
         try {
             HttpGet httpGet = new HttpGet(url);
-            
+
             response = httpclient.execute(httpGet);
-            
+
             System.out.println(response.getStatusLine());
             HttpEntity entity = response.getEntity();
-            
+
             if (entity != null) {
             	InputStream instream = entity.getContent();
             	return instream;
 			}
 
         }catch (Exception e) {
-        	
+
 		} finally {
 			try {
 				response.close();
@@ -219,7 +219,7 @@ public class PmtaskTechparkHandler {
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-            
+
         }
         return null;
     }
