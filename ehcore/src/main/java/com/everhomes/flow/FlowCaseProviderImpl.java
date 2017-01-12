@@ -64,7 +64,7 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
         prepareObj(obj);
         EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());
         dao.insert(obj);
-        return id;
+        return obj.getId();
     }
 
     @Override
