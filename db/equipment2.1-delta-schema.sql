@@ -25,6 +25,7 @@ ALTER TABLE `eh_equipment_inspection_standards` ADD COLUMN `namespace_id` INTEGE
 ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `namespace_id` INTEGER;
 ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, etc';
 ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `target_id` BIGINT NOT NULL DEFAULT '0';
+ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions';
 
 
   
