@@ -4,6 +4,8 @@ import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -19,6 +21,7 @@ import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.rentalv2.RentalNotificationTemplateCode;
 import com.everhomes.rentalv2.RentalOrder;
+import com.everhomes.rentalv2.RentalOrderEmbeddedHandler;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowReferType;
@@ -37,6 +40,7 @@ import com.everhomes.util.ConvertHelper;
 public abstract class GeneralApprovalFlowModuleListener implements FlowModuleListener {
 	protected static List<String> DEFUALT_FIELDS = new ArrayList<String>();
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(GeneralApprovalFlowModuleListener.class);
 	@Autowired
 	protected ContentServerService contentServerService;
 	@Autowired
@@ -127,55 +131,59 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 			List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(),
 					GeneralFormFieldDTO.class);
 			for (GeneralApprovalVal val : vals) {
-				if (!DEFUALT_FIELDS.contains(val)) {
-					// 不在默认fields的就是自定义字符串，组装这些
-					FlowCaseEntity e = new FlowCaseEntity();
-					GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
-					e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
-					 
-					switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
-					case SINGLE_LINE_TEXT:
-						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
-						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-						break;
-					case MULTI_LINE_TEXT:
-						e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-						entities.add(e);
-						break;
-					case IMAGE:
-						e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
-						//工作流images怎么传
-						PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormImageValue.class);
-						for(String uriString : imageValue.getUris()){
-							String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-							e.setValue(url);
-							FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-							entities.add(e2);
+				try{
+					if (!DEFUALT_FIELDS.contains(val)) {
+						// 不在默认fields的就是自定义字符串，组装这些
+						FlowCaseEntity e = new FlowCaseEntity();
+						GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+						e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
+						 
+						switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
+						case SINGLE_LINE_TEXT:
+							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+							e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+							break;
+						case MULTI_LINE_TEXT:
+							e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
+							e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+							entities.add(e);
+							break;
+						case IMAGE:
+							e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
+							//工作流images怎么传
+							PostApprovalFormImageValue imageValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormImageValue.class);
+							for(String uriString : imageValue.getUris()){
+								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								e.setValue(url);
+								FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+								entities.add(e2);
+							}
+							break;
+						case FILE:
+	//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
+							//TODO:工作流需要新增类型file
+							e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
+							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
+							for(String uriString : fileValue.getUris()){
+								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								e.setValue(url);
+								FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+								entities.add(e2);
+							}
+							break;
+						case INTEGER_TEXT:
+							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
+							e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+							entities.add(e);
+							break;
+							
 						}
-						break;
-					case FILE:
-//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
-						//TODO:工作流需要新增类型file
-						e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
-						PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
-						for(String uriString : fileValue.getUris()){
-							String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-							e.setValue(url);
-							FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-							entities.add(e2);
-						}
-						break;
-					case INTEGER_TEXT:
-						e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
-						e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-						entities.add(e);
-						break;
 						
 					}
+				}catch(NullPointerException e){
+					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val));
 					
 				}
-
 			}
 		}
 		return entities;
