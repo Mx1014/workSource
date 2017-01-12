@@ -17,8 +17,6 @@ public class AclinkCreateAllDoorAuthListCommand {
 
     private Byte rightRemote;
 
-    private Long pageAnchor;
-
     private Integer namespaceId;
 
     private String keyword;
@@ -67,14 +65,6 @@ public class AclinkCreateAllDoorAuthListCommand {
 
     public void setRightRemote(Byte rightRemote) {
         this.rightRemote = rightRemote;
-    }
-
-    public Long getPageAnchor() {
-        return pageAnchor;
-    }
-
-    public void setPageAnchor(Long pageAnchor) {
-        this.pageAnchor = pageAnchor;
     }
 
     public Integer getNamespaceId() {

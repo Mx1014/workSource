@@ -2585,7 +2585,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        redisTemplate.opsForValue().set(key, System.currentTimeMillis(), 30, TimeUnit.MINUTES);
+        Long v = System.currentTimeMillis();
+        redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
+        LOGGER.debug("start door auth. startTime = " + v);
         while (true){
             AclinkUserResponse userRes = this.listAclinkUsers(userCmd);
             for (AclinkUserDTO user: userRes.getUsers()) {
@@ -2601,6 +2603,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }
             userCmd.setPageAnchor(userRes.getNextPageAnchor());
         }
+        LOGGER.debug("end door auth. startTime = " + System.currentTimeMillis());
         redisTemplate.delete(key);
         return resp;
     }
