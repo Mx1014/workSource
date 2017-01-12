@@ -11,6 +11,7 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -24,6 +25,7 @@ import com.everhomes.rentalv2.RentalOrder;
 import com.everhomes.rentalv2.RentalOrderEmbeddedHandler;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowCaseFileDTO;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
@@ -164,14 +166,18 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 	//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
 							//TODO:工作流需要新增类型file
 							e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
-//							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
-//							for(String uriString : fileValue.getUris()){
-//								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-//								e.setValue(url);
-//								FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-//								entities.add(e2);
-//							}
-							e.setValue(val.getFieldStr3());
+							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
+							List<FlowCaseFileDTO> files = new ArrayList<>();
+							for(String uriString : fileValue.getUris()){
+								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								ContentServerResource resource = contentServerService.findResourceByUri(uriString);
+								fileDTO.setUrl(url);
+								fileDTO.setFileName(resource.getResourceName());
+								fileDTO.setFileSize(resource.getResourceSize());
+								files.add(fileDTO);
+							}
+							e.setValue(JSON.toJSONString(files));
 							entities.add(e);
 							break;
 						case INTEGER_TEXT:
