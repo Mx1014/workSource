@@ -136,6 +136,8 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			if(null == flow) {
 				// 给他一个默认哑的flow
 				GeneralModuleInfo gm = ConvertHelper.convert(ga, GeneralModuleInfo.class);
+				gm.setOwnerId(ga.getId());
+				gm.setOwnerType(FlowOwnerType.GENERAL_APPROVAL.getCode());
 				flowCase = flowService.createDumpFlowCase(gm, cmd21);
 			} else {
 				cmd21.setFlowMainId(flow.getFlowMainId());

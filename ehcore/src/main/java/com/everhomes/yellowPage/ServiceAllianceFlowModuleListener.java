@@ -26,6 +26,7 @@ import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
+import com.everhomes.rest.quality.OwnerType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.util.DateHelper;
 @Component
@@ -110,8 +111,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		 
 		request.setCreatorMobile(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 //		request.setCreatorOrganizationId(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		request.setOwnerType(flowCase.getOwnerType());
-		request.setOwnerId(flowCase.getOwnerId());
+		request.setOwnerType(OwnerType.COMMUNITY.getCode());
+		request.setOwnerId(flowCase.getProjectId());
 		request.setFlowCaseId(flowCase.getId());
 		request.setId(flowCase.getId());
 		request.setTemplateType("flowCase");
