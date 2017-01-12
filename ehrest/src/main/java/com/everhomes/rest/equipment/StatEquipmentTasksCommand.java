@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
  *  <li>startTime: 起始月份  </li>
  *  <li>endTime: 截止月份  </li>
- *  <li>pageAnchor: 锚点</li>
+ *  <li>offset: 偏移</li>
  *  <li>pageSize: 页面大小</li>
  * </ul>
  */
@@ -35,7 +35,7 @@ public class StatEquipmentTasksCommand {
 	
 	private Long endTime;
 	
-	private Long pageAnchor;
+	private Integer offset;
 	
 	private Integer pageSize;
 
@@ -95,12 +95,13 @@ public class StatEquipmentTasksCommand {
 		this.endTime = endTime;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+
+	public Integer getOffset() {
+		return offset;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setOffset(Integer offset) {
+		this.offset = offset;
 	}
 
 	public Integer getPageSize() {

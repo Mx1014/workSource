@@ -1,6 +1,7 @@
 package com.everhomes.rest.equipment;
 
 import java.sql.Timestamp;
+import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
@@ -78,6 +79,12 @@ public class EquipmentStandardsDTO {
 	private String templateName;
 	
 	private Integer reviewExpiredDays;
+	
+	@ItemType(StandardGroupDTO.class)
+	private List<StandardGroupDTO> executiveGroup;
+
+	@ItemType(StandardGroupDTO.class)
+	private List<StandardGroupDTO> reviewGroup;
 	
 	public Long getId() {
 		return id;

@@ -1,7 +1,10 @@
 package com.everhomes.rest.equipment;
 
+import java.util.List;
+
 import javax.validation.constraints.NotNull;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.repeat.RepeatSettingsDTO;
 import com.everhomes.util.StringHelper;
 
@@ -52,6 +55,17 @@ public class UpdateEquipmentStandardCommand {
 	
 	private Long inspectionCategoryId;
 	
+	@ItemType(StandardGroupDTO.class)
+	private List<StandardGroupDTO> group;
+	
+	public List<StandardGroupDTO> getGroup() {
+		return group;
+	}
+
+	public void setGroup(List<StandardGroupDTO> group) {
+		this.group = group;
+	}
+
 	public Long getInspectionCategoryId() {
 		return inspectionCategoryId;
 	}

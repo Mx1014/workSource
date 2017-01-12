@@ -4,7 +4,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- *  <li>id: 参考主键id</li>
  *  <li>targetName: 项目名</li>
  *  <li>targetId: 项目id</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
@@ -24,8 +23,6 @@ import com.everhomes.util.StringHelper;
  */
 public class TaskCountDTO {
 
-	private Long id;
-	
 	private Long targetId;
 	
 	private String targetName;
@@ -56,14 +53,6 @@ public class TaskCountDTO {
 	
 	private Double maintanceRate;
 	
-	public Long getId() {
-		return id;
-	}
-
-	public void setId(Long id) {
-		this.id = id;
-	}
-
 	public Long getTargetId() {
 		return targetId;
 	}

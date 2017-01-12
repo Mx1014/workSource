@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>tasks: 参考 {@link com.everhomes.rest.equipment.TaskCountDTO}</li>
- *  <li>nextPageAnchor: 下一页的锚点</li>
+ *  <li>offset: 偏移</li>
  * </ul>
  */
 public class StatEquipmentTasksResponse {
@@ -16,7 +16,7 @@ public class StatEquipmentTasksResponse {
 	@ItemType(TaskCountDTO.class)
 	private List<TaskCountDTO> tasks;
 	
-	private Long nextPageAnchor;
+	private Integer offset;
 
 
 	public List<TaskCountDTO> getTasks() {
@@ -29,13 +29,13 @@ public class StatEquipmentTasksResponse {
 	}
 
 
-	public Long getNextPageAnchor() {
-		return nextPageAnchor;
+	public Integer getOffset() {
+		return offset;
 	}
 
 
-	public void setNextPageAnchor(Long nextPageAnchor) {
-		this.nextPageAnchor = nextPageAnchor;
+	public void setOffset(Integer offset) {
+		this.offset = offset;
 	}
 
 
