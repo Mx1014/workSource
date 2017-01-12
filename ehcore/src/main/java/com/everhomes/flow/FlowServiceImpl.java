@@ -2347,7 +2347,9 @@ public class FlowServiceImpl implements FlowService {
 			if(selType == FlowUserSelectionType.DEPARTMENT) {
 				//Users selection
 				UserInfo userInfo = userService.getUserSnapshotInfo(dto.getSourceIdA());
-				dto.setSelectionName(userInfo.getNickName());
+				if(dto.getSelectionName() == null) {
+					dto.setSelectionName(userInfo.getNickName());	
+				}
 			}
 		}
 	}
