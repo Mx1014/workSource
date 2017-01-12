@@ -206,7 +206,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -403,6 +405,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -3040,9 +3043,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(isAdmin) {
 			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, offset, pageSize + 1);
 		} else {
-			List<OrganizationDTO> groupDtos = listUserRelateDepartment(cmd.getOwnerId());
+			List<OrganizationDTO> groupDtos = listUserRelateGroups(cmd.getOwnerId());
 			
-				
 			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, offset, pageSize + 1);
 		}
         if(tasks.size() > pageSize) {
@@ -3096,21 +3098,25 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return response;
 	}
 	
-	private List<OrganizationDTO> listUserRelateDepartment(Long orgId) {
+	private List<OrganizationDTO> listUserRelateGroups(Long orgId) {
 		User user = UserContext.current().getUser();
 		 
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-		
-		if(userIdentifier == null) {
-			return new ArrayList<OrganizationDTO>();
-		}
-		
 		Organization org = organizationProvider.findOrganizationById(orgId);
 		if(org == null) {
 			return new ArrayList<OrganizationDTO>();
 		}
-		List<OrganizationDTO> groupDtos =  organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), org.getPath());
-				
+		
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(UserContext.current().getUser().getId());
+		if(members == null || members.size() == 0) {
+			return new ArrayList<OrganizationDTO>();
+		}
+		
+		List<OrganizationDTO> groupDtos = members.stream().map(r -> {
+			Organization organization = organizationProvider.findOrganizationById(r.getOrganizationId());
+			OrganizationDTO dto = ConvertHelper.convert(organization, OrganizationDTO.class);
+			
+			return dto;
+		}).collect(Collectors.toList());
 		return groupDtos;
 	}
 

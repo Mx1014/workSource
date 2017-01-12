@@ -1587,10 +1587,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 				DSL.count(delay).as("delay"),DSL.count(completeInspection).as("completeInspection"),DSL.count(completeMaintance).as("completeMaintance")};
 		final SelectQuery<Record> query = context.selectQuery();
 		query.addSelect(fields);
-		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASKS);
+		query.addFrom(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
 		
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
 		
 		if(!StringUtils.isNullOrEmpty(targetType)) {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
