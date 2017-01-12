@@ -162,14 +162,16 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 						case FILE:
 	//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
 							//TODO:工作流需要新增类型file
-							e.setEntityType(FlowCaseEntityType.IMAGE.getCode()); 
-							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
-							for(String uriString : fileValue.getUris()){
-								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-								e.setValue(url);
-								FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
-								entities.add(e2);
-							}
+							e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
+//							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
+//							for(String uriString : fileValue.getUris()){
+//								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
+//								e.setValue(url);
+//								FlowCaseEntity e2 = ConvertHelper.convert(e, FlowCaseEntity.class);
+//								entities.add(e2);
+//							}
+							e.setValue(val.getFieldStr3());
+							entities.add(e);
 							break;
 						case INTEGER_TEXT:
 							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
