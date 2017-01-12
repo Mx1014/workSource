@@ -570,6 +570,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
      */
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
+
+        LOGGER.debug("start door auth", cmd);
+
         if(cmd.getApproveUserId() == null) {
             User user = UserContext.current().getUser();
             cmd.setApproveUserId(user.getId());
