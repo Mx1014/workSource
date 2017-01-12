@@ -13,7 +13,7 @@ import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
@@ -23,7 +23,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -149,7 +148,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                 List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, community.getId(), pageSize, null);
 
                 if (LOGGER.isDebugEnabled())
-                    LOGGER.debug("queryOrganizationCommunityRequestByCommunityId result is: {}", requests);
+                    LOGGER.debug("CommunityId {}, queryOrganizationCommunityRequestByCommunityId result: {}", community.getId(), requests.toString());
 
                 for (OrganizationCommunityRequest request : requests) {
                     OpPromotionUserVisitor child = new OpPromotionUserVisitor();
@@ -157,7 +156,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                     child.setValue(request.getMemberId());
                     child.setPromotion(visitor.getPromotion());
 
-                    listUserByCompany(child, callback);
+                    this.listUserByCompany(child, callback);
                 }
             } while (locator.getAnchor() != null);
 
@@ -187,37 +186,16 @@ public class PromotionUserServiceImpl implements PromotionUserService {
     }
     
     @Override
-    public void listUserByCompany(OpPromotionUserVisitor visitor, OpPromotionUserCallback callback) {
-        ListOrganizationMemberCommand cmd = new ListOrganizationMemberCommand();
-        cmd.setOrganizationId((Long)visitor.getValue());
-        List<String> groupTypes = new ArrayList<String>();
-        //groupTypes.add(OrganizationGroupType.GROUP.getCode());
-        //groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
-        cmd.setGroupTypes(groupTypes);
-        cmd.setPageSize(100);
-        
-        ListOrganizationMemberCommandResponse resp = organizationService.listParentOrganizationPersonnels(cmd);
-        while((resp != null) && (resp.getMembers() != null) && (resp.getMembers().size() > 0)) {
+    public void listUserByCompany(final OpPromotionUserVisitor visitor, final OpPromotionUserCallback callback) {
+        Long orgId = (Long)visitor.getValue();
 
-            if (LOGGER.isDebugEnabled())
-                LOGGER.debug("listParentOrganizationPersonnels result is: {}", resp.getMembers());
+        List<OrganizationMember> organizationMembers = organizationProvider.listOrganizationMembersByOrgId(orgId);
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("OrganizationId {}, listOrganizationMembersByOrgId result: {}", orgId, organizationMembers.toString());
 
-            List<OrganizationMemberDTO>  dtos = resp.getMembers();
-            for(OrganizationMemberDTO dto : dtos) {
-                if(dto.getTargetType().equals(OrganizationMemberTargetType.USER.toString())) {
-                    User user = userProvider.findUserById(dto.getTargetId());
-                    callback.userFound(user, visitor);
-                }
-            }
-            
-            if(resp.getNextPageAnchor() == null || resp.getMembers() == null || resp.getMembers().size() < cmd.getPageSize()) {
-                break;
-            }
-            
-            cmd.setPageAnchor(resp.getNextPageAnchor());
-            resp = organizationService.listParentOrganizationPersonnels(cmd);
-        }
+        organizationMembers.stream()
+                .filter(member -> member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()))
+                .forEach(member -> callback.userFound(userProvider.findUserById(member.getTargetId()), visitor));
     }
     
     @Override
