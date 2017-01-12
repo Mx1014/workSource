@@ -146,6 +146,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			// 把values 存起来
 			for (PostApprovalFormItem val : cmd.getValues()) {
 				GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
+				obj.setApprovalId(ga.getId());
 				obj.setFlowCaseId(flowCase.getId());
 				obj.setFieldName(val.getFieldName());
 				obj.setFieldType(val.getFieldType());
