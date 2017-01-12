@@ -1582,7 +1582,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		final Field<Byte> inMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()), EquipmentTaskStatus.IN_MAINTENANCE.getCode());
 		final Field<Byte> completeMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode()), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
 		final Field<Byte> completeInspection = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(EquipmentTaskResult.COMPLETE_OK.getCode()), EquipmentTaskResult.COMPLETE_OK.getCode());
-		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID, DSL.count().as("taskCount"), 
+		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID, Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID, DSL.count().as("taskCount"), 
 				DSL.count(toExecuted).as("toExecuted"), DSL.count(needMaintance).as("needMaintance"), DSL.count(inMaintance).as("inMaintance"), 
 				DSL.count(delay).as("delay"),DSL.count(completeInspection).as("completeInspection"),DSL.count(completeMaintance).as("completeMaintance")};
 		final SelectQuery<Record> query = context.selectQuery();
