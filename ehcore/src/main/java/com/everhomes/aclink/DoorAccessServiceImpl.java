@@ -2598,7 +2598,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                         DoorAuthDTO dto = createDoorAuth(authCmd);
                         dtos.add(dto);
                     }
-
+                    LOGGER.debug("listAclinkUsers. res = " + userRes);
                     if(null == userRes.getNextPageAnchor()){
                         break;
                     }
