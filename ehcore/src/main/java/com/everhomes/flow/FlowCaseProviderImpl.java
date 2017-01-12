@@ -58,6 +58,16 @@ public class FlowCaseProviderImpl implements FlowCaseProvider {
     }
 
     @Override
+    public Long createFlowCaseHasId(FlowCase obj) {
+    	DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
+        
+        prepareObj(obj);
+        EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());
+        dao.insert(obj);
+        return id;
+    }
+
+    @Override
     public void updateFlowCase(FlowCase obj) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhFlowCases.class));
         EhFlowCasesDao dao = new EhFlowCasesDao(context.configuration());
