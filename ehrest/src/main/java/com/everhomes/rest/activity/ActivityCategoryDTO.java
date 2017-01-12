@@ -25,7 +25,6 @@ import com.everhomes.util.StringHelper;
  * <li>selectedIconUri: 选中时的icon地址uri</li>
  * <li>iconUrl: icon地址url</li>
  * <li>selectedIconUrl: 选中时的icon地址url</li>
- * <li>showName: 显示名称</li>
  * <li>allFlag: 是否表示全部，1是0否，参考{@link com.everhomes.rest.approval.TrueOrFalseFlag}</li>
  * </ul>
  */
@@ -49,7 +48,6 @@ public class ActivityCategoryDTO {
 	private String selectedIconUri;
 	private String iconUrl;
 	private String selectedIconUrl;
-	private String showName;
 	private Byte allFlag;
 
 	public String getIconUrl() {
@@ -90,14 +88,6 @@ public class ActivityCategoryDTO {
 
 	public void setSelectedIconUri(String selectedIconUri) {
 		this.selectedIconUri = selectedIconUri;
-	}
-
-	public String getShowName() {
-		return showName;
-	}
-
-	public void setShowName(String showName) {
-		this.showName = showName;
 	}
 
 	public Byte getAllFlag() {
