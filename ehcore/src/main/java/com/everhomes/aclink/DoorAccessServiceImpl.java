@@ -2591,6 +2591,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 while (true){
                     LOGGER.debug("listAclinkUsers. cmd = " + userCmd);
                     AclinkUserResponse userRes = listAclinkUsers(userCmd);
+                    LOGGER.debug("listAclinkUsers. res = " + userRes);
                     for (AclinkUserDTO user: userRes.getUsers()) {
                         CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
                         authCmd.setUserId(user.getId());
@@ -2598,7 +2599,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                         DoorAuthDTO dto = createDoorAuth(authCmd);
                         dtos.add(dto);
                     }
-                    LOGGER.debug("listAclinkUsers. res = " + userRes);
+                    LOGGER.debug("createDoorAuth. end ");
                     if(null == userRes.getNextPageAnchor()){
                         break;
                     }
