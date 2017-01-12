@@ -2585,7 +2585,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        Long v = System.currentTimeMillis();
+        String v = "" + System.currentTimeMillis();
         redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
         LOGGER.debug("start door auth. startTime = " + v);
         while (true){
