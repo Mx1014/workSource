@@ -1,15 +1,20 @@
 package com.everhomes.yellowPage;
 
+import com.everhomes.activity.ActivityAttachment;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.rest.activity.ActivityAttachmentDTO;
+import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.forum.PostContentType;
@@ -502,14 +507,31 @@ public class YellowPageServiceImpl implements YellowPageService {
 		
 //		ServiceAlliance serviceAlliance =  ConvertHelper.convert(yellowPage ,ServiceAlliance.class);
 		response = ConvertHelper.convert(sa,ServiceAllianceDTO.class);
-		if(!StringUtils.isEmpty(response.getTemplateType())) {
-			RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
-			if(template != null) {
-				response.setTemplateName(template.getName());
-				response.setButtonTitle(template.getButtonTitle());
+		if(response.getJumpType() != null) {
+			
+			if(JumpType.TEMPLATE.equals(JumpType.fromCode(response.getJumpType()))) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+				if(template != null) {
+					response.setTemplateName(template.getName());
+					response.setButtonTitle(template.getButtonTitle());
+				}
+			} else if(JumpType.MODULE.equals(JumpType.fromCode(response.getJumpType()))) {
+				response.setTemplateName(response.getTemplateType());
+				response.setButtonTitle("我要申请");
+			}
+		} else {
+			//兼容以前只有模板跳转时jumptype字段为null的情况
+			if(response.getTemplateType() != null) {
+				RequestTemplates template = userActivityProvider.getCustomRequestTemplate(response.getTemplateType());
+				if(template != null) {
+					response.setTemplateName(template.getName());
+					response.setButtonTitle(template.getButtonTitle());
+				}
 			}
 			
 		}
+		
+		this.processDetailUrl(response);
 //		response.setDisplayName(serviceAlliance.getNickName());
 		
 		return response;
@@ -611,7 +633,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 					}
 				} else if(JumpType.MODULE.equals(JumpType.fromCode(dto.getJumpType()))) {
 					dto.setTemplateName(dto.getTemplateType());
-					dto.setButtonTitle(dto.getTemplateType());
+					dto.setButtonTitle("我要申请");
 				}
 			} else {
 				//兼容以前只有模板跳转时jumptype字段为null的情况
@@ -635,10 +657,18 @@ public class YellowPageServiceImpl implements YellowPageService {
 
     private void processDetailUrl(ServiceAllianceDTO dto) {
         try {
-            String detailUrl = configurationProvider.getValue(ServiceAllianceConst.SERVICE_ALLIANCE_DETAIL_URL_CONF, "");
+            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+            String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
             String name = org.apache.commons.lang.StringUtils.trimToEmpty(dto.getName());
-            String url = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
-            dto.setDetailUrl(url);
+            
+            String ownerType = dto.getOwnerType();
+            ownerType = (ownerType  == null) ? "" : ownerType;
+            Long ownerId = dto.getOwnerId();
+            ownerId = (ownerId == null) ? 0 : ownerId;
+            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2), ownerType, ownerId);
+            
+//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+            dto.setDetailUrl(homeUrl + detailUrl);
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -815,6 +845,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			attachment.setOwnerId(ownerId);
 //			attachment.setContentType(PostContentType.IMAGE.getCode());
 			attachment.setAttachmentType(attachmentType);
+			
+			attachment.setCreatorUid(UserContext.current().getUser().getId());
+	        attachment.setFileSize(dto.getFileSize());
+	        
 			this.yellowPageProvider.createServiceAllianceAttachments(attachment);
 		}
 	}
@@ -1031,6 +1065,39 @@ public class YellowPageServiceImpl implements YellowPageService {
 		}
 
 		return modules;
+	}
+
+	@Override
+	public ListAttachmentsResponse listAttachments(ListAttachmentsCommand cmd) {
+		CrossShardListingLocator locator=new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor() == null ? 0L : cmd.getPageAnchor());
+        if(cmd.getPageSize()==null){
+            int value=configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
+            cmd.setPageSize(value);
+        }
+
+        ListAttachmentsResponse response = new ListAttachmentsResponse();
+        List<ServiceAllianceAttachment> attachments = yellowPageProvider.listAttachments(locator, cmd.getPageSize() + 1, cmd.getOwnerId());
+        if(attachments != null && attachments.size() > 0) {
+            if(attachments.size() > cmd.getPageSize()) {
+                attachments.remove(attachments.size() - 1);
+                response.setNextPageAnchor(attachments.get(attachments.size() - 1).getId());
+            }
+
+            List<AttachmentDTO> dtos = attachments.stream().map((r) -> {
+            	AttachmentDTO dto = ConvertHelper.convert(r, AttachmentDTO.class);
+                String contentUrl = contentServerService.parserUri(dto.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+                User creator = userProvider.findUserById(dto.getCreatorUid());
+                if(creator != null) {
+                    dto.setCreatorName(creator.getNickName());
+                }
+                dto.setContentUrl(contentUrl);
+                return dto;
+            }).collect(Collectors.toList());
+            response.setAttachments(dtos);
+        }
+
+        return response;
 	}
 
 }

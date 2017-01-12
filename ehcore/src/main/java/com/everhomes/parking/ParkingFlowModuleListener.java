@@ -292,4 +292,10 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 			flow.setStringTag1("1");
 
 	}
+
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
 }

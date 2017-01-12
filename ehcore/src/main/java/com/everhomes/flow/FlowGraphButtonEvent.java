@@ -152,6 +152,16 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			log.setLogType(FlowLogType.NODE_ENTER.getCode());
 			log.setLogTitle("");
 			ctx.getLogs().add(log);
+			log = null;
+			
+			//Remove the old logs
+			log = flowEventLogProvider.getValidEnterStep(firedUser.getId(), ctx.getFlowCase());
+			if(null != log) {
+				log.setStepCount(-1l); // mark as invalid
+				ctx.getUpdateLogs().add(log);
+				log = null;
+			}
+			
 			
 			break;
 		case COMMENT_STEP:

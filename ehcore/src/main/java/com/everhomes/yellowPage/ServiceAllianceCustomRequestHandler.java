@@ -43,6 +43,7 @@ import com.everhomes.rest.user.RequestFieldDTO;
 import com.everhomes.rest.user.RequestTemplateDTO;
 import com.everhomes.rest.videoconf.ConfServiceErrorCode;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
+import com.everhomes.rest.yellowPage.JumpType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
@@ -115,6 +116,7 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		yellowPageProvider.createServiceAllianceRequests(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
+		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
 		saRequestInfoSearcher.feedDoc(requestInfo);
 		
 		if(cmd.getAttachments() != null && cmd.getAttachments().size() > 0) {
@@ -208,7 +210,8 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		if(fieldList != null && fieldList.size() > 0) {
 			StringBuilder sb = new StringBuilder();
 			for(RequestFieldDTO field : fieldList) {
-				sb.append(field.getFieldName() + ":" + field.getFieldValue() + "\n");
+				String fieldValue = (field.getFieldValue() == null) ? "" : field.getFieldValue();
+				sb.append(field.getFieldName() + ":" + fieldValue + "\n");
 			}
 			
 			return sb.toString();
@@ -244,7 +247,11 @@ public class ServiceAllianceCustomRequestHandler implements CustomRequestHandler
 		
 		GetRequestInfoResponse response = new GetRequestInfoResponse();
 		response.setDtos(fieldList);
-		response.setCreateTime(request.getCreateTime());
+		
+		if(request != null) {
+			response.setCreateTime(request.getCreateTime());
+		}
+		
 
 		return response;
 	}

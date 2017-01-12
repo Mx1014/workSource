@@ -3,8 +3,10 @@ package com.everhomes.business;
 import java.util.List;
 
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
@@ -38,6 +40,9 @@ import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
 import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
+import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
 import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
@@ -103,4 +108,7 @@ public interface BusinessService {
 	void updateUserOrderCount(UpdateUserOrderCountCommand cmd);
 	List<RegionDTO> listRegion(ListRegionCommand cmd);
 	UserInfo validateUserPass(ValidateUserPassCommand cmd);
+	CreateBusinessGroupResponse createBusinessGroup(CreateBusinessGroupCommand cmd);
+	void joinBusinessGroup(JoinBusinessGroupCommand cmd);
+	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(ListApartmentFloorCommand cmd);
 }

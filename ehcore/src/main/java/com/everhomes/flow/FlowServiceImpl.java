@@ -564,7 +564,9 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowNodeId, FlowConstants.FLOW_CONFIG_VER, FlowUserType.APPLIER.getCode());
 		List<FlowButtonDTO> dtos1 = new ArrayList<FlowButtonDTO>();
 		buttons.stream().forEach((fb) ->{
-			dtos1.add(ConvertHelper.convert(fb, FlowButtonDTO.class));
+			if(!fb.getFlowStepType().equals(FlowStepType.EVALUATE_STEP.getCode())) {
+				dtos1.add(ConvertHelper.convert(fb, FlowButtonDTO.class));	
+			}
 		});
 		
 		List<FlowButtonDTO> dtos2 = new ArrayList<FlowButtonDTO>();
@@ -1732,11 +1734,46 @@ public class FlowServiceImpl implements FlowService {
 			flowCase.setProjectType(snapshotFlow.getProjectType());
 		}
 		
+    	flowListenerManager.onFlowCaseCreating(flowCase);
 		flowCaseProvider.createFlowCase(flowCase);
 		flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());//get again for default values
 		
 		FlowCaseState ctx = flowStateProcessor.prepareStart(userInfo, flowCase);
 		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
+		
+		return flowCase;
+	}
+	
+	@Override
+	public FlowCase createDumpFlowCase(GeneralModuleInfo ga, CreateFlowCaseCommand flowCaseCmd) {
+		FlowCase flowCase = ConvertHelper.convert(flowCaseCmd, FlowCase.class);
+		flowCase.setCurrentNodeId(0l);
+		if(flowCase.getApplyUserId() == null) {
+			flowCase.setApplyUserId(UserContext.current().getUser().getId());	
+		}
+		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(flowCase.getApplyUserId());
+		flowCase.setApplierName(userInfo.getNickName());
+		if(userInfo.getPhones() != null && userInfo.getPhones().size() > 0) {
+			flowCase.setApplierPhone(userInfo.getPhones().get(0));	
+		}
+		
+		FlowModuleDTO moduleDTO = this.getModuleById(ga.getModuleId());
+		
+		flowCase.setFlowMainId(0l);
+		flowCase.setFlowVersion(0);
+		flowCase.setNamespaceId(ga.getNamespaceId());
+		flowCase.setModuleId(ga.getModuleId());
+		flowCase.setModuleName(moduleDTO.getDisplayName());
+		flowCase.setModuleType(ga.getModuleType());
+		flowCase.setOwnerId(ga.getOwnerId());
+		flowCase.setOwnerType(ga.getOwnerType());
+		flowCase.setCaseType(FlowCaseType.DUMB.getCode());
+		flowCase.setStatus(FlowCaseStatus.FINISHED.getCode());
+		flowCase.setProjectId(ga.getProjectId());
+		flowCase.setProjectType(ga.getProjectType());
+		
+    	flowListenerManager.onFlowCaseCreating(flowCase);
+		flowCaseProvider.createFlowCase(flowCase);
 		
 		return flowCase;
 	}
@@ -1978,7 +2015,7 @@ public class FlowServiceImpl implements FlowService {
 		return getFlowCaseDetail(flowCaseId, inUserId, flowUserType, false);
 	}
 	
-	private FlowButtonDTO flowButtonToDTO(Flow snapshotFlow, FlowButton b) {
+	private FlowButtonDTO flowButtonToDTO(Flow snapshotFlow,  FlowButton b, Map<Long, FlowNode> nodeMap, int level) {
 		FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
 		
 		FlowStepType stepType = FlowStepType.fromCode(b.getFlowStepType());
@@ -1988,6 +2025,9 @@ public class FlowServiceImpl implements FlowService {
 		if(stepType == FlowStepType.TRANSFER_STEP) {
 			/* force use processor */
 			btnDTO.setNeedProcessor((byte)1);
+		}
+		if(stepType == FlowStepType.APPROVE_STEP && level >= nodeMap.size()-2 ) {
+			btnDTO.setNeedProcessor((byte)0);
 		}
 		
 		return btnDTO;
@@ -2013,9 +2053,20 @@ public class FlowServiceImpl implements FlowService {
 		
 		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		Map<Long, FlowNode> nodeMap = new HashMap<Long, FlowNode>();
+		int level = 0;
 		for(FlowNode node : nodes) {
 			nodeMap.put(node.getId(), node);
+			
+			if(!flowCase.getCurrentNodeId().equals(node.getId())) {
+				level++;
+			}
 		}
+		if(level == nodes.size()) {
+			//not found
+			level = 0;
+		}
+		final Integer nlevel = level;
+		
 		if(nodes.size() < 3) {
 			return dto;
 		}
@@ -2038,7 +2089,7 @@ public class FlowServiceImpl implements FlowService {
 
 						if(isAdd && b.getStatus().equals(FlowButtonStatus.ENABLED.getCode()) 
 								&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode())) {
-							FlowButtonDTO btnDTO = flowButtonToDTO(snapshotFlow, b);
+							FlowButtonDTO btnDTO = flowButtonToDTO(snapshotFlow, b, nodeMap, nlevel);
 							btnDTOS.add(btnDTO);
 						}
 					});
@@ -2048,8 +2099,14 @@ public class FlowServiceImpl implements FlowService {
 		} else if(flowUserType == FlowUserType.APPLIER) {
 			List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(), flowCase.getFlowVersion(), flowUserType.getCode());
 			buttons.stream().forEach((b)->{
-				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
+				if(b.getStatus().equals(FlowButtonStatus.ENABLED.getCode())
+						&& !b.getFlowStepType().equals(FlowStepType.COMMENT_STEP.getCode()) ) {
 					FlowButtonDTO btnDTO = ConvertHelper.convert(b, FlowButtonDTO.class);
+					FlowStepType stepType = FlowStepType.fromCode(b.getFlowStepType());
+					if(stepType == FlowStepType.REMINDER_STEP) {
+						btnDTO.setNeedSubject((byte)0);
+					}
+					
 					btnDTOS.add(btnDTO);
 				}
 			});
@@ -2389,14 +2446,16 @@ public class FlowServiceImpl implements FlowService {
 			dto.setModuleId(moduleId);
 			return dto;
 		}
-		 
-		if(moduleId.equals(41500L)) {
-			FlowModuleDTO dto = new FlowModuleDTO();
-			dto.setModuleId(41500L);
-			dto.setModuleName("车辆放行");
-			dto.setDisplayName("车辆放行");
-			return dto;
-		}
+		
+//		 
+//    Only for test. by Janson
+//		if(moduleId.equals(41500L)) {
+//			FlowModuleDTO dto = new FlowModuleDTO();
+//			dto.setModuleId(41500L);
+//			dto.setModuleName("车辆放行");
+//			dto.setDisplayName("车辆放行");
+//			return dto;
+//		}
  
 		return null;
 	}
@@ -2608,6 +2667,8 @@ public class FlowServiceImpl implements FlowService {
 				ctx.getFlowCase().setLastStepTime(now);
 				flowCaseProvider.updateFlowCase(ctx.getFlowCase());
 				flowEventLogProvider.createFlowEventLogs(ctx.getLogs());	
+				
+				flowEventLogProvider.updateFlowEventLogs(ctx.getUpdateLogs());
 			} else {
 				throw new FlowStepBusyException("already step by others");
 			}

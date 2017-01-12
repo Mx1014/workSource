@@ -94,4 +94,6 @@ public interface YellowPageProvider {
 
 
 	List<JumpModuleDTO> jumpModules(Integer namespaceId);
+	
+	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
 }

@@ -1272,4 +1272,17 @@ public class OrganizationController extends ControllerBase {
 		res.setErrorDescription("OK");
 		return res;
 	}
+	
+	/**
+	 * <b>URL: /org/getOrganizationActiveCommunityId</b>
+	 * <p>获取企业所在园区id</p>
+	 */
+	@RequestMapping("getOrganizationActiveCommunityId")
+	@RestReturn(value=Long.class)
+	public RestResponse getOrganizationActiveCommunityId(GetOrganizationActiveCommunityId cmd){
+		RestResponse res = new RestResponse(organizationService.getOrganizationActiveCommunityId(cmd.getOrganizationId()));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
 }

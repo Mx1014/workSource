@@ -73,4 +73,6 @@ public interface FlowListenerManager {
 	List<FlowModuleInfo> getModules();
 
 	void onFlowCreating(Flow flow);
+
+	void onFlowCaseCreating(FlowCase flowCase);
 }

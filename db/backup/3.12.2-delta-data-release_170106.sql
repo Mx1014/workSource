@@ -452,6 +452,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 
 
+
 -- 要上线的app版本 by sfyan 20161220
 SET @app_version_id = (SELECT MAX(id) FROM `eh_app_version`);
 INSERT INTO `eh_app_version` (`id`, `type`, `name`, `realm`, `namespace_id`, `default_order`, `create_time`) VALUES((@app_version_id := @app_version_id + 1),'android','3.12.2','','0','3156995','2016-12-01 14:57:56');
@@ -604,5 +605,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20662, '', 'EhNamespaces', 999992, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20670, '', 'EhNamespaces', 999992, 2);
+
 	
 update eh_parking_lots set rate_flag = 1 where id = 10001;
+

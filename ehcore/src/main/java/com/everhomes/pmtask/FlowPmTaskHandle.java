@@ -12,12 +12,19 @@ import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import com.alibaba.fastjson.JSONArray;
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bigcollection.Accessor;
+import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -117,6 +124,8 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	private FlowProvider flowProvider;
     @Autowired
     private FlowCaseProvider flowCaseProvider;
+    @Autowired
+    private BigCollectionProvider bigCollectionProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
@@ -199,7 +208,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	    			FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
 	    	if(null == flow) {
 	    		LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
-	    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
 	    				"Enable pmtask flow not found.");
 	    	}
     		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
@@ -217,8 +226,6 @@ public class FlowPmTaskHandle implements PmTaskHandle {
         	task.setFlowCaseId(flowCase.getId());
         	pmTaskProvider.updateTask(task);
 			
-			pmTaskSearch.feedDoc(task);
-
 	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
 	    			PmTaskOperateType.EXECUTOR.getCode(), null, null);
 	    	int size = targets.size();
@@ -229,18 +236,55 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	    	}
 			return null;
 		});
+		
+		pmTaskSearch.feedDoc(task);
+		
     	//同步数据到科技园
-		if(user.getNamespaceId() == 1000000) {
-			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
-			Category category = null;
-			if(null != cmd.getCategoryId())
-				category = categoryProvider.findCategoryById(cmd.getCategoryId());
-			handler.synchronizedData(task, cmd.getAttachments(), taskCategory, category);
-		}
+		long start = System.currentTimeMillis();
 
+//		if(user.getNamespaceId() == 1000000) {
+//			
+//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+//			String value = "[]";
+//			
+//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
+//			if(null != attachments) {
+//				attachments.stream().forEach(a -> {
+//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+//					a.setContentUrl(contentUrl);
+//				});
+//				value = JSONObject.toJSONString(attachments);
+//			}
+//			
+//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//	      
+//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//	        valueOperations.set(key, value);
+//			
+//			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
+//			handler.pushToQueque(task.getId());
+//		}
+		long end = System.currentTimeMillis();
+		System.out.println( (end - start) / 1000);
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
+    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
+
+    private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+	
 	private void sendMessage4CreateTask(List<PmTaskTarget> targets, String requestorName, String requestorPhone,
 			String taskCategoryName, User user) {
 		List<String> phones = new ArrayList<String>();
