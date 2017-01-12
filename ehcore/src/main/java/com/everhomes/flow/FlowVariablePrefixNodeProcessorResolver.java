@@ -34,7 +34,11 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 		FlowCase flowCase = ctx.getFlowCase();
 		FlowNode node = null;
 		if(ctx.getCurrentNode() != null) {
-			node = ctx.getCurrentNode().getFlowNode();
+			if(ctx.getPrefixNode() != null) {
+				node = ctx.getPrefixNode().getFlowNode();
+			} else {
+				node = ctx.getCurrentNode().getFlowNode();	
+			}
 		} else {
 			FlowGraphNode graphNode = ctx.getFlowGraph().getGraphNode(flowCase.getCurrentNodeId());
 			if(graphNode != null) {
@@ -49,7 +53,7 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 		}
 		
 		//found fired buttons
-		List<FlowEventLog> logs = flowEventLogProvider.findStepEventLogs(flowCase.getId());
+		List<FlowEventLog> logs = flowEventLogProvider.findStepEventLogs(flowCase.getId(), flowCase.getStepCount());
 		List<Long> users = new ArrayList<Long>();
 		if(logs != null && logs.size() > 0) {
 			for(FlowEventLog log : logs) {

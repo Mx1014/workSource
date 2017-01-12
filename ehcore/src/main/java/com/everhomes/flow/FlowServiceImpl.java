@@ -2054,11 +2054,16 @@ public class FlowServiceImpl implements FlowService {
 		List<FlowNode> nodes = flowNodeProvider.findFlowNodesByFlowId(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		Map<Long, FlowNode> nodeMap = new HashMap<Long, FlowNode>();
 		int level = 0;
+		boolean found = false;
 		for(FlowNode node : nodes) {
 			nodeMap.put(node.getId(), node);
 			
-			if(!flowCase.getCurrentNodeId().equals(node.getId())) {
-				level++;
+			if(!found) {
+				if(!flowCase.getCurrentNodeId().equals(node.getId())) {
+					level++;
+				} else {
+					found = true;
+				}
 			}
 		}
 		if(level == nodes.size()) {
@@ -2151,7 +2156,7 @@ public class FlowServiceImpl implements FlowService {
 					
 					FlowButton commentBtn = flowButtonProvider.findFlowButtonByStepType(currNode.getId()
 							, currNode.getFlowVersion(), FlowStepType.COMMENT_STEP.getCode(), flowUserType.getCode());
-					if(commentBtn != null) {
+					if(commentBtn != null && commentBtn.getStatus().equals(FlowButtonStatus.ENABLED.getCode())) {
 						nodeLogDTO.setAllowComment((byte)1);
 						nodeLogDTO.setCommentButtonId(commentBtn.getId());
 					}
