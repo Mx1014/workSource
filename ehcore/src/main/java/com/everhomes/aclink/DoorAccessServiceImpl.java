@@ -2589,6 +2589,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                 redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
                 LOGGER.debug("start door auth. startTime = " + v);
                 while (true){
+                    LOGGER.debug("listAclinkUsers. cmd = " + userCmd);
                     AclinkUserResponse userRes = listAclinkUsers(userCmd);
                     for (AclinkUserDTO user: userRes.getUsers()) {
                         CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
@@ -2604,7 +2605,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     userCmd.setPageAnchor(userRes.getNextPageAnchor());
                 }
                 redisTemplate.delete(key);
-                LOGGER.debug("end door auth. startTime = " + System.currentTimeMillis());
+                LOGGER.debug("end door auth. endTime = " + System.currentTimeMillis());
             }
         });
 
