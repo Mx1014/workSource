@@ -80,7 +80,7 @@ public class EbeiPmTaskHandleTest {
 		param.put("remarks", "业主报修水管坏了");
 		param.put("projectId", "240111044331055940");
 		param.put("anonymous", "0");
-		param.put("fileAddrs", "http://1.jpg,http://2.jpg");
+		param.put("fileAddrs", "http://10.1.10.102:5000/image/aW1hZ2UvTVRwaE1HSmlNelUyTURNNE0ySmpObUZtWWpVeE1XVTRZV014WW1Gak9XWTJNZw?ownerType=EhUsers&ownerId=241964&token=7seYNzWeS09VsFkHbMAu3w8GmVrAxz1xictvqVKgHWhVDJOktEwsi8Si7CH4NS3pJ7uosgA3tPL6PNE9lh4u2DeFLZrqgwdD5SHErJrtFjUlaqRpnTcOrzsWasE5J8FG&pxw=1920&pxh=1080");
 		param.put("buildingType", "0");
 		
 		

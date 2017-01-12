@@ -338,7 +338,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		if(entity.isSuccess())
 			return entity.getData();
 		
-		return null;
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				"Request of third failed.");
 	}
 	
 	@Override
@@ -617,44 +618,58 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-		EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
-		
 		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
 		
-		CategoryDTO taskCategory = createCategoryDTO();
-		dto.setTaskCategoryName(taskCategory.getName());
-		dto.setCategoryName(ebeiPmTask.getServiceName());
-		
-		String filePath = ebeiPmTask.getFilePath();
-		if(StringUtils.isNotBlank(filePath)) {
-			String[] filePaths = filePath.split(",");
+		dbProvider.execute((TransactionStatus status) -> {
 			
-			List<PmTaskAttachmentDTO> attachments = new ArrayList<>();
-			for (String url: filePaths) {
-				PmTaskAttachmentDTO d = new PmTaskAttachmentDTO();
-				d.setContentUrl(url);
-				attachments.add(d);
+			EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
+			
+			Integer state = ebeiPmTask.getState();
+			task.setStar(state.byteValue());
+			pmTaskProvider.updateTask(task);
+			
+			CategoryDTO taskCategory = createCategoryDTO();
+			dto.setTaskCategoryName(taskCategory.getName());
+			dto.setCategoryName(ebeiPmTask.getServiceName());
+			
+			String filePath = ebeiPmTask.getFilePath();
+			if(StringUtils.isNotBlank(filePath)) {
+				String[] filePaths = filePath.split(",");
+				
+				List<PmTaskAttachmentDTO> attachments = new ArrayList<>();
+				for (String url: filePaths) {
+					PmTaskAttachmentDTO d = new PmTaskAttachmentDTO();
+					d.setContentUrl(url);
+					attachments.add(d);
+				}
+				dto.setAttachments(attachments);
 			}
-			dto.setAttachments(attachments);
-		}
-		
-		List<EbeiPmtaskLogDTO> logs = ebeiPmTask.getScheduleStr();
-		
-		if(null != logs) {
-			List<PmTaskLogDTO> taskLogs = new ArrayList<>();
-			for(EbeiPmtaskLogDTO ebeiLog: logs) {
-				PmTaskLogDTO taskLog = new PmTaskLogDTO();
-				taskLog.setId(0L);
-				taskLog.setNamespaceId(namespaceId);
-				taskLog.setOwnerId(task.getOwnerId());
-				taskLog.setOwnerType(task.getOwnerType());
-				taskLog.setOperatorTime(strDateToTimestamp(ebeiLog.getOperateDate()));
-				taskLog.setText(ebeiLog.getOperateResult());
-				taskLog.setStatus((byte)1);
-				taskLogs.add(taskLog);
+			
+			List<EbeiPmtaskLogDTO> logs = ebeiPmTask.getScheduleStr();
+			
+			if(null != logs) {
+				List<PmTaskLogDTO> taskLogs = new ArrayList<>();
+				for(EbeiPmtaskLogDTO ebeiLog: logs) {
+					PmTaskLogDTO taskLog = new PmTaskLogDTO();
+					taskLog.setId(0L);
+					taskLog.setNamespaceId(namespaceId);
+					taskLog.setOwnerId(task.getOwnerId());
+					taskLog.setOwnerType(task.getOwnerType());
+					taskLog.setOperatorTime(strDateToTimestamp(ebeiLog.getOperateDate()));
+					taskLog.setText(ebeiLog.getOperateResult());
+					taskLog.setStatus((byte)0);
+					taskLog.setStatusName(ebeiLog.getOperateName());
+					taskLogs.add(taskLog);
+				}
+				dto.setTaskLogs(taskLogs);
 			}
-			dto.setTaskLogs(taskLogs);
-		}
+		
+			return null;
+		});
+		
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 		
 		return dto;
 	}
