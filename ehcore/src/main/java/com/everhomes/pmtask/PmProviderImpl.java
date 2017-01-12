@@ -1,11 +1,30 @@
 package com.everhomes.pmtask;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
+
+import org.apache.commons.lang.StringUtils;
+import org.jooq.Condition;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Record1;
+import org.jooq.Result;
+import org.jooq.SelectJoinStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DefaultRecordMapper;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.pmtask.PmTaskProcessStatus;
 import com.everhomes.rest.pmtask.PmTaskStatus;
 import com.everhomes.rest.pmtask.PmTaskTargetStatus;
@@ -25,6 +44,7 @@ import org.jooq.*;
 import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import com.everhomes.util.DateHelper;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
@@ -127,6 +147,7 @@ public class PmProviderImpl implements PmTaskProvider{
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         EhPmTaskLogsDao dao = new EhPmTaskLogsDao(context.configuration());
         pmTaskLog.setId(id);
+        pmTaskLog.setOperatorTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
     	dao.insert(pmTaskLog);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskLogs.class, null);
     }
@@ -487,4 +508,45 @@ public class PmProviderImpl implements PmTaskProvider{
     	dao.insert(pmTaskTargetStatistic);
         DaoHelper.publishDaoAction(DaoAction.CREATE, EhPmTaskTargetStatistics.class, null);
     }
+
+	/**
+	 * 金地同步数据使用
+	 */
+	@Override
+	public List<PmTaskLog> listRepairByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_PM_TASK_LOGS)
+			.where(Tables.EH_PM_TASK_LOGS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_PM_TASK_LOGS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_PM_TASK_LOGS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, PmTaskLog.class));
+		}
+		return new ArrayList<PmTaskLog>();
+	}
+	
+	/**
+	 * 金地同步数据使用
+	 */
+	@Override
+	public List<PmTaskLog> listRepairByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_PM_TASK_LOGS)
+			.where(Tables.EH_PM_TASK_LOGS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_PM_TASK_LOGS.OPERATOR_TIME.asc(), Tables.EH_PM_TASK_LOGS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, PmTaskLog.class));
+		}
+		return new ArrayList<PmTaskLog>();
+	}
+	
 }

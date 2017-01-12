@@ -1,6 +1,7 @@
 package com.everhomes.officecubicle;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import org.apache.commons.lang.StringUtils;
@@ -9,6 +10,7 @@ import org.jooq.DSLContext;
 import org.jooq.DeleteWhereStep;
 import org.jooq.InsertQuery;
 import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -21,6 +23,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.officecubicle.OfficeOrderStatus;
 import com.everhomes.rest.officecubicle.OfficeStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -35,6 +38,7 @@ import com.everhomes.server.schema.tables.records.EhOfficeCubicleCategoriesRecor
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleOrdersRecord;
 import com.everhomes.server.schema.tables.records.EhOfficeCubicleSpacesRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
@@ -176,6 +180,8 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOfficeCubicleOrders.class));
 		order.setId(id);
+		order.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		order.setUpdateTime(order.getCreateTime());
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleOrdersRecord record = ConvertHelper.convert(order, EhOfficeCubicleOrdersRecord.class);
 		InsertQuery<EhOfficeCubicleOrdersRecord> query = context.insertQuery(Tables.EH_OFFICE_CUBICLE_ORDERS);
@@ -198,6 +204,7 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOfficeCubicleOrdersDao dao = new EhOfficeCubicleOrdersDao(context.configuration());
+		order.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(order);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, OfficeCubicleOrder.class, order.getId());
 
@@ -238,6 +245,46 @@ public class OfficeCubicleProviderImpl implements OfficeCubicleProvider {
 		if (null != result && result.size() > 0)
 			return result;
 		return null;
+	}
+
+	/**
+	 * 金地同步数据使用
+	 */
+	@Override
+	public List<OfficeCubicleOrder> listStationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS)
+			.where(Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, OfficeCubicleOrder.class));
+		}
+		return new ArrayList<OfficeCubicleOrder>();
+	}
+
+	/**
+	 * 金地同步数据使用
+	 */
+	@Override
+	public List<OfficeCubicleOrder> listStationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_OFFICE_CUBICLE_ORDERS)
+			.where(Tables.EH_OFFICE_CUBICLE_ORDERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_OFFICE_CUBICLE_ORDERS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_OFFICE_CUBICLE_ORDERS.UPDATE_TIME.asc(), Tables.EH_OFFICE_CUBICLE_ORDERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, OfficeCubicleOrder.class));
+		}
+		return new ArrayList<OfficeCubicleOrder>();
 	}
 
 }
