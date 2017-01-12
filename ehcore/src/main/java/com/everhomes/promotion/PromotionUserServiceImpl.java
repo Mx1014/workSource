@@ -5,9 +5,11 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.community.admin.CommunityUserAddressDTO;
 import com.everhomes.rest.community.admin.CommunityUserAddressResponse;
 import com.everhomes.rest.community.admin.ListCommunityUsersCommand;
@@ -16,6 +18,8 @@ import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -26,6 +30,9 @@ import java.util.Map;
 
 @Component
 public class PromotionUserServiceImpl implements PromotionUserService {
+
+    private static final Logger LOGGER = LoggerFactory.getLogger(PromotionUserServiceImpl.class);
+
     @Autowired
     private CommunityService communityService;
     
@@ -106,38 +113,60 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         cmd.setNamespaceId(visitor.getPromotion().getNamespaceId());
         cmd.setPageSize(100);
 
+        Community community = communityProvider.findCommunityById(id);
 
-        // 之前的代码是如果communityType商业园区的话查询该域空间下的所有user
-        // 但是需求是也需要按照园区区分的，所以把判断语句注释掉       add by xq.tian  2017/01/11
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("promotion communityType is: {}", community.getCommunityType());
 
-        // Community community = communityProvider.findCommunityById(id);
+        if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL) {
+            CommunityUserAddressResponse resp = communityService.listUserBycommunityId(cmd);
 
-        // if(CommunityType.fromCode(community.getCommunityType()) == CommunityType.RESIDENTIAL) {
-        CommunityUserAddressResponse resp = communityService.listUserBycommunityId(cmd);
+            while((resp != null) && (resp.getDtos() != null) && (resp.getDtos().size() > 0)) {
+                List<CommunityUserAddressDTO>  dtos = resp.getDtos();
+                for(CommunityUserAddressDTO dto : dtos) {
+                    User user = userProvider.findUserById(dto.getUserId());
 
-        while((resp != null) && (resp.getDtos() != null) && (resp.getDtos().size() > 0)) {
-            List<CommunityUserAddressDTO>  dtos = resp.getDtos();
-            for(CommunityUserAddressDTO dto : dtos) {
-                User user = userProvider.findUserById(dto.getUserId());
-
-                if(user != null) {
-                    callback.userFound(user, visitor);
+                    if(user != null) {
+                        callback.userFound(user, visitor);
+                    }
                 }
+
+                //break after first process
+                if(resp.getNextPageAnchor() == null || resp.getDtos() == null || resp.getDtos().size() < cmd.getPageSize()) {
+                    break;
+                }
+
+                cmd.setPageAnchor(resp.getNextPageAnchor());
+                resp = communityService.listUserBycommunityId(cmd);
             }
+        } else {
+            // 之前的代码是如果communityType商业园区的话查询该域空间下的所有user
+            // 但是需求是也需要按照园区区分的       add by xq.tian  2017/01/11
 
-            //break after first process
-            if(resp.getNextPageAnchor() == null || resp.getDtos() == null || resp.getDtos().size() < cmd.getPageSize()) {
-                break;
-            }
+            CrossShardListingLocator locator = new CrossShardListingLocator();
+            int pageSize = 100;
+            do {
+                List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(locator, community.getId(), pageSize, null);
 
-            cmd.setPageAnchor(resp.getNextPageAnchor());
-            resp = communityService.listUserBycommunityId(cmd);
+                if (LOGGER.isDebugEnabled())
+                    LOGGER.debug("queryOrganizationCommunityRequestByCommunityId result is: {}", requests);
 
-        }
-        /*} else {
-            // 园区
-            ListOrganizationsCommand cmd = null;
-            ListOrganizationsCommandResponse resp = organizationService.listOrganizations(cmd);
+                for (OrganizationCommunityRequest request : requests) {
+                    OpPromotionUserVisitor child = new OpPromotionUserVisitor();
+                    child.setParent(visitor);
+                    child.setValue(request.getMemberId());
+                    child.setPromotion(visitor.getPromotion());
+
+                    listUserByCompany(child, callback);
+                }
+            } while (locator.getAnchor() != null);
+
+
+            /*// 园区
+            ListOrganizationsCommand listOrganizationsCommand = new ListOrganizationsCommand();
+            listOrganizationsCommand.setPageSize(100);
+
+            ListOrganizationsCommandResponse resp = organizationService.listOrganizations(listOrganizationsCommand);
             for(OrganizationDTO dto : resp.getDtos()) {
                    OpPromotionUserVisitor child = new OpPromotionUserVisitor();
                    child.setParent(visitor);
@@ -145,16 +174,16 @@ public class PromotionUserServiceImpl implements PromotionUserService {
                    child.setPromotion(visitor.getPromotion());
 
                    listUserByCompany(child, callback);
-            }
+            }*/
 
-        	if(visitor.getParent() == null) {
+        	/*if(visitor.getParent() == null) {
         		OpPromotionUserVisitor child = new OpPromotionUserVisitor();
         		child.setParent(visitor);
         		child.setValue(id);
         		child.setPromotion(visitor.getPromotion());
         		this.listAllUser(visitor, callback);
-        	}
-        }*/
+        	}*/
+        }
     }
     
     @Override
@@ -170,6 +199,10 @@ public class PromotionUserServiceImpl implements PromotionUserService {
         
         ListOrganizationMemberCommandResponse resp = organizationService.listParentOrganizationPersonnels(cmd);
         while((resp != null) && (resp.getMembers() != null) && (resp.getMembers().size() > 0)) {
+
+            if (LOGGER.isDebugEnabled())
+                LOGGER.debug("listParentOrganizationPersonnels result is: {}", resp.getMembers());
+
             List<OrganizationMemberDTO>  dtos = resp.getMembers();
             for(OrganizationMemberDTO dto : dtos) {
                 if(dto.getTargetType().equals(OrganizationMemberTargetType.USER.toString())) {
@@ -184,8 +217,7 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             
             cmd.setPageAnchor(resp.getNextPageAnchor());
             resp = organizationService.listParentOrganizationPersonnels(cmd);
-            
-        }   
+        }
     }
     
     @Override
