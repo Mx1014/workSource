@@ -78,4 +78,6 @@ public interface FlowModuleListener {
 	void onFlowButtonFired(FlowCaseState ctx);
 
 	void onFlowCaseCreating(FlowCase flowCase);
+
+	void onFlowCaseCreated(FlowCase flowCase);
 }

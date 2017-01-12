@@ -370,6 +370,12 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		
 	}
 
+	@Override
+	public void onFlowCaseCreated(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
 	// @Override
 	// public void issueParkingCards(IssueParkingCardsCommand cmd) {
 	//

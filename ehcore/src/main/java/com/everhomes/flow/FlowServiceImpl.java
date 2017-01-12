@@ -1735,8 +1735,11 @@ public class FlowServiceImpl implements FlowService {
 			flowCase.setProjectType(snapshotFlow.getProjectType());
 		}
 		
-    	flowListenerManager.onFlowCaseCreating(flowCase);
+		flowListenerManager.onFlowCaseCreating(flowCase);
+		
 		flowCaseProvider.createFlowCase(flowCase);
+
+		flowListenerManager.onFlowCaseCreated(flowCase);
 		flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());//get again for default values
 		
 		FlowCaseState ctx = flowStateProcessor.prepareStart(userInfo, flowCase);
@@ -1773,8 +1776,13 @@ public class FlowServiceImpl implements FlowService {
 		flowCase.setProjectId(ga.getProjectId());
 		flowCase.setProjectType(ga.getProjectType());
 		
-    	flowListenerManager.onFlowCaseCreating(flowCase);
+		flowListenerManager.onFlowCaseCreating(flowCase);
+		
 		flowCaseProvider.createFlowCase(flowCase);
+		
+		
+		flowListenerManager.onFlowCaseCreated(flowCase);
+		
 		
 		return flowCase;
 	}
