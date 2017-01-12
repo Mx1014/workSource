@@ -107,6 +107,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setOwnerType(flowCase.getOwnerType());
 		request.setOwnerId(flowCase.getOwnerId());
 		request.setFlowCaseId(flowCase.getId());
+		request.setId(flowCase.getId());
+		request.setTemplateType("flowCase");
 		serviceAllianceRequestInfoSearcher.feedDoc(request);
 	}
 
