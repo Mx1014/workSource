@@ -31,5 +31,5 @@ public interface FlowUserSelectionService {
 	 * @param departmentId
 	 * @return
 	 */
-	List<Long> findManagersByDepartmentId(Long parentOrgId, Long departmentId);
+	List<Long> findManagersByDepartmentId(Long parentOrgId, Long departmentId, Flow flow);
 }

@@ -1951,7 +1951,8 @@ public class FlowServiceImpl implements FlowService {
 		} else {
 			 if(1 == type && !snapshotFlow.getNeedEvaluate().equals((byte)0) 
 					 && flowNode.getNodeLevel() >= snapshotFlow.getEvaluateStart() 
-					 && flowNode.getNodeLevel() <= snapshotFlow.getEvaluateEnd() ) {
+					 && flowNode.getNodeLevel() <= snapshotFlow.getEvaluateEnd()
+					 && !flowCase.getStatus().equals(FlowCaseStatus.ABSORTED.getCode())) {
 				 dto.setNeedEvaluate((byte)1);
 			 }
 		}
@@ -2543,7 +2544,9 @@ public class FlowServiceImpl implements FlowService {
 					parentOrgId = sel.getOrganizationId();
 				}
 				Long departmentId = parentOrgId;
-				if(sel.getSourceIdB() != null && FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
+				if(sel.getSourceIdB() != null 
+						&& !sel.getSourceIdB().equals(0l) 
+						&& FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
 					departmentId = sel.getSourceIdB();
 				}
 //				LOGGER.error("position selId= " + sel.getId() + " positionId= " + sel.getSourceIdA() + " departmentId= " + departmentId);
@@ -2564,12 +2567,13 @@ public class FlowServiceImpl implements FlowService {
 				}
 				
 				Long departmentId = parentOrgId;
-				if(FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeA())) {
-					if(null != sel.getSourceIdA()) {
+				if(sel.getSourceTypeA() == null 
+						|| FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeA())) {
+					if(null != sel.getSourceIdA() && !sel.getSourceIdA().equals(0l)) {
 						departmentId = sel.getSourceIdA();	
 					}
 					
-					List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId);
+					List<Long> tmp = flowUserSelectionService.findManagersByDepartmentId(parentOrgId, departmentId, ctx.getFlowGraph().getFlow());
 					users.addAll(tmp);
 				} else {
 					LOGGER.error("resolvUser selId= " + sel.getId() + " manager parse error!");
