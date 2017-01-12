@@ -1127,6 +1127,8 @@ public class FlowServiceImpl implements FlowService {
         Long ver = redisTemplate.opsForValue().increment(key, 1);
         if(ver == null || ver < flow.getFlowVersion()) {
         	redisTemplate.opsForValue().set(key, String.valueOf(flow.getFlowVersion()));
+        } else {
+        	flow.setFlowVersion(ver.intValue());
         }
 	}
 
@@ -1152,6 +1154,10 @@ public class FlowServiceImpl implements FlowService {
 			return true;
 		} else if(flow.getStatus().equals(FlowStatusType.RUNNING.getCode())) {
 			//already running
+			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+			flow.setUpdateTime(now);
+			flow.setRunTime(now);
+			flowProvider.updateFlow(flow);
 			return true;
 		}
 		
