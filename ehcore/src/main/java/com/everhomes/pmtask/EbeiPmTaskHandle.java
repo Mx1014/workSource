@@ -625,7 +625,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
 			
 			Integer state = ebeiPmTask.getState();
-			task.setStar(state.byteValue());
+			task.setStatus(state.byteValue());
 			pmTaskProvider.updateTask(task);
 			
 			CategoryDTO taskCategory = createCategoryDTO();
