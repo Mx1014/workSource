@@ -144,7 +144,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setKey(dto.getFieldDisplayName());
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-		
+		entities.add(e);
 		//企业
 		e = new FlowCaseEntity();
 		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
@@ -153,6 +153,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setKey(dto.getFieldDisplayName());
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+		entities.add(e);
 		
 		//申请类型
 		e = new FlowCaseEntity(); 
@@ -161,6 +162,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setKey("申请类型");
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(ga.getApprovalName());
+		entities.add(e);
 		//申请来源
 
 		e = new FlowCaseEntity(); 
@@ -168,6 +170,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(ga.getModuleId());
 		e.setValue(serviceModule.getName());
+		entities.add(e);
 		//服务机构
 
 		e = new FlowCaseEntity();
@@ -178,6 +181,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
 		e.setValue(yellowPage.getName());
+		entities.add(e);
 		
 		//后面跟自定义模块--通用父类方法
 		entities.addAll(super.onFlowCaseDetailRender(flowCase, flowUserType));
