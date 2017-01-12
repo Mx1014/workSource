@@ -1576,62 +1576,62 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		List<TaskCountDTO> dtos = new ArrayList<TaskCountDTO>();
 		
-//		final Field<Byte> delay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NONE.getCode()), EquipmentTaskStatus.NONE.getCode());
-//		final Field<Byte> toExecuted = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()), EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
-//		final Field<Byte> needMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode()), EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-//		final Field<Byte> inMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()), EquipmentTaskStatus.IN_MAINTENANCE.getCode());
-//		final Field<Byte> completeMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.INSPECT_DELAY.getCode()));
-//		final Field<Byte> completeInspection = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.CORRECT_DELAY.getCode()));
-//		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID, DSL.count().as("taskCount"), 
-//				DSL.count(toExecuted).as("toExecuted"), DSL.count(needMaintance).as("needMaintance"), DSL.count(inMaintance).as("inMaintance"), 
-//				DSL.count(delay).as("delay"),DSL.count(inspectDelay).as("completeInspection"),DSL.count(correctDelay).as("completeMaintance")};
-//		final SelectQuery<Record> query = context.selectQuery();
-//		query.addSelect(fields);
-//		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASKS);
-//		
-//		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
-//		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
-//		
-//		if(!StringUtils.isNullOrEmpty(targetType)) {
-//			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
-//		}
-//		
-//		if(targetId != null) {
-//			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
-//		}
-//		
-//		if(startTime != null) {
-//			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(startTime)));
-//		}
-//		
-//		if(endTime != null) {
-//			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.le(new Timestamp(endTime)));
-//		}
-//		
-//		query.addGroupBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID);
-//		query.addLimit(offset, count);
-//		
-//		if(LOGGER.isDebugEnabled()) {
-//            LOGGER.debug("countTasks, sql=" + query.getSQL());
-//            LOGGER.debug("countTasks, bindValues=" + query.getBindValues());
-//        }
-//		query.fetch().map((r) -> {
-//			TaskCountDTO dto = new TaskCountDTO();
-//
-//			dto.setTargetId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID));
-//			dto.setInspectionCategoryId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID));
-//			dto.setEquipmentId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID));
-//			dto.setStandardId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID));
-//			dto.setTaskCount(r.getValue("taskCount", Long.class));
-//			dto.setToExecuted(r.getValue("toExecuted", Long.class));
-//			dto.setInCorrection(r.getValue("inCorrection", Long.class));
-//			dto.setCompleteInspection(r.getValue("completeInspection", Long.class));
-//			dto.setCompleteCorrection(r.getValue("completeCorrection", Long.class));
-//			dto.setDelayInspection(r.getValue("delayInspection", Long.class));
-//			dto.setDelayCorrection(r.getValue("delayCorrection", Long.class));
-//			dtos.add(dto);
-//			return null;
-//		});
+		final Field<Byte> delay = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NONE.getCode()), EquipmentTaskStatus.NONE.getCode());
+		final Field<Byte> toExecuted = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()), EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode());
+		final Field<Byte> needMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode()), EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
+		final Field<Byte> inMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()), EquipmentTaskStatus.IN_MAINTENANCE.getCode());
+		final Field<Byte> completeMaintance = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.in(EquipmentTaskResult.NEED_MAINTENANCE_DELAY_COMPLETE_OK.getCode(), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode()), EquipmentTaskResult.NEED_MAINTENANCE_OK_COMPLETE_OK.getCode());
+		final Field<Byte> completeInspection = DSL.decode().when(Tables.EH_EQUIPMENT_INSPECTION_TASKS.RESULT.eq(EquipmentTaskResult.COMPLETE_OK.getCode()), EquipmentTaskResult.COMPLETE_OK.getCode());
+		final Field<?>[] fields = {Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID, DSL.count().as("taskCount"), 
+				DSL.count(toExecuted).as("toExecuted"), DSL.count(needMaintance).as("needMaintance"), DSL.count(inMaintance).as("inMaintance"), 
+				DSL.count(delay).as("delay"),DSL.count(completeInspection).as("completeInspection"),DSL.count(completeMaintance).as("completeMaintance")};
+		final SelectQuery<Record> query = context.selectQuery();
+		query.addSelect(fields);
+		query.addFrom(Tables.EH_QUALITY_INSPECTION_TASKS);
+		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+		
+		if(!StringUtils.isNullOrEmpty(targetType)) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.eq(targetType));
+		}
+		
+		if(targetId != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.eq(targetId));
+		}
+		
+		if(startTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(startTime)));
+		}
+		
+		if(endTime != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.le(new Timestamp(endTime)));
+		}
+		
+		query.addGroupBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE, Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID);
+		query.addLimit(offset, pageSize);
+		
+		if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("countTasks, sql=" + query.getSQL());
+            LOGGER.debug("countTasks, bindValues=" + query.getBindValues());
+        }
+		query.fetch().map((r) -> {
+			TaskCountDTO dto = new TaskCountDTO();
+
+			dto.setTargetId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID));
+			dto.setInspectionCategoryId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID));
+			dto.setEquipmentId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EQUIPMENT_ID));
+			dto.setStandardId(r.getValue(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID));
+			dto.setTaskCount(r.getValue("taskCount", Long.class));
+			dto.setToExecuted(r.getValue("toExecuted", Long.class));
+			dto.setInMaintance(r.getValue("inMaintance", Long.class));
+			dto.setNeedMaintance(r.getValue("needMaintance", Long.class));
+			dto.setCompleteInspection(r.getValue("completeInspection", Long.class));
+			dto.setCompleteMaintance(r.getValue("completeMaintance", Long.class));
+			dto.setDelay(r.getValue("delay", Long.class));
+			dtos.add(dto);
+			return null;
+		});
 		
 		return dtos;
 	}

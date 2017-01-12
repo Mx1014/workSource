@@ -2372,7 +2372,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		for(StandardGroupDTO executiveGroup : standardDto.getExecutiveGroup()) {
 			
 			task.setExecutiveGroupId(executiveGroup.getGroupId());
-			task.setExecutivePositionId(executiveGroup.getPositionId());
+			task.setPositionId(executiveGroup.getPositionId());
 				
 			if(timeRanges != null && timeRanges.size() > 0) {
 				long current = System.currentTimeMillis();
