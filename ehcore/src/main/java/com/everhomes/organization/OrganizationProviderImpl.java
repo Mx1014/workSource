@@ -63,7 +63,6 @@ import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.ui.user.ContactSignUpStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhEnterpriseAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressMappingsDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationAssignedScopesDao;
@@ -82,7 +81,6 @@ import com.everhomes.server.schema.tables.daos.EhOrganizationOrdersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationOwnersDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationTasksDao;
 import com.everhomes.server.schema.tables.daos.EhOrganizationsDao;
-import com.everhomes.server.schema.tables.pojos.EhEnterpriseAddresses;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddressMappings;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationAddresses;
@@ -3109,4 +3107,39 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizationAddressMappings.class, null); 
 	}
 
+	@Override
+	public List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+
+		List<OrganizationMember> result  = new ArrayList<OrganizationMember>();
+		SelectQuery<EhOrganizationMembersRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_MEMBERS);
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_PATH.like(path + "%"));
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.in(groupTypes));
+		if(!StringUtils.isEmpty(keywords)){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN.eq(keywords).or(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_NAME.like(keywords + "%")));
+		}
+
+		if(null != visibleFlag){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.VISIBLE_FLAG.eq(visibleFlag.getCode()));
+		}
+
+		if(null != locator.getAnchor()){
+			query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.ID.lt(locator.getAnchor()));
+		}
+		query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+		query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+		query.addOrderBy(Tables.EH_ORGANIZATION_MEMBERS.ID.desc());
+		query.addLimit(pageSize + 1);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, OrganizationMember.class));
+			return null;
+		});
+
+		locator.setAnchor(null);
+		if(result.size() > pageSize){
+			result.remove(result.size() - 1);
+			locator.setAnchor(result.get(result.size() - 1).getId());
+		}
+		return result;
+	}
 }

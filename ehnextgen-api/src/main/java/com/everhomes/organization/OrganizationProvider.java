@@ -288,5 +288,7 @@ public interface OrganizationProvider {
 			String namespaceType);
 
 	List<Organization> listOrganizationByGroupType(Long parentId, OrganizationGroupType groupType);
+
+	List<OrganizationMember> listOrganizationMemberByPath(String keywords, String path, List<String> groupTypes, VisibleFlag visibleFlag, CrossShardListingLocator locator,Integer pageSize);
  
 }
