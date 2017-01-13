@@ -1114,6 +1114,11 @@ public class FlowServiceImpl implements FlowService {
 	
 	private void updateFlowVersion(Flow flow) {//TODO better for version increment
 		Flow snapshotFlow = flowProvider.getSnapshotFlowById(flow.getId());
+		
+		String key = String.format("flow:%d", flow.getId());
+		Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+		RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+		
 		if(snapshotFlow != null) {
 			clearSnapshotGraph(snapshotFlow);
 			if(snapshotFlow.getFlowVersion() > flow.getFlowVersion()) {
@@ -1121,11 +1126,8 @@ public class FlowServiceImpl implements FlowService {
 			}
 		}
 		
-        String key = String.format("flow:%d", flow.getId());
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         Long ver = redisTemplate.opsForValue().increment(key, 1);
-        if(ver == null || ver < flow.getFlowVersion()) {
+        if(ver == null || ver.intValue() < flow.getFlowVersion()) {
         	redisTemplate.opsForValue().set(key, String.valueOf(flow.getFlowVersion()));
         } else {
         	flow.setFlowVersion(ver.intValue());
