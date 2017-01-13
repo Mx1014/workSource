@@ -1,13 +1,12 @@
 package com.everhomes.general_approval;
 
-import java.net.URL;
 import java.util.ArrayList;
 import java.util.List;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
@@ -17,12 +16,8 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
-import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.module.ServiceModuleProvider;
-import com.everhomes.rentalv2.RentalNotificationTemplateCode;
-import com.everhomes.rentalv2.RentalOrder;
-import com.everhomes.rentalv2.RentalOrderEmbeddedHandler;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
@@ -36,7 +31,6 @@ import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
 import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 
@@ -176,7 +170,7 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
 								ContentServerResource resource = contentServerService.findResourceByUri(uriString);
 								fileDTO.setUrl(url);
-								fileDTO.setFileName(resource.getResourceName());
+								fileDTO.setFileName(StringUtils.isEmpty(resource.getResourceName())?"未命名":resource.getResourceName() );
 								fileDTO.setFileSize(resource.getResourceSize());
 								files.add(fileDTO);
 							}
