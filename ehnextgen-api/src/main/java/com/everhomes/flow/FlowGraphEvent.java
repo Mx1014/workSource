@@ -8,6 +8,7 @@ public interface FlowGraphEvent {
 	FlowEventType getEventType();
 	Long getFiredUserId();
 	Long getFiredButtonId();
-	
+	public Long getEntityId();
+	public String getFlowEntityType();
 	void fire(FlowCaseState ctx);
 }
