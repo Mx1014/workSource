@@ -27,8 +27,12 @@ import com.everhomes.rest.general_approval.PostApprovalFormCommand;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
 import com.everhomes.rest.general_approval.PostApprovalFormTextValue;
 import com.everhomes.rest.quality.OwnerType;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
@@ -39,7 +43,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
     @Autowired
     private YellowPageProvider yellowPageProvider;
     
-
+    @Autowired
+    private UserProvider userProvider;
+    
 	@Override
 	public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
@@ -63,14 +69,14 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				.getFormOriginId());
 		List<PostApprovalFormItem> values = cmd.getValues();
 		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
-		PostApprovalFormItem nameVal = getFormFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),values);
+//		PostApprovalFormItem nameVal = getFormFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),values);
 //		if(null != nameVal){
 //			GeneralFormFieldDTO dto = getFieldDTO(nameVal.getFieldName(),fieldDTOs); 
 //			contentBuffer.append(dto.getFieldDisplayName());
 //			contentBuffer.append(" : ");
 //			contentBuffer.append(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 //		}
-		PostApprovalFormItem contactVal = getFormFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(),values);
+//		PostApprovalFormItem contactVal = getFormFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(),values);
 //		if(null != contactVal){
 //			if(contentBuffer.length()>1)
 //				contentBuffer.append("\n");
@@ -112,11 +118,13 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		//服务联盟加一个申请
 		PostApprovalFormItem organizationVal = getFormFieldDTO(GeneralFormDataSourceType.ORGANIZATION_ID.getCode(),values);
 		
+		User user = this.userProvider.findUserById(flowCase.getApplyUserId());
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		request.setJumpType(2L);
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
-		request.setCreatorName(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+		request.setCreatorName(user.getNickName());
 		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
-		request.setCreatorMobile(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+		request.setCreatorMobile(identifier.getIdentifierToken());
 		request.setOwnerType(OwnerType.COMMUNITY.getCode());
 		request.setOwnerId(flowCase.getProjectId());
 		request.setFlowCaseId(flowCase.getId());
