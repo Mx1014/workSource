@@ -232,7 +232,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
 		
-		//TODO:为科兴与一碑对接加的特殊处理
+		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
 				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
 			handle = PmTaskHandle.EBEI;
@@ -799,7 +799,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
 		
-		//TODO:为科兴与一碑对接加的特殊处理
+		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
 				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
 			handle = PmTaskHandle.EBEI;
