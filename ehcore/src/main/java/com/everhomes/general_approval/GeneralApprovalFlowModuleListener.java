@@ -26,6 +26,7 @@ import com.everhomes.rentalv2.RentalOrderEmbeddedHandler;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowCaseFileDTO;
+import com.everhomes.rest.flow.FlowCaseFileValue;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
@@ -167,6 +168,8 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 							//TODO:工作流需要新增类型file
 							e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
 							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
+							if (null == fileValue || fileValue.getUris() ==null )
+								break;
 							List<FlowCaseFileDTO> files = new ArrayList<>();
 							for(String uriString : fileValue.getUris()){
 								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
@@ -177,7 +180,9 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 								fileDTO.setFileSize(resource.getResourceSize());
 								files.add(fileDTO);
 							}
-							e.setValue(JSON.toJSONString(files));
+							FlowCaseFileValue value = new FlowCaseFileValue();
+							value.setFiles(files);
+							e.setValue(JSON.toJSONString(value));
 							entities.add(e);
 							break;
 						case INTEGER_TEXT:
