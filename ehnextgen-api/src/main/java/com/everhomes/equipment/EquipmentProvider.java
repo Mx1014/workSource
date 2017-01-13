@@ -5,8 +5,10 @@ import java.util.List;
 import java.util.Set;
 
 
+
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.quality.QualityInspectionStandards;
 import com.everhomes.rest.equipment.TaskCountDTO;
 
 
@@ -111,4 +113,7 @@ public interface EquipmentProvider {
 	void deleteEquipmentInspectionStandardGroupMap(Long standardGroupId);
 	void deleteEquipmentInspectionStandardGroupMapByStandardId(Long standardId);
 	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
+	
+	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
+	void populateStandardGroups(EquipmentInspectionStandards standard);
 }

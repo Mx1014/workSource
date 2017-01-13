@@ -1175,10 +1175,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 		//填充执行周期repeat
 		processRepeatSetting(standard);
 		
+		equipmentProvider.populateStandardGroups(standard);
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 		
 		return dto;
 	}
+	
 	
 	private void processRepeatSetting(EquipmentInspectionStandards standard) {
 		if(null != standard.getRepeatSettingId() && standard.getRepeatSettingId() != 0) {
@@ -2362,6 +2364,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	@Override
 	public void creatTaskByStandard(EquipmentInspectionEquipments equipment, EquipmentInspectionStandards standard) {
+		equipmentProvider.populateStandardGroups(standard);
 		EquipmentStandardsDTO standardDto = converStandardToDto(standard);
 		EquipmentInspectionTasks task = new EquipmentInspectionTasks();
 		task.setOwnerType(equipment.getOwnerType());

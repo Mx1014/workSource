@@ -2,7 +2,9 @@ package com.everhomes.equipment;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 import javax.annotation.PostConstruct;
@@ -29,6 +31,8 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.quality.QualityInspectionStandardGroupMap;
+import com.everhomes.quality.QualityInspectionStandards;
 import com.everhomes.quality.QualityInspectionTasks;
 import com.everhomes.rest.equipment.EquipmentReviewStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
@@ -38,6 +42,7 @@ import com.everhomes.rest.equipment.EquipmentTaskStatus;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.equipment.TaskCountDTO;
+import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
 import com.everhomes.rest.quality.QualityInspectionTaskStatus;
 import com.everhomes.scheduler.EquipmentInspectionScheduleJob;
@@ -78,6 +83,7 @@ import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTasks;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplateItemMap;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionTemplates;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandardGroupMap;
+import com.everhomes.server.schema.tables.pojos.EhQualityInspectionStandards;
 import com.everhomes.server.schema.tables.pojos.EhQualityInspectionTasks;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoriesRecord;
 import com.everhomes.server.schema.tables.records.EhEquipmentInspectionAccessoryMapRecord;
@@ -97,6 +103,7 @@ import com.everhomes.server.schema.tables.records.EhEquipmentInspectionTemplates
 import com.everhomes.server.schema.tables.records.EhQualityInspectionStandardGroupMapRecord;
 import com.everhomes.server.schema.tables.records.EhQualityInspectionTasksRecord;
 import com.everhomes.sharding.ShardIterator;
+import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
@@ -111,6 +118,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	
+	@Autowired
+	private ShardingProvider shardingProvider;
 	
 	@Autowired
 	private ScheduleProvider scheduleProvider;
@@ -1636,6 +1646,58 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		});
 		
 		return dtos;
+	}
+
+	@Override
+	public void populateStandardsGroups(
+			List<EquipmentInspectionStandards> standards) {
+		if(standards == null || standards.size() == 0) {
+            return;
+        }
+            
+        final List<Long> standardIds = new ArrayList<Long>();
+        final Map<Long, EquipmentInspectionStandards> mapStandards = new HashMap<Long, EquipmentInspectionStandards>();
+        
+        for(EquipmentInspectionStandards standard: standards) {
+        	standardIds.add(standard.getId());
+        	standard.setExecutiveGroup(new ArrayList<EquipmentInspectionStandardGroupMap>());
+        	standard.setReviewGroup(new ArrayList<EquipmentInspectionStandardGroupMap>());
+        	mapStandards.put(standard.getId(), standard);
+        }
+        
+        List<Integer> shards = this.shardingProvider.getContentShards(EhEquipmentInspectionStandards.class, standardIds);
+        this.dbProvider.mapReduce(shards, AccessSpec.readOnlyWith(EhEquipmentInspectionTasks.class), null, (DSLContext context, Object reducingContext) -> {
+            SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.in(standardIds));
+            query.fetch().map((EhEquipmentInspectionStandardGroupMapRecord record) -> {
+            	EquipmentInspectionStandards standard = mapStandards.get(record.getStandardId());
+            	
+                assert(standard != null);
+                if(QualityGroupType.EXECUTIVE_GROUP.getCode()==record.getGroupType()) {
+                	standard.getExecutiveGroup().add(ConvertHelper.convert(record, EquipmentInspectionStandardGroupMap.class));
+				 }
+				 if(record.getGroupType()==QualityGroupType.REVIEW_GROUP.getCode()) {
+					 standard.getReviewGroup().add(ConvertHelper.convert(record, EquipmentInspectionStandardGroupMap.class));
+				 }
+				 
+                return null;
+            });
+            return true;
+        });
+		
+	}
+
+	@Override
+	public void populateStandardGroups(EquipmentInspectionStandards standard) {
+		if(standard == null) {
+            return;
+        } else {
+            List<EquipmentInspectionStandards> standards = new ArrayList<EquipmentInspectionStandards>();
+            standards.add(standard);
+            
+            populateStandardsGroups(standards);
+        }
+		
 	}
 
 }
