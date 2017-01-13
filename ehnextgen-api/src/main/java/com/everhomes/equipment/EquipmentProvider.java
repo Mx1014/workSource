@@ -56,6 +56,8 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
 			List<String> targetType, List<Long> targetId, List<ExecuteGroupAndPosition> executiveGroups, Integer offset, Integer pageSize);
+	List<EquipmentInspectionTasks> listEquipmentInspectionReviewTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
+			List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset, Integer pageSize);
 	
 	List<EquipmentInspectionEquipmentParameters> listParametersByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> listAttachmentsByEquipmentId(Long equipmentId, Byte attachmentType);
@@ -94,7 +96,7 @@ public interface EquipmentProvider {
 	void createEquipmentInspectionItemResults(EquipmentInspectionItemResults result);
 	List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(Long logId);
 	
-	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(String targetType);
+	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(Long equipmentId);
 	List<EquipmentStandardMap> listEquipmentStandardMap(CrossShardListingLocator locator, Integer pageSize);
 	
 	void closeDelayTasks();
@@ -115,6 +117,7 @@ public interface EquipmentProvider {
 	void deleteEquipmentInspectionStandardGroupMap(Long standardGroupId);
 	void deleteEquipmentInspectionStandardGroupMapByStandardId(Long standardId);
 	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
+	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups);
 	
 	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
 	void populateStandardGroups(EquipmentInspectionStandards standard);

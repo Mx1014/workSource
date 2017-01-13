@@ -210,7 +210,11 @@ import java.util.stream.Collectors;
 
 
 
+
+
 import javax.servlet.http.HttpServletResponse;
+
+
 
 
 
@@ -411,6 +415,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
+
 
 
 
@@ -1260,25 +1266,25 @@ public class EquipmentServiceImpl implements EquipmentService {
 			
 			equipmentStandardMapSearcher.feedDoc(map);
 			
-			String scope = EquipmentNotificationTemplateCode.SCOPE;
-			String locale = "zh_CN";
-			
-			Map<String, Object> notifyMap = new HashMap<String, Object>();
-			notifyMap.put("equipmentName", equipment.getName());
-			int code = 0;
-			if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())))
-				code = EquipmentNotificationTemplateCode.QUALIFIED_EQUIPMENT_NOTIFY_EXECUTOR;
-			
-			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())))
-				code = EquipmentNotificationTemplateCode.UNQUALIFIED_EQUIPMENT_NOTIFY_EXECUTOR;
-			
-			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
+//			String scope = EquipmentNotificationTemplateCode.SCOPE;
+//			String locale = "zh_CN";
+//			
+//			Map<String, Object> notifyMap = new HashMap<String, Object>();
+//			notifyMap.put("equipmentName", equipment.getName());
+//			int code = 0;
+//			if(ReviewResult.QUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())))
+//				code = EquipmentNotificationTemplateCode.QUALIFIED_EQUIPMENT_NOTIFY_EXECUTOR;
+//			
+//			if(ReviewResult.UNQUALIFIED.equals(ReviewResult.fromStatus(cmd.getReviewResult())))
+//				code = EquipmentNotificationTemplateCode.UNQUALIFIED_EQUIPMENT_NOTIFY_EXECUTOR;
+//			
+//			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, notifyMap, "");
 			
 			//发消息给管理员
-			List<Long> userIds = getEquipmentManagerIds(equipment);
-			for(Long uId : userIds) {
-				sendMessageToUser(uId, notifyTextForApplicant);
-			}
+//			List<Long> userIds = getEquipmentManagerIds(equipment);
+//			for(Long uId : userIds) {
+//				sendMessageToUser(uId, notifyTextForApplicant);
+//			}
 			
 			
 		} else {
@@ -2337,7 +2343,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public void createEquipmentTask(DeleteEquipmentsCommand cmd) {
 
-		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(cmd.getEquipmentId());
 		
 		if(maps != null && maps.size() > 0) {
 			for(EquipmentStandardMap map : maps) {
@@ -3062,7 +3068,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
-				//select task
+				
+				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos);
+				if(maps != null && maps.size() > 0) {
+					List<Long> standardIds = maps.stream().map(r->{
+						return r.getStandardId();
+					}).collect(Collectors.toList());
+					tasks = equipmentProvider.listEquipmentInspectionReviewTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
+				}
+				
 			} else {
 				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, groupDtos, offset, pageSize + 1);
 			}
