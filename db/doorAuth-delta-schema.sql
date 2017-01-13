@@ -12,4 +12,8 @@ CREATE TABLE `eh_door_auth_logs` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4
 
+-- 增加机构类型
+ALTER TABLE `eh_organization_members` ADD COLUMN `group_type` varchar(64) DEFAULT NULL COMMENT 'ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER';
+
+
 
