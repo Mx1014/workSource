@@ -2229,7 +2229,15 @@ public class PmTaskServiceImpl implements PmTaskService {
 		if(null == cmd.getNamespaceId())
 			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
 		
-		String handler = configProvider.getValue(HANDLER + cmd.getNamespaceId(), PmTaskHandle.SHEN_YE);
+		StringBuilder sb = new StringBuilder(HANDLER);
+		sb.append(cmd.getNamespaceId());
+		
+		if(null != cmd.getWebmenuId())
+			sb.append("-").append(cmd.getWebmenuId());
+			
+		String key =  sb.toString();
+		
+		String handler = configProvider.getValue(key, PmTaskHandle.SHEN_YE);
 		
 		dto.setHandler(handler);
 		

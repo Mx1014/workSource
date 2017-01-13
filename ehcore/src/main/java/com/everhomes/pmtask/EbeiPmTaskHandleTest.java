@@ -92,6 +92,10 @@ public class EbeiPmTaskHandleTest {
 		param.put("serviceQuality", 5);
 		param.put("remark", "");
 		param.put("fileAddrs", "");
+		param.put("ownerName", "18011001100");
+		param.put("ownerPhone", "一碑测试");
+		param.put("projectId", "240111044331055940");
+		
 //		login();
 		postToEbei(param, EVALUATE);
 		
