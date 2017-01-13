@@ -2613,9 +2613,23 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
-		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
-				, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
-		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);
+		List<Long> users;
+		List<FlowUserSelection> selections;
+		
+		FlowGraphEvent evt = ctx.getCurrentEvent();
+		if(evt != null && evt.getEntityId() != null 
+				&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType())
+				) {
+			selections = new ArrayList<>();
+			FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
+			selections.add(sel);
+			users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);
+		} else {
+			selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
+					, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+			users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);	
+		}
+		
 		if(users.size() > 0) {
 			for(Long selUser : users) {
 				FlowEventLog log = new FlowEventLog();
