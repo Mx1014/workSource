@@ -171,13 +171,14 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				GeneralFormDataSourceType.SOURCE_ID.getCode()); 
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
-		ServiceAlliances  parentPage = yellowPageProvider.findServiceAllianceById(yellowPage.getParentId(),null,null);
+		ServiceAlliances  parentPage = null;
+		if(null != yellowPage)
+			parentPage = yellowPageProvider.findServiceAllianceById(yellowPage.getParentId(),null,null);
 		
 		//申请来源
 		e = new FlowCaseEntity(); 
 		e.setKey("申请来源");
-		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(ga.getModuleId());
+		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());  
 		if(null == parentPage)
 			e.setValue("已删除");
 		else
