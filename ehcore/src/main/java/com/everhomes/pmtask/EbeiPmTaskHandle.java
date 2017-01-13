@@ -319,6 +319,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		param.put("serviceQuality", task.getStar());
 		param.put("remark", "");
 		param.put("fileAddrs", "");
+		param.put("ownerName", task.getRequestorName());
+		param.put("ownerPhone", task.getRequestorPhone());
+		param.put("projectId", projectId);
 		
 		String json = postToEbei(param, EVALUATE, null);
 		
