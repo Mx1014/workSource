@@ -407,6 +407,23 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		addressProvider.createAddress(address);
 	}
 	
+	// 插入或更新招租管理
+	private void insertOrUpdateLeasePromotion(Byte theirLivingStatus, Integer namespaceId, Long communityId, Double rentArea, String buildingName, String apartmentName){
+		CustomerLivingStatus livingStatus = CustomerLivingStatus.fromCode(theirLivingStatus);
+		if (livingStatus == null) {
+			return;
+		}
+		
+		if (livingStatus == CustomerLivingStatus.WAITING_FOR_RENTING) {
+			// 待租状态时，在招租管理里面插入一条数据，状态为已下线（因为需要科技园区编辑图文信息之后再发布到APP端），招租标题就是楼栋门牌，发布时间和入驻时间=插入数据时间，面积=传过来的面积，负责人和电话都为空
+			// 也有可能是更新
+			
+		}else if (livingStatus == CustomerLivingStatus.NEW_RENTING || livingStatus == CustomerLivingStatus.CONTINUE_RENTING) {
+			// 新租和已租时，将招租管理对应的门牌的招租状态改为“已出租”
+			
+		}
+	}
+	
 	private String getAddress(String buildingName, String apartmentName){
 		if (apartmentName.contains(buildingName)) {
 			return apartmentName;
