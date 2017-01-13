@@ -6,9 +6,11 @@ import java.util.Set;
 
 
 
+
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.quality.QualityInspectionStandards;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.equipment.TaskCountDTO;
 
 
@@ -53,7 +55,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipments> listEquipments(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
-			List<String> targetType, List<Long> targetId, Integer offset, Integer pageSize);
+			List<String> targetType, List<Long> targetId, List<ExecuteGroupAndPosition> executiveGroups, Integer offset, Integer pageSize);
 	
 	List<EquipmentInspectionEquipmentParameters> listParametersByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> listAttachmentsByEquipmentId(Long equipmentId, Byte attachmentType);

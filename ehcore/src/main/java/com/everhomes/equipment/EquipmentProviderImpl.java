@@ -39,6 +39,7 @@ import com.everhomes.rest.equipment.EquipmentStatus;
 import com.everhomes.rest.equipment.EquipmentTaskProcessType;
 import com.everhomes.rest.equipment.EquipmentTaskResult;
 import com.everhomes.rest.equipment.EquipmentTaskStatus;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
 import com.everhomes.rest.equipment.ReviewResult;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.equipment.TaskCountDTO;
@@ -766,7 +767,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasks(
 			String ownerType, Long ownerId, Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
-			Integer offset, Integer pageSize) {
+			List<ExecuteGroupAndPosition> executiveGroups, Integer offset, Integer pageSize) {
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -780,14 +781,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.DELAY.getCode()));
 		if(targetType != null && targetType.size() > 0)
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_TYPE.in(targetType));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_TYPE.in(targetType));
 		
 		if(targetId != null && targetId.size() > 0)
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.in(targetId));
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.TARGET_ID.in(targetId));
 		
 		if(inspectionCategoryId != null) {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.INSPECTION_CATEGORY_ID.eq(inspectionCategoryId));
 		}
+		
 		
 		
 		Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
@@ -804,6 +806,16 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		Condition con = con1.or(con2);
 //		con = con.or(con3);
+		if(executiveGroups != null) {
+			Condition con5 = null;
+			for(ExecuteGroupAndPosition executiveGroup : executiveGroups) {
+				Condition con4 = null; 
+				con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(executiveGroup.getGroupId());
+				con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.POSITION_ID.eq(executiveGroup.getPositionId()));
+				con5 = con5.or(con4);
+			}
+			con = con.and(con5);
+		}
 		
 		query.addConditions(con);
 		
