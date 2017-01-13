@@ -35,6 +35,7 @@ import com.everhomes.util.StringHelper;
  *  <li>templateType : 模板类型</li>
  *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  *  <li>moduleUrl : 跳转模块路径</li>
+ *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  * </ul>
  */
 public class UpdateServiceAllianceEnterpriseCommand {
@@ -92,6 +93,8 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private Long jumpType;
 
 	private String moduleUrl;
+	
+	private Byte supportType;
 	
 	public Long getId() {
 		return id;
@@ -299,6 +302,14 @@ public class UpdateServiceAllianceEnterpriseCommand {
 
 	public void setModuleUrl(String moduleUrl) {
 		this.moduleUrl = moduleUrl;
+	}
+
+	public Byte getSupportType() {
+		return supportType;
+	}
+
+	public void setSupportType(Byte supportType) {
+		this.supportType = supportType;
 	}
 
 	@Override
