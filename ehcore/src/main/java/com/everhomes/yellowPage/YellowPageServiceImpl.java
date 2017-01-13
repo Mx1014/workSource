@@ -29,18 +29,27 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import freemarker.cache.StringTemplateLoader;
+import freemarker.template.Configuration;
+import freemarker.template.Template;
+import freemarker.template.TemplateException;
+
 import org.apache.commons.lang.math.RandomUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.StringUtils;
 
+import java.io.IOException;
 import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
@@ -77,6 +86,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
 	@Autowired
 	private UserActivityProvider userActivityProvider;
+    
+    private StringTemplateLoader templateLoader;
+    
+    private Configuration templateConfig;
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -783,6 +796,25 @@ public class YellowPageServiceImpl implements YellowPageService {
 			this.yellowPageProvider.createServiceAlliances(serviceAlliance);
 			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.BANNER.getCode());
 			createServiceAllianceAttachments(cmd.getFileAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
+		
+			Map<String, Object> urlMap = new HashMap<String, Object>();
+			urlMap.put("id", serviceAlliance.getId());
+			try {
+				String templateKey = "serviceAlliance.moduleUrl";
+				templateLoader.putTemplate(templateKey, serviceAlliance.getModuleUrl());
+				Template freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
+	
+				if(freeMarkerTemplate != null) {
+						String moduleUrl =  FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, urlMap);
+						serviceAlliance.setModuleUrl(moduleUrl);
+						this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
+				} 
+			} catch(Exception e) {
+				if(LOGGER.isErrorEnabled()) {
+					LOGGER.error("updateServiceAllianceEnterprise serviceAlliance:" + serviceAlliance + "modify moduleUrl");
+				}
+			}
+		
 		} else {
 			ServiceAlliances sa = verifyServiceAlliance(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			if(sa.getLatitude() != null && sa.getLongitude() != null) {
