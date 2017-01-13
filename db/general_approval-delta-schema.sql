@@ -88,3 +88,5 @@ CREATE TABLE `eh_general_approval_vals` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+
+ALTER TABLE `eh_service_alliances` ADD COLUMN `support_type` TINYINT NOT NULL DEFAULT 2 COMMENT 'APP:0, WEB:1, APP_WEB: 2';

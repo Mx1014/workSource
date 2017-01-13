@@ -13,6 +13,7 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.rest.activity.ActivityAttachmentDTO;
 import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
 import com.everhomes.rest.app.AppConstants;
@@ -797,22 +798,39 @@ public class YellowPageServiceImpl implements YellowPageService {
 			createServiceAllianceAttachments(cmd.getAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.BANNER.getCode());
 			createServiceAllianceAttachments(cmd.getFileAttachments(),serviceAlliance.getId(), ServiceAllianceAttachmentType.FILE_ATTACHMENT.getCode());
 		
-			Map<String, Object> urlMap = new HashMap<String, Object>();
-			urlMap.put("id", serviceAlliance.getId());
-			try {
-				String templateKey = "serviceAlliance.moduleUrl";
-				templateLoader.putTemplate(templateKey, serviceAlliance.getModuleUrl());
-				Template freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
-	
-				if(freeMarkerTemplate != null) {
-						String moduleUrl =  FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, urlMap);
-						serviceAlliance.setModuleUrl(moduleUrl);
-						this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
-				} 
-			} catch(Exception e) {
-				if(LOGGER.isErrorEnabled()) {
-					LOGGER.error("updateServiceAllianceEnterprise serviceAlliance:" + serviceAlliance + "modify moduleUrl");
-				}
+//			Map<String, Object> urlMap = new HashMap<String, Object>();
+//			urlMap.put("id", serviceAlliance.getId());
+//			try {
+//				String templateKey = "servicealliance.moduleurl";
+//				 try {
+//		                templateConfig.getTemplate(templateKey, "UTF8");
+//		            }catch(Exception e) {
+//		                
+//		            }
+//				 
+//				Template freeMarkerTemplate = null;
+//	
+//				if(freeMarkerTemplate == null) {
+//                    String templateText = serviceAlliance.getModuleUrl();
+//                    templateLoader.putTemplate(templateKey, templateText);
+//                    freeMarkerTemplate = templateConfig.getTemplate(templateKey, "UTF8");
+//	            }
+//	            
+//				if(freeMarkerTemplate != null) {
+//					String moduleUrl =  FreeMarkerTemplateUtils.processTemplateIntoString(freeMarkerTemplate, urlMap);
+//					serviceAlliance.setModuleUrl(moduleUrl);
+//					this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
+//				} 
+//			} catch(Exception e) {
+//				if(LOGGER.isErrorEnabled()) {
+//					LOGGER.error("updateServiceAllianceEnterprise serviceAlliance:" + serviceAlliance + "modify moduleUrl");
+//				}
+//			}
+			
+			if(serviceAlliance.getModuleUrl() != null && serviceAlliance.getModuleUrl().contains("{id}")) {
+				String moduleUrl = serviceAlliance.getModuleUrl().replace("{id}", serviceAlliance.getId().toString());
+				serviceAlliance.setModuleUrl(moduleUrl);
+				this.yellowPageProvider.updateServiceAlliances(serviceAlliance);
 			}
 		
 		} else {
