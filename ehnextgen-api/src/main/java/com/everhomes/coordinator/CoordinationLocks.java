@@ -46,7 +46,11 @@ public enum CoordinationLocks {
     PARKING_STATISTICS("parking.statistics"),
 
     PARKING_CLEARANCE_LOG("parking.clearance.log"),
-    PARKING_CLEARANCE_OPERATOR("parking.clearance.operator");
+    PARKING_CLEARANCE_OPERATOR("parking.clearance.operator"),
+
+    ENERGY_METER("energyMeter"),
+    ENERGY_METER_CATEGORY("energyMeter.category"),
+    ENERGY_METER_FORMULA("energyMeter.formula");
 
     private String code;
     private CoordinationLocks(String code) {
