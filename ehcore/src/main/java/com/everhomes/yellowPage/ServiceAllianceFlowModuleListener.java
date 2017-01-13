@@ -97,7 +97,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				contentBuffer.append("\n");
 			Long yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
-			ServiceAlliances  parentPage = yellowPageProvider.findServiceAllianceById(yellowPage.getParentId(),null,null);
+			ServiceAllianceCategories  parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
 			 
 			contentBuffer.append("申请来源");
 			contentBuffer.append(" : ");
@@ -176,9 +176,9 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				GeneralFormDataSourceType.SOURCE_ID.getCode()); 
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
-		ServiceAlliances  parentPage = null;
+		ServiceAllianceCategories  parentPage = null;
 		if(null != yellowPage)
-			parentPage = yellowPageProvider.findServiceAllianceById(yellowPage.getParentId(),null,null);
+			parentPage = yellowPageProvider.findCategoryById(yellowPage.getParentId());
 		
 		//申请来源
 		e = new FlowCaseEntity(); 
