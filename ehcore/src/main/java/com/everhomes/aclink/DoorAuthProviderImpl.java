@@ -626,7 +626,7 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
                 }
 
                 if(isOpenAuth < 1){
-                    authCond = authCond.and(Tables.EH_DOOR_AUTH.DOOR_ID.isNull());
+                    authCond = authCond.or(Tables.EH_DOOR_AUTH.DOOR_ID.isNull());
                 }
                 cond = cond.and(authCond);
             }
