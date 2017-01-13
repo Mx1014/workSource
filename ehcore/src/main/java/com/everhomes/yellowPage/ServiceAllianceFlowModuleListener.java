@@ -167,6 +167,8 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setValue(ga.getApprovalName());
 		entities.add(e);
 
+		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
+				GeneralFormDataSourceType.SOURCE_ID.getCode()); 
 		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
 		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
 		ServiceAlliances  parentPage = yellowPageProvider.findServiceAllianceById(yellowPage.getParentId(),null,null);
@@ -184,8 +186,6 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		//服务机构
 
 		e = new FlowCaseEntity();
-		val = this.generalApprovalValProvider.getGeneralApprovalByFlowCaseAndName(flowCase.getId(),
-				GeneralFormDataSourceType.SOURCE_ID.getCode()); 
 		e.setKey("服务机构");
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		if(null == yellowPage)
