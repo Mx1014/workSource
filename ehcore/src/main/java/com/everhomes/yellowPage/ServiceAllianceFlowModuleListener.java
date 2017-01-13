@@ -97,11 +97,11 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			contentBuffer.append("服务机构");
 			contentBuffer.append(" : ");
 			contentBuffer.append(yellowPage.getName());
-			flowCase.setModuleName(yellowPage.getName());
 			request.setServiceAllianceId(yellowPageId);
 			request.setType(yellowPage.getParentId());
 			
 		}
+		flowCase.setModuleName(ga.getApprovalName());
 		flowCase.setContent(contentBuffer.toString());
 		
 		//服务联盟加一个申请
@@ -137,6 +137,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setKey(dto.getFieldDisplayName());
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+		entities.add(e);
 		
 		//电话
 		e = new FlowCaseEntity();
@@ -165,13 +166,20 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		e.setValue(ga.getApprovalName());
 		entities.add(e);
-		//申请来源
 
+		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
+		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
+		ServiceAlliances  parentPage = yellowPageProvider.findServiceAllianceById(yellowPage.getParentId(),null,null);
+		
+		//申请来源
 		e = new FlowCaseEntity(); 
 		e.setKey("申请来源");
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
 		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(ga.getModuleId());
-		e.setValue(serviceModule.getName());
+		if(null == parentPage)
+			e.setValue("已删除");
+		else
+			e.setValue(parentPage.getName());
 		entities.add(e);
 		//服务机构
 
@@ -180,8 +188,6 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 				GeneralFormDataSourceType.SOURCE_ID.getCode()); 
 		e.setKey("服务机构");
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode()); 
-		Long yellowPageId = Long.valueOf(JSON.parseObject(val.getFieldStr3(), PostApprovalFormTextValue.class).getText());
-		ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
 		if(null == yellowPage)
 			e.setValue("已删除");
 		else
