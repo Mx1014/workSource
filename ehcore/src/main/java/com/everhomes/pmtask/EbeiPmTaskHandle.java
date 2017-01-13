@@ -304,7 +304,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			}
 		}
 		
-		return false;
+		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+				"Request of third failed.");
 	}
 	
 	private Boolean evaluateTask(PmTask task) {
@@ -566,21 +567,21 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     				"Task cannot be canceled.");
 		}
 
-		if(cancelTask(task)) {
-			dbProvider.execute((TransactionStatus transactionStatus) -> {
+		dbProvider.execute((TransactionStatus transactionStatus) -> {
+			if(cancelTask(task)) {
 				User user = UserContext.current().getUser();
 				Timestamp now = new Timestamp(System.currentTimeMillis());
 				task.setStatus(PmTaskStatus.INACTIVE.getCode());
 				task.setDeleteUid(user.getId());
 				task.setDeleteTime(now);
 				pmTaskProvider.updateTask(task);
-				
-				//elasticsearch更新
-				pmTaskSearch.deleteById(task.getId());
-				return null;
-			});
-		}
-	
+			}
+			
+			return null;
+		});
+			
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
 	}
 	
 	@Override
@@ -627,6 +628,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+		
 		PmTaskDTO dto = ConvertHelper.convert(task, PmTaskDTO.class);
 		
 		dbProvider.execute((TransactionStatus status) -> {

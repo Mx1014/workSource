@@ -2,7 +2,7 @@ package com.everhomes.rest.pmtask;
 
 public class GetNamespaceHandlerCommand {
 	private Integer namespaceId;
-	private Long webmenuId;
+	private Long categoryId;
 
 	public Integer getNamespaceId() {
 		return namespaceId;
@@ -12,13 +12,13 @@ public class GetNamespaceHandlerCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public Long getWebmenuId() {
-		return webmenuId;
+	public Long getCategoryId() {
+		return categoryId;
 	}
 
-	public void setWebmenuId(Long webmenuId) {
-		this.webmenuId = webmenuId;
+	public void setCategoryId(Long categoryId) {
+		this.categoryId = categoryId;
 	}
-	
+
 	
 }

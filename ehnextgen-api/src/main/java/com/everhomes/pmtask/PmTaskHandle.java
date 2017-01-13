@@ -17,6 +17,7 @@ import com.everhomes.rest.pmtask.SearchTasksCommand;
 import com.everhomes.rest.pmtask.SearchTasksResponse;
 
 public interface PmTaskHandle {
+	 long EBEI_TASK_CATEGORY = 1l;
 	 String PMTASK_PREFIX = "Pmtask-";
 	 String SHEN_YE = "shenye";
 	 String EBEI = "ebei";
