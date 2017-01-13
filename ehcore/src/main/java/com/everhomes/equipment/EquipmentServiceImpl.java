@@ -209,7 +209,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -596,6 +598,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -709,6 +712,7 @@ import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
 import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.Status;
 import com.everhomes.rest.equipment.TaskCountDTO;
+import com.everhomes.rest.equipment.TaskType;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
@@ -3057,8 +3061,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, null, offset, pageSize + 1);
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			
-			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, groupDtos, offset, pageSize + 1);
+			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
+				//select task
+			} else {
+				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, groupDtos, offset, pageSize + 1);
+			}
 		}
         if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
@@ -3066,48 +3073,13 @@ public class EquipmentServiceImpl implements EquipmentService {
         }
         
         
-        if(isAdmin) {
-        	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-	        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-	        	return dto;
-	        }).filter(r->r!=null).collect(Collectors.toList());
-	        
-			response.setTasks(dtos);
-        } else {
-        	
-        	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-        		boolean isGroupAdmin = false;
-        		List<RoleAssignment> res = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), r.getExecutiveGroupId(), EntityType.USER.getCode(), user.getId());
-				if(null != res && 0 != res.size()){
-					for (RoleAssignment resource : res) {
-						if(resource.getRoleId() == RoleConstants.EQUIPMENT_MANAGER) {
-							isGroupAdmin = true;
-							break;
-						}
-					}
-				}
-	        	EquipmentTaskDTO dto = null;
-	        	
-	        	if(isGroupAdmin) {
-	        		dto = convertEquipmentTaskToDTO(r);
-	        	} else {
-	        	
-		        	if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
+    	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+        	return dto;
+        }).filter(r->r!=null).collect(Collectors.toList());
+        
+		response.setTasks(dtos);
 		
-		        		dto = convertEquipmentTaskToDTO(r);
-		        	}
-		        	if(EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus())) && 
-		        			r.getOperatorId() == user.getId()) {
-		        		
-		        		dto = convertEquipmentTaskToDTO(r);
-		        	}
-	        	}
-	
-	        	return dto;
-	        }).filter(r->r!=null).collect(Collectors.toList());
-	        
-			response.setTasks(dtos);
-        }
 		return response;
 	}
 	
