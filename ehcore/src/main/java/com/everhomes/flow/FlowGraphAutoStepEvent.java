@@ -51,7 +51,17 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	public Long getFiredButtonId() {
 		return null;
 	}
+	
+	@Override
+	public Long getEntityId() {
+		return null;
+	}
 
+	@Override
+	public String getFlowEntityType() {
+		return null;
+	}
+	
 	@Override
 	public void fire(FlowCaseState ctx) {
 		FlowStepType nextStep = FlowStepType.fromCode(stepDTO.getAutoStepType());
