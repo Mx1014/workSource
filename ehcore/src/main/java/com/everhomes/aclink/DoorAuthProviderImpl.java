@@ -616,13 +616,19 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
             cond = getIsAuthCond(cond, isAuth);
 
             if(null != isOpenAuth){
+                Condition authCond = null;
                 if(DoorAuthRightType.fromCode(rightType) == DoorAuthRightType.RIGHT_OPEN){
-                    cond = cond.and(Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(isOpenAuth));
+                    authCond = Tables.EH_DOOR_AUTH.RIGHT_OPEN.eq(isOpenAuth);
                 }else if(DoorAuthRightType.fromCode(rightType) == DoorAuthRightType.RIGHT_VISITOR){
-                    cond = cond.and(Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq(isOpenAuth));
+                    authCond = Tables.EH_DOOR_AUTH.RIGHT_VISITOR.eq(isOpenAuth);
                 }else if(DoorAuthRightType.fromCode(rightType) == DoorAuthRightType.RIGHT_REMOTE){
-                    cond = cond.and(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(isOpenAuth));
+                    authCond = Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(isOpenAuth);
                 }
+
+                if(isOpenAuth < 1){
+                    authCond = authCond.and(Tables.EH_DOOR_AUTH.DOOR_ID.isNull());
+                }
+                cond = cond.and(authCond);
             }
 
             SelectConditionStep<Record1<Integer>> step = context.selectCount().from(
