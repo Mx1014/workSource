@@ -64,39 +64,44 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		List<PostApprovalFormItem> values = cmd.getValues();
 		List<GeneralFormFieldDTO> fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 		PostApprovalFormItem nameVal = getFormFieldDTO(GeneralFormDataSourceType.USER_NAME.getCode(),values);
-		if(null != nameVal){
-			GeneralFormFieldDTO dto = getFieldDTO(nameVal.getFieldName(),fieldDTOs); 
-			contentBuffer.append(dto.getFieldDisplayName());
-			contentBuffer.append(" : ");
-			contentBuffer.append(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		}
+//		if(null != nameVal){
+//			GeneralFormFieldDTO dto = getFieldDTO(nameVal.getFieldName(),fieldDTOs); 
+//			contentBuffer.append(dto.getFieldDisplayName());
+//			contentBuffer.append(" : ");
+//			contentBuffer.append(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+//		}
 		PostApprovalFormItem contactVal = getFormFieldDTO(GeneralFormDataSourceType.USER_PHONE.getCode(),values);
-		if(null != contactVal){
-			if(contentBuffer.length()>1)
-				contentBuffer.append("\n");
-			GeneralFormFieldDTO dto = getFieldDTO(contactVal.getFieldName(),fieldDTOs); 
-			contentBuffer.append(dto.getFieldDisplayName());
-			contentBuffer.append(" : ");
-			contentBuffer.append(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		}
-		PostApprovalFormItem entpriseVal = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
-		if(null != entpriseVal){
-			if(contentBuffer.length()>1)
-				contentBuffer.append("\n");
-			GeneralFormFieldDTO dto = getFieldDTO(entpriseVal.getFieldName(),fieldDTOs); 
-			contentBuffer.append(dto.getFieldDisplayName());
-			contentBuffer.append(" : ");
-			contentBuffer.append(JSON.parseObject(entpriseVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		}
+//		if(null != contactVal){
+//			if(contentBuffer.length()>1)
+//				contentBuffer.append("\n");
+//			GeneralFormFieldDTO dto = getFieldDTO(contactVal.getFieldName(),fieldDTOs); 
+//			contentBuffer.append(dto.getFieldDisplayName());
+//			contentBuffer.append(" : ");
+//			contentBuffer.append(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+//		}
+//		PostApprovalFormItem entpriseVal = getFormFieldDTO(GeneralFormDataSourceType.USER_COMPANY.getCode(),values);
+//		if(null != entpriseVal){
+//			if(contentBuffer.length()>1)
+//				contentBuffer.append("\n");
+//			GeneralFormFieldDTO dto = getFieldDTO(entpriseVal.getFieldName(),fieldDTOs); 
+//			contentBuffer.append(dto.getFieldDisplayName());
+//			contentBuffer.append(" : ");
+//			contentBuffer.append(JSON.parseObject(entpriseVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
+//		}
+		contentBuffer.append("申请类型");
+		contentBuffer.append(" : ");
+		contentBuffer.append(ga.getApprovalName());
 		PostApprovalFormItem sourceVal = getFormFieldDTO(GeneralFormDataSourceType.SOURCE_ID.getCode(),values);
 		if(null != sourceVal){
 			if(contentBuffer.length()>1)
 				contentBuffer.append("\n");
 			Long yellowPageId = Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null);
-			contentBuffer.append("服务机构");
+			ServiceAlliances  yellowPage = yellowPageProvider.findServiceAllianceById(yellowPageId,null,null); 
+			ServiceAlliances  parentPage = yellowPageProvider.findServiceAllianceById(yellowPage.getParentId(),null,null);
+			 
+			contentBuffer.append("申请来源");
 			contentBuffer.append(" : ");
-			contentBuffer.append(yellowPage.getName());
+			contentBuffer.append(parentPage.getName());
 			request.setServiceAllianceId(yellowPageId);
 			request.setType(yellowPage.getParentId());
 			
@@ -110,7 +115,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 		request.setJumpType(2L);
 		request.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime())); 
 		request.setCreatorName(JSON.parseObject(nameVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
-		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(sourceVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
+		request.setCreatorOrganizationId(Long.valueOf(JSON.parseObject(organizationVal.getFieldValue(), PostApprovalFormTextValue.class).getText()));
 		request.setCreatorMobile(JSON.parseObject(contactVal.getFieldValue(), PostApprovalFormTextValue.class).getText());
 		request.setOwnerType(OwnerType.COMMUNITY.getCode());
 		request.setOwnerId(flowCase.getProjectId());
