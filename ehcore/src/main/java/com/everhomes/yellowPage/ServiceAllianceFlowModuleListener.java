@@ -101,7 +101,7 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 			request.setType(yellowPage.getParentId());
 			
 		}
-		flowCase.setModuleName(ga.getApprovalName());
+//		flowCase.setModuleName(ga.getApprovalName());
 		flowCase.setContent(contentBuffer.toString());
 		
 		//服务联盟加一个申请
