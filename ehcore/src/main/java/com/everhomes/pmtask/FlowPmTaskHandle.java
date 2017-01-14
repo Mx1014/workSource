@@ -383,18 +383,18 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		//TODO:为科兴与一碑对接
-				if(namespaceId == 999983) {
-					
-					PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-					
-					if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
-						String handle = PmTaskHandle.EBEI;
-						
-						PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-						
-						handler.cancelTask(cmd);
-					}
-				}
+		if(namespaceId == 999983) {
+			
+			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+			
+			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+				String handle = PmTaskHandle.EBEI;
+				
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+				
+				handler.cancelTask(cmd);
+			}
+		}				
 	}
 
 	@Override
@@ -402,18 +402,18 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		//TODO:为科兴与一碑对接
-				if(namespaceId == 999983) {
-					
-					PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-					
-					if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
-						String handle = PmTaskHandle.EBEI;
-						
-						PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-						
-						handler.evaluateTask(cmd);
-					}
-				}
+		if(namespaceId == 999983) {
+			
+			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+			
+			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+				String handle = PmTaskHandle.EBEI;
+				
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+				
+				handler.evaluateTask(cmd);
+			}
+		}				
 	}
 
 	@Override
