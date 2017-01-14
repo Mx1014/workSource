@@ -256,7 +256,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			int i = 0;
 			for(AttachmentDescriptor ad: attachments) {
 				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-				if(i == 0)
+				if(i == (attachments.size() - 1))
 					sb.append(contentUrl);
 				else
 					sb.append(",").append(contentUrl);
