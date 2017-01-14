@@ -395,9 +395,9 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 				handler.cancelTask(cmd);
 			}
 		}
+//			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//			handler.cancelTask(cmd);	
 		
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		handler.cancelTask(cmd);
 	}
 
 	@Override
@@ -418,8 +418,8 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 			}
 		}
 		
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		handler.evaluateTask(cmd);
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//		handler.evaluateTask(cmd);
 	}
 
 	@Override
