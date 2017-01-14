@@ -639,7 +639,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			EbeiPmTaskDTO ebeiPmTask = getTaskDetail(task);
 			
 			Integer state = ebeiPmTask.getState();
-			task.setStatus(state.byteValue());
+			task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
 			pmTaskProvider.updateTask(task);
 			
 			CategoryDTO taskCategory = createCategoryDTO();
