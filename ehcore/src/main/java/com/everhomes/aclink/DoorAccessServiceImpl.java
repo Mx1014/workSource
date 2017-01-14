@@ -1140,19 +1140,21 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             AesUserKeyDTO dto = new AesUserKeyDTO();
             
             if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-                if(auth.getRightOpen().equals((byte)0)) {
-                    //Not has right
-                    continue;
-                } else if(auth.getRightVisitor().equals((byte)1)) {
+            
+            	if(auth.getRightOpen().equals((byte)0)) {
+            		//Not has right
+                	continue;
+               } else if(auth.getRightVisitor().equals((byte)1)) {
                         //有访客授权权限
                     dto.setKeyType(AesUserKeyType.ADMIN.getCode());   
-                } else {
-                    //普通用户权限
-                 dto.setKeyType(AesUserKeyType.NORMAL.getCode());   
-                }
+               } else {
+                    	//普通用户权限
+            	   dto.setKeyType(AesUserKeyType.NORMAL.getCode());
+                 	}
+            	
             } else {
                 dto.setKeyType(AesUserKeyType.TEMP.getCode());
-            }
+                }
             
             dto.setCreateTimeMs(auth.getCreateTime().getTime());
             dto.setCreatorUid(user.getId());
@@ -1494,7 +1496,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         Long lastTick = updateDoorAccessLastTick(resp.getId());
         //generate a time message
-        if( (lastTick+10*1000) < System.currentTimeMillis() ) {
+        if( (lastTick+15*1000) < System.currentTimeMillis() ) {
             return msgGenerator.generateTimeMessage(resp.getId());
         }
         
