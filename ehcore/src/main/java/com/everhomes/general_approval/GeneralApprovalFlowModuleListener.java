@@ -121,8 +121,7 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 		List<FlowCaseEntity> entities = new ArrayList<>();
-		if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) {
-			// TODO
+		if (flowCase.getReferType().equals(FlowReferType.APPROVAL.getCode())) { 
 			List<GeneralApprovalVal> vals = this.generalApprovalValProvider
 					.queryGeneralApprovalValsByFlowCaseId(flowCase.getId());
 			GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginIdAndVersion(
