@@ -4618,6 +4618,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         }
         
         if(member != null) {
+			if(OrganizationMemberStatus.fromCode(member.getStatus()) != OrganizationMemberStatus.WAITING_FOR_APPROVAL){
+				LOGGER.error("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
+				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
+						"organization member status error.");
+			}
             member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
             updateEnterpriseContactStatus(operator.getId(), member);
             DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
@@ -4647,7 +4652,11 @@ public class OrganizationServiceImpl implements OrganizationService {
         User operator = UserContext.current().getUser();
         Long operatorUid = operator.getId();
         OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectForEnterpriseContact");
-		
+		if(OrganizationMemberStatus.fromCode(member.getStatus()) != OrganizationMemberStatus.WAITING_FOR_APPROVAL){
+			LOGGER.error("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
+			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
+					"organization member status error.");
+		}
         deleteEnterpriseContactStatus(operatorUid, member);
 		
         sendMessageForContactReject(member);

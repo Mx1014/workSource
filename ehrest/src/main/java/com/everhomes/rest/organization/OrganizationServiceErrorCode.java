@@ -41,7 +41,7 @@ public interface OrganizationServiceErrorCode {
     static final int ERROR_ASSIGNMENT_EXISTS=400004; //人员角色已存在
     static final int ERROR_MOBILE_NUM = 500003; //手机号错误
 
-    
+    static final int ERROR_MEMBER_STSUTS_MODIFIED= 500005; //状态已被修改
     
     static final int ERROR_VERIFY_OVER_TIME= 600002; //认证超时
 
