@@ -7,10 +7,11 @@ import java.util.Objects;
  * <ul>
  *     <li>LIST(1)列表</li>
  *     <li>IMAGE(2)大图</li>
+ *     <li>IMAGE_APPLY(3)大图带申请</li>
  * </ul>
  */
 public enum ServiceAllianceCategoryDisplayMode {
-    LIST((byte)1), IMAGE((byte) 2);
+    LIST((byte)1), IMAGE((byte) 2), IMAGE_APPLY((byte)3);
 
     private Byte code;
 
