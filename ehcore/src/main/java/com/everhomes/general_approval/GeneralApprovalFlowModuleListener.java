@@ -193,6 +193,10 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 				}catch(NullPointerException e){
 					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val));
 					
+				}catch(Exception e){
+					LOGGER.error(e.getMessage());
+					LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val));
+					
 				}
 			}
 		}
