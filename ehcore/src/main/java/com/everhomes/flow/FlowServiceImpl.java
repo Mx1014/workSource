@@ -3116,8 +3116,8 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
 		}
 		
-		if(cmd.getItems() == null || cmd.getItems().size() == 0) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "items is empty");
+		if(cmd.getItems() == null || cmd.getItems().size() == 0 || cmd.getItems().size() > 5) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "items size error!");
 		}
 		
 //		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());
