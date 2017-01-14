@@ -1357,18 +1357,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 
-		if(MessageBodyType.fromCode(messageBodyType) == MessageBodyType.IMAGE){
-			if(StringUtils.isEmpty(imgUri)){
-				LOGGER.error("uri is null.");
-				return ;
-			}
-			ImageBody imageBody = contentServerService.parserImageBody(imgUri, EntityType.USER.getCode(), user.getId());
-			if(null == imageBody){
-				LOGGER.error("image data error image uri = {}.", imgUri);
-				return ;
-			}
-			message = StringHelper.toJsonString(imageBody);
-		}
+		// 去重
+        phones = phones.stream().distinct().collect(Collectors.toList());
+        userIds = userIds.stream().distinct().collect(Collectors.toList());
+
+        message = this.processMessage(message, messageBodyType, imgUri, EntityType.USER.getCode(), user.getId());
+        if (message == null) {
+            return;
+        }
 
 		// 平台用户就推送消息
 		for (Long userId : userIds) {
@@ -1472,18 +1468,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			}
 		}
 
-        String message = cmd.getMessage();
-
-        // 如果是图片消息的话
-        if (MessageBodyType.fromCode(cmd.getMessageBodyType()) == MessageBodyType.IMAGE) {
-            if(StringUtils.isEmpty(cmd.getImgUri())){
-                LOGGER.error("message image uri is null.");
-                return;
-            }
-            ImageBody imageBody = contentServerService.parserImageBody(cmd.getImgUri(), EntityType.USER.getCode(), user.getId());
-            if (imageBody != null) {
-                message = StringHelper.toJsonString(imageBody);
-            }
+        String message = this.processMessage(cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), EntityType.USER.getCode(), user.getId());
+        if (message == null) {
+            return;
         }
 
         if(familyIds.size() > 0) {
@@ -1502,13 +1489,32 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         }
     }
 
+    private String processMessage(String message, String messageBodyType, String imgUri, String ownerType, Long ownerId) {
+        if(MessageBodyType.fromCode(messageBodyType) == MessageBodyType.IMAGE){
+            if(StringUtils.isEmpty(imgUri)){
+                LOGGER.error("uri is null.");
+                return null;
+            }
+            ImageBody imageBody = contentServerService.parserImageBody(imgUri, ownerType, ownerId);
+            if(null == imageBody){
+                LOGGER.error("image data error image uri = {}.", imgUri);
+                return null;
+            }
+            message = StringHelper.toJsonString(imageBody);
+        }
+        return message;
+    }
+
     @Override
     public void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd) {
-        Map<String, Object> args = new HashMap<>();
-        args.put("cmd", cmd);
-        args.put("operateTime", System.currentTimeMillis());
 
-        Job job = new Job(SendNoticeToPmAdminAction.class.getName(), cmd.toString(), System.currentTimeMillis()+"");
+        Job job = new Job(
+                SendNoticeToPmAdminAction.class.getName(),
+                cmd.toString(),
+                System.currentTimeMillis()+"",
+                String.valueOf(UserContext.current().getUser().getId()),
+                UserContext.current().getScheme()
+        );
         
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
     }
@@ -1538,12 +1544,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             pmAdminIds = cmd.getPmAdminIds();
         }
 
+        String message = this.processMessage(cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+        if (message == null) {
+            return;
+        }
+
         if (pmAdminIds.size() > 0) {
             for (Long userId : pmAdminIds) {
                 long pushCount = 0L;
-                PushMessage message = this.buildPushMessage(cmd, userId, operateTime, pushCount);
-                this.sendNoticeToUserById(userId, message.getContent(), MessageBodyType.TEXT.getCode());
-                this.insertPushMessageResult(message.getId(), userId, ++pushCount);
+                PushMessage pushMessage = this.buildPushMessage(message, userId, operateTime, pushCount);
+                this.sendNoticeToUserById(userId, message, cmd.getMessageBodyType());
+                this.insertPushMessageResult(pushMessage.getId(), userId, ++pushCount);
             }
             LOGGER.info("Finished to push message to pm admin, pm admin ids list = {}", pmAdminIds.toString());
         }
@@ -1579,9 +1590,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         pushMessageProvider.updatePushMessage(message);
     }
 
-    private PushMessage buildPushMessage(SendNoticeToPmAdminCommand cmd, Long userId, Timestamp operateTime, Long pushCount) {
+    private PushMessage buildPushMessage(String content, Long userId, Timestamp operateTime, Long pushCount) {
         PushMessage message = new PushMessage();
-        message.setContent(cmd.getMessage());
+        message.setContent(content);
         message.setPushCount(pushCount);
         message.setMessageType(PushMessageType.NORMAL.getCode());
         message.setTargetType(PushMessageTargetType.USER.getCode());
@@ -1609,7 +1620,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				String.valueOf(familyId), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 	}
 
-	public void sendNoticeToUserById(Long userId,String message, String messageBodyType){
+	public void sendNoticeToUserById(Long userId, String message, String messageBodyType){
 		MessageDTO messageDto = new MessageDTO();
 		messageDto.setAppId(AppConstants.APPID_MESSAGING);
 		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), String.valueOf(userId)));
