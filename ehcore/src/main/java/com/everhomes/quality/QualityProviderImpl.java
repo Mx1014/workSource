@@ -119,6 +119,7 @@ import org.springframework.stereotype.Component;
 
 
 
+
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
@@ -129,6 +130,7 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.equipment.ReviewResult;
+import com.everhomes.rest.quality.ExecuteGroupAndPosition;
 import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.rest.quality.QualityInspectionCategoryStatus;
 import com.everhomes.rest.quality.QualityInspectionTaskResult;
@@ -262,7 +264,7 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
-    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<Long> groupId, 
+    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds, 
     		Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class, locator.getEntityId()));
@@ -302,8 +304,15 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endDate));
 		}
 		
-		if(groupId != null && groupId.size() > 0) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.in(groupId));
+		if(groupIds != null) {
+			Condition con5 = null;
+			for(ExecuteGroupAndPosition groupId : groupIds) {
+				Condition con4 = null; 
+				con4 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
+				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(groupId.getPositionId()));
+				con5 = con5.or(con4);
+			}
+			query.addConditions(con5);
 		}
 		if(executeStatus != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(executeStatus));
@@ -1169,14 +1178,21 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<Long> listQualityInspectionStandardGroupMapByGroup(
-			List<Long> groupIds, Byte groupType) {
+			List<ExecuteGroupAndPosition> groupIds, Byte groupType) {
 		final List<Long> standardIds = new ArrayList<Long>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionStandardGroupMap.class));
  
         SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
        
         if(groupIds != null)
-        	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.in(groupIds));
+        	Condition con5 = null;
+        	for(ExecuteGroupAndPosition groupId : groupIds) {
+        		Condition con4 = null; 
+				con4 = Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.eq(groupId.getGroupId());
+				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(groupId.getPositionId()));
+				con5 = con5.or(con4);
+        	}
+        	query.addConditions(con5);
         if(groupType != null)
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
         

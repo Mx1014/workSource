@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.Set;
 
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.rest.quality.ExecuteGroupAndPosition;
 import com.everhomes.rest.quality.ScoreDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
 
@@ -16,7 +17,7 @@ public interface QualityProvider {
 	void deleteVerificationTasks(Long taskId);
 	QualityInspectionTasks findVerificationTaskById(Long taskId);
 	List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
-    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<Long> groupId, 
+    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds, 
     		Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
 			Timestamp startDate, Timestamp endDate, Long groupId, Byte executeStatus, Byte reviewStatus);
@@ -38,7 +39,7 @@ public interface QualityProvider {
 	void createQualityInspectionStandardGroupMap(QualityInspectionStandardGroupMap standardGroup);
 	void deleteQualityInspectionStandardGroupMap(Long standardGroupId);
 	void deleteQualityInspectionStandardGroupMapByStandardId(Long standardId);
-	List<Long> listQualityInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
+	List<Long> listQualityInspectionStandardGroupMapByGroup(List<ExecuteGroupAndPosition> groupIds, Byte groupType);
 	
 	void createQualityInspectionTaskAttachments(QualityInspectionTaskAttachments attachment);
 	void deleteQualityInspectionTaskAttachments(Long attachmentId);
