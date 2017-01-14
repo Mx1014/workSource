@@ -358,6 +358,12 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
 
+		if(null == cmd.getCategoryId()){
+			LOGGER.error("Invalid categoryId parameter.");
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+    				"Invalid categoryId parameter.");
+		}
+		
 		if(null == cmd.getAddressType()){
 			LOGGER.error("Invalid addressType parameter.");
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,

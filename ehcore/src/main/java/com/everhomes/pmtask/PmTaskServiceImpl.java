@@ -565,7 +565,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		User targetUser = userProvider.findUserById(cmd.getTargetId());
 		if(null == targetUser){
 			LOGGER.error("TargetUser not found, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_NULL,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_NOT_EXIST,
     				"TargetUser not found");
 		}
 		
@@ -742,7 +742,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		Category category = categoryProvider.findCategoryById(id);
 		if(category == null) {
 			LOGGER.error("PmTask category not found, cmd={}", cmd);
-			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NULL,
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CATEGORY_NOT_EXIST,
 					"PmTask category not found");
 		}
 		if(!category.getNamespaceId().equals(namespaceId)){
