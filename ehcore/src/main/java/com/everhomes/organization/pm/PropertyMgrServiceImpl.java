@@ -1111,8 +1111,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		LOGGER.debug("push message task scheduling, cmd = {}", cmd);
 
 		// 调度执行一键推送
-		Job job = new Job(SendNoticeAction.class.getName(),
-                new Object[]{StringHelper.toJsonString(cmd), StringHelper.toJsonString(UserContext.current().getUser())});
+		Job job = new Job(
+		        SendNoticeAction.class.getName(),
+                StringHelper.toJsonString(cmd),
+                String.valueOf(UserContext.current().getUser().getId()),
+                UserContext.current().getScheme()
+        );
 
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
 	}
