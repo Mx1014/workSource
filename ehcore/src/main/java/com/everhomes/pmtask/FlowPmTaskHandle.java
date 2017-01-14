@@ -380,19 +380,32 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 
 	@Override
 	public void cancelTask(CancelTaskCommand cmd) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public void evaluateTask(EvaluateTaskCommand cmd) {
-		// TODO Auto-generated method stub
 		
 	}
 
 	@Override
 	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
-		// TODO Auto-generated method stub
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		//TODO:为科兴与一碑对接
+		if(namespaceId == 999983) {
+			
+			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+			
+			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+				String handle = PmTaskHandle.EBEI;
+				
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+				
+				return handler.getTaskDetail(cmd);
+			}
+		}				
+		
 		return null;
 	}
 
