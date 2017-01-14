@@ -1936,6 +1936,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 
+	private Timestamp getLaterTime(Timestamp time1, Timestamp time2) {
+		if(time1 != null) {
+			if(time2 == null) {
+				return time1;
+			}
+			
+		    if (time1.after(time2)){
+		    	return time1;
+		    };
+		}
+		
+		return time2;
+	}
+	
 	@Override
 	public EquipmentTaskDTO reportEquipmentTask(ReportEquipmentTaskCommand cmd) {
 		
@@ -1943,8 +1957,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
+		Timestamp laterTime = getLaterTime(task.getExecutiveExpireTime(), task.getProcessExpireTime());
 		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
-				 && task.getExecutiveExpireTime() != null && task.getExecutiveExpireTime().before(now)) {
+				 && laterTime.before(now)) {
 			equipmentProvider.closeTask(task);
 		} else if(EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
 				 && task.getProcessExpireTime() != null && task.getProcessExpireTime().before(now)) {
