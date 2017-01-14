@@ -60,8 +60,6 @@ import com.everhomes.rest.organization.*;
 import com.everhomes.rest.organization.pm.*;
 import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
 import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
-import com.everhomes.rest.promotion.OpPromotionRegionPushingCommand;
-import com.everhomes.rest.promotion.OpPromotionScopeType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.user.*;
@@ -83,7 +81,6 @@ import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import net.greghaines.jesque.Job;
-import org.apache.commons.lang.time.DateUtils;
 import org.apache.poi.ss.usermodel.*;
 import org.jooq.Record;
 import org.jooq.RecordMapper;
@@ -1027,7 +1024,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					Family family = familyProvider.findFamilyByAddressId(address.getId());
 					if(family != null){
 						String message = buildBillMessage(communityPmBill);
-						sendNoticeToFamilyById(family.getId(), message);
+						sendNoticeToFamilyById(family.getId(), message, MessageBodyType.TEXT.getCode());
 					}
 				}
 			}
@@ -1073,7 +1070,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					"Unable to find the family.");
 		}
 		String message = buildBillMessage(bill);
-		sendNoticeToFamilyById(family.getId(), message);
+		sendNoticeToFamilyById(family.getId(), message, MessageBodyType.TEXT.getCode());
 	}
 
 	@Override
@@ -1081,7 +1078,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 
-		List<String> buildingNames = cmd.getBuildingNames();
+		/*List<String> buildingNames = cmd.getBuildingNames();
 		List<Long> buildingIds = cmd.getBuildingIds();
 		List<Long> addressIds = cmd.getAddressIds();
 		List<String> phones = cmd.getMobilePhones();
@@ -1089,16 +1086,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 		if(null != addressIds && 0 != addressIds.size()){
 
-			/** 根据楼栋Id获取要推送的企业  **/
 		}else if(null != buildingIds && 0 != buildingIds.size()){
 
-			/** 根据楼栋名称获取要推送的企业**/
 		}else if(null != buildingNames && 0 != buildingNames.size()){
 
-		/** 根据电话号码推送   **/
 		}else if(null != phones && 0 != phones.size()){
 
-		/** 根据小区获取要推送的企业  **/
 		}else if(null != cmd.getCommunityId()){
 			LOGGER.debug("All Park push message, cmd = {}", cmd);
 
@@ -1113,18 +1106,19 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 			promotionService.createRegionPushing(command);
 
 			return;
-		}
+		}*/
 
 		LOGGER.debug("push message task scheduling, cmd = {}", cmd);
 
-		/**
-		 * 调度执行一键推送
-		 */
-		Job job = new Job(SendNoticeAction.class.getName(),
-                new Object[]{StringHelper.toJsonString(cmd), StringHelper.toJsonString(UserContext.current().getUser())});
+		// 调度执行一键推送
+		Job job = new Job(
+		        SendNoticeAction.class.getName(),
+                StringHelper.toJsonString(cmd),
+                String.valueOf(UserContext.current().getUser().getId()),
+                UserContext.current().getScheme()
+        );
 
         jesqueClientFactory.getClientPool().enqueue(queueName, job);
-
 	}
 
 	@Override
@@ -1134,9 +1128,8 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		if(community.getCommunityType() == CommunityType.RESIDENTIAL.getCode()) {
 			sendNoticeToCommunityPmOwner(cmd, user);
 		}
-
 		else if(community.getCommunityType() == CommunityType.COMMERCIAL.getCode()) {
-			//sendNoticeToEnterpriseContactor(cmd);
+			// sendNoticeToEnterpriseContactor(cmd);
 			this.sendNoticeToOrganizationMember(cmd, user);
 		}
 	}
@@ -1220,44 +1213,48 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		List<Long> buildingIds = cmd.getBuildingIds();
 		List<Long> addressIds = cmd.getAddressIds();
 		List<String> phones = cmd.getMobilePhones();
-		List<Organization> orgs = new ArrayList<Organization>();
+		List<Organization> orgs = new ArrayList<>();
 		Integer namespaceId = user.getNamespaceId();
-		/** 获取全部企业的全部人员 **/
-		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+
+		// 全部企业的全部人员
+		List<OrganizationMember> members = new ArrayList<>();
 
 		LOGGER.debug("send notice to organizationMember , phones = {}, namespaceId = {}", phones, namespaceId);
 
-		/** 根据地址获取要推送的企业 **/
+		// 根据地址获取要推送的企业
 		if(null != addressIds && 0 != addressIds.size()){
 			for (Long addressId : addressIds) {
 				OrganizationAddress orgAddress = organizationProvider.findOrganizationAddressByAddressId(addressId);
-				if(null != orgAddress)
-					orgs.add(organizationProvider.findOrganizationById(orgAddress.getOrganizationId()));
-			}
-
-			/** 根据楼栋Id获取要推送的企业  **/
-		}else if(null != buildingIds && 0 != buildingIds.size()){
+                if (null != orgAddress) {
+                    orgs.add(organizationProvider.findOrganizationById(orgAddress.getOrganizationId()));
+                }
+            }
+		}
+        // 根据楼栋Id获取要推送的企业
+		else if(null != buildingIds && 0 != buildingIds.size()){
 			for (Long buildingId : buildingIds) {
 				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingId(buildingId, Integer.MAX_VALUE, null);
 				for (OrganizationAddress organizationAddress : orgAddresses) {
-					if(null != organizationAddress)
-						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
-				}
+                    if (null != organizationAddress) {
+                        orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
+                    }
+                }
 			}
-
-			/** 根据楼栋名称获取要推送的企业**/
-		}else if(null != buildingNames && 0 != buildingNames.size()){
+		}
+        // 根据楼栋名称获取要推送的企业
+		else if(null != buildingNames && 0 != buildingNames.size()){
 			for (String buildingName : buildingNames) {
-				List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingName(buildingName);
+                List<OrganizationAddress> orgAddresses = organizationProvider.listOrganizationAddressByBuildingName(buildingName);
 				for (OrganizationAddress organizationAddress : orgAddresses) {
-					if(null != organizationAddress)
-						orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
-				}
+                    if (null != organizationAddress) {
+                        orgs.add(organizationProvider.findOrganizationById(organizationAddress.getOrganizationId()));
+                    }
+                }
 			}
-
-		/** 根据电话号码推送   **/
-		}else if(null != phones && 0 != phones.size()){
-			members = new ArrayList<OrganizationMember>();
+		}
+		// 根据电话号码推送
+		else if(null != phones && 0 != phones.size()){
+			members = new ArrayList<>();
 			for (String phone : phones) {
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
 				OrganizationMember member = new OrganizationMember();
@@ -1269,32 +1266,31 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 				members.add(member);
 			}
-		/** 根据小区获取要推送的企业  **/
-		}else if(null != communityId){
+		}
+		// 根据小区获取要推送的企业
+		else if(null != communityId) {
 			List<OrganizationCommunityRequest> requests = organizationProvider.queryOrganizationCommunityRequestByCommunityId(new CrossShardListingLocator(), communityId, 100000, null);
 			for (OrganizationCommunityRequest req : requests) {
 				orgs.add(organizationProvider.findOrganizationById(req.getMemberId()));
 			}
 		}
 
-		if(null != orgs && 0 != orgs.size()){
-			/** 获取全部企业的全部人员 **/
+		if(0 != orgs.size()){
+			// 获取全部企业的全部人员
 			members = this.getOrganizationMembersByAddress(orgs);
 		}
 
 		LOGGER.debug("send message to organization member, members = {}", members);
 
-		/** 推送消息 **/
+		// 推送消息
 		this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), user);
 	}
 
 	/**
-	 * 获取企业所以人员
-	 * @param orgs
-	 * @return
+	 * 获取企业所有人员
 	 */
 	private List<OrganizationMember> getOrganizationMembersByAddress(List<Organization> orgs){
-		List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+		List<OrganizationMember> members = new ArrayList<>();
 		for (Organization organization : orgs) {
 			if(null != organization){
 				members.addAll(organizationProvider.listOrganizationMembersByOrgId(organization.getId()));
@@ -1325,7 +1321,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		}
 
 		//是user，发个人信息.
-		if(userIds != null && userIds.size() > 0){
+		if(userIds != null && userIds.size() > 0) {
 			for (Long userId : userIds) {
 				sendNoticeToUserById(userId, message, messageBodyType);
 			}
@@ -1349,10 +1345,10 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	private void processSmsByMembers(List<OrganizationMember> members,String message,String messageBodyType, String imgUri, User user) {
 
-		List<String> phones = new ArrayList<String>();
-		List<Long> userIds = new ArrayList<Long>();
+		List<String> phones = new ArrayList<>();
+		List<Long> userIds = new ArrayList<>();
 
-		/** 区分是否是平台用户  **/
+		// 区分是否是平台用户
 		for (OrganizationMember member : members) {
 			if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())){
 				userIds.add(member.getTargetId());
@@ -1371,44 +1367,50 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				LOGGER.error("image data error image uri = {}.", imgUri);
 				return ;
 			}
-
 			message = StringHelper.toJsonString(imageBody);
 		}
 
-		/** 平台用户就推送消息  **/
+		// 平台用户就推送消息
 		for (Long userId : userIds) {
 			sendNoticeToUserById(userId, message, messageBodyType);
 		}
 
-		/** 非平台用户就发短信  **/
-		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
-		String templateScope = SmsTemplateCode.SCOPE;
-		int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
-		String[] phoneArray = new String[phones.size()];
-		phones.toArray(phoneArray);
-		smsProvider.sendSms(user.getNamespaceId(),phoneArray , templateScope, templateId, user.getLocale(), variables);
+        if (phones.size() > 0 && MessageBodyType.fromCode(messageBodyType) != MessageBodyType.IMAGE) {
+            // 非平台用户就发短信
+            List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_MSG, message);
+            String templateScope = SmsTemplateCode.SCOPE;
+            int templateId = SmsTemplateCode.WY_SEND_MSG_CODE;
+            String[] phoneArray = new String[phones.size()];
+            phones.toArray(phoneArray);
+            smsProvider.sendSms(user.getNamespaceId(),phoneArray , templateScope, templateId, user.getLocale(), variables);
+        }
 	}
 
-	public void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd,User user) {
+	private void sendNoticeToCommunityPmOwner(PropCommunityBuildAddessCommand cmd,User user) {
 
 		Integer namespaceId = user.getNamespaceId();
+        Long communityId = cmd.getCommunityId();
+        List<String> buildingNames = cmd.getBuildingNames();
+        List<Long> addressIds = cmd.getAddressIds();
+        List<String> phones = cmd.getMobilePhones();
 
-		Long communityId = cmd.getCommunityId();
-		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
-		Long orgId = org.getId();
+        this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
 
-		List<String> buildingNames = cmd.getBuildingNames();
-		List<Long> addressIds = cmd.getAddressIds();
-		List<String> phones = cmd.getMobilePhones();
-		//物业发通知机制： 对于已注册的发消息 -familyIds   未注册的发短信-userIds。
-		//已注册的user 分三种： 1-已加入家庭，发家庭消息。 2-还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
-		List<CommunityPmOwner> owners  = new ArrayList<CommunityPmOwner>();
-		List<Long> familyIds = new ArrayList<Long>();
+		// 物业发通知机制：
+        // 对于已注册的发消息 - familyIds
+        // 未注册的发短信 - userIds。
 
+		// 已注册的 user 分三种：
+        // 1-已加入家庭，发家庭消息。
+        // 2-还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。
+        // 3-家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
+
+		List<CommunityPmOwner> owners  = new ArrayList<>();
+		List<Long> familyIds = new ArrayList<>();
 
 		//按电话号码发送
 		if(phones != null && phones.size() > 0){
-			List<OrganizationMember> members = new ArrayList<OrganizationMember>();
+			List<OrganizationMember> members = new ArrayList<>();
 			for (String phone : phones) {
 				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
 				OrganizationMember member = new OrganizationMember();
@@ -1420,20 +1422,23 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				}
 				members.add(member);
 			}
-			if(members.size() > 0)
-				this.processSmsByMembers(members, cmd.getMessage(),cmd.getMessageBodyType(), cmd.getImgUri(), user);
-		//按门牌地址发送：
-		}if(addressIds != null && addressIds.size()  > 0){
+            if (members.size() > 0) {
+                this.processSmsByMembers(members, cmd.getMessage(), cmd.getMessageBodyType(), cmd.getImgUri(), user);
+            }
+		}
+        //按门牌地址发送：
+		else if(addressIds != null && addressIds.size()  > 0){
 			for (Long addressId : addressIds) {
 				Family family = familyProvider.findFamilyByAddressId(addressId);
 				if(family != null){
 					familyIds.add(family.getId());
 				}
-//				List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, addressId);
-//				owners.addAll(ownerList);
+				// List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, addressId);
+				// owners.addAll(ownerList);
 			}
-		//按楼栋发送：
-		}else if(buildingNames != null && buildingNames.size() > 0){
+		}
+        //按楼栋发送：
+		else if(buildingNames != null && buildingNames.size() > 0){
 			for (String buildingName : buildingNames) {
 				List<ApartmentDTO> addresses =  addressProvider.listApartmentsByBuildingName(communityId, buildingName, 1, Integer.MAX_VALUE);
 				if(addresses != null && addresses.size() > 0){
@@ -1442,13 +1447,14 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 						if(family != null){
 							familyIds.add(family.getId());
 						}
-//						List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, address.getApartmentId());
-//						owners.addAll(ownerList);
+						// List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, address.getApartmentId());
+						// owners.addAll(ownerList);
 					}
 				}
 			}
-		//按小区发送
-		}else if(null != communityId){
+		}
+        //按小区发送
+		else if(null != communityId){
 			ListAddressByKeywordCommand comand = new ListAddressByKeywordCommand();
 			comand.setCommunityId(cmd.getCommunityId());
 			comand.setKeyword("");
@@ -1460,25 +1466,41 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 					if(family != null){
 						familyIds.add(family.getId());
 					}
-//					List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, address.getId());
-//					owners.addAll(ownerList);
-
+					// List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwners(orgId, address.getId());
+					// owners.addAll(ownerList);
 				}
 			}
 		}
 
-		//按门牌推送
-		if(familyIds.size() > 0){
+        String message = cmd.getMessage();
+
+        // 如果是图片消息的话
+        if (MessageBodyType.fromCode(cmd.getMessageBodyType()) == MessageBodyType.IMAGE) {
+            if(StringUtils.isEmpty(cmd.getImgUri())){
+                LOGGER.error("message image uri is null.");
+                return;
+            }
+            ImageBody imageBody = contentServerService.parserImageBody(cmd.getImgUri(), EntityType.USER.getCode(), user.getId());
+            if (imageBody != null) {
+                message = StringHelper.toJsonString(imageBody);
+            }
+        }
+
+        if(familyIds.size() > 0) {
 			for (Long familyId : familyIds) {
-				sendNoticeToFamilyById(familyId, cmd.getMessage());
+				sendNoticeToFamilyById(familyId, message, cmd.getMessageBodyType());
 			}
 		}
 
-
-		//处理业主信息表 :1- 是user，已加入家庭，发家庭消息已包含该user。 2- 是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。 3-不是user，发短信。  4：是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
-		if(null != owners && owners.size() > 0)
-			processCommunityPmOwner(communityId,owners,cmd.getMessage(), cmd.getMessageBodyType(), user);
-	}
+		// 处理业主信息表:
+        // 1-是user，已加入家庭，发家庭消息已包含该user。
+        // 2-是user，还未加入家庭，发个人信息 + 提醒配置项【可以加入家庭】。
+        // 3-不是user，发短信。
+        // 4-是user，家庭不存在，发个人信息 + 提醒配置项【可以创建家庭】。
+        if (owners.size() > 0) {
+            processCommunityPmOwner(communityId, owners, cmd.getMessage(), cmd.getMessageBodyType(), user);
+        }
+    }
 
     @Override
     public void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd) {
@@ -1571,15 +1593,15 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         return message;
     }
 
-    public void sendNoticeToFamilyById(Long familyId,String message){
+    public void sendNoticeToFamilyById(Long familyId, String message, String messageBodyType){
 		MessageDTO messageDto = new MessageDTO();
 		//messageDto.setAppId(AppConstants.APPID_FAMILY);
-		messageDto.setAppId(AppConstants.APPID_MESSAGING);
-		messageDto.setSenderUid(User.SYSTEM_UID);
-		//messageDto.setSenderUid(UserContext.current().getUser().getId());
+        //messageDto.setSenderUid(UserContext.current().getUser().getId());
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_UID);
 		messageDto.setChannels(new MessageChannel(MessageChannelType.GROUP.getCode(), String.valueOf(familyId)));
 		messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-		messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+		messageDto.setBodyType(messageBodyType);
 		messageDto.setMetaAppId(AppConstants.APPID_FAMILY);
 		messageDto.setBody(message);
 

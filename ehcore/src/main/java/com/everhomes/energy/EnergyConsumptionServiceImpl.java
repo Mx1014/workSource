@@ -4,6 +4,8 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
@@ -21,10 +23,10 @@ import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.MySheetContentsHandler;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
-
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,7 +42,6 @@ import javax.script.ScriptException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
-
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
@@ -67,24 +68,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private final Logger LOGGER = LoggerFactory.getLogger(EnergyConsumptionServiceImpl.class);
     private final Validator validator = Validation.buildDefaultValidatorFactory().getValidator();
-    
+
     private static ThreadLocal<SimpleDateFormat> yearSF = new ThreadLocal<SimpleDateFormat>(){
-    	protected SimpleDateFormat initialValue() {
-    		return new SimpleDateFormat("yyyy");
-    	};
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyy");
+        };
     };
     private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>(){
-    	protected SimpleDateFormat initialValue() {
-    		return new SimpleDateFormat("yyyyMM");
-    	};
-    }; 
-    
-	@Autowired
-	private CommunityProvider communityProvider;
-	
-	@Autowired
-	private EnergyYoyStatisticProvider energyYoyStatisticProvider;
-	
+        protected SimpleDateFormat initialValue() {
+            return new SimpleDateFormat("yyyyMM");
+        };
+    };
+
+    @Autowired
+    private CommunityProvider communityProvider;
+
+    @Autowired
+    private EnergyYoyStatisticProvider energyYoyStatisticProvider;
+
     @Autowired
     private EnergyDateStatisticProvider energyDateStatisticProvider;
 
@@ -96,10 +97,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private DbProvider dbProvider;
- 
+
     @Autowired
     private EnergyMeterChangeLogProvider meterChangeLogProvider;
-    
+
     @Autowired
     private OrganizationProvider organizationProvider;
 
@@ -141,6 +142,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private EnergyMeterFormulaVariableProvider meterFormulaVariableProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
@@ -379,31 +383,34 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterDTO updateEnergyMeter(UpdateEnergyMeterCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
-        if (cmd.getName() != null) {
-            meter.setName(cmd.getName());
-        }
-        if (cmd.getMeterNumber() != null) {
-            meter.setMeterNumber(cmd.getMeterNumber());
-        }
-        dbProvider.execute(r -> {
-            if (cmd.getPrice() != null) {
-                this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd);
+        Tuple<EnergyMeter, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER.getCode() + cmd.getMeterId()).enter(() -> {
+            EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+            if (cmd.getName() != null) {
+                meter.setName(cmd.getName());
             }
-            if (cmd.getRate() != null) {
-                this.insertMeterSettingLog(EnergyMeterSettingType.RATE, cmd);
+            if (cmd.getMeterNumber() != null) {
+                meter.setMeterNumber(cmd.getMeterNumber());
             }
-            if (cmd.getAmountFormulaId() != null) {
-                this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, cmd);
-            }
-            if (cmd.getCostFormulaId() != null) {
-                this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, cmd);
-            }
-            meterProvider.updateEnergyMeter(meter);
-            return true;
+            dbProvider.execute(r -> {
+                if (cmd.getPrice() != null) {
+                    this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd);
+                }
+                if (cmd.getRate() != null) {
+                    this.insertMeterSettingLog(EnergyMeterSettingType.RATE, cmd);
+                }
+                if (cmd.getAmountFormulaId() != null) {
+                    this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, cmd);
+                }
+                if (cmd.getCostFormulaId() != null) {
+                    this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, cmd);
+                }
+                meterProvider.updateEnergyMeter(meter);
+                return true;
+            });
+            meterSearcher.feedDoc(meter);
+            return meter;
         });
-        meterSearcher.feedDoc(meter);
-        return toEnergyMeterDTO(meter);
+        return result.second() ? toEnergyMeterDTO(result.first()) : new EnergyMeterDTO();
     }
 
     private void insertMeterSettingLog(EnergyMeterSettingType settingType, UpdateEnergyMeterCommand cmd) {
@@ -769,33 +776,32 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public EnergyMeterCategoryDTO updateEnergyMeterCategory(UpdateEnergyMeterCategoryCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
-        if (category != null) {
-            category.setName(cmd.getName());
-            meterCategoryProvider.updateEnergyMeterCategory(category);
-        }
-        return ConvertHelper.convert(category, EnergyMeterCategoryDTO.class);
+        Tuple<EnergyMeterCategory, Boolean> result = coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_CATEGORY.getCode() + cmd.getCategoryId()).enter(() -> {
+            EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
+            if (category != null) {
+                category.setName(cmd.getName());
+                meterCategoryProvider.updateEnergyMeterCategory(category);
+            }
+            return category;
+        });
+        return result.second() ? ConvertHelper.convert(result.first(), EnergyMeterCategoryDTO.class) : new EnergyMeterCategoryDTO();
     }
 
     @Override
     public void deleteEnergyMeterCategory(DeleteEnergyMeterCategoryCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
-        if (category != null) {
-            EnergyMeter meter = meterProvider.findAnyByCategoryId(currNamespaceId(), category.getId());
-            if (meter != null) {
-                LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
-                throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_CATEGORY.getCode() + cmd.getCategoryId()).tryEnter(() -> {
+            EnergyMeterCategory category = meterCategoryProvider.findById(currNamespaceId(), cmd.getCategoryId());
+            if (category != null) {
+                EnergyMeter meter = meterProvider.findAnyByCategoryId(currNamespaceId(), category.getId());
+                if (meter != null) {
+                    LOGGER.info("Energy meter category has been reference, categoryId = {}", category.getId());
+                    throw errorWith(SCOPE, ERR_METER_CATEGORY_HAS_BEEN_REFERENCE, "Energy meter category has been reference");
+                }
+                meterCategoryProvider.deleteEnergyMeterCategory(category);
             }
-            if (category.getDeleteFlag() == TrueOrFalseFlag.TRUE.getCode()) {
-                category.setStatus(EnergyCommonStatus.INACTIVE.getCode());
-                meterCategoryProvider.updateEnergyMeterCategory(category);
-            } else {
-                LOGGER.info("Default energy meter category can not delete, categoryId = {}", category.getId());
-                throw errorWith(SCOPE, ERR_METER_CATEGORY_CAN_NOT_DELETE, "Default energy meter category can not delete");
-            }
-        }
+        });
     }
 
     @Override
@@ -877,6 +883,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.COST_FORMULA, updateCmd);
+
+                // 创建一条初始读表记录
+                ReadEnergyMeterCommand readEnergyMeterCmd = new ReadEnergyMeterCommand();
+                readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
+                readEnergyMeterCmd.setCurrReading(meter.getStartReading());
+                readEnergyMeterCmd.setMeterId(meter.getId());
+                readEnergyMeterCmd.setOrganizationId(cmd.getOrganizationId());
+                readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
+                this.readEnergyMeter(readEnergyMeterCmd);
                 return true;
             });
             meterList.add(meter);
@@ -900,260 +915,260 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         return sheetContentHandler.getResultList();
     }
-	/**
-	* 获取月份起始日期
-	* @param date
-	* @return
-	* @throws ParseException
-	*/
-	public static Calendar getStartDate(Date date)  {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-		calendar.add(Calendar.DAY_OF_MONTH, -1);
-		return calendar ;
-	}
-	
-	/**
-	* 获取月份最后日期 -如果是本月就取今天
-	* @param date
-	* @return
-	* @throws ParseException
-	*/
-	public static Calendar getMaxMonthDate(Date date) { 
-		
-			
-		Calendar calendar = Calendar.getInstance();
-		//本月则就是今天了
-		if (monthSF.get().format(date).equals(monthSF.get().format(DateHelper.currentGMTTime()))){
-			calendar.setTime(DateHelper.currentGMTTime());
-		}
-		else {
-			calendar.setTime(date);
-			calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
-		}
-		return calendar ;
-	}
-	
-	/**
-	* 获取去年12月 
-	* @param date
-	* @return
-	* @throws ParseException
-	*/
-	public static Calendar getYearBeginDate(Date date) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		calendar.add(Calendar.YEAR, -1);
-		calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
-		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
-		calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
-		calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
-		calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
-		return calendar ;
-	}
+    /**
+     * 获取月份起始日期
+     * @param date
+     * @return
+     * @throws ParseException
+     */
+    public static Calendar getStartDate(Date date)  {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+        calendar.add(Calendar.DAY_OF_MONTH, -1);
+        return calendar ;
+    }
 
-	/**
-	* 获取年查询的endDate - 如果是今年则就上个月 其他则末月
-	* @param date
-	* @return
-	* @throws ParseException
-	*/
-	public static Calendar getYearEndDate(Date date) {
-		Calendar calendar = Calendar.getInstance();
-		calendar.setTime(date);
-		//本月则就是上个月了
-		if (yearSF.get().format(date).equals(yearSF.get().format(DateHelper.currentGMTTime()))){
-			calendar.setTime(DateHelper.currentGMTTime());
-			calendar.add(Calendar.MONTH, -1);
-		}
-		else {
-			calendar.setTime(date); 
-			calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
-		}
+    /**
+     * 获取月份最后日期 -如果是本月就取今天
+     * @param date
+     * @return
+     * @throws ParseException
+     */
+    public static Calendar getMaxMonthDate(Date date) {
 
-		calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
-		calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
-		calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
-		calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
-		calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
-		return calendar ;
-	}
-	public List<DayStatDTO> deepCopyStatDays(List<DayStatDTO> days){
-		List<DayStatDTO> result = new ArrayList<DayStatDTO>();
-		if(days == null )
-			return null;
-		for(DayStatDTO day : days ){
-			result.add(ConvertHelper.convert(day, DayStatDTO.class));
-		}
-		return result;
-	}
+
+        Calendar calendar = Calendar.getInstance();
+        //本月则就是今天了
+        if (monthSF.get().format(date).equals(monthSF.get().format(DateHelper.currentGMTTime()))){
+            calendar.setTime(DateHelper.currentGMTTime());
+        }
+        else {
+            calendar.setTime(date);
+            calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMaximum(Calendar.DAY_OF_MONTH));
+        }
+        return calendar ;
+    }
+
+    /**
+     * 获取去年12月
+     * @param date
+     * @return
+     * @throws ParseException
+     */
+    public static Calendar getYearBeginDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        calendar.add(Calendar.YEAR, -1);
+        calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+        calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
+        return calendar ;
+    }
+
+    /**
+     * 获取年查询的endDate - 如果是今年则就上个月 其他则末月
+     * @param date
+     * @return
+     * @throws ParseException
+     */
+    public static Calendar getYearEndDate(Date date) {
+        Calendar calendar = Calendar.getInstance();
+        calendar.setTime(date);
+        //本月则就是上个月了
+        if (yearSF.get().format(date).equals(yearSF.get().format(DateHelper.currentGMTTime()))){
+            calendar.setTime(DateHelper.currentGMTTime());
+            calendar.add(Calendar.MONTH, -1);
+        }
+        else {
+            calendar.setTime(date);
+            calendar.set(Calendar.MONTH, calendar.getActualMaximum(Calendar.MONTH));
+        }
+
+        calendar.set(Calendar.DAY_OF_MONTH, calendar.getActualMinimum(Calendar.DAY_OF_MONTH));
+        calendar.set(Calendar.HOUR_OF_DAY, calendar.getActualMinimum(Calendar.HOUR_OF_DAY));
+        calendar.set(Calendar.SECOND, calendar.getActualMinimum(Calendar.SECOND));
+        calendar.set(Calendar.MILLISECOND, calendar.getActualMinimum(Calendar.MILLISECOND));
+        calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
+        return calendar ;
+    }
+    public List<DayStatDTO> deepCopyStatDays(List<DayStatDTO> days){
+        List<DayStatDTO> result = new ArrayList<DayStatDTO>();
+        if(days == null )
+            return null;
+        for(DayStatDTO day : days ){
+            result.add(ConvertHelper.convert(day, DayStatDTO.class));
+        }
+        return result;
+    }
     @Override
     public EnergyStatDTO getEnergyStatByDay(EnergyStatCommand cmd) {
-    	//TODO: check cmd
-    	//查所有符合条件的记录
+        //TODO: check cmd
+        //查所有符合条件的记录
 
-		
-    	EnergyStatDTO result = new EnergyStatDTO();
-    	result.setBillDayStats(new ArrayList<BillStatDTO>());
-    	result.setDayBurdenStats(new ArrayList<DayStatDTO>());
-    	SimpleDateFormat dateStrSF = new SimpleDateFormat("yyyy年MM月");
-    	result.setDateStr(dateStrSF.format(new Date(cmd.getStatDate())));
-    	Community com = this.communityProvider.findCommunityById(cmd.getCommunityId());
-    	if(null == com)
-    		return null;
-    	result.setCommunityName(com.getName());
-    	result.setMeterType(EnergyMeterType.WATER.getCode().equals(cmd.getMeterType())?"用水分析"
-    			:EnergyMeterType.ELECTRIC.getCode().equals(cmd.getMeterType())?"用电分析":"");
-    	Date startDate =new Date(getStartDate(new Date(cmd.getStatDate())).getTime().getTime());
-    	Date endDate =new Date(getMaxMonthDate(new Date(cmd.getStatDate())).getTime().getTime());
-    	List<EnergyDateStatistic> dayStats = this.energyDateStatisticProvider.listEnergyDateStatistics(cmd.getMeterType(),
-    			cmd.getCommunityId(),cmd.getBillCategoryIds(),cmd.getServiceCategoryIds(),startDate,endDate);
-    	Calendar beginCalendar = Calendar.getInstance();
-    	beginCalendar.setTime(startDate);
-    	Calendar endCalendar = Calendar.getInstance();
-    	endCalendar.setTime(endDate);
-    	int looptimes = 0;
-    	result.setDates(new ArrayList<DayStatDTO>());
-    	while(beginCalendar.compareTo(endCalendar) <1 ){
-    		dateStrSF = new SimpleDateFormat("MM月dd日");
-    		DayStatDTO date = new DayStatDTO();
-    		date.setStatDate(new Date(beginCalendar.getTime().getTime()).getTime());
-    		date.setDateStr(dateStrSF.format(beginCalendar.getTime()));
-    		result.getDates().add(date);
-    		//日期增加每一天,循环不能超过33天
-    		beginCalendar.add(Calendar.DAY_OF_MONTH, 1);
-    		if(looptimes ++ > 33)
-    			break;
-    	}
-    	//查不到就返回null
-    	if(null == dayStats)
-    		return null; 
-    	
-    	for(EnergyDateStatistic dayStat : dayStats){
-    		dateStrSF = new SimpleDateFormat("MM月dd日");
-    		DayStatDTO dayDTO = ConvertHelper.convert(dayStat, DayStatDTO.class);
-    		dayDTO.setStatDate(dayStat.getStatDate().getTime());
-    		dayDTO.setDateStr(dateStrSF.format(dayStat.getStatDate()));
-    		//查询是否有项目dto,没有则添加,有则累加用量
-    		BillStatDTO billDTO =  findBillDTO(result, dayStat.getBillCategoryId());
-    		if(null == billDTO){
-    			billDTO = new BillStatDTO();
-    			EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(dayStat.getBillCategoryId());
-    			billDTO.setBillCategoryId(billCategory.getId());
-    			billDTO.setBillCategoryName(billCategory.getName());
-    			billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
-    			billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
-    			result.getBillDayStats().add(billDTO);
-    		}
-    		DayStatDTO dayBillStat = findDayStat(billDTO.getDayBillStats(), dayDTO.getStatDate());
-    		dayBillStat.setCurrentAmount(dayBillStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
-    		dayBillStat.setCurrentCost(dayBillStat.getCurrentCost().add(dayDTO.getCurrentCost()));
-    		//查询是否有性质dto,没有则添加,有则累加用量
 
-    		ServiceStatDTO serviceDTO = findServiceStatDTO(billDTO, dayStat.getServiceCategoryId());
-    		if(null == serviceDTO){
-    			serviceDTO = new ServiceStatDTO();
-    			EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(dayStat.getServiceCategoryId());
-    			serviceDTO.setServiceCategoryId(serviceCategory.getId());
-    			serviceDTO.setServiceCategoryName(serviceCategory.getName());
-    			serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
-    			serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
-    			billDTO.getServiceDayStats().add(serviceDTO);
-    		}
-    		DayStatDTO dayServiceStat = findDayStat(serviceDTO.getDayServiceStats(), dayDTO.getStatDate());
-    		dayServiceStat.setCurrentAmount(dayServiceStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
-    		dayServiceStat.setCurrentCost(dayServiceStat.getCurrentCost().add(dayDTO.getCurrentCost()));
-    		
-    		//查询是否有表DTO 没有则添加 有则累加用量
-    		MeterStatDTO meterDTO = findMeterStatDTO(serviceDTO, dayStat.getMeterId());
-    		if(meterDTO == null){
-    			meterDTO = ConvertHelper.convert(dayStat, MeterStatDTO.class);
-    			meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
-    			serviceDTO.getMeterDayStats().add(meterDTO);
-    		}
-    		DayStatDTO meterDayStat = findDayStat(meterDTO.getDayStats(), dayDTO.getStatDate());
-    		meterDayStat.setCurrentAmount(dayDTO.getCurrentAmount());
-    		meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
-    		meterDayStat.setCurrentReading(dayDTO.getCurrentReading());
-    		meterDayStat.setLastReading(dayDTO.getLastReading());
+        EnergyStatDTO result = new EnergyStatDTO();
+        result.setBillDayStats(new ArrayList<BillStatDTO>());
+        result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+        SimpleDateFormat dateStrSF = new SimpleDateFormat("yyyy年MM月");
+        result.setDateStr(dateStrSF.format(new Date(cmd.getStatDate())));
+        Community com = this.communityProvider.findCommunityById(cmd.getCommunityId());
+        if(null == com)
+            return null;
+        result.setCommunityName(com.getName());
+        result.setMeterType(EnergyMeterType.WATER.getCode().equals(cmd.getMeterType())?"用水分析"
+                :EnergyMeterType.ELECTRIC.getCode().equals(cmd.getMeterType())?"用电分析":"");
+        Date startDate =new Date(getStartDate(new Date(cmd.getStatDate())).getTime().getTime());
+        Date endDate =new Date(getMaxMonthDate(new Date(cmd.getStatDate())).getTime().getTime());
+        List<EnergyDateStatistic> dayStats = this.energyDateStatisticProvider.listEnergyDateStatistics(cmd.getMeterType(),
+                cmd.getCommunityId(),cmd.getBillCategoryIds(),cmd.getServiceCategoryIds(),startDate,endDate);
+        Calendar beginCalendar = Calendar.getInstance();
+        beginCalendar.setTime(startDate);
+        Calendar endCalendar = Calendar.getInstance();
+        endCalendar.setTime(endDate);
+        int looptimes = 0;
+        result.setDates(new ArrayList<DayStatDTO>());
+        while(beginCalendar.compareTo(endCalendar) <1 ){
+            dateStrSF = new SimpleDateFormat("MM月dd日");
+            DayStatDTO date = new DayStatDTO();
+            date.setStatDate(new Date(beginCalendar.getTime().getTime()).getTime());
+            date.setDateStr(dateStrSF.format(beginCalendar.getTime()));
+            result.getDates().add(date);
+            //日期增加每一天,循环不能超过33天
+            beginCalendar.add(Calendar.DAY_OF_MONTH, 1);
+            if(looptimes ++ > 33)
+                break;
+        }
+        //查不到就返回null
+        if(null == dayStats)
+            return null;
 
-    	}
-    	
-    	//最终计算实际负担 
-    	result.setDayBurdenStats(new ArrayList<DayStatDTO>());
-    	BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
-    	BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
-    	Set<Long> statDates = new HashSet<Long>();
-    	if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
-    		receivableDTO.getDayBillStats().stream().forEach(r->{
-    			statDates.add(r.getStatDate()); 
-    		});
-    	if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
-    		payableDTO.getDayBillStats().stream().forEach(r->{
-    			statDates.add(r.getStatDate()); 
-    		});
-    	
-    	if(null != receivableDTO && null != payableDTO)
-	    	for(Long statDate: statDates){
-	    		DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
-	    		DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), statDate);
-	    		DayStatDTO burdenDay = new DayStatDTO();
-	    		//应收减应付
-	    		burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
-	    		burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
-	    		result.getDayBurdenStats().add(burdenDay);
-	    	}
+        for(EnergyDateStatistic dayStat : dayStats){
+            dateStrSF = new SimpleDateFormat("MM月dd日");
+            DayStatDTO dayDTO = ConvertHelper.convert(dayStat, DayStatDTO.class);
+            dayDTO.setStatDate(dayStat.getStatDate().getTime());
+            dayDTO.setDateStr(dateStrSF.format(dayStat.getStatDate()));
+            //查询是否有项目dto,没有则添加,有则累加用量
+            BillStatDTO billDTO =  findBillDTO(result, dayStat.getBillCategoryId());
+            if(null == billDTO){
+                billDTO = new BillStatDTO();
+                EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(dayStat.getBillCategoryId());
+                billDTO.setBillCategoryId(billCategory.getId());
+                billDTO.setBillCategoryName(billCategory.getName());
+                billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
+                billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
+                result.getBillDayStats().add(billDTO);
+            }
+            DayStatDTO dayBillStat = findDayStat(billDTO.getDayBillStats(), dayDTO.getStatDate());
+            dayBillStat.setCurrentAmount(dayBillStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
+            dayBillStat.setCurrentCost(dayBillStat.getCurrentCost().add(dayDTO.getCurrentCost()));
+            //查询是否有性质dto,没有则添加,有则累加用量
 
-    	sumStatDTO(result);
-    	return result ;
-    	
+            ServiceStatDTO serviceDTO = findServiceStatDTO(billDTO, dayStat.getServiceCategoryId());
+            if(null == serviceDTO){
+                serviceDTO = new ServiceStatDTO();
+                EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(dayStat.getServiceCategoryId());
+                serviceDTO.setServiceCategoryId(serviceCategory.getId());
+                serviceDTO.setServiceCategoryName(serviceCategory.getName());
+                serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
+                serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
+                billDTO.getServiceDayStats().add(serviceDTO);
+            }
+            DayStatDTO dayServiceStat = findDayStat(serviceDTO.getDayServiceStats(), dayDTO.getStatDate());
+            dayServiceStat.setCurrentAmount(dayServiceStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
+            dayServiceStat.setCurrentCost(dayServiceStat.getCurrentCost().add(dayDTO.getCurrentCost()));
+
+            //查询是否有表DTO 没有则添加 有则累加用量
+            MeterStatDTO meterDTO = findMeterStatDTO(serviceDTO, dayStat.getMeterId());
+            if(meterDTO == null){
+                meterDTO = ConvertHelper.convert(dayStat, MeterStatDTO.class);
+                meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
+                serviceDTO.getMeterDayStats().add(meterDTO);
+            }
+            DayStatDTO meterDayStat = findDayStat(meterDTO.getDayStats(), dayDTO.getStatDate());
+            meterDayStat.setCurrentAmount(dayDTO.getCurrentAmount());
+            meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
+            meterDayStat.setCurrentReading(dayDTO.getCurrentReading());
+            meterDayStat.setLastReading(dayDTO.getLastReading());
+
+        }
+
+        //最终计算实际负担
+        result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+        BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
+        BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
+        Set<Long> statDates = new HashSet<Long>();
+        if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
+            receivableDTO.getDayBillStats().stream().forEach(r->{
+                statDates.add(r.getStatDate());
+            });
+        if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
+            payableDTO.getDayBillStats().stream().forEach(r->{
+                statDates.add(r.getStatDate());
+            });
+
+        if(null != receivableDTO && null != payableDTO)
+            for(Long statDate: statDates){
+                DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
+                DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), statDate);
+                DayStatDTO burdenDay = new DayStatDTO();
+                //应收减应付
+                burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
+                burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
+                result.getDayBurdenStats().add(burdenDay);
+            }
+
+        sumStatDTO(result);
+        return result ;
+
     }
 
     /**
      * 计算result的所有合计
      * */
-	private void sumStatDTO(EnergyStatDTO result) {
-		sumStatDTO(result.getDayBurdenStats());
-		sumStatDTO(result.getLastYearPayableStats());
-		if(null!=result.getBillDayStats())
-			for(BillStatDTO bill : result.getBillDayStats()){
-				sumStatDTO(bill.getDayBillStats());
-				if(null != bill.getServiceDayStats())
-					for(ServiceStatDTO service : bill.getServiceDayStats()){
-						sumStatDTO(service.getDayServiceStats());
-						if(null!=service.getMeterDayStats())
-							for(MeterStatDTO meter : service.getMeterDayStats()){
-								sumStatDTO(meter.getDayStats());
-							}
-					}
-			}
-				
-	}
+    private void sumStatDTO(EnergyStatDTO result) {
+        sumStatDTO(result.getDayBurdenStats());
+        sumStatDTO(result.getLastYearPayableStats());
+        if(null!=result.getBillDayStats())
+            for(BillStatDTO bill : result.getBillDayStats()){
+                sumStatDTO(bill.getDayBillStats());
+                if(null != bill.getServiceDayStats())
+                    for(ServiceStatDTO service : bill.getServiceDayStats()){
+                        sumStatDTO(service.getDayServiceStats());
+                        if(null!=service.getMeterDayStats())
+                            for(MeterStatDTO meter : service.getMeterDayStats()){
+                                sumStatDTO(meter.getDayStats());
+                            }
+                    }
+            }
+
+    }
 
     /**
      * 计算一个DayStatDTO list 的 合计
      * */
-	private void sumStatDTO(List<DayStatDTO> dayStats) {
-		if(dayStats == null)
-			return;
-		DayStatDTO sumDTO = new DayStatDTO();
-		sumDTO.setDateStr("合计");
-		for(DayStatDTO dto : dayStats){
-			sumDTO.setCurrentAmount(sumDTO.getCurrentAmount().add(dto.getCurrentAmount()));
-			sumDTO.setCurrentCost(sumDTO.getCurrentCost().add(dto.getCurrentCost()));
-		}
-		dayStats.add(sumDTO);
-	}
+    private void sumStatDTO(List<DayStatDTO> dayStats) {
+        if(dayStats == null)
+            return;
+        DayStatDTO sumDTO = new DayStatDTO();
+        sumDTO.setDateStr("合计");
+        for(DayStatDTO dto : dayStats){
+            sumDTO.setCurrentAmount(sumDTO.getCurrentAmount().add(dto.getCurrentAmount()));
+            sumDTO.setCurrentCost(sumDTO.getCurrentCost().add(dto.getCurrentCost()));
+        }
+        dayStats.add(sumDTO);
+    }
 
-	/**
-	* 通过id查DTO是否有该项目
-	* @param  
-	* @return   
-	*/
+    /**
+     * 通过id查DTO是否有该项目
+     * @param
+     * @return
+     */
     private DayStatDTO findDayStat(List<DayStatDTO> list , Long statDate){
-    	DayStatDTO dayStatDTO = new DayStatDTO();
+        DayStatDTO dayStatDTO = new DayStatDTO();
         dayStatDTO.setStatDate(statDate);
         if(null != list && list.size()>0) {
             for (DayStatDTO dto : list) {
@@ -1163,248 +1178,248 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             list.add(dayStatDTO);
         }
-    	return dayStatDTO;
+        return dayStatDTO;
     }
 
-	/**
-	* 通过id查DTO是否有该项目
-	* @param  
-	* @return   
-	*/
+    /**
+     * 通过id查DTO是否有该项目
+     * @param
+     * @return
+     */
     private BillStatDTO findBillDTO(EnergyStatDTO fatherDto , Long id){
-    	if(null != fatherDto.getBillDayStats() && fatherDto.getBillDayStats().size()>0)
-    		for(BillStatDTO dto : fatherDto.getBillDayStats() )
-    			if(dto.getBillCategoryId().equals(id))
-    				return dto;
-    	return null;
+        if(null != fatherDto.getBillDayStats() && fatherDto.getBillDayStats().size()>0)
+            for(BillStatDTO dto : fatherDto.getBillDayStats() )
+                if(dto.getBillCategoryId().equals(id))
+                    return dto;
+        return null;
     }
 
-	/**
-	* 通过id查DTO是否有该性质
-	* @param  
-	* @return   
-	*/
+    /**
+     * 通过id查DTO是否有该性质
+     * @param
+     * @return
+     */
     private ServiceStatDTO findServiceStatDTO(BillStatDTO fatherDto , Long id){
-    	if(null != fatherDto.getServiceDayStats() && fatherDto.getServiceDayStats().size()>0)
-    		for(ServiceStatDTO dto : fatherDto.getServiceDayStats() )
-    			if(dto.getServiceCategoryId().equals(id))
-    				return dto;
-    	return null;
+        if(null != fatherDto.getServiceDayStats() && fatherDto.getServiceDayStats().size()>0)
+            for(ServiceStatDTO dto : fatherDto.getServiceDayStats() )
+                if(dto.getServiceCategoryId().equals(id))
+                    return dto;
+        return null;
     }
 
-	/**
-	* 通过id查DTO是否有该表记
-	* @param  
-	* @return   
-	*/
+    /**
+     * 通过id查DTO是否有该表记
+     * @param
+     * @return
+     */
     private MeterStatDTO findMeterStatDTO(ServiceStatDTO fatherDto , Long id){
-    	if(null != fatherDto.getMeterDayStats() && fatherDto.getMeterDayStats().size()>0)
-    		for(MeterStatDTO dto : fatherDto.getMeterDayStats() )
-    			if(dto.getMeterId().equals(id))
-    				return dto;
-    	return null;
+        if(null != fatherDto.getMeterDayStats() && fatherDto.getMeterDayStats().size()>0)
+            for(MeterStatDTO dto : fatherDto.getMeterDayStats() )
+                if(dto.getMeterId().equals(id))
+                    return dto;
+        return null;
     }
     @Override
     public EnergyStatDTO getEnergyStatByMonth(EnergyStatCommand cmd)   {
-    	SimpleDateFormat dateStrSF = new SimpleDateFormat("yyyy年MM月");
+        SimpleDateFormat dateStrSF = new SimpleDateFormat("yyyy年MM月");
 
-    	//TODO: check cmd
-    	//查所有符合条件的记录
-    	EnergyStatDTO result = new EnergyStatDTO();
-    	result.setBillDayStats(new ArrayList<BillStatDTO>());
-    	result.setDayBurdenStats(new ArrayList<DayStatDTO>()); 
-    	result.setDateStr(yearSF.get().format(new Date(cmd.getStatDate())));
-    	Community com = this.communityProvider.findCommunityById(cmd.getCommunityId());
-    	if(null == com)
-    		return null;
-    	result.setCommunityName(com.getName());
-    	result.setMeterType(EnergyMeterType.WATER.getCode().equals(cmd.getMeterType())?"用水分析"
-    			:EnergyMeterType.ELECTRIC.getCode().equals(cmd.getMeterType())?"用电分析":"");
-    	List<EnergyMonthStatistic> monthStats = this.energyMonthStatisticProvider.listEnergyMonthStatistics(cmd.getMeterType(),
-    			cmd.getCommunityId(),cmd.getBillCategoryIds(),cmd.getServiceCategoryIds(),yearSF.get().format(new Date(cmd.getStatDate())));
-    	//查不到就返回null
-    	if(null == monthStats)
-    		return null; 
+        //TODO: check cmd
+        //查所有符合条件的记录
+        EnergyStatDTO result = new EnergyStatDTO();
+        result.setBillDayStats(new ArrayList<BillStatDTO>());
+        result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+        result.setDateStr(yearSF.get().format(new Date(cmd.getStatDate())));
+        Community com = this.communityProvider.findCommunityById(cmd.getCommunityId());
+        if(null == com)
+            return null;
+        result.setCommunityName(com.getName());
+        result.setMeterType(EnergyMeterType.WATER.getCode().equals(cmd.getMeterType())?"用水分析"
+                :EnergyMeterType.ELECTRIC.getCode().equals(cmd.getMeterType())?"用电分析":"");
+        List<EnergyMonthStatistic> monthStats = this.energyMonthStatisticProvider.listEnergyMonthStatistics(cmd.getMeterType(),
+                cmd.getCommunityId(),cmd.getBillCategoryIds(),cmd.getServiceCategoryIds(),yearSF.get().format(new Date(cmd.getStatDate())));
+        //查不到就返回null
+        if(null == monthStats)
+            return null;
 
-    	try {
-    		//把所有的日期单独拿出来,做表头
-	    	Calendar beginCalendar = Calendar.getInstance();
-	    	beginCalendar.setTime(getYearBeginDate(new Date(cmd.getStatDate())).getTime());
-	    	Calendar endCalendar = Calendar.getInstance();
-	    	endCalendar.setTime(getYearEndDate(new Date(cmd.getStatDate())).getTime());
-	    	int looptimes = 0;
-	    	result.setDates(new ArrayList<DayStatDTO>());
-	    	while(beginCalendar.compareTo(endCalendar) <1 ){ 
-	    		DayStatDTO date = new DayStatDTO();
-	    		date.setStatDate(monthSF.get().parse(monthSF.get().format(beginCalendar.getTime())).getTime());
-	    		date.setDateStr(dateStrSF.format(beginCalendar.getTime()));
-	    		result.getDates().add(date);
-	    		
-	    		//日期增加每一天,循环不能超过13个月
-	    		beginCalendar.add(Calendar.MONTH, 1);
-	    		if(looptimes ++ > 13)
-	    			break;
-	    	}
-    	
-	    	for(EnergyMonthStatistic monthStat : monthStats){
-	    		DayStatDTO dayDTO = ConvertHelper.convert(monthStat, DayStatDTO.class);
-	    		dayDTO.setStatDate(monthSF.get().parse(monthStat.getDateStr()).getTime());
+        try {
+            //把所有的日期单独拿出来,做表头
+            Calendar beginCalendar = Calendar.getInstance();
+            beginCalendar.setTime(getYearBeginDate(new Date(cmd.getStatDate())).getTime());
+            Calendar endCalendar = Calendar.getInstance();
+            endCalendar.setTime(getYearEndDate(new Date(cmd.getStatDate())).getTime());
+            int looptimes = 0;
+            result.setDates(new ArrayList<DayStatDTO>());
+            while(beginCalendar.compareTo(endCalendar) <1 ){
+                DayStatDTO date = new DayStatDTO();
+                date.setStatDate(monthSF.get().parse(monthSF.get().format(beginCalendar.getTime())).getTime());
+                date.setDateStr(dateStrSF.format(beginCalendar.getTime()));
+                result.getDates().add(date);
 
-	    		dayDTO.setDateStr(dateStrSF.format(monthSF.get().parse(monthStat.getDateStr())));
-	    		
-	    		//查询是否有项目dto,没有则添加,有则累加用量
-	    		BillStatDTO billDTO =  findBillDTO(result, monthStat.getBillCategoryId());
-	    		if(null == billDTO){
-	    			billDTO = new BillStatDTO();
-	    			EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(monthStat.getBillCategoryId());
-	    			billDTO.setBillCategoryId(billCategory.getId());
-	    			billDTO.setBillCategoryName(billCategory.getName());
-	    			billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
-	    			billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
-	    			result.getBillDayStats().add(billDTO);
-	    		}
-	    		DayStatDTO dayBillStat = findDayStat(billDTO.getDayBillStats(), dayDTO.getStatDate());
-	    		dayBillStat.setCurrentAmount(dayBillStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
-	    		dayBillStat.setCurrentCost(dayBillStat.getCurrentCost().add(dayDTO.getCurrentCost()));
-	    		//查询是否有性质dto,没有则添加,有则累加用量
-	
-	    		ServiceStatDTO serviceDTO = findServiceStatDTO(billDTO, monthStat.getServiceCategoryId());
-	    		if(null == serviceDTO){
-	    			serviceDTO = new ServiceStatDTO();
-	    			EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(monthStat.getServiceCategoryId());
-	    			serviceDTO.setServiceCategoryId(serviceCategory.getId());
-	    			serviceDTO.setServiceCategoryName(serviceCategory.getName());
-	    			serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
-	    			serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
-	    			billDTO.getServiceDayStats().add(serviceDTO);
-	    		}
-	    		DayStatDTO dayServiceStat = findDayStat(serviceDTO.getDayServiceStats(), dayDTO.getStatDate());
-	    		dayServiceStat.setCurrentAmount(dayServiceStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
-	    		dayServiceStat.setCurrentCost(dayServiceStat.getCurrentCost().add(dayDTO.getCurrentCost()));
-	    		
-	    		//查询是否有表DTO 没有则添加 有则累加用量
-	    		MeterStatDTO meterDTO = findMeterStatDTO(serviceDTO, monthStat.getMeterId());
-	    		if(meterDTO == null){
-	    			meterDTO = ConvertHelper.convert(monthStat, MeterStatDTO.class);
-	    			meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
-	    			serviceDTO.getMeterDayStats().add(meterDTO);
-	    		}
+                //日期增加每一天,循环不能超过13个月
+                beginCalendar.add(Calendar.MONTH, 1);
+                if(looptimes ++ > 13)
+                    break;
+            }
 
-	    		DayStatDTO meterDayStat = findDayStat(meterDTO.getDayStats(), dayDTO.getStatDate());
-	    		meterDayStat.setCurrentAmount(dayDTO.getCurrentAmount());
-	    		meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
-	    		meterDayStat.setCurrentReading(dayDTO.getCurrentReading());
-	    		meterDayStat.setLastReading(dayDTO.getLastReading());
-	    	}
-	    	 
-	    	//最终计算实际负担  和同比  
-	    	result.setLastYearPayableStats(new ArrayList<DayStatDTO>());
-	    	result.setDayBurdenStats(new ArrayList<DayStatDTO>());
-	    	BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
-	    	BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
-	    	Set<Long> statDates = new HashSet<Long>();
-	    	if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
-	    		receivableDTO.getDayBillStats().stream().forEach(r->{
-	    			statDates.add(r.getStatDate()); 
-	    		});
-	    	if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
-	    		payableDTO.getDayBillStats().stream().forEach(r->{
-	    			statDates.add(r.getStatDate()); 
-	    		});
-	    	
-	    	for(Long statDate: statDates){
-	    		
-	    		DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
-	    		DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), receivableDay.getStatDate());
-	    		DayStatDTO burdenDay = new DayStatDTO();
-	    		DayStatDTO lastYearDTO = new DayStatDTO();
-	    		//应收减应付
-	    		burdenDay.setStatDate(receivableDay.getStatDate());
-	    		burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
-	    		burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost())); 
-	    		result.getDayBurdenStats().add(burdenDay);
-	    		result.getLastYearPayableStats().add(lastYearDTO);
-	    		lastYearDTO.setStatDate(receivableDay.getStatDate());
-	    		//得到去年的字符串
-	        	Calendar lastYear = Calendar.getInstance();
-	        	lastYear.setTime(new Date(receivableDay.getStatDate())); 
-	        	lastYear.add(Calendar.YEAR,-1);
-	        	lastYearDTO.setCurrentAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear.getTime()),cmd.getMeterType()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
-	        	lastYearDTO.setCurrentCost(energyCountStatisticProvider.getSumCost(monthSF.get().format(lastYear.getTime()),cmd.getMeterType()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
-	    	}
-    	} catch (ParseException e) {
-			LOGGER.error(e.getLocalizedMessage());
-		}
-    	sumStatDTO(result);
-    	return result ;
+            for(EnergyMonthStatistic monthStat : monthStats){
+                DayStatDTO dayDTO = ConvertHelper.convert(monthStat, DayStatDTO.class);
+                dayDTO.setStatDate(monthSF.get().parse(monthStat.getDateStr()).getTime());
+
+                dayDTO.setDateStr(dateStrSF.format(monthSF.get().parse(monthStat.getDateStr())));
+
+                //查询是否有项目dto,没有则添加,有则累加用量
+                BillStatDTO billDTO =  findBillDTO(result, monthStat.getBillCategoryId());
+                if(null == billDTO){
+                    billDTO = new BillStatDTO();
+                    EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(monthStat.getBillCategoryId());
+                    billDTO.setBillCategoryId(billCategory.getId());
+                    billDTO.setBillCategoryName(billCategory.getName());
+                    billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
+                    billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
+                    result.getBillDayStats().add(billDTO);
+                }
+                DayStatDTO dayBillStat = findDayStat(billDTO.getDayBillStats(), dayDTO.getStatDate());
+                dayBillStat.setCurrentAmount(dayBillStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
+                dayBillStat.setCurrentCost(dayBillStat.getCurrentCost().add(dayDTO.getCurrentCost()));
+                //查询是否有性质dto,没有则添加,有则累加用量
+
+                ServiceStatDTO serviceDTO = findServiceStatDTO(billDTO, monthStat.getServiceCategoryId());
+                if(null == serviceDTO){
+                    serviceDTO = new ServiceStatDTO();
+                    EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(monthStat.getServiceCategoryId());
+                    serviceDTO.setServiceCategoryId(serviceCategory.getId());
+                    serviceDTO.setServiceCategoryName(serviceCategory.getName());
+                    serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
+                    serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
+                    billDTO.getServiceDayStats().add(serviceDTO);
+                }
+                DayStatDTO dayServiceStat = findDayStat(serviceDTO.getDayServiceStats(), dayDTO.getStatDate());
+                dayServiceStat.setCurrentAmount(dayServiceStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
+                dayServiceStat.setCurrentCost(dayServiceStat.getCurrentCost().add(dayDTO.getCurrentCost()));
+
+                //查询是否有表DTO 没有则添加 有则累加用量
+                MeterStatDTO meterDTO = findMeterStatDTO(serviceDTO, monthStat.getMeterId());
+                if(meterDTO == null){
+                    meterDTO = ConvertHelper.convert(monthStat, MeterStatDTO.class);
+                    meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
+                    serviceDTO.getMeterDayStats().add(meterDTO);
+                }
+
+                DayStatDTO meterDayStat = findDayStat(meterDTO.getDayStats(), dayDTO.getStatDate());
+                meterDayStat.setCurrentAmount(dayDTO.getCurrentAmount());
+                meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
+                meterDayStat.setCurrentReading(dayDTO.getCurrentReading());
+                meterDayStat.setLastReading(dayDTO.getLastReading());
+            }
+
+            //最终计算实际负担  和同比
+            result.setLastYearPayableStats(new ArrayList<DayStatDTO>());
+            result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+            BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
+            BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
+            Set<Long> statDates = new HashSet<Long>();
+            if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
+                receivableDTO.getDayBillStats().stream().forEach(r->{
+                    statDates.add(r.getStatDate());
+                });
+            if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
+                payableDTO.getDayBillStats().stream().forEach(r->{
+                    statDates.add(r.getStatDate());
+                });
+
+            for(Long statDate: statDates){
+
+                DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
+                DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), receivableDay.getStatDate());
+                DayStatDTO burdenDay = new DayStatDTO();
+                DayStatDTO lastYearDTO = new DayStatDTO();
+                //应收减应付
+                burdenDay.setStatDate(receivableDay.getStatDate());
+                burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
+                burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
+                result.getDayBurdenStats().add(burdenDay);
+                result.getLastYearPayableStats().add(lastYearDTO);
+                lastYearDTO.setStatDate(receivableDay.getStatDate());
+                //得到去年的字符串
+                Calendar lastYear = Calendar.getInstance();
+                lastYear.setTime(new Date(receivableDay.getStatDate()));
+                lastYear.add(Calendar.YEAR,-1);
+                lastYearDTO.setCurrentAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear.getTime()),cmd.getMeterType()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
+                lastYearDTO.setCurrentCost(energyCountStatisticProvider.getSumCost(monthSF.get().format(lastYear.getTime()),cmd.getMeterType()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
+            }
+        } catch (ParseException e) {
+            LOGGER.error(e.getLocalizedMessage());
+        }
+        sumStatDTO(result);
+        return result ;
     }
 
     @Override
     public List<EnergyStatByYearDTO> getEnergyStatisticByYear(EnergyStatCommand cmd) {
-    	List<EnergyStatByYearDTO> result = new ArrayList<EnergyStatByYearDTO>();
-    	Calendar statDate = Calendar.getInstance();
-    	statDate.setTime(new Date(cmd.getStatDate())); 
-    	Calendar anchorDate = Calendar.getInstance();
-    	anchorDate.setTime(new Date(cmd.getStatDate()));
-    	//从年初开始
-    	anchorDate.set(Calendar.DAY_OF_YEAR, anchorDate.getActualMinimum(Calendar.DAY_OF_YEAR));
-    	int i = 0;
-    	while(anchorDate.compareTo(statDate)<=0){
-    		//避免死循环
-    		if(i++ >12)
-    			break;
-    		String dateStr = monthSF.get().format(anchorDate.getTime());
-    		EnergyStatByYearDTO dto = new EnergyStatByYearDTO();
-    		dto.setDateStr(dateStr);
-    		result.add(dto);
-    		//循环插入每一个数据
-    		//用量
-			//本月-水费-账单项目-应收
-    		dto.setWaterReceivableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.WATER.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-			//本月-水费-账单项目-应付
-    		dto.setWaterPayableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.WATER.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-			
-    		dto.setWaterBurdenAmount(dto.getWaterPayableAmount().subtract(dto.getWaterReceivableAmount()));
-			 
+        List<EnergyStatByYearDTO> result = new ArrayList<EnergyStatByYearDTO>();
+        Calendar statDate = Calendar.getInstance();
+        statDate.setTime(new Date(cmd.getStatDate()));
+        Calendar anchorDate = Calendar.getInstance();
+        anchorDate.setTime(new Date(cmd.getStatDate()));
+        //从年初开始
+        anchorDate.set(Calendar.DAY_OF_YEAR, anchorDate.getActualMinimum(Calendar.DAY_OF_YEAR));
+        int i = 0;
+        while(anchorDate.compareTo(statDate)<=0){
+            //避免死循环
+            if(i++ >12)
+                break;
+            String dateStr = monthSF.get().format(anchorDate.getTime());
+            EnergyStatByYearDTO dto = new EnergyStatByYearDTO();
+            dto.setDateStr(dateStr);
+            result.add(dto);
+            //循环插入每一个数据
+            //用量
+            //本月-水费-账单项目-应收
+            dto.setWaterReceivableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.WATER.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+            //本月-水费-账单项目-应付
+            dto.setWaterPayableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.WATER.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 
-			//本月-电费-账单项目-应收
-    		dto.setElectricReceivableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.ELECTRIC.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-			//本月-电费-账单项目-应付
-    		dto.setElectricPayableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.ELECTRIC.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-			
-    		dto.setElectricBurdenAmount(dto.getElectricPayableAmount().subtract(dto.getElectricReceivableAmount()));
-    		
-			//费用
-    		//本月-水费-账单项目-应收
-    		dto.setWaterReceivableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.WATER.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-			//本月-水费-账单项目-应付
-    		dto.setWaterPayableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.WATER.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-			
-    		dto.setWaterBurdenCost(dto.getWaterPayableCost().subtract(dto.getWaterReceivableCost()));
-			 
+            dto.setWaterBurdenAmount(dto.getWaterPayableAmount().subtract(dto.getWaterReceivableAmount()));
 
-			//本月-电费-账单项目-应收
-    		dto.setElectricReceivableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.ELECTRIC.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-			//本月-电费-账单项目-应付
-    		dto.setElectricPayableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.ELECTRIC.getCode()
-					,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-			
-    		dto.setElectricBurdenCost(dto.getElectricPayableCost().subtract(dto.getElectricReceivableCost()));
-			
-    		//下一个月
-    		anchorDate.add(Calendar.MONTH, 1);
-    	}
-    	return result;
-    	
+
+            //本月-电费-账单项目-应收
+            dto.setElectricReceivableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.ELECTRIC.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+            //本月-电费-账单项目-应付
+            dto.setElectricPayableAmount(energyCountStatisticProvider.getSumAmount(dateStr,EnergyMeterType.ELECTRIC.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+
+            dto.setElectricBurdenAmount(dto.getElectricPayableAmount().subtract(dto.getElectricReceivableAmount()));
+
+            //费用
+            //本月-水费-账单项目-应收
+            dto.setWaterReceivableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.WATER.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+            //本月-水费-账单项目-应付
+            dto.setWaterPayableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.WATER.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+
+            dto.setWaterBurdenCost(dto.getWaterPayableCost().subtract(dto.getWaterReceivableCost()));
+
+
+            //本月-电费-账单项目-应收
+            dto.setElectricReceivableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.ELECTRIC.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+            //本月-电费-账单项目-应付
+            dto.setElectricPayableCost(energyCountStatisticProvider.getSumCost(dateStr,EnergyMeterType.ELECTRIC.getCode()
+                    ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+
+            dto.setElectricBurdenCost(dto.getElectricPayableCost().subtract(dto.getElectricReceivableCost()));
+
+            //下一个月
+            anchorDate.add(Calendar.MONTH, 1);
+        }
+        return result;
+
     }
 
     /* (non-Javadoc)
@@ -1412,15 +1427,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      */
     @Override
     public List<EnergyCommunityYoyStatDTO> getEnergyStatisticByYoy(EnergyStatCommand cmd) {
-    	List<EnergyYoyStatistic> stats = this.energyYoyStatisticProvider.listenergyYoyStatistics(UserContext.getCurrentNamespaceId(),
-    			monthSF.get().format(new Date(cmd.getStatDate())));
+        List<EnergyYoyStatistic> stats = this.energyYoyStatisticProvider.listenergyYoyStatistics(UserContext.getCurrentNamespaceId(),
+                monthSF.get().format(new Date(cmd.getStatDate())));
         if(null == stats)
-        	return null;
+            return null;
 
-    	Calendar lastYear = Calendar.getInstance();
-    	lastYear.setTime(new Date(cmd.getStatDate())); 
-    	lastYear.add(Calendar.YEAR,-1);
-    	
+        Calendar lastYear = Calendar.getInstance();
+        lastYear.setTime(new Date(cmd.getStatDate()));
+        lastYear.add(Calendar.YEAR,-1);
+
         List<EnergyCommunityYoyStatDTO> result = new ArrayList<EnergyCommunityYoyStatDTO>();
         EnergyCommunityYoyStatDTO totalDTO = new EnergyCommunityYoyStatDTO();
         totalDTO.setCommunityName("合计");
@@ -1432,45 +1447,45 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         totalDTO.getStatlist().add(totalYearDTO);
         totalDTO.getStatlist().add(totalLastYearDTO);
         for(EnergyYoyStatistic stat : stats){
-        	EnergyCommunityYoyStatDTO dto = new EnergyCommunityYoyStatDTO();
-        	result.add(dto);
-        	dto.setCommunityId(stat.getCommunityId());
-        	Community com = this.communityProvider.findCommunityById(stat.getCommunityId());
-        	if (com != null)
-        		dto.setCommunityName(com.getName());
-        	dto.setStatlist(new ArrayList<EnergyStatByYearDTO>());
-        	EnergyStatByYearDTO thisYearDTO = ConvertHelper.convert(stat, EnergyStatByYearDTO.class);
-        	dto.getStatlist().add(thisYearDTO);
-        	EnergyStatByYearDTO lastYearDTO = new EnergyStatByYearDTO();
-        	dto.getStatlist().add(lastYearDTO);
-        	lastYearDTO.setDateStr(monthSF.get().format(lastYear.getTime()));
-        	lastYearDTO.setElectricBurdenAmount(stat.getElectricLastBurdenAmount()); 
-        	lastYearDTO.setElectricPayableAmount(stat.getElectricLastPayableAmount()); 
-        	lastYearDTO.setElectricReceivableAmount(stat.getElectricLastReceivableAmount()); 
-        	lastYearDTO.setElectricAverageAmount(stat.getElectricLastAverageAmount());
-        	lastYearDTO.setWaterBurdenAmount(stat.getWaterLastBurdenAmount()); 
-        	lastYearDTO.setWaterPayableAmount(stat.getWaterLastPayableAmount()); 
-        	lastYearDTO.setWaterReceivableAmount(stat.getWaterLastReceivableAmount());
-        	lastYearDTO.setWaterAverageAmount(stat.getWaterLastAverageAmount());
-        	
-        	//合计
-        	totalYearDTO.setElectricBurdenAmount(totalYearDTO.getElectricBurdenAmount().add(thisYearDTO.getElectricBurdenAmount())); 
-        	totalYearDTO.setElectricPayableAmount(totalYearDTO.getElectricPayableAmount().add(thisYearDTO.getElectricPayableAmount())); 
-        	totalYearDTO.setElectricReceivableAmount(totalYearDTO.getElectricReceivableAmount().add(thisYearDTO.getElectricReceivableAmount())); 
-        	totalYearDTO.setElectricAverageAmount(totalYearDTO.getElectricAverageAmount().add(thisYearDTO.getElectricAverageAmount()));
-        	totalYearDTO.setWaterBurdenAmount(totalYearDTO.getWaterBurdenAmount().add(thisYearDTO.getWaterBurdenAmount())); 
-        	totalYearDTO.setWaterPayableAmount(totalYearDTO.getWaterPayableAmount().add(thisYearDTO.getWaterPayableAmount())); 
-        	totalYearDTO.setWaterReceivableAmount(totalYearDTO.getWaterReceivableAmount().add(thisYearDTO.getWaterReceivableAmount()));
-        	totalYearDTO.setWaterAverageAmount(totalYearDTO.getWaterAverageAmount().add(thisYearDTO.getWaterAverageAmount()));
- 
-        	totalLastYearDTO.setElectricBurdenAmount(totalLastYearDTO.getElectricBurdenAmount().add(totalYearDTO.getElectricBurdenAmount())); 
-        	totalLastYearDTO.setElectricPayableAmount(totalLastYearDTO.getElectricPayableAmount().add(totalYearDTO.getElectricPayableAmount())); 
-        	totalLastYearDTO.setElectricReceivableAmount(totalLastYearDTO.getElectricReceivableAmount().add(totalYearDTO.getElectricReceivableAmount())); 
-        	totalLastYearDTO.setElectricAverageAmount(totalLastYearDTO.getElectricAverageAmount().add(totalYearDTO.getElectricAverageAmount()));
-        	totalLastYearDTO.setWaterBurdenAmount(totalLastYearDTO.getWaterBurdenAmount().add(totalYearDTO.getWaterBurdenAmount())); 
-        	totalLastYearDTO.setWaterPayableAmount(totalLastYearDTO.getWaterPayableAmount().add(totalYearDTO.getWaterPayableAmount())); 
-        	totalLastYearDTO.setWaterReceivableAmount(totalLastYearDTO.getWaterReceivableAmount().add(totalYearDTO.getWaterReceivableAmount()));
-        	totalLastYearDTO.setWaterAverageAmount(totalLastYearDTO.getWaterAverageAmount().add(totalYearDTO.getWaterAverageAmount()));
+            EnergyCommunityYoyStatDTO dto = new EnergyCommunityYoyStatDTO();
+            result.add(dto);
+            dto.setCommunityId(stat.getCommunityId());
+            Community com = this.communityProvider.findCommunityById(stat.getCommunityId());
+            if (com != null)
+                dto.setCommunityName(com.getName());
+            dto.setStatlist(new ArrayList<EnergyStatByYearDTO>());
+            EnergyStatByYearDTO thisYearDTO = ConvertHelper.convert(stat, EnergyStatByYearDTO.class);
+            dto.getStatlist().add(thisYearDTO);
+            EnergyStatByYearDTO lastYearDTO = new EnergyStatByYearDTO();
+            dto.getStatlist().add(lastYearDTO);
+            lastYearDTO.setDateStr(monthSF.get().format(lastYear.getTime()));
+            lastYearDTO.setElectricBurdenAmount(stat.getElectricLastBurdenAmount());
+            lastYearDTO.setElectricPayableAmount(stat.getElectricLastPayableAmount());
+            lastYearDTO.setElectricReceivableAmount(stat.getElectricLastReceivableAmount());
+            lastYearDTO.setElectricAverageAmount(stat.getElectricLastAverageAmount());
+            lastYearDTO.setWaterBurdenAmount(stat.getWaterLastBurdenAmount());
+            lastYearDTO.setWaterPayableAmount(stat.getWaterLastPayableAmount());
+            lastYearDTO.setWaterReceivableAmount(stat.getWaterLastReceivableAmount());
+            lastYearDTO.setWaterAverageAmount(stat.getWaterLastAverageAmount());
+
+            //合计
+            totalYearDTO.setElectricBurdenAmount(totalYearDTO.getElectricBurdenAmount().add(thisYearDTO.getElectricBurdenAmount()));
+            totalYearDTO.setElectricPayableAmount(totalYearDTO.getElectricPayableAmount().add(thisYearDTO.getElectricPayableAmount()));
+            totalYearDTO.setElectricReceivableAmount(totalYearDTO.getElectricReceivableAmount().add(thisYearDTO.getElectricReceivableAmount()));
+            totalYearDTO.setElectricAverageAmount(totalYearDTO.getElectricAverageAmount().add(thisYearDTO.getElectricAverageAmount()));
+            totalYearDTO.setWaterBurdenAmount(totalYearDTO.getWaterBurdenAmount().add(thisYearDTO.getWaterBurdenAmount()));
+            totalYearDTO.setWaterPayableAmount(totalYearDTO.getWaterPayableAmount().add(thisYearDTO.getWaterPayableAmount()));
+            totalYearDTO.setWaterReceivableAmount(totalYearDTO.getWaterReceivableAmount().add(thisYearDTO.getWaterReceivableAmount()));
+            totalYearDTO.setWaterAverageAmount(totalYearDTO.getWaterAverageAmount().add(thisYearDTO.getWaterAverageAmount()));
+
+            totalLastYearDTO.setElectricBurdenAmount(totalLastYearDTO.getElectricBurdenAmount().add(totalYearDTO.getElectricBurdenAmount()));
+            totalLastYearDTO.setElectricPayableAmount(totalLastYearDTO.getElectricPayableAmount().add(totalYearDTO.getElectricPayableAmount()));
+            totalLastYearDTO.setElectricReceivableAmount(totalLastYearDTO.getElectricReceivableAmount().add(totalYearDTO.getElectricReceivableAmount()));
+            totalLastYearDTO.setElectricAverageAmount(totalLastYearDTO.getElectricAverageAmount().add(totalYearDTO.getElectricAverageAmount()));
+            totalLastYearDTO.setWaterBurdenAmount(totalLastYearDTO.getWaterBurdenAmount().add(totalYearDTO.getWaterBurdenAmount()));
+            totalLastYearDTO.setWaterPayableAmount(totalLastYearDTO.getWaterPayableAmount().add(totalYearDTO.getWaterPayableAmount()));
+            totalLastYearDTO.setWaterReceivableAmount(totalLastYearDTO.getWaterReceivableAmount().add(totalYearDTO.getWaterReceivableAmount()));
+            totalLastYearDTO.setWaterAverageAmount(totalLastYearDTO.getWaterAverageAmount().add(totalYearDTO.getWaterAverageAmount()));
         }
         return result;
     }
@@ -1495,17 +1510,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void deleteEnergyMeterFormula(DeleteEnergyMeterFormulaCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), cmd.getFormulaId());
-        if (formula != null) {
-            // 查看当前公式是否被引用, 被引用则无法删除
-            EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(currNamespaceId(), formula.getId());
-            if (settingLog != null) {
-                LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
-                throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
-            } else {
-                meterFormulaProvider.deleteFormula(formula);
+        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_FORMULA.getCode() + cmd.getFormulaId()).tryEnter(() -> {
+            EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), cmd.getFormulaId());
+            if (formula != null) {
+                // 查看当前公式是否被引用, 被引用则无法删除
+                EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(currNamespaceId(), formula.getId());
+                if (settingLog != null) {
+                    LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
+                    throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+                } else {
+                    meterFormulaProvider.deleteFormula(formula);
+                }
             }
-        }
+        });
     }
 
     @Override
@@ -1606,12 +1623,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     public Timestamp getDayBegin( Calendar cal) {
 
-    	  cal.set(Calendar.HOUR_OF_DAY, 0);
-    	  cal.set(Calendar.SECOND, 0);
-    	  cal.set(Calendar.MINUTE, 0);
-    	  cal.set(Calendar.MILLISECOND, 001);
-    	  return new Timestamp(cal.getTimeInMillis());
-    	 }
+        cal.set(Calendar.HOUR_OF_DAY, 0);
+        cal.set(Calendar.SECOND, 0);
+        cal.set(Calendar.MINUTE, 0);
+        cal.set(Calendar.MILLISECOND, 001);
+        return new Timestamp(cal.getTimeInMillis());
+    }
 
     private void checkCurrentUserNotInOrg(Long orgId) {
         if (orgId == null) {
@@ -1646,257 +1663,257 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return UserContext.getCurrentNamespaceId();
     }
 
-	/**
-	 * 每天早上1点10分刷前一天的读表
-	 * */
-	@Scheduled(cron = "0 10 1 * * ?")
+    /**
+     * 每天早上1点10分刷前一天的读表
+     * */
+    @Scheduled(cron = "0 10 1 * * ?")
     public void caculateEnergyDayStat(){
-		//刷今天的
-		caculateEnergyDayStatByDate(DateHelper.currentGMTTime());
-	}
-		
-	@Override
-	public void caculateEnergyDayStatByDate(java.util.Date date){
-		//查出所有的表
-		List<EnergyMeter> meters = meterProvider.listEnergyMeters();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		Timestamp todayBegin = getDayBegin(cal);
-  	  	cal.add(Calendar.DAY_OF_MONTH, -1);
-  	  	Timestamp yesterdayBegin = getDayBegin(cal);
-  	  	cal.add(Calendar.DAY_OF_MONTH, -1);
-  	  	Timestamp dayBeforeYestBegin = getDayBegin(cal);
-		for(EnergyMeter meter : meters){
-			EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ;
-			//拿前天的度数
-			EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
-			EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,todayBegin);
-			/**读表用量差*/
-			BigDecimal amount = new BigDecimal(0);
+        //刷今天的
+        caculateEnergyDayStatByDate(DateHelper.currentGMTTime());
+    }
 
-			//默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
-			BigDecimal ReadingAnchor = meter.getStartReading();
-			BigDecimal dayLastReading = meter.getStartReading();
-			BigDecimal dayCurrReading = meter.getStartReading();
-			if(null != dayBeforeYestLastLog){
-				ReadingAnchor = dayBeforeYestLastLog.getReading();
-				dayLastReading =  dayBeforeYestLastLog.getReading();
-			}
+    @Override
+    public void caculateEnergyDayStatByDate(java.util.Date date){
+        //查出所有的表
+        List<EnergyMeter> meters = meterProvider.listEnergyMeters();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        Timestamp todayBegin = getDayBegin(cal);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        Timestamp yesterdayBegin = getDayBegin(cal);
+        cal.add(Calendar.DAY_OF_MONTH, -1);
+        Timestamp dayBeforeYestBegin = getDayBegin(cal);
+        for(EnergyMeter meter : meters){
+            EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ;
+            //拿前天的度数
+            EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
+            EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,todayBegin);
+            /**读表用量差*/
+            BigDecimal amount = new BigDecimal(0);
 
-			if(null != yesterdayLastLog){
-				dayCurrReading = yesterdayLastLog.getReading(); 
-			}
-			//拿出单个表前一天所有的读表记录
-			List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);
+            //默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
+            BigDecimal ReadingAnchor = meter.getStartReading();
+            BigDecimal dayLastReading = meter.getStartReading();
+            BigDecimal dayCurrReading = meter.getStartReading();
+            if(null != dayBeforeYestLastLog){
+                ReadingAnchor = dayBeforeYestLastLog.getReading();
+                dayLastReading =  dayBeforeYestLastLog.getReading();
+            }
+
+            if(null != yesterdayLastLog){
+                dayCurrReading = yesterdayLastLog.getReading();
+            }
+            //拿出单个表前一天所有的读表记录
+            List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);
 
 
-			Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
-			Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
-			//查看是否有换表,是否有归零
-			if(meterReadingLogs != null){
-				for(EnergyMeterReadingLog log : meterReadingLogs){
-	
-					//有归零 量程设置为最大值-锚点,锚点设置为0
-					if(log.getResetMeterFlag()!=null && TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
-						resetFlag = TrueOrFalseFlag.TRUE.getCode();
-						amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
-						ReadingAnchor = new BigDecimal(0);
-						dayStat.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
-					}
-					//有换表 量程加上旧表读数-锚点,锚点重置为新读数
-					if(log.getChangeMeterFlag() != null && TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
-						changeFlag = TrueOrFalseFlag.TRUE.getCode();
-						EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
-						amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
-						ReadingAnchor = changeLog.getNewReading();
-						dayStat.setChangeMeterFlag(TrueOrFalseFlag.TRUE.getCode());
-					}
-				}
-			}
-			//计算当天走了多少字 量程+昨天最后一次读数-锚点
-			amount = amount.add(dayCurrReading.subtract(ReadingAnchor));
-			//获取公式,计算当天的费用
-			EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
-			EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
-			EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
-			EnergyMeterSettingLog costSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
-			if(amountSetting == null || rateSetting == null || priceSetting == null || costSetting == null)
-				continue;
-			String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-			String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+            Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
+            Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
+            //查看是否有换表,是否有归零
+            if(meterReadingLogs != null){
+                for(EnergyMeterReadingLog log : meterReadingLogs){
 
-			ScriptEngineManager manager = new ScriptEngineManager();
-			ScriptEngine engine = manager.getEngineByName("js");
+                    //有归零 量程设置为最大值-锚点,锚点设置为0
+                    if(log.getResetMeterFlag()!=null && TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
+                        resetFlag = TrueOrFalseFlag.TRUE.getCode();
+                        amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
+                        ReadingAnchor = new BigDecimal(0);
+                        dayStat.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                    }
+                    //有换表 量程加上旧表读数-锚点,锚点重置为新读数
+                    if(log.getChangeMeterFlag() != null && TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
+                        changeFlag = TrueOrFalseFlag.TRUE.getCode();
+                        EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+                        amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
+                        ReadingAnchor = changeLog.getNewReading();
+                        dayStat.setChangeMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                    }
+                }
+            }
+            //计算当天走了多少字 量程+昨天最后一次读数-锚点
+            amount = amount.add(dayCurrReading.subtract(ReadingAnchor));
+            //获取公式,计算当天的费用
+            EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
+            EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
+            EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
+            EnergyMeterSettingLog costSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
+            if(amountSetting == null || rateSetting == null || priceSetting == null || costSetting == null)
+                continue;
+            String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+            String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
 
-			engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-			engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
-			engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+            ScriptEngineManager manager = new ScriptEngineManager();
+            ScriptEngine engine = manager.getEngineByName("js");
 
-			BigDecimal realAmount = new BigDecimal(0);
-			BigDecimal realCost = new BigDecimal(0);
+            engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+            engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+            engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
 
-			try {
-				realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
-				realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
-			} catch (ScriptException e) { 
-				e.printStackTrace();
-				  LOGGER.error("The energy meter error");
-		            throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
+            BigDecimal realAmount = new BigDecimal(0);
+            BigDecimal realCost = new BigDecimal(0);
 
-			}
-			//删除昨天的记录（手工刷的时候）
-			energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(),new Date(yesterdayBegin.getTime()));
-			//写数据库
-			
+            try {
+                realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
+                realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+            } catch (ScriptException e) {
+                e.printStackTrace();
+                LOGGER.error("The energy meter error");
+                throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
+
+            }
+            //删除昨天的记录（手工刷的时候）
+            energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(),new Date(yesterdayBegin.getTime()));
+            //写数据库
+
 //			dayStat.set
-			dayStat.setMeterId(meter.getId());
-			dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
-			dayStat.setMeterName(meter.getName());
-			dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
-			dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
-			dayStat.setMeterRate(rateSetting.getSettingValue());
-			dayStat.setMeterPrice(priceSetting.getSettingValue());
-			dayStat.setLastReading(dayLastReading);
-			dayStat.setCurrentReading(dayCurrReading);
-			dayStat.setCurrentAmount(realAmount);
-			dayStat.setCurrentCost(realCost);
-			dayStat.setResetMeterFlag(resetFlag);
-			dayStat.setChangeMeterFlag(changeFlag);
-			dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+            dayStat.setMeterId(meter.getId());
+            dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
+            dayStat.setMeterName(meter.getName());
+            dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
+            dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
+            dayStat.setMeterRate(rateSetting.getSettingValue());
+            dayStat.setMeterPrice(priceSetting.getSettingValue());
+            dayStat.setLastReading(dayLastReading);
+            dayStat.setCurrentReading(dayCurrReading);
+            dayStat.setCurrentAmount(realAmount);
+            dayStat.setCurrentCost(realCost);
+            dayStat.setResetMeterFlag(resetFlag);
+            dayStat.setChangeMeterFlag(changeFlag);
+            dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
 //			dayStat.setCreatorUid(UserContext.current().getUser().getId());
-			dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-					.getTime()));
-			energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
-		}
-	}
+            dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+                    .getTime()));
+            energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
+        }
+    }
 
-	/**
-	 * 每月1日  早上3点10分刷前一个月的读表
-	 * */
-	@Scheduled(cron = "0 10 3 1 * ?")
+    /**
+     * 每月1日  早上3点10分刷前一个月的读表
+     * */
+    @Scheduled(cron = "0 10 3 1 * ?")
     public void caculateEnergyMonthStat(){
-		caculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
-	}
-		
-	@Override
-	public void caculateEnergyMonthStatByDate(java.util.Date date){
-		//查出所有的表
-		List<EnergyMeter> meters = meterProvider.listEnergyMeters();
-		Calendar cal = Calendar.getInstance();
-		cal.setTime(date);
-		//减一个月取月末和月初
-  	  	cal.add(Calendar.MONTH, -1);
-  	  	cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
-  	  	Timestamp monthEnd = getDayBegin(cal);
-  	  	cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
-  	  	Timestamp monthBegin = getDayBegin(cal);
-  	  	cal.add(Calendar.YEAR, -1);
-  	  	Timestamp lastYear = getDayBegin(cal);
-		for(EnergyMeter meter : meters){
+        caculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+    }
 
-			//取月初的上次度数和月末的当前读数
-			EnergyDateStatistic monthEndStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(meter.getId(),new Date(monthEnd.getTime()));
-			EnergyMonthStatistic monthStat = ConvertHelper.convert(monthEndStat, EnergyMonthStatistic.class);
-			if(null == monthEndStat)
-				continue;
-			monthStat.setMeterId(meter.getId());
-			monthStat.setDateStr(monthSF.get().format(monthBegin));
-			EnergyDateStatistic monthBeginStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(meter.getId(),new Date(monthBegin.getTime()));
+    @Override
+    public void caculateEnergyMonthStatByDate(java.util.Date date){
+        //查出所有的表
+        List<EnergyMeter> meters = meterProvider.listEnergyMeters();
+        Calendar cal = Calendar.getInstance();
+        cal.setTime(date);
+        //减一个月取月末和月初
+        cal.add(Calendar.MONTH, -1);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        Timestamp monthEnd = getDayBegin(cal);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+        Timestamp monthBegin = getDayBegin(cal);
+        cal.add(Calendar.YEAR, -1);
+        Timestamp lastYear = getDayBegin(cal);
+        for(EnergyMeter meter : meters){
 
-			if(null == monthBeginStat)
-				continue;
-			monthStat.setLastReading(monthBeginStat.getLastReading());
-			//统计该表sum 用量和费用
-			monthStat.setCurrentAmount(energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
-			monthStat.setCurrentCost(energyDateStatisticProvider.getSumCostBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
-			//delete
-			energyMonthStatisticProvider.deleteEnergyMonthStatisticByDate(meter.getId(), monthSF.get().format(monthBegin));
-			//写数据库
+            //取月初的上次度数和月末的当前读数
+            EnergyDateStatistic monthEndStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(meter.getId(),new Date(monthEnd.getTime()));
+            EnergyMonthStatistic monthStat = ConvertHelper.convert(monthEndStat, EnergyMonthStatistic.class);
+            if(null == monthEndStat)
+                continue;
+            monthStat.setMeterId(meter.getId());
+            monthStat.setDateStr(monthSF.get().format(monthBegin));
+            EnergyDateStatistic monthBeginStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(meter.getId(),new Date(monthBegin.getTime()));
 
-			energyMonthStatisticProvider.createEnergyMonthStatistic(monthStat);
-		}
-		//总量记录表 -用sql汇总
-		List<EnergyCountStatistic> countStats = energyMonthStatisticProvider.listEnergyCountStatistic(monthSF.get().format(monthBegin));
-		if(null != countStats){
-			List<Long> comIds = new ArrayList<Long>();
-			for(EnergyCountStatistic cs : countStats){
+            if(null == monthBeginStat)
+                continue;
+            monthStat.setLastReading(monthBeginStat.getLastReading());
+            //统计该表sum 用量和费用
+            monthStat.setCurrentAmount(energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
+            monthStat.setCurrentCost(energyDateStatisticProvider.getSumCostBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
+            //delete
+            energyMonthStatisticProvider.deleteEnergyMonthStatisticByDate(meter.getId(), monthSF.get().format(monthBegin));
+            //写数据库
 
-				cs.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+            energyMonthStatisticProvider.createEnergyMonthStatistic(monthStat);
+        }
+        //总量记录表 -用sql汇总
+        List<EnergyCountStatistic> countStats = energyMonthStatisticProvider.listEnergyCountStatistic(monthSF.get().format(monthBegin));
+        if(null != countStats){
+            List<Long> comIds = new ArrayList<Long>();
+            for(EnergyCountStatistic cs : countStats){
+
+                cs.setStatus(EnergyCommonStatus.ACTIVE.getCode());
 //				cs.setCreatorUid(UserContext.current().getUser().getId());
-				cs.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-						.getTime()));
-				energyCountStatisticProvider.createEnergyCountStatistic(cs);
-				comIds.add(cs.getCommunityId());
-			}
-			//各项目月水电能耗情况-同比
-			for(Long comId : comIds){
-				Community com = communityProvider.findCommunityById(comId);
-				EnergyYoyStatistic yoy = new EnergyYoyStatistic();
-				yoy.setNamespaceId(com.getNamespaceId());
-				yoy.setCommunityId(com.getId());
-				yoy.setAreaSize(com.getAreaSize());
-				yoy.setDateStr(monthSF.get().format(monthBegin));
-				// 通过sql计算每一个值
-				//本月-水费-账单项目-应收
-				yoy.setWaterReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.WATER.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-				//本月-水费-账单项目-应付
-				yoy.setWaterPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.WATER.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-				
-				yoy.setWaterBurdenAmount(yoy.getWaterPayableAmount().subtract(yoy.getWaterReceivableAmount()));
-				yoy.setWaterAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterBurdenAmount().divide(new BigDecimal(com.getAreaSize())
-				, 3, RoundingMode.HALF_UP));
-				
+                cs.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+                        .getTime()));
+                energyCountStatisticProvider.createEnergyCountStatistic(cs);
+                comIds.add(cs.getCommunityId());
+            }
+            //各项目月水电能耗情况-同比
+            for(Long comId : comIds){
+                Community com = communityProvider.findCommunityById(comId);
+                EnergyYoyStatistic yoy = new EnergyYoyStatistic();
+                yoy.setNamespaceId(com.getNamespaceId());
+                yoy.setCommunityId(com.getId());
+                yoy.setAreaSize(com.getAreaSize());
+                yoy.setDateStr(monthSF.get().format(monthBegin));
+                // 通过sql计算每一个值
+                //本月-水费-账单项目-应收
+                yoy.setWaterReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.WATER.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+                //本月-水费-账单项目-应付
+                yoy.setWaterPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.WATER.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 
-				//本月-电费-账单项目-应收
-				yoy.setElectricReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-				//本月-电费-账单项目-应付
-				yoy.setElectricPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-				
-				yoy.setElectricBurdenAmount(yoy.getElectricPayableAmount().subtract(yoy.getElectricReceivableAmount()));
-				yoy.setElectricAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())
-				, 3, RoundingMode.HALF_UP));
-				
+                yoy.setWaterBurdenAmount(yoy.getWaterPayableAmount().subtract(yoy.getWaterReceivableAmount()));
+                yoy.setWaterAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+                        , 3, RoundingMode.HALF_UP));
 
 
-				//去年本月-水费-账单项目-应收
-				yoy.setWaterLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.WATER.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-				//去年本月-水费-账单项目-应付
-				yoy.setWaterLastPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.WATER.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-				
-				yoy.setWaterLastBurdenAmount(yoy.getWaterLastPayableAmount().subtract(yoy.getWaterLastReceivableAmount()));
-				yoy.setWaterLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
-				, 3, RoundingMode.HALF_UP));
+                //本月-电费-账单项目-应收
+                yoy.setElectricReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+                //本月-电费-账单项目-应付
+                yoy.setElectricPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(monthBegin),EnergyMeterType.ELECTRIC.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
 
-				
-				//去年本月-电费-账单项目-应收
-				yoy.setElectricLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.ELECTRIC.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
-				//去年本月-电费-账单项目-应付
-				yoy.setElectricLastPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.ELECTRIC.getCode()
-						,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
-				
-				yoy.setElectricLastBurdenAmount(yoy.getElectricLastPayableAmount().subtract(yoy.getElectricLastReceivableAmount()));
-				yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
-				, 3, RoundingMode.HALF_UP));
-				
+                yoy.setElectricBurdenAmount(yoy.getElectricPayableAmount().subtract(yoy.getElectricReceivableAmount()));
+                yoy.setElectricAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+                        , 3, RoundingMode.HALF_UP));
 
-				yoy.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+
+
+                //去年本月-水费-账单项目-应收
+                yoy.setWaterLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.WATER.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+                //去年本月-水费-账单项目-应付
+                yoy.setWaterLastPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.WATER.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+
+                yoy.setWaterLastBurdenAmount(yoy.getWaterLastPayableAmount().subtract(yoy.getWaterLastReceivableAmount()));
+                yoy.setWaterLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getWaterLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+                        , 3, RoundingMode.HALF_UP));
+
+
+                //去年本月-电费-账单项目-应收
+                yoy.setElectricLastReceivableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.ELECTRIC.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.RECEIVABLE.getCode()) );
+                //去年本月-电费-账单项目-应付
+                yoy.setElectricLastPayableAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear),EnergyMeterType.ELECTRIC.getCode()
+                        ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()) );
+
+                yoy.setElectricLastBurdenAmount(yoy.getElectricLastPayableAmount().subtract(yoy.getElectricLastReceivableAmount()));
+                yoy.setElectricLastAverageAmount(com.getAreaSize() == null ? new BigDecimal(0):yoy.getElectricLastBurdenAmount().divide(new BigDecimal(com.getAreaSize())
+                        , 3, RoundingMode.HALF_UP));
+
+
+                yoy.setStatus(EnergyCommonStatus.ACTIVE.getCode());
 //				yoy.setCreatorUid(UserContext.current().getUser().getId());
-				yoy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-						.getTime()));
-				energyYoyStatisticProvider.deleteEnergyYoyStatistic(yoy.getCommunityId(), yoy.getDateStr());
-				energyYoyStatisticProvider.createEnergyYoyStatistic(yoy);
-			}
-			
-		}
-		 
-	}
+                yoy.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+                        .getTime()));
+                energyYoyStatisticProvider.deleteEnergyYoyStatistic(yoy.getCommunityId(), yoy.getDateStr());
+                energyYoyStatisticProvider.createEnergyYoyStatistic(yoy);
+            }
+
+        }
+
+    }
 
     @Override
     public void syncEnergyMeterReadingLogIndex() {
