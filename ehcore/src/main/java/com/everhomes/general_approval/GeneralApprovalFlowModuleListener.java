@@ -3,6 +3,7 @@ package com.everhomes.general_approval;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.tools.ant.types.FileList.FileName;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -27,6 +28,7 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
+import com.everhomes.rest.general_approval.PostApprovalFormFileDTO;
 import com.everhomes.rest.general_approval.PostApprovalFormFileValue;
 import com.everhomes.rest.general_approval.PostApprovalFormImageValue;
 import com.everhomes.rest.general_approval.PostApprovalFormItem;
@@ -162,15 +164,15 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 							//TODO:工作流需要新增类型file
 							e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
 							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
-							if (null == fileValue || fileValue.getUris() ==null )
+							if (null == fileValue || fileValue.getFiles() ==null )
 								break;
 							List<FlowCaseFileDTO> files = new ArrayList<>();
-							for(String uriString : fileValue.getUris()){
+							for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
 								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-								String url = this.contentServerService.parserUri(uriString, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-								ContentServerResource resource = contentServerService.findResourceByUri(uriString);
+								String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
 								fileDTO.setUrl(url);
-								fileDTO.setFileName(StringUtils.isEmpty(resource.getResourceName())?"未命名":resource.getResourceName() );
+								fileDTO.setFileName(dto2.getFileName());
 								fileDTO.setFileSize(resource.getResourceSize());
 								files.add(fileDTO);
 							}

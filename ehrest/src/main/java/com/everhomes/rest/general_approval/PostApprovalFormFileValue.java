@@ -7,25 +7,18 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>uris: 文件的链接</li>
+ * <li>files: 文件列表<@link com.everhomes.rest.general_approval.PostApprovalFormFileDTO}</li>
  * </ul>
  * @author janson
  *
  */
 public class PostApprovalFormFileValue {
-	@ItemType(String.class)
-	private List<String> uris;
+	@ItemType(PostApprovalFormFileDTO.class)
+	private List<PostApprovalFormFileDTO> files;
 	
 	@ItemType(String.class)
 	private List<String> urls;
-
-	public List<String> getUris() {
-		return uris;
-	}
-
-	public void setUris(List<String> uris) {
-		this.uris = uris;
-	}
+ 
 
 	@Override
     public String toString() {
@@ -38,5 +31,13 @@ public class PostApprovalFormFileValue {
 
 	public void setUrls(List<String> urls) {
 		this.urls = urls;
+	}
+
+	public List<PostApprovalFormFileDTO> getFiles() {
+		return files;
+	}
+
+	public void setFiles(List<PostApprovalFormFileDTO> files) {
+		this.files = files;
 	}
 }
