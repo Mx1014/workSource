@@ -212,7 +212,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -605,6 +607,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 
 
+
 import com.alibaba.fastjson.JSONArray;
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.Role;
@@ -628,6 +631,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationJobPosition;
 import com.everhomes.organization.OrganizationJobPositionMap;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
@@ -965,8 +969,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 	        	
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-				if(group != null)
+				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+				if(group != null) {
 					dto.setGroupName(group.getName());
+					
+				} 
+				
+				if(position != null) {
+					if(dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-");
+					}
+					dto.setGroupName(dto.getGroupName() + position.getName());
+				}
 	        	
 	        	return dto;
 	        }).collect(Collectors.toList());
@@ -2109,9 +2123,19 @@ public class EquipmentServiceImpl implements EquipmentService {
         	dto.setQrCodeFlag(equipment.getQrCodeFlag());
         }
         
-    	Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
-		if(group != null)
+        Organization group = organizationProvider.findOrganizationById(task.getExecutiveGroupId());
+		OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(task.getPositionId());
+		if(group != null) {
 			dto.setGroupName(group.getName());
+			
+		} 
+		
+		if(position != null) {
+			if(dto.getGroupName() != null) {
+				dto.setGroupName(dto.getGroupName() + "-");
+			}
+			dto.setGroupName(dto.getGroupName() + position.getName());
+		}
     	
     	if(task.getExecutorId() != null && task.getExecutorId() != 0) {
         	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getExecutorId(), task.getOwnerId());
@@ -3118,6 +3142,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 					for(OrganizationJobPositionMap map : maps) {
 						ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
 						group.setGroupId(map.getOrganizationId());
+						group.setPositionId(map.getJobPositionId());
+						groupDtos.add(group);
+						
+						group.setGroupId(0L);
 						group.setPositionId(map.getJobPositionId());
 						groupDtos.add(group);
 					}

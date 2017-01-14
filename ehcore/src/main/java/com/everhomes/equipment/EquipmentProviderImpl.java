@@ -1776,8 +1776,32 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(
 			List<ExecuteGroupAndPosition> reviewGroups) {
-		// TODO Auto-generated method stub
-		return null;
+		final List<EquipmentInspectionStandardGroupMap> maps = new ArrayList<EquipmentInspectionStandardGroupMap>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class));
+ 
+        SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+       
+        Condition con = null;
+        if(reviewGroups != null) {
+			Condition con5 = null;
+			for(ExecuteGroupAndPosition executiveGroup : reviewGroups) {
+				Condition con4 = null; 
+				con4 = Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
+				con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
+				con5 = con5.or(con4);
+			}
+			con = con5;
+		}
+        
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(QualityGroupType.REVIEW_GROUP.getCode()));
+        query.addConditions(con);
+        query.fetch().map((r) -> {
+        	maps.add(ConvertHelper.convert(r, EquipmentInspectionStandardGroupMap.class));
+             return null;
+        });
+        
+       
+        return maps;
 	}
 
 }
