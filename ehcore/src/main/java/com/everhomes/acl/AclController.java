@@ -290,4 +290,17 @@ public class AclController extends ControllerBase {
         return response;
     }
 
+    /**
+     * <b>URL: /acl/listUserRelatedPrivilegeByModuleId</b>
+     * <p>获取用户模块权限</p>
+     */
+    @RequestMapping("listUserRelatedPrivilegeByModuleId")
+    @RestReturn(value=Long.class, collection = true)
+    public RestResponse listUserRelatedPrivilegeByModuleId(@Valid ListUserRelatedPrivilegeByModuleIdCommand cmd) {
+        RestResponse response = new RestResponse(rolePrivilegeService.listUserRelatedPrivilegeByModuleId(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
 }

@@ -569,9 +569,48 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return null;
 		});
 	}
-	
+
+	@Override
+	public List<Long> listUserRelatedPrivilegeByModuleId(ListUserRelatedPrivilegeByModuleIdCommand cmd){
+		return listUserPrivilegeByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.current().getUser().getId(), cmd.getModuleId());
+	}
 
 
+	@Override
+	public List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId){
+		List<Long> privilegeIds = getUserPrivileges(null ,organizationId, userId);
+		// 用户在当前机构自身权限
+		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId));
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+		groupTypes.add(OrganizationGroupType.GROUP.getCode());
+		List<OrganizationDTO> organizations = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
+		for (OrganizationDTO organization:organizations) {
+			privilegeIds.addAll(this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+		}
+
+		List<Long> pIds = new ArrayList<>();
+
+		List<ServiceModulePrivilege> moduleSuperPrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.SUPER);
+		for (ServiceModulePrivilege moduleSuperPrivilege:  moduleSuperPrivileges) {
+			if(privilegeIds.contains(moduleSuperPrivilege.getPrivilegeId())){
+				List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, null);
+				for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
+					pIds.add(modulePrivilege.getPrivilegeId());
+				}
+				return pIds;
+			}
+		}
+
+		List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.ORDINARY);
+		for (ServiceModulePrivilege modulePrivilege:  modulePrivileges) {
+			if(privilegeIds.contains(modulePrivilege.getPrivilegeId())){
+				pIds.add(modulePrivilege.getPrivilegeId());
+			}
+		}
+
+		return pIds;
+	}
 
 	 /**
      * 获取用户的权限列表
@@ -588,7 +627,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	List<Long> roleIds = new ArrayList<Long>();
     	for (RoleAssignment role : userRoles) {
-    		roleIds.add(role.getRoleId());
+			if(RoleConstants.BLACKLIST != role.getRoleId()){
+				roleIds.add(role.getRoleId());
+			}
 		}
 
 		List<Privilege> s = null;
