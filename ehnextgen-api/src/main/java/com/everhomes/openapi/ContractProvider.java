@@ -14,7 +14,7 @@ public interface ContractProvider {
 
 	List<Contract> listContract();
 
-	Contract findContractByNumber(Integer namespaceId, Long id, String contractNumber);
+	Contract findContractByNumber(Integer namespaceId, Long organizationId, String contractNumber);
 
 	void deleteContractByOrganizationName(Integer namespaceId, String name);
 
@@ -27,5 +27,7 @@ public interface ContractProvider {
 	List<Contract> listContractsByCreateDateRange(Timestamp minValue, Timestamp maxValue);
 
 	void deleteContract(Contract contract);
+
+	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId);
 
 }

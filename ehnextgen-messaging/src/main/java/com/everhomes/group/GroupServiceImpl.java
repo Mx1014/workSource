@@ -411,7 +411,11 @@ public class GroupServiceImpl implements GroupService {
 
             // join policy is not exposed current in API, derive it from its visibility flag
             if(privateFlag != 0) {
-                group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
+            	Integer joinPolicy = cmd.getJoinPolicy();
+            	if (joinPolicy == null) {
+            		joinPolicy = GroupJoinPolicy.NEED_APPROVE.getCode();
+				}
+                group.setJoinPolicy(joinPolicy);
                 
                 Acl acl = new Acl();
                 acl.setOwnerType(EntityType.GROUP.getCode());
@@ -1018,13 +1022,17 @@ public class GroupServiceImpl implements GroupService {
     
     @Override
     public void requestToJoinGroup(RequestToJoinGroupCommand cmd) {
-        User user = UserContext.current().getUser();
+    	createGroupMember(cmd, true);
+    }
+    
+    private void createGroupMember(RequestToJoinGroupCommand cmd, boolean needNotify) {
+    	User user = UserContext.current().getUser();
         Long userId = user.getId();
         
         Long groupId = cmd.getGroupId();
         Group group = checkGroupParameter(groupId, userId, "requestToJoinGroup");
         
-        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
+    	GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
         if(member == null) {
             member = new GroupMember();
             member.setCreatorUid(user.getId());
@@ -1049,11 +1057,13 @@ public class GroupServiceImpl implements GroupService {
             }
             
             // send notifications to applicant and other members
-            if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
-                sendGroupNotificationForReqToJoinGroupFreely(group, member);
-            } else {
-                sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
-            }
+            if (needNotify) {
+            	if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
+                    sendGroupNotificationForReqToJoinGroupFreely(group, member);
+                } else {
+                    sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
+                }
+			}
         } else {
             if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE) {
                 member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
@@ -1063,7 +1073,9 @@ public class GroupServiceImpl implements GroupService {
                 
                 GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                     EntityType.USER.getCode(), member.getInviterUid());
-                sendGroupNotificationForInviteToJoinGroupFreely(group, inviter, member);
+                if (needNotify) {
+                	sendGroupNotificationForInviteToJoinGroupFreely(group, inviter, member);
+				}
             }
             
             //俱乐部可以重复申请加入，这里只改变申请理由，其它不变, add by tt, 20161104
@@ -1072,7 +1084,9 @@ public class GroupServiceImpl implements GroupService {
                 member.setRequestorComment(cmd.getRequestText());
             	member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());  //有可能被拒绝了重复加入
             	groupProvider.updateGroupMember(member);
-            	sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
+            	if (needNotify) {
+            		sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
+				}
 			}
             
         }
@@ -4966,4 +4980,22 @@ public class GroupServiceImpl implements GroupService {
 			return null;
 		});
 	}
+
+	@Override
+	public GroupDTO createBusinessGroup(String groupName) {
+		CreateGroupCommand cmd = new CreateGroupCommand();
+		cmd.setName(groupName);
+		cmd.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+		cmd.setJoinPolicy(GroupJoinPolicy.FREE.getCode());
+		
+		return createGroup(cmd, null);
+	}
+
+	@Override
+	public void joinBusinessGroup(Long groupId) {
+		RequestToJoinGroupCommand cmd = new RequestToJoinGroupCommand();
+		cmd.setGroupId(groupId);
+		createGroupMember(cmd, false);
+	}
+	
 }

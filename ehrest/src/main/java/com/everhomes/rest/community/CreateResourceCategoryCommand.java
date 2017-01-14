@@ -24,6 +24,8 @@ public class CreateResourceCategoryCommand {
 
     private Long parentId;
 
+    private Byte type;
+
     public CreateResourceCategoryCommand() {
     }
 
@@ -57,6 +59,14 @@ public class CreateResourceCategoryCommand {
 
     public void setParentId(Long parentId) {
         this.parentId = parentId;
+    }
+
+    public Byte getType() {
+        return type;
+    }
+
+    public void setType(Byte type) {
+        this.type = type;
     }
 
     @Override

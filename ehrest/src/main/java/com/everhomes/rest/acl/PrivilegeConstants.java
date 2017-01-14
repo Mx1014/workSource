@@ -43,6 +43,8 @@ public interface PrivilegeConstants {
     public static final long COMPLETETASK = 332L; 
     public static final long CLOSETASK = 333L;
     public static final long REVISITTASK = 920L;
+    public static final long PM_TASK_MODULE = 10008L;
+
     
     // privileges defined by Notice module
     public static final long NoticeManagementPost = 200L;
@@ -69,6 +71,9 @@ public interface PrivilegeConstants {
 
     //管理员管理
     public static final long ADMIN_MANAGE = 10043L;
+
+    //普通管理员管理
+    public static final long ENTERPRISE_ADMIN_MANAGE = 10095L;
 
     //业务授权
     public static final long SERVICE_AUTHORIZATION = 10044L;
@@ -97,4 +102,7 @@ public interface PrivilegeConstants {
     //黑名单意见反馈论坛
     public static final long BLACKLIST_FEEDBACK_FORUM = 1008L;
 
+
+    //11开头是资源预约权限 
+    public static final long RENTAL_CHECK = 1101L; 
 }

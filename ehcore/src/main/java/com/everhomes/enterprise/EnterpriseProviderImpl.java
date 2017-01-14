@@ -700,4 +700,19 @@ public class EnterpriseProviderImpl implements EnterpriseProvider {
 		}
 		return enterpriseDetails.get(0);
 	}
+
+	@Override
+	public EnterpriseAddress findEnterpriseAddressByEnterpriseIdAndAddressId(Long enterpriseId, Long addressId) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_ENTERPRISE_ADDRESSES)
+			.where(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID.eq(enterpriseId))
+			.and(Tables.EH_ENTERPRISE_ADDRESSES.ADDRESS_ID.eq(addressId))
+			.fetchOne();
+		if (record != null) {
+			return ConvertHelper.convert(record, EnterpriseAddress.class);
+		}
+		return null;
+	}
+	
+	
 }

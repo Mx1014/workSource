@@ -23,15 +23,18 @@ import com.everhomes.rest.pmtask.CancelTaskCommand;
 import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
+import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
+import com.everhomes.rest.pmtask.GetUserRelatedAddressByCommunityResponse;
 import com.everhomes.rest.pmtask.GetUserRelatedAddressesByCommunityCommand;
 import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
+import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.CreateTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskCategoryCommand;
@@ -377,9 +380,9 @@ public class PmTaskController extends ControllerBase {
      * <p>根据园区/小区 获取用户相关的地址列表</p>
      */
     @RequestMapping("getUserRelatedAddressesByCommunity")
-    @RestReturn(value=GetUserRelatedAddressResponse.class)
+    @RestReturn(value=GetUserRelatedAddressByCommunityResponse.class)
     public RestResponse getUserRelatedAddressesByCommunity(GetUserRelatedAddressesByCommunityCommand cmd) {
-    	GetUserRelatedAddressResponse resp = pmTaskService.getUserRelatedAddressesByCommunity(cmd);
+    	GetUserRelatedAddressByCommunityResponse resp = pmTaskService.getUserRelatedAddressesByCommunity(cmd);
         RestResponse response = new RestResponse(resp);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
@@ -395,6 +398,20 @@ public class PmTaskController extends ControllerBase {
     public RestResponse searchTasks(SearchTasksCommand cmd) {
   	    SearchTasksResponse res = pmTaskService.searchTasks(cmd);
         RestResponse response = new RestResponse(res);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /pmtask/getNamespaceHandler</b>
+     * <p>搜索任务</p>
+     */
+    @RequestMapping("getNamespaceHandler")
+    @RestReturn(value=NamespaceHandlerDTO.class)
+    public RestResponse getNamespaceHandler(GetNamespaceHandlerCommand cmd) {
+    	NamespaceHandlerDTO dto = pmTaskService.getNamespaceHandler(cmd);
+        RestResponse response = new RestResponse(dto);
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

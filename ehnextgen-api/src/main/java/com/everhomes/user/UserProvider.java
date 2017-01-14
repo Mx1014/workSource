@@ -6,6 +6,7 @@ import java.util.List;
 import com.everhomes.aclink.AclinkUser;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.user.InvitationRoster;
@@ -98,4 +99,7 @@ public interface UserProvider {
      */
     List<User> findThirdparkUserByTokenAndType(Integer namespaceId, String userType, String userToken);
     List<User> listUserByNamespace(String keyword, Integer namespaceId, CrossShardListingLocator locator, int pageSize);
+	List<User> listUserByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize);
+	List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Integer pageSize);
+	Organization findAnyUserRelatedOrganization(Long id, Integer namespaceId);
 }

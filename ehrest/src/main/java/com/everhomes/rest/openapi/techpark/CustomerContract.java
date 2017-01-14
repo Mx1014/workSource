@@ -10,8 +10,17 @@ public class CustomerContract {
     private String contractEndDate;
     @ItemType(CustomerContractBuilding.class)
     private List<CustomerContractBuilding> buildings;
+    private Boolean dealed;
 
-    public String getContractNumber() {
+    public Boolean getDealed() {
+		return dealed;
+	}
+
+	public void setDealed(Boolean dealed) {
+		this.dealed = dealed;
+	}
+
+	public String getContractNumber() {
         return contractNumber;
     }
 

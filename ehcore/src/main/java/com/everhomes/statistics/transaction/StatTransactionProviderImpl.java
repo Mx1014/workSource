@@ -8,6 +8,8 @@ import java.util.List;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.DeleteQuery;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.tools.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,7 +19,9 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.statistics.transaction.PaidChannel;
+import com.everhomes.rest.statistics.transaction.SettlementStatTransactionPaidStatus;
 import com.everhomes.rest.statistics.transaction.StatServiceStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
@@ -271,12 +275,11 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
 		List<StatServiceSettlementResult> results = new ArrayList<StatServiceSettlementResult>();
 		Condition condition = Tables.EH_STAT_SETTLEMENTS.PAID_DATE.eq(date);
-		if(null == PaidChannel.fromCode(paidChannel)){
+		if(null != PaidChannel.fromCode(paidChannel)){
 			condition = condition.and(Tables.EH_STAT_SETTLEMENTS.PAID_CHANNEL.eq(paidChannel));
 		}
 		SelectQuery<EhStatSettlementsRecord> query = context.selectQuery(Tables.EH_STAT_SETTLEMENTS);
 		query.addConditions(condition);
-		
 		query.fetch().map((r) -> {
 			StatServiceSettlementResult statServiceSettlementResult = ConvertHelper.convert(r, StatServiceSettlementResult.class);
 			
@@ -424,7 +427,8 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_PAID_AMOUNT.sum(),
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.PAYMENT_CARD_REFUND_AMOUNT.sum(),
 				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_PAID_AMOUNT.sum(),
-				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum())
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_REFUND_AMOUNT.sum(),
+				Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.TOTAL_PAID_COUNT.sum())
 				.from(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS)
 				.where(condition)
 				.groupBy(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.SERVICE_TYPE)
@@ -646,4 +650,49 @@ public class StatTransactionProviderImpl implements StatTransactionProvider {
 		}
 		return results;
 	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<StatTransaction> listBusinessByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_STAT_TRANSACTIONS)
+				.where(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_STAT_TRANSACTIONS.CREATE_TIME.eq(new Timestamp(timestamp)))   //此表中update_time没用，所以使用create_time
+				.and(Tables.EH_STAT_TRANSACTIONS.PAID_STATUS.eq(SettlementStatTransactionPaidStatus.PAID.getCode()))
+				.and(Tables.EH_STAT_TRANSACTIONS.ID.gt(pageAnchor))
+				.orderBy(Tables.EH_STAT_TRANSACTIONS.ID.asc())
+				.limit(pageSize)
+				.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, StatTransaction.class));
+		}
+		return new ArrayList<StatTransaction>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<StatTransaction> listBusinessByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_STAT_TRANSACTIONS)
+			.where(Tables.EH_STAT_TRANSACTIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_STAT_TRANSACTIONS.PAID_STATUS.eq(SettlementStatTransactionPaidStatus.PAID.getCode()))
+			.and(Tables.EH_STAT_TRANSACTIONS.CREATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_STAT_TRANSACTIONS.CREATE_TIME.asc(), Tables.EH_STAT_TRANSACTIONS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, StatTransaction.class));
+		}
+		return new ArrayList<StatTransaction>();
+	}
+	
+	
+	
 }

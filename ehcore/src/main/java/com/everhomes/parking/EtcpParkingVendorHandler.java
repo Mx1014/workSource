@@ -22,8 +22,10 @@ import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.parking.CreateParkingRechargeOrderCommand;
 import com.everhomes.rest.parking.CreateParkingRechargeRateCommand;
 import com.everhomes.rest.parking.DeleteParkingRechargeRateCommand;
+import com.everhomes.rest.parking.GetOpenCardInfoCommand;
 import com.everhomes.rest.parking.ListCardTypeCommand;
 import com.everhomes.rest.parking.ListCardTypeResponse;
+import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
@@ -189,6 +191,12 @@ public class EtcpParkingVendorHandler implements ParkingVendorHandler {
 	@Override
 	public ParkingTempFeeDTO getParkingTempFee(String ownerType, Long ownerId,
 			Long parkingLotId, String plateNumber) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+
+	@Override
+	public OpenCardInfoDTO getOpenCardInfo(GetOpenCardInfoCommand cmd) {
 		// TODO Auto-generated method stub
 		return null;
 	}

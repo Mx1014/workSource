@@ -24,8 +24,10 @@ import com.everhomes.discover.RestReturn;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
@@ -53,7 +55,10 @@ import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
 import com.everhomes.rest.openapi.BizMessageType;
 import com.everhomes.rest.openapi.BusinessMessageCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
+import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
 import com.everhomes.rest.openapi.GetUserServiceAddressCommand;
+import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
 import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
 import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
 import com.everhomes.rest.openapi.UserCouponsCommand;
@@ -544,6 +549,20 @@ public class BusinessOpenController extends ControllerBase {
     }
     
     /**
+     * <b>URL: /openapi/listApartmentFloor</b>
+     * <p>根据小区Id、楼栋号和关键字查询楼层</p>
+     */
+    @RequestMapping("listApartmentFloor")
+    @RestReturn(value=ApartmentFloorDTO.class, collection=true)
+    public RestResponse listApartmentFloor(@Valid ListApartmentFloorCommand cmd) {
+        Tuple<Integer, List<ApartmentFloorDTO>> data = this.businessService.listApartmentFloor(cmd);
+        RestResponse response = new RestResponse(data.second());
+        response.setErrorCode(data.first());
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
      * <b>URL: /openapi/listApartmentsByKeyword</b>
      * <p>根据小区Id、楼栋号和关键字查询门牌</p>
      */
@@ -688,5 +707,28 @@ public class BusinessOpenController extends ControllerBase {
     	response.setErrorCode(ErrorCodes.SUCCESS);
     	response.setErrorDescription("OK");
     	return response;
+    }
+
+	/**
+	 * 
+	 * <p>创建电商拼单group</p>
+	 * <b>URL: /openapi/createBusinessGroup</b>
+	 */
+    @RequestMapping("createBusinessGroup")
+    @RestReturn(value=CreateBusinessGroupResponse.class)
+    public RestResponse createBusinessGroup(CreateBusinessGroupCommand cmd){
+    	return new RestResponse(businessService.createBusinessGroup(cmd));
+    }
+    
+	/**
+	 * 
+	 * <p>加入电商拼单group</p>
+	 * <b>URL: /openapi/joinBusinessGroup</b>
+	 */
+    @RequestMapping("joinBusinessGroup")
+    @RestReturn(value=String.class)
+    public RestResponse joinBusinessGroup(JoinBusinessGroupCommand cmd){
+    	businessService.joinBusinessGroup(cmd);
+    	return new RestResponse();
     }
 }

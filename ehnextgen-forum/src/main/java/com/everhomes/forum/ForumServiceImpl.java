@@ -3523,8 +3523,24 @@ public class ForumServiceImpl implements ForumService {
                 break;
             case REGION:
                 Organization organization = organizationProvider.findOrganizationById(regionId);
-                if(organization !=null)
-                	creatorNickName = creatorNickName + "@" + organization.getName();
+                // 根据产品姚绮云要求，当以公司名义发送时，使用公司所入驻的小区，而不是使用公司名称 by lqs 20161217
+//                if(organization !=null)
+//                	creatorNickName = creatorNickName + "@" + organization.getName();
+                if(organization !=null) {
+                	String regionName = organization.getName();
+                	Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+                    if(communityId != null) {
+                        community = communityProvider.findCommunityById(communityId);
+                        if(community != null) {
+                            regionName = community.getName();
+                        } else {
+                            LOGGER.error("Community not found, userId={}, communityId={}, , regionType={}, postId={}", userId, communityId, regionType, post.getId());
+                        }
+                    } else {
+                        LOGGER.error("No community id found in organization, organizationId={}", organization.getId());
+                    }
+                    creatorNickName = creatorNickName + "@" + regionName;
+                }
                 break;
             default:
                 LOGGER.error("Unsupported visible region type, userId=" + userId 

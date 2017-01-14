@@ -1359,6 +1359,23 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
+	public QualityInspectionSpecifications getSpecificationById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.eq(id));
+
+		List<QualityInspectionSpecifications> result = new ArrayList<QualityInspectionSpecifications>();
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, QualityInspectionSpecifications.class));
+			return null;
+		});
+		if(result.size()==0)
+			return null;
+
+		return result.get(0);
+	}
+
+	@Override
 	public void populateStandardsSpecifications(
 			List<QualityInspectionStandards> standards) {
 		if(standards == null || standards.size() == 0) {
@@ -1708,8 +1725,8 @@ public class QualityProviderImpl implements QualityProvider {
 		
 		query.fetch().map((r) -> {
 			Double totalScore = r.getValue("totalScore", Double.class);
-			QualityInspectionSpecifications parentSpecification = findSpecificationById(r.getValue(
-					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID), ownerType, ownerId);
+			QualityInspectionSpecifications parentSpecification = getSpecificationById(r.getValue(
+					Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID));
 			if(parentSpecification.getScore() < totalScore) {
 				score.setScore(parentSpecification.getScore());
 			} else {

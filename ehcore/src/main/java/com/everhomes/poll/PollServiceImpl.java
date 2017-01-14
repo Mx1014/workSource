@@ -147,9 +147,17 @@ public class PollServiceImpl implements PollService {
                 pollVote.setVoterUid(user.getId());
                 votes.add(pollVote);
                 //if addresses is not empty
-                if(user.getAddressId()!=null)
-                        //ensure all address is ok
-                    pollVote.setVoterFamilyId(familyProvider.findFamilyByAddressId(user.getAddressId()).getId());
+                if(user.getAddressId()!=null) {
+                	//ensure all address is ok
+                	Family family = familyProvider.findFamilyByAddressId(user.getAddressId());
+                
+                	//family要存在
+                	if(family != null) {
+                		pollVote.setVoterFamilyId(family.getId());
+                	}
+                    
+                }
+                        
                 pollProvider.createPollVote(pollVote);
                 item.setVoteCount(item.getVoteCount()+1);
                 //update poll item

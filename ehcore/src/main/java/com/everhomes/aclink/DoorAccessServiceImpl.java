@@ -46,6 +46,8 @@ import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.border.Border;
 import com.everhomes.border.BorderConnectionProvider;
 import com.everhomes.border.BorderProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
@@ -143,8 +145,10 @@ import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
+import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -169,7 +173,7 @@ import org.apache.commons.httpclient.util.DateUtil;
 
 @Component
 public class DoorAccessServiceImpl implements DoorAccessService {
-    private static final Logger LOGGER = LoggerFactory.getLogger(AesServerKeyProvider.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(DoorAccessServiceImpl.class);
     
     @Autowired
     BigCollectionProvider bigCollectionProvider;
@@ -257,6 +261,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     
     @Autowired
     private DoorUserPermissionProvider doorUserPermissionProvider;
+    
+    @Autowired
+    private CommunityProvider communityProvider;
     
     final Pattern npattern = Pattern.compile("\\d+");
     
@@ -1133,19 +1140,21 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             AesUserKeyDTO dto = new AesUserKeyDTO();
             
             if(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-                if(auth.getRightOpen().equals((byte)0)) {
-                    //Not has right
-                    continue;
-                } else if(auth.getRightVisitor().equals((byte)1)) {
+            
+            	if(auth.getRightOpen().equals((byte)0)) {
+            		//Not has right
+                	continue;
+               } else if(auth.getRightVisitor().equals((byte)1)) {
                         //有访客授权权限
                     dto.setKeyType(AesUserKeyType.ADMIN.getCode());   
-                } else {
-                    //普通用户权限
-                 dto.setKeyType(AesUserKeyType.NORMAL.getCode());   
-                }
+               } else {
+                    	//普通用户权限
+            	   dto.setKeyType(AesUserKeyType.NORMAL.getCode());
+                 	}
+            	
             } else {
                 dto.setKeyType(AesUserKeyType.TEMP.getCode());
-            }
+                }
             
             dto.setCreateTimeMs(auth.getCreateTime().getTime());
             dto.setCreatorUid(user.getId());
@@ -1487,7 +1496,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         Long lastTick = updateDoorAccessLastTick(resp.getId());
         //generate a time message
-        if( (lastTick+5*60*1000) < System.currentTimeMillis() ) {
+        if( (lastTick+15*1000) < System.currentTimeMillis() ) {
             return msgGenerator.generateTimeMessage(resp.getId());
         }
         
@@ -2375,7 +2384,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         if(borders.get(0).getPublicPort().equals(443)) {
             borderUrl = "wss://" + borderUrl + "/aclink";
         } else {
-            borderUrl = "ws://" + borderUrl + ":" + borders.get(0).getPublicAddress() + "/aclink";
+            borderUrl = "ws://" + borderUrl + ":" + borders.get(0).getPublicPort() + "/aclink";
         }
         
         AesServerKey aesServerKey = aesServerKeyService.getCurrentAesServerKey(cmd.getDoorId());
@@ -2703,6 +2712,83 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         resp.setDtos(dtos);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
+    }
+    
+    private void deleteAllAuths(Integer namespaceId, Long orgId, Long userId) {
+		ListingLocator locator = new ListingLocator();
+		int count = 100;
+		List<DoorAuth> doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, null, null, count);
+		if(doorAuths == null || doorAuths.size() == 0) {
+			LOGGER.info("deleteAllAuths. doorAuths not found, orgId=" + orgId + " userId=" + userId);
+			return;
+		}
+		
+		do {
+			List<DoorAuth> dels = new ArrayList<DoorAuth>();
+			for(DoorAuth doorAuth : doorAuths) {
+				DoorAccessOwnerType ownerType = DoorAccessOwnerType.fromCode(doorAuth.getOwnerType());
+				
+				if(ownerType == DoorAccessOwnerType.COMMUNITY) {
+					Community c = communityProvider.findCommunityById(doorAuth.getOwnerId());
+					if(c != null && c.getNamespaceId().equals(namespaceId)) {
+						doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+						dels.add(doorAuth);
+					}
+				} else if(ownerType == DoorAccessOwnerType.ENTERPRISE) {
+					Organization org = organizationProvider.findOrganizationById(doorAuth.getOwnerId());
+					if(org != null && org.getNamespaceId().equals(namespaceId)) {
+						doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+						dels.add(doorAuth);
+					}
+				}
+			}
+			
+			if(dels.size() > 0) {
+				doorAuthProvider.updateDoorAuth(dels);
+			}
+			
+			if(locator.getAnchor() != null) {
+				doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, null, null, count);	
+			}
+			
+		} while (doorAuths != null && doorAuths.size() > 0 && locator.getAnchor() != null);
+    }
+    
+    @Override
+    public void deleteAuthWhenLeaveFromOrg(Integer namespaceId, Long orgId, Long userId) {
+    	ListUserRelatedOrganizationsCommand cmd = new ListUserRelatedOrganizationsCommand();
+    	User user = userProvider.findUserById(userId);
+        if(null == user){
+            LOGGER.info("user is null orgId=" + orgId + " userId=" + userId);
+            return;
+        }
+    	List<OrganizationSimpleDTO> dtos = organizationService.listUserRelateOrgs(cmd, user);
+    	if(dtos.isEmpty()) {
+    		deleteAllAuths(namespaceId, orgId, userId);
+    		LOGGER.info("delete all auths orgId=" + orgId + " userId=" + userId);
+    	} else {
+    		ListingLocator locator = new ListingLocator();
+    		int count = 100;
+    		List<DoorAuth> doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, orgId, DoorAccessOwnerType.ENTERPRISE.getCode(), count);
+    		if(doorAuths == null || doorAuths.size() == 0) {
+    			LOGGER.info("has more orgs. doorAuths not found, orgId=" + orgId + " userId=" + userId);
+    			return;
+    		}
+    		
+    		do {
+    			for(DoorAuth doorAuth : doorAuths) {
+    				doorAuth.setStatus(DoorAuthStatus.INVALID.getCode());
+    			}
+    			doorAuthProvider.updateDoorAuth(doorAuths);
+    		
+    			if(locator.getAnchor() != null) {
+    				doorAuths = doorAuthProvider.queryValidDoorAuths(locator, userId, orgId, DoorAccessOwnerType.ENTERPRISE.getCode(), count);	
+    			}
+    			
+    		} while (doorAuths != null && doorAuths.size() > 0 && locator.getAnchor() != null);
+    	}
+    	
+    	LOGGER.info("delete all auths ok! orgId=" + orgId + " userId=" + userId);
     }
     
     @Override

@@ -49,6 +49,7 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
     public EnergyMeterCategory findByName(Integer namespaceId, String name) {
         return context().selectFrom(EH_ENERGY_METER_CATEGORIES)
                 .where(EH_ENERGY_METER_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+                .and(EH_ENERGY_METER_CATEGORIES.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_CATEGORIES.NAME.eq(name))
                 .fetchAnyInto(EnergyMeterCategory.class);
     }
@@ -77,6 +78,11 @@ public class EnergyMeterCategoryProviderImpl implements EnergyMeterCategoryProvi
         category.setUpdateUid(UserContext.current().getUser().getId());
         category.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         rwDao().update(category);
+    }
+
+    @Override
+    public void deleteEnergyMeterCategory(EnergyMeterCategory category) {
+        rwDao().delete(category);
     }
 
     private DSLContext context() {

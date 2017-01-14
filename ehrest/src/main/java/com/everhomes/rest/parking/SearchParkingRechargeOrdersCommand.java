@@ -25,7 +25,7 @@ public class SearchParkingRechargeOrdersCommand {
     private String plateOwnerName;
 //    private String plateOwnerPhone;
     private String payerPhone;
-//    private String paidType;
+    private String paidType;
 //    private Byte rechargeStatus;
     private Long startDate;
     private Long endDate;
@@ -127,6 +127,14 @@ public class SearchParkingRechargeOrdersCommand {
 
 	public void setRechargeType(Byte rechargeType) {
 		this.rechargeType = rechargeType;
+	}
+
+	public String getPaidType() {
+		return paidType;
+	}
+
+	public void setPaidType(String paidType) {
+		this.paidType = paidType;
 	}
 
 }

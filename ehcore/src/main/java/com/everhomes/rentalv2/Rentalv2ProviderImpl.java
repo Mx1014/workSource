@@ -22,6 +22,7 @@ import org.jooq.Record;
 import org.jooq.Record1;
 import org.jooq.Record2;
 import org.jooq.Record4;
+import org.jooq.Result;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOnConditionStep;
 import org.jooq.UpdateConditionStep;
@@ -37,9 +38,11 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.rentalv2.DateLength;
 import com.everhomes.rest.rentalv2.RentalSiteStatus;
 import com.everhomes.rest.rentalv2.RentalType;
+import com.everhomes.rest.rentalv2.ResourceOrderStatus;
 import com.everhomes.rest.rentalv2.SiteBillStatus;
 import com.everhomes.rest.rentalv2.VisibleFlag;
 import com.everhomes.sequence.SequenceProvider;
@@ -90,6 +93,8 @@ import com.everhomes.server.schema.tables.records.EhRentalv2ResourceTypesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2ResourcesRecord;
 import com.everhomes.server.schema.tables.records.EhRentalv2TimeIntervalRecord;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.RecordHelper;
 
 @Component
 public class Rentalv2ProviderImpl implements Rentalv2Provider {
@@ -353,6 +358,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2OrdersRecord record = ConvertHelper.convert(rentalBill,
 				EhRentalv2OrdersRecord.class);
+		record.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		InsertQuery<EhRentalv2OrdersRecord> query = context
 				.insertQuery(Tables.EH_RENTALV2_ORDERS);
 		query.setRecord(record);
@@ -629,7 +635,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		UpdateConditionStep<EhRentalv2OrdersRecord> step = context
 				.update(Tables.EH_RENTALV2_ORDERS)
 				.set(Tables.EH_RENTALV2_ORDERS.STATUS,
-						SiteBillStatus.FAIL.getCode()).where(condition);
+						SiteBillStatus.FAIL.getCode())
+				.set(Tables.EH_RENTALV2_ORDERS.OPERATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+				.where(condition);
 		step.execute();
 
 	}
@@ -773,6 +781,10 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(siteRuleId);
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.REFUNDED.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.REFUNDING.getCode()));
 
 		return step.where(condition).fetchOneInto(Double.class);
 	}
@@ -901,6 +913,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
         	condition=condition.and(Tables.EH_RENTALV2_RESOURCES.COMMUNITY_ID.eq(communityId));
 		if(null!= status&&status.size()!=0)
 			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.in(status));
+		else
+			condition = condition.and(Tables.EH_RENTALV2_RESOURCES.STATUS.ne(RentalSiteStatus.DISABLE.getCode()));
 		step.where(condition);
 
 		List<RentalResource> result = step
@@ -919,6 +933,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		UpdateConditionStep<EhRentalv2OrdersRecord> step = context
 				.update(Tables.EH_RENTALV2_ORDERS)
 				.set(Tables.EH_RENTALV2_ORDERS.INVOICE_FLAG, invoiceFlag)
+				.set(Tables.EH_RENTALV2_ORDERS.OPERATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
 				.where(condition);
 
 		return step.execute();
@@ -938,6 +953,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		assert (ordeMap.getId() == null);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhRentalv2OrderPayorderMapDao dao = new EhRentalv2OrderPayorderMapDao(context.configuration());
+		
 		dao.update(ordeMap);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhRentalv2OrderPayorderMap.class,
 				ordeMap.getId());
@@ -950,7 +966,9 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		UpdateConditionStep<EhRentalv2OrdersRecord> step = context
 				.update(Tables.EH_RENTALV2_ORDERS)
 				.set(Tables.EH_RENTALV2_ORDERS.VISIBLE_FLAG,
-						VisibleFlag.UNVISIBLE.getCode()).where(condition);
+						VisibleFlag.UNVISIBLE.getCode())
+				.set(Tables.EH_RENTALV2_ORDERS.OPERATE_TIME, new Timestamp(DateHelper.currentGMTTime().getTime()))
+				.where(condition);
 		step.execute();
 	}
 
@@ -998,8 +1016,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		Condition condition = Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID
 				.equal(id);
-//		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-//				.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_RESOURCE_ORDERS.STATUS
+				.ne(ResourceOrderStatus.DISPLOY.getCode()));
 		step.where(condition);
 		List<RentalResourceOrder> result  = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -1115,6 +1133,24 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return result ;
 		return null;
 	}
+	@Override
+	public List<RentalOrder> listSuccessRentalBills() {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context.select().from(
+				Tables.EH_RENTALV2_ORDERS);
+		//TODO：
+		Condition condition = Tables.EH_RENTALV2_ORDERS.STATUS
+				.eq(SiteBillStatus.SUCCESS.getCode()); 
+		step.where(condition);
+		List<RentalOrder> result = step
+				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+				});
+		if (null != result && result.size() > 0)
+			return result ;
+		return null;
+	}
+	
 //
 //	@Override
 //	public void createRentalRule(RentalRule rentalRule) {
@@ -1900,8 +1936,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		}
 		return priceToString(minPrice,rentalType,timeStep)+"~" +priceToString(maxPrice,rentalType,timeStep);
 	}
-
-
+ 
 	private boolean isInteger(double d){
 		double eps = 0.0001;
 		return Math.abs(d - (double)((int)d)) < eps;
@@ -1919,7 +1954,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 			return "￥"+price.toString()+"/"+(isInteger(timeStep.doubleValue())?timeStep.intValue():timeStep)+"小时";
 		return "";
 	}
-
+ 
 	@Override
 	public void deleteRentalCellsByResourceId(Long rentalSiteId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1929,6 +1964,52 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.equal(rentalSiteId);
 		step.where(condition);
 		step.execute();
+	} 
+
+	/**
+	 * 金地同步数据使用
+	 */
+	@Override
+	public List<RentalOrder> listSiteRentalByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_RENTALV2_ORDERS.fields()).from(Tables.EH_RENTALV2_ORDERS)
+			.join(Tables.EH_ORGANIZATIONS)
+			.on(Tables.EH_RENTALV2_ORDERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_RENTALV2_ORDERS.OPERATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.SUCCESS.getCode(), SiteBillStatus.COMPLETE.getCode(), SiteBillStatus.OVERTIME.getCode()))
+			.and(Tables.EH_RENTALV2_ORDERS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_RENTALV2_ORDERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, RentalOrder.class));
+		}
+		return new ArrayList<RentalOrder>();
+	}
+
+	/**
+	 * 金地同步数据使用
+	 */
+	@Override
+	public List<RentalOrder> listSiteRentalByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_RENTALV2_ORDERS.fields()).from(Tables.EH_RENTALV2_ORDERS)
+			.join(Tables.EH_ORGANIZATIONS)
+			.on(Tables.EH_RENTALV2_ORDERS.ORGANIZATION_ID.eq(Tables.EH_ORGANIZATIONS.ID))
+			.and(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_RENTALV2_ORDERS.OPERATE_TIME.gt(new Timestamp(timestamp)))
+			.and(Tables.EH_RENTALV2_ORDERS.STATUS.in(SiteBillStatus.SUCCESS.getCode(), SiteBillStatus.COMPLETE.getCode(), SiteBillStatus.OVERTIME.getCode()))
+			.orderBy(Tables.EH_RENTALV2_ORDERS.OPERATE_TIME.asc(), Tables.EH_RENTALV2_ORDERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, RentalOrder.class));
+		}
+		return new ArrayList<RentalOrder>();
 	}
  
 	

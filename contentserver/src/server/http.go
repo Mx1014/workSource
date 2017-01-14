@@ -107,6 +107,7 @@ func serveImageUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 		return 500, err
 	}
 
+	totalSize := len(data)
 	s.context.Logger.Info("serve image data:%d", len(data))
 
 	info, err := s.imageStorage.InfoImageFromData(data)
@@ -124,6 +125,7 @@ func serveImageUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	//Now the field of Md5 is a key from image storage
 	obj.Md5 = md5
 	obj.Filename = header.Filename
+	obj.TotalSize = totalSize
 	rsp, errcode, err = s.auth.Created(s, obj)
 	if err != nil {
 		return errcode, err
@@ -447,6 +449,7 @@ func serveAudioUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 		return 500, err
 	}
 
+	totalSize := len(data)
 	data_md5 := gen_md5_str(data)
 	md5, err := s.audioStorage.SaveAudio(data_md5, data, format)
 	if err != nil {
@@ -459,6 +462,7 @@ func serveAudioUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (i
 	}
 
 	obj.Md5 = md5
+	obj.TotalSize = totalSize
 	rsp, errcode, err = s.auth.Created(s, obj)
 	if err != nil {
 		return errcode, err
@@ -755,11 +759,14 @@ func serveFileUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (in
 		return 500, err
 	}
 
+	totalSize := len(data)
 	md5 := gen_md5_str(data)
 	meta := make(map[string]string)
 	meta["filename"] = header.Filename
+	obj.Filename = header.Filename
 	obj.Format = filepath.Ext(header.Filename)
 	obj.Md5, err = s.fileStorage.SaveFile(md5, data, len(data), len(data), meta)
+	obj.TotalSize = totalSize
 	if err != nil {
 		return http.StatusForbidden, err
 	}

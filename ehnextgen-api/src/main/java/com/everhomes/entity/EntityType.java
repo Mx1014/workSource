@@ -46,7 +46,13 @@ public enum EntityType {
     IMPERSONATION(EhUserImpersonations.class.getSimpleName()),
     SACATEGORY(EhServiceAllianceCategories.class.getSimpleName()),
     ROLE(EhAclRoles.class.getSimpleName()),
-    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName());
+    RESOURCE_CATEGORY(EhResourceCategories.class.getSimpleName()),
+    PARKING_CARD_REQUEST(EhParkingCardRequests.class.getSimpleName()),
+    PARKING_LOT(EhParkingLots.class.getSimpleName()),
+    PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
+    ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
+    PM_TASK(EhPmTasks.class.getSimpleName());
+
     private String code;
     
     private EntityType(String code) {
@@ -94,7 +100,11 @@ public enum EntityType {
         else if(code.equalsIgnoreCase(IMPERSONATION.getCode())) {
             return IMPERSONATION;
         }
-        
+        for (EntityType entityType : EntityType.values()) {
+            if (entityType.getCode().equals(code)) {
+                return entityType;
+            }
+        }
         return null;
     }
 }

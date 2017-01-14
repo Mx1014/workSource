@@ -1,18 +1,5 @@
 package com.everhomes.techpark.expansion;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.DeleteQuery;
-import org.jooq.SelectQuery;
-import org.jooq.UpdateQuery;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -29,13 +16,17 @@ import com.everhomes.server.schema.tables.daos.EhLeasePromotionsDao;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotionAttachments;
 import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
-import com.everhomes.server.schema.tables.records.EhEnterpriseAddressesRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseDetailsRecord;
-import com.everhomes.server.schema.tables.records.EhEnterpriseOpRequestsRecord;
-import com.everhomes.server.schema.tables.records.EhLeasePromotionAttachmentsRecord;
-import com.everhomes.server.schema.tables.records.EhLeasePromotionsRecord;
+import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+import org.jooq.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Component
 public class EnterpriseApplyEntryProviderImpl implements
@@ -101,24 +92,25 @@ public class EnterpriseApplyEntryProviderImpl implements
 		}
 		
 		if(null != locator.getAnchor()){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(locator.getAnchor()));
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.le(locator.getAnchor()));
 		}
 		
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 		query.addConditions(cond);
+        query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
 		query.addLimit(pageSize);
 		query.fetch().map((r) -> {
 			enterpriseOpRequests.add(ConvertHelper.convert(r, EnterpriseOpRequest.class));
 			return null;
 		});
-		
-		if(enterpriseOpRequests.size() >= pageSize) {
-			enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+
+        if (enterpriseOpRequests.size() >= pageSize) {
             locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
-		}
-		
-		
-		return enterpriseOpRequests;
+            enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return enterpriseOpRequests;
 	}
 
 	@Override

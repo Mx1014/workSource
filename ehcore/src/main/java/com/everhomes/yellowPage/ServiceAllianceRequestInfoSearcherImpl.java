@@ -8,7 +8,9 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.rest.yellowPage.*;
 import com.everhomes.user.CustomRequestConstants;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
@@ -35,9 +37,6 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.wifi.WifiOwnerType;
-import com.everhomes.rest.yellowPage.RequestInfoDTO;
-import com.everhomes.rest.yellowPage.SearchRequestInfoCommand;
-import com.everhomes.rest.yellowPage.SearchRequestInfoResponse;
 import com.everhomes.search.AbstractElasticSearch;
 import com.everhomes.search.SearchUtils;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
@@ -74,8 +73,28 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         syncFromReservationRequestsDb(pageSize);
         syncFromSettleRequestInfoSearcherDb(pageSize);
         syncFromServiceAllianceApartmentRequestsDb(pageSize);
-		
+        syncFromServiceAllianceInvestRequestsDb(pageSize);
+
 	}
+
+    private void syncFromServiceAllianceInvestRequestsDb(int pageSize) {
+
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        for(;;) {
+            List<ServiceAllianceInvestRequests> requests = yellowPageProvider.listInvestRequests(locator, pageSize);
+
+            if(requests.size() > 0) {
+                this.bulkUpdateServiceAllianceInvestRequests(requests);
+            }
+
+            if(locator.getAnchor() == null) {
+                break;
+            }
+        }
+
+        LOGGER.info("sync for service alliance apartment request ok");
+
+    }
 
     private void syncFromServiceAllianceApartmentRequestsDb(int pageSize) {
 
@@ -158,6 +177,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (ServiceAllianceRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.SERVICE_ALLIANCE_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance request id:" + request.getId()+"-EhServiceAllianceRequests");
@@ -173,11 +193,33 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	}
 
     @Override
+    public void bulkUpdateServiceAllianceInvestRequests(List<ServiceAllianceInvestRequests> requests) {
+        BulkRequestBuilder brb = getClient().prepareBulk();
+        for (ServiceAllianceInvestRequests request : requests) {
+            ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
+            requestInfo.setTemplateType(CustomRequestConstants.INVEST_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
+            XContentBuilder source = createDoc(requestInfo);
+            if(null != source) {
+                LOGGER.info("service alliance invest request id:" + request.getId()+"-EhServiceAllianceInvestRequests");
+                brb.add(Requests.indexRequest(getIndexName()).type(getIndexType())
+                        .id(request.getId()+"-EhServiceAllianceInvestRequests").source(source));
+            }
+
+        }
+        if (brb.numberOfActions() > 0) {
+            brb.execute().actionGet();
+        }
+
+    }
+
+    @Override
     public void bulkUpdateServiceAllianceApartmentRequests(List<ServiceAllianceApartmentRequests> requests) {
         BulkRequestBuilder brb = getClient().prepareBulk();
         for (ServiceAllianceApartmentRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.APARTMENT_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("service alliance apartment request id:" + request.getId() + "-EhServiceAllianceApartmentRequests");
@@ -197,6 +239,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (SettleRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.SETTLE_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("settle request id:" + request.getId() + "-EhSettleRequests");
@@ -217,6 +260,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
         for (ReservationRequests request : requests) {
             ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
             requestInfo.setTemplateType(CustomRequestConstants.RESERVE_REQUEST_CUSTOM);
+            requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
             XContentBuilder source = createDoc(requestInfo);
             if(null != source) {
                 LOGGER.info("reserve request id:" + request.getId() + "-" + request.getTemplateType());
@@ -304,16 +348,94 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 		return response;
 	}
 
-	private XContentBuilder createDoc(ServiceAllianceRequestInfo request){
+    @Override
+    public SearchRequestInfoResponse searchOneselfRequestInfo(SearchOneselfRequestInfoCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+        QueryBuilder qb = null;
+
+        FilterBuilder fb = FilterBuilders.termFilter("type", cmd.getType());
+        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("creatorUid", UserContext.current().getUser().getId()));
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
+        
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("ServiceAllianceRequestInfoSearcherImpl query builder ："+builder);
+
+        SearchResponse rsp = builder.execute().actionGet();
+        SearchRequestInfoResponse response = new SearchRequestInfoResponse();
+        List<RequestInfoDTO> dtos = getDTOs(rsp);
+
+        if(dtos.size() > pageSize){
+            response.setNextPageAnchor(anchor+1);
+            dtos.remove(dtos.size() - 1);
+        }
+
+        response.setDtos(dtos);
+
+        return response;
+    }
+
+    @Override
+    public SearchRequestInfoResponse searchOrgRequestInfo(SearchOrgRequestInfoCommand cmd) {
+        SearchRequestBuilder builder = getClient().prepareSearch(getIndexName()).setTypes(getIndexType());
+
+        QueryBuilder qb = null;
+
+        FilterBuilder fb = FilterBuilders.termFilter("creatorOrganizationId", cmd.getOrgId());
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long anchor = 0l;
+        if(cmd.getPageAnchor() != null) {
+            anchor = cmd.getPageAnchor();
+        }
+
+        qb = QueryBuilders.filteredQuery(qb, fb);
+        builder.setSearchType(SearchType.QUERY_THEN_FETCH);
+        builder.setFrom(anchor.intValue() * pageSize).setSize(pageSize + 1);
+        builder.setQuery(qb);
+        builder.addSort(SortBuilders.fieldSort("createTime").order(SortOrder.DESC).ignoreUnmapped(true));
+
+        if(LOGGER.isDebugEnabled())
+            LOGGER.info("ServiceAllianceRequestInfoSearcherImpl query builder ："+builder);
+
+        SearchResponse rsp = builder.execute().actionGet();
+        SearchRequestInfoResponse response = new SearchRequestInfoResponse();
+        List<RequestInfoDTO> dtos = getDTOs(rsp);
+
+        if(dtos.size() > pageSize){
+            response.setNextPageAnchor(anchor+1);
+            dtos.remove(dtos.size() - 1);
+        }
+
+        response.setDtos(dtos);
+
+        return response;
+    }
+
+    private XContentBuilder createDoc(ServiceAllianceRequestInfo request){
 		try {
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
+            b.field("jumpType", request.getJumpType());
             b.field("templateType", request.getTemplateType());
             b.field("type", request.getType());
             b.field("ownerType", request.getOwnerType());
             b.field("ownerId", request.getOwnerId());
             b.field("creatorName", request.getCreatorName());
+            b.field("creatorOrganizationId", request.getCreatorOrganizationId());
             b.field("creatorMobile", request.getCreatorMobile());
             b.field("createTime", request.getCreateTime().getTime());
+            b.field("creatorUid", request.getCreatorUid());
             String d = format.format(request.getCreateTime().getTime());  
             try {
 				Date date=format.parse(d);
@@ -363,6 +485,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
                 String day = format.format(time);
             	dto.setCreateTime(day);
             	
+            	dto.setJumpType(SearchUtils.getLongField(source.get("jumpType")));
             	dtos.add(dto);
             }
             catch(Exception ex) {

@@ -6,11 +6,17 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
-import com.everhomes.server.schema.tables.daos.EhActivityCategoriesDao;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.daos.*;
+import com.everhomes.server.schema.tables.pojos.*;
+import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
 import org.slf4j.Logger;
@@ -30,30 +36,22 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
-import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
-import com.everhomes.server.schema.tables.pojos.EhActivities;
-import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
-import com.everhomes.server.schema.tables.pojos.EhUserIdentifiers;
-import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityCategoriesRecord;
-import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
-import com.everhomes.server.schema.tables.records.EhServiceAllianceCategoriesRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserProfile;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-import com.everhomes.yellowPage.ServiceAllianceCategories;
 import com.mysql.jdbc.StringUtils;
 
 @Component
@@ -74,6 +72,9 @@ public class ActivityProviderImpl implements ActivityProivider {
     
     @Autowired
     private CoordinationProvider coordinationProvider;
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
     
     @Override
     public void createActity(Activity activity) {
@@ -84,6 +85,8 @@ public class ActivityProviderImpl implements ActivityProivider {
         if (activity.getOfficialFlag() == null) {
 			activity.setOfficialFlag(OfficialFlag.NO.getCode());
 		}
+        activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
     }
@@ -146,6 +149,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     public void updateActivity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, activity.getId()));
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
+        activity.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(activity);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
     }
@@ -198,6 +202,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, createRoster.getActivityId()));
         EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
         createRoster.setId(id);
+        createRoster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.insert(createRoster);
     }
 
@@ -379,7 +384,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
     @Override
-    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition) {
+    public List<Activity> listActivities(CrossShardListingLocator locator, int count, Condition condition, Boolean orderByCreateTime) {
     	
     	//按时间排序 用offset方式替代原有anchor modified by xiongying 20160707
     	DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -405,7 +410,13 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
         Integer offset =  (int) ((pageOffset - 1 ) * count);
         query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
-        query.addOrderBy(Tables.EH_ACTIVITIES.START_TIME.desc());
+
+        if(orderByCreateTime) {
+            query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
+        } else {
+            query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
+        }
+
 //            query.addLimit(count - activities.size());
         query.addLimit(offset, count);
         
@@ -539,5 +550,261 @@ public class ActivityProviderImpl implements ActivityProivider {
         return ConvertHelper.convert(result, ActivityCategories.class);
     }
 
+    @Override
+    public void createActivityAttachment(ActivityAttachment attachment) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityAttachments.class));
 
+        attachment.setId(id);
+        attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("createActivityAttachment: " + attachment);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityAttachments.class, id));
+        EhActivityAttachmentsDao dao = new EhActivityAttachmentsDao(context.configuration());
+        dao.insert(attachment);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityAttachments.class, null);
+    }
+
+    @Override
+    public void updateActivityAttachment(ActivityAttachment attachment) {
+        assert(attachment.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityAttachments.class, attachment.getId()));
+        EhActivityAttachmentsDao dao = new EhActivityAttachmentsDao(context.configuration());
+        dao.update(attachment);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivityAttachments.class, attachment.getId());
+    }
+
+    @Override
+    public ActivityAttachment findByActivityAttachmentId(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityAttachments.class, id));
+        EhActivityAttachmentsDao dao = new EhActivityAttachmentsDao(context.configuration());
+        EhActivityAttachments result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, ActivityAttachment.class);
+    }
+
+    @Override
+    public void deleteActivityAttachment(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityAttachmentsDao dao = new EhActivityAttachmentsDao(context.configuration());
+        dao.deleteById(id);
+    }
+
+    @Override
+    public List<ActivityAttachment> listActivityAttachments(CrossShardListingLocator locator, int count, Long activityId) {
+        List<ActivityAttachment> attachments = new ArrayList<ActivityAttachment>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivityAttachments.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhActivityAttachmentsRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ATTACHMENTS);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ACTIVITY_ATTACHMENTS.ID.gt(locator.getAnchor()));
+
+            query.addConditions(Tables.EH_ACTIVITY_ATTACHMENTS.ACTIVITY_ID.eq(activityId));
+
+            query.addOrderBy(Tables.EH_ACTIVITY_ATTACHMENTS.ID.asc());
+            query.addLimit(count - attachments.size());
+
+            query.fetch().map((r) -> {
+                attachments.add(ConvertHelper.convert(r, ActivityAttachment.class));
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        return attachments;
+    }
+
+    @Override
+    public boolean existActivityAttachments(Long activityId) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityAttachments.class));
+        List<ActivityAttachment> attachments = new ArrayList<ActivityAttachment>();
+
+        SelectQuery<EhActivityAttachmentsRecord> query = context.selectQuery(Tables.EH_ACTIVITY_ATTACHMENTS);
+
+        query.addConditions(Tables.EH_ACTIVITY_ATTACHMENTS.ACTIVITY_ID.eq(activityId));
+
+        query.fetch().map((r) -> {
+            attachments.add(ConvertHelper.convert(r, ActivityAttachment.class));
+            return null;
+        });
+
+        if(attachments.size() > 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    @Override
+    public void createActivityGoods(ActivityGoods goods) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhActivityGoods.class));
+
+        goods.setId(id);
+        goods.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("createActivityGoods: " + goods);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityGoods.class, id));
+        EhActivityGoodsDao dao = new EhActivityGoodsDao(context.configuration());
+        dao.insert(goods);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhActivityGoods.class, null);
+    }
+
+    @Override
+    public void updateActivityGoods(ActivityGoods goods) {
+        assert(goods.getId() != null);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivityGoods.class, goods.getId()));
+        EhActivityGoodsDao dao = new EhActivityGoodsDao(context.configuration());
+        dao.update(goods);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivityGoods.class, goods.getId());
+    }
+
+    @Override
+    public void deleteActivityGoods(Long id) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhActivityGoodsDao dao = new EhActivityGoodsDao(context.configuration());
+        dao.deleteById(id);
+    }
+
+    @Override
+    public ActivityGoods findActivityGoodsById(Long id) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityGoods.class, id));
+        EhActivityGoodsDao dao = new EhActivityGoodsDao(context.configuration());
+        EhActivityGoods result = dao.findById(id);
+        if (result == null) {
+            return null;
+        }
+        return ConvertHelper.convert(result, ActivityGoods.class);
+    }
+
+    @Override
+    public List<ActivityGoods> listActivityGoods(CrossShardListingLocator locator, int count, Long activityId) {
+        List<ActivityGoods> goods = new ArrayList<ActivityGoods>();
+
+        if (locator.getShardIterator() == null) {
+            AccessSpec accessSpec = AccessSpec.readOnlyWith(EhActivityGoods.class);
+            ShardIterator shardIterator = new ShardIterator(accessSpec);
+            locator.setShardIterator(shardIterator);
+        }
+        this.dbProvider.iterationMapReduce(locator.getShardIterator(), null, (context, obj) -> {
+            SelectQuery<EhActivityGoodsRecord> query = context.selectQuery(Tables.EH_ACTIVITY_GOODS);
+
+            if (locator.getAnchor() != null)
+                query.addConditions(Tables.EH_ACTIVITY_GOODS.ID.ge(locator.getAnchor()));
+
+            query.addConditions(Tables.EH_ACTIVITY_GOODS.ACTIVITY_ID.eq(activityId));
+
+            query.addOrderBy(Tables.EH_ACTIVITY_GOODS.ID.asc());
+            query.addLimit(count - goods.size());
+
+            query.fetch().map((r) -> {
+                goods.add(ConvertHelper.convert(r, ActivityGoods.class));
+                return null;
+            });
+
+            return AfterAction.next;
+        });
+
+        return goods;
+    }
+
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Activity> listActivityByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITIES)
+			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITIES.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ACTIVITIES.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ACTIVITIES.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Activity.class));
+		}
+		return new ArrayList<Activity>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Activity> listActivityByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITIES)
+			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITIES.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ACTIVITIES.UPDATE_TIME.asc(), Tables.EH_ACTIVITIES.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Activity.class));
+		}
+		return new ArrayList<Activity>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<ActivityRoster> listActivitySignupByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITY_ROSTER)
+			.join(Tables.EH_ACTIVITIES)
+			.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+			.and(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ACTIVITY_ROSTER.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ACTIVITY_ROSTER.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
+		}
+		return new ArrayList<ActivityRoster>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<ActivityRoster> listActivitySignupByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITY_ROSTER)
+			.join(Tables.EH_ACTIVITIES)
+			.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+			.and(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc(), Tables.EH_ACTIVITY_ROSTER.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
+		}
+		return new ArrayList<ActivityRoster>();
+	}
 }

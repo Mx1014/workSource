@@ -6,11 +6,12 @@ import java.util.List;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.module.ServiceModulePrivilegeType;
 import com.everhomes.rest.acl.*;
 import com.everhomes.rest.acl.admin.*;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.organization.OrganizationMemberDTO;
-import com.everhomes.serviceModule.ServiceModulePrivilegeType;
 
 import org.springframework.web.multipart.MultipartFile;
 
@@ -300,4 +301,6 @@ public interface RolePrivilegeService {
      * @return
      */
 	List<Privilege> listPrivilegesByTarget(String ownerType, Long ownerId, String targetType, Long targetId, String scope);
+
+	List<CommunityDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd);
 }

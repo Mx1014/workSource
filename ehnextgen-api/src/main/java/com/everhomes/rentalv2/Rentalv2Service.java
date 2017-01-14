@@ -24,6 +24,8 @@ import com.everhomes.rest.rentalv2.DisableRentalSiteCommand;
 import com.everhomes.rest.rentalv2.EnableRentalSiteCommand;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusCommand;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteDayStatusResponse;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusCommand;
+import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteMonthStatusResponse;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusCommand;
 import com.everhomes.rest.rentalv2.FindAutoAssignRentalSiteWeekStatusResponse;
 import com.everhomes.rest.rentalv2.FindRentalBillsCommand;
@@ -58,6 +60,7 @@ import com.everhomes.rest.rentalv2.UpdateRentalRuleCommand;
 import com.everhomes.rest.rentalv2.UpdateRentalSiteCommand;
 import com.everhomes.rest.rentalv2.VerifyRentalBillCommandResponse;
 import com.everhomes.rest.rentalv2.RentalBillRuleDTO;
+import com.everhomes.rest.rentalv2.admin.AddCheckOperatorCommand;
 import com.everhomes.rest.rentalv2.admin.AddDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.AddResourceAdminCommand;
@@ -72,6 +75,7 @@ import com.everhomes.rest.rentalv2.admin.GetRefundUrlCommand;
 import com.everhomes.rest.rentalv2.admin.GetRentalBillCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceListAdminCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceListAdminResponse;
+import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
@@ -215,5 +219,25 @@ public interface Rentalv2Service {
 
 	void sendRentalSuccessSms(Integer namespaceId, String phoneNumber,
 			RentalOrder order);
+
+
+	QueryDefaultRuleAdminResponse getResourceRule(
+			GetResourceRuleAdminCommand cmd);
+
+
+	FindAutoAssignRentalSiteMonthStatusResponse findAutoAssignRentalSiteMonthStatus(
+			FindAutoAssignRentalSiteMonthStatusCommand cmd);
+
+
+	void addCheckOperator(AddCheckOperatorCommand cmd);
+
+
+	void deleteCheckOperator(AddCheckOperatorCommand cmd);
+
+
+	void onOrderSuccess(RentalOrder bill);
+
+
+	void onOrderCancel(RentalOrder order);
 
 }
