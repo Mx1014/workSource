@@ -275,3 +275,11 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业报修"}' where namespace_id= 1000000 and item_label = '物业报修';
 
+
+-- 把能耗管理菜单由原来在“运营服务”下 移到 “物业服务”菜单下 by lqs 20170114 已上到现网
+UPDATE `eh_web_menus` SET parent_id=20000, `path`='/20000/49100' WHERE `id`=49100; -- 能耗管理
+UPDATE `eh_web_menus` SET `path`='/20000/49100/49110' WHERE `id`=49110; -- 表计管理
+UPDATE `eh_web_menus` SET `path`='/20000/49100/49120' WHERE `id`=49120; -- 抄表记录
+UPDATE `eh_web_menus` SET `path`='/20000/49100/49130' WHERE `id`=49130; -- 统计信息
+UPDATE `eh_web_menus` SET `path`='/20000/49100/49140' WHERE `id`=49140; -- 参数设置
+UPDATE `eh_service_modules` SET parent_id=20000, `path`='/20000/49100' WHERE `id`=49100; -- 能耗管理
