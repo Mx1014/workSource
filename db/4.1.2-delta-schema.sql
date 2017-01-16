@@ -90,3 +90,6 @@ CREATE TABLE `eh_general_approval_vals` (
 
 
 ALTER TABLE `eh_service_alliances` ADD COLUMN `support_type` TINYINT NOT NULL DEFAULT 2 COMMENT 'APP:0, WEB:1, APP_WEB: 2';
+
+
+ALTER TABLE `eh_pm_tasks` ADD COLUMN `string_tag1` VARCHAR(128);
