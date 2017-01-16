@@ -72,12 +72,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private static ThreadLocal<SimpleDateFormat> yearSF = new ThreadLocal<SimpleDateFormat>(){
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyy");
-        };
+        }
     };
     private static ThreadLocal<SimpleDateFormat> monthSF = new ThreadLocal<SimpleDateFormat>(){
         protected SimpleDateFormat initialValue() {
             return new SimpleDateFormat("yyyyMM");
-        };
+        }
     };
 
     @Autowired
@@ -995,8 +995,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         calendar.set(Calendar.MINUTE, calendar.getActualMinimum(Calendar.MINUTE));
         return calendar ;
     }
-    public List<DayStatDTO> deepCopyStatDays(List<DayStatDTO> days){
-        List<DayStatDTO> result = new ArrayList<DayStatDTO>();
+
+    private List<DayStatDTO> deepCopyStatDays(List<DayStatDTO> days){
+        List<DayStatDTO> result = new ArrayList<>();
         if(days == null )
             return null;
         for(DayStatDTO day : days ){
@@ -1004,6 +1005,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         return result;
     }
+
     @Override
     public EnergyStatDTO getEnergyStatByDay(EnergyStatCommand cmd) {
         //TODO: check cmd
@@ -1162,14 +1164,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         dayStats.add(sumDTO);
     }
 
-    /**
-     * 通过id查DTO是否有该项目
-     * @param
-     * @return
-     */
     private DayStatDTO findDayStat(List<DayStatDTO> list , Long statDate){
         DayStatDTO dayStatDTO = new DayStatDTO();
         dayStatDTO.setStatDate(statDate);
+        dayStatDTO.setCurrentAmount(BigDecimal.ZERO);
+        dayStatDTO.setCurrentCost(BigDecimal.ZERO);
         if(null != list && list.size()>0) {
             for (DayStatDTO dto : list) {
                 if (dto.getStatDate().equals(statDate)) {
@@ -1183,8 +1182,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     /**
      * 通过id查DTO是否有该项目
-     * @param
-     * @return
      */
     private BillStatDTO findBillDTO(EnergyStatDTO fatherDto , Long id){
         if(null != fatherDto.getBillDayStats() && fatherDto.getBillDayStats().size()>0)
@@ -1196,8 +1193,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     /**
      * 通过id查DTO是否有该性质
-     * @param
-     * @return
      */
     private ServiceStatDTO findServiceStatDTO(BillStatDTO fatherDto , Long id){
         if(null != fatherDto.getServiceDayStats() && fatherDto.getServiceDayStats().size()>0)
@@ -1209,8 +1204,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     /**
      * 通过id查DTO是否有该表记
-     * @param
-     * @return
      */
     private MeterStatDTO findMeterStatDTO(ServiceStatDTO fatherDto , Long id){
         if(null != fatherDto.getMeterDayStats() && fatherDto.getMeterDayStats().size()>0)
@@ -1219,6 +1212,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     return dto;
         return null;
     }
+
     @Override
     public EnergyStatDTO getEnergyStatByMonth(EnergyStatCommand cmd)   {
         SimpleDateFormat dateStrSF = new SimpleDateFormat("yyyy年MM月");
@@ -1226,8 +1220,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         //TODO: check cmd
         //查所有符合条件的记录
         EnergyStatDTO result = new EnergyStatDTO();
-        result.setBillDayStats(new ArrayList<BillStatDTO>());
-        result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+        result.setBillDayStats(new ArrayList<>());
+        result.setDayBurdenStats(new ArrayList<>());
         result.setDateStr(yearSF.get().format(new Date(cmd.getStatDate())));
         Community com = this.communityProvider.findCommunityById(cmd.getCommunityId());
         if(null == com)
@@ -1235,8 +1229,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         result.setCommunityName(com.getName());
         result.setMeterType(EnergyMeterType.WATER.getCode().equals(cmd.getMeterType())?"用水分析"
                 :EnergyMeterType.ELECTRIC.getCode().equals(cmd.getMeterType())?"用电分析":"");
+
         List<EnergyMonthStatistic> monthStats = this.energyMonthStatisticProvider.listEnergyMonthStatistics(cmd.getMeterType(),
                 cmd.getCommunityId(),cmd.getBillCategoryIds(),cmd.getServiceCategoryIds(),yearSF.get().format(new Date(cmd.getStatDate())));
+
         //查不到就返回null
         if(null == monthStats)
             return null;
@@ -1247,42 +1243,42 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             beginCalendar.setTime(getYearBeginDate(new Date(cmd.getStatDate())).getTime());
             Calendar endCalendar = Calendar.getInstance();
             endCalendar.setTime(getYearEndDate(new Date(cmd.getStatDate())).getTime());
-            int looptimes = 0;
-            result.setDates(new ArrayList<DayStatDTO>());
-            while(beginCalendar.compareTo(endCalendar) <1 ){
+            int loopTimes = 0;
+            result.setDates(new ArrayList<>());
+            while(beginCalendar.compareTo(endCalendar) < 1) {
                 DayStatDTO date = new DayStatDTO();
-                date.setStatDate(monthSF.get().parse(monthSF.get().format(beginCalendar.getTime())).getTime());
+                date.setStatDate(beginCalendar.getTime().getTime());
                 date.setDateStr(dateStrSF.format(beginCalendar.getTime()));
                 result.getDates().add(date);
 
                 //日期增加每一天,循环不能超过13个月
                 beginCalendar.add(Calendar.MONTH, 1);
-                if(looptimes ++ > 13)
+                if(loopTimes ++ > 13)
                     break;
             }
 
-            for(EnergyMonthStatistic monthStat : monthStats){
+            for(EnergyMonthStatistic monthStat : monthStats) {
                 DayStatDTO dayDTO = ConvertHelper.convert(monthStat, DayStatDTO.class);
-                dayDTO.setStatDate(monthSF.get().parse(monthStat.getDateStr()).getTime());
 
+                dayDTO.setStatDate(monthSF.get().parse(monthStat.getDateStr()).getTime());
                 dayDTO.setDateStr(dateStrSF.format(monthSF.get().parse(monthStat.getDateStr())));
 
-                //查询是否有项目dto,没有则添加,有则累加用量
-                BillStatDTO billDTO =  findBillDTO(result, monthStat.getBillCategoryId());
+                // 查询是否有项目dto,没有则添加,有则累加用量
+                BillStatDTO billDTO = findBillDTO(result, monthStat.getBillCategoryId());
                 if(null == billDTO){
                     billDTO = new BillStatDTO();
                     EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(monthStat.getBillCategoryId());
                     billDTO.setBillCategoryId(billCategory.getId());
                     billDTO.setBillCategoryName(billCategory.getName());
                     billDTO.setDayBillStats(deepCopyStatDays(result.getDates()));
-                    billDTO.setServiceDayStats(new ArrayList<ServiceStatDTO>());
+                    billDTO.setServiceDayStats(new ArrayList<>());
                     result.getBillDayStats().add(billDTO);
                 }
                 DayStatDTO dayBillStat = findDayStat(billDTO.getDayBillStats(), dayDTO.getStatDate());
                 dayBillStat.setCurrentAmount(dayBillStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
                 dayBillStat.setCurrentCost(dayBillStat.getCurrentCost().add(dayDTO.getCurrentCost()));
-                //查询是否有性质dto,没有则添加,有则累加用量
 
+                //查询是否有性质dto,没有则添加,有则累加用量
                 ServiceStatDTO serviceDTO = findServiceStatDTO(billDTO, monthStat.getServiceCategoryId());
                 if(null == serviceDTO){
                     serviceDTO = new ServiceStatDTO();
@@ -1290,7 +1286,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     serviceDTO.setServiceCategoryId(serviceCategory.getId());
                     serviceDTO.setServiceCategoryName(serviceCategory.getName());
                     serviceDTO.setDayServiceStats(deepCopyStatDays(result.getDates()));
-                    serviceDTO.setMeterDayStats(new ArrayList<MeterStatDTO>());
+                    serviceDTO.setMeterDayStats(new ArrayList<>());
                     billDTO.getServiceDayStats().add(serviceDTO);
                 }
                 DayStatDTO dayServiceStat = findDayStat(serviceDTO.getDayServiceStats(), dayDTO.getStatDate());
@@ -1304,7 +1300,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
                     serviceDTO.getMeterDayStats().add(meterDTO);
                 }
-
+                // TODO did not have to add this amount or cost ?
                 DayStatDTO meterDayStat = findDayStat(meterDTO.getDayStats(), dayDTO.getStatDate());
                 meterDayStat.setCurrentAmount(dayDTO.getCurrentAmount());
                 meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
@@ -1313,44 +1309,58 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
 
             //最终计算实际负担  和同比
-            result.setLastYearPayableStats(new ArrayList<DayStatDTO>());
-            result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+            result.setLastYearPayableStats(new ArrayList<>());
+            result.setDayBurdenStats(new ArrayList<>());
+
             BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
             BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
-            Set<Long> statDates = new HashSet<Long>();
-            if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
-                receivableDTO.getDayBillStats().stream().forEach(r->{
-                    statDates.add(r.getStatDate());
-                });
-            if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
-                payableDTO.getDayBillStats().stream().forEach(r->{
-                    statDates.add(r.getStatDate());
-                });
 
-            for(Long statDate: statDates){
+            Set<Long> statDates = new HashSet<>();
 
-                DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
-                DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), receivableDay.getStatDate());
+            if (receivableDTO != null && receivableDTO.getDayBillStats() != null) {
+                receivableDTO.getDayBillStats().forEach(r -> statDates.add(r.getStatDate()));
+            }
+            if (payableDTO != null && payableDTO.getDayBillStats() != null) {
+                payableDTO.getDayBillStats().forEach(r -> statDates.add(r.getStatDate()));
+            }
+
+            for(Long statDate : statDates) {
+                BigDecimal receivableAmount = BigDecimal.ZERO;
+                BigDecimal receivableCost = BigDecimal.ZERO;
+                BigDecimal payableAmount = BigDecimal.ZERO;
+                BigDecimal payableCost = BigDecimal.ZERO;
+
+                if (receivableDTO != null) {
+                    DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
+                    receivableAmount = receivableDay.getCurrentAmount();
+                    receivableCost = receivableDay.getCurrentCost();
+                }
+                if (payableDTO != null) {
+                    DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), statDate);
+                    payableAmount = payableDay.getCurrentAmount();
+                    payableCost = payableDay.getCurrentCost();
+                }
+
                 DayStatDTO burdenDay = new DayStatDTO();
                 DayStatDTO lastYearDTO = new DayStatDTO();
-                //应收减应付
-                burdenDay.setStatDate(receivableDay.getStatDate());
-                burdenDay.setCurrentAmount(payableDay.getCurrentAmount().subtract(receivableDay.getCurrentAmount()));
-                burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
+                // 应付减应收
+                burdenDay.setStatDate(statDate);
+                burdenDay.setCurrentAmount(payableAmount.subtract(receivableAmount));
+                burdenDay.setCurrentCost(payableCost.subtract(receivableCost));
                 result.getDayBurdenStats().add(burdenDay);
                 result.getLastYearPayableStats().add(lastYearDTO);
-                lastYearDTO.setStatDate(receivableDay.getStatDate());
+                lastYearDTO.setStatDate(statDate);
                 //得到去年的字符串
                 Calendar lastYear = Calendar.getInstance();
-                lastYear.setTime(new Date(receivableDay.getStatDate()));
+                lastYear.setTime(new Date(statDate));
                 lastYear.add(Calendar.YEAR,-1);
                 lastYearDTO.setCurrentAmount(energyCountStatisticProvider.getSumAmount(monthSF.get().format(lastYear.getTime()),cmd.getMeterType()
                         ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
                 lastYearDTO.setCurrentCost(energyCountStatisticProvider.getSumCost(monthSF.get().format(lastYear.getTime()),cmd.getMeterType()
                         ,EnergyStatisticType.BILL.getCode(),EnergyCategoryDefault.PAYABLE.getCode()));
             }
-        } catch (ParseException e) {
-            LOGGER.error(e.getLocalizedMessage());
+        } catch (Exception e) {
+            e.printStackTrace();
         }
         sumStatDTO(result);
         return result ;
@@ -1358,7 +1368,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public List<EnergyStatByYearDTO> getEnergyStatisticByYear(EnergyStatCommand cmd) {
-        List<EnergyStatByYearDTO> result = new ArrayList<EnergyStatByYearDTO>();
+        List<EnergyStatByYearDTO> result = new ArrayList<>();
         Calendar statDate = Calendar.getInstance();
         statDate.setTime(new Date(cmd.getStatDate()));
         Calendar anchorDate = Calendar.getInstance();
