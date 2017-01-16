@@ -435,7 +435,8 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             b.field("creatorOrganizationId", request.getCreatorOrganizationId());
             b.field("creatorMobile", request.getCreatorMobile());
             b.field("createTime", request.getCreateTime().getTime());
-            b.field("creatorUid", request.getCreatorUid());
+            b.field("creatorUid", request.getCreatorUid()); 
+            b.field("flowCaseId", request.getFlowCaseId());
             String d = format.format(request.getCreateTime().getTime());  
             try {
 				Date date=format.parse(d);
@@ -481,6 +482,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
             	dto.setCreatorMobile(String.valueOf(source.get("creatorMobile")));
             	dto.setCreatorOrganization(String.valueOf(source.get("creatorOrganization")));
             	dto.setServiceOrganization(String.valueOf(source.get("serviceOrganization")));
+            	dto.setFlowCaseId(SearchUtils.getLongField(source.get("flowCaseId")));
             	Long time = SearchUtils.getLongField(source.get("createDate"));  
                 String day = format.format(time);
             	dto.setCreateTime(day);

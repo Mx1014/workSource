@@ -7,6 +7,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateProvider;
@@ -14,6 +15,7 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.module.ServiceModule;
 import com.everhomes.module.ServiceModuleProvider;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
 import com.everhomes.rest.app.AppConstants;
@@ -27,7 +29,9 @@ import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserInfo;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.tables.pojos.EhFlowAttachments;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.server.schema.tables.pojos.EhNewsAttachments;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -66,7 +70,9 @@ import java.util.regex.Pattern;
 public class FlowServiceImpl implements FlowService {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowServiceImpl.class);
-	
+
+    @Autowired
+    private SequenceProvider sequenceProvider;
 	@Autowired
 	private FlowProvider flowProvider;
 	
@@ -1741,9 +1747,15 @@ public class FlowServiceImpl implements FlowService {
 			flowCase.setProjectId(snapshotFlow.getProjectId());
 			flowCase.setProjectType(snapshotFlow.getProjectType());
 		}
+
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
+		flowCase.setId(id);
 		
-    	flowListenerManager.onFlowCaseCreating(flowCase);
-		flowCaseProvider.createFlowCase(flowCase);
+		flowListenerManager.onFlowCaseCreating(flowCase);
+		
+		flowCaseProvider.createFlowCaseHasId(flowCase);
+
+		flowListenerManager.onFlowCaseCreated(flowCase);
 		flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());//get again for default values
 		
 		FlowCaseState ctx = flowStateProcessor.prepareStart(userInfo, flowCase);
@@ -1780,8 +1792,15 @@ public class FlowServiceImpl implements FlowService {
 		flowCase.setProjectId(ga.getProjectId());
 		flowCase.setProjectType(ga.getProjectType());
 		
-    	flowListenerManager.onFlowCaseCreating(flowCase);
-		flowCaseProvider.createFlowCase(flowCase);
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhFlowCases.class));
+		flowCase.setId(id);
+		flowListenerManager.onFlowCaseCreating(flowCase);
+		
+		flowCaseProvider.createFlowCaseHasId(flowCase);
+		
+		
+		flowListenerManager.onFlowCaseCreated(flowCase);
+		
 		
 		return flowCase;
 	}
