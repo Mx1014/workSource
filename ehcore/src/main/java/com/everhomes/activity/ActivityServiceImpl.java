@@ -1609,21 +1609,37 @@ public class ActivityServiceImpl implements ActivityService {
         //List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
         Condition condition = buildNearbyActivityCondition(cmd.getNamespaceId(), geoHashCodes, cmd.getTag());
 
-        if(null != cmd.getOfficialFlag()){
-            condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
-        }
-
-        //增加活动类型判断add by xiongying 20161117
-        if(null != cmd.getCategoryId()) {
-            ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getCategoryId());
-            if (category != null) {
-            	if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
-                    condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
-                } else {
-                    condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
-                }
-			}
-        }
+        //comment by tt, 20170116
+//        if(null != cmd.getOfficialFlag()){
+//            condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
+//        }
+//
+//        //增加活动类型判断add by xiongying 20161117
+//        if(null != cmd.getCategoryId()) {
+//            ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getCategoryId());
+//            if (category != null) {
+//            	if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
+//                    condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
+//                } else {
+//                    condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+//                }
+//			}
+//        }
+        
+        // 旧版本查询活动时，只有officialFlag标记，新版本查询活动时有categoryId，当然更老的版本两者都没有
+        // 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+        if (cmd.getCategoryId() == null) {
+        	OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+			if(officialFlag == null) officialFlag = OfficialFlag.NO;
+			Long categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+			cmd.setCategoryId(categoryId);
+		}
+//        else {
+//			officialFlag = categoryId.longValue() == 1L?OfficialFlag.YES:OfficialFlag.NO;
+//		}
+        // 把officialFlag换成categoryId一个条件
+        condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+        
         //增加活动主题分类，add by tt, 20170109
         if (cmd.getContentCategoryId() != null) {
         	ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getContentCategoryId());

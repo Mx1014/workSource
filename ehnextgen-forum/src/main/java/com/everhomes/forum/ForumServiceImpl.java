@@ -3177,7 +3177,7 @@ public class ForumServiceImpl implements ForumService {
 			return null;
 		}
     	
-    	return Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.notEqual(OfficialFlag.YES.getCode());
+    	return Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.NO.getCode());
     	
 //    	if(null == unCategorys || 0 == unCategorys.size()){
 //       	 	unCategorys = new ArrayList<Long>();
