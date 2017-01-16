@@ -2,6 +2,8 @@ package com.everhomes.pusher;
 
 import java.util.Locale;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -27,6 +29,8 @@ import com.everhomes.user.UserLogin;
 @Component(PushMessageResolver.PUSH_MESSAGE_RESOLVER_DEFAULT)
 public class DefaultPushMessageResolver implements PushMessageResolver {
 
+	private static final Logger LOGGER = LoggerFactory.getLogger(DefaultPushMessageResolver.class);
+	
     @Autowired
     MessagingService messagingService;
    
@@ -59,14 +63,18 @@ public class DefaultPushMessageResolver implements PushMessageResolver {
         Integer namespaceId = destLogin.getNamespaceId();
 //        String messageTitle = this.configurationProvider.getValue(namespaceId, "message.title", "左邻App");        
         
-        //默认取eh_app_urls的ios版的应用名称，eh_app_urls没收录的取左邻 by xiongying20161228
-        deviceMessage.setTitle("左邻App");
-        
-        AppUrls appUrls = appUrlProvider.findByNamespaceIdAndOSType(senderLogin.getNamespaceId(), OSType.IOS.getCode());
-        if(appUrls != null) {
-        	deviceMessage.setTitle(appUrls.getName());
-        }
-        
+        //去掉title 已有logo和应用名 by xiongying20170110
+//        //默认取eh_app_urls的ios版的应用名称，eh_app_urls没收录的取左邻 by xiongying20161228
+//        deviceMessage.setTitle("左邻App");
+//        
+//        AppUrls appUrls = appUrlProvider.findByNamespaceIdAndOSType(senderLogin.getNamespaceId(), OSType.IOS.getCode());
+//        if(appUrls != null) {
+//        	deviceMessage.setTitle(appUrls.getName());
+//        }
+//        
+//        if(LOGGER.isInfoEnabled()) {
+//            LOGGER.info("resolvMessage： appUrls = " + appUrls + " , senderLogin namespaceId is " + senderLogin.getNamespaceId());
+//        }
         
         deviceMessage.setBadge(new Integer((int)messagingService.getMessageCountInLoginMessageBox(destLogin)));
         

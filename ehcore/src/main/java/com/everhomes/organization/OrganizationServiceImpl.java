@@ -7565,11 +7565,12 @@ System.out.println();
 	private CheckOfficalPrivilegeResponse checkOfficalPrivilege(Long organizationId) {
 		CheckOfficalPrivilegeResponse response = new CheckOfficalPrivilegeResponse();
 		response.setOfficialFlag((byte) 0);
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		if (organizationId != null && organizationId.longValue() >= 0) {
 			Organization organization = organizationProvider.findOrganizationById(organizationId);
 			if (organization != null && OrganizationType.isGovAgencyOrganization(organization.getOrganizationType())) {
 				try{
-					if (rolePrivilegeService.checkAuthority(EntityType.ORGANIZATIONS.getCode(), organizationId, PrivilegeConstants.OfficialActivity)) {
+					if (resolver.checkUserPrivilege(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), organizationId, organizationId, PrivilegeConstants.OfficialActivity)) {
 						response.setOfficialFlag((byte) 1);
 					}
 				}catch(Exception e){
@@ -8427,11 +8428,11 @@ System.out.println();
 			return null;
 		}
 		//如果只有一个公司,直接认证
-		if(organizations.size() == 1){
-			ApplyForEnterpriseContactByEmailCommand cmd2 = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
-			cmd2.setOrganizationId(organizations.get(0).getId());
-			applyForEnterpriseContactByEmail(cmd2);
-		}
+//		if(organizations.size() == 1){
+//			ApplyForEnterpriseContactByEmailCommand cmd2 = ConvertHelper.convert(cmd, ApplyForEnterpriseContactByEmailCommand.class);
+//			cmd2.setOrganizationId(organizations.get(0).getId());
+//			applyForEnterpriseContactByEmail(cmd2);
+//		}
 		
 		return organizations.stream().map(r->{
 			return ConvertHelper.convert(r, OrganizationDTO.class); 

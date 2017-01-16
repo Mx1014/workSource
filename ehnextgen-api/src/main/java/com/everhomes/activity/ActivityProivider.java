@@ -72,4 +72,13 @@ public interface ActivityProivider {
     ActivityGoods findActivityGoodsById(Long id);
 
     List<ActivityGoods> listActivityGoods(CrossShardListingLocator locator, int count, Long activityId);
+
+	List<Activity> listActivityByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+	List<Activity> listActivityByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+	List<ActivityRoster> listActivitySignupByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize);
+
+	List<ActivityRoster> listActivitySignupByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 }

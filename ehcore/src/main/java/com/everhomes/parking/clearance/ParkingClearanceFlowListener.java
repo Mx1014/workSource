@@ -23,6 +23,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -227,4 +228,10 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
     private String currLocale() {
         return UserContext.current().getUser().getLocale();
     }
+
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
 }

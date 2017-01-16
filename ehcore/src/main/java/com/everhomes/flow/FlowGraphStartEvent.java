@@ -42,4 +42,14 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 		return 0l;
 	}
 
+	@Override
+	public Long getEntityId() {
+		return null;
+	}
+
+	@Override
+	public String getFlowEntityType() {
+		return null;
+	}
+
 }

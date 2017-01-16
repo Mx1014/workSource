@@ -14,6 +14,7 @@ import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -159,4 +160,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     public void onFlowCreating(Flow flow) {
 
     }
+
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
 }

@@ -31,5 +31,10 @@ public interface EnergyMeterCategoryProvider {
     /**
      * 更新分类
      */
-    void updateEnergyMeterCategory(EnergyMeterCategory category); 
+    void updateEnergyMeterCategory(EnergyMeterCategory category);
+
+    /**
+     * 删除分类
+     */
+    void deleteEnergyMeterCategory(EnergyMeterCategory category);
 }

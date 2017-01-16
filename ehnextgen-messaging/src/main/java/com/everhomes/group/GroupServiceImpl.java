@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.hibernate.jpa.criteria.ValueHandlerFactory.LongValueHandler;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -307,7 +308,7 @@ public class GroupServiceImpl implements GroupService {
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
-    	Integer namespaceId = (cmd.getNamespaceId() == null) ? UserContext.getCurrentNamespaceId(): cmd.getNamespaceId();
+    	Integer namespaceId =  UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
@@ -346,7 +347,15 @@ public class GroupServiceImpl implements GroupService {
             return user.getLocale();
         return Locale.SIMPLIFIED_CHINESE.toString();
     }
-    
+
+    private void checkBlacklist(String ownerType, Long ownerId){
+        ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
+        ownerId = null == ownerId ? 0L : ownerId;
+        Long userId = UserContext.current().getUser().getId();
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_CLUP);
+    }
+
     private GroupDTO createGroup(CreateGroupCommand cmd, GroupSetting groupSetting) {
     	Integer namespaceId = (cmd.getNamespaceId() == null) ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
     	
@@ -393,11 +402,20 @@ public class GroupServiceImpl implements GroupService {
             if(cmd.getPrivateFlag() != null)
                 privateFlag = cmd.getPrivateFlag().byteValue();
             group.setPrivateFlag(privateFlag);
-            
-            
+
+            //黑名单权限校验 by sfyan20161213
+            if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP
+                    && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC){
+                checkBlacklist(null, null);
+            }
+
             // join policy is not exposed current in API, derive it from its visibility flag
             if(privateFlag != 0) {
-                group.setJoinPolicy(GroupJoinPolicy.NEED_APPROVE.getCode());
+            	Integer joinPolicy = cmd.getJoinPolicy();
+            	if (joinPolicy == null) {
+            		joinPolicy = GroupJoinPolicy.NEED_APPROVE.getCode();
+				}
+                group.setJoinPolicy(joinPolicy);
                 
                 Acl acl = new Acl();
                 acl.setOwnerType(EntityType.GROUP.getCode());
@@ -445,6 +463,7 @@ public class GroupServiceImpl implements GroupService {
             if (group.getStatus() == null) {
             	group.setStatus(GroupAdminStatus.ACTIVE.getCode());
 			}
+
             this.groupProvider.createGroup(group);
     
             // create the group owned forum and save it
@@ -1003,13 +1022,17 @@ public class GroupServiceImpl implements GroupService {
     
     @Override
     public void requestToJoinGroup(RequestToJoinGroupCommand cmd) {
-        User user = UserContext.current().getUser();
+    	createGroupMember(cmd, true);
+    }
+    
+    private void createGroupMember(RequestToJoinGroupCommand cmd, boolean needNotify) {
+    	User user = UserContext.current().getUser();
         Long userId = user.getId();
         
         Long groupId = cmd.getGroupId();
         Group group = checkGroupParameter(groupId, userId, "requestToJoinGroup");
         
-        GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
+    	GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
         if(member == null) {
             member = new GroupMember();
             member.setCreatorUid(user.getId());
@@ -1034,11 +1057,13 @@ public class GroupServiceImpl implements GroupService {
             }
             
             // send notifications to applicant and other members
-            if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
-                sendGroupNotificationForReqToJoinGroupFreely(group, member);
-            } else {
-                sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
-            }
+            if (needNotify) {
+            	if(GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE) {
+                    sendGroupNotificationForReqToJoinGroupFreely(group, member);
+                } else {
+                    sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
+                }
+			}
         } else {
             if(GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_ACCEPTANCE) {
                 member.setMemberStatus(GroupMemberStatus.ACTIVE.getCode());
@@ -1048,7 +1073,9 @@ public class GroupServiceImpl implements GroupService {
                 
                 GroupMember inviter = this.groupProvider.findGroupMemberByMemberInfo(groupId, 
                     EntityType.USER.getCode(), member.getInviterUid());
-                sendGroupNotificationForInviteToJoinGroupFreely(group, inviter, member);
+                if (needNotify) {
+                	sendGroupNotificationForInviteToJoinGroupFreely(group, inviter, member);
+				}
             }
             
             //俱乐部可以重复申请加入，这里只改变申请理由，其它不变, add by tt, 20161104
@@ -1057,7 +1084,9 @@ public class GroupServiceImpl implements GroupService {
                 member.setRequestorComment(cmd.getRequestText());
             	member.setMemberStatus(GroupMemberStatus.WAITING_FOR_APPROVAL.getCode());  //有可能被拒绝了重复加入
             	groupProvider.updateGroupMember(member);
-            	sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
+            	if (needNotify) {
+            		sendGroupNotificationForReqToJoinGroupWaitingApproval(group, member);
+				}
 			}
             
         }
@@ -4951,4 +4980,22 @@ public class GroupServiceImpl implements GroupService {
 			return null;
 		});
 	}
+
+	@Override
+	public GroupDTO createBusinessGroup(String groupName) {
+		CreateGroupCommand cmd = new CreateGroupCommand();
+		cmd.setName(groupName);
+		cmd.setPrivateFlag(GroupPrivacy.PRIVATE.getCode());
+		cmd.setJoinPolicy(GroupJoinPolicy.FREE.getCode());
+		
+		return createGroup(cmd, null);
+	}
+
+	@Override
+	public void joinBusinessGroup(Long groupId) {
+		RequestToJoinGroupCommand cmd = new RequestToJoinGroupCommand();
+		cmd.setGroupId(groupId);
+		createGroupMember(cmd, false);
+	}
+	
 }

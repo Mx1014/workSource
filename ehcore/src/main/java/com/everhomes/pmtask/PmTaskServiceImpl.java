@@ -21,8 +21,16 @@ import java.util.stream.Collectors;
 
 
 
+
+
+
+
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+
+
+
+
 
 
 
@@ -43,6 +51,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
+
+
+
+
 
 
 
@@ -73,6 +85,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
@@ -80,6 +93,7 @@ import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -100,6 +114,7 @@ import com.everhomes.rest.pmtask.CloseTaskCommand;
 import com.everhomes.rest.pmtask.CreateTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.DeleteTaskOperatePersonCommand;
 import com.everhomes.rest.pmtask.EvaluateScoreDTO;
+import com.everhomes.rest.pmtask.GetNamespaceHandlerCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesCommand;
 import com.everhomes.rest.pmtask.GetPrivilegesDTO;
 import com.everhomes.rest.pmtask.GetTaskLogCommand;
@@ -110,6 +125,7 @@ import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
 import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsCommand;
 import com.everhomes.rest.pmtask.ListOperatePersonnelsResponse;
+import com.everhomes.rest.pmtask.NamespaceHandlerDTO;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
@@ -169,6 +185,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	public static final String CATEGORY_SEPARATOR = "/";
 
+	private static final String HANDLER = "pmtask.handler-";
+	
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
@@ -793,20 +811,27 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    dto.setOperatorName(user.getNickName());
 	    dto.setOperatorPhone(userIdentifier.getIdentifierToken());
 	}
-	
+
+	private void checkBlacklist(String ownerType, Long ownerId){
+		ownerType = org.springframework.util.StringUtils.isEmpty(ownerType) ? "" : ownerType;
+		ownerId = null == ownerId ? 0L : ownerId;
+		Long userId = UserContext.current().getUser().getId();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_PROPERTY_POST);
+	}
+
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
-		
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());
 		
 		Integer namespaceId = user.getNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
-		
-		if(namespaceId == 1000000) 
-			handle = PmTaskHandle.FLOW;
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
@@ -815,7 +840,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
-		
+
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
 		String requestorPhone = cmd.getRequestorPhone();
 		String requestorName = cmd.getRequestorName();
 		if(StringUtils.isBlank(requestorPhone)){
@@ -834,11 +861,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
-		String handle = PmTaskHandle.SHEN_YE;
-		
-		if(namespaceId == 1000000) 
-			handle = PmTaskHandle.FLOW;
-		
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
 		return handler.createTask(cmd, null, requestorName, requestorPhone);
@@ -1901,12 +1925,28 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetIds cannot be null or empty.");
 		}
 		
+		int size = targetIds.size();
+		
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		
+		if(size == 1) {
+			
+			if(resolver.checkUserPrivilege(targetIds.get(0), EntityType.COMMUNITY.getCode(), 
+					cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
+				LOGGER.error("user privilege exist.");
+	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_PRIVILEGE_EXIST,
+	    				"user privilege exist.");
+			}
+		}
+		
 		dbProvider.execute((TransactionStatus status) -> {
 			
-			for(int i=0,l=targetIds.size(); i<l;i++ ) {
+			for(int i=0,l=size; i<l;i++ ) {
 				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
 						EntityType.USER.getCode(), targetIds.get(i));
-				if(null == pmTaskTarget) {
+				if(!resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
+						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE) &&
+						null == pmTaskTarget) {
 					pmTaskTarget = new PmTaskTarget();
 					pmTaskTarget.setRoleId(cmd.getOperateType());
 					pmTaskTarget.setOwnerId(cmd.getOwnerId());
@@ -1916,20 +1956,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 					pmTaskTarget.setTargetId(targetIds.get(i));
 					
 					pmTaskProvider.createTaskTarget(pmTaskTarget);
-					
-//					List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
-//					cmd.getOwnerId(), EntityType.USER.getCode(), targetIds.get(i));
-//					
-//					if(null == roleAssignments || roleAssignments.size() == 0) {
-//						RoleAssignment roleAssignment = new RoleAssignment();
-//						roleAssignment.setRoleId(pmTaskTarget.getRoleId());
-//						roleAssignment.setOwnerType(EntityType.COMMUNITY.getCode());
-//						roleAssignment.setOwnerId(cmd.getOwnerId());
-//						roleAssignment.setTargetType(EntityType.USER.getCode());
-//						roleAssignment.setTargetId(targetIds.get(i));
-//						roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-//						aclProvider.createRoleAssignment(roleAssignment);
-//					}
 					
 					rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
 							EntityType.USER.getCode(), targetIds.get(i), "pmtask", privilegeIds);
@@ -2190,7 +2216,14 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		checkOrganizationId(cmd.getOrganizationId());
 		ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
-		List<CommunityDTO> dtos = listAllChildrenOrganizationCoummunities(cmd.getOrganizationId(), cmd.getKeyword());
+//		List<CommunityDTO> dtos = listAllChildrenOrganizationCoummunities(cmd.getOrganizationId(), cmd.getKeyword());
+		
+		ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
+		listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
+		listUserRelatedProjectByModuleIdCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
+		
+		List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+		
 		response.setCommunities(dtos);
 		return response;
 	}
@@ -2444,6 +2477,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 					"ExportTaskOperatorStatistics is fail.");
 		}
 		
+	}
+
+	@Override   
+	public NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd) {
+		
+		NamespaceHandlerDTO dto = new NamespaceHandlerDTO();
+		
+		if(null == cmd.getNamespaceId())
+			cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+		
+		String handler = configProvider.getValue(HANDLER + cmd.getNamespaceId(), PmTaskHandle.SHEN_YE);
+		
+		dto.setHandler(handler);
+		
+		return dto;
 	}
 	
 }

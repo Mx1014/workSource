@@ -111,4 +111,10 @@ public class FlowModuleListenerDummy2 implements FlowModuleListener {
 		
 	}
 
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
 }

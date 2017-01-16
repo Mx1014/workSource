@@ -43,6 +43,7 @@ import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.organization.pm.CommunityPmBill;
 import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.rest.enterprise.EnterpriseAddressStatus;
+import com.everhomes.rest.openapi.jindi.JindiCsthomerelDTO;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -100,6 +101,7 @@ import com.everhomes.server.schema.tables.pojos.EhOrganizationOrders;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationOwners;
 import com.everhomes.server.schema.tables.pojos.EhOrganizationTasks;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
+import com.everhomes.server.schema.tables.pojos.EhUsers;
 import com.everhomes.server.schema.tables.records.EhCommunitiesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationAssignedScopesRecord;
@@ -118,10 +120,12 @@ import com.everhomes.server.schema.tables.records.EhOrganizationTasksRecord;
 import com.everhomes.server.schema.tables.records.EhOrganizationsRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import com.everhomes.util.RecordHelper;
  
 @Component
 public class OrganizationProviderImpl implements OrganizationProvider {
@@ -167,6 +171,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhOrganizationsDao dao = new EhOrganizationsDao(context.configuration());
+		department.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(department);
 
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhOrganizations.class, department.getId());
@@ -2091,7 +2096,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
         long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhOrganizationAddresses.class));
         address.setId(id);
-        
+        address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        address.setUpdateTime(address.getCreateTime());
         EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
         dao.insert(address);
         
@@ -2289,7 +2295,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         // eh_organizations不是key table，不能使用key table的方式操作 by lqs 20160722
 		// DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhOrganizations.class, oa.getCommunityId()));
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
-		oa.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		oa.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		EhOrganizationAddressesDao dao = new EhOrganizationAddressesDao(context.configuration());
 		oa.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(oa);
@@ -3141,5 +3147,89 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			locator.setAnchor(result.get(result.size() - 1).getId());
 		}
 		return result;
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Organization> listOrganizationByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS)
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATIONS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ORGANIZATIONS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ORGANIZATIONS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Organization.class));
+		}
+		return new ArrayList<Organization>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ORGANIZATIONS)
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATIONS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ORGANIZATIONS.UPDATE_TIME.asc(), Tables.EH_ORGANIZATIONS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Organization.class));
+		}
+		return new ArrayList<Organization>();
+	}
+
+	/**
+	 * 金地抓取客房数据
+	 */
+	@Override
+	public List<CommunityAddressMapping> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.fields()).from(Tables.EH_ORGANIZATIONS)
+			.join(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+			.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID))
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, CommunityAddressMapping.class));
+		}
+		return new ArrayList<CommunityAddressMapping>();
+	}
+
+	/**
+	 * 金地抓取客房数据
+	 */
+	@Override
+	public List<CommunityAddressMapping> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.fields()).from(Tables.EH_ORGANIZATIONS)
+			.join(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS)
+			.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ORGANIZATION_ID))
+			.where(Tables.EH_ORGANIZATIONS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.UPDATE_TIME.asc(), Tables.EH_ORGANIZATION_ADDRESS_MAPPINGS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, CommunityAddressMapping.class));
+		}
+		return new ArrayList<CommunityAddressMapping>();
 	}
 }

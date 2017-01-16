@@ -1213,8 +1213,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		} catch (ParseException e) {
 			 LOGGER.error("计算平均值-时间转换 异常");
 		}
-
-		if(minPrice.compareTo(maxPrice) == 0){
+		if(minPrice == null)
+			minPrice = new BigDecimal(0);
+		if(maxPrice == null)
+			maxPrice = new BigDecimal(0);
+		if( minPrice.compareTo(maxPrice) == 0){
 			rSiteDTO.setAvgPriceStr(priceToString(minPrice,rentalSite.getRentalType(),minTimeStep));
 		}else{
 			rSiteDTO.setAvgPriceStr( priceToString(minPrice,rentalSite.getRentalType(),minTimeStep)+"~" +priceToString(maxPrice,rentalSite.getRentalType(),maxTimeStep));

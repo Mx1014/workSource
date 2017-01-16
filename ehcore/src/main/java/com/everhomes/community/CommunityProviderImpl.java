@@ -1158,8 +1158,8 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public void createResourceCategory(ResourceCategory resourceCategory) {
 		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhResourceCategories.class));
-        
-		resourceCategory.setId(id);
+        resourceCategory.setCreateTime(new Timestamp(System.currentTimeMillis()));
+        resourceCategory.setId(id);
 		if(null != resourceCategory.getPath())
 			resourceCategory.setPath(resourceCategory.getPath() + "/" + id);
 		else
@@ -1181,7 +1181,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 	
 	@Override
-	public ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name) {
+	public ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name, Byte type) {
 		
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategories.class));
         SelectJoinStep<Record> query = context.select().from(Tables.EH_RESOURCE_CATEGORIES);
@@ -1189,7 +1189,8 @@ public class CommunityProviderImpl implements CommunityProvider {
         Condition condition = Tables.EH_RESOURCE_CATEGORIES.OWNER_ID.eq(ownerId);
         condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
         condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.STATUS.eq(ResourceCategoryStatus.ACTIVE.getCode()));
-		
+        condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.TYPE.eq(type));
+
         if(null != parentId)
             condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.PARENT_ID.eq(parentId));
         if(!StringUtils.isBlank(name))
@@ -1198,7 +1199,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 	
 	@Override
-	public List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path) {
+	public List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path, Byte type) {
 		
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategories.class));
         SelectJoinStep<Record> query = context.select().from(Tables.EH_RESOURCE_CATEGORIES);
@@ -1206,6 +1207,7 @@ public class CommunityProviderImpl implements CommunityProvider {
         Condition condition = Tables.EH_RESOURCE_CATEGORIES.OWNER_ID.eq(ownerId);
         condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
         condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.STATUS.eq(ResourceCategoryStatus.ACTIVE.getCode()));
+        condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.TYPE.eq(type));
         if(null != parentId)
             condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.PARENT_ID.eq(parentId));
         if(!StringUtils.isBlank(path))
@@ -1216,12 +1218,13 @@ public class CommunityProviderImpl implements CommunityProvider {
 	}
 
     @Override
-    public List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids) {
+    public List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids, Byte type) {
 
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategories.class));
         SelectJoinStep<Record> query = context.select().from(Tables.EH_RESOURCE_CATEGORIES);
 
         Condition condition =  Tables.EH_RESOURCE_CATEGORIES.STATUS.eq(ResourceCategoryStatus.ACTIVE.getCode());
+        condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.TYPE.eq(type));
         if(!StringUtils.isEmpty(ownerType)){
             condition = condition.and(Tables.EH_RESOURCE_CATEGORIES.OWNER_TYPE.eq(ownerType));
         }
@@ -1248,7 +1251,7 @@ public class CommunityProviderImpl implements CommunityProvider {
 	@Override
 	public void createResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment) {
 		long id = this.sequnceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhResourceCategoryAssignments.class));
-        
+        resourceCategoryAssignment.setCreateTime(new Timestamp(System.currentTimeMillis()));
 		resourceCategoryAssignment.setId(id);
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhResourceCategoryAssignmentsDao dao = new EhResourceCategoryAssignmentsDao(context.configuration());
@@ -1305,6 +1308,17 @@ public class CommunityProviderImpl implements CommunityProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhResourceCategoryAssignments.class, null);
 
 	}
+
+    @Override
+    public void deleteResourceCategoryById(Long id) {
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        EhResourceCategoriesDao dao = new EhResourceCategoriesDao(context.configuration());
+        dao.deleteById(id);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhResourceCategories.class, null);
+
+    }
 	
 	@Override
 	public List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor, 
@@ -1342,4 +1356,18 @@ public class CommunityProviderImpl implements CommunityProvider {
 		
 		return communities;
 	}
+
+    @Override
+    public List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId) {
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhCommunities.class));
+        final List<Community> communities = new ArrayList<Community>();
+        SelectQuery<EhCommunitiesRecord> query = context.selectQuery(Tables.EH_COMMUNITIES);
+        query.addConditions(Tables.EH_COMMUNITIES.FEEDBACK_FORUM_ID.eq(feedbackForumId));
+        query.addConditions(Tables.EH_COMMUNITIES.STATUS.eq(CommunityAdminStatus.ACTIVE.getCode()));
+        query.fetch().map(r ->{
+            communities.add(ConvertHelper.convert(r, Community.class));
+           return null;
+        });
+        return communities;
+    }
 }

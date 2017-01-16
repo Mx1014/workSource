@@ -90,15 +90,18 @@ public interface CommunityProvider {
     
     void deleteResourceCategoryAssignmentById(Long id);
     
-    ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name);
+    ResourceCategory findResourceCategoryByParentIdAndName(Long ownerId, String ownerType, Long parentId, String name, Byte type);
     
     void updateResourceCategoryAssignment(ResourceCategoryAssignment resourceCategoryAssignment);
     
     List<Community> listCommunitiesByCategory(Long cityId, Long areaId, Long categoryId, String keyword, Long pageAnchor, 
 			Integer pageSize);
     
-    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path);
+    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path, Byte type);
     
     List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId);
-    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids);
+
+    List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId);
+    List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids, Byte type);
+    void deleteResourceCategoryById(Long id);
 }

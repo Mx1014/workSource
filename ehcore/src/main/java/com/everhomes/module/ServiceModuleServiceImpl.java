@@ -33,7 +33,7 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 	
 	@Override
 	public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+//		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		List<ServiceModuleScope> scopes = serviceModuleProvider.listServiceModuleScopes(namespaceId, cmd.getOwnerType(), cmd.getOwnerId(), ServiceModuleScopeApplyPolicy.REVERT.getCode());

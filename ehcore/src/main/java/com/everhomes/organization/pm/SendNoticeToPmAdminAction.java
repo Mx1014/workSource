@@ -2,6 +2,9 @@ package com.everhomes.organization.pm;
 
 import com.alibaba.fastjson.JSON;
 import com.everhomes.rest.organization.pm.SendNoticeToPmAdminCommand;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserProvider;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,11 +27,22 @@ public class SendNoticeToPmAdminAction implements Runnable {
     @Autowired
     private PropertyMgrService propertyMgrService;
 
+    @Autowired
+    private UserProvider userProvider;
+
     private Long operateTime;// 创建发送任务的时间
     private SendNoticeToPmAdminCommand cmd;
+    private Long userId;
+    private String schema;
 
     @Override
     public void run() {
+        User user = userProvider.findUserById(userId);
+
+        UserContext.setCurrentNamespaceId(user.getNamespaceId());
+        UserContext.setCurrentUser(user);
+        UserContext.current().setScheme(schema);
+
         LOGGER.info("Push message to pm admin start");
         long start = System.currentTimeMillis();
         propertyMgrService.sendNoticeToPmAdmin(cmd, new Timestamp(operateTime));
@@ -36,8 +50,10 @@ public class SendNoticeToPmAdminAction implements Runnable {
         LOGGER.info("Push message to pm admin end, time = {} seconds", (end - start) / 1000);
     }
 
-    public SendNoticeToPmAdminAction(String cmd, String operateTime) {
+    public SendNoticeToPmAdminAction(String cmd, String operateTime, String userId, String schema) {
         this.operateTime = Long.valueOf(operateTime);
         this.cmd = JSON.parseObject(cmd, SendNoticeToPmAdminCommand.class);
+        this.userId = Long.valueOf(userId);
+        this.schema = schema;
     }
 }

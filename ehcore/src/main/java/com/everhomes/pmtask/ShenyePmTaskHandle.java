@@ -185,8 +185,6 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 			pmTaskLog.setTaskId(task.getId());
 			pmTaskProvider.createTaskLog(pmTaskLog);
 
-			pmTaskSearch.feedDoc(task);
-
 	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
 	    			PmTaskOperateType.EXECUTOR.getCode(), null, null);
 	    	int size = targets.size();
@@ -197,13 +195,8 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	    	}
 			return null;
 		});
-    	//同步数据到科技园
-//		if(user.getNamespaceId() == 1000000) {
-//			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
-//			Category category = categoryProvider.findCategoryById(cmd.getCategoryId());
-//			handler.synchronizedData(task, cmd.getAttachments(), taskCategory, category);
-//		}
 
+		pmTaskSearch.feedDoc(task);
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 

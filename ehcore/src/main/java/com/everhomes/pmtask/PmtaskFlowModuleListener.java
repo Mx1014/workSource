@@ -212,4 +212,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		
 
 	}
+
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
 }
