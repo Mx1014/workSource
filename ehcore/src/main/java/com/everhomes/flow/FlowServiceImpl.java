@@ -2206,7 +2206,7 @@ public class FlowServiceImpl implements FlowService {
 		//fix multiple current node
 		for(int i = nodeDTOS.size()-1; i >= 0; i--) {
 			logDTO = nodeDTOS.get(i);
-			if(logDTO.getIsCurrentNode().equals((byte)1)) {
+			if(logDTO != null && logDTO.getIsCurrentNode().equals((byte)1)) {
 				int j = i-1;
 				for(; j >= 0; j--) {
 					logDTO.setIsCurrentNode((byte)0);
