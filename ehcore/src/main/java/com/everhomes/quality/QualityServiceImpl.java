@@ -874,8 +874,6 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
         
 		if(isAdmin) {
-//			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, null, offset, pageSize + 1);
-		
 			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
             		cmd.getTaskType(), null, startDate, endDate, null,
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());

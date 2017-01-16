@@ -1184,15 +1184,17 @@ public class QualityProviderImpl implements QualityProvider {
  
         SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
        
-        if(groupIds != null)
-        	Condition con5 = null;
-        	for(ExecuteGroupAndPosition groupId : groupIds) {
-        		Condition con4 = null; 
+        if(groupIds != null) {
+			Condition con5 = null;
+			for(ExecuteGroupAndPosition groupId : groupIds) {
+				Condition con4 = null;
 				con4 = Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.eq(groupId.getGroupId());
-				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(groupId.getPositionId()));
+//				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(groupId.getPositionId()));
 				con5 = con5.or(con4);
-        	}
-        	query.addConditions(con5);
+			}
+			query.addConditions(con5);
+		}
+
         if(groupType != null)
         	query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
         
