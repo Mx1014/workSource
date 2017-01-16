@@ -1,3 +1,7 @@
+-- 初始化数据，把官方活动的category_id全部配成1, add by tt, 20170116
+update eh_activities set category_id = 1 where official_flag = 1;
+update eh_forum_posts set category_id = 1 where official_flag = 1;
+
 -- 配置社群layout，仅用于测试环境配置，add by tt, 20170109
 select max(id) into @id from `eh_launch_pad_layouts`;
 INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES (@id:=@id+1, 1000000, 'AssociationLayout', '{"versionCode":"2017010601","versionName":"4.1.2","layoutName":"AssociationLayout","displayName":"社群","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup","itemLocation": "/association"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017010601, 0, 2, now(), 'park_tourist', 0, 0, 0);

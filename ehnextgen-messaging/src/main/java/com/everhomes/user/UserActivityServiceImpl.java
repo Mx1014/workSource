@@ -630,6 +630,8 @@ public class UserActivityServiceImpl implements UserActivityService {
             ListTreasureResponse rsp = new ListTreasureResponse();
             rsp.setBusinessUrl(getTouristBusinessUrl());
             rsp.setBusinessRealm(getBusinessRealm());
+            //设置活动列表的默认列表样式, add by tt, 20170116
+            rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
             return rsp;
         }
         //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
