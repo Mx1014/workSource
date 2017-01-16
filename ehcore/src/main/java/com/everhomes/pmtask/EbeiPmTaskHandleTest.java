@@ -30,6 +30,7 @@ import com.alibaba.fastjson.JSONObject;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ketuo.EncryptUtil;
 import com.everhomes.pmtask.ebei.EbeiJsonEntity;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 
@@ -68,6 +69,12 @@ public class EbeiPmTaskHandleTest {
 	}
 	
 	public static void main(String[] args) {
+		
+		String s = String.format("%s:111111111",
+                null);
+		System.out.println(s);
+//		System.out.println("123".startsWith(null));
+		
 		JSONObject param = new JSONObject();
 		
 //		param.put("userId", "");
@@ -97,7 +104,7 @@ public class EbeiPmTaskHandleTest {
 		param.put("projectId", "240111044331055940");
 		
 //		login();
-		postToEbei(param, EVALUATE);
+//		postToEbei(param, EVALUATE);
 		
 		
 //		postToEbei(param, GET_TASK_DETAIL);

@@ -83,28 +83,52 @@ public class TechparkSynchronizedAction implements Runnable{
 	
 	@Override
 	public void run() {
-		User user = UserContext.current().getUser();
+		
 		PmTask task = pmTaskProvider.findTaskById(taskId);
+		
+		UserContext userContext = UserContext.current();
+		User user = userContext.getUser();
+		
+		if(null == user) {
+			user = userProvider.findUserById(task.getCreatorUid());
+			userContext.setUser(user);
+			userContext.setNamespaceId(task.getNamespaceId());
+			userContext.setScheme("http");
+		}
+		
 		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
 		Category category = null;
 		if(null != task.getCategoryId())
 			category = categoryProvider.findCategoryById(task.getCategoryId());
 		
 		//查询图片
-//		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
-//		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
-//			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
-//			
-//			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
-//	                EntityType.USER.getCode(), r.getCreatorUid());
-//			attachmentDto.setContentUrl(contentUrl);
-//			return attachmentDto;
-//		}).collect(Collectors.toList());						
+		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
+		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
+			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
+			
+			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
+	                EntityType.USER.getCode(), r.getCreatorUid());
+			attachmentDto.setContentUrl(contentUrl);
+			return attachmentDto;
+		}).collect(Collectors.toList());					
 		
-		synchronizedData(task, /*attachmentDtos,*/ taskCategory, category);
+		synchronizedData(task, attachmentDtos, taskCategory, category);
 	}
 
-	public void synchronizedData(PmTask task, /*List<PmTaskAttachmentDTO> attachments,*/ Category taskCategory, Category category) {
+	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+	
+	public void synchronizedData(PmTask task, List<PmTaskAttachmentDTO> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
 		param.put("fileFlag", "1");
@@ -163,18 +187,18 @@ public class TechparkSynchronizedAction implements Runnable{
 		
 		JSONArray enclosure = new JSONArray();
 		
-		String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-
-        String attachmentJson = valueOperations.get(key);
-        List<AttachmentDescriptor> attachments = JSONObject.parseArray(attachmentJson, AttachmentDescriptor.class);
-        LOGGER.error("Delete TechparkSynchronizedData key, key={}", key);
-        redisTemplate.delete(key);
+//		String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+//        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//
+//        String attachmentJson = valueOperations.get(key);
+//        List<AttachmentDescriptor> attachments = JSONObject.parseArray(attachmentJson, AttachmentDescriptor.class);
+//        LOGGER.error("Delete TechparkSynchronizedData key, key={}", key);
+//        redisTemplate.delete(key);
 		
 		if(null != attachments) {
-			for(AttachmentDescriptor ad: attachments) {
+			for(PmTaskAttachmentDTO ad: attachments) {
 				JSONObject attachment = new JSONObject();
 				ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
 				String resourceName = resource.getResourceName();
@@ -188,13 +212,13 @@ public class TechparkSynchronizedAction implements Runnable{
 					attachment.put("fileName", "");
 				}
 				
-//				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
 				
 				attachment.put("fileSuffix", fileSuffix);
 				
 				String fileContent = null;
 				try {
-					fileContent = getImageStr(ad.getContentUrl());
+					fileContent = getImageStr(contentUrl);
 //					String fileContent1 = getURLImage(contentUrl);
 //					
 //					System.out.println(fileContent.equals(fileContent1));

@@ -10,6 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
@@ -32,6 +33,7 @@ import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -190,9 +192,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskProvider.updateTask(task);
 			}
 			else if("ASSIGNING".equals(nodeType)) {
+				//TODO: 同步数据到科技园
 				task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
 				pmTaskProvider.updateTask(task);
 				
+//				synchronizedTaskToTechpark(task);
 			}else if("PROCESSING".equals(nodeType)) {
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
@@ -207,6 +211,35 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		pmTaskSearch.feedDoc(task);
 	}
 
+	//同步数据到科技园
+	private void synchronizedTaskToTechpark(PmTask task) {
+		UserContext context = UserContext.current();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if(namespaceId == 1000000) {
+		
+//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+//			String value = "[]";
+//			
+//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
+//			if(null != attachments) {
+//				attachments.stream().forEach(a -> {
+//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+//					a.setContentUrl(contentUrl);
+//				});
+//				value = JSONObject.toJSONString(attachments);
+//			}
+//			
+//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//	      
+//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//	        valueOperations.set(key, value);
+			
+			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
+			handler.pushToQueque(task.getId());
+		}
+	}
+	
 	@Override
 	public void onFlowCreating(Flow flow) {
 		

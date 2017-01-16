@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -63,6 +64,7 @@ import com.everhomes.rest.pmtask.ListUserTasksCommand;
 import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
+import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.rest.pmtask.PmTaskLogDTO;
@@ -436,7 +438,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			
 			pmTaskProvider.createTask(task);
 			//图片
-//			addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
+			addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
 
 //			PmTaskLog pmTaskLog = new PmTaskLog();
 //			pmTaskLog.setNamespaceId(task.getNamespaceId());
@@ -509,22 +511,22 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 //                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
 //	}
 //	
-//	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
-//		if(!CollectionUtils.isEmpty(list)){
-//			for(AttachmentDescriptor ad: list){
-//				if(null != ad){
-//					PmTaskAttachment attachment = new PmTaskAttachment();
-//					attachment.setContentType(ad.getContentType());
-//					attachment.setContentUri(ad.getContentUri());
-//					attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
-//					attachment.setCreatorUid(userId);
-//					attachment.setOwnerId(ownerId);
-//					attachment.setOwnerType(targetType);
-//					pmTaskProvider.createTaskAttachment(attachment);
-//				}
-//			}
-//		}
-//	}
+	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
+		if(!CollectionUtils.isEmpty(list)){
+			for(AttachmentDescriptor ad: list){
+				if(null != ad){
+					PmTaskAttachment attachment = new PmTaskAttachment();
+					attachment.setContentType(ad.getContentType());
+					attachment.setContentUri(ad.getContentUri());
+					attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					attachment.setCreatorUid(userId);
+					attachment.setOwnerId(ownerId);
+					attachment.setOwnerType(targetType);
+					pmTaskProvider.createTaskAttachment(attachment);
+				}
+			}
+		}
+	}
 	
 	private Category checkCategory(Long id){
 		Category category = categoryProvider.findCategoryById(id);
