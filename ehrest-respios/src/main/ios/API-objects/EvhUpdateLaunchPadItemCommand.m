@@ -46,8 +46,8 @@
         [jsonObject setObject: self.applyPolicy forKey: @"applyPolicy"];
     if(self.itemName)
         [jsonObject setObject: self.itemName forKey: @"itemName"];
-    if(self.itemLabel)
-        [jsonObject setObject: self.itemLabel forKey: @"itemLabel"];
+    if(self.itemName)
+        [jsonObject setObject: self.itemName forKey: @"itemName"];
     if(self.itemGroup)
         [jsonObject setObject: self.itemGroup forKey: @"itemGroup"];
     if(self.itemLocation)
@@ -103,9 +103,9 @@
         if(self.itemName && [self.itemName isEqual:[NSNull null]])
             self.itemName = nil;
 
-        self.itemLabel = [jsonObject objectForKey: @"itemLabel"];
-        if(self.itemLabel && [self.itemLabel isEqual:[NSNull null]])
-            self.itemLabel = nil;
+        self.itemName = [jsonObject objectForKey: @"itemName"];
+        if(self.itemName && [self.itemName isEqual:[NSNull null]])
+            self.itemName = nil;
 
         self.itemGroup = [jsonObject objectForKey: @"itemGroup"];
         if(self.itemGroup && [self.itemGroup isEqual:[NSNull null]])
