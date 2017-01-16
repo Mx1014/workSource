@@ -76,9 +76,15 @@ public class TechparkSynchronizedAction implements Runnable{
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private Long taskId;
+	private Long targetId;
+	private Long organizationId;
 	
-	public TechparkSynchronizedAction(final String taskId) {
-		this.taskId = Long.valueOf(taskId);
+	public TechparkSynchronizedAction(final String json) {
+		String[] ids = json.split(",");
+		this.taskId = Long.valueOf(ids[0]);
+		this.targetId = Long.valueOf(ids[1]);
+		this.organizationId = Long.valueOf(ids[2]);
+
 	}
 	
 	@Override
@@ -134,56 +140,17 @@ public class TechparkSynchronizedAction implements Runnable{
 		param.put("fileFlag", "1");
 		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
-		JSONArray headContent = new JSONArray();
-		JSONObject head1 = new JSONObject();
-		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
-			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
-			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getAddressOrgId());
-			if(null != orgMember) {
-				head1.put("userName", orgMember.getContactName());
-				head1.put("userId", orgMember.getTargetId());
-				head1.put("phone", orgMember.getContactToken());
-				head1.put("company", organization.getName());
-				
-				param.put("submitUserId", orgMember.getContactToken());
-			}else {
-				
-			}
-		}else {
-			Organization organization = organizationProvider.findOrganizationById(task.getOrganizationId());
-			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getOrganizationId());
-			if(null != orgMember) {
-				head1.put("userName", orgMember.getContactName());
-				head1.put("userId", orgMember.getTargetId());
-				head1.put("phone", orgMember.getContactToken());
-				head1.put("company", organization.getName());
-				
-				param.put("submitUserId", orgMember.getContactToken());
-			}
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getOrganizationId());
+		if(null != orgMember) {
+			param.put("submitUserId", orgMember.getContactToken());
 		}
-		
-		headContent.add(head1);
-		
-		JSONArray formContent = new JSONArray();
-		JSONObject form = new JSONObject();
-		if(null != task.getAddressId()) {
-			Address address = addressProvider.findAddressById(task.getAddressId());
-			if(null != address)
-				form.put("chooseStoried", address.getBuildingName());
-			else
-				form.put("chooseStoried", "");
-		}else{
-			form.put("chooseStoried", "");
-		}
-		
-		form.put("serviceType", taskCategory.getName());
-		form.put("serviceClassify", null != category?category.getName():"");
-		form.put("serviceContent", content);
-		form.put("fileType", "物业维修申请流程");
-		form.put("taskUrgencyLevel", "普通");
-		form.put("liaisonContent", "");
-		form.put("backDate", dateSF.format(new Date()));
-		formContent.add(form);
+		OrganizationMember orgMember2 = organizationProvider.findOrganizationMemberByOrgIdAndUId(targetId, organizationId);
+
+		param.put("acquiringDept", organization.getName());
+		param.put("acquiringUser", orgMember2.getContactToken());
+		param.put("serviceContent", content);
+		param.put("backDate", dateSF.format(new Date()));
 		
 		JSONArray enclosure = new JSONArray();
 		
@@ -235,8 +202,6 @@ public class TechparkSynchronizedAction implements Runnable{
 			}
 		}
 		
-		param.put("headContent", headContent);
-		param.put("formContent", formContent);
 		param.put("enclosure", enclosure);
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());
