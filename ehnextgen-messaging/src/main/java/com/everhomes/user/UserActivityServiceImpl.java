@@ -67,6 +67,7 @@ import com.everhomes.rest.activity.UserActiveStatDTO;
 import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
+import com.everhomes.rest.common.ActivityListStyleFlag;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.ForumServiceErrorCode;
 import com.everhomes.rest.forum.NewTopicCommand;
@@ -674,10 +675,18 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         rsp.setBusinessUrl(getBusinessUrl());
         rsp.setBusinessRealm(getBusinessRealm());
+        
+        //设置活动列表的默认列表样式, add by tt, 20170116
+        rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
         return rsp;
     }
     
-    private String getBusinessRealm() {
+    private Byte getActivityDefaultListStyle() {
+    	String activityDefaultListStyle = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.ACTIVITY_DEFAULT_LIST_STYLE, String.valueOf(ActivityListStyleFlag.ZUOLIN_COMMON));
+    	return Byte.parseByte(activityDefaultListStyle);
+	}
+
+	private String getBusinessRealm() {
     	String businessRealm = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_REALM, "");
         if(businessRealm.length() == 0) {
             LOGGER.error("Invalid business url path, businessRealm=" + businessRealm);
