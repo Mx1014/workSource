@@ -2498,7 +2498,7 @@ UPDATE `eh_launch_pad_items` SET default_order=10 WHERE `id`=112302 or `id`=1123
 UPDATE `eh_launch_pad_items` SET default_order=20 WHERE `id`=112311 or `id`=112330; -- 2 园区通讯录
 UPDATE `eh_launch_pad_items` SET default_order=30 WHERE `id`=112301 or `id`=112321; -- 3 园区活动
 UPDATE `eh_launch_pad_items` SET default_order=40 WHERE `id`=112306 or `id`=112326; -- 4 创新服务
-UPDATE `eh_launch_pad_items` SET default_order=50 WHERE `id`=112309 or `id`=112329; -- 5 物业服务
+UPDATE `eh_launch_pad_items` SET default_order=50 WHERE `id`=112310 or `id`=112328; -- 5 物业服务
 UPDATE `eh_launch_pad_items` SET default_order=60 WHERE `id`=112312 or `id`=112331; -- 6 公共资源预订
 UPDATE `eh_launch_pad_items` SET default_order=70 WHERE `id`=112316 or `id`=112335; -- 7 众创空间
 UPDATE `eh_launch_pad_items` SET default_order=80 WHERE `id`=112318 or `id`=112337; -- 8 智能停车场
@@ -2507,6 +2507,12 @@ UPDATE `eh_launch_pad_items` SET default_order=100 WHERE `id`=112313 or `id`=112
 UPDATE `eh_launch_pad_items` SET default_order=110 WHERE `id`=112319 or `id`=112338; -- 11 VIP车位预订
 UPDATE `eh_launch_pad_items` SET default_order=120 WHERE `id`=112834 or `id`=112835; -- 12 咨询热线
 UPDATE `eh_launch_pad_items` SET default_order=130 WHERE `id`=112317 or `id`=112336; -- 13 智慧家居
+UPDATE `eh_launch_pad_items` SET default_order=999 WHERE `id`=112314 or `id`=112333; -- 99 更多服务
+-- 视频会议移到更多、众创空间移到首页
+UPDATE `eh_launch_pad_items` SET `display_flag`=1 WHERE `id`=112316 or `id`=112335; -- 7 众创空间
+UPDATE `eh_launch_pad_items` SET `display_flag`=0 WHERE `id`=112313 or `id`=112332; -- 10 视频会议
+
+
 
 
 
