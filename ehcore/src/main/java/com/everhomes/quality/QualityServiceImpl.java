@@ -874,14 +874,15 @@ public class QualityServiceImpl implements QualityService {
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
         
 		if(isAdmin) {
+
 			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
             		cmd.getTaskType(), null, startDate, endDate, null,
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 			if(cmd.getIsReview() != null && cmd.getIsReview() == 1) {
-				
-				
+
+
 					List<Long> standardIds = qualityProvider.listQualityInspectionStandardGroupMapByGroup(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
 					tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
 		            		cmd.getTaskType(), null, startDate, endDate, null,
@@ -1052,8 +1053,8 @@ public class QualityServiceImpl implements QualityService {
 //					}
 //				}
 //			}
-			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+			Organization group = organizationProvider.findOrganizationById(r.getExecutiveGroupId());
+			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getExecutivePositionId());
 			if(group != null) {
 				dto.setGroupName(group.getName());
 				
