@@ -216,195 +216,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+import com.everhomes.util.*;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -781,10 +593,6 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.WebTokenGenerator;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.videoconf.ConfOrders;
@@ -1934,22 +1742,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		return time;
 	}
-	
 
-	private Timestamp getLaterTime(Timestamp time1, Timestamp time2) {
-		if(time1 != null) {
-			if(time2 == null) {
-				return time1;
-			}
-			
-		    if (time1.after(time2)){
-		    	return time1;
-		    };
-		}
-		
-		return time2;
-	}
-	
+
+
 	@Override
 	public EquipmentTaskDTO reportEquipmentTask(ReportEquipmentTaskCommand cmd) {
 		
@@ -1957,7 +1752,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		Timestamp now = new Timestamp(System.currentTimeMillis());
 		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
-		Timestamp laterTime = getLaterTime(task.getExecutiveExpireTime(), task.getProcessExpireTime());
+		Timestamp laterTime = DateUtils.getLaterTime(task.getExecutiveExpireTime(), task.getProcessExpireTime());
 		if(EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(task.getStatus()))
 				 && laterTime.before(now)) {
 			equipmentProvider.closeTask(task);

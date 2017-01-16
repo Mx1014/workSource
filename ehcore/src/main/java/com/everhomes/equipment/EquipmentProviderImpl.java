@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.util.DateUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -1409,9 +1410,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
 			if (locator.getAnchor() != null && locator.getAnchor() != 0)
 				query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.gt(locator.getAnchor()));
-			
+
+
 			Condition conExecutive = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current);
-			conExecutive = conExecutive.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current));
+			conExecutive = conExecutive.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current));
 			
 			conExecutive.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 			
