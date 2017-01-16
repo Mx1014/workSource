@@ -52,11 +52,21 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 
 	@Override
 	public List<Long> findManagersByDepartmentId(Long parentOrgId,
-			Long departmentId) {
+			Long departmentId, Flow flow) {
 		List<Long> users = new ArrayList<>();
-		ListOrganizationManagersCommand cmd = new ListOrganizationManagersCommand();
-		cmd.setOrganizationId(departmentId);
-		List<OrganizationManagerDTO> dtos = organizationService.listOrganizationManagers(cmd);
+		List<OrganizationManagerDTO> dtos;
+		
+		if(departmentId.equals(parentOrgId)) {
+			ListOrganizationManagersCommand cmd = new ListOrganizationManagersCommand();
+			cmd.setOrganizationId(parentOrgId);
+			cmd.setModuleId(flow.getModuleId());
+			dtos = organizationService.listOrganizationAllManagers(cmd);
+		} else {
+			ListOrganizationManagersCommand cmd = new ListOrganizationManagersCommand();
+			cmd.setOrganizationId(departmentId);
+			dtos = organizationService.listOrganizationManagers(cmd);			
+		}
+		
 		if(dtos != null) {
 			for(OrganizationManagerDTO dto: dtos) {
 				if(dto.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())) {
@@ -64,7 +74,7 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 				}
 			}
 		}
-		
+
 		return users;
 	}
 }

@@ -666,9 +666,97 @@ public class PmTaskServiceImpl implements PmTaskService {
 		return handler.getTaskDetail(cmd);
 	}
 
+	private List<PmTaskLogDTO> listPmTaskLogs(PmTaskDTO task) {
+		
+		List<PmTaskLog> taskLogs = pmTaskProvider.listPmTaskLogs(task.getId(), null);
+		List<PmTaskLogDTO> taskLogDtos = taskLogs.stream().map(r -> {
+			
+			PmTaskLogDTO pmTaskLogDTO = ConvertHelper.convert(r, PmTaskLogDTO.class);
+			
+			Map<String, Object> map = new HashMap<String, Object>();
+			
+		    String scope = PmTaskNotificationTemplateCode.SCOPE;
+		    String locale = PmTaskNotificationTemplateCode.LOCALE;
+		    
+			if(r.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+			    
+				if(null == task.getOrganizationId() || task.getOrganizationId() == 0){
+					setParam(map, task.getCreatorUid(), pmTaskLogDTO);
+				}else{
+					map.put("operatorName", task.getRequestorName());
+				    map.put("operatorPhone", task.getRequestorPhone());
+				}
+				
+				int code = PmTaskNotificationTemplateCode.UNPROCESS_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+				
+			}else if(r.getStatus().equals(PmTaskStatus.PROCESSING.getCode())){
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				User target = userProvider.findUserById(r.getTargetId());
+				UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(target.getId(), IdentifierType.MOBILE.getCode());
+				map.put("targetName", target.getNickName());
+			    map.put("targetPhone", targetIdentifier.getIdentifierToken());
+			    
+			    int code = PmTaskNotificationTemplateCode.PROCESSING_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+				
+			}else if(r.getStatus().equals(PmTaskStatus.PROCESSED.getCode())){
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				int code = PmTaskNotificationTemplateCode.PROCESSED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+				List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(r.getId(), PmTaskAttachmentType.TASKLOG.getCode());
+				List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r2 -> {
+					PmTaskAttachmentDTO dto = ConvertHelper.convert(r2, PmTaskAttachmentDTO.class);
+					String contentUrl = getResourceUrlByUir(r2.getContentUri(), 
+			                EntityType.USER.getCode(), r2.getCreatorUid());
+					dto.setContentUrl(contentUrl);
+					return dto;
+				}).collect(Collectors.toList());
+				pmTaskLogDTO.setAttachments(attachmentDtos);
+				
+			}else if(r.getStatus().equals(PmTaskStatus.CLOSED.getCode())){
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				int code = PmTaskNotificationTemplateCode.CLOSED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+			}else {
+				setParam(map, r.getOperatorUid(), pmTaskLogDTO);
+				int code = PmTaskNotificationTemplateCode.REVISITED_TASK_LOG;
+				String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+				pmTaskLogDTO.setText(text);
+			}
+			
+			return pmTaskLogDTO;
+		}).collect(Collectors.toList());
+		
+		return taskLogDtos;
+	}
+	
+	private void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
+		User user = userProvider.findUserById(userId);
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		map.put("operatorName", user.getNickName());
+	    map.put("operatorPhone", userIdentifier.getIdentifierToken());
+	    dto.setOperatorName(user.getNickName());
+	    dto.setOperatorPhone(userIdentifier.getIdentifierToken());
+	}
+
+	private void checkBlacklist(String ownerType, Long ownerId){
+		ownerType = org.springframework.util.StringUtils.isEmpty(ownerType) ? "" : ownerType;
+		ownerId = null == ownerId ? 0L : ownerId;
+		Long userId = UserContext.current().getUser().getId();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_PROPERTY_POST);
+	}
+
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
-		
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());
@@ -690,7 +778,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
-		
+
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
 		String requestorPhone = cmd.getRequestorPhone();
 		String requestorName = cmd.getRequestorName();
 		if(StringUtils.isBlank(requestorPhone)){
@@ -1723,12 +1813,28 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetIds cannot be null or empty.");
 		}
 		
+		int size = targetIds.size();
+		
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		
+		if(size == 1) {
+			
+			if(resolver.checkUserPrivilege(targetIds.get(0), EntityType.COMMUNITY.getCode(), 
+					cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
+				LOGGER.error("user privilege exist.");
+	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_PRIVILEGE_EXIST,
+	    				"user privilege exist.");
+			}
+		}
+		
 		dbProvider.execute((TransactionStatus status) -> {
 			
-			for(int i=0,l=targetIds.size(); i<l;i++ ) {
+			for(int i=0,l=size; i<l;i++ ) {
 				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
 						EntityType.USER.getCode(), targetIds.get(i));
-				if(null == pmTaskTarget) {
+				if(!resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
+						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE) &&
+						null == pmTaskTarget) {
 					pmTaskTarget = new PmTaskTarget();
 					pmTaskTarget.setRoleId(cmd.getOperateType());
 					pmTaskTarget.setOwnerId(cmd.getOwnerId());
@@ -1738,20 +1844,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 					pmTaskTarget.setTargetId(targetIds.get(i));
 					
 					pmTaskProvider.createTaskTarget(pmTaskTarget);
-					
-//					List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
-//					cmd.getOwnerId(), EntityType.USER.getCode(), targetIds.get(i));
-//					
-//					if(null == roleAssignments || roleAssignments.size() == 0) {
-//						RoleAssignment roleAssignment = new RoleAssignment();
-//						roleAssignment.setRoleId(pmTaskTarget.getRoleId());
-//						roleAssignment.setOwnerType(EntityType.COMMUNITY.getCode());
-//						roleAssignment.setOwnerId(cmd.getOwnerId());
-//						roleAssignment.setTargetType(EntityType.USER.getCode());
-//						roleAssignment.setTargetId(targetIds.get(i));
-//						roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-//						aclProvider.createRoleAssignment(roleAssignment);
-//					}
 					
 					rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
 							EntityType.USER.getCode(), targetIds.get(i), "pmtask", privilegeIds);

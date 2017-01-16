@@ -54,4 +54,5 @@ public interface AddressService {
     List<AddressDTO> listAddressByBuildingName(ListApartmentByBuildingNameCommand cmd);
     
     AddressDTO getApartmentByBuildingApartmentName(GetApartmentByBuildingApartmentNameCommand cmd);
+	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(ListApartmentFloorCommand cmd);
 }

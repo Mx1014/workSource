@@ -12,6 +12,8 @@ import java.util.List;
  * <li>organizationIds: 公司id列表</li>
  * <li>pmAdminIds: 管理员id列表</li>
  * <li>message: 消息内容</li>
+ * <li>messageBodyType: 消息类型</li>
+ * <li>imgUri: 图片uri</li>
  * </ul>
  */
 public class SendNoticeToPmAdminCommand {
@@ -24,8 +26,8 @@ public class SendNoticeToPmAdminCommand {
     private List<Long> pmAdminIds;
 
     private String message;
-    // private String messageBodyType;
-    // private String imgUri;
+    private String messageBodyType;
+    private String imgUri;
 
     public List<Long> getCommunityIds() {
         return communityIds;
@@ -57,6 +59,22 @@ public class SendNoticeToPmAdminCommand {
 
     public void setMessage(String message) {
         this.message = message;
+    }
+
+    public String getMessageBodyType() {
+        return messageBodyType;
+    }
+
+    public void setMessageBodyType(String messageBodyType) {
+        this.messageBodyType = messageBodyType;
+    }
+
+    public String getImgUri() {
+        return imgUri;
+    }
+
+    public void setImgUri(String imgUri) {
+        this.imgUri = imgUri;
     }
 
     @Override

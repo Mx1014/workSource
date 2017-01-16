@@ -2,13 +2,14 @@ package com.everhomes.rest.flow;
 
 /**
  * <ul>
- * <li>inner: 工作流内部的 Case</li>
+ * <li>inner: 工作流内部的 Case </li>
+ * <li>dumb: 哑工作流 </li>
  * </ul>
  * @author janson
  *
  */
 public enum FlowCaseType {
-	INNER("inner");
+	INNER("inner"), DUMB("dumb");
 	
 	private String code;
     private FlowCaseType(String code) {

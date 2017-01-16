@@ -15,6 +15,8 @@ import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Operator;
+import org.jooq.Record;
+import org.jooq.Result;
 import org.jooq.SelectQuery;
 import org.jooq.Table;
 import org.slf4j.Logger;
@@ -34,6 +36,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
@@ -44,6 +47,9 @@ import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
@@ -79,6 +85,8 @@ public class ActivityProviderImpl implements ActivityProivider {
         if (activity.getOfficialFlag() == null) {
 			activity.setOfficialFlag(OfficialFlag.NO.getCode());
 		}
+        activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        activity.setUpdateTime(activity.getCreateTime());
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
         dao.insert(activity);
     }
@@ -141,6 +149,7 @@ public class ActivityProviderImpl implements ActivityProivider {
     public void updateActivity(Activity activity) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, activity.getId()));
         EhActivitiesDao dao = new EhActivitiesDao(context.configuration());
+        activity.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(activity);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhActivities.class, activity.getId());
     }
@@ -193,6 +202,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhActivities.class, createRoster.getActivityId()));
         EhActivityRosterDao dao = new EhActivityRosterDao(context.configuration());
         createRoster.setId(id);
+        createRoster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.insert(createRoster);
     }
 
@@ -714,4 +724,87 @@ public class ActivityProviderImpl implements ActivityProivider {
     }
 
 
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Activity> listActivityByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor,
+			int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITIES)
+			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITIES.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ACTIVITIES.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ACTIVITIES.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Activity.class));
+		}
+		return new ArrayList<Activity>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<Activity> listActivityByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITIES)
+			.where(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITIES.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ACTIVITIES.UPDATE_TIME.asc(), Tables.EH_ACTIVITIES.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, Activity.class));
+		}
+		return new ArrayList<Activity>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<ActivityRoster> listActivitySignupByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp,
+			Long pageAnchor, int pageSize) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITY_ROSTER)
+			.join(Tables.EH_ACTIVITIES)
+			.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+			.and(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.eq(new Timestamp(timestamp)))
+			.and(Tables.EH_ACTIVITY_ROSTER.ID.gt(pageAnchor))
+			.orderBy(Tables.EH_ACTIVITY_ROSTER.ID.asc())
+			.limit(pageSize)
+			.fetch();
+		
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
+		}
+		return new ArrayList<ActivityRoster>();
+	}
+
+	/**
+	 * 金地取数据使用
+	 */
+	@Override
+	public List<ActivityRoster> listActivitySignupByUpdateTime(Integer namespaceId, Long timestamp, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Result<Record> result = context.select().from(Tables.EH_ACTIVITY_ROSTER)
+			.join(Tables.EH_ACTIVITIES)
+			.on(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(Tables.EH_ACTIVITIES.ID))
+			.and(Tables.EH_ACTIVITIES.NAMESPACE_ID.eq(namespaceId))
+			.where(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_ACTIVITY_ROSTER.CREATE_TIME.asc(), Tables.EH_ACTIVITY_ROSTER.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->RecordHelper.convert(r, ActivityRoster.class));
+		}
+		return new ArrayList<ActivityRoster>();
+	}
 }

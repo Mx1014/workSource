@@ -23,7 +23,7 @@ public class EnergyStatCommand {
     @ItemType(Long.class)
     private List<Long> billCategoryIds;
     @ItemType(Long.class)
-    private List<Long>serviceCategoryIds;
+    private List<Long> serviceCategoryIds;
     private Long statDate;
     @ItemType(Byte.class)
     private List<Byte> statBills;

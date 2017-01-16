@@ -10,6 +10,7 @@ import java.util.Locale;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.hibernate.jpa.criteria.ValueHandlerFactory.LongValueHandler;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -307,7 +308,7 @@ public class GroupServiceImpl implements GroupService {
     //因为提示“不允许创建俱乐部”中的俱乐部三个字是可配的，所以这里这样处理下，add by tt, 20161102
     @Override
     public RestResponse createAGroup(CreateGroupCommand cmd) {
-    	Integer namespaceId = (cmd.getNamespaceId() == null) ? UserContext.getCurrentNamespaceId(): cmd.getNamespaceId();
+    	Integer namespaceId =  UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
     	//创建俱乐部需要从后台获取设置的参数判断允不允许创建俱乐部， add by tt, 20161102
     	GroupSetting groupSetting = null;
     	if (cmd.getPrivateFlag() != null && GroupPrivacy.fromCode(cmd.getPrivateFlag()) == GroupPrivacy.PUBLIC) {
@@ -346,7 +347,15 @@ public class GroupServiceImpl implements GroupService {
             return user.getLocale();
         return Locale.SIMPLIFIED_CHINESE.toString();
     }
-    
+
+    private void checkBlacklist(String ownerType, Long ownerId){
+        ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
+        ownerId = null == ownerId ? 0L : ownerId;
+        Long userId = UserContext.current().getUser().getId();
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_CLUP);
+    }
+
     private GroupDTO createGroup(CreateGroupCommand cmd, GroupSetting groupSetting) {
     	Integer namespaceId = (cmd.getNamespaceId() == null) ? UserContext.getCurrentNamespaceId() : cmd.getNamespaceId();
     	
@@ -393,8 +402,13 @@ public class GroupServiceImpl implements GroupService {
             if(cmd.getPrivateFlag() != null)
                 privateFlag = cmd.getPrivateFlag().byteValue();
             group.setPrivateFlag(privateFlag);
-            
-            
+
+            //黑名单权限校验 by sfyan20161213
+            if(GroupDiscriminator.fromCode(group.getDiscriminator()) == GroupDiscriminator.GROUP
+                    && GroupPrivacy.fromCode(group.getPrivateFlag()) == GroupPrivacy.PUBLIC){
+                checkBlacklist(null, null);
+            }
+
             // join policy is not exposed current in API, derive it from its visibility flag
             if(privateFlag != 0) {
             	Integer joinPolicy = cmd.getJoinPolicy();
@@ -449,6 +463,7 @@ public class GroupServiceImpl implements GroupService {
             if (group.getStatus() == null) {
             	group.setStatus(GroupAdminStatus.ACTIVE.getCode());
 			}
+
             this.groupProvider.createGroup(group);
     
             // create the group owned forum and save it

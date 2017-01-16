@@ -6,14 +6,13 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.cache.CacheAccessor;
 import com.everhomes.cache.CacheProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.http.HttpUtils;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationAddress;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.*;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -49,7 +48,7 @@ import java.util.stream.Collectors;
 @Service
 public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
-    private final Logger LOGGER = LoggerFactory.getLogger(PmKeXingBillServiceImpl.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(PmKeXingBillServiceImpl.class);
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -62,6 +61,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 
     @Autowired
     private RolePrivilegeService rolePrivilegeService;
@@ -151,17 +153,20 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         if (cmd.getBillStatus() != null) {
             params.put("isPay", cmd.getBillStatus()+"");
         }
-        params.put("pageCount", (cmd.getPageOffset() != null ? cmd.getPageOffset() : 1)+"");
-        params.put("pageSize", pageSize+"");
+        params.put("pageCount", "1");
+        params.put("pageSize", "1000");
 
-        LocalDate date = LocalDate.now().plusMonths(10);
-        // LocalDate date = LocalDate.now().plusMonths(10);
-        int monthOffset = (cmd.getPageOffset() != null ? cmd.getPageOffset() - 1 : 0) * pageSize;
+        LocalDate date = LocalDate.now().plusMonths(20);
+        // LocalDate date = LocalDate.now();
+
+        int pageOffset = cmd.getPageOffset() != null ? cmd.getPageOffset() - 1 : 0;
+        int monthOffset = pageOffset * pageSize + pageOffset;
+
         params.put("sdateFrom", date.minusMonths(monthOffset + pageSize).format(DateTimeFormatter.ofPattern("yyyy-MM")));
         params.put("sdateTo", date.minusMonths(monthOffset).format(DateTimeFormatter.ofPattern("yyyy-MM")));
 
         BillItemList itemList = post(api, params, BillItemList.class);
-        return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset()) : new ListPmKeXingBillsResponse();
+        return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset(), pageSize) : new ListPmKeXingBillsResponse();
     }
 
     private void putLatestSelectedOrganizationToCache(Long organizationId) {
@@ -230,7 +235,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("companyName", organization.getName());
         params.put("pageCount", "1");
         params.put("pageSize", "1000");
-        params.put("sdate", cmd.getDateStr());// 不传查所有
+        params.put("sdateFrom", cmd.getDateStr());
+        params.put("sdateTo", cmd.getDateStr());
 
         BillItemList itemList = post(api, params, BillItemList.class);
         if (itemList != null && itemList.result.size() > 0) {
@@ -261,6 +267,18 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_ORG_NOT_EXIST,
                     "Organization are not exist");
         }
+        if (organization.getCommunityId() == null || organization.getCommunityName() == null) {
+            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+            if (communityRequest != null) {
+                Community community = communityProvider.findCommunityById(communityRequest.getCommunityId());
+                if (community != null) {
+                    organization.setCommunityId(community.getId());
+                    organization.setCommunityName(community.getName());
+                }
+            }
+        }
+        if (LOGGER.isDebugEnabled())
+            LOGGER.debug("Current user organization is {}", organization);
         return organization;
     }
 
@@ -290,8 +308,11 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
     private String post(String api, Map<String, String> params) {
         try {
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("Http post params is :{}", params.toString());
+            }
             return HttpUtils.post(api, params, 10, "utf-8");
-        } catch (Exception e) {
+        } catch (Throwable e) {
             LOGGER.error("Http post error for api: {}", api, e);
             throw RuntimeErrorException.errorWith(PmKeXingBillServiceErrorCode.SCOPE, PmKeXingBillServiceErrorCode.ERROR_HTTP_REQUEST,
                     "Http post error");
@@ -307,7 +328,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         @XmlElement
         private List<BillItem> result = new ArrayList<>();
 
-        ListPmKeXingBillsResponse toPmKeXingBillResponse(Integer pageOffset) {
+        ListPmKeXingBillsResponse toPmKeXingBillResponse(Integer pageOffset, Integer pageSize) {
             ListPmKeXingBillsResponse response = new ListPmKeXingBillsResponse();
 
             Map<String, List<BillItem>> dateBillItemListMap = result.parallelStream().collect(Collectors.groupingBy(BillItem::getBillDate));
@@ -317,7 +338,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
                 response.getBills().add(dto);
             });
 
-            if (result.size() > 0 && result.get(result.size() - 1).hasNextPag > 0) {
+            // 因为对方提供的分页机制有点问题, 所以我们这边只要取到数据就设置有下一页, 直到取不到数据为止
+            if (response.getBills().size() >= pageSize) {
                 response.setNextPageOffset(pageOffset != null ? pageOffset + 1 : 2);
             }
             response.getBills().sort((o1, o2) -> o2.getBillDate().compareTo(o1.getBillDate()));
@@ -350,17 +372,6 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             dateBillItemListMap.forEach((date, itemList) -> dtoArr[0] = this.toPmKeXingBillDTO(date, itemList));
             return dtoArr[0];
         }
-
-        /*List<PmKeXingBillDTO> toPmKeXingBillDTOList() {
-            List<PmKeXingBillDTO> dtoList = new ArrayList<>();
-            Map<String, List<BillItem>> dateBillItemListMap = result.parallelStream().collect(Collectors.groupingBy(BillItem::getBillDate));
-
-            dateBillItemListMap.forEach((date, billItemList) -> {
-                PmKeXingBillDTO dto = this.toPmKeXingBillDTO(date, billItemList);
-                dtoList.add(dto);
-            });
-            return dtoList;
-        }*/
     }
 
     private static String currLocale() {
@@ -393,7 +404,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         }
 
         String getBillDate() {
-            return billDate;
+            return billDate != null ? billDate : "";
         }
 
         BigDecimal getReceivable() {

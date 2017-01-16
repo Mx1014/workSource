@@ -8,7 +8,7 @@ package com.everhomes.rest.energy;
  */
 public enum EnergyCategoryDefault {
 
-	RECEIVABLE( 1L,"应收"), PAYABLE(2L,"应付");
+	RECEIVABLE(1L,"应收"), PAYABLE(2L,"应付");
 
     private long code;
     private String name;
@@ -26,7 +26,7 @@ public enum EnergyCategoryDefault {
 
     public static EnergyCategoryDefault fromCode(Long code) {
         for (EnergyCategoryDefault type : EnergyCategoryDefault.values()) {
-            if (type.getCode() == code.longValue()) {
+            if (type.getCode() == code) {
                 return type;
             }
         }

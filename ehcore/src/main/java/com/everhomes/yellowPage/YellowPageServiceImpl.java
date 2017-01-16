@@ -847,9 +847,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			attachment.setAttachmentType(attachmentType);
 			
 			attachment.setCreatorUid(UserContext.current().getUser().getId());
-	        ContentServerResource resource = contentServerService.findResourceByUri(dto.getContentUri());
-	        Integer size = resource.getResourceSize();
-	        attachment.setFileSize(size);
+	        attachment.setFileSize(dto.getFileSize());
 	        
 			this.yellowPageProvider.createServiceAllianceAttachments(attachment);
 		}

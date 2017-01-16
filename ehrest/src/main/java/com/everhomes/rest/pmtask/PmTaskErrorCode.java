@@ -20,6 +20,7 @@ public interface PmTaskErrorCode {
     
     int ERROR_ENABLE_FLOW = 10008;  //请启用工作流
     
-    int ERROR_CATEGORY_NULL = 10009;  //分类不能为空！
-    
+    int ERROR_USER_PRIVILEGE_EXIST = 10009;  //用户已有该权限，不能重复添加!
+
+    int ERROR_CATEGORY_NULL = 10010;  //分类不能为空！   
 }

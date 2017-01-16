@@ -43,6 +43,8 @@ public interface PrivilegeConstants {
     public static final long COMPLETETASK = 332L; 
     public static final long CLOSETASK = 333L;
     public static final long REVISITTASK = 920L;
+    public static final long PM_TASK_MODULE = 10008L;
+
     
     // privileges defined by Notice module
     public static final long NoticeManagementPost = 200L;
@@ -75,7 +77,32 @@ public interface PrivilegeConstants {
 
     //业务授权
     public static final long SERVICE_AUTHORIZATION = 10044L;
-    
+
+    //黑名单话题投票发帖、评论、回复评论
+    public static final long BLACKLIST_COMMON_POLLING_POST = 1001L;
+
+    //黑名单活动发帖、评论、回复评论
+    public static final long BLACKLIST_ACTIVITY_POST = 1002L;
+
+    //黑名单公告发帖、评论、回复评论
+    public static final long BLACKLIST_NOTICE_POST = 1003L;
+
+    //黑名单园区快讯发帖、评论、回复评论
+    public static final long BLACKLIST_NEWS = 1004L;
+
+    //黑名单创建俱乐部
+    public static final long BLACKLIST_CLUP = 1005L;
+
+    //黑名单物业发帖、评论、回复评论
+    public static final long BLACKLIST_PROPERTY_POST = 1006L;
+
+    //黑名单发消息
+    public static final long BLACKLIST_SEND_MESSAGE = 1007L;
+
+    //黑名单意见反馈论坛
+    public static final long BLACKLIST_FEEDBACK_FORUM = 1008L;
+
+
     //11开头是资源预约权限 
     public static final long RENTAL_CHECK = 1101L; 
 }
