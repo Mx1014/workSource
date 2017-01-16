@@ -684,7 +684,7 @@ public class UserActivityServiceImpl implements UserActivityService {
     }
     
     private Byte getActivityDefaultListStyle() {
-    	String activityDefaultListStyle = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.ACTIVITY_DEFAULT_LIST_STYLE, String.valueOf(ActivityListStyleFlag.ZUOLIN_COMMON));
+    	String activityDefaultListStyle = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.ACTIVITY_DEFAULT_LIST_STYLE, String.valueOf(ActivityListStyleFlag.ZUOLIN_COMMON.getCode()));
     	return Byte.parseByte(activityDefaultListStyle);
 	}
 
