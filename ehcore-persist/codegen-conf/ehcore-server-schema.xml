@@ -127,8 +127,6 @@
         eh_pm_task_target_statistics |
         eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
 		eh_user_blacklists |
-		eh_terminal_app_version_cumulatives | eh_terminal_app_version_actives | eh_terminal_day_statistics | eh_terminal_hour_statistics | eh_terminal_app_version_statistics | eh_app_version | eh_terminal_statistics_tasks |
-        eh_pm_task_target_statistics |
         eh_service_alliance_invest_requests | eh_service_alliance_jump_module |
         eh_parking_clearance_operators | eh_parking_clearance_logs |
         eh_parking_flow | eh_parking_statistics | eh_parking_car_series | eh_parking_attachments |
@@ -136,7 +134,8 @@
 		eh_flows | eh_flow_stats | eh_flow_nodes | eh_flow_buttons | eh_flow_forms | eh_flow_actions | eh_flow_user_selections | eh_flow_cases | eh_flow_event_logs | eh_flow_variables | eh_flow_evaluates | eh_flow_scripts | eh_flow_attachments | eh_flow_subjects | eh_flow_timeouts | eh_flow_evaluate_items |
         eh_service_hotlines | eh_service_configurations |
         eh_launch_advertisements |
-		eh_techpark_syncdata_backup |       
+		eh_techpark_syncdata_backup |
+        eh_general_forms | eh_general_approvals | eh_general_approval_vals  
         </includes>
 
             <!-- All elements that are excluded from your schema

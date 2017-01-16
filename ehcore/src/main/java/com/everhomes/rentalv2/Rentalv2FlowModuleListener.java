@@ -127,7 +127,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		// e.setKey("test-text-key2");
 		// e.setValue("test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2test-list-value2");
 		// entities.add(e);
-
+		
 		RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
 		FlowCaseEntity e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -366,6 +366,12 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowCaseCreated(FlowCase flowCase) {
 		// TODO Auto-generated method stub
 		
 	}
