@@ -697,6 +697,7 @@ public class PropertyMgrController extends ControllerBase {
 	@RequestMapping("listOrganizationOwnerCarsByAddress")
 	@RestReturn(value=OrganizationOwnerCarDTO.class, collection = true)
 	public RestResponse listOrganizationOwnerCarsByAddress(@Valid ListOrganizationOwnerCarsByAddressCommand cmd) {
+
 		List<OrganizationOwnerCarDTO> dtoList = propertyMgrService.listOrganizationOwnerCarsByAddress(cmd);
 		RestResponse response = new RestResponse(dtoList);
 		response.setErrorCode(ErrorCodes.SUCCESS);
