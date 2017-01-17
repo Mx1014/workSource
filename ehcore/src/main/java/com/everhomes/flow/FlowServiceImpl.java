@@ -609,28 +609,40 @@ public class FlowServiceImpl implements FlowService {
 		FlowAction action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
 		if(action != null) {
-			dto.setReminderMessageEnabled((byte)1);
+			if(action.getStatus().equals(FlowActionStatus.ENABLED.getCode())) {
+				dto.setReminderMessageEnabled((byte)1);	
+			}
+			
 			dto.setMessageAction(actionToDTO(action));
 		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
 		if(action != null) {
-			dto.setReminderSMSEnabled((byte)1);
+			if(action.getStatus().equals(FlowActionStatus.ENABLED.getCode())) {
+				dto.setReminderSMSEnabled((byte)1);	
+			}
+			
 			dto.setSmsAction(actionToDTO(action));
 		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.TICK_MESSAGE.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
 		if(action != null) {
-			dto.setReminderTickMsgEnabled((byte)1);
+			if(action.getStatus().equals(FlowActionStatus.ENABLED.getCode())) {
+				dto.setReminderTickMsgEnabled((byte)1);	
+			}
+			
 			dto.setTickMessageAction(actionToDTO(action));
 		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.TICK_SMS.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
 		if(action != null) {
-			dto.setReminderTickSMSEnabled((byte)1);
+			if(action.getStatus().equals(FlowActionStatus.ENABLED.getCode())) {
+				dto.setReminderTickSMSEnabled((byte)1);	
+			}
+			
 			dto.setTickSMSAction(actionToDTO(action));
 		}
 		
