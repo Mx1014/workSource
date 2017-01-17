@@ -1,5 +1,7 @@
 package com.everhomes.aclink;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.security.Security;
 import java.util.ArrayList;
 import java.util.Arrays;
@@ -15,10 +17,20 @@ import java.util.regex.Pattern;
 
 import javax.annotation.PostConstruct;
 import javax.crypto.Cipher;
-import javax.crypto.KeyGenerator;
-import javax.crypto.SecretKey;
 import javax.crypto.spec.SecretKeySpec;
+import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.payment.util.DownloadUtil;
+import com.everhomes.rest.aclink.*;
+import com.everhomes.rest.organization.*;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.sms.DateUtil;
+import com.everhomes.util.*;
+import org.apache.poi.ss.usermodel.Font;
+import org.apache.poi.xssf.usermodel.XSSFCellStyle;
+import org.apache.poi.xssf.usermodel.XSSFRow;
+import org.apache.poi.xssf.usermodel.XSSFSheet;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.jooq.Condition;
 import org.jooq.Record;
@@ -49,7 +61,6 @@ import com.everhomes.border.BorderProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
-import com.everhomes.constants.ErrorCodes;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
@@ -63,92 +74,13 @@ import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
-import com.everhomes.rest.aclink.AclinkConnectingCommand;
-import com.everhomes.rest.aclink.AclinkCreateDoorAuthListCommand;
-import com.everhomes.rest.aclink.AclinkDeviceVer;
-import com.everhomes.rest.aclink.AclinkDisconnectedCommand;
-import com.everhomes.rest.aclink.AclinkFirmwareDTO;
-import com.everhomes.rest.aclink.AclinkFirmwareType;
-import com.everhomes.rest.aclink.AclinkLogCreateCommand;
-import com.everhomes.rest.aclink.AclinkLogDTO;
-import com.everhomes.rest.aclink.AclinkLogItem;
-import com.everhomes.rest.aclink.AclinkLogListResponse;
-import com.everhomes.rest.aclink.AclinkMessage;
-import com.everhomes.rest.aclink.AclinkMessageMeta;
-import com.everhomes.rest.aclink.AclinkMgmtCommand;
-import com.everhomes.rest.aclink.AclinkNotificationTemplateCode;
-import com.everhomes.rest.aclink.AclinkQueryLogCommand;
-import com.everhomes.rest.aclink.AclinkQueryLogResponse;
-import com.everhomes.rest.aclink.AclinkServiceErrorCode;
-import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeCommand;
-import com.everhomes.rest.aclink.AclinkUpgradeResponse;
-import com.everhomes.rest.aclink.AclinkUserDTO;
-import com.everhomes.rest.aclink.AclinkUserResponse;
-import com.everhomes.rest.aclink.AclinkWebSocketMessage;
-import com.everhomes.rest.aclink.AesUserKeyDTO;
-import com.everhomes.rest.aclink.AesUserKeyStatus;
-import com.everhomes.rest.aclink.AesUserKeyType;
-import com.everhomes.rest.aclink.CreateAclinkFirmwareCommand;
-import com.everhomes.rest.aclink.CreateDoorAccessGroup;
-import com.everhomes.rest.aclink.CreateDoorAccessLingLing;
-import com.everhomes.rest.aclink.CreateDoorAuthByUser;
-import com.everhomes.rest.aclink.CreateDoorAuthCommand;
-import com.everhomes.rest.aclink.CreateDoorVisitorCommand;
-import com.everhomes.rest.aclink.CreateLinglingVisitorCommand;
-import com.everhomes.rest.aclink.CreateQRUserPermissionCommand;
-import com.everhomes.rest.aclink.DataUtil;
-import com.everhomes.rest.aclink.DeleteQRUserPermissionCommand;
-import com.everhomes.rest.aclink.DoorAccessActivedCommand;
-import com.everhomes.rest.aclink.DoorAccessActivingCommand;
-import com.everhomes.rest.aclink.DoorAccessAdminUpdateCommand;
-import com.everhomes.rest.aclink.DoorAccessCapapilityDTO;
-import com.everhomes.rest.aclink.DoorAccessDTO;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
-import com.everhomes.rest.aclink.DoorAccessLinkStatus;
-import com.everhomes.rest.aclink.DoorAccessOwnerType;
-import com.everhomes.rest.aclink.DoorAccessQRKeyDTO;
-import com.everhomes.rest.aclink.DoorAccessStatus;
-import com.everhomes.rest.aclink.DoorAccessType;
-import com.everhomes.rest.aclink.DoorAuthDTO;
-import com.everhomes.rest.aclink.DoorAuthStatus;
-import com.everhomes.rest.aclink.DoorAuthType;
-import com.everhomes.rest.aclink.DoorLinglingExtraKeyDTO;
-import com.everhomes.rest.aclink.DoorMessage;
-import com.everhomes.rest.aclink.DoorMessageType;
-import com.everhomes.rest.aclink.DoorUserPermissionDTO;
-import com.everhomes.rest.aclink.GetCurrentFirmwareCommand;
-import com.everhomes.rest.aclink.GetDoorAccessCapapilityCommand;
-import com.everhomes.rest.aclink.GetShortMessageCommand;
-import com.everhomes.rest.aclink.GetShortMessageResponse;
-import com.everhomes.rest.aclink.GetVisitorCommand;
-import com.everhomes.rest.aclink.GetVisitorResponse;
-import com.everhomes.rest.aclink.ListAclinkUserCommand;
-import com.everhomes.rest.aclink.ListAesUserKeyByUserResponse;
-import com.everhomes.rest.aclink.ListDoorAccessByOwnerIdCommand;
-import com.everhomes.rest.aclink.ListDoorAccessGroupCommand;
-import com.everhomes.rest.aclink.ListDoorAccessQRKeyResponse;
-import com.everhomes.rest.aclink.ListDoorAccessResponse;
-import com.everhomes.rest.aclink.ListDoorAuthCommand;
-import com.everhomes.rest.aclink.ListDoorAuthResponse;
-import com.everhomes.rest.aclink.ListQRUserPermissionCommand;
-import com.everhomes.rest.aclink.ListQRUserPermissionResponse;
-import com.everhomes.rest.aclink.QueryDoorAccessAdminCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageCommand;
-import com.everhomes.rest.aclink.QueryDoorMessageResponse;
-import com.everhomes.rest.aclink.SearchDoorAuthCommand;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.group.GroupNotificationTemplateCode;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessageMetaConstant;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.organization.OrganizationGroupType;
-import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rpc.server.AclinkRemotePdu;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.MessageChannelType;
@@ -162,13 +94,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
 
 import org.apache.commons.codec.binary.Base64;
-import org.apache.commons.httpclient.util.DateUtil;
+import org.springframework.util.StringUtils;
 
 
 @Component
@@ -270,6 +198,9 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
     
     final static String LAST_TICK = "dooraccess:%d:lasttick";
+
+    final static String DOOR_AUTH_ALL_USER = "doorauth:%d:alluser";
+
     final static long TASK_TICK_TIMEOUT = 5*60*1000;
     public final static String Manufacturer = "zuolin001";
     private final static long MAX_KEY_ID = 1024;
@@ -443,40 +374,195 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         CrossShardListingLocator locator = new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        
-        List<AclinkUser> users = userProvider.searchDoorUsers(cmd, locator, pageSize);
-        
-        List<AclinkUserDTO> userDTOs = new ArrayList<AclinkUserDTO>();
-        for(AclinkUser u : users) {
-            AclinkUserDTO dto = ConvertHelper.convert(u, AclinkUserDTO.class);
-            if(dto.getCompanyId() != null) {
-                Organization org = organizationProvider.findOrganizationById(dto.getCompanyId());    
-                if(org != null) {
-                    dto.setCompany(org.getName());
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        List<User> users = null;
+        if(!StringUtils.isEmpty(cmd.getKeyword())){
+            users = userProvider.listUserByNamespace(cmd.getKeyword(), namespaceId, locator, pageSize);
+        }else if(null != cmd.getOrganizationId()){
+            users = doorAuthProvider.listDoorAuthByOrganizationId(cmd.getOrganizationId(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize);
+        }else{
+            users = doorAuthProvider.listDoorAuthByIsAuth(cmd.getIsAuth(), cmd.getIsOpenAuth(), cmd.getDoorId(), locator, pageSize, namespaceId);
+        }
+
+        List<AclinkUserDTO> userDTOs = new ArrayList<>();
+
+        for (User user: users) {
+            List<OrganizationSimpleDTO> organizationDTOs = organizationService.listUserRelateOrgs(null, user);
+            AclinkUserDTO dto = ConvertHelper.convert(user, AclinkUserDTO.class);
+            dto.setRegisterTime(user.getCreateTime().getTime());
+            if(null != organizationDTOs && organizationDTOs.size() > 0){
+                OrganizationSimpleDTO organization =  organizationDTOs.get(0);
+                dto.setUserName(organization.getContactName());
+                dto.setCompany(organization.getName());
+                dto.setCompanyId(organization.getId());
+                dto.setPhone(organization.getContactToken());
+                dto.setIsAuth((byte)1);
+            }else{
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+                dto.setIsAuth((byte)0);
+                if(null != identifier){
+                    dto.setPhone(identifier.getIdentifierToken());
                 }
             }
-            
-            dto.setPhone(u.getIdentifierToken());
             DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthForever(cmd.getDoorId(), dto.getId());
             if(doorAuth != null) {
                 dto.setRightOpen(doorAuth.getRightOpen());
                 dto.setRightRemote(doorAuth.getRightRemote());
                 dto.setRightVisitor(doorAuth.getRightVisitor());
                 dto.setAuthId(doorAuth.getId());
+                dto.setAuthTime(doorAuth.getCreateTime().getTime());
             } else {
                 dto.setRightOpen((byte)0);
                 dto.setRightRemote((byte)0);
                 dto.setRightVisitor((byte)0);
-                }
+            }
             userDTOs.add(dto);
         }
-        
+
         AclinkUserResponse resp = new AclinkUserResponse();
         resp.setUsers(userDTOs);
         resp.setNextPageAnchor(locator.getAnchor());
         return resp;
     }
-    
+
+    @Override
+    public void exportAclinkUsersXls(ListAclinkUserCommand cmd, HttpServletResponse response){
+        ByteArrayOutputStream out = null;
+        XSSFWorkbook wb = this.createXSSFWorkbook(cmd);
+        try {
+            out = new ByteArrayOutputStream();
+            wb.write(out);
+            DownloadUtil.download(out, response);
+        } catch (Exception e) {
+            LOGGER.error("export error, e = {}", e);
+        } finally{
+            try {
+                wb.close();
+                out.close();
+            } catch (IOException e) {
+                LOGGER.error("close error", e);
+            }
+        }
+    }
+
+    /**
+     * 创建excel
+     * @param cmd
+     * @return
+     */
+    private XSSFWorkbook createXSSFWorkbook(ListAclinkUserCommand cmd){
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+
+        XSSFWorkbook wb = new XSSFWorkbook();
+        String sheetName = "门禁受权用户列表";
+        XSSFSheet sheet = wb.createSheet(sheetName);
+        XSSFCellStyle style = wb.createCellStyle();// 样式对象
+        Font font = wb.createFont();
+        font.setFontHeightInPoints((short)20);
+        font.setFontName("Courier New");
+
+        style.setFont(font);
+
+        XSSFCellStyle titleStyle = wb.createCellStyle();// 样式对象
+        titleStyle.setFont(font);
+        titleStyle.setAlignment(XSSFCellStyle.ALIGN_CENTER);
+
+        int rowNum = 0;
+
+        XSSFRow row1 = sheet.createRow(rowNum ++);
+        row1.setRowStyle(style);
+        int cellN = 0;
+        row1.createCell(cellN ++).setCellValue("用户昵称");
+        row1.createCell(cellN ++).setCellValue("手机号");
+        row1.createCell(cellN ++).setCellValue("注册时间");
+        row1.createCell(cellN ++).setCellValue("认证状态");
+        row1.createCell(cellN ++).setCellValue("开门权限");
+        if(namespaceId != 999990){
+            row1.createCell(cellN ++).setCellValue("访客授权权限");
+            row1.createCell(cellN ++).setCellValue("远程开门权限");
+        }
+        row1.createCell(cellN ++).setCellValue("真是姓名");
+        row1.createCell(cellN ++).setCellValue("公司");
+        row1.createCell(cellN ++).setCellValue("认证时间");
+
+        cmd.setPageSize(1000);
+        while (true){
+            AclinkUserResponse userRes = this.listAclinkUsers(cmd);
+            for (AclinkUserDTO user: userRes.getUsers()) {
+                cellN = 0;
+                XSSFRow row = sheet.createRow(rowNum ++);
+                row.setRowStyle(style);
+                row.createCell(cellN ++).setCellValue(user.getNickName());
+                row.createCell(cellN ++).setCellValue(user.getPhone());
+                row.createCell(cellN ++).setCellValue(DateUtil.dateToStr(new Date(user.getRegisterTime()), DateUtil.DATE_TIME_LINE));
+                row.createCell(cellN ++).setCellValue(user.getIsAuth() > 0 ? "已认证" : "未认证");
+                row.createCell(cellN ++).setCellValue(user.getRightOpen() > 0 ? "已授权" : "未授权");
+                if(namespaceId != 999990){
+                    row.createCell(cellN ++).setCellValue(user.getRightVisitor() > 0 ? "已授权" : "未授权");
+                    row.createCell(cellN ++).setCellValue(user.getRightRemote() > 0 ? "已授权" : "未授权");
+                }
+                row.createCell(cellN ++).setCellValue(user.getUserName());
+                row.createCell(cellN ++).setCellValue(user.getCompany());
+                row.createCell(cellN ++).setCellValue(null != user.getAuthTime() ? DateUtil.dateToStr(new Date(user.getRegisterTime()), DateUtil.DATE_TIME_LINE) : "");
+            }
+
+            if(null == userRes.getNextPageAnchor()){
+                break;
+            }
+            cmd.setPageAnchor(userRes.getNextPageAnchor());
+        }
+
+        return wb;
+    }
+
+    @Override
+    public DoorAuthStatisticsDTO qryDoorAuthStatistics(QryDoorAuthStatisticsCommand cmd){
+        DoorAuthStatisticsDTO dto = new DoorAuthStatisticsDTO();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Long utn = doorAuthProvider.countDoorAuthUser(null, null, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long autn = doorAuthProvider.countDoorAuthUser(null, (byte)1, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long uautn = doorAuthProvider.countDoorAuthUser(null, (byte)0, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long acutn = doorAuthProvider.countDoorAuthUser((byte)1, (byte)1, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long aucutn = doorAuthProvider.countDoorAuthUser((byte)0, (byte)1, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long uacutn = doorAuthProvider.countDoorAuthUser((byte)1, (byte)0, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        Long uaucutn = doorAuthProvider.countDoorAuthUser((byte)0, (byte)0, cmd.getDoorId(), namespaceId, cmd.getRightType());
+        dto.setUtn(utn);
+        dto.setAutn(autn);
+        dto.setUautn(uautn);
+        dto.setAcutn(acutn);
+        dto.setAucutn(aucutn);
+        dto.setUacutn(uacutn);
+        dto.setUaucutn(uaucutn);
+        return dto;
+    }
+
+    @Override
+    public ListDoorAuthLogResponse listDoorAuthLogs(ListDoorAuthLogCommand cmd){
+        ListDoorAuthLogResponse res = new ListDoorAuthLogResponse();
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        CrossShardListingLocator locator = new CrossShardListingLocator();
+        locator.setAnchor(cmd.getPageAnchor());
+        List<DoorAuthLogDTO> dtos = new ArrayList<>();
+        List<DoorAuthLog> logs = doorAuthProvider.listDoorAuthLogsByUserId(locator, pageSize, cmd.getUserId(), cmd.getDoorId());
+        for (DoorAuthLog log: logs) {
+            DoorAuthLogDTO dto = ConvertHelper.convert(log, DoorAuthLogDTO.class);
+            dto.setCreateTime(log.getCreateTime().getTime());
+            User user = userProvider.findUserById(log.getCreateUid());
+            if(null != user){
+                dto.setCreateUname(user.getNickName());
+                UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+                if(null != identifier){
+                    dto.setCreateUtoken(identifier.getIdentifierToken());
+                }
+            }
+            dtos.add(dto);
+        }
+        res.setDtos(dtos);
+        res.setNextPageAnchor(locator.getAnchor());
+        return res;
+    }
+
     /**
      * <ul> 授权的静态数据，不同授权对应的真实钥匙需要客户端来取的时候产生。
      * <li></li>
@@ -484,6 +570,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
      */
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthCommand cmd) {
+
         if(cmd.getApproveUserId() == null) {
             User user = UserContext.current().getUser();
             cmd.setApproveUserId(user.getId());
@@ -588,7 +675,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             rlt.setDoorName(doorAcc.getName());
             rlt.setHardwareId(doorAcc.getHardwareId());
         }
-        
+
+        // 记录操作日志
+        this.createDoorAuthLog(doorAuth);
+
         User tmpUser = new User();
         tmpUser.setId(user.getId());
         tmpUser.setAccountName(user.getAccountName());
@@ -601,9 +691,39 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         } else {
             sendMessageToUser(tmpUser, doorAcc, DoorAccessType.ZLACLINK_WIFI.getCode());    
         }
-        
+
         return rlt;
     }
+
+    private void createDoorAuthLog(DoorAuth doorAuth){
+        DoorAuthLog log = new DoorAuthLog();
+        log.setDoorId(doorAuth.getDoorId());
+        log.setUserId(doorAuth.getUserId());
+        log.setRightContent(doorAuth.getRightOpen() + "," + doorAuth.getRightVisitor() + "," + doorAuth.getRightRemote());
+        log.setCreateUid(UserContext.current().getUser().getId());
+        String discription = "";
+        if(doorAuth.getRightOpen() > 0){
+            discription += "授权开门权限";
+        }else{
+            discription += "<font color=\"red\">取消授权开门权限</font>";
+        }
+
+        if(doorAuth.getRightVisitor() > 0){
+            discription += "<br>授权访客授权权限";
+        }else{
+            discription += "<br><font color=\"red\">取消授权访客授权权限</font>";
+        }
+
+        if(doorAuth.getRightRemote() > 0){
+            discription += "<br>授权远程开门权限";
+        }else{
+            discription += "<br><font color=\"red\">取消授权远程开门权限</font>";
+        }
+
+        log.setDiscription(discription);
+        doorAuthProvider.createDoorAuthLog(log);
+    }
+
     
     @Override
     public DoorAuthDTO createDoorAuth(CreateDoorAuthByUser cmd2) {
@@ -1383,6 +1503,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         for(DoorAuth auth : auths) {
             DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(auth.getDoorId());
             DoorAuthDTO dto = ConvertHelper.convert(auth, DoorAuthDTO.class);
+            dto.setGoFloor(auth.getCurrStorey());
             dto.setHardwareId(doorAccess.getHardwareId());
             dto.setDoorName(doorAccess.getName());
             dto.setPhone(auth.getPhone());
@@ -2160,6 +2281,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         auth.setPhone(cmd.getPhone());
         auth.setNickname(cmd.getUserName());
         auth.setKeyValidTime(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
+        auth.setValidFromMs(
+                System.currentTimeMillis()
+        );
+        auth.setValidEndMs(System.currentTimeMillis() + KEY_TICK_ONE_DAY);
         
         List<DoorAccess> childs = null;
         
@@ -2426,12 +2551,66 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         
         List<DoorAuthDTO> dtos = new ArrayList<DoorAuthDTO>();
         resp.setDtos(dtos);
-        
+
         for(CreateDoorAuthCommand authCmd: cmd.getAuths()) {
             DoorAuthDTO dto = createDoorAuth(authCmd);
             dtos.add(dto);
         }
         
+        return resp;
+    }
+
+    @Override
+    public String checkAllDoorAuthList(){
+        String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId());
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        Object v = redisTemplate.opsForValue().get(key);
+        if(null == v){
+            return null;
+        }
+        return v.toString();
+    }
+
+    @Override
+    public ListDoorAuthResponse createAllDoorAuthList(AclinkCreateAllDoorAuthListCommand cmd) {
+        ListDoorAuthResponse resp = new ListDoorAuthResponse();
+        User u = UserContext.current().getUser();
+        List<DoorAuthDTO> dtos = new ArrayList<>();
+        resp.setDtos(dtos);
+
+        ListAclinkUserCommand userCmd = ConvertHelper.convert(cmd, ListAclinkUserCommand.class);
+        userCmd.setPageSize(1000);
+
+        String key = String.format(DOOR_AUTH_ALL_USER, UserContext.getCurrentNamespaceId(cmd.getNamespaceId()));
+        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+        ExecutorUtil.submit(new Runnable() {
+            @Override
+            public void run() {
+                UserContext.setCurrentUser(u);
+                String v = "" + System.currentTimeMillis();
+                redisTemplate.opsForValue().set(key, v, 30, TimeUnit.MINUTES);
+                LOGGER.debug("start door auth. startTime = {}", v);
+                while (true){
+                    AclinkUserResponse userRes = listAclinkUsers(userCmd);
+                    for (AclinkUserDTO user: userRes.getUsers()) {
+                        CreateDoorAuthCommand authCmd = ConvertHelper.convert(cmd, CreateDoorAuthCommand.class);
+                        authCmd.setUserId(user.getId());
+                        authCmd.setApproveUserId(u.getId());
+                        DoorAuthDTO dto = createDoorAuth(authCmd);
+                        dtos.add(dto);
+                    }
+                    if(null == userRes.getNextPageAnchor()){
+                        break;
+                    }
+                    userCmd.setPageAnchor(userRes.getNextPageAnchor());
+                }
+                redisTemplate.delete(key);
+                LOGGER.debug("end door auth. endTime = {}", System.currentTimeMillis());
+            }
+        });
+
         return resp;
     }
     

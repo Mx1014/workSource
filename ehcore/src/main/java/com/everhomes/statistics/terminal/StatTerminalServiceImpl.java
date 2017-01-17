@@ -489,25 +489,25 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                 if(0L == yesterdayStatistics.getActiveUserNumber()){
                     toDayStatistics.setActiveChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setActiveChangeRate(new BigDecimal((yesterdayStatistics.getActiveUserNumber().doubleValue() - toDayStatistics.getActiveUserNumber().doubleValue()) / yesterdayStatistics.getActiveUserNumber().doubleValue()*100));
+                    toDayStatistics.setActiveChangeRate(new BigDecimal((toDayStatistics.getActiveUserNumber().doubleValue() - yesterdayStatistics.getActiveUserNumber().doubleValue()) / yesterdayStatistics.getActiveUserNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getCumulativeUserNumber()){
                     toDayStatistics.setCumulativeChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setCumulativeChangeRate(new BigDecimal((yesterdayStatistics.getCumulativeUserNumber().doubleValue() - toDayStatistics.getCumulativeUserNumber().doubleValue()) / yesterdayStatistics.getCumulativeUserNumber().doubleValue()*100));
+                    toDayStatistics.setCumulativeChangeRate(new BigDecimal((toDayStatistics.getCumulativeUserNumber().doubleValue() - yesterdayStatistics.getCumulativeUserNumber().doubleValue()) / yesterdayStatistics.getCumulativeUserNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getStartNumber()){
                     toDayStatistics.setStartChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setStartChangeRate(new BigDecimal((yesterdayStatistics.getStartNumber().doubleValue() - toDayStatistics.getStartNumber().doubleValue()) / yesterdayStatistics.getStartNumber().doubleValue()*100));
+                    toDayStatistics.setStartChangeRate(new BigDecimal((toDayStatistics.getStartNumber().doubleValue() - yesterdayStatistics.getStartNumber().doubleValue()) / yesterdayStatistics.getStartNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getNewUserNumber()){
                     toDayStatistics.setNewChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setNewChangeRate(new BigDecimal((yesterdayStatistics.getNewUserNumber().doubleValue() - toDayStatistics.getNewUserNumber().doubleValue()) / yesterdayStatistics.getNewUserNumber().doubleValue()*100));
+                    toDayStatistics.setNewChangeRate(new BigDecimal((toDayStatistics.getNewUserNumber().doubleValue() - yesterdayStatistics.getNewUserNumber().doubleValue()) / yesterdayStatistics.getNewUserNumber().doubleValue()*100));
                 }
             }
             if(0L == toDayStatistics.getCumulativeUserNumber()){

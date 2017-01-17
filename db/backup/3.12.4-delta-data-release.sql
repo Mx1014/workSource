@@ -313,7 +313,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
 
 	
 	
--- WARN: blacklist sql is not released yet by lqs 20170116
+
 -- merge blacklist sfyan 20170114
 -- 黑名单权限
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (1001, '0', '禁止话题、投票帖子发言', '包括发帖、评论、回复评论', NULL);
@@ -365,9 +365,9 @@ INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_i
 VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10090, 1001,'EhAclRoles', 0, 1, NOW());
 
 
-SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
+-- SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+-- INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+-- VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
 
 INSERT INTO `eh_locale_templates` (`scope`, `code`,`locale`,`description`, `text`, `namespace_id`) VALUES( 'blacklist.notification', '1', 'zh_CN', '通知用户已经被加入黑名单', '由于您的发言涉及部分违反相关版规行为，您已被禁言，将不能正常使用部分板块的发言功能。如有疑问，请联系左邻客服。', 0);	
 INSERT INTO `eh_locale_templates` (`scope`, `code`,`locale`,`description`, `text`, `namespace_id`) VALUES( 'blacklist.notification', '2', 'zh_CN', '通知用户已经被解除黑名单', '您的禁言已被解除，可继续使用各大板块的发言功能。如有疑问，请联系左邻客服。', 0);	

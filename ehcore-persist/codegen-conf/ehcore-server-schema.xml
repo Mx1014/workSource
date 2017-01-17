@@ -138,6 +138,7 @@
         eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule | eh_launch_advertisements |
 		    eh_activity_attachments | eh_activity_goods |
 		eh_techpark_syncdata_backup | eh_business_promotions |
+		eh_door_auth_logs |
         </includes>
 
             <!-- All elements that are excluded from your schema
