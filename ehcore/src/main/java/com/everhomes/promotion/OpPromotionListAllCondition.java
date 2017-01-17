@@ -67,6 +67,8 @@ public class OpPromotionListAllCondition implements OpPromotionCondition, OpProm
                 visitor.setPushCount(0);
             }            
             promotionService.finishOpPromotion(c.getPromotion());
+            
+            LOGGER.info("finished promotion id=" + c.getPromotion().getId());
         } catch(Exception ex) {
             LOGGER.error("promotion list all error", ex);
         }
