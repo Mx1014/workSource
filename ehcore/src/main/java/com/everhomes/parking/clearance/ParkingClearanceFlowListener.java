@@ -70,9 +70,12 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
     public FlowModuleInfo initModule() {
         FlowModuleInfo moduleInfo = new FlowModuleInfo();
         ServiceModule module = serviceModuleProvider.findServiceModuleById(MODULE_ID);
-        moduleInfo.setModuleName(module.getName());
-        moduleInfo.setModuleId(MODULE_ID);
-        return moduleInfo;
+        if (module != null) {
+            moduleInfo.setModuleName(module.getName());
+            moduleInfo.setModuleId(MODULE_ID);
+            return moduleInfo;
+        }
+        return null;
     }
 
     @Override
