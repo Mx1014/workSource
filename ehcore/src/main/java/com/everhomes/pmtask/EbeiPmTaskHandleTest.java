@@ -70,10 +70,6 @@ public class EbeiPmTaskHandleTest {
 	
 	public static void main(String[] args) {
 		
-		String s = String.format("%s:111111111",
-                null);
-		System.out.println(s);
-//		System.out.println("123".startsWith(null));
 		
 		JSONObject param = new JSONObject();
 		
@@ -91,23 +87,23 @@ public class EbeiPmTaskHandleTest {
 //		param.put("buildingType", "0");
 		
 		
-//		param.put("orderId", "19f53feb-c382-4f64-b8f8-5052a16da200");
-		param.put("recordId", "6a627936-2f15-47cd-9589-4bc783a0f01f");
-		param.put("userId", "");
-		param.put("serviceAttitude", 5);
-		param.put("serviceEfficiency", 5);
-		param.put("serviceQuality", 5);
-		param.put("remark", "");
-		param.put("fileAddrs", "");
-		param.put("ownerName", "18011001100");
-		param.put("ownerPhone", "一碑测试");
-		param.put("projectId", "240111044331055940");
+		param.put("orderId", "b149e32d-bf49-405a-a863-f7406821543b");
+//		param.put("recordId", "6a627936-2f15-47cd-9589-4bc783a0f01f");
+//		param.put("userId", "");
+//		param.put("serviceAttitude", 5);
+//		param.put("serviceEfficiency", 5);
+//		param.put("serviceQuality", 5);
+//		param.put("remark", "");
+//		param.put("fileAddrs", "");
+//		param.put("ownerName", "18011001100");
+//		param.put("ownerPhone", "一碑测试");
+//		param.put("projectId", "240111044331055940");
 		
 //		login();
 //		postToEbei(param, EVALUATE);
 		
 		
-//		postToEbei(param, GET_TASK_DETAIL);
+		postToEbei(param, GET_TASK_DETAIL);
 //		listPmtasks();
 //		listServiceType("240111044331055940");
 	}

@@ -15,15 +15,19 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowGraphEvent;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowUserSelection;
+import com.everhomes.flow.FlowUserSelectionProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -50,6 +54,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private PmTaskService pmTaskService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
+	@Autowired
+    private FlowUserSelectionProvider flowUserSelectionProvider;
 	
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 	@Autowired
@@ -196,7 +202,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
 				pmTaskProvider.updateTask(task);
 				
-//				synchronizedTaskToTechpark(task);
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				if(namespaceId == 1000000) {
+					FlowGraphEvent evt = ctx.getCurrentEvent();
+					if(evt != null && evt.getEntityId() != null 
+							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
+						
+						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
+						Long targetId = sel.getSourceIdA();
+						
+						synchronizedTaskToTechpark(task, targetId, flow.getOrganizationId());
+					}
+					
+				}
 			}else if("PROCESSING".equals(nodeType)) {
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
@@ -212,7 +230,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	}
 
 	//同步数据到科技园
-	private void synchronizedTaskToTechpark(PmTask task) {
+	private void synchronizedTaskToTechpark(PmTask task, Long targetId, Long organizationId) {
 		UserContext context = UserContext.current();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(namespaceId == 1000000) {
@@ -236,7 +254,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 //	        valueOperations.set(key, value);
 			
 			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
-			handler.pushToQueque(task.getId());
+			handler.pushToQueque(task.getId() + "," + targetId + "," + organizationId);
 		}
 	}
 	

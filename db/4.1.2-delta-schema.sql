@@ -36,7 +36,7 @@ CREATE TABLE `eh_general_forms` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 
-DROP TABLE IF EXISTS `eh_general_approvals`;
+-- DROP TABLE IF EXISTS `eh_general_approvals`;
 CREATE TABLE `eh_general_approvals` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -62,7 +62,7 @@ CREATE TABLE `eh_general_approvals` (
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- the values of form from request
-DROP TABLE IF EXISTS `eh_general_approval_vals`;
+-- DROP TABLE IF EXISTS `eh_general_approval_vals`;
 CREATE TABLE `eh_general_approval_vals` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -112,4 +112,4 @@ CREATE TABLE `eh_business_promotions`(
   `update_time` DATETIME,
   `update_uid` BIGINT,
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
