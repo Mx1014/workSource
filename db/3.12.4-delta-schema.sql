@@ -1,4 +1,4 @@
-
+-- merge doorAuth by sfyan 20170117
 -- DROP TABLE IF EXISTS `eh_door_auth_logs`;
 CREATE TABLE `eh_door_auth_logs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
