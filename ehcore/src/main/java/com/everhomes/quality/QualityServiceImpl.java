@@ -1100,13 +1100,13 @@ public class QualityServiceImpl implements QualityService {
 	        	dto.setRecord(recordDto);
 			}
         	 
-        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getExecutiveGroupId());
+        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getOwnerId());
         	if(executor != null) {
         		dto.setExecutorName(executor.getContactName());
         	}
         	
         	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
-        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), r.getExecutiveGroupId());
+        		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), r.getOwnerId());
             	if(operator != null) {
             		dto.setOperatorName(operator.getContactName());
             	}
@@ -1215,7 +1215,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
-			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getExecutiveGroupId());
+			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
@@ -1226,7 +1226,7 @@ public class QualityServiceImpl implements QualityService {
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
 			
-			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getExecutiveGroupId());
+			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
 			msgMap.put("operator", operator.getContactName());
 			msgMap.put("target", target.getContactName());
@@ -1363,7 +1363,7 @@ public class QualityServiceImpl implements QualityService {
 		
 		if(!StringUtils.isNullOrEmpty(cmd.getOperatorType()) && cmd.getOperatorId() != null
 				 && cmd.getEndTime() != null) {
-			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getExecutiveGroupId());
+			OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), task.getOwnerId());
 			Map<String, Object> map = new HashMap<String, Object>();
 		    map.put("userName", operator.getContactName());
 		    map.put("taskName", task.getTaskName());
@@ -1374,7 +1374,7 @@ public class QualityServiceImpl implements QualityService {
 			String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 			sendMessageToUser(cmd.getOperatorId(), notifyTextForApplicant);
 			
-			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getExecutiveGroupId());
+			OrganizationMember target = organizationProvider.findOrganizationMemberByOrgIdAndUId(cmd.getOperatorId(), task.getOwnerId());
 			Map<String, Object> msgMap = new HashMap<String, Object>();
 		    map.put("operator", operator.getContactName());
 		    map.put("target", target.getContactName());
