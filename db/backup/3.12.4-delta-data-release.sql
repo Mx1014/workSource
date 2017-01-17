@@ -313,7 +313,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`)
 
 	
 	
--- WARN: blacklist sql is not released yet by lqs 20170116
+
 -- merge blacklist sfyan 20170114
 -- 黑名单权限
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (1001, '0', '禁止话题、投票帖子发言', '包括发帖、评论、回复评论', NULL);
