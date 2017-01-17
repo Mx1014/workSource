@@ -194,6 +194,8 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             LOGGER.debug("check role privilege success...");
             return true;
         }
+
+        LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
         return false;
     }
 
