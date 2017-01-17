@@ -180,8 +180,8 @@ update eh_launch_pad_items set action_data = '{\"url\":\"http://core.zuolin.com/
 
 
 -- 正中汇修改广场图标和名字 by xiongying20170117
-update eh_launch_pad_items set item_label = "物业查费" where id in(select id from eh_launch_pad_items where item_label = "费用查询" and namespace_id = 999983);
-update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where id in(select id from eh_launch_pad_items where item_label = "任务管理" and namespace_id = 999983);
+update eh_launch_pad_items set item_label = "物业查费" where item_label = "费用查询" and namespace_id = 999983;
+update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where item_label = "任务管理" and namespace_id = 999983;
 
 
 -- 黑名单配置到清华信息港 by sfyan 20170117
