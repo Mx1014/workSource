@@ -352,7 +352,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         PmKeXingBillItemDTO toBillItemDTO() {
             PmKeXingBillItemDTO dto = new PmKeXingBillItemDTO();
             dto.setName(fiName);
-            dto.setAmount(actualmoney);
+            dto.setAmount(receivable);
             return dto;
         }
 
