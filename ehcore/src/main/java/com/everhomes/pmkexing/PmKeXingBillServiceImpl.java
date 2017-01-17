@@ -151,7 +151,8 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         if (cmd.getBillStatus() != null) {
             params.put("isPay", String.valueOf(cmd.getBillStatus()));
         }
-        params.put("pageCount", String.valueOf(cmd.getPageOffset()));
+        int pageOffset = cmd.getPageOffset() != null ? cmd.getPageOffset() : 1;
+        params.put("pageCount", String.valueOf(pageOffset));
         params.put("pageSize", String.valueOf(pageSize));
 
         BillBeans itemList = post(api, params, BillBeans.class);
