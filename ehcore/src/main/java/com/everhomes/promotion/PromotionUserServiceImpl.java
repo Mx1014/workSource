@@ -211,6 +211,10 @@ public class PromotionUserServiceImpl implements PromotionUserService {
             }
         }
         
+        if(user == null) {
+        	LOGGER.warn("promotion user not found value=" + visitor.getValue() + " promotionId=" + visitor.getPromotion().getId());
+        }
+        
     }
     
     @Override
