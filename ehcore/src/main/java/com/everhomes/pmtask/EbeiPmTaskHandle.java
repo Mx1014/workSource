@@ -576,7 +576,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
-		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+		EbeiPmTaskDTO dto = getTaskDetail(task);
+		if(!(dto.getState().byteValue() == PmTaskStatus.UNPROCESSED.getCode())){
 			LOGGER.error("Task cannot be canceled. cmd={}", cmd);
     		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CANCEL_TASK,
     				"Task cannot be canceled.");
