@@ -290,11 +290,6 @@ public class QualityProviderImpl implements QualityProvider {
 		if(taskType != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(taskType));
 		}
-		if(executeUid != null && executeUid != 0) {
-			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
-			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
-			query.addConditions(con);
-		}
 		
 		if(startDate != null && !"".equals(startDate)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(startDate));
@@ -304,16 +299,25 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endDate));
 		}
 
-		if(groupIds != null) {
-			Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode());
-			for(ExecuteGroupAndPosition groupId : groupIds) {
-				Condition con4 = null; 
-				con4 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
-				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(groupId.getPositionId()));
-				con5 = con5.or(con4);
+		if(executeUid != null && executeUid != 0) {
+			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
+			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
+
+			if(groupIds != null) {
+				Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode());
+				for(ExecuteGroupAndPosition groupId : groupIds) {
+					Condition con4 = null;
+					con4 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
+					con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(groupId.getPositionId()));
+					con5 = con5.or(con4);
+				}
+
+				con = con.or(con5);
 			}
-			query.addConditions(con5);
+
+			query.addConditions(con);
 		}
+
 		if(executeStatus != null) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(executeStatus));
 		}
