@@ -267,72 +267,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		Integer pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-		User current = UserContext.current().getUser();
 		
-		Byte status = cmd.getStatus();
-		List<PmTask> list = new ArrayList<>();
-		if(null != status && (status.equals(PmTaskProcessStatus.PROCESSED.getCode()) || 
-				status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))) {
-			
-			checkOrganizationId(cmd.getOrganizationId());
-
-	    	SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-	    	
-	    	if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
-	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTALLTASK)
-	    			){
-	    		
-	    		list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, null,
-	    				cmd.getPageAnchor(), cmd.getPageSize());
-			}else if(resolver.checkUserPrivilege(current.getId(), EntityType.COMMUNITY.getCode(), 
-	    			cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.LISTUSERTASK)
-	    			){
-				
-				if(status.equals(PmTaskProcessStatus.UNPROCESSED.getCode()))
-				list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.USER_UNPROCESSED.getCode(),
-						null, cmd.getPageAnchor(), cmd.getPageSize());
-				else if(status.equals(PmTaskProcessStatus.PROCESSED.getCode()))
-					list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), PmTaskProcessStatus.PROCESSED.getCode(),
-							null, cmd.getPageAnchor(), cmd.getPageSize());
-			}else{
-				returnNoPrivileged(null, current.getId());
-			}
-	    	
-		}else{
-			list = pmTaskProvider.listPmTask(cmd.getOwnerType(), cmd.getOwnerId(), current.getId(), status, cmd.getTaskCategoryId(),
-					cmd.getPageAnchor(), cmd.getPageSize());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+		
+		//TODO:为科兴与一碑对接
+		if(namespaceId == 999983 && null != cmd.getTaskCategoryId() && 
+				cmd.getTaskCategoryId() == PmTaskHandle.EBEI_TASK_CATEGORY) {
+			handle = PmTaskHandle.EBEI;
 		}
 		
-		ListUserTasksResponse response = new ListUserTasksResponse();
-		int size = list.size();
-		if(size > 0){
-    		response.setRequests(list.stream().map(r -> {
-    			PmTaskDTO dto = ConvertHelper.convert(r, PmTaskDTO.class);
-    			if(null == r.getOrganizationId() || r.getOrganizationId() ==0 ){
-    				User user = userProvider.findUserById(r.getCreatorUid());
-        			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-        			dto.setRequestorName(user.getNickName());
-        			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
-    			}
-    			Category category = categoryProvider.findCategoryById(r.getCategoryId());
-    			Category taskCategory = checkCategory(r.getTaskCategoryId());
-    			if(null != category)
-    				dto.setCategoryName(category.getName());
-    	    	dto.setTaskCategoryName(taskCategory.getName());
-    			
-    			setPmTaskDTOAddress(r, dto);
-    			return dto;
-    		}).collect(Collectors.toList()));
-    		if(size != pageSize){
-        		response.setNextPageAnchor(null);
-        	}else{
-        		response.setNextPageAnchor(list.get(size-1).getCreateTime().getTime());
-        	}
-    	}
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
 		
-		return response;
+		return handler.listUserTasks(cmd);
 	}
 
 	@Override
