@@ -58,6 +58,10 @@ import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
+import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
+import com.everhomes.rest.techpark.expansion.LeasePromotionType;
+import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
+import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateHelper;
@@ -100,6 +104,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	@Autowired
 	private EnterpriseProvider enterpriseProvider;
+	
+	@Autowired
+	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 	
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
@@ -405,6 +412,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
 		address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
 		addressProvider.createAddress(address);
+		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
 	
 	// 插入或更新招租管理
@@ -414,15 +422,48 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			return;
 		}
 		
+		String namespaceType = "jindie";
+		String namespaceToken = generateLeasePromotionToken(buildingName, apartmentName);
 		if (livingStatus == CustomerLivingStatus.WAITING_FOR_RENTING) {
 			// 待租状态时，在招租管理里面插入一条数据，状态为已下线（因为需要科技园区编辑图文信息之后再发布到APP端），招租标题就是楼栋门牌，发布时间和入驻时间=插入数据时间，面积=传过来的面积，负责人和电话都为空
-			// 也有可能是更新
-			
+			// 如果有数据则不变
+			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionByToken(namespaceId, communityId, namespaceType, namespaceToken);
+			if (leasePromotion == null) {
+				leasePromotion = new LeasePromotion();
+				leasePromotion.setNamespaceId(namespaceId);
+				leasePromotion.setCommunityId(communityId);
+				leasePromotion.setRentType(LeasePromotionType.ORDINARY.getCode());
+				leasePromotion.setSubject(apartmentName);
+				leasePromotion.setRentAreas(String.valueOf(rentArea));
+				leasePromotion.setCreateUid(1L);
+				leasePromotion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				leasePromotion.setUpdateTime(leasePromotion.getCreateTime());
+				leasePromotion.setStatus(LeasePromotionStatus.OFFLINE.getCode());
+				Building building = buildingProvider.findBuildingByName(namespaceId, communityId, buildingName);
+				if (building != null) {
+					leasePromotion.setBuildingId(building.getId());
+				}else {
+					leasePromotion.setBuildingId(0L);
+				}
+				leasePromotion.setRentPosition(buildingName);
+				leasePromotion.setEnterTime(leasePromotion.getCreateTime());
+				leasePromotion.setNamespaceType(namespaceType);
+				leasePromotion.setNamespaceToken(namespaceToken);
+				enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
+			}
 		}else if (livingStatus == CustomerLivingStatus.NEW_RENTING || livingStatus == CustomerLivingStatus.CONTINUE_RENTING) {
 			// 新租和已租时，将招租管理对应的门牌的招租状态改为“已出租”
-			
+			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionByToken(namespaceId, communityId, namespaceType, namespaceToken);
+			if (leasePromotion != null && LeasePromotionStatus.fromType(leasePromotion.getStatus()) != LeasePromotionStatus.RENTAL) {
+				leasePromotion.setStatus(LeasePromotionStatus.RENTAL.getCode());
+				enterpriseApplyEntryProvider.updateLeasePromotion(leasePromotion);
+			}
 		}
 	}
+	
+	private String generateLeasePromotionToken(String buildingName, String apartmentName) {
+		return buildingName+"-"+apartmentName;
+	};
 	
 	private String getAddress(String buildingName, String apartmentName){
 		if (apartmentName.contains(buildingName)) {
@@ -452,6 +493,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		address.setStatus(CommonStatus.ACTIVE.getCode());
 		addressProvider.updateAddress(address);
+		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
 
 	private CustomerApartment findFromTheirApartmentList(Address myApartment,
