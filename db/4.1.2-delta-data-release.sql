@@ -169,6 +169,6 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10010', 'zh_CN', '分类不能为空！');
 
 update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=205250&displayName=投诉建议"}' where action_type = 60 and item_label = '投诉建议' and namespace_id = 999983;
-update eh_launch_pad_items set action_data = '{\"url\":\"http://beta.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' where action_type = 14 and item_label = '报修' and namespace_id = 999983;
+update eh_launch_pad_items set action_data = '{\"url\":\"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' where action_type = 14 and item_label = '报修' and namespace_id = 999983;
 
 
