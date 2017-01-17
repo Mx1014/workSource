@@ -135,9 +135,10 @@
 		eh_flow_scripts | eh_flow_attachments | eh_flow_subjects | eh_flow_timeouts | eh_flow_evaluate_items |
         eh_service_hotlines | eh_service_configurations |
         eh_general_forms | eh_general_approvals | eh_general_approval_vals  |
-        eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule |
+        eh_service_alliance_apartment_requests | eh_service_alliance_skip_rule | eh_launch_advertisements |
 		    eh_activity_attachments | eh_activity_goods |
 		eh_techpark_syncdata_backup | eh_business_promotions |
+		eh_door_auth_logs |
         </includes>
 
             <!-- All elements that are excluded from your schema

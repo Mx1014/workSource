@@ -48,9 +48,9 @@ public class PmKeXingBillTest extends BaseLoginAuthTestCase {
         logon();
         ListPmKeXingBillsCommand cmd = new ListPmKeXingBillsCommand();
         cmd.setOrganizationId(organizationId);
-        cmd.setBillStatus((byte) 1);
+        // cmd.setBillStatus((byte) 1);
         cmd.setPageSize(10);
-        cmd.setPageOffset(1);
+        cmd.setPageOffset(3);
         ListPmKeXingBillsRestResponse response = httpClientService.restPost(LIST_PM_KE_XING_BILLS_URL, cmd, ListPmKeXingBillsRestResponse.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
@@ -78,7 +78,7 @@ public class PmKeXingBillTest extends BaseLoginAuthTestCase {
         logon();
         GetPmKeXingBillCommand cmd = new GetPmKeXingBillCommand();
         cmd.setOrganizationId(organizationId);
-        cmd.setDateStr("2016-11");
+        cmd.setDateStr("2017-01");
         GetPmKeXingBillRestResponse response = httpClientService.restPost(GET_PM_KE_XING_BILL_URL, cmd, GetPmKeXingBillRestResponse.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
