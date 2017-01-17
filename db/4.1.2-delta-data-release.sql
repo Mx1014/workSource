@@ -170,4 +170,9 @@ INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pm
 
 
 
+-- 黑名单配置到清华信息港 by sfyan 20170117
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999984, 2);
+
 
