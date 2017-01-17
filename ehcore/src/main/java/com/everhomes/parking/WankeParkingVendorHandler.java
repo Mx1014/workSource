@@ -170,19 +170,32 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     	List<ParkingRechargeRate> parkingRechargeRateList = null;
     	List<ParkingRechargeRateDTO> result = null;
     	if(StringUtils.isBlank(plateNumber)) {
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,null);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, null);
     		
     	}else{
     		WankeCardInfo cardInfo = getCard(plateNumber);           
 			
     		String cardType = cardInfo.getCardType();
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, cardType);
     	}
+    	
+    	
+		List<WankeCardType> types = getCardType();
+    	
 		result = parkingRechargeRateList.stream().map(r->{
+			String type = null;
+			for(WankeCardType t: types) {
+				if(t.getId().equals(r.getCardType())) {
+					type = t.getName();
+				}
+			}
+			
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.WANKE.getCode());
+			
+			dto.setCardType(type);
 			return dto;
 		}
 		).collect(Collectors.toList());
