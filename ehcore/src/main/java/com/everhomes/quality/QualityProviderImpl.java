@@ -291,8 +291,8 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.TASK_TYPE.eq(taskType));
 		}
 		if(executeUid != null && executeUid != 0) {
-			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTOR_ID.eq(executeUid);
-			con = con.or(Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid));
+			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
+			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 			query.addConditions(con);
 		}
 		
@@ -303,9 +303,9 @@ public class QualityProviderImpl implements QualityProvider {
 		if(endDate != null && !"".equals(endDate)) {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.le(endDate));
 		}
-		
+
 		if(groupIds != null) {
-			Condition con5 = null;
+			Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode());
 			for(ExecuteGroupAndPosition groupId : groupIds) {
 				Condition con4 = null; 
 				con4 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
@@ -318,9 +318,9 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(executeStatus));
 		}
 		if(reviewStatus != null) {
-			if(QualityInspectionTaskReviewStatus.NONE.getCode() == reviewStatus)
+			if(QualityInspectionTaskReviewStatus.NONE.equals(QualityInspectionTaskReviewStatus.fromStatus(reviewStatus)))
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.eq(QualityInspectionTaskReviewResult.NONE.getCode()));
-			if(QualityInspectionTaskReviewStatus.REVIEWED.getCode() == reviewStatus)
+			if(QualityInspectionTaskReviewStatus.REVIEWED.equals(QualityInspectionTaskReviewStatus.fromStatus(reviewStatus)))
 				query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.REVIEW_RESULT.ne(QualityInspectionTaskReviewResult.NONE.getCode()));
 		}
 		
