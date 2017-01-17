@@ -1105,6 +1105,10 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhTerminalStatisticsTasks.class, Tables.EH_TERMINAL_STATISTICS_TASKS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_TERMINAL_STATISTICS_TASKS.ID.max()).from(Tables.EH_TERMINAL_STATISTICS_TASKS).fetchOne().value1();
         });
+
+        syncTableSequence(null, EhAppVersion.class, Tables.EH_APP_VERSION.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_APP_VERSION.ID.max()).from(Tables.EH_APP_VERSION).fetchOne().value1();
+        });
  
          
         syncTableSequence(null, EhServiceHotlines.class, Tables.EH_SERVICE_HOTLINES.getName(), (dbContext) -> {

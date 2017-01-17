@@ -6,3 +6,28 @@ UPDATE `eh_terminal_day_statistics` SET `start_change_rate` = `start_change_rate
 SELECT max(id) FROM eh_locale_strings INTO @max_id;
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
   VALUES ((@max_id := @max_id + 1), 'organization', '500005', 'zh_CN', '已被其他管理员审批！');
+  
+
+-- app版本数据整理  add sfyan 20170117
+SET @version_id = (SELECT MAX(id) FROM `eh_app_version`);
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'ios', '3.12.0', id, 3158016.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'ios', '3.12.4', id, 3158020.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'ios', '4.1.0', id, 4195328.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'ios', '4.1.2', id, 4195330.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'ios', '4.2.2', id, 4196354.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'android', '3.12.0', id, 3158016.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'android', '3.12.4', id, 3158020.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'android', '4.1.0', id, 4195328.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'android', '4.1.2', id, 4195330.0, now() FROM `eh_namespaces`;
+
+INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'android', '4.2.2', id, 4196354.0, now() FROM `eh_namespaces`;
+  
+
