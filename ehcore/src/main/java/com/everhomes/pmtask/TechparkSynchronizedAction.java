@@ -95,12 +95,12 @@ public class TechparkSynchronizedAction implements Runnable{
 		UserContext userContext = UserContext.current();
 		User user = userContext.getUser();
 		
-		if(null == user) {
+//		if(null == user) {
 			user = userProvider.findUserById(task.getCreatorUid());
 			userContext.setUser(user);
 			userContext.setNamespaceId(task.getNamespaceId());
 			userContext.setScheme("http");
-		}
+//		}
 		
 		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
 		Category category = null;
@@ -141,9 +141,17 @@ public class TechparkSynchronizedAction implements Runnable{
 		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
-		OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getOrganizationId());
-		if(null != orgMember) {
-			param.put("submitUserId", orgMember.getContactToken());
+		
+		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
+			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getAddressOrgId());
+			if(null != orgMember) {
+				param.put("submitUserPhone", orgMember.getContactToken());
+			}
+		}else {
+			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getOrganizationId());
+			if(null != orgMember) {
+				param.put("submitUserPhone", orgMember.getContactToken());
+			}
 		}
 		OrganizationMember orgMember2 = organizationProvider.findOrganizationMemberByOrgIdAndUId(targetId, organizationId);
 
