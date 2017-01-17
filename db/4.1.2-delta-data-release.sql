@@ -8,15 +8,15 @@ VALUES (50900, '表单管理', 50000, NULL, 'react:/form-management/form-list', 
 
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10123, 0, '表单管理', '表单管理 全部权限', NULL);
+VALUES (10126, 0, '表单管理', '表单管理 全部权限', NULL);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10123, 50900, '表单管理', 1, 1, '表单管理  全部权限', 590); 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10126, 50900, '表单管理', 1, 1, '表单管理  全部权限', 590); 
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`)
-VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10123, 1001, 0, 1, NOW(), 'EhAclRoles');
+VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10126, 1001, 0, 1, NOW(), 'EhAclRoles');
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
@@ -27,7 +27,7 @@ VALUES ('50900', '表单管理', '50000', '/50000/50900', '0', '2', '2', '0', UT
 
 SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
-VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id +1), '50900', '1', '10123', NULL, '0', UTC_TIMESTAMP());
+VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id +1), '50900', '1', '10126', NULL, '0', UTC_TIMESTAMP());
 
 
 
