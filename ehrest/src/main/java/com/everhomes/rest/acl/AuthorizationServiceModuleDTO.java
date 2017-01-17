@@ -20,8 +20,8 @@ public class AuthorizationServiceModuleDTO implements Serializable{
 
 	private Byte allModuleFlag;
 
-	@ItemType(ServiceModuleDTO.class)
-	private List<ServiceModuleDTO> serviceModules;
+	@ItemType(ServiceModuleAssignmentDTO.class)
+	private List<ServiceModuleAssignmentDTO> assignments;
 
 	private String resourceType;
 
@@ -37,12 +37,12 @@ public class AuthorizationServiceModuleDTO implements Serializable{
 		this.allModuleFlag = allModuleFlag;
 	}
 
-	public List<ServiceModuleDTO> getServiceModules() {
-		return serviceModules;
+	public List<ServiceModuleAssignmentDTO> getAssignments() {
+		return assignments;
 	}
 
-	public void setServiceModules(List<ServiceModuleDTO> serviceModules) {
-		this.serviceModules = serviceModules;
+	public void setAssignments(List<ServiceModuleAssignmentDTO> assignments) {
+		this.assignments = assignments;
 	}
 
 	public String getResourceType() {

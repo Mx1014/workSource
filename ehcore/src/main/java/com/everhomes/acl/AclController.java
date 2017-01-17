@@ -292,7 +292,7 @@ public class AclController extends ControllerBase {
 
     /**
      * <b>URL: /acl/listUserRelatedPrivilegeByModuleId</b>
-     * <p>获取用户模块权限</p>
+     * <p>业务模块下用户的有关权限</p>
      */
     @RequestMapping("listUserRelatedPrivilegeByModuleId")
     @RestReturn(value=Long.class, collection = true)

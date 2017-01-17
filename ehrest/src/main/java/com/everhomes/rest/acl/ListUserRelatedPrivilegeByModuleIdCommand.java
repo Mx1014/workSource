@@ -9,6 +9,7 @@ import javax.validation.constraints.NotNull;
  * <ul>
  * <li>ownerType: 范围权限</li>
  * <li>ownerId: 范围id</li>
+ * <li>organizationId: 机构id</li>
  * <li>moduleId: 模块id</li>
  * </ul>
  */
