@@ -172,6 +172,10 @@ INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pm
 update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=205250&displayName=投诉建议"}' where action_type = 60 and item_label = '投诉建议' and namespace_id = 999983;
 update eh_launch_pad_items set action_data = '{\"url\":\"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' where action_type = 14 and item_label = '报修' and namespace_id = 999983;
 
+-- 万科停车 add by sw 20160117
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('parking.wanke.url', 'http://122.224.250.35:7021', '万科立方系统', '0', NULL);
+
 
 -- 黑名单配置到清华信息港 by sfyan 20170117
  SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
