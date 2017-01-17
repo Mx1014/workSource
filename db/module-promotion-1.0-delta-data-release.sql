@@ -20,7 +20,7 @@ VALUES((@max_id := @max_id+1),'999985','0','0','0','/home','OPPushBiz','OE_SELEC
 --
 -- 电商运营测试数据   add by xq.tian  2017/01/09
 --
-SELECT MAX(id) FROM `eh_business_promotions` INTO @max_id;
+SELECT 1 INTO @max_id;
 INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
 VALUES ((@max_id := @max_id + 1), '999985', '简单的土豆泥沙拉', '简单的土豆泥沙拉', 'cs://1/image/aW1hZ2UvTVRvd05tWmpaVFZtWVRkaE0yUTVNMlZpTVdFME9EbG1abVl3WldRMU16RTJZZw', '14.02', 'http://www.baidu.com', '10', '2017-01-10 16:20:23', '1', NULL, NULL);
 INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
