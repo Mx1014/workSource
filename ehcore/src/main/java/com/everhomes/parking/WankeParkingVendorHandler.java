@@ -148,7 +148,14 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 
 			parkingCardDTO.setEndTime(expireTime);
 			
-			parkingCardDTO.setCardType(card.getCardType());
+			String type = null;
+			List<WankeCardType> types = getCardType();
+			for(WankeCardType t: types) {
+				if(t.getId().equals(card.getCardType())) {
+					type = t.getName();
+				}
+			}
+			parkingCardDTO.setCardType(type);
 			parkingCardDTO.setCardNumber(card.getCardNo());
 			parkingCardDTO.setIsValid(true);
 			
