@@ -269,22 +269,39 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
         ListPmKeXingBillsResponse toPmKeXingBillResponse(Integer pageOffset) {
             ListPmKeXingBillsResponse response = new ListPmKeXingBillsResponse();
-
             for (Bill b : bill) {
-                PmKeXingBillDTO billDTO = new PmKeXingBillDTO();
-                billDTO.setBillDate(b.billDate);
-                String billStatus = processBillStatusLocaleString(cacheMap, b.billBeans);
-                billDTO.setBillStatus(billStatus);
-                billDTO.setReceivableAmount(b.totalShouldMoney);
-                Optional<BigDecimal> unpaidAmount = b.billBeans.parallelStream().map(BillBean::getActualmoney).collect(Collectors.reducing(BigDecimal::add));
-                unpaidAmount.ifPresent(billDTO::setUnpaidAmount);
-
+                PmKeXingBillDTO billDTO = this.toPmKeXingBillDTO(b);
                 response.getBills().add(billDTO);
                 if (response.getNextPageOffset() == null && b.hasNextPag == TrueOrFalseFlag.TRUE.getCode()) {
                     response.setNextPageOffset(pageOffset != null ? ++pageOffset : 2);
                 }
             }
             return response;
+        }
+
+        PmKeXingBillDTO toPmKeXingBillDTO(Bill bill) {
+            PmKeXingBillDTO dto = new PmKeXingBillDTO();
+            dto.setBillDate(bill.billDate);
+            dto.setReceivableAmount(bill.totalShouldMoney);
+
+            bill.billBeans.parallelStream()
+                    .filter(bean -> bean.isPay == 0)
+                    .map(BillBean::getActualmoney).collect(Collectors.reducing(BigDecimal::add))
+                    .ifPresent(dto::setUnpaidAmount);
+
+            dto.setBillStatus(processBillStatusLocaleString(cacheMap, bill.billBeans));
+
+            List<PmKeXingBillItemDTO> items = bill.billBeans.parallelStream()
+                    .map(BillBean::toBillItemDTO).collect(Collectors.toList());
+            dto.setItems(items);
+            return dto;
+        }
+
+        PmKeXingBillDTO toPmKeXingBillDTO() {
+            if (bill != null && bill.size() > 0) {
+                return this.toPmKeXingBillDTO(bill.get(0));
+            }
+            return new PmKeXingBillDTO();
         }
 
         private String processBillStatusLocaleString(Map<Byte, String> cacheMap, List<BillBean> billBeans) {
@@ -296,28 +313,6 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
                 cacheMap.put(billStatusLocaleCode, billStatus);
             }
             return billStatus;
-        }
-
-        PmKeXingBillDTO toPmKeXingBillDTO(Bill bill) {
-            PmKeXingBillDTO dto = new PmKeXingBillDTO();
-            dto.setBillDate(bill.billDate);
-            dto.setReceivableAmount(bill.totalShouldMoney);
-
-            Optional<BigDecimal> unpaidAmount = bill.billBeans.parallelStream().map(BillBean::getActualmoney).collect(Collectors.reducing(BigDecimal::add));
-            unpaidAmount.ifPresent(dto::setUnpaidAmount);
-
-            dto.setBillStatus(processBillStatusLocaleString(cacheMap, bill.billBeans));
-
-            List<PmKeXingBillItemDTO> items = bill.billBeans.parallelStream().map(BillBean::toBillItemDTO).collect(Collectors.toList());
-            dto.setItems(items);
-            return dto;
-        }
-
-        PmKeXingBillDTO toPmKeXingBillDTO() {
-            if (bill != null && bill.size() > 0) {
-                return this.toPmKeXingBillDTO(bill.get(0));
-            }
-            return new PmKeXingBillDTO();
         }
     }
 
@@ -357,7 +352,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         PmKeXingBillItemDTO toBillItemDTO() {
             PmKeXingBillItemDTO dto = new PmKeXingBillItemDTO();
             dto.setName(fiName);
-            dto.setAmount(receivable);
+            dto.setAmount(actualmoney);
             return dto;
         }
 
