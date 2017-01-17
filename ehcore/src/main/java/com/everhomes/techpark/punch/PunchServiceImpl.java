@@ -4383,45 +4383,48 @@ public class PunchServiceImpl implements PunchService {
 	@Scheduled(cron = "0 10 5 * * ?")
 	@Override
 	public void dayRefreshLogScheduled(){
-		//刷新前一天的
-		Calendar punCalendar = Calendar.getInstance();
-		punCalendar.add(Calendar.DATE, -1);
-		//取所有设置了rule的公司
-		Calendar startCalendar =Calendar.getInstance();
-
- 
 		
-		List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
-		for(Long orgId : orgIds){
-
-			List<String> groupTypeList = new ArrayList<String>();
-			groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
-			groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
-			List<OrganizationMemberDTO> organizationMembers = organizationService.listAllChildOrganizationPersonnel
-					(orgId, groupTypeList, null) ;
-			//循环刷所有员工
-			for(OrganizationMemberDTO member : organizationMembers){
-				if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId()){
-					try {
-						//刷新 daylog
-						this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
-						//刷月报
-						
-						//从计算日的月初计算到计算日当天
-						startCalendar.setTime(punCalendar.getTime());
-						startCalendar.set(Calendar.DAY_OF_MONTH, 1);
-						
-						addPunchStatistics(member, orgId, startCalendar, punCalendar);
-					} catch (Exception e) {
-						LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
-								+"] organization id :["+orgId+"] ");
-						LOGGER.error(e.getLocalizedMessage());
-						 
-						e.printStackTrace();
+		coordinationProvider.getNamedLock(CoordinationLocks.WARNING_ACTIVITY_SCHEDULE.getCode()).tryEnter(()->{
+			//刷新前一天的
+			Calendar punCalendar = Calendar.getInstance();
+			punCalendar.add(Calendar.DATE, -1);
+			//取所有设置了rule的公司
+			Calendar startCalendar =Calendar.getInstance();
+	
+	 
+			
+			List<Long> orgIds = this.punchProvider.queryPunchOrganizationsFromRules();
+			for(Long orgId : orgIds){
+	
+				List<String> groupTypeList = new ArrayList<String>();
+				groupTypeList.add(OrganizationGroupType.ENTERPRISE.getCode());
+				groupTypeList.add(OrganizationGroupType.DEPARTMENT.getCode());
+				List<OrganizationMemberDTO> organizationMembers = organizationService.listAllChildOrganizationPersonnel
+						(orgId, groupTypeList, null) ;
+				//循环刷所有员工
+				for(OrganizationMemberDTO member : organizationMembers){
+					if(member.getTargetType().equals(OrganizationMemberTargetType.USER.getCode()) && null != member.getTargetId()){
+						try {
+							//刷新 daylog
+							this.refreshPunchDayLog(member.getTargetId(), orgId, punCalendar);
+							//刷月报
+							
+							//从计算日的月初计算到计算日当天
+							startCalendar.setTime(punCalendar.getTime());
+							startCalendar.set(Calendar.DAY_OF_MONTH, 1);
+							
+							addPunchStatistics(member, orgId, startCalendar, punCalendar);
+						} catch (Exception e) {
+							LOGGER.error("#####refresh day log error!! userid:["+member.getTargetId()
+									+"] organization id :["+orgId+"] ");
+							LOGGER.error(e.getLocalizedMessage());
+							 
+							e.printStackTrace();
+						}
 					}
 				}
 			}
-		}
+		});
 	}
 	@Override
 	public void deletePunchRuleMap(DeletePunchRuleMapCommand cmd) {

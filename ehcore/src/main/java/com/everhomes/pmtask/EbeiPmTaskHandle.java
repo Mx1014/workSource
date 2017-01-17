@@ -317,9 +317,12 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		param.put("userId", "");
 		param.put("recordId", task.getStringTag1());
-		param.put("serviceAttitude", task.getStar());
-		param.put("serviceEfficiency", task.getStar());
-		param.put("serviceQuality", task.getStar());
+		Byte star = task.getStar();
+		if(null == star)
+			star = (byte)0;
+		param.put("serviceAttitude", star);
+		param.put("serviceEfficiency", star);
+		param.put("serviceQuality", star);
 		param.put("remark", "");
 		param.put("fileAddrs", "");
 		param.put("ownerName", task.getRequestorName());
@@ -573,9 +576,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
 		checkId(cmd.getId());
 		PmTask task = checkPmTask(cmd.getId());
-		if(!task.getStatus().equals(PmTaskStatus.UNPROCESSED.getCode())){
+		EbeiPmTaskDTO dto = getTaskDetail(task);
+		if(!(dto.getState().byteValue() == PmTaskStatus.UNPROCESSED.getCode())){
 			LOGGER.error("Task cannot be canceled. cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CANCEL_TASK,
     				"Task cannot be canceled.");
 		}
 
@@ -650,6 +654,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			Integer state = ebeiPmTask.getState();
 			task.setStatus(state.byteValue() > PmTaskStatus.PROCESSED.getCode() ? PmTaskStatus.PROCESSED.getCode(): state.byteValue() );
 			pmTaskProvider.updateTask(task);
+			dto.setStatus(task.getStatus());
 			
 			CategoryDTO taskCategory = createCategoryDTO();
 			dto.setTaskCategoryName(taskCategory.getName());

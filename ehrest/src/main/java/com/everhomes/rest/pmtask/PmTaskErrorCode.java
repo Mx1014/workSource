@@ -22,5 +22,8 @@ public interface PmTaskErrorCode {
     
     int ERROR_USER_PRIVILEGE_EXIST = 10009;  //用户已有该权限，不能重复添加!
 
-    int ERROR_CATEGORY_NULL = 10010;  //分类不能为空！   
+    int ERROR_CATEGORY_NULL = 10010;  //分类不能为空！
+    
+    int ERROR_CANCEL_TASK = 10011;  //任务已在处理中，不能取消！
+
 }

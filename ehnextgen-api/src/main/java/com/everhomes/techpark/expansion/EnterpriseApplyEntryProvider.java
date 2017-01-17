@@ -41,4 +41,6 @@ public interface EnterpriseApplyEntryProvider {
 	boolean deleteLeasePromotion(long id);
 	
 	boolean deleteApplyEntry(long id);
+
+	LeasePromotion getLeasePromotionByToken(Integer namespaceId, Long communityId, String namespaceType, String namespaceToken);
 }

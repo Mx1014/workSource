@@ -259,14 +259,22 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
 			              LOGGER.error("None of promotion");
 			         } else {
 			              LOGGER.debug("new promotion id= " + id);
-			              OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(id);
-			              if(promotion != null) {
-				              	OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
-				              	OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
-				                    
-				                //Create local condition event
-				                condition.createCondition(ctx);
-			               }
+			              
+			              try {
+				           
+			            	  OpPromotionActivity promotion = promotionActivityProvider.getOpPromotionActivityById(id);
+				              if(promotion != null) {
+					              	OpPromotionCondition condition = OpPromotionUtils.getConditionFromPromotion(promotion);
+					              	OpPromotionActivityContext ctx = new OpPromotionActivityContext(promotion);
+					                    
+					                //Create local condition event
+					                condition.createCondition(ctx);
+				               }
+				              
+			              } catch(Exception exx) {
+			            	  LOGGER.error("execute promotion error promotionId=" + id, exx);
+			              }
+
 			         }
 				}
 			});
@@ -432,7 +440,7 @@ public class PromotionServiceImpl implements PromotionService, LocalBusSubscribe
     
     @Override
     public void closeOpPromotion(OpPromotionActivity promotion) {
-        if(promotion != null) {
+        if(promotion != null && !promotion.getStatus().equals(OpPromotionStatus.COMPLETE.getCode())) {
             promotion.setStatus(OpPromotionStatus.INACTIVE.getCode());
             updateOpPromotionActivity(promotion);    
         }

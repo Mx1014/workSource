@@ -301,5 +301,22 @@ public class EnterpriseApplyEntryProviderImpl implements
 		dao.deleteById(id);
 		return true;
 	}
+
+	@Override
+	public LeasePromotion getLeasePromotionByToken(Integer namespaceId, Long communityId, String namespaceType, String namespaceToken) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select().from(Tables.EH_LEASE_PROMOTIONS)
+						.where(Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(namespaceId))
+						.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(communityId))
+						.and(Tables.EH_LEASE_PROMOTIONS.NAMESPACE_TYPE.eq(namespaceType))
+						.and(Tables.EH_LEASE_PROMOTIONS.NAMESPACE_TOKEN.eq(namespaceToken))
+						.fetchOne();
+		
+		if (record != null) {
+			return ConvertHelper.convert(record, LeasePromotion.class);
+		}
+		
+		return null;
+	}
 	
 }

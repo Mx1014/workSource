@@ -8,7 +8,9 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 import javax.annotation.PostConstruct;
@@ -55,12 +57,16 @@ import com.everhomes.rest.parking.OpenCardInfoDTO;
 import com.everhomes.rest.parking.ParkingCardDTO;
 import com.everhomes.rest.parking.ParkingCardType;
 import com.everhomes.rest.parking.ParkingLotVendor;
+import com.everhomes.rest.parking.ParkingNotificationTemplateCode;
 import com.everhomes.rest.parking.ParkingOwnerType;
 import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
+import com.everhomes.rest.parking.ParkingRechargeRateStatus;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -142,7 +148,14 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 
 			parkingCardDTO.setEndTime(expireTime);
 			
-			parkingCardDTO.setCardType(card.getCardType());
+			String type = null;
+			List<WankeCardType> types = getCardType();
+			for(WankeCardType t: types) {
+				if(t.getId().equals(card.getCardType())) {
+					type = t.getName();
+				}
+			}
+			parkingCardDTO.setCardType(type);
 			parkingCardDTO.setCardNumber(card.getCardNo());
 			parkingCardDTO.setIsValid(true);
 			
@@ -157,19 +170,32 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     	List<ParkingRechargeRate> parkingRechargeRateList = null;
     	List<ParkingRechargeRateDTO> result = null;
     	if(StringUtils.isBlank(plateNumber)) {
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,null);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, null);
     		
     	}else{
     		WankeCardInfo cardInfo = getCard(plateNumber);           
 			
     		String cardType = cardInfo.getCardType();
-    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId,cardType);
+    		parkingRechargeRateList = parkingProvider.listParkingRechargeRates(ownerType, ownerId, parkingLotId, cardType);
     	}
+    	
+    	
+		List<WankeCardType> types = getCardType();
+    	
 		result = parkingRechargeRateList.stream().map(r->{
+			String type = null;
+			for(WankeCardType t: types) {
+				if(t.getId().equals(r.getCardType())) {
+					type = t.getName();
+				}
+			}
+			
 			ParkingRechargeRateDTO dto = new ParkingRechargeRateDTO();
 			dto = ConvertHelper.convert(r, ParkingRechargeRateDTO.class);
 			dto.setRateToken(r.getId().toString());
 			dto.setVendorName(ParkingLotVendor.WANKE.getCode());
+			
+			dto.setCardType(type);
 			return dto;
 		}
 		).collect(Collectors.toList());
@@ -209,16 +235,46 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     
     @Override
     public ParkingRechargeRateDTO createParkingRechargeRate(CreateParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support create parkingRechageRate.");
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support create parkingRechageRate.");
+    	User user = UserContext.current().getUser();
+    	
+    	ParkingRechargeRate parkingRechargeRate = new ParkingRechargeRate();
+    	parkingRechargeRate.setOwnerType(cmd.getOwnerType());
+    	parkingRechargeRate.setOwnerId(cmd.getOwnerId());
+    	parkingRechargeRate.setParkingLotId(cmd.getParkingLotId());
+    	parkingRechargeRate.setCardType(cmd.getCardType());
+    	/*费率 名称默认设置 by sw*/
+    	Map<String, Object> map = new HashMap<String, Object>();
+	    map.put("count", cmd.getMonthCount().intValue());
+		String scope = ParkingNotificationTemplateCode.SCOPE;
+		int code = ParkingNotificationTemplateCode.DEFAULT_RATE_NAME;
+		String locale = "zh_CN";
+		String rateName = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+    	parkingRechargeRate.setRateName(rateName);
+    	parkingRechargeRate.setMonthCount(cmd.getMonthCount());
+    	parkingRechargeRate.setPrice(cmd.getPrice());
+    	parkingRechargeRate.setCreatorUid(user.getId());
+    	parkingRechargeRate.setCreateTime(new Timestamp(System.currentTimeMillis()));
+    	parkingRechargeRate.setStatus(ParkingRechargeRateStatus.ACTIVE.getCode());
+    	parkingProvider.createParkingRechargeRate(parkingRechargeRate);
+    	return ConvertHelper.convert(parkingRechargeRate, ParkingRechargeRateDTO.class);
     }
     
     @Override
     public void deleteParkingRechargeRate(DeleteParkingRechargeRateCommand cmd){
-    	LOGGER.error("Not support delete parkingRechageRate.");
-		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_UNSUPPORTED_USAGE,
-				"Not support delete parkingRechageRate.");
+    	try {
+    		ParkingRechargeRate rate = parkingProvider.findParkingRechargeRatesById(Long.parseLong(cmd.getRateToken()));
+    		if(rate == null){
+    			LOGGER.error("remote search pay order return null.rateId="+cmd.getRateToken());
+    			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+    					"remote search pay order return null.");
+    		}else{
+    			parkingProvider.deleteParkingRechargeRate(rate);
+    		}
+    	} catch (Exception e) {
+			LOGGER.error("delete parkingRechargeRate fail."+cmd.getRateToken());
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_SQL_EXCEPTION,
+    				"delete parkingRechargeRate fail."+cmd.getRateToken());
+		}
     }
     
     private void checkExpireDateIsNull(String expireDate,String plateNo) {
@@ -408,7 +464,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     }
 	
 	public String postToWanke(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://122.224.250.35:7021" + type);
+		
+		
+		HttpPost httpPost = new HttpPost(configProvider.getValue("parking.wanke.url", "") + type);
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String json = null;
 		
@@ -493,6 +551,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		dto.setDelayTime(Integer.valueOf(tempFee.getDelayTime()));
 		dto.setPrice(new BigDecimal(Integer.valueOf(tempFee.getAmount()) / 100));
 		dto.setOrderToken(tempFee.getOrderNo());
+		dto.setPayTime(System.currentTimeMillis());
 		return dto;
 	}
 
