@@ -10,7 +10,6 @@ ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `update_time` DATETIME;
 
 
 
--- WARN: blacklist sql is not released yet by lqs 20170116
 -- merge blacklist sfyan 20170114
 -- 用户黑名单
 -- DROP TABLE IF EXISTS `eh_user_blacklists`;
