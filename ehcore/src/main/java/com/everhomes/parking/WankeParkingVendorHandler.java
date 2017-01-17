@@ -464,7 +464,9 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
     }
 	
 	public String postToWanke(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://122.224.250.35:7021" + type);
+		
+		
+		HttpPost httpPost = new HttpPost(configProvider.getValue("parking.wanke.url", "") + type);
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String json = null;
 		
@@ -549,6 +551,7 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 		dto.setDelayTime(Integer.valueOf(tempFee.getDelayTime()));
 		dto.setPrice(new BigDecimal(Integer.valueOf(tempFee.getAmount()) / 100));
 		dto.setOrderToken(tempFee.getOrderNo());
+		dto.setPayTime(System.currentTimeMillis());
 		return dto;
 	}
 
