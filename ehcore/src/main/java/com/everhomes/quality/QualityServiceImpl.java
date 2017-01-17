@@ -2739,10 +2739,17 @@ public class QualityServiceImpl implements QualityService {
         }
 
         Collections.sort(taskIdlist);
+		if(cmd.getPageAnchor() != null && cmd.getPageAnchor() != 0L) {
+			if(taskIdlist.contains(cmd.getPageAnchor())) {
+				int last = taskIdlist.indexOf(cmd.getPageAnchor());
+				taskIdlist = taskIdlist.subList(0, last);
+			}
+		}
+
         Collections.reverse(taskIdlist);
         
         if(taskIdlist.size() > pageSize) {
-        	taskIdlist.subList(0,pageSize);
+			taskIdlist = taskIdlist.subList(0,pageSize);
         	response.setNextPageAnchor(taskIdlist.get(taskIdlist.size()-1));
         }
        
