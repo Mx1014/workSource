@@ -130,3 +130,7 @@ CREATE TABLE `eh_door_auth_logs` (
 -- 增加机构类型
 ALTER TABLE `eh_organization_members` ADD COLUMN `group_type` varchar(64) DEFAULT NULL COMMENT 'ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER';
 
+-- 招租管理添加门牌列，以便金蝶同步数据使用，add by tt, 20170117
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `namespace_type` VARCHAR(128) NULL DEFAULT NULL;
+ALTER TABLE `eh_lease_promotions` ADD COLUMN `namespace_token` VARCHAR(256) NULL DEFAULT NULL;
+
