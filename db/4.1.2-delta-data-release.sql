@@ -172,3 +172,29 @@ update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create
 update eh_launch_pad_items set action_data = '{\"url\":\"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' where action_type = 14 and item_label = '报修' and namespace_id = 999983;
 
 
+-- 黑名单配置到清华信息港 by sfyan 20170117
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999984, 2);
+
+
+
+-- 正中汇修改广场图标和名字 by xiongying20170117
+update eh_launch_pad_items set item_label = "物业查费" where item_label = "费用查询" and namespace_id = 999983;
+update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where item_label = "任务管理" and namespace_id = 999983;
+
+
+-- 黑名单配置到清华信息港 by sfyan 20170117
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999984, 2);
+ 
+ -- 黑名单配置到创源 by sfyan 20170117
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999986, 2);
+ 
+ -- 黑名单配置到左邻 by sfyan 20170117
+  SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
