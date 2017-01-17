@@ -1213,7 +1213,8 @@ public class ActivityServiceImpl implements ActivityService {
             fixupVideoInfo(dto);//added by janson
             return dto;
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+         // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
         if(activityDtos.size()<value){
             locator.setAnchor(null);
         }
@@ -1271,7 +1272,8 @@ public class ActivityServiceImpl implements ActivityService {
           fixupVideoInfo(dto);//added by janson
           return dto;
            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-       }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+       // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+       })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
        if(result.size()<pageSize)
        {
            locator.setAnchor(null);
@@ -1361,7 +1363,8 @@ public class ActivityServiceImpl implements ActivityService {
 			return dto;
 
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+			// 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
        
 		if(result.size()<pageSize){
 			
@@ -1432,7 +1435,8 @@ public class ActivityServiceImpl implements ActivityService {
 			return dto;
 
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+			// 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
        
 		if(result.size()<pageSize){
 			
@@ -1729,7 +1733,8 @@ public class ActivityServiceImpl implements ActivityService {
 
             return dto;
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+         // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
 
         Long nextPageAnchor = locator.getAnchor();
 
@@ -2473,7 +2478,8 @@ public class ActivityServiceImpl implements ActivityService {
                 fixupVideoInfo(dto);
                 return dto;
                 //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-            }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+             // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
 
             return activityDtos;
         }

@@ -406,7 +406,9 @@ public class ActivityProviderImpl implements ActivityProivider {
         if(orderByCreateTime) {
             query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
         } else {
-            query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
+        	// 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+//          query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
+        	query.addOrderBy(Tables.EH_ACTIVITIES.START_TIME.desc());
         }
 
 //            query.addLimit(count - activities.size());
@@ -416,24 +418,27 @@ public class ActivityProviderImpl implements ActivityProivider {
             LOGGER.debug("Query activities by geohash, sql=" + query.getSQL());
             LOGGER.debug("Query activities by geohash, bindValues=" + query.getBindValues());
         }
-
-        query.fetch().map((r) -> {
-        	if(r.getEndTime().after(now)){
-        		activities.add(ConvertHelper.convert(r, Activity.class));
-        	}
-        	else
-        		overdue.add(ConvertHelper.convert(r, Activity.class));
-            return null;
-        });
-
-        activities.addAll(overdue);
-        if (activities.size() >= count) {
-            locator.setAnchor(pageOffset+1);
-        }
-
-       if(activities.size()>=count){
-            return activities.subList(0, count);
-        }
+        
+        // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        activities = query.fetch().map(r->ConvertHelper.convert(r, Activity.class));
+       
+//        query.fetch().map((r) -> {
+//        	if(r.getEndTime().after(now)){
+//        		activities.add(ConvertHelper.convert(r, Activity.class));
+//        	}
+//        	else
+//        		overdue.add(ConvertHelper.convert(r, Activity.class));
+//            return null;
+//        });
+//
+//        activities.addAll(overdue);
+//        if (activities.size() >= count) {
+//            locator.setAnchor(pageOffset+1);
+//        }
+//
+//       if(activities.size()>=count){
+//            return activities.subList(0, count);
+//        }
         return activities;
     }
 
