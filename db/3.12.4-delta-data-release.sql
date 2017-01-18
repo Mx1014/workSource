@@ -31,3 +31,17 @@ INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`c
 INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`create_time`) SELECT (@version_id := @version_id + 1), 'android', '4.2.2', id, 4196354.0, now() FROM `eh_namespaces`;
   
 
+  -- 黑名单配置到清华信息港 by sfyan 20170117
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999984, 2);
+ 
+ -- 黑名单配置到创源 by sfyan 20170117
+ SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999986, 2);
+ 
+ -- 黑名单配置到左邻 by sfyan 20170117
+  SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+ VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
