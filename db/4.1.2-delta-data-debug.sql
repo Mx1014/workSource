@@ -119,3 +119,7 @@ UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":0,\"live
 
 -- 上一步节点处理人 by janson
 UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='2001';
+
+--北环门禁
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
+VALUES ('1112290', '1000000', '0', '4', '0', '/home', 'Bizs', '北环门禁', '北环门禁', 'cs://1/image/aW1hZ2UvTVRwa05ERmhNMlkzWW1SalpqYzROREEzTVRJM01qQXpNREl5TnpJM1ptVm1Ndw', '1', '1', '63', '{\"hardwareId\":\"F9:86:16:F2:2F:8B\"}', '0', '0', '1', '1', NULL, '0', NULL, '', '', '1', 'park_tourist', '1');

@@ -1046,6 +1046,9 @@ public class FlowServiceImpl implements FlowService {
 			action.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
 			action.setNamespaceId(flowButton.getNamespaceId());
 			action.setFlowStepType(flowStepType);
+			if(actionInfo.getTemplateId() != null) {
+				action.setTemplateId(actionInfo.getTemplateId());
+			}
 
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
@@ -1056,6 +1059,9 @@ public class FlowServiceImpl implements FlowService {
 			flowActionProvider.createFlowAction(action);
 			
 		} else {
+			if(actionInfo.getTemplateId() != null) {
+				action.setTemplateId(actionInfo.getTemplateId());
+			}
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
 			action.setTrackerApplier(actionInfo.getTrackerApplier());
