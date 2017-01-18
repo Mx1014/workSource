@@ -142,7 +142,7 @@ public class AclController extends ControllerBase {
     @RestReturn(value=AuthorizationServiceModuleDTO.class, collection = true)
     public RestResponse listAuthorizationServiceModules(@Valid ListAuthorizationServiceModuleCommand cmd) {
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserAuthority(UserContext.current().getUser().getId(), EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), cmd.getOrganizationId(), PrivilegeConstants.SERVICE_AUTHORIZATION);
+        resolver.checkUserAuthority(UserContext.current().getUser().getId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOwnerId(), PrivilegeConstants.SERVICE_AUTHORIZATION);
         RestResponse response = new RestResponse(rolePrivilegeService.listAuthorizationServiceModules(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
