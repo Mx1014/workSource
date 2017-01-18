@@ -230,7 +230,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
 		FlowGraphButtonEvent event = new FlowGraphButtonEvent();
 		
-		if(cmd.getContent() != null 
+		if((cmd.getContent() != null && !cmd.getContent().isEmpty()) 
 				|| (null != cmd.getImages() && cmd.getImages().size() > 0) ) {
 			FlowSubject subject = new FlowSubject();
 			subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());

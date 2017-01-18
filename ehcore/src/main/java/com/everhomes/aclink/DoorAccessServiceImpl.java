@@ -888,6 +888,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public DoorMessage activatingDoorAccess(DoorAccessActivingCommand cmd) {        
         User user = UserContext.current().getUser();
+        cmd.setHardwareId(cmd.getHardwareId().toUpperCase());
         
         DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(cmd.getHardwareId());
         if(doorAccess != null && !doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())) {
@@ -1007,6 +1008,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     @Override
     public QueryDoorMessageResponse activateDoorAccess(DoorAccessActivedCommand cmd) {
         User user = UserContext.current().getUser();
+        cmd.setHardwareId(cmd.getHardwareId().toUpperCase());
+        
         DoorAccess doorAccess = doorAccessProvider.getDoorAccessById(cmd.getDoorId());
         if(doorAccess != null && doorAccess.getStatus().equals(DoorAccessStatus.ACTIVING.getCode())
                 && doorAccess.getCreatorUserId().equals(user.getId())
@@ -2658,6 +2661,23 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         pdu.setUuid(doorAccess.getUuid());
         long requestId = LocalSequenceGenerator.getNextSequence();
         borderConnectionProvider.broadcastToAllBorders(requestId, pdu);
+    }
+    
+    @Override
+    public void remoteOpenDoor(String hardwareId) {
+    	User user = UserContext.current().getUser();
+    	
+        DoorAccess doorAccess = doorAccessProvider.queryDoorAccessByHardwareId(hardwareId.toUpperCase());
+        if(doorAccess == null) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
+        }
+        
+        DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(doorAccess.getId(), user.getId());
+        if(doorAuth == null /* || !doorAuth.getUserId().equals(user.getId()) */ || !doorAuth.getRightRemote().equals((byte)1) ) {
+            throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
+        }
+        
+        remoteOpenDoor(doorAuth.getId());
     }
     
     private List<Long> getDoorListbyUser(User user, DoorAccess doorAccess, Long curr) {
