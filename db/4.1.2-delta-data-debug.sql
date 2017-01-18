@@ -115,7 +115,7 @@ update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4
 
 
 -- 修改活动运营icon action_data   add by xq.tian  2017/01/18
-UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":0,\"livePrivilege\":1,\"categoryId\": 1000001}' WHERE `namespace_id`='999985' AND `item_group` = 'OPPushActivity';
+UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":1,\"livePrivilege\":1,\"categoryId\": 1000001}' WHERE `namespace_id`='999985' AND `item_group` = 'OPPushActivity';
 
 -- 上一步节点处理人 by janson
 UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='2001';
