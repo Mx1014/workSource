@@ -112,3 +112,7 @@ VALUES ((@max_id := @max_id + 1), '999985', '三色金枪鱼沙拉', '简单的�
 -- 正中汇修改广场图标和名字 by xiongying20170117
 update eh_launch_pad_items set item_label = "物业查费" where id in(select id from eh_launch_pad_items where item_label = "费用查询" and namespace_id = 999983);
 update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where id in(select id from eh_launch_pad_items where item_label = "任务管理" and namespace_id = 999983);
+
+
+-- 修改活动运营icon action_data   add by xq.tian  2017/01/18
+UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":0,\"livePrivilege\":1,\"categoryId\": 1000001}' WHERE `namespace_id`='999985' AND `item_group` = 'OPPushActivity';
