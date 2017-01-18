@@ -41,6 +41,7 @@ import com.everhomes.util.StringHelper;
  *  <li>reviewResult: 审阅结果com.everhomes.rest.quality.QualityInspectionTaskReviewResult</li>
  *  <li>record: 操作记录列表 com.everhomes.rest.quality.QualityInspectionTaskRecordsDTO</li>
  *  <li>executiveGroupId: 执行业务组id</li>
+ *  <li>executivePositionId: 通用岗位id</li>
  *  <li>groupUsers: 参考com.everhomes.rest.quality.GroupUserDTO</li>
  *  <li>standardDescription: 标准内容</li>
  *  <li>categoryId: 类型id</li>
@@ -80,6 +81,8 @@ public class QualityInspectionTaskDTO {
 	private String categoryName;
 	
 	private Long executiveGroupId;
+	
+	private Long executivePositionId;
 	
 	private Long executorId;
 	
@@ -351,6 +354,14 @@ public class QualityInspectionTaskDTO {
 
 	public void setExecutiveGroupId(Long executiveGroupId) {
 		this.executiveGroupId = executiveGroupId;
+	}
+
+	public Long getExecutivePositionId() {
+		return executivePositionId;
+	}
+
+	public void setExecutivePositionId(Long executivePositionId) {
+		this.executivePositionId = executivePositionId;
 	}
 
 	public List<GroupUserDTO> getGroupUsers() {

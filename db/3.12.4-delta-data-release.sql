@@ -46,5 +46,11 @@ INSERT INTO eh_app_version (`id`,`type`,`name`,`namespace_id`,`default_order`,`c
  INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
  VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
 
+
 -- 机构人员字段填值   by sfyan 20170118
 UPDATE `eh_organization_members` eom SET `group_type` = (SELECT `group_type` FROM `eh_organizations` where `id` = eom.organization_id), `group_path` = (SELECT `path` FROM `eh_organizations` where `id` = eom.organization_id);
+
+-- merge from quality2.1 by xiongying 20170118 
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('quality', '10012', 'zh_CN', '任务模板不存在');
+INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('quality', '10013', 'zh_CN', '只能删除自己创建的模板');
+

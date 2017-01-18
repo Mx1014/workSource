@@ -18,4 +18,6 @@ public interface QualityServiceErrorCode {
     static final int ERROR_DOWNLOAD_EXCEL = 10010;  //下载excel信息有问题
     
     static final int ERROR_ASSIGN_TO_ONESELF = 10011;  //把任务转给自己
+    static final int ERROR_TEMPLATE_NOT_EXIST = 10012;  //任务模板不存在
+    static final int ERROR_TEMPLATE_CREATOR = 10013;  //任务模板创建者非当前用户
 }

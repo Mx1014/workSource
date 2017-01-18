@@ -2402,6 +2402,8 @@ public class ActivityServiceImpl implements ActivityService {
                     //add UserActivityStatus by xiongying 20160628
                     ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
                     dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+				}else {
+					dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
 				}
                 fixupVideoInfo(dto);
                 return dto;
@@ -2437,6 +2439,19 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setStopTime(activity.getEndTime().toString());
                 dto.setGroupId(activity.getGroupId());
                 dto.setPosterUrl(getActivityPosterUrl(activity));
+                if (user != null) {
+                	List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(user.getId(), UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
+                    if (favorite == null || favorite.size() == 0) {
+                        dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+                    } else {
+                        dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+                    }
+                    //add UserActivityStatus by xiongying 20160628
+                    ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+                    dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+				}else {
+					dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+				}
                 fixupVideoInfo(dto);
                 return dto;
                 //全部查速度太慢，先把查出的部分排序 by xiongying20161208
