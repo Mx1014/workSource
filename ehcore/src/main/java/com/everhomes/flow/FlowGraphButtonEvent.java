@@ -254,7 +254,12 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			tracker.setFlowCaseId(ctx.getFlowCase().getId());
 			tracker.setFlowUserId(ctx.getOperator().getId());
 			tracker.setFlowUserName(ctx.getOperator().getNickName());
-			tracker.setSubjectId(subject.getId());
+			if(subject.getContent() != null && !subject.getContent().isEmpty()) {
+				tracker.setSubjectId(subject.getId());	
+			} else {
+				tracker.setSubjectId(0l);// BUG #5431
+			}
+			
 			tracker.setLogType(FlowLogType.NODE_TRACKER.getCode());
 			
 			tracker.setButtonFiredStep(nextStep.getCode());

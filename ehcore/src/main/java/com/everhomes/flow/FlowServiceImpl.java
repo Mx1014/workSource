@@ -737,10 +737,6 @@ public class FlowServiceImpl implements FlowService {
 				, actionType, actionStepType, flowStepType);
 		
 		CreateFlowUserSelectionCommand selectionCmd = actionInfo.getUserSelections();
-		boolean configUser = false;
-		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
-			configUser = true;
-		}
 		
 		if(action == null) {
 			action = new FlowAction();
@@ -798,13 +794,10 @@ public class FlowServiceImpl implements FlowService {
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
 			
-			//delete all old selections
-			if(configUser) {
-				flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
-			}
+			flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());
 		}
 		
-		if(configUser) {
+		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
 			List<FlowSingleUserSelectionCommand> seles = selectionCmd.getSelections();
 			for(FlowSingleUserSelectionCommand selCmd : seles) {
 				FlowUserSelection userSel = new FlowUserSelection(); 
@@ -956,9 +949,7 @@ public class FlowServiceImpl implements FlowService {
 		if(cmd.getButtonName() != null) {
 			flowButton.setButtonName(cmd.getButtonName());	
 		}
-		if(cmd.getDescription() != null) {
-			flowButton.setDescription(cmd.getDescription());	
-		}
+		flowButton.setDescription(cmd.getDescription());	
 		if(cmd.getGotoNodeId() != null) {
 			flowButton.setGotoNodeId(cmd.getGotoNodeId());	
 		}
@@ -983,7 +974,7 @@ public class FlowServiceImpl implements FlowService {
 		
 		if(null != cmd.getSmsAction()) {
 			dbProvider.execute((a) -> {
-				return createButtonAction(flowButton, cmd.getMessageAction(), FlowActionType.SMS.getCode()
+				return createButtonAction(flowButton, cmd.getSmsAction(), FlowActionType.SMS.getCode()
 						, FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
 			});	
 		}
@@ -1111,7 +1102,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
-				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
 		if(action != null) {
 			dto.setPushSms(actionToDTO(action));
 		}
@@ -1664,6 +1655,11 @@ public class FlowServiceImpl implements FlowService {
 		
 		if(LOGGER.isDebugEnabled())
 			LOGGER.debug("flowtimeout tick message, text={}, size={}", dataStr, users.size());
+
+		if(dataStr == null || dataStr.trim().isEmpty()) {
+			LOGGER.error("flowtimeout dataStr empty ft=" + ft.getId());
+			return;
+		}
 		
 		for(Long userId : users) {
 			
@@ -2235,17 +2231,17 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		//fix multiple current node
-		for(int i = nodeDTOS.size()-1; i >= 0; i--) {
-			logDTO = nodeDTOS.get(i);
-			if(logDTO.getIsCurrentNode() != null && logDTO.getIsCurrentNode().equals((byte)1)) {
-				int j = i-1;
-				for(; j >= 0; j--) {
-					logDTO.setIsCurrentNode((byte)0);
-				}
-				
-				break;
-			}
-		}
+//		for(int i = nodeDTOS.size()-1; i >= 0; i--) {
+//			logDTO = nodeDTOS.get(i);
+//			if(logDTO.getIsCurrentNode() != null && logDTO.getIsCurrentNode().equals((byte)1)) {
+//				int j = i-1;
+//				for(; j >= 0; j--) {
+//					logDTO.setIsCurrentNode((byte)0);
+//				}
+//				
+//				break;
+//			}
+//		}
 		
 		return dto;
 	}

@@ -121,4 +121,6 @@ public interface DoorAccessService {
 
     String checkAllDoorAuthList();
 
+	public void remoteOpenDoor(String hardwareId);
+
 }

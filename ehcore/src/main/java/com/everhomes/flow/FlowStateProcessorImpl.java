@@ -109,11 +109,10 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			
 	    	User user = null;
 	    	if(stepDTO.getOperatorId() != null) {
+	    		//force to set context user
 	    		user = userProvider.findUserById(stepDTO.getOperatorId());
-	    		if(UserContext.current().getUser() == null) {
-	    			UserContext.current().setUser(user);
-	    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
-	    		}
+    			UserContext.current().setUser(user);
+    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
 	    	} else if(UserContext.current().getUser() != null) {
 	    		user = UserContext.current().getUser();
 	    	} else {
@@ -231,7 +230,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		FlowGraphButton button = flowGraph.getGraphButton(cmd.getButtonId());
 		FlowGraphButtonEvent event = new FlowGraphButtonEvent();
 		
-		if(cmd.getContent() != null 
+		if((cmd.getContent() != null /* && !cmd.getContent().isEmpty() */ ) 
 				|| (null != cmd.getImages() && cmd.getImages().size() > 0) ) {
 			FlowSubject subject = new FlowSubject();
 			subject.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
