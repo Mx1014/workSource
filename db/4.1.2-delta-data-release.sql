@@ -4,7 +4,7 @@
 -- 表单管理
 --
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (50900, '表单管理', 50000, NULL, 'react:/form-management/form-list', 1, 2, '/50000/50900', 'park', 590);  
+VALUES (50900, '表单管理', 50000, NULL, 'react:/form-management/form-list', 1, 2, '/50000/50900', 'park', 590);
 
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
@@ -12,7 +12,7 @@ VALUES (10126, 0, '表单管理', '表单管理 全部权限', NULL);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10126, 50900, '表单管理', 1, 1, '表单管理  全部权限', 590); 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10126, 50900, '表单管理', 1, 1, '表单管理  全部权限', 590);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`)
@@ -20,7 +20,7 @@ VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 10126, 1001, 0, 1, NOW()
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 50900, '表单管理', 'EhNamespaces', 999983, 2); 
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 50900, '表单管理', 'EhNamespaces', 999983, 2);
 
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`)
 VALUES ('50900', '表单管理', '50000', '/50000/50900', '0', '2', '2', '0', UTC_TIMESTAMP());
@@ -36,14 +36,14 @@ VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id +1
 --
 UPDATE `eh_web_menus` SET NAME = '审批管理' ,data_type =NULL WHERE id = 40540;
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (40541, '审批列表', 40540, NULL, 'react:/approval-management/approval-list/service-alliance/40500', 1, 2, '/40000/40500/40540/40541', 'park', 458);  
+VALUES (40541, '审批列表', 40540, NULL, 'react:/approval-management/approval-list/service-alliance/40500', 1, 2, '/40000/40500/40540/40541', 'park', 458);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (40542, '申请记录', 40540, NULL, 'apply_record', 1, 2, '/40000/40500/40540/40542', 'park', 459);  
+VALUES (40542, '申请记录', 40540, NULL, 'apply_record', 1, 2, '/40000/40500/40540/40542', 'park', 459);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES((@web_menu_privilege_id := @web_menu_privilege_id + 1),'10024','40541','服务联盟','1','1','服务联盟 全部权限','710');
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
 VALUES((@web_menu_privilege_id := @web_menu_privilege_id + 1),'10024','40542','服务联盟','1','1','服务联盟 全部权限','710');
 
 
@@ -95,28 +95,28 @@ INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `descript
 VALUES ((@max_id := @max_id + 1), '999985', '三色金枪鱼沙拉', '简单的土豆泥沙拉', 'cs://1/image/aW1hZ2UvTVRvME1EZzFZV1JrTnpZNVlqQXlNVGd5WVdZNE1HSmpOR00xWWpnd05HWXlNUQ', '1080.56', 'http://www.baidu.com', '10', '2017-01-10 16:20:23', '1', NULL, NULL);
 
 -- 物业报修科兴菜单 add by sw 20160117
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20200', '物业报修', '20000', NULL, NULL, '1', '2', '/20000/20200', 'park', '201', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES (20210, '任务列表', 20200, NULL, 'task_management_list/1', 0, 2, '/20000/20200/20210', 'park', 419, NULL);
 
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20230', '投诉建议', '20000', NULL, NULL, '1', '2', '/20000/20230', 'park', '201', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20240', '任务列表', '20230', NULL, 'task_management_list/205250', '0', '2', '/20000/20230/20240', 'park', '220', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20250', '服务录入', '20230', NULL, 'task_management_service_entry', '0', '2', '/20000/20230/20250', 'park', '225', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20255', '设置', '20230', NULL, NULL, '0', '2', '/20000/20230/20255', 'park', '228', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20258', '工作流设置', '20255', NULL, 'react:/working-flow/flow-list/property-service/20100', '0', '2', '/20000/20230/20255/20258', 'park', '230', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20280', '分类设置', '20255', NULL, 'classify_setting', '0', '2', '/20000/20230/20255/20280', 'park', '240', NULL);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20290', '统计', '20230', NULL, NULL, '0', '2', '/20000/20230/20290', 'park', '245', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20291', '服务统计', '20290', NULL, 'task_statistics', '0', '2', '/20000/20230/20290/20291', 'park', '180', NULL);
-	
+
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
 	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),10008,20200,'物业报修',1,1,'物业报修 管理员权限',710);
@@ -162,7 +162,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20291, '', 'EhNamespaces', 999983, 2);
 
 delete from eh_web_menu_scopes where menu_id in (20100, 20140, 20150, 20155, 20158, 20160, 20170, 20180, 20190, 20191, 20192) and owner_id = 999983;
-	
+
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999983-1', 'ebei', '', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999983-205250', 'flow', '', '0', NULL);
 
@@ -173,7 +173,7 @@ update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create
 update eh_launch_pad_items set action_data = '{\"url\":\"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' where action_type = 14 and item_label = '报修' and namespace_id = 999983;
 
 -- 万科停车 add by sw 20160117
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('parking.wanke.url', 'http://122.224.250.35:7021', '万科立方系统', '0', NULL);
 
 
@@ -193,18 +193,24 @@ update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4
  SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
  INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
  VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999984, 2);
- 
+
  -- 黑名单配置到创源 by sfyan 20170117
  SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
  INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
  VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 999986, 2);
- 
+
  -- 黑名单配置到左邻 by sfyan 20170117
   SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
  INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
  VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
-
  
- --增加审批 by xiongying20170117
+ -- 增加审批 by xiongying20170117
  SET @jump_id = (SELECT MAX(id) FROM eh_service_alliance_jump_module);
  INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES ((@jump_id := @jump_id + 1), '999983', '审批', 'zl://approval/create?approvalId={}&sourceId={}');
+
+
+-- 修改活动运营icon action_data   add by xq.tian  2017/01/18
+UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":0,\"livePrivilege\":1,\"categoryId\": 1000001}' WHERE `namespace_id`='999985' AND `item_group` = 'OPPushActivity';
+
+-- 上一步节点处理人 by janson
+UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='2001';
