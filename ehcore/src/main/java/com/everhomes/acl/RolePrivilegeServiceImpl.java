@@ -1668,14 +1668,15 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	private ServiceModuleAssignmentDTO convertServiceModuleAssignmentDTO(ServiceModuleAssignment assignment){
 		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
 		ServiceModuleAssignmentDTO assignmentDTO = ConvertHelper.convert(assignment, ServiceModuleAssignmentDTO.class);
-		assignmentDTO.setModuleId(serviceModule.getId());
-		assignmentDTO.setModuleName(serviceModule.getName());
+		assignmentDTO.setModuleId(assignment.getModuleId());
+		if(null != serviceModule)
+			assignmentDTO.setModuleName(serviceModule.getName());
 
 		if(ServiceModuleAssignmentType.PORTION == ServiceModuleAssignmentType.fromCode(assignment.getAssignmentType())){
 			List<Acl> acls = aclProvider.getAcl(new QueryBuilder() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.eq(assignment.getTargetType() + assignment.getTargetId() + ".M" + assignment.getModuleId() + "." + assignment.getOwnerType() + assignment.getOwnerId()).or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
 					return null;
 				}
 			});
