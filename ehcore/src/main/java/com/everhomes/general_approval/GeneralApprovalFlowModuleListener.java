@@ -168,7 +168,9 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 							List<FlowCaseFileDTO> files = new ArrayList<>();
 							for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
 								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
+								LOGGER.debug("BEGIN PARSE URI  DTO = ["+JSON.toJSONString(dto2)+"], userContext " +JSON.toJSONString(UserContext.current()));
 								String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								LOGGER.debug("file URL = "+url);
 								ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
 								fileDTO.setUrl(url);
 								fileDTO.setFileName(dto2.getFileName());
@@ -191,7 +193,7 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 					}
 				}catch(NullPointerException e){
 					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val));
-					
+					LOGGER.error(e.getMessage());
 				}catch(Exception e){
 					LOGGER.error(e.getMessage());
 					LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val));

@@ -56,7 +56,7 @@ public class ServiceAllianceRequestInfoSearcherImpl extends AbstractElasticSearc
 	@Autowired
 	private ConfigurationProvider configProvider;
 	
-	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd");
+	private SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 	
 	@Override
 	public void deleteById(Long id) {
