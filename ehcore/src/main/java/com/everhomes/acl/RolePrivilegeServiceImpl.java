@@ -1682,14 +1682,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			});
 
 			List<PrivilegeDTO> ps = new ArrayList<>();
+			List<Long> pIds = new ArrayList<>();
 			for (Acl acl: acls) {
-				Privilege p = aclProvider.getPrivilegeById(acl.getPrivilegeId());
-				PrivilegeDTO pDTO = new PrivilegeDTO();
-				pDTO.setPrivilegeId(acl.getPrivilegeId());
-				if(null != p){
-					pDTO.setPrivilegeName(p.getName());
+				if(!pIds.contains(acl.getPrivilegeId())){
+					Privilege p = aclProvider.getPrivilegeById(acl.getPrivilegeId());
+					PrivilegeDTO pDTO = new PrivilegeDTO();
+					pDTO.setPrivilegeId(acl.getPrivilegeId());
+					if(null != p){
+						pDTO.setPrivilegeName(p.getName());
+					}
+					ps.add(pDTO);
+					pIds.add(acl.getPrivilegeId());
 				}
-				ps.add(pDTO);
+
 			}
 			assignmentDTO.setPrivileges(ps);
 		}
@@ -2044,7 +2049,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
      */
 	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, List<Long> privilegeIds){
 		if(null != moduleIds && moduleIds.size() > 0){
-			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, ServiceModulePrivilegeType.SUPER);
+			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, null);
 			if(null == privilegeIds){
 				privilegeIds = new ArrayList<>();
 			}

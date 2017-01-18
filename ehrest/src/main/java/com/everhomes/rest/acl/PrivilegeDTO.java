@@ -1,7 +1,7 @@
 package com.everhomes.rest.acl;
 
 
-
+import java.io.Serializable;
 
 /**
  * <p>权限</p>
@@ -10,7 +10,7 @@ package com.everhomes.rest.acl;
  * <li>privilegeName: 权限名称</li>
  * </ul>
  */
-public class PrivilegeDTO {
+public class PrivilegeDTO  implements Serializable {
 
 	private Long privilegeId;
 	private String    privilegeName;
