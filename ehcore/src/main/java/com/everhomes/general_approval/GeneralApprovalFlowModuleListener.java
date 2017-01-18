@@ -163,14 +163,15 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 							//TODO:工作流需要新增类型file
 							e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
 							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
+							LOGGER.error("filevalue : "+JSON.toJSONString(fileValue));
 							if (null == fileValue || fileValue.getFiles() ==null )
 								break;
 							List<FlowCaseFileDTO> files = new ArrayList<>();
 							for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
 								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-								LOGGER.debug("BEGIN PARSE URI  DTO = ["+JSON.toJSONString(dto2)+"], userContext " +JSON.toJSONString(UserContext.current()));
+								LOGGER.error("BEGIN PARSE URI  DTO = ["+JSON.toJSONString(dto2)+"], userContext " +JSON.toJSONString(UserContext.current()));
 								String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
-								LOGGER.debug("file URL = "+url);
+								LOGGER.error("file URL = "+url);
 								ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
 								fileDTO.setUrl(url);
 								fileDTO.setFileName(dto2.getFileName());
