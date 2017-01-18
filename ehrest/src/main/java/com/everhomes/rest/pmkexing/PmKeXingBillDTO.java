@@ -21,8 +21,8 @@ public class PmKeXingBillDTO {
 
     private String billDate;
     private String billStatus;
-    private BigDecimal receivableAmount;
-    private BigDecimal unpaidAmount;
+    private BigDecimal receivableAmount = BigDecimal.ZERO;
+    private BigDecimal unpaidAmount = BigDecimal.ZERO;
     @ItemType(PmKeXingBillItemDTO.class)
     private List<PmKeXingBillItemDTO> items = new ArrayList<>();
 
