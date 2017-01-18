@@ -11,8 +11,6 @@ public class TabInstanceConfig implements Serializable  {
 
 	private String itemGroup;
     
-    private String itemLocation;
-
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -24,14 +22,6 @@ public class TabInstanceConfig implements Serializable  {
 
 	public void setItemGroup(String itemGroup) {
 		this.itemGroup = itemGroup;
-	}
-
-	public String getItemLocation() {
-		return itemLocation;
-	}
-
-	public void setItemLocation(String itemLocation) {
-		this.itemLocation = itemLocation;
 	}
 
 }
