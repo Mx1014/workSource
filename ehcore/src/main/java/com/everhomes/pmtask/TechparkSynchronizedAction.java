@@ -54,9 +54,9 @@ import com.everhomes.util.ConvertHelper;
 
 @Component
 @Scope(value = ConfigurableBeanFactory.SCOPE_PROTOTYPE)
-public class TechparkSynchronizedData implements Runnable{
+public class TechparkSynchronizedAction implements Runnable{
 	
-	private static final Logger LOGGER = LoggerFactory.getLogger(TechparkSynchronizedData.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TechparkSynchronizedAction.class);
 	
 	@Autowired
 	private AddressProvider addressProvider;
@@ -77,7 +77,7 @@ public class TechparkSynchronizedData implements Runnable{
 	
 	private Long taskId;
 	
-	public TechparkSynchronizedData(final String taskId) {
+	public TechparkSynchronizedAction(final String taskId) {
 		this.taskId = Long.valueOf(taskId);
 	}
 	
@@ -163,7 +163,7 @@ public class TechparkSynchronizedData implements Runnable{
 		
 		JSONArray enclosure = new JSONArray();
 		
-		String key = "TechparkSynchronizedData-pmtask" + task.getId();
+		String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
         Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
         RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
         ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();

@@ -175,4 +175,13 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 			  
 		  }
 	}
+
+	@Override
+	public void onFlowCaseCreating(FlowCase flowCase) {
+		FlowModuleInst inst = moduleMap.get(flowCase.getModuleName());
+		  if(inst != null) {
+			  FlowModuleListener listener = inst.getListener();
+			  listener.onFlowCaseCreating(flowCase);  
+		  }		 
+	}
 }

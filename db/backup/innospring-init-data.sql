@@ -2470,6 +2470,54 @@ INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespac
 	VALUES ('600', 'business.url', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https://biz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fstore%2Fdefault%3Fpos%3D1%26_k%3Dzlbiz#sign_suffix', 'business url', '999986', NULL);
 
 
+-- 根据http://devops.lab.everhomes.com/issues/5507要求修改 by lqs 20170109
+-- 把“创新服务->创源服务”提取到服务市场替换原“创新服务”，把“创新服务->物业服务”提取到服务市场替换原“增值服务”
+UPDATE `eh_launch_pad_items` SET `action_type`=33, `action_data`='{"type":60,"parentId":60,"displayType": "grid"}', `icon_uri`='cs://1/image/aW1hZ2UvTVRveE1HWm1NREZsWWpFNFpEUmtPVE5oTWpOa1pUSmtZVE5rWldSaVpHRXdaUQ' WHERE `id` in (112306, 112326);
+UPDATE `eh_launch_pad_items` SET `action_type`=51, `action_data`='', `item_name`='物业服务', `item_label`='物业服务', `icon_uri`='cs://1/image/aW1hZ2UvTVRwa00yVTNNV1JtWXpsbFlURmlabU5pTkdSak56ZGtPR0kwTlRVNFl6VmtaZw' WHERE `id`=112310;
+UPDATE `eh_launch_pad_items` SET `action_type`=14, `action_data`='{"url":"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1#/my_service#sign_suffix"}', `item_name`='物业服务', `item_label`='物业服务', `icon_uri`='cs://1/image/aW1hZ2UvTVRwa00yVTNNV1JtWXpsbFlURmlabU5pTkdSak56ZGtPR0kwTlRVNFl6VmtaZw' WHERE `id`=112328;
+-- “智能家居”里的即将上线页面更换为没有左邻信息的即将上线
+UPDATE `eh_launch_pad_items` SET `action_type`=14, `action_data`='{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}' WHERE `id` IN (112317, 112336);
+-- “工位预定”改为“众创空间”，把后台管理菜单名称也改为“众创空间"
+UPDATE `eh_launch_pad_items` SET `item_name`='众创空间', `item_label`='众创空间' WHERE `id` IN (112316, 112335);
+UPDATE `eh_web_menu_scopes` SET `menu_name`='众创空间', `apply_policy`='1' where owner_id=999986 and menu_id=40200;
+-- 把“园区配套”的action_type/action_data换成原来的“增值服务”
+UPDATE `eh_service_alliance_categories` SET `name`='园区配套' WHERE `id`=61;
+UPDATE `eh_launch_pad_items` SET `action_type`=33, `action_data`='{"type":61,"parentId":61,"displayType": "grid"}' WHERE `id` IN (112315, 112334);
+-- 删除“园区一卡通”图标
+DELETE FROM `eh_launch_pad_items` WHERE `id` IN (112319, 112338);
+-- 添加VIP车位
+INSERT INTO `eh_rentalv2_resource_types` (`id`, `name`, `page_type`, `icon_uri`, `status`, `namespace_id`) 
+	VALUES(10076,'VIP车位预约','0',NULL,'0', 999986);
+DELETE FROM `eh_launch_pad_items` WHERE `id` IN (112319, 112338);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
+	VALUES (112319, 999986, '0', '0', '0', '/home', 'Bizs', 'RENTALV2', 'VIP车位', 'cs://1/image/aW1hZ2UvTVRwbU5ETTFNamhtWXpFME16WXhNMk5oTWpJelpqWTVPREZpTXpCaE5XSXpNdw', '1', '1', '49', CONCAT('{\"resourceTypeId\":',10076,',\"pageType\":0}'), '55', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
+	VALUES (112338, 999986, '0', '0', '0', '/home', 'Bizs', 'RENTALV2', 'VIP车位', 'cs://1/image/aW1hZ2UvTVRwbU5ETTFNamhtWXpFME16WXhNMk5oTWpJelpqWTVPREZpTXpCaE5XSXpNdw', '1', '1', '49', CONCAT('{\"resourceTypeId\":',10076,',\"pageType\":0}'), '55', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0');
+-- 调整排序
+UPDATE `eh_launch_pad_items` SET default_order=10 WHERE `id`=112302 or `id`=112322; -- 1 门禁考勤
+UPDATE `eh_launch_pad_items` SET default_order=20 WHERE `id`=112311 or `id`=112330; -- 2 园区通讯录
+UPDATE `eh_launch_pad_items` SET default_order=30 WHERE `id`=112301 or `id`=112321; -- 3 园区活动
+UPDATE `eh_launch_pad_items` SET default_order=40 WHERE `id`=112306 or `id`=112326; -- 4 创新服务
+UPDATE `eh_launch_pad_items` SET default_order=50 WHERE `id`=112310 or `id`=112328; -- 5 物业服务
+UPDATE `eh_launch_pad_items` SET default_order=60 WHERE `id`=112312 or `id`=112331; -- 6 公共资源预订
+UPDATE `eh_launch_pad_items` SET default_order=70 WHERE `id`=112316 or `id`=112335; -- 7 众创空间
+UPDATE `eh_launch_pad_items` SET default_order=80 WHERE `id`=112318 or `id`=112337; -- 8 智能停车场
+UPDATE `eh_launch_pad_items` SET default_order=90 WHERE `id`=112315 or `id`=112334; -- 9 园区配套
+UPDATE `eh_launch_pad_items` SET default_order=100 WHERE `id`=112313 or `id`=112332; -- 10 视频会议
+UPDATE `eh_launch_pad_items` SET default_order=110 WHERE `id`=112319 or `id`=112338; -- 11 VIP车位预订
+UPDATE `eh_launch_pad_items` SET default_order=120 WHERE `id`=112834 or `id`=112835; -- 12 咨询热线
+UPDATE `eh_launch_pad_items` SET default_order=130 WHERE `id`=112317 or `id`=112336; -- 13 智慧家居
+UPDATE `eh_launch_pad_items` SET default_order=999 WHERE `id`=112314 or `id`=112333; -- 99 更多服务
+-- 视频会议移到更多、众创空间移到首页
+UPDATE `eh_launch_pad_items` SET `display_flag`=1 WHERE `id`=112316 or `id`=112335; -- 7 众创空间
+UPDATE `eh_launch_pad_items` SET `display_flag`=0 WHERE `id`=112313 or `id`=112332; -- 10 视频会议
+
+
+
+
+
+
+
 
 
 

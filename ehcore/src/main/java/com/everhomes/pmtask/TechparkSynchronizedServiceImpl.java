@@ -13,10 +13,10 @@ import org.springframework.stereotype.Component;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 
-@Component("pmtaskTechparkHandler")
-public class PmtaskTechparkHandler implements ApplicationListener<ContextRefreshedEvent>{
+@Component("techparkSynchronizedServiceImpl")
+public class TechparkSynchronizedServiceImpl implements ApplicationListener<ContextRefreshedEvent>{
 
-	private static final Logger LOGGER = LoggerFactory.getLogger(PmtaskTechparkHandler.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(TechparkSynchronizedServiceImpl.class);
 
 	@Autowired
     WorkerPoolFactory workerPoolFactory;
@@ -28,7 +28,7 @@ public class PmtaskTechparkHandler implements ApplicationListener<ContextRefresh
     
 	public void pushToQueque(Long taskId) {
 		
-		final Job job = new Job(TechparkSynchronizedData.class.getName(), new Object[]{ String.valueOf(taskId) });
+		final Job job = new Job(TechparkSynchronizedAction.class.getName(), new Object[]{ String.valueOf(taskId) });
 		
 		jesqueClientFactory.getClientPool().enqueue(pmtask, job);
 		

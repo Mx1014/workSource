@@ -811,10 +811,20 @@ public class PmTaskServiceImpl implements PmTaskService {
 	    dto.setOperatorName(user.getNickName());
 	    dto.setOperatorPhone(userIdentifier.getIdentifierToken());
 	}
-	
+
+	private void checkBlacklist(String ownerType, Long ownerId){
+		ownerType = org.springframework.util.StringUtils.isEmpty(ownerType) ? "" : ownerType;
+		ownerId = null == ownerId ? 0L : ownerId;
+		Long userId = UserContext.current().getUser().getId();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_PROPERTY_POST);
+	}
+
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd) {
-		
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());
@@ -830,7 +840,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 	
 	@Override
 	public PmTaskDTO createTaskByOrg(CreateTaskCommand cmd) {
-		
+
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
 		String requestorPhone = cmd.getRequestorPhone();
 		String requestorName = cmd.getRequestorName();
 		if(StringUtils.isBlank(requestorPhone)){
@@ -1913,12 +1925,28 @@ public class PmTaskServiceImpl implements PmTaskService {
     				"TargetIds cannot be null or empty.");
 		}
 		
+		int size = targetIds.size();
+		
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		
+		if(size == 1) {
+			
+			if(resolver.checkUserPrivilege(targetIds.get(0), EntityType.COMMUNITY.getCode(), 
+					cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
+				LOGGER.error("user privilege exist.");
+	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_PRIVILEGE_EXIST,
+	    				"user privilege exist.");
+			}
+		}
+		
 		dbProvider.execute((TransactionStatus status) -> {
 			
-			for(int i=0,l=targetIds.size(); i<l;i++ ) {
+			for(int i=0,l=size; i<l;i++ ) {
 				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
 						EntityType.USER.getCode(), targetIds.get(i));
-				if(null == pmTaskTarget) {
+				if(!resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
+						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE) &&
+						null == pmTaskTarget) {
 					pmTaskTarget = new PmTaskTarget();
 					pmTaskTarget.setRoleId(cmd.getOperateType());
 					pmTaskTarget.setOwnerId(cmd.getOwnerId());
@@ -1928,20 +1956,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 					pmTaskTarget.setTargetId(targetIds.get(i));
 					
 					pmTaskProvider.createTaskTarget(pmTaskTarget);
-					
-//					List<RoleAssignment> roleAssignments = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.COMMUNITY.getCode(),
-//					cmd.getOwnerId(), EntityType.USER.getCode(), targetIds.get(i));
-//					
-//					if(null == roleAssignments || roleAssignments.size() == 0) {
-//						RoleAssignment roleAssignment = new RoleAssignment();
-//						roleAssignment.setRoleId(pmTaskTarget.getRoleId());
-//						roleAssignment.setOwnerType(EntityType.COMMUNITY.getCode());
-//						roleAssignment.setOwnerId(cmd.getOwnerId());
-//						roleAssignment.setTargetType(EntityType.USER.getCode());
-//						roleAssignment.setTargetId(targetIds.get(i));
-//						roleAssignment.setCreatorUid(UserContext.current().getUser().getId());
-//						aclProvider.createRoleAssignment(roleAssignment);
-//					}
 					
 					rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
 							EntityType.USER.getCode(), targetIds.get(i), "pmtask", privilegeIds);

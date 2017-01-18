@@ -11,6 +11,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.user.IdentifierType;
@@ -175,24 +176,26 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
         if(checkSuperAdmin(userId, organizationId)){
-            LOGGER.debug("check super admin privilege success...");
+            LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
 
         if(checkModuleAdmin(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check module admin privilege success...");
+            LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
 
         if(checkAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check privilege success...");
+            LOGGER.debug("check privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
 
         if(checkRoleAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check role privilege success...");
+            LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
+
+        LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
         return false;
     }
 
@@ -205,6 +208,19 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         LOGGER.error("Insufficient privilege, privilegeId={}, organizationId = {}", privilegeId, organizationId);
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
+    }
+
+    @Override
+    public void checkUserBlacklistAuthority(Long userId, String ownerType, Long ownerId, Long privilegeId){
+        List<AclRoleDescriptor> descriptors = new ArrayList<>();
+        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
+        descriptors.add(descriptor);
+
+        if(aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors)){
+            LOGGER.error("Permission is prohibited, userId={}, privilegeId = {}", userId, privilegeId);
+            throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+                    "Permission is prohibited");
+        }
     }
     
 }

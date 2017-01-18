@@ -242,29 +242,29 @@ public class FlowPmTaskHandle implements PmTaskHandle {
     	//同步数据到科技园
 		long start = System.currentTimeMillis();
 
-		if(user.getNamespaceId() == 1000000) {
-			
-			String key = "TechparkSynchronizedData-pmtask" + task.getId();
-			String value = "[]";
-			
-			List<AttachmentDescriptor> attachments = cmd.getAttachments();
-			if(null != attachments) {
-				attachments.stream().forEach(a -> {
-					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-					a.setContentUrl(contentUrl);
-				});
-				value = JSONObject.toJSONString(attachments);
-			}
-			
-	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-	      
-	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-	        valueOperations.set(key, value);
-			
-			PmtaskTechparkHandler handler = PlatformContext.getComponent("pmtaskTechparkHandler");
-			handler.pushToQueque(task.getId());
-		}
+//		if(user.getNamespaceId() == 1000000) {
+//			
+//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+//			String value = "[]";
+//			
+//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
+//			if(null != attachments) {
+//				attachments.stream().forEach(a -> {
+//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+//					a.setContentUrl(contentUrl);
+//				});
+//				value = JSONObject.toJSONString(attachments);
+//			}
+//			
+//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//	      
+//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//	        valueOperations.set(key, value);
+//			
+//			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
+//			handler.pushToQueque(task.getId());
+//		}
 		long end = System.currentTimeMillis();
 		System.out.println( (end - start) / 1000);
 		return ConvertHelper.convert(task, PmTaskDTO.class);

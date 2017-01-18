@@ -3,8 +3,10 @@ package com.everhomes.business;
 import java.util.List;
 
 import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
 import com.everhomes.rest.address.BuildingDTO;
 import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
@@ -108,4 +110,5 @@ public interface BusinessService {
 	UserInfo validateUserPass(ValidateUserPassCommand cmd);
 	CreateBusinessGroupResponse createBusinessGroup(CreateBusinessGroupCommand cmd);
 	void joinBusinessGroup(JoinBusinessGroupCommand cmd);
+	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(ListApartmentFloorCommand cmd);
 }

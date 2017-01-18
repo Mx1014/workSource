@@ -14,6 +14,9 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
+import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -148,6 +151,10 @@ public class NewsServiceImpl implements NewsService {
 
 		// 检查参数等信息
 		checkNewsParameter(userId, cmd);
+
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
+
 		Integer namespaceId = checkOwner(userId, cmd.getOwnerId(), cmd.getOwnerType()).getNamespaceId();
 
 		News news = processNewsCommand(userId, namespaceId, cmd);
@@ -158,6 +165,14 @@ public class NewsServiceImpl implements NewsService {
 		CreateNewsResponse response = ConvertHelper.convert(news, CreateNewsResponse.class);
 		response.setNewsToken(WebTokenGenerator.getInstance().toWebToken(news.getId()));
 		return response;
+	}
+
+	private void checkBlacklist(String ownerType, Long ownerId){
+		ownerType = StringUtils.isEmpty(ownerType) ? "" : ownerType;
+		ownerId = null == ownerId ? 0L : ownerId;
+		Long userId = UserContext.current().getUser().getId();
+		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+		resolver.checkUserBlacklistAuthority(userId, ownerType, ownerId, PrivilegeConstants.BLACKLIST_NEWS);
 	}
 
 	private News processNewsCommand(Long userId, Integer namespaceId, CreateNewsCommand cmd) {
@@ -650,6 +665,9 @@ public class NewsServiceImpl implements NewsService {
 		final Long newsId = checkNewsToken(userId, cmd.getNewsToken());
 		// 检查参数
 		checkCommentParameter(userId, cmd);
+
+		//黑名单权限校验 by sfyan20161213
+		checkBlacklist(null, null);
 
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();

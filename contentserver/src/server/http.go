@@ -763,6 +763,7 @@ func serveFileUpload(s *ServerHttpd, w http.ResponseWriter, r *http.Request) (in
 	md5 := gen_md5_str(data)
 	meta := make(map[string]string)
 	meta["filename"] = header.Filename
+	obj.Filename = header.Filename
 	obj.Format = filepath.Ext(header.Filename)
 	obj.Md5, err = s.fileStorage.SaveFile(md5, data, len(data), len(data), meta)
 	obj.TotalSize = totalSize

@@ -1,9 +1,39 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.io.IOException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Comparator;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import org.apache.commons.lang.StringUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record3;
+import org.jooq.SelectConditionStep;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.bus.LocalBus;
 import com.everhomes.bus.LocalBusSubscriber;
-import com.everhomes.community.*;
+import com.everhomes.community.Building;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityDataInfo;
+import com.everhomes.community.CommunityGeoPoint;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
@@ -29,7 +59,37 @@ import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.AddressAdminStatus;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressLivingStatus;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.ApartmentFloorDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ClaimAddressCommand;
+import com.everhomes.rest.address.ClaimedAddressInfo;
+import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
+import com.everhomes.rest.address.CommunitySummaryDTO;
+import com.everhomes.rest.address.CreateServiceAddressCommand;
+import com.everhomes.rest.address.DeleteServiceAddressCommand;
+import com.everhomes.rest.address.DisclaimAddressCommand;
+import com.everhomes.rest.address.GetApartmentByBuildingApartmentNameCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListAddressByKeywordCommandResponse;
+import com.everhomes.rest.address.ListAddressCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommand;
+import com.everhomes.rest.address.ListApartmentByBuildingNameCommandResponse;
+import com.everhomes.rest.address.ListApartmentFloorCommand;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListCommunityByKeywordCommand;
+import com.everhomes.rest.address.ListNearbyCommunityCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommand;
+import com.everhomes.rest.address.ListNearbyMixCommunitiesCommandResponse;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.SearchCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityCommand;
+import com.everhomes.rest.address.SuggestCommunityDTO;
 import com.everhomes.rest.address.admin.CorrectAddressAdminCommand;
 import com.everhomes.rest.address.admin.ImportAddressCommand;
 import com.everhomes.rest.community.CommunityDoc;
@@ -48,31 +108,23 @@ import com.everhomes.server.schema.tables.pojos.EhAddresses;
 import com.everhomes.server.schema.tables.pojos.EhCommunities;
 import com.everhomes.server.schema.tables.pojos.EhGroups;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserActivityProvider;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserGroupHistory;
+import com.everhomes.user.UserGroupHistoryProvider;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserServiceAddress;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.FileHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 import com.everhomes.util.file.DataFileHandler;
 import com.everhomes.util.file.DataProcessConstants;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.jooq.DSLContext;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
-
-import java.io.IOException;
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
 
 @Component
 public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
@@ -397,6 +449,52 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         LOGGER.info("List buildings by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<BuildingDTO>>(ErrorCodes.SUCCESS, results);
     }
+    
+    @Override
+    public Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(ListApartmentFloorCommand cmd) {
+        if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()) {
+        	 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                     "Invalid communityId parameter");
+        }
+        if(cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()) {
+       	 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+                    "Invalid buildingName parameter");
+       }
+       
+        if(cmd.getKeyword() == null) {
+            cmd.setKeyword("");
+        }
+        
+        List<ApartmentFloorDTO> results = new ArrayList<ApartmentFloorDTO>();
+        String likeVal = "%" + cmd.getKeyword() + "%";
+        long startTime = System.currentTimeMillis();
+        int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+                (DSLContext context, Object reducingContext)-> {
+                    context.selectDistinct(Tables.EH_ADDRESSES.APARTMENT_FLOOR)
+                        .from(Tables.EH_ADDRESSES)
+                        .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+                        .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+                        .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
+                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
+                        .and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.like(likeVal))
+                        .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+                        .and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.isNotNull())
+                        .and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.trim().ne(""))
+                        .orderBy(Tables.EH_ADDRESSES.APARTMENT_FLOOR.asc())
+                        .fetch().map((r) -> {
+                        	ApartmentFloorDTO floor = new ApartmentFloorDTO();
+                        	floor.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
+                            results.add(floor);
+                            return null;
+                        });
+                    
+                return true;
+            });
+        long endTime = System.currentTimeMillis();
+        LOGGER.info("List apartmentFloor by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
+        return new Tuple<Integer, List<ApartmentFloorDTO>>(ErrorCodes.SUCCESS, results);
+    }
 
     @Override
     public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
@@ -411,15 +509,22 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
-                    context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
+                	
+                	SelectConditionStep<Record3<Long, String, Double>> selectSql =
+                			context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
-                        .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
-                        .fetch().map((r) -> {
+                        .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()));
+                	
+                	if(cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
+                    	selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
+                    }
+                	
+                	selectSql.fetch().map((r) -> {
                             ApartmentDTO apartment = new ApartmentDTO();
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                             apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));

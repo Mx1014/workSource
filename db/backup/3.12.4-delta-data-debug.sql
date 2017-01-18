@@ -34,3 +34,7 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 更新费用查询的icon
 --
 UPDATE `eh_launch_pad_items` SET `action_data` = '{"url":"http://beta.zuolin.com/property-bill/index.html?hideNavigationBar=1#verify_account#sign_suffix"}' WHERE `namespace_id` = '999983' AND `item_name` = '费用查询';
+
+-- 修改localstring add by xq.tian  2017/01/06
+UPDATE `eh_locale_strings` SET `text`='待缴' WHERE (`scope`='pmkexing' AND `code` = '0');
+UPDATE `eh_locale_strings` SET `text`='已缴' WHERE (`scope`='pmkexing' AND `code` = '1');

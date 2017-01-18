@@ -17,6 +17,7 @@ import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Record1;
+import org.jooq.Result;
 import org.jooq.SelectConditionStep;
 import org.jooq.SelectJoinStep;
 import org.jooq.SelectOffsetStep;
@@ -44,11 +45,13 @@ import com.everhomes.enterprise.EnterpriseContactProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.aclink.DoorAuthStatus;
 import com.everhomes.rest.aclink.DoorAuthType;
 import com.everhomes.rest.aclink.ListAclinkUserCommand;
 import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationStatus;
 import com.everhomes.rest.user.IdentifierClaimStatus;
 import com.everhomes.rest.user.InvitationRoster;
 import com.everhomes.rest.user.UserInvitationsDTO;
@@ -92,6 +95,7 @@ import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 
 import com.everhomes.util.MapReduceCallback;
+import com.everhomes.util.RecordHelper;
 
 import static com.everhomes.server.schema.Tables.*;
 
@@ -159,6 +163,7 @@ public class UserProviderImpl implements UserProvider {
         if(user.getUuid() == null)
             user.setUuid(UUID.randomUUID().toString());
         user.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        user.setUpdateTime(user.getCreateTime());
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, id));
         EhUsersDao dao = new EhUsersDao(context.configuration());
@@ -175,6 +180,7 @@ public class UserProviderImpl implements UserProvider {
         
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class, user.getId().longValue()));
         EhUsersDao dao = new EhUsersDao(context.configuration());
+        user.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
         dao.update(user);
         
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhUsers.class, user.getId());
@@ -903,7 +909,8 @@ public class UserProviderImpl implements UserProvider {
 	        dbProvider.mapReduce(AccessSpec.readOnlyWith(EhUsers.class), null, (context,obj)->{
 	            Condition cond = Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId);
 	            if(!StringUtils.isEmpty(keyword)){
-	                 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.like(keyword + "%");
+	                 Condition cond1 = Tables.EH_USER_IDENTIFIERS.IDENTIFIER_TOKEN.eq(keyword);
+                    cond1 = cond1.or(Tables.EH_USERS.NICK_NAME.like(keyword + "%"));
 	                 cond = cond.and(cond1);
 	            }
 	             
@@ -1348,6 +1355,72 @@ public class UserProviderImpl implements UserProvider {
         
         return list;
     }
+
+    /**
+     * 金地取数据使用
+     */
+	@Override
+	public List<User> listUserByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize) {
+		//暂不考虑分库分表的问题，因为是按更新时间来取，比较麻烦
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		Result<Record> result = context.select().from(Tables.EH_USERS)
+			.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_USERS.ID.gt(pageAnchor))
+			.and(Tables.EH_USERS.UPDATE_TIME.eq(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_USERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, User.class));
+		}
+		return new ArrayList<User>();
+	}
+
+    /**
+     * 金地取数据使用
+     */
+	@Override
+	public List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Integer pageSize) {
+		//暂不考虑分库分表的问题，因为是按更新时间来取，比较麻烦
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhUsers.class));
+		Result<Record> result = context.select().from(Tables.EH_USERS)
+			.where(Tables.EH_USERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_USERS.UPDATE_TIME.gt(new Timestamp(timestamp)))
+			.orderBy(Tables.EH_USERS.UPDATE_TIME.asc(), Tables.EH_USERS.ID.asc())
+			.limit(pageSize)
+			.fetch();
+			
+		if (result != null && result.isNotEmpty()) {
+			return result.map(r->ConvertHelper.convert(r, User.class));
+		}
+		return new ArrayList<User>();
+	}
+
+    /**
+     * 金地取数据使用
+     * 随便找一个用户所在的组织
+     */
+	@Override
+	public Organization findAnyUserRelatedOrganization(Long userId, Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select(Tables.EH_ORGANIZATIONS.fields()).from(Tables.EH_ORGANIZATIONS)
+			.join(Tables.EH_ORGANIZATION_MEMBERS)
+			.on(Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_ORGANIZATION_MEMBERS.ORGANIZATION_ID))
+			.where(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+			.and(Tables.EH_ORGANIZATIONS.STATUS.eq(OrganizationStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ORGANIZATIONS.LEVEL.eq(1))
+			.fetchAny();
+		
+		if (record != null) {
+			return RecordHelper.convert(record, Organization.class);
+		}
+		
+		return null;
+	}
 
 	
 }

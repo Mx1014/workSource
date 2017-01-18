@@ -35,6 +35,7 @@ import com.everhomes.rest.flow.FlowSubjectDTO;
 import com.everhomes.rest.flow.FlowUserSelectionDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.FlowVariableResponse;
+import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.flow.GetFlowButtonDetailByIdCommand;
 import com.everhomes.rest.flow.GetFlowGraphDetailCommand;
 import com.everhomes.rest.flow.ListBriefFlowNodeResponse;
@@ -439,6 +440,9 @@ public interface FlowService {
 	FlowSMSTemplateResponse listSMSTemplates(ListSMSTemplateCommand cmd);
 
 	FlowResolveUsersResponse resolveSelectionUsers(Long flowId, Long selectionUserId);
+
+	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
+			CreateFlowCaseCommand flowCaseCmd);
 	
 	//TODO 日志信息分类：
 	

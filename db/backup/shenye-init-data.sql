@@ -4172,12 +4172,14 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 
+-- 深业增加两个item  add by sfyan 20170105
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '请示审批', '请示审批', 'cs://1/image/aW1hZ2UvTVRvMk5USXdNR0ZqWXpnMU5UTXdNemM0WXpKbFltUmpaalJqWVRVeVptVmpOdw', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyFlow?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '请示审批', '请示审批', 'cs://1/image/aW1hZ2UvTVRvMk5USXdNR0ZqWXpnMU5UTXdNemM0WXpKbFltUmpaalJqWVRVeVptVmpOdw', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyFlow?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL);
 
 
-
-
-
-
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '企业公告', '企业公告', 'cs://1/image/aW1hZ2UvTVRveU9EZGxPRE15WlRSa09UQmlPRGN6TVRoaFlqTTJObUUyWVdKa1pHTXdaUQ', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyNews?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '0', NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES ((@item_id := @item_id + 1), '999992', '0', '0', '0', '/home', 'Bizs', '企业公告', '企业公告', 'cs://1/image/aW1hZ2UvTVRveU9EZGxPRE15WlRSa09UQmlPRGN6TVRoaFlqTTJObUUyWVdKa1pHTXdaUQ', '1', '1', '14', '{\"url\":\"http://121.199.40.86/kpoa/app/hoa_appintegrated.nsf/FM_MyNews?openform\"}', '2', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL);
 
 
 

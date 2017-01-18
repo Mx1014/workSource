@@ -21,4 +21,13 @@ public enum OSType {
         }
         return Unknown;
     }
+
+    public static OSType fromCode(String code) {
+        for (OSType os : OSType.values()) {
+            if (os.getCode().toString().equals(code)) {
+                return os;
+            }
+        }
+        return Unknown;
+    }
 }
