@@ -169,6 +169,7 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 							for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
 								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
 								String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								LOGGER.debug("file URL = "+url);
 								ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
 								fileDTO.setUrl(url);
 								fileDTO.setFileName(dto2.getFileName());
