@@ -2206,7 +2206,7 @@ public class FlowServiceImpl implements FlowService {
 		//fix multiple current node
 		for(int i = nodeDTOS.size()-1; i >= 0; i--) {
 			logDTO = nodeDTOS.get(i);
-			if(logDTO.getIsCurrentNode().equals((byte)1)) {
+			if(logDTO.getIsCurrentNode() != null && logDTO.getIsCurrentNode().equals((byte)1)) {
 				int j = i-1;
 				for(; j >= 0; j--) {
 					logDTO.setIsCurrentNode((byte)0);
@@ -3116,8 +3116,8 @@ public class FlowServiceImpl implements FlowService {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NOT_EXISTS, "flowId not exists");	
 		}
 		
-		if(cmd.getItems() == null || cmd.getItems().size() == 0) {
-			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "items is empty");
+		if(cmd.getItems() == null || cmd.getItems().size() == 0 || cmd.getItems().size() > 5) {
+			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_PARAM_ERROR, "items size error!");
 		}
 		
 //		FlowNode node1 = flowNodeProvider.getFlowNodeById(cmd.getEvaluateStart());

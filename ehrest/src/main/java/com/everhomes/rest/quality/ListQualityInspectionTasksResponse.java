@@ -18,6 +18,9 @@ public class ListQualityInspectionTasksResponse {
 	
 	private Long nextPageAnchor;
 
+	public ListQualityInspectionTasksResponse() {
+		
+	}
 	public ListQualityInspectionTasksResponse(Long nextPageAnchor, 
 			List<QualityInspectionTaskDTO> tasks) {
         this.nextPageAnchor = nextPageAnchor;

@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
+ *  <li>templateId: 从模板进入时填模板id</li>
  *  <li>ownerId: 任务所属的主体id</li>
  *  <li>ownerType: 任务所属的主体，com.everhomes.rest.quality.OwnerType</li>
  *  <li>targetId: 任务所属的项目id</li>
@@ -18,9 +19,12 @@ import com.everhomes.util.StringHelper;
  *  <li>executorId: 执行人uid</li>
  *  <li>group: 业务组信息 com.everhomes.rest.quality.StandardGroupDTO</li>
  *  <li>executiveExpireTime: 任务截止时间</li>
+ *  <li>templateFlag: 是否存为模板 true: 是; false: 否</li>
  * </ul>
  */
 public class CreateQualityInspectionTaskCommand {
+	
+	private Long templateId;
 
 	@NotNull
 	private Long ownerId;
@@ -47,10 +51,27 @@ public class CreateQualityInspectionTaskCommand {
 	
 	private Long executorId;
 	
+	private Boolean templateFlag;
+	
+	public Long getTemplateId() {
+		return templateId;
+	}
+
+	public void setTemplateId(Long templateId) {
+		this.templateId = templateId;
+	}
+
+	public Boolean getTemplateFlag() {
+		return templateFlag;
+	}
+
+	public void setTemplateFlag(Boolean templateFlag) {
+		this.templateFlag = templateFlag;
+	}
+
 	public Long getOwnerId() {
 		return ownerId;
 	}
-
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;

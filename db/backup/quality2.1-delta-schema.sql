@@ -1,56 +1,3 @@
-ALTER TABLE `eh_resource_categories` ADD COLUMN `type` tinyint(4)  DEFAULT '1' COMMENT '1:分类, 2：子项目';
-
--- move from db/3.12.4-delta-schema.sql for it's already released by lqs 20170116
-ALTER TABLE `eh_users` ADD COLUMN `update_time` DATETIME;
-ALTER TABLE `eh_organization_address_mappings` ADD COLUMN `create_time` DATETIME;
-ALTER TABLE `eh_organization_address_mappings` ADD COLUMN `update_time` DATETIME;
-ALTER TABLE `eh_activities` ADD COLUMN `update_time` DATETIME;
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `create_time` DATETIME;
-ALTER TABLE `eh_office_cubicle_orders` ADD COLUMN `update_time` DATETIME;
-
-
-
--- merge blacklist sfyan 20170114
--- 用户黑名单
--- DROP TABLE IF EXISTS `eh_user_blacklists`;
-CREATE TABLE `eh_user_blacklists` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `namespace_id` INTEGER NOT NULL DEFAULT '0',
-  `scope_type` VARCHAR(64) DEFAULT NULL,
-  `scope_id` BIGINT DEFAULT NULL,
-  `owner_uid` BIGINT NOT NULL,
-  `contact_type` TINYINT NOT NULL DEFAULT '0',
-  `contact_token` varchar(128) DEFAULT '',
-  `contact_name` VARCHAR(64) DEFAULT NULL,
-  `gender` TINYINT DEFAULT '0' COMMENT '0: undisclosured, 1: male, 2: female',
-  `status` TINYINT NOT NULL DEFAULT '1' COMMENT '0: inactive, 1: confirming, 2: active',
-  `create_time` DATETIME DEFAULT NULL,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
-
-
-
-
-
--- merge doorAuth by sfyan 20170117
--- DROP TABLE IF EXISTS `eh_door_auth_logs`;
-CREATE TABLE `eh_door_auth_logs` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `door_id` BIGINT NOT NULL,
-  `user_id` BIGINT NOT NULL,
-  `is_auth` TINYINT NOT NULL DEFAULT '0',
-  `right_content` VARCHAR(1024) NOT NULL DEFAULT '0',
-  `create_time` datetime DEFAULT NULL,
-  `create_uid` BIGINT NOT NULL,
-  `discription` text,
-  PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
-
--- 增加机构类型
-ALTER TABLE `eh_organization_members` ADD COLUMN `group_type` varchar(64) DEFAULT NULL COMMENT 'ENTERPRISE, DEPARTMENT, GROUP, JOB_POSITION, JOB_LEVEL, MANAGER';
-
-
--- merge from quality2.1 by xiongying20170118
 CREATE TABLE `eh_quality_inspection_task_templates` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the standard, organization, etc',
@@ -93,4 +40,5 @@ ALTER TABLE `eh_quality_inspection_tasks` ADD COLUMN `executive_position_id` BIG
 ALTER TABLE `eh_quality_inspection_standard_group_map` ADD COLUMN `position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions';
 ALTER TABLE `eh_quality_inspection_task_templates` ADD COLUMN `executive_position_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'refernece to the id of eh_organization_job_positions';
 
-
+-- 3.12.4
+ALTER TABLE `eh_resource_categories` ADD COLUMN `type` tinyint(4)  DEFAULT '1' COMMENT '1:分类, 2：子项目';
