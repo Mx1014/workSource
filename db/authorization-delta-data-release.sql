@@ -64,6 +64,8 @@ VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10134, 37000, '�
 -- 开放项目管理业务模块 by sfyan 20170119
 UPDATE `eh_service_modules` SET `type` = 0 WHERE `id` in (30000, 30500, 31000, 32000, 33000, 34000, 35000, 37000, 38000);
 
+
+SELECT max(id) FROM `eh_service_module_scopes` INTO @eh_service_module_scopes;
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
 select (@eh_service_module_scopes := @eh_service_module_scopes + 1), owner_id, menu_id, '', owner_type, owner_id, NULL, '2' from eh_web_menu_scopes where 
 menu_id in (select id from eh_service_modules where id in (30000, 30500, 31000, 32000, 33000, 34000, 35000, 37000, 38000));

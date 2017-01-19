@@ -139,20 +139,6 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      */
     private boolean checkAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
 
-        Organization organization = organizationProvider.findOrganizationById(organizationId);
-
-        if(null == organization){
-            LOGGER.debug("user organization is null..");
-            return false;
-        }
-
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
-
-        if(null == userIdentifier){
-            LOGGER.debug("user identifierToken is null..");
-            return false;
-        }
-
         List<String> groupTypes = new ArrayList<>();
         groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
         groupTypes.add(OrganizationGroupType.GROUP.getCode());
