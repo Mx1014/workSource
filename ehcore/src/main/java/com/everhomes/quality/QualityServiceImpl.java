@@ -2643,6 +2643,7 @@ public class QualityServiceImpl implements QualityService {
 							score.setSpecificationScore(dto.getScore());
 							score.setSpecificationWeight(dto.getWeight());
 
+							score.setSpecificationDescription(dto.getDescription());
 							Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
 							score.setScore(mark);
 
