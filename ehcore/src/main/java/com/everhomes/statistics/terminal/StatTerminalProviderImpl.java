@@ -491,4 +491,34 @@ public class StatTerminalProviderImpl implements StatTerminalProvider{
         return resules;
     }
 
+
+    @Override
+    public void createAppVersion(AppVersion appVersion) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAppVersion.class));
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWrite());
+        appVersion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        appVersion.setId(id);
+        EhAppVersionDao dao = new EhAppVersionDao(context.configuration());
+        dao.insert(appVersion);
+    }
+
+
+    @Override
+    public AppVersion findAppVersion(Integer namespaceId, String name, String type) {
+        List<AppVersion> resules = new ArrayList<>();
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAppVersionRecord> query = context.selectQuery(Tables.EH_APP_VERSION);
+        query.addConditions(Tables.EH_APP_VERSION.NAMESPACE_ID.eq(namespaceId));
+        query.addConditions(Tables.EH_APP_VERSION.NAME.eq(name));
+        query.addConditions(Tables.EH_APP_VERSION.TYPE.eq(type));
+        query.fetch().map(r ->{
+            resules.add(ConvertHelper.convert(r, AppVersion.class));
+            return null;
+        });
+
+        if(resules.size() > 0){
+            return resules.get(0);
+        }
+        return null;
+    }
 }
