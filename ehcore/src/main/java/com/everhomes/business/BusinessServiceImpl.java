@@ -2180,6 +2180,7 @@ public class BusinessServiceImpl implements BusinessService {
             businessPromotionProvider.updateBusinessPromotion(promotion);
         } else {
             BusinessPromotion promotion = ConvertHelper.convert(cmd, BusinessPromotion.class);
+            promotion.setNamespaceId(UserContext.getCurrentNamespaceId());
             businessPromotionProvider.createBusinessPromotion(promotion);
         }
     }
@@ -2197,7 +2198,7 @@ public class BusinessServiceImpl implements BusinessService {
         dto.setMetadata(StringHelper.toJsonString(metadata));
 
         ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO();
-        infoDTO.setContent("¥"+promotion.getPrice().toString());
+        infoDTO.setContent("¥" + promotion.getPrice().toString());
         infoDTO.setInfoType(ModulePromotionInfoType.TEXT.getCode());
         dto.setInfoList(Collections.singletonList(infoDTO));
         return dto;
