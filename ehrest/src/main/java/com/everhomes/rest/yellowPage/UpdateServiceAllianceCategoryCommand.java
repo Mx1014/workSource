@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  *  <li> ownerId: 拥有者ID</li>
  *  <li> parentId: 父id</li>
  *  <li> logoUrl: 类型logo的url地址</li>
+ *  <li> selectedLogoUrl: 类型logo被选中时的url地址</li>
  *  <li> displayMode: 显示类型 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayMode}</li>
  *  <li> displayDestination: 展示端 {@link com.everhomes.rest.yellowPage.ServiceAllianceCategoryDisplayDestination}</li>
  * </ul>
@@ -27,6 +28,8 @@ public class UpdateServiceAllianceCategoryCommand {
 	private Long parentId;
 	
 	private String logoUrl;
+	
+	private String selectedLogoUrl;
 
     private Byte displayMode;
 
@@ -94,6 +97,14 @@ public class UpdateServiceAllianceCategoryCommand {
 
 	public void setLogoUrl(String logoUrl) {
 		this.logoUrl = logoUrl;
+	}
+
+	public String getSelectedLogoUrl() {
+		return selectedLogoUrl;
+	}
+
+	public void setSelectedLogoUrl(String selectedLogoUrl) {
+		this.selectedLogoUrl = selectedLogoUrl;
 	}
 
 	@Override

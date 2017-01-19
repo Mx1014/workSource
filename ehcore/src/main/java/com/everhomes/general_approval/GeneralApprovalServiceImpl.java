@@ -89,6 +89,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 				GetTemplateByApprovalIdResponse.class);
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
 				.getFormOriginId());
+		form.setFormVersion(form.getFormVersion());
 		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
 		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
 		//增加一个隐藏的field 用于存放sourceId

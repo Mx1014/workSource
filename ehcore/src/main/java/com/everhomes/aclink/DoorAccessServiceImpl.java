@@ -455,7 +455,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
         XSSFWorkbook wb = new XSSFWorkbook();
-        String sheetName = "门禁受权用户列表";
+        String sheetName = "门禁授权用户列表";
         XSSFSheet sheet = wb.createSheet(sheetName);
         XSSFCellStyle style = wb.createCellStyle();// 样式对象
         Font font = wb.createFont();
@@ -482,7 +482,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             row1.createCell(cellN ++).setCellValue("访客授权权限");
             row1.createCell(cellN ++).setCellValue("远程开门权限");
         }
-        row1.createCell(cellN ++).setCellValue("真是姓名");
+        row1.createCell(cellN ++).setCellValue("真实姓名");
         row1.createCell(cellN ++).setCellValue("公司");
         row1.createCell(cellN ++).setCellValue("认证时间");
 
@@ -2672,8 +2672,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_DOOR_NOT_FOUND, "Door not found");
         }
         
-        DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(doorAccess.getId(), user.getId());
-        if(doorAuth == null /* || !doorAuth.getUserId().equals(user.getId()) */ || !doorAuth.getRightRemote().equals((byte)1) ) {
+        DoorAuth doorAuth = doorAuthProvider.queryValidDoorAuthByDoorIdAndUserId(doorAccess.getId(), user.getId(), (byte)1);
+        if(doorAuth == null) {
             throw RuntimeErrorException.errorWith(AclinkServiceErrorCode.SCOPE, AclinkServiceErrorCode.ERROR_ACLINK_USER_AUTH_ERROR, "DoorAuth error");
         }
         

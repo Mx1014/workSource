@@ -286,6 +286,37 @@ public class DoorAuthProviderImpl implements DoorAuthProvider {
         return auths.get(0);
     }
     
+    @Override 
+    public DoorAuth queryValidDoorAuthByDoorIdAndUserId(Long doorId, Long userId, Byte isRemote) {
+        ListingLocator locator = new ListingLocator();
+        long now = DateHelper.currentGMTTime().getTime();
+        
+        List<DoorAuth> auths = queryDoorAuth(locator, 1, new ListingQueryBuilderCallback() {
+
+            @Override
+            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+                    SelectQuery<? extends Record> query) {
+                Condition c1 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.TEMPERATE.getCode()). 
+                        and(Tables.EH_DOOR_AUTH.VALID_FROM_MS.le(now).
+                        and(Tables.EH_DOOR_AUTH.VALID_END_MS.ge(now)));
+                Condition c2 = Tables.EH_DOOR_AUTH.AUTH_TYPE.eq(DoorAuthType.FOREVER.getCode());
+                query.addConditions(Tables.EH_DOOR_AUTH.USER_ID.eq(userId));
+                query.addConditions(Tables.EH_DOOR_AUTH.DOOR_ID.eq(doorId));
+                query.addConditions(Tables.EH_DOOR_AUTH.STATUS.eq(DoorAuthStatus.VALID.getCode()));
+                if(isRemote != null) {
+                	query.addConditions(Tables.EH_DOOR_AUTH.RIGHT_REMOTE.eq(isRemote));
+                }
+                query.addConditions(c1.or(c2));
+                return query;
+            }
+        }); 
+        
+        if(auths == null || auths.size() == 0) {
+            return null;
+        }
+        return auths.get(0);
+    }
+    
     @Override
     public List<DoorAuth> queryDoorAuthByApproveId(ListingLocator locator, Long approveId, int count) {
         

@@ -134,3 +134,5 @@ ALTER TABLE `eh_organization_members` ADD COLUMN `group_type` varchar(64) DEFAUL
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `namespace_type` VARCHAR(128) NULL DEFAULT NULL;
 ALTER TABLE `eh_lease_promotions` ADD COLUMN `namespace_token` VARCHAR(256) NULL DEFAULT NULL;
 
+-- merge from serviceAlliance2.0 add by xiongying20170119
+ALTER TABLE `eh_service_alliance_categories` ADD COLUMN `selected_logo_url` VARCHAR(1024) COMMENT 'the selected logo url of the category';

@@ -375,6 +375,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 							"parent category not found!"));
 		}
 		
+		//没传时 取logourl
+		if(cmd.getSelectedLogoUrl() == null) {
+			cmd.setSelectedLogoUrl(cmd.getLogoUrl());
+		}
+		
 		if(cmd.getCategoryId() == null) {
 			category.setName(cmd.getName());
 			category.setOwnerId(cmd.getOwnerId());
@@ -393,6 +398,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			category.setParentId(parent.getId());
 			category.setPath(parent.getName() + "/" + cmd.getName());
 			category.setLogoUrl(cmd.getLogoUrl());
+			category.setSelectedLogoUrl(cmd.getSelectedLogoUrl());
 			yellowPageProvider.createCategory(category);
 		} else {
 			category = yellowPageProvider.findCategoryById(cmd.getCategoryId());
@@ -406,6 +412,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 			category.setLogoUrl(cmd.getLogoUrl());
             category.setDisplayMode(cmd.getDisplayMode());
 			category.setDisplayDestination(cmd.getDisplayDestination());
+			category.setSelectedLogoUrl(cmd.getSelectedLogoUrl());
             yellowPageProvider.updateCategory(category);
 
             if (!Objects.equals(category.getName(), cmd.getName())) {
