@@ -107,12 +107,12 @@ public interface PrivilegeConstants {
     public static final long RENTAL_CHECK = 1101L;
 
     // ----------- 客户资料管理权限 --------------
-    public static final long CUSTOMER_CREATE    = 10060L;// 创建客户
-    public static final long CUSTOMER_IMPORT    = 10061L;// 批量导入
-    public static final long CUSTOMER_EXPORT    = 10062L;// 批量导出
-    public static final long CUSTOMER_STATISTIC = 10063L;// 查看统计信息
-    public static final long CUSTOMER_UPDATE    = 10064L;// 修改客户资料
-    public static final long CUSTOMER_LIST      = 10065L;// 查看客户资料
-    public static final long CUSTOMER_MANAGE    = 10066L;// 管理客户资料
-    public static final long CUSTOMER_DELETE    = 10067L;// 删除客户资料
+    public static final long CUSTOMER_CREATE    = 10127L;// 创建客户
+    public static final long CUSTOMER_IMPORT    = 10128L;// 批量导入
+    public static final long CUSTOMER_EXPORT    = 10129L;// 批量导出
+    public static final long CUSTOMER_STATISTIC = 10130L;// 查看统计信息
+    public static final long CUSTOMER_UPDATE    = 10131L;// 修改客户资料
+    public static final long CUSTOMER_LIST      = 10132L;// 查看客户资料
+    public static final long CUSTOMER_MANAGE    = 10133L;// 管理客户资料
+    public static final long CUSTOMER_DELETE    = 10134L;// 删除客户资料
 }
