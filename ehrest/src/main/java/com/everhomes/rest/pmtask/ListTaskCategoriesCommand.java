@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>namespaceId: 域空间</li>
  * <li>parentId: 父类型Id</li>
+ * <li>taskCategoryId: 服务类型Id</li>
  * <li>keyword: 分类名称</li>
  * <li>pageAnchor: 分页瞄</li>
  * <li>pageSize: 每页条数</li>

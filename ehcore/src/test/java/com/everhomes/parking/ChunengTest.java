@@ -24,7 +24,7 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.parking.ketuo.EncryptUtil;
 import com.everhomes.util.RuntimeErrorException;
 
-public class Test {
+public class ChunengTest {
 
 	private static CloseableHttpClient httpclient = HttpClients.createDefault();
 	private static final String RECHARGE = "/api/pay/CardRecharge";
@@ -41,7 +41,7 @@ public class Test {
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("plateNo", "浙A185VK");
+		param.put("plateNo", "DWX622");
 //		param.put("money", "30000");
 ////		param.put("carType", "2");
 //		param.put("plateNo", "B12347");
@@ -49,7 +49,7 @@ public class Test {
 //		BX082N
 //		B7DC77
 
-		String json = Test.post(param, GET_TEMP_FEE);
+		String json = post(param, GET_CARD);
         System.out.println(json);
         System.out.println(new Date(1490975999000L));
 //        JSONObject param2 = new JSONObject();
@@ -71,11 +71,11 @@ public class Test {
 	
 	public static String post(JSONObject param, String type) {
 
-		HttpPost httpPost = new HttpPost("http://220.160.111.114:9090" + type);
+		HttpPost httpPost = new HttpPost("http://220.160.111.114:9099/" + type);
 		StringBuilder result = new StringBuilder();
 		
         String key = "F7A0B971B199FD2A1017CEC5";
-        String iv = "20161226";
+        String iv = "20170110";
         String user = "ktapi";
         String pwd = "0306A9";
         String data = null;

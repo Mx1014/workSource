@@ -6,6 +6,7 @@ import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
@@ -18,21 +19,15 @@ import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.RolePrivilegeService;
-import com.everhomes.address.AddressProvider;
+import com.everhomes.address.Address;
 import com.everhomes.bigcollection.Accessor;
 import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
-import com.everhomes.community.CommunityProvider;
-import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -42,9 +37,9 @@ import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.Organization;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.flow.FlowModuleType;
@@ -54,6 +49,14 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.pmtask.AttachmentDescriptor;
+import com.everhomes.rest.pmtask.CancelTaskCommand;
+import com.everhomes.rest.pmtask.EvaluateTaskCommand;
+import com.everhomes.rest.pmtask.GetTaskDetailCommand;
+import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
+import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
+import com.everhomes.rest.pmtask.ListUserTasksCommand;
+import com.everhomes.rest.pmtask.ListUserTasksResponse;
 import com.everhomes.rest.pmtask.PmTaskAddressType;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.rest.pmtask.PmTaskDTO;
@@ -63,9 +66,12 @@ import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
 import com.everhomes.rest.pmtask.PmTaskOperateType;
 import com.everhomes.rest.pmtask.PmTaskSourceType;
 import com.everhomes.rest.pmtask.PmTaskStatus;
+import com.everhomes.rest.pmtask.SearchTasksCommand;
+import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -85,39 +91,23 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowPmTaskHandle.class);
 	@Autowired
-	private PmTaskProvider pmTaskProvider;
-	@Autowired
-    private ConfigurationProvider configProvider;
-	@Autowired
 	private CategoryProvider categoryProvider;
 	@Autowired
-    private ContentServerService contentServerService;
+    private DbProvider dbProvider;
+	@Autowired
+	private PmTaskProvider pmTaskProvider;
+	@Autowired
+	private PmTaskSearch pmTaskSearch;
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
 	private LocaleTemplateService localeTemplateService;
 	@Autowired
-	private PmTaskSearch pmTaskSearch;
-	@Autowired
-	private CommunityProvider communityProvider;
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
-	@Autowired
-	private OrganizationProvider organizationProvider;
+	private SmsProvider smsProvider;
 	@Autowired
 	private MessagingService messagingService;
 	@Autowired
-	private SmsProvider smsProvider;
-	@Autowired
-	private AclProvider aclProvider;
-	@Autowired
-    private DbProvider dbProvider;
-	@Autowired
-    private CoordinationProvider coordinationProvider;
-	@Autowired
-	private OrganizationService organizationService;
-	@Autowired
-	private AddressProvider addressProvider;
+    private ContentServerService contentServerService;
 	@Autowired
 	private FlowService flowService;
     @Autowired
@@ -239,34 +229,6 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		
 		pmTaskSearch.feedDoc(task);
 		
-    	//同步数据到科技园
-		long start = System.currentTimeMillis();
-
-//		if(user.getNamespaceId() == 1000000) {
-//			
-//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
-//			String value = "[]";
-//			
-//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
-//			if(null != attachments) {
-//				attachments.stream().forEach(a -> {
-//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-//					a.setContentUrl(contentUrl);
-//				});
-//				value = JSONObject.toJSONString(attachments);
-//			}
-//			
-//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-//	      
-//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-//	        valueOperations.set(key, value);
-//			
-//			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
-//			handler.pushToQueque(task.getId());
-//		}
-		long end = System.currentTimeMillis();
-		System.out.println( (end - start) / 1000);
 		return ConvertHelper.convert(task, PmTaskDTO.class);
 	}
 
@@ -386,6 +348,100 @@ public class FlowPmTaskHandle implements PmTaskHandle {
     		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
     				"Invalid ownerType parameter.");
         }
+	}
+
+	@Override
+	public void cancelTask(CancelTaskCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		//TODO:为科兴与一碑对接
+		if(namespaceId == 999983) {
+			
+			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+			
+			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+				String handle = PmTaskHandle.EBEI;
+				
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+				
+				handler.cancelTask(cmd);
+			}
+		}
+//			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//			handler.cancelTask(cmd);	
+		
+	}
+
+	@Override
+	public void evaluateTask(EvaluateTaskCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		//TODO:为科兴与一碑对接
+		if(namespaceId == 999983) {
+			
+			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+			
+			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+				String handle = PmTaskHandle.EBEI;
+				
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+				
+				handler.evaluateTask(cmd);
+			}
+		}
+		
+//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+//		handler.evaluateTask(cmd);
+	}
+
+	@Override
+	public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd) {
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		//TODO:为科兴与一碑对接
+		if(namespaceId == 999983) {
+			
+			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
+			
+			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
+				String handle = PmTaskHandle.EBEI;
+				
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+				
+				return handler.getTaskDetail(cmd);
+			}
+		}
+		
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		return handler.getTaskDetail(cmd);
+	}
+
+	@Override
+	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		
+		return handler.listTaskCategories(cmd);
+	}
+
+	@Override
+	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		
+		return handler.listAllTaskCategories(cmd);
+	}
+
+	@Override
+	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		
+		return handler.searchTasks(cmd);
+	}
+
+	@Override
+	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		
+		return handler.listUserTasks(cmd);
 	}
 
 

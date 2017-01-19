@@ -26,9 +26,9 @@ public class TechparkSynchronizedServiceImpl implements ApplicationListener<Cont
 	
     private String pmtask = "synchronizedpmtask";
     
-	public void pushToQueque(Long taskId) {
+	public void pushToQueque(String json) {
 		
-		final Job job = new Job(TechparkSynchronizedAction.class.getName(), new Object[]{ String.valueOf(taskId) });
+		final Job job = new Job(TechparkSynchronizedAction.class.getName(), new Object[]{ json });
 		
 		jesqueClientFactory.getClientPool().enqueue(pmtask, job);
 		

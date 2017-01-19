@@ -1,35 +1,17 @@
 package com.everhomes.business;
 
 
-
-
-import java.util.List;
-import java.util.UUID;
-
-import javax.validation.Valid;
-
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.business.BusinessDTO;
-import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
-import com.everhomes.rest.business.DeleteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.business.FindBusinessByIdCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
-import com.everhomes.rest.business.ListBusinessByKeywordCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
-import com.everhomes.rest.business.UpdateBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
-import com.everhomes.util.SignatureHelper;
+import com.everhomes.rest.business.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.validation.Valid;
 
 @RestDoc(value="Business controller", site="core")
 @RestController
@@ -165,6 +147,33 @@ public class BusinessController extends ControllerBase {
         
         businessService.cancelFavoriteBusiness(cmd);
         RestResponse response =  new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>获取电商运营数据</p>
+     * <b>URL: /business/listBusinessPromotionEntities</b>
+     */
+    @RequestMapping("listBusinessPromotionEntities")
+    @RestReturn(value = ListBusinessPromotionEntitiesReponse.class)
+    public RestResponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd){
+        RestResponse response = new RestResponse(businessService.listBusinessPromotionEntities(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>创建电商运营数据</p>
+     * <b>URL: /business/createBusinessPromotion</b>
+     */
+    @RequestMapping("createBusinessPromotion")
+    @RestReturn(value = String.class)
+    public RestResponse createBusinessPromotion(CreateBusinessPromotionCommand cmd){
+        businessService.createBusinessPromotion(cmd);
+        RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

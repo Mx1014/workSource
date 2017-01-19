@@ -11,6 +11,7 @@ import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.blacklist.BlacklistErrorCode;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.user.IdentifierType;
@@ -205,6 +206,19 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         LOGGER.error("Insufficient privilege, privilegeId={}, organizationId = {}", privilegeId, organizationId);
         throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                 "Insufficient privilege");
+    }
+
+    @Override
+    public void checkUserBlacklistAuthority(Long userId, String ownerType, Long ownerId, Long privilegeId){
+        List<AclRoleDescriptor> descriptors = new ArrayList<>();
+        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
+        descriptors.add(descriptor);
+
+        if(aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors)){
+            LOGGER.error("Permission is prohibited, userId={}, privilegeId = {}", userId, privilegeId);
+            throw RuntimeErrorException.errorWith(BlacklistErrorCode.SCOPE, BlacklistErrorCode.ERROR_FORBIDDEN_PERMISSIONS,
+                    "Permission is prohibited");
+        }
     }
     
 }

@@ -43,6 +43,8 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
         return context().selectFrom(EH_ENERGY_METER_FORMULAS)
                 .where(EH_ENERGY_METER_FORMULAS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_FORMULAS.NAME.eq(name))
+                .and(EH_ENERGY_METER_FORMULAS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
+                .orderBy(EH_ENERGY_METER_FORMULAS.CREATE_TIME.desc())
                 .fetchAnyInto(EnergyMeterFormula.class);
     }
 
@@ -57,10 +59,7 @@ public class EnergyMeterFormulaProviderImpl implements EnergyMeterFormulaProvide
 
     @Override
     public void deleteFormula(EnergyMeterFormula formula) {
-        formula.setUpdateUid(UserContext.current().getUser().getId());
-        formula.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        formula.setStatus(EnergyCommonStatus.INACTIVE.getCode());
-        rwDao().update(formula);
+        rwDao().delete(formula);
     }
 
     @Override

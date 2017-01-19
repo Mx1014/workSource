@@ -70,6 +70,14 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		this.subject = subject;
 	}
 
+	public Long getEntityId() {
+		return cmd.getEntityId();
+	}
+
+	public String getFlowEntityType() {
+		return cmd.getFlowEntityType();
+	}
+
 	@Override
 	public void fire(FlowCaseState ctx) {
 		FlowGraphButton btn = ctx.getFlowGraph().getGraphButton(cmd.getButtonId());

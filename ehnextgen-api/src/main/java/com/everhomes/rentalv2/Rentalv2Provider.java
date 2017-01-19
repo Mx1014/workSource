@@ -267,6 +267,12 @@ public interface Rentalv2Provider {
  
 	void deleteRentalCellsByResourceId(Long rentalSiteId); 
 
+
+	List<RentalOrder> listSiteRentalByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
+
+
+	List<RentalOrder> listSiteRentalByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
  
 
  

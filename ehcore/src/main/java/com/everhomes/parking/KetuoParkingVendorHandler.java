@@ -6,7 +6,6 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
 import java.math.BigDecimal;
-import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -70,10 +69,6 @@ import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -144,12 +139,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
 			
-			User user = UserContext.current().getUser();
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			
-			parkingCardDTO.setPlateOwnerName(user.getNickName());
 			parkingCardDTO.setPlateNumber(plateNumber);
-			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
+			parkingCardDTO.setPlateOwnerPhone("");
 			//parkingCardDTO.setStartTime(startTime);
 			parkingCardDTO.setEndTime(expireTime);
 			List<KetuoCardType> types = getCardType();

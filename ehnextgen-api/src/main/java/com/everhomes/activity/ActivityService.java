@@ -1,18 +1,18 @@
 package com.everhomes.activity;
 
-import java.util.List;
-
-import javax.validation.Valid;
-
 import com.everhomes.category.Category;
 import com.everhomes.forum.Post;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
 import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.util.Tuple;
+
+import java.util.List;
 
 public interface ActivityService {
 
@@ -101,6 +101,11 @@ public interface ActivityService {
 	
 	List<ActivityCategoryDTO> listActivityEntryCategories(ListActivityEntryCategoriesCommand cmd);
 
+    /**
+     * 根据场景获取活动运营数据
+     */
+    ListActivityPromotionEntitiesBySceneReponse listActivityPromotionEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd);
+
     void setActivityAchievement(SetActivityAchievementCommand cmd);
 
     GetActivityAchievementResponse getActivityAchievement(GetActivityAchievementCommand cmd);
@@ -122,5 +127,4 @@ public interface ActivityService {
     ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd);
 
     ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
-
 }

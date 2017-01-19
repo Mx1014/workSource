@@ -18,6 +18,7 @@ public class ServiceAllianceRequestInfo {
     private Long creatorOrganizationId;
     private Long serviceAllianceId;
     private Long creatorUid;
+    private Long flowCaseId;
     private Timestamp createTime;
 
     public Long getId() {
@@ -120,4 +121,12 @@ public class ServiceAllianceRequestInfo {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
 }

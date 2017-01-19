@@ -42,6 +42,8 @@ public class CategoryDTO {
     @ItemType(CategoryDTO.class)
 	private List<CategoryDTO> childrens;
     
+    private Byte isSupportDelete;
+    
     public CategoryDTO() {
     }
 
@@ -153,4 +155,12 @@ public class CategoryDTO {
     public int hashCode(){
         return HashCodeBuilder.reflectionHashCode(this);
     }
+
+	public Byte getIsSupportDelete() {
+		return isSupportDelete;
+	}
+
+	public void setIsSupportDelete(Byte isSupportDelete) {
+		this.isSupportDelete = isSupportDelete;
+	}
 }

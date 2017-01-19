@@ -79,13 +79,10 @@ import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeRateDTO;
 import com.everhomes.rest.parking.ParkingRechargeType;
 import com.everhomes.rest.parking.ParkingRequestFlowType;
-import com.everhomes.rest.parking.ParkingSupportOnlinePaidStatus;
 import com.everhomes.rest.parking.ParkingSupportRechargeStatus;
 import com.everhomes.rest.parking.ParkingTempFeeDTO;
-import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -166,12 +163,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			parkingCardDTO.setOwnerId(ownerId);
 			parkingCardDTO.setParkingLotId(parkingLotId);
 			
-			User user = UserContext.current().getUser();
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			
-			parkingCardDTO.setPlateOwnerName(user.getNickName());
 			parkingCardDTO.setPlateNumber(plateNumber);
-			parkingCardDTO.setPlateOwnerPhone(userIdentifier.getIdentifierToken());
+			parkingCardDTO.setPlateOwnerPhone("");
 			if(card.getFreeMoney() != 0)
 				parkingCardDTO.setFreeAmount(card.getFreeMoney() / 100 + "元/月");
 			parkingCardDTO.setIsSupportOnlinePaid(card.getIsAllow().byteValue());

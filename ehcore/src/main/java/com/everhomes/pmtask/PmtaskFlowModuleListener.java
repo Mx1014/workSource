@@ -10,19 +10,24 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowGraphEvent;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowUserSelection;
+import com.everhomes.flow.FlowUserSelectionProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -32,6 +37,7 @@ import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskDTO;
 import com.everhomes.rest.pmtask.PmTaskFlowStatus;
 import com.everhomes.rest.pmtask.PmTaskOwnerType;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -48,6 +54,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private PmTaskService pmTaskService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
+	@Autowired
+    private FlowUserSelectionProvider flowUserSelectionProvider;
 	
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 	@Autowired
@@ -190,9 +198,23 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				pmTaskProvider.updateTask(task);
 			}
 			else if("ASSIGNING".equals(nodeType)) {
+				//TODO: 同步数据到科技园
 				task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
 				pmTaskProvider.updateTask(task);
 				
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				if(namespaceId == 1000000) {
+					FlowGraphEvent evt = ctx.getCurrentEvent();
+					if(evt != null && evt.getEntityId() != null 
+							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
+						
+						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
+						Long targetId = sel.getSourceIdA();
+						
+						synchronizedTaskToTechpark(task, targetId, flow.getOrganizationId());
+					}
+					
+				}
 			}else if("PROCESSING".equals(nodeType)) {
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
@@ -207,6 +229,35 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		pmTaskSearch.feedDoc(task);
 	}
 
+	//同步数据到科技园
+	private void synchronizedTaskToTechpark(PmTask task, Long targetId, Long organizationId) {
+		UserContext context = UserContext.current();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		if(namespaceId == 1000000) {
+		
+//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+//			String value = "[]";
+//			
+//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
+//			if(null != attachments) {
+//				attachments.stream().forEach(a -> {
+//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+//					a.setContentUrl(contentUrl);
+//				});
+//				value = JSONObject.toJSONString(attachments);
+//			}
+//			
+//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//	      
+//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//	        valueOperations.set(key, value);
+			
+			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
+			handler.pushToQueque(task.getId() + "," + targetId + "," + organizationId);
+		}
+	}
+	
 	@Override
 	public void onFlowCreating(Flow flow) {
 		
@@ -215,6 +266,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowCaseCreated(FlowCase flowCase) {
 		// TODO Auto-generated method stub
 		
 	}

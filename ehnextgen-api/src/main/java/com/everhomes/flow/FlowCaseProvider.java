@@ -30,4 +30,6 @@ public interface FlowCaseProvider {
 
 	FlowCase findFlowCaseByReferId(Long referId, String referType, Long moduleId);
 
+	Long createFlowCaseHasId(FlowCase obj);
+
 }

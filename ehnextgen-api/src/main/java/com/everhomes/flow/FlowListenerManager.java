@@ -75,4 +75,6 @@ public interface FlowListenerManager {
 	void onFlowCreating(Flow flow);
 
 	void onFlowCaseCreating(FlowCase flowCase);
+
+	void onFlowCaseCreated(FlowCase flowCase);
 }

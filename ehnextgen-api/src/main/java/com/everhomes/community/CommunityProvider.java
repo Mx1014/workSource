@@ -100,6 +100,8 @@ public interface CommunityProvider {
     List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, Long parentId, String path, Byte type);
     
     List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId);
+
+    List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId);
     List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids, Byte type);
     void deleteResourceCategoryById(Long id);
 }
