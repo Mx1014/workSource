@@ -1,5 +1,6 @@
 package com.everhomes.util;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 
@@ -22,5 +23,19 @@ public class DateUtils {
 			date = new Date();
 		}
     	return date;
+	}
+
+	public static Timestamp getLaterTime(Timestamp time1, Timestamp time2) {
+		if(time1 != null) {
+			if(time2 == null) {
+				return time1;
+			}
+
+			if (time1.after(time2)){
+				return time1;
+			};
+		}
+
+		return time2;
 	}
 }

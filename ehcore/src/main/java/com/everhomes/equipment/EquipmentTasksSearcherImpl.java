@@ -161,6 +161,8 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
         if(cmd.getTaskType() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("taskType", cmd.getTaskType())); 
         
+        if(cmd.getInspectionCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
@@ -240,12 +242,13 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             XContentBuilder b = XContentFactory.jsonBuilder().startObject();
             b.field("ownerId", task.getOwnerId());
             b.field("ownerType", task.getOwnerType());
-            b.field("targetId", task.getExecutiveGroupId());
-            b.field("targetType", task.getExecutiveGroupType());
+            b.field("targetId", task.getTargetId());
+            b.field("targetType", task.getTargetType());
             b.field("startTime", task.getExecutiveStartTime());
             b.field("endTime", task.getExecutiveExpireTime());
             b.field("status", task.getStatus());
             b.field("taskName", task.getTaskName());
+            b.field("inspectionCategoryId", task.getInspectionCategoryId());
 
            // reviewStatus: 任务审核状态 0: UNREVIEWED 1: REVIEWED 
             if(ReviewResult.fromStatus(task.getReviewResult()) == ReviewResult.NONE) {

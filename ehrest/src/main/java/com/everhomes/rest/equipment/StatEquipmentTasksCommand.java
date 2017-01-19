@@ -7,50 +7,38 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  *  <li>ownerId: 任务所属组织等的id</li>
- *  <li>ownerType: 任务所属组织类型，参考{@link com.everhomes.rest.quality.OwnerType}</li>
- *  <li>targetId: 任务所属管理处id</li>
- *  <li>targetType: 任务所属管理处类型</li>
- *  <li>pageAnchor: 锚点</li>
- *  <li>pageSize: 页面大小</li>
+ *  <li>ownerType: 任务所属组织类型，如enterprise</li>
+ *  <li>targetId: 任务所属项目等的id</li>
+ *  <li>targetType: 任务所属项目类型，如community</li>
  *  <li>inspectionCategoryId: 巡检对象类型id</li>
- *  <li>isReview: 是否查审阅任务</li>
+ *  <li>startTime: 起始月份  </li>
+ *  <li>endTime: 截止月份  </li>
+ *  <li>offset: 偏移</li>
+ *  <li>pageSize: 页面大小</li>
  * </ul>
  */
-public class ListEquipmentTasksCommand {
+public class StatEquipmentTasksCommand {
+
 	@NotNull
 	private Long ownerId;
 	
 	@NotNull
 	private String ownerType;
-
+	
 	private Long targetId;
 	
 	private String targetType;
 	
-	private Long pageAnchor;
+	private Long inspectionCategoryId; 
+	
+	private Long startTime;
+	
+	private Long endTime;
+	
+	private Integer offset;
 	
 	private Integer pageSize;
-	
-	private Long inspectionCategoryId;
-	
-	private Byte isReview;
-	
-	public Byte getIsReview() {
-		return isReview;
-	}
 
-	public void setIsReview(Byte isReview) {
-		this.isReview = isReview;
-	}
-
-	public Long getInspectionCategoryId() {
-		return inspectionCategoryId;
-	}
-
-	public void setInspectionCategoryId(Long inspectionCategoryId) {
-		this.inspectionCategoryId = inspectionCategoryId;
-	}
-	
 	public Long getOwnerId() {
 		return ownerId;
 	}
@@ -83,12 +71,37 @@ public class ListEquipmentTasksCommand {
 		this.targetType = targetType;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
+
+	public Long getStartTime() {
+		return startTime;
+	}
+
+	public void setStartTime(Long startTime) {
+		this.startTime = startTime;
+	}
+
+	public Long getEndTime() {
+		return endTime;
+	}
+
+	public void setEndTime(Long endTime) {
+		this.endTime = endTime;
+	}
+
+
+	public Integer getOffset() {
+		return offset;
+	}
+
+	public void setOffset(Integer offset) {
+		this.offset = offset;
 	}
 
 	public Integer getPageSize() {
@@ -98,7 +111,7 @@ public class ListEquipmentTasksCommand {
 	public void setPageSize(Integer pageSize) {
 		this.pageSize = pageSize;
 	}
-
+	
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

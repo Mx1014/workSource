@@ -56,7 +56,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob: createTask");
 		}
-		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+		List<EquipmentStandardMap> maps = equipmentProvider.listQualifiedEquipmentStandardMap(null);
 		
 		if(maps != null && maps.size() > 0) {
 			for(EquipmentStandardMap map : maps) {

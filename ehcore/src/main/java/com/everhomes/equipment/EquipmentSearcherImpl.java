@@ -144,6 +144,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         
+        if(cmd.getInspectionCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -282,6 +285,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
             b.field("name", equipment.getName());
+            b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 //            b.field("reviewResult", equipment.getReviewResult());
 //            b.field("reviewStatus", equipment.getReviewStatus());
 //            
