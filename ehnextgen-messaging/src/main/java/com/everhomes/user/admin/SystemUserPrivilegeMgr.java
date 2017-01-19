@@ -176,24 +176,26 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
     @Override
     public boolean checkUserPrivilege(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
         if(checkSuperAdmin(userId, organizationId)){
-            LOGGER.debug("check super admin privilege success...");
+            LOGGER.debug("check super admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
 
         if(checkModuleAdmin(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check module admin privilege success...");
+            LOGGER.debug("check module admin privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
 
         if(checkAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check privilege success...");
+            LOGGER.debug("check privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
 
         if(checkRoleAccess(userId, ownerType, ownerId, organizationId, privilegeId)){
-            LOGGER.debug("check role privilege success...");
+            LOGGER.debug("check role privilege success.userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
             return true;
         }
+
+        LOGGER.debug("check privilege error. userId={}, ownerType={}, ownerId={}, organizationId={}, privilegeId={}" , userId, ownerType, ownerId, organizationId, privilegeId);
         return false;
     }
 

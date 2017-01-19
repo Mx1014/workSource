@@ -455,7 +455,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
 
         XSSFWorkbook wb = new XSSFWorkbook();
-        String sheetName = "门禁受权用户列表";
+        String sheetName = "门禁授权用户列表";
         XSSFSheet sheet = wb.createSheet(sheetName);
         XSSFCellStyle style = wb.createCellStyle();// 样式对象
         Font font = wb.createFont();
@@ -482,7 +482,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             row1.createCell(cellN ++).setCellValue("访客授权权限");
             row1.createCell(cellN ++).setCellValue("远程开门权限");
         }
-        row1.createCell(cellN ++).setCellValue("真是姓名");
+        row1.createCell(cellN ++).setCellValue("真实姓名");
         row1.createCell(cellN ++).setCellValue("公司");
         row1.createCell(cellN ++).setCellValue("认证时间");
 

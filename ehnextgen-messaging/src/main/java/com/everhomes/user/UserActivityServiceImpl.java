@@ -12,6 +12,9 @@ import java.util.Map;
 import java.util.Set;
 import java.util.stream.Collectors;
 
+import com.everhomes.statistics.terminal.AppVersion;
+import com.everhomes.statistics.terminal.StatTerminalProvider;
+import com.everhomes.util.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
@@ -117,11 +120,6 @@ import com.everhomes.rest.version.VersionUrlResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StatusChecker;
-import com.everhomes.util.Tuple;
 import com.everhomes.version.VersionService;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
@@ -193,6 +191,9 @@ public class UserActivityServiceImpl implements UserActivityService {
     @Autowired
     private VersionService versionService;
 
+    @Autowired
+    private StatTerminalProvider statTerminalProvider;
+
     @Override
     public CommunityStatusResponse listCurrentCommunityStatus() {
         User user = UserContext.current().getUser();
@@ -252,12 +253,36 @@ public class UserActivityServiceImpl implements UserActivityService {
         if (user != null)
             activity.setUid(user.getId());
         activity.setActivityType(ActivityType.fromString(cmd.getActivityType()).getCode());
+
+        if(OSType.fromString(cmd.getOsType()) == OSType.Unknown){
+            activity.setOsType(OSType.fromCode(cmd.getOsType()).getCode());
+        }else{
+            activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
+        }
         activity.setOsType(OSType.fromString(cmd.getOsType()).getCode());
         activity.setNamespaceId(UserContext.getCurrentNamespaceId());
         activity.setVersionRealm(UserContext.current().getVersionRealm());
         if (user != null)
         	userActivityProvider.addActivity(activity, user.getId());
-        
+
+        // 增加版本号 用于运营统计 by sfyan 20170117
+        String type = OSType.fromCode(activity.getOsType().toString()).name().toLowerCase();
+        String version = activity.getAppVersionName();
+        if(!org.springframework.util.StringUtils.isEmpty(version)
+                && version.split("\\.").length > 3)
+            version = version.substring(0, version.lastIndexOf("."));
+
+        AppVersion appVersion = statTerminalProvider.findAppVersion(activity.getNamespaceId(), version, type);
+        if(null == appVersion){
+            appVersion = new AppVersion();
+            appVersion.setName(version);
+            appVersion.setType(type);
+            appVersion.setNamespaceId(activity.getNamespaceId());
+            appVersion.setRealm(activity.getVersionRealm());
+            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+            appVersion.setDefaultOrder((int)versionRange.getUpperBound());
+            statTerminalProvider.createAppVersion(appVersion);
+        }
     }
 
     private static Timestamp getCreateTime() {

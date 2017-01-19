@@ -3,6 +3,7 @@ package com.everhomes.user;
 
 import com.everhomes.app.App;
 import com.everhomes.namespace.Namespace;
+import org.springframework.util.StringUtils;
 
 public class UserContext {
     private static ThreadLocal<UserContext> s_userContexts = new ThreadLocal<UserContext>();
@@ -115,6 +116,9 @@ public class UserContext {
     }
 
     public String getScheme() {
+        if(StringUtils.isEmpty(scheme)){
+            scheme = "https";
+        }
         return scheme;
     }
 
