@@ -1020,6 +1020,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
     public List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){
     	Organization org = organizationProvider.findOrganizationById(organizationId);
+		if(null == org){
+			LOGGER.debug("organization is null. organizationId = {}", organizationId);
+			return new ArrayList<>();
+		}
     	String path = org.getPath();
     	String[] orgIds = path.split("/");
     	List<RoleAssignment> userRoles = null;
