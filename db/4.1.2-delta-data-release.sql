@@ -205,7 +205,7 @@ update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4
   SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
  INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
  VALUES ((@menu_scope_id := @menu_scope_id + 1), 30600, '', 'EhNamespaces', 0, 2);
- 
+
  -- 增加审批 by xiongying20170117
  SET @jump_id = (SELECT MAX(id) FROM eh_service_alliance_jump_module);
  INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`) VALUES ((@jump_id := @jump_id + 1), '999983', '审批', 'zl://approval/create?approvalId={}&sourceId={}');
@@ -220,3 +220,8 @@ UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='20
 
 -- merge from serviceAlliance2.0 add by xiongying20170119
 UPDATE eh_service_alliance_categories SET selected_logo_url = logo_url;
+
+-- 删除下个节点处理人
+delete from `eh_flow_variables` where id=2003;
+delete from `eh_flow_variables` where id=2004;
+
