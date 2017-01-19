@@ -1,6 +1,7 @@
 package com.everhomes.contentserver;
 
 import java.util.HashMap;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -212,16 +213,15 @@ public class ContentServerManagerImpl implements ContentServerMananger {
      * @return
      */
     private String getScheme(MessageHandleRequest request) {
-        String meta = request.getExt();
+        Map<String, String> meta = request.getMeta();
         if(LOGGER.isInfoEnabled()) {
             LOGGER.info("Try to strip the scheme from request, meta={}", meta);
         }
         
         String scheme = "http";
-        if(meta != null && meta.trim().length() > 0) {
+        if(meta != null) {
             try {
-                HashMap map = (HashMap)StringHelper.fromJsonString(meta, HashMap.class);
-                String tmpScheme = (String)map.get("X-Forwarded-Scheme");
+                String tmpScheme = meta.get("X-Forwarded-Scheme");
                 if(tmpScheme != null && tmpScheme.trim().length() > 0) {
                     scheme = tmpScheme.trim();
                 }
