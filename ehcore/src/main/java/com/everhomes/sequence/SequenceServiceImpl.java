@@ -1214,7 +1214,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhDoorAuthLogs.class, Tables.EH_DOOR_AUTH_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOOR_AUTH_LOGS.ID.max()).from(Tables.EH_DOOR_AUTH_LOGS).fetchOne().value1();
         });
-
+        syncTableSequence(null, EhQualityInspectionSpecifications.class, Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
