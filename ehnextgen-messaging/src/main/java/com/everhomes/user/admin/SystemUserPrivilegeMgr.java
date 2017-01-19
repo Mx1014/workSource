@@ -152,8 +152,13 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
             LOGGER.debug("user identifierToken is null..");
             return false;
         }
-        List<OrganizationDTO> orgDTOs = organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), organization.getPath());
 
+        List<String> groupTypes = new ArrayList<>();
+        groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+        groupTypes.add(OrganizationGroupType.GROUP.getCode());
+        groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+        List<OrganizationDTO> orgDTOs = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
+        LOGGER.debug("user organizations:{}", orgDTOs);
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
         for (OrganizationDTO orgDTO: orgDTOs) {
             AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), orgDTO.getId());
