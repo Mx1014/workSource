@@ -2922,23 +2922,24 @@ public class CommunityServiceImpl implements CommunityService {
 			projectAssignment.setResourceType(EntityType.BUILDING.getCode());
 			communityProvider.createResourceCategoryAssignment(projectAssignment);
 
-			for (ServiceModuleAssignment sma: smas) {
-				rolePrivilegeService.assignmentPrivileges(projectAssignment.getResourceType(),projectAssignment.getResourceId(), sma.getTargetType(),sma.getTargetId(),"M" + sma.getModuleId() + "." + sma.getOwnerType() + sma.getOwnerId(), sma.getModuleId(),ServiceModulePrivilegeType.SUPER);
-			}
+//			for (ServiceModuleAssignment sma: smas) {
+//				rolePrivilegeService.assignmentPrivileges(projectAssignment.getResourceType(),projectAssignment.getResourceId(), sma.getTargetType(),sma.getTargetId(),"M" + sma.getModuleId() + "." + sma.getOwnerType() + sma.getOwnerId(), sma.getModuleId(),ServiceModulePrivilegeType.SUPER);
+//			}
 
 		}
+
 	}
 
 	private void deleleteResourceCategoryAssignmentById(Long id, Long categoryId, Long buildingId){
 		communityProvider.deleteResourceCategoryAssignmentById(id);
-		List<ServiceModuleAssignment> moduleAssignments = serviceModuleProvider.listResourceAssignmentGroupByTargets(EntityType.RESOURCE_CATEGORY.getCode(), categoryId, null);
-		for (ServiceModuleAssignment moduleAssignment: moduleAssignments) {
-			AclRoleDescriptor aclRoleDescriptor = new AclRoleDescriptor(moduleAssignment.getTargetType(), moduleAssignment.getTargetId());
-			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.BUILDING.getCode(), buildingId, aclRoleDescriptor);
-			for (Acl acl: acls) {
-				aclProvider.deleteAcl(acl.getId());
-			}
-		}
+//		List<ServiceModuleAssignment> moduleAssignments = serviceModuleProvider.listResourceAssignmentGroupByTargets(EntityType.RESOURCE_CATEGORY.getCode(), categoryId, null);
+//		for (ServiceModuleAssignment moduleAssignment: moduleAssignments) {
+//			AclRoleDescriptor aclRoleDescriptor = new AclRoleDescriptor(moduleAssignment.getTargetType(), moduleAssignment.getTargetId());
+//			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.BUILDING.getCode(), buildingId, aclRoleDescriptor);
+//			for (Acl acl: acls) {
+//				aclProvider.deleteAcl(acl.getId());
+//			}
+//		}
 	}
 
 	@Override

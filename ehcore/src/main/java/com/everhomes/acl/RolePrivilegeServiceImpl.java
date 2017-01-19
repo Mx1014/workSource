@@ -1311,7 +1311,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				acl.setOwnerId(ownerId);
 				acl.setPrivilegeId(privilegeId);
 				acl.setRoleType(targetType);
-				acl.setScope(ownerType + ownerId + "." + scope);
+				acl.setScope(scope);
 				acl.setNamespaceId(UserContext.getCurrentNamespaceId());
 				aclProvider.createAcl(acl);
 			}
@@ -1568,25 +1568,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							assignment.setCreateUid(user.getId());
 							serviceModuleProvider.createServiceModuleAssignment(assignment);
 
-							if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
-								List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
-								for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
-									if(ServiceModuleAssignmentType.fromCode(moduleAssignment.getAssignmentType()) == ServiceModuleAssignmentType.PORTION
-											&& null != moduleAssignment.getPrivilegeIds() && moduleAssignment.getPrivilegeIds().size() > 0)
-										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleAssignment.getPrivilegeIds());
-									else
-										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
-
-								}
-
-							}else{
+//							if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
+//								List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
+//								for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
+//									if(ServiceModuleAssignmentType.fromCode(moduleAssignment.getAssignmentType()) == ServiceModuleAssignmentType.PORTION
+//											&& null != moduleAssignment.getPrivilegeIds() && moduleAssignment.getPrivilegeIds().size() > 0)
+//										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleAssignment.getPrivilegeIds());
+//									else
+//										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
+//
+//								}
+//
+//							}else{
 								if(ServiceModuleAssignmentType.fromCode(moduleAssignment.getAssignmentType()) == ServiceModuleAssignmentType.PORTION
 										&& null != moduleAssignment.getPrivilegeIds() && moduleAssignment.getPrivilegeIds().size() > 0)
-									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), moduleAssignment.getPrivilegeIds());
+									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), moduleAssignment.getPrivilegeIds());
 								else
-									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
+									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
 
-							}
+//							}
 							/**
 							 * 业务模块权限授权
 							 */
@@ -1607,14 +1607,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					/**
 					 * 业务模块权限授权
 					 */
-					if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
-						List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
-						for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
-							this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleIds,ServiceModulePrivilegeType.SUPER);
-						}
-					}else{
-						this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
-					}
+//					if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
+//						List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
+//						for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
+//							this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleIds,ServiceModulePrivilegeType.SUPER);
+//						}
+//					}else{
+						this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
+//					}
 				}
 			}
 
@@ -1686,11 +1686,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			List<Acl> acls = aclProvider.getAcl(new QueryBuilder() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
-					if(EntityType.fromCode(assignment.getOwnerType()) == EntityType.RESOURCE_CATEGORY){
-						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%.M" + assignment.getModuleId() + "." + assignment.getOwnerType() + assignment.getOwnerId()).or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
-					}else{
+//					if(EntityType.fromCode(assignment.getOwnerType()) == EntityType.RESOURCE_CATEGORY){
+//						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%.M" + assignment.getModuleId() + "." + assignment.getOwnerType() + assignment.getOwnerId()).or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+//					}else{
 						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
-					}
+//					}
 					return null;
 				}
 			});
@@ -2074,20 +2074,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 		List<Acl> acls = null;
-		if(EntityType.fromCode(resourceType) == EntityType.RESOURCE_CATEGORY){
-			acls = aclProvider.getAcl(new QueryBuilder() {
-				@Override
-				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%." + resourceType + resourceId));
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(targetId));
-					return null;
-				}
-			});
-		}else{
+//		if(EntityType.fromCode(resourceType) == EntityType.RESOURCE_CATEGORY){
+//			acls = aclProvider.getAcl(new QueryBuilder() {
+//				@Override
+//				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
+//					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%." + resourceType + resourceId));
+//					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
+//					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(targetId));
+//					return null;
+//				}
+//			});
+//		}else{
 			AclRoleDescriptor descriptor = new AclRoleDescriptor(targetType, targetId);
 			acls = aclProvider.getResourceAclByRole(resourceType, resourceId, descriptor);
-		}
+//		}
 
 		if(null != acls){
 			for (Acl acl :acls) {
