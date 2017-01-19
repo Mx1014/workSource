@@ -10,7 +10,6 @@ import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
-import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -43,7 +42,6 @@ import com.everhomes.pushmessage.*;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.address.*;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
@@ -76,7 +74,6 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.*;
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
@@ -3943,7 +3940,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerDTO updateOrganizationOwner(UpdateOrganizationOwnerCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_UPDATE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4014,7 +4010,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
 	public OrganizationOwnerDTO createOrganizationOwner(CreateOrganizationOwnerCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_CREATE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4241,7 +4236,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
     public void updateOrganizationOwnerAddressStatus(UpdateOrganizationOwnerAddressStatusCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4281,7 +4275,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerBehaviorDTO> listOrganizationOwnerBehaviors(ListOrganizationOwnerBehaviorsCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_LIST);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4308,7 +4301,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerBehavior(DeleteOrganizationOwnerBehaviorCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4326,7 +4318,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerAttachment(DeleteOrganizationOwnerAttachmentCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4343,7 +4334,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerCarAttachment(DeleteOrganizationOwnerCarAttachmentCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4360,7 +4350,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
 	public void deleteOrganizationOwner(DeleteOrganizationOwnerCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_DELETE);
         validate(cmd);
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4409,7 +4398,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerAddressDTO> listOrganizationOwnerAddresses(ListOrganizationOwnerAddressesCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_LIST);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4440,7 +4428,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<OrganizationOwnerAttachmentDTO> listOrganizationOwnerAttachments(ListOrganizationOwnerAttachmentsCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_LIST);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4548,7 +4535,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteRelationOfOrganizationOwnerAndCar(DeleteRelationOfOrganizationOwnerAndCarCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4637,7 +4623,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void exportOrganizationOwners(ExportOrganizationsOwnersCommand cmd, HttpServletResponse response) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_EXPORT);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4689,7 +4674,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public List<ListOrganizationOwnerStatisticDTO> listOrganizationOwnerStatisticByGender(ListOrganizationOwnerStatisticCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_STATISTIC);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4711,7 +4695,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public ListOrganizationOwnerStatisticByAgeDTO listOrganizationOwnerStatisticByAge(ListOrganizationOwnerStatisticCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_STATISTIC);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4810,7 +4793,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerAttachmentDTO uploadOrganizationOwnerAttachment(UploadOrganizationOwnerAttachmentCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
     	checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4828,7 +4810,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerAddressDTO addOrganizationOwnerAddress(AddOrganizationOwnerAddressCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -4870,7 +4851,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
 	@Override
     public void deleteOrganizationOwnerAddress(DeleteOrganizationOwnerAddressCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
 		checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -5053,7 +5033,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void deleteOrganizationOwnerAddressAuthStatus(UpdateOrganizationOwnerAddressAuthTypeCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_MANAGE);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -5161,7 +5140,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public OrganizationOwnerDTO getOrganizationOwner(GetOrganizationOwnerCommand cmd) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_LIST);
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
 
@@ -5334,7 +5312,6 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 
     @Override
     public void importOrganizationOwners(@Valid ImportOrganizationsOwnersCommand cmd, MultipartFile[] file) {
-        checkPrivilege(cmd.getOwnerType(), cmd.getOwnerId(), PrivilegeConstants.CUSTOMER_IMPORT);
         User user = UserContext.current().getUser();
         Long communityId = cmd.getCommunityId();
         this.checkCommunityIdIsNull(communityId);
@@ -5554,13 +5531,5 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
                 throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid parameter %s", r);
             });
         }
-    }
-
-    /**
-     * 检查用户对应的具体的权限
-     */
-    private void checkPrivilege(String ownerType, Long ownerId, Long privilegeId) {
-        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, ownerId, privilegeId);
     }
 }
