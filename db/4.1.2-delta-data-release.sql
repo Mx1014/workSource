@@ -103,7 +103,7 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20230', '投诉建议', '20000', NULL, NULL, '1', '2', '/20000/20230', 'park', '201', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
-	VALUES ('20240', '任务列表', '20230', NULL, 'task_management_list/205250', '0', '2', '/20000/20230/20240', 'park', '220', NULL);
+	VALUES ('20240', '任务列表', '20230', NULL, 'task_management_list/202564', '0', '2', '/20000/20230/20240', 'park', '220', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 	VALUES ('20250', '服务录入', '20230', NULL, 'task_management_service_entry', '0', '2', '/20000/20230/20250', 'park', '225', NULL);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
@@ -164,7 +164,9 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 delete from eh_web_menu_scopes where menu_id in (20100, 20140, 20150, 20155, 20158, 20160, 20170, 20180, 20190, 20191, 20192) and owner_id = 999983;
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999983-1', 'ebei', '', '0', NULL);
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999983-205250', 'flow', '', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999983-202564', 'flow', '', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.ebei.url', 'http://120.24.88.192:13902/ebeitest/', '', '0', NULL);
+
 
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10010', 'zh_CN', '分类不能为空！');
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10011', 'zh_CN', '任务已在处理中，不能取消！');

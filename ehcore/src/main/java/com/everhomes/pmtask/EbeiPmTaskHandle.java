@@ -177,8 +177,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	}
 	
 	public String postToEbei(JSONObject param, String method, Map<String, String> headers) {
-
-		String url = "http://120.24.88.192:13902/ebeitest/";
+		
+		String url = configProvider.getValue("pmtask.ebei.url", "");
 		HttpPost httpPost = new HttpPost(url + method);
 		CloseableHttpResponse response = null;
 		
