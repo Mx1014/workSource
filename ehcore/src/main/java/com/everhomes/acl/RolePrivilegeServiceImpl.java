@@ -1689,7 +1689,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 //					if(EntityType.fromCode(assignment.getOwnerType()) == EntityType.RESOURCE_CATEGORY){
 //						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%.M" + assignment.getModuleId() + "." + assignment.getOwnerType() + assignment.getOwnerId()).or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
 //					}else{
-						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M0" + "%")));
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(assignment.getTargetType()));
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(assignment.getTargetId()));
 //					}
 					return null;
 				}
