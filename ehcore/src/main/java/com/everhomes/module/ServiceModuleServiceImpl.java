@@ -123,24 +123,27 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 			serviceModuleDTO.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
 			if(dto.getId().equals(serviceModuleDTO.getParentId())){
 				childrens.add(getChildServiceModules(list, serviceModuleDTO));
-				if(0 == serviceModuleDTO.getServiceModules().size()){
-					List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(serviceModuleDTO.getId(), ServiceModulePrivilegeType.ORDINARY);
-					List<ServiceModuleDTO> ps = new ArrayList<ServiceModuleDTO>();
-					for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
-						ServiceModuleDTO p = new ServiceModuleDTO();
-						p.setId(modulePrivilege.getId());
-						Privilege privilege = aclProvider.getPrivilegeById(modulePrivilege.getId());
-						if(null != privilege){
-							p.setName(privilege.getName());
-						}
-						p.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
-						ps.add(p);
-					}
-					serviceModuleDTO.setServiceModules(ps);
-				}
 			}
 		}
-		dto.setServiceModules(childrens);
+		if(childrens.size() > 0)
+			dto.setServiceModules(childrens);
+		else{
+			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(dto.getId(), ServiceModulePrivilegeType.ORDINARY);
+			List<ServiceModuleDTO> ps = new ArrayList<ServiceModuleDTO>();
+			for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
+				ServiceModuleDTO p = new ServiceModuleDTO();
+				p.setId(modulePrivilege.getPrivilegeId());
+				Privilege privilege = aclProvider.getPrivilegeById(modulePrivilege.getPrivilegeId());
+				if(null != privilege){
+					p.setName(privilege.getName());
+				}
+				p.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
+				ps.add(p);
+			}
+			dto.setServiceModules(ps);
+		}
+
+
 		
 		return dto;
 	}

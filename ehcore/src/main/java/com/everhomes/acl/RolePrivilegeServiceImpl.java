@@ -1567,15 +1567,21 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
 								List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
 								for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
-									this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
-									if(moduleAssignment.getPrivilegeIds().size() > 0)
+									if(ServiceModuleAssignmentType.fromCode(moduleAssignment.getAssignmentType()) == ServiceModuleAssignmentType.PORTION
+											&& null != moduleAssignment.getPrivilegeIds() && moduleAssignment.getPrivilegeIds().size() > 0)
 										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleAssignment.getPrivilegeIds());
+									else
+										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
+
 								}
 
 							}else{
-								this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
-								if(moduleAssignment.getPrivilegeIds().size() > 0)
+								if(ServiceModuleAssignmentType.fromCode(moduleAssignment.getAssignmentType()) == ServiceModuleAssignmentType.PORTION
+										&& null != moduleAssignment.getPrivilegeIds() && moduleAssignment.getPrivilegeIds().size() > 0)
 									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), moduleAssignment.getPrivilegeIds());
+								else
+									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
+
 							}
 							/**
 							 * 业务模块权限授权
@@ -1668,27 +1674,33 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	private ServiceModuleAssignmentDTO convertServiceModuleAssignmentDTO(ServiceModuleAssignment assignment){
 		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
 		ServiceModuleAssignmentDTO assignmentDTO = ConvertHelper.convert(assignment, ServiceModuleAssignmentDTO.class);
-		assignmentDTO.setModuleId(serviceModule.getId());
-		assignmentDTO.setModuleName(serviceModule.getName());
+		assignmentDTO.setModuleId(assignment.getModuleId());
+		if(null != serviceModule)
+			assignmentDTO.setModuleName(serviceModule.getName());
 
 		if(ServiceModuleAssignmentType.PORTION == ServiceModuleAssignmentType.fromCode(assignment.getAssignmentType())){
 			List<Acl> acls = aclProvider.getAcl(new QueryBuilder() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.eq(assignment.getTargetType() + assignment.getTargetId() + ".M" + assignment.getModuleId() + "." + assignment.getOwnerType() + assignment.getOwnerId()).or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
 					return null;
 				}
 			});
 
 			List<PrivilegeDTO> ps = new ArrayList<>();
+			List<Long> pIds = new ArrayList<>();
 			for (Acl acl: acls) {
-				Privilege p = aclProvider.getPrivilegeById(acl.getPrivilegeId());
-				PrivilegeDTO pDTO = new PrivilegeDTO();
-				pDTO.setPrivilegeId(acl.getPrivilegeId());
-				if(null != p){
-					pDTO.setPrivilegeName(p.getName());
+				if(!pIds.contains(acl.getPrivilegeId())){
+					Privilege p = aclProvider.getPrivilegeById(acl.getPrivilegeId());
+					PrivilegeDTO pDTO = new PrivilegeDTO();
+					pDTO.setPrivilegeId(acl.getPrivilegeId());
+					if(null != p){
+						pDTO.setPrivilegeName(p.getName());
+					}
+					ps.add(pDTO);
+					pIds.add(acl.getPrivilegeId());
 				}
-				ps.add(pDTO);
+
 			}
 			assignmentDTO.setPrivileges(ps);
 		}
@@ -2043,7 +2055,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
      */
 	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, List<Long> privilegeIds){
 		if(null != moduleIds && moduleIds.size() > 0){
-			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, ServiceModulePrivilegeType.SUPER);
+			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, null);
 			if(null == privilegeIds){
 				privilegeIds = new ArrayList<>();
 			}
