@@ -2904,7 +2904,7 @@ public class CommunityServiceImpl implements CommunityService {
 		List<ResourceCategoryAssignment> bulidingCategorys = communityProvider.listResourceCategoryAssignment(categoryId,namespaceId);
 
 		for (ResourceCategoryAssignment bulidingCategory: bulidingCategorys) {
-			deleleteResourceCategoryAssignmentById(bulidingCategory.getId(), bulidingCategory.getResourceCategryId(), bulidingCategory.getResourceId());
+			communityProvider.deleteResourceCategoryAssignmentById(bulidingCategory.getId());
 		}
 
 		List<ServiceModuleAssignment> smas = serviceModuleProvider.listServiceModuleAssignmentsByTargetIdAndOwnerId(EntityType.RESOURCE_CATEGORY.getCode(), categoryId, null, null, null);
@@ -2912,7 +2912,7 @@ public class CommunityServiceImpl implements CommunityService {
 		for (Long buildingId: buildingIds) {
 			ResourceCategoryAssignment  projectAssignment = communityProvider.findResourceCategoryAssignment(buildingId, EntityType.BUILDING.getCode(), namespaceId);
 			if(null != projectAssignment){
-				deleleteResourceCategoryAssignmentById(projectAssignment.getId(), projectAssignment.getResourceCategryId(), projectAssignment.getResourceId());
+				communityProvider.deleteResourceCategoryAssignmentById(projectAssignment.getId());
 			}
 			projectAssignment = new ResourceCategoryAssignment();
 			projectAssignment.setNamespaceId(namespaceId);
@@ -2930,18 +2930,6 @@ public class CommunityServiceImpl implements CommunityService {
 
 	}
 
-	private void deleleteResourceCategoryAssignmentById(Long id, Long categoryId, Long buildingId){
-		communityProvider.deleteResourceCategoryAssignmentById(id);
-//		List<ServiceModuleAssignment> moduleAssignments = serviceModuleProvider.listResourceAssignmentGroupByTargets(EntityType.RESOURCE_CATEGORY.getCode(), categoryId, null);
-//		for (ServiceModuleAssignment moduleAssignment: moduleAssignments) {
-//			AclRoleDescriptor aclRoleDescriptor = new AclRoleDescriptor(moduleAssignment.getTargetType(), moduleAssignment.getTargetId());
-//			List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.BUILDING.getCode(), buildingId, aclRoleDescriptor);
-//			for (Acl acl: acls) {
-//				aclProvider.deleteAcl(acl.getId());
-//			}
-//		}
-	}
-
 	@Override
 	public void deleteChildProject(DeleteChildProjectCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -2949,7 +2937,16 @@ public class CommunityServiceImpl implements CommunityService {
 			communityProvider.deleteResourceCategoryById(cmd.getId());
 			List<ResourceCategoryAssignment> bulidingCategorys = communityProvider.listResourceCategoryAssignment(cmd.getId(), namespaceId);
 			for (ResourceCategoryAssignment bulidingCategory : bulidingCategorys) {
-				deleleteResourceCategoryAssignmentById(bulidingCategory.getId(), bulidingCategory.getResourceCategryId(), bulidingCategory.getResourceId());
+				communityProvider.deleteResourceCategoryAssignmentById(bulidingCategory.getId());
+			}
+
+			List<ServiceModuleAssignment> moduleAssignments = serviceModuleProvider.listResourceAssignmentGroupByTargets(EntityType.RESOURCE_CATEGORY.getCode(), cmd.getId(), null);
+			for (ServiceModuleAssignment moduleAssignment: moduleAssignments) {
+				AclRoleDescriptor aclRoleDescriptor = new AclRoleDescriptor(moduleAssignment.getTargetType(), moduleAssignment.getTargetId());
+				List<Acl> acls = aclProvider.getResourceAclByRole(EntityType.RESOURCE_CATEGORY.getCode(), cmd.getId(), aclRoleDescriptor);
+				for (Acl acl: acls) {
+					aclProvider.deleteAcl(acl.getId());
+				}
 			}
 			return null;
 		});
