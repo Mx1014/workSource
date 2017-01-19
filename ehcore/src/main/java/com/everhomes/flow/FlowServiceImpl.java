@@ -715,6 +715,9 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		if(cmd.getTickMessageAction() != null) {
+			//超过 x 小时未处理则推送消息
+//			if(cmd.getMessageAction().getReminderAfterMinute() != null && cmd.getMessageAction().getReminderAfterMinute() > 0) {
+//			}
 			dbProvider.execute((a) -> {
 				return createNodeAction(flowNode, cmd.getTickMessageAction(), FlowActionType.TICK_MESSAGE.getCode()
 						, FlowActionStepType.STEP_TIMEOUT.getCode(), null);
@@ -1035,10 +1038,6 @@ public class FlowServiceImpl implements FlowService {
 				, actionType, actionStepType, flowStepType);
 		
 		CreateFlowUserSelectionCommand selectionCmd = actionInfo.getUserSelections();
-		boolean configUser = false;
-		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
-			configUser = true;
-		}
 		
 		if(action == null) {
 			action = new FlowAction();
@@ -1050,6 +1049,9 @@ public class FlowServiceImpl implements FlowService {
 			action.setBelongEntity(FlowEntityType.FLOW_BUTTON.getCode());
 			action.setNamespaceId(flowButton.getNamespaceId());
 			action.setFlowStepType(flowStepType);
+			if(actionInfo.getTemplateId() != null) {
+				action.setTemplateId(actionInfo.getTemplateId());
+			}
 
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
@@ -1060,6 +1062,9 @@ public class FlowServiceImpl implements FlowService {
 			flowActionProvider.createFlowAction(action);
 			
 		} else {
+			if(actionInfo.getTemplateId() != null) {
+				action.setTemplateId(actionInfo.getTemplateId());
+			}
 			action.setReminderTickMinute(actionInfo.getReminderTickMinute());
 			action.setReminderAfterMinute(actionInfo.getReminderAfterMinute());
 			action.setTrackerApplier(actionInfo.getTrackerApplier());
@@ -1069,12 +1074,10 @@ public class FlowServiceImpl implements FlowService {
 			flowActionProvider.updateFlowAction(action);
 			
 			//delete all old selections
-			if(configUser) {
-				flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
-			}
+			flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
 		}
 		
-		if(configUser) {
+		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
 			List<FlowSingleUserSelectionCommand> seles = selectionCmd.getSelections();
 			for(FlowSingleUserSelectionCommand selCmd : seles) {
 				FlowUserSelection userSel = new FlowUserSelection(); 
@@ -1292,7 +1295,7 @@ public class FlowServiceImpl implements FlowService {
 		if(action != null) {
 			graphAction = new FlowGraphSMSAction();//TODO action.getReminderAfterMinute(), action.getReminderTickMinute(), 50l
 			graphAction.setFlowAction(action);
-			graphNode.setTickMessageAction(graphAction);	
+			graphNode.setTickSMSAction(graphAction);	
 		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
@@ -3059,10 +3062,6 @@ public class FlowServiceImpl implements FlowService {
 				, actionType, actionStepType, flowStepType);
 		
 		CreateFlowUserSelectionCommand selectionCmd = actionInfo.getUserSelections();
-		boolean configUser = false;
-		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
-			configUser = true;
-		}
 		
 		if(action == null) {
 			action = new FlowAction();
@@ -3110,13 +3109,10 @@ public class FlowServiceImpl implements FlowService {
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
 			
-			//delete all old selections
-			if(configUser) {
-				flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
-			}
+			flowUserSelectionProvider.deleteSelectionByBelong(action.getId(), FlowEntityType.FLOW_ACTION.getCode(), FlowUserType.PROCESSOR.getCode());	
 		}
 		
-		if(configUser) {
+		if(selectionCmd != null && selectionCmd.getSelections() != null && selectionCmd.getSelections().size() > 0) {
 			List<FlowSingleUserSelectionCommand> seles = selectionCmd.getSelections();
 			for(FlowSingleUserSelectionCommand selCmd : seles) {
 				FlowUserSelection userSel = new FlowUserSelection(); 

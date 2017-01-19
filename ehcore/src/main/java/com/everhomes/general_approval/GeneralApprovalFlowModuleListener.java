@@ -162,13 +162,13 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 	//						e.setEntityType(FlowCaseEntityType.F.getCode()); 
 							//TODO:工作流需要新增类型file
 							e.setEntityType(FlowCaseEntityType.FILE.getCode()); 
-							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class);
+							PostApprovalFormFileValue fileValue = JSON.parseObject(val.getFieldStr3(), PostApprovalFormFileValue.class); 
 							if (null == fileValue || fileValue.getFiles() ==null )
 								break;
 							List<FlowCaseFileDTO> files = new ArrayList<>();
 							for(PostApprovalFormFileDTO dto2 : fileValue.getFiles()){
-								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO();
-								String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId());
+								FlowCaseFileDTO fileDTO = new FlowCaseFileDTO(); 
+								String url = this.contentServerService.parserUri(dto2.getUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()); 
 								ContentServerResource resource = contentServerService.findResourceByUri(dto2.getUri());
 								fileDTO.setUrl(url);
 								fileDTO.setFileName(dto2.getFileName());
@@ -190,11 +190,9 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 						
 					}
 				}catch(NullPointerException e){
-					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val));
-					
+					LOGGER.error(" ********** 空指针错误  val = "+JSON.toJSONString(val), e);
 				}catch(Exception e){
-					LOGGER.error(e.getMessage());
-					LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val));
+					LOGGER.error(" ********** 这是什么错误  = "+JSON.toJSONString(val), e);
 					
 				}
 			}

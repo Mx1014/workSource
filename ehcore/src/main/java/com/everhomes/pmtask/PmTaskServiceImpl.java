@@ -1838,7 +1838,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			pmTaskProvider.updateTaskTarget(pmTaskTarget);
 			
 			rolePrivilegeService.deleteAcls(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
-					EntityType.USER.getCode(), cmd.getTargetId(), null, null);
+					EntityType.USER.getCode(), cmd.getTargetId(), 20100L, null);
 			if(null != pmTaskTarget2) {
 				rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
 						EntityType.USER.getCode(), cmd.getTargetId(), "pmtask", privilegeIds);

@@ -33,3 +33,7 @@ INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `descript
 VALUES ((@max_id := @max_id + 1), '999985', '藜麦减脂沙拉', '藜麦减脂沙拉', 'cs://1/image/aW1hZ2UvTVRvNVpURXdaR0UzT1RjeE5qWXpPV1U1WmpBeE9XSmhPVGs0WldFMFptUXhaUQ', '22.22', 'http://www.baidu.com', '10', '2017-01-10 16:20:23', '1', NULL, NULL);
 INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
 VALUES ((@max_id := @max_id + 1), '999985', '三色金枪鱼沙拉', '简单的土豆泥沙拉', 'cs://1/image/aW1hZ2UvTVRvME1EZzFZV1JrTnpZNVlqQXlNVGd5WVdZNE1HSmpOR00xWWpnd05HWXlNUQ', '1080.56', 'http://www.baidu.com', '10', '2017-01-10 16:20:23', '1', NULL, NULL);
+
+
+-- 修改活动运营icon action_data   add by xq.tian  2017/01/18
+UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":1,\"livePrivilege\":1,\"categoryId\": 1000001}' WHERE `namespace_id`='999985' AND `item_group` = 'OPPushActivity';
