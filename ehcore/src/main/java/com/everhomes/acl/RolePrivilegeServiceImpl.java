@@ -581,13 +581,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Long> privilegeIds = getUserPrivileges(null ,organizationId, userId);
 		// 用户在当前机构自身权限
 		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId));
-		List<String> groupTypes = new ArrayList<>();
-		groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
-		groupTypes.add(OrganizationGroupType.GROUP.getCode());
-		List<OrganizationDTO> organizations = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
-		for (OrganizationDTO organization:organizations) {
-			privilegeIds.addAll(this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+
+		List<Long> userPIds = this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.USER.getCode(), userId);
+		if(null == userPIds || userPIds.size() == 0){
+			List<String> groupTypes = new ArrayList<>();
+			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+			groupTypes.add(OrganizationGroupType.GROUP.getCode());
+			List<OrganizationDTO> organizations = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
+			for (OrganizationDTO organization:organizations) {
+				privilegeIds.addAll(this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+			}
+		}else{
+			privilegeIds.addAll(userPIds);
 		}
+
 
 		List<Long> pIds = new ArrayList<>();
 
