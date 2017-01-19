@@ -412,7 +412,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ft.setJson(stepDTO.toString());
 			
 			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 60*1000l;
-//			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 1000;
+//			Long timeoutTick = DateHelper.currentGMTTime().getTime() + 6000;
 			ft.setTimeoutTick(new Timestamp(timeoutTick));
 			
 //			flowTimeoutService.pushTimeout(ft);
