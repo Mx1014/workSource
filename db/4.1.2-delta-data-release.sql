@@ -214,3 +214,7 @@ UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":1,\"live
 
 -- 上一步节点处理人 by janson
 UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='2001';
+
+
+-- merge from serviceAlliance2.0 add by xiongying20170119
+UPDATE eh_service_alliance_categories SET selected_logo_url = logo_url;
