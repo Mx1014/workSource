@@ -18,6 +18,7 @@ import com.everhomes.util.StringHelper;
  *<li>orderCount:待发货订单数量</li>
  *<li>businessUrl:电商链接</li>
  *<li>businessRealm:电商realm</li>
+ *<li>activityDefaultListStyle:活动列表默认样式</li>
  *</ul>
  */
 public class ListTreasureResponse {
@@ -34,8 +35,16 @@ public class ListTreasureResponse {
     private Integer orderCount;
     private String businessUrl;
     private String businessRealm;
-    
+    private Byte activityDefaultListStyle;
 	
+	public Byte getActivityDefaultListStyle() {
+		return activityDefaultListStyle;
+	}
+
+	public void setActivityDefaultListStyle(Byte activityDefaultListStyle) {
+		this.activityDefaultListStyle = activityDefaultListStyle;
+	}
+
 	public String getMyOrderUrl() {
 		return myOrderUrl;
 	}

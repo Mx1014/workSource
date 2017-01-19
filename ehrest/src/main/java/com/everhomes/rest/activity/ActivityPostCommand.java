@@ -33,7 +33,8 @@ import com.everhomes.util.StringHelper;
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>maxQuantity: 限制人数</li>
- * <li>categoryId: 活动类型id</li>
+ * <li>categoryId: 活动类型id（入口id)</li>
+ * <li>contentCategoryId: 主题分类id</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
@@ -78,6 +79,9 @@ public class ActivityPostCommand{
     
     //added by xiongying
     private Long categoryId;
+    
+    //added by tt
+    private Long contentCategoryId;
 
     private Long forumId;
     
@@ -88,6 +92,14 @@ public class ActivityPostCommand{
     private Byte visibleRegionType;
     
     private Long visibleRegionId;
+
+	public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
 
 	public String getContentType() {
 		return contentType;

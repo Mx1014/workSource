@@ -25,7 +25,17 @@ public class ListOrgNearbyActivitiesCommand {
     
     private Long categoryId;
 
-    public Long getCategoryId() {
+    private Long contentCategoryId;
+
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
 		return categoryId;
 	}
 

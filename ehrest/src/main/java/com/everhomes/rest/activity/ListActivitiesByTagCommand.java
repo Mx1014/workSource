@@ -27,8 +27,18 @@ public class ListActivitiesByTagCommand {
     private Integer pageSize;
     
     private Long categoryId;
+
+    private Long contentCategoryId;
     
-    public Long getCategoryId() {
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
 		return categoryId;
 	}
 

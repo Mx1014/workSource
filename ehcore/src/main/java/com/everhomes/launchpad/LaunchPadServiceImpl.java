@@ -951,12 +951,25 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 					}else{
 						String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
 						itemDTO.setIconUrl(url);
+						if (StringUtils.isNotBlank(itemDTO.getSelectedIconUri())) {
+							String selectedUrl = parserUri(itemDTO.getSelectedIconUri(),EntityType.USER.getCode(),userId);
+							itemDTO.setSelectedIconUrl(selectedUrl);
+						}else {
+							itemDTO.setSelectedIconUrl(itemDTO.getIconUrl());
+						}
 						itemDTO.setEditFlag(r.getDeleteFlag());
 						distinctDto.add(itemDTO);
 					}
 				}else{
 					String url = parserUri(itemDTO.getIconUri(),EntityType.USER.getCode(),userId);
 					itemDTO.setIconUrl(url);
+					if (StringUtils.isNotBlank(itemDTO.getSelectedIconUri())) {
+						String selectedUrl = parserUri(itemDTO.getSelectedIconUri(),EntityType.USER.getCode(),userId);
+						itemDTO.setSelectedIconUrl(selectedUrl);
+					}else {
+						itemDTO.setSelectedIconUrl(itemDTO.getIconUrl());
+					}
+					
 //                    if(LOGGER.isDebugEnabled()) {
 //                        LOGGER.debug("Parse uri while processing launchpad items, item=" + itemDTO);
 //                    }

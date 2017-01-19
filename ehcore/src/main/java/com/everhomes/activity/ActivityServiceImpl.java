@@ -1,6 +1,30 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
+import java.util.stream.Collectors;
+
+import javax.annotation.PostConstruct;
+
+import com.everhomes.contentserver.ContentServerProvider;
+import com.everhomes.contentserver.ContentServerResource;
+import com.everhomes.rest.activity.*;
+import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
+import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
+import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.Condition;
+import org.jooq.JoinType;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -10,7 +34,6 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -35,9 +58,9 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.family.FamilyDTO;
@@ -58,34 +81,20 @@ import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
-import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.Condition;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
-import javax.annotation.PostConstruct;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.*;
-import java.util.stream.Collectors;
 
 
 @Component
@@ -253,6 +262,7 @@ public class ActivityServiceImpl implements ActivityService {
         
         //add by xiongying, 添加类型id， 20161117
         activity.setCategoryId(cmd.getCategoryId());
+        activity.setContentCategoryId(cmd.getContentCategoryId());
         
         activityProvider.createActity(activity);
         createScheduleForActivity(activity);
@@ -1163,7 +1173,8 @@ public class ActivityServiceImpl implements ActivityService {
             fixupVideoInfo(dto);//added by janson
             return dto;
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+         // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
         if(activityDtos.size()<value){
             locator.setAnchor(null);
         }
@@ -1218,10 +1229,25 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setStopTime(activity.getEndTime().toString());
           dto.setGroupId(activity.getGroupId());
           dto.setForumId(post.getForumId());
+          User user = UserContext.current().getUser();
+          if (user != null) {
+        	  List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(user.getId(), UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
+        	  if (favorite == null || favorite.size() == 0) {
+        		  dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+        	  } else {
+        		  dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+        	  }
+        	  //add UserActivityStatus by xiongying 20160628
+        	  ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+        	  dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+          }else {
+        	  dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+          }
           fixupVideoInfo(dto);//added by janson
           return dto;
            //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-       }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+       // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+       })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
        if(result.size()<pageSize)
        {
            locator.setAnchor(null);
@@ -1307,11 +1333,26 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setStopTime(activity.getEndTime().toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
+			User user = UserContext.current().getUser();
+			if (user != null) {
+            	List<UserFavoriteDTO> favorite = userActivityProvider.findFavorite(user.getId(), UserFavoriteTargetType.ACTIVITY.getCode(), activity.getPostId());
+            	if (favorite == null || favorite.size() == 0) {
+            		dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+            	} else {
+            		dto.setFavoriteFlag(PostFavoriteFlag.FAVORITE.getCode());
+            	}
+            	//add UserActivityStatus by xiongying 20160628
+            	ActivityRoster roster = activityProvider.findRosterByUidAndActivityId(activity.getId(), user.getId());
+            	dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+			}else {
+				dto.setFavoriteFlag(PostFavoriteFlag.NONE.getCode());
+			}
 			fixupVideoInfo(dto);//added by janson
 			return dto;
 
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+			// 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
        
 		if(result.size()<pageSize){
 			
@@ -1382,7 +1423,8 @@ public class ActivityServiceImpl implements ActivityService {
 			return dto;
 
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+			// 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
        
 		if(result.size()<pageSize){
 			
@@ -1434,6 +1476,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         execCmd.setOfficialFlag(cmd.getOfficialFlag());
         execCmd.setCategoryId(cmd.getCategoryId());
+        execCmd.setContentCategoryId(cmd.getContentCategoryId());
         return listActivitiesByLocation(execCmd);
 		
         // 把公用的代码转移到listActivitiesByLocation()中，公司场景和小区场景获取经纬度的方式不一样 by lqs 20160419
@@ -1558,19 +1601,45 @@ public class ActivityServiceImpl implements ActivityService {
         //List<Condition> conditions = geoHashCodes.stream().map(r->Tables.EH_ACTIVITIES.GEOHASH.like(r+"%")).collect(Collectors.toList());
         Condition condition = buildNearbyActivityCondition(cmd.getNamespaceId(), geoHashCodes, cmd.getTag());
 
-        if(null != cmd.getOfficialFlag()){
-            condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
-        }
-
-        //增加活动类型判断add by xiongying 20161117
-        if(null != cmd.getCategoryId()) {
-            ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getCategoryId());
-            if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
-                condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
-            } else {
-                condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
-            }
-        }
+        //comment by tt, 20170116
+//        if(null != cmd.getOfficialFlag()){
+//            condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(cmd.getOfficialFlag()));
+//        }
+//
+//        //增加活动类型判断add by xiongying 20161117
+//        if(null != cmd.getCategoryId()) {
+//            ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getCategoryId());
+//            if (category != null) {
+//            	if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
+//                    condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
+//                } else {
+//                    condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+//                }
+//			}
+//        }
+        
+        // 旧版本查询活动时，只有officialFlag标记，新版本查询活动时有categoryId，当然更老的版本两者都没有
+        // 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+        if (cmd.getCategoryId() == null) {
+        	OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+			if(officialFlag == null) officialFlag = OfficialFlag.NO;
+			Long categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+			cmd.setCategoryId(categoryId);
+		}
+//        else {
+//			officialFlag = categoryId.longValue() == 1L?OfficialFlag.YES:OfficialFlag.NO;
+//		}
+        // 把officialFlag换成categoryId一个条件
+        condition = condition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+        
+        //增加活动主题分类，add by tt, 20170109
+        if (cmd.getContentCategoryId() != null) {
+        	ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getContentCategoryId());
+        	//如果没有查到分类或者分类的allFlag为是，则表示查询全部，不用加条件
+        	if (category != null && TrueOrFalseFlag.FALSE == TrueOrFalseFlag.fromCode(category.getAllFlag())) {
+        		condition = condition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(cmd.getContentCategoryId()));
+			}
+		}
         
         CrossShardListingLocator locator=new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
@@ -1652,7 +1721,8 @@ public class ActivityServiceImpl implements ActivityService {
 
             return dto;
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-        }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+         // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
 
         Long nextPageAnchor = locator.getAnchor();
 
@@ -2020,6 +2090,7 @@ public class ActivityServiceImpl implements ActivityService {
             execCmd.setTag(cmd.getTag());
             execCmd.setRange(geoCharCount);
             execCmd.setCategoryId(cmd.getCategoryId());
+            execCmd.setContentCategoryId(cmd.getContentCategoryId());
             if(999987L == namespaceId){
             	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
             }
@@ -2076,6 +2147,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setPageSize(cmd.getPageSize());
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         execCmd.setCategoryId(cmd.getCategoryId());
+        execCmd.setContentCategoryId(cmd.getContentCategoryId());
         if(999987L == namespaceId){
         	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
         }
@@ -2179,6 +2251,7 @@ public class ActivityServiceImpl implements ActivityService {
 		cmd.setPageSize(command.getPageSize());
 		cmd.setCategoryId(command.getCategoryId());
         cmd.setOrderByCreateTime(command.getOrderByCreateTime());
+		cmd.setContentCategoryId(command.getContentCategoryId());
 		
 		ListActivitiesReponse activities = listOfficialActivities(cmd);
 		
@@ -2239,13 +2312,22 @@ public class ActivityServiceImpl implements ActivityService {
         //增加categoryId add by xiongying 20161118
         if(null != cmd.getCategoryId()) {
             ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getCategoryId());
-            if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
-                activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
-            } else {
-                activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
-            }
+            if (category != null) {
+            	if(SelectorBooleanFlag.TRUE.equals(SelectorBooleanFlag.fromCode(category.getDefaultFlag()))) {
+                    activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.in(cmd.getCategoryId(), 0L));
+                } else {
+                    activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CATEGORY_ID.eq(cmd.getCategoryId()));
+                }
+			}
         }
-        
+        //增加活动主题分类，add by tt, 20170109
+        if (cmd.getContentCategoryId() != null) {
+        	ActivityCategories category = activityProvider.findActivityCategoriesById(cmd.getContentCategoryId());
+        	//如果没有查到分类或者分类的allFlag为是，则表示查询全部，不用加条件
+        	if (category != null && TrueOrFalseFlag.FALSE == TrueOrFalseFlag.fromCode(category.getAllFlag())) {
+        		activityCondition = activityCondition.and(Tables.EH_ACTIVITIES.CONTENT_CATEGORY_ID.eq(cmd.getContentCategoryId()));
+			}
+		}
         
         // 可见性条件：如果有当前小区/园区，则加上小区条件；如果有对应的管理机构，则加上机构条件；这两个条件为或的关系；
         Condition communityCondition = null;
@@ -2411,7 +2493,8 @@ public class ActivityServiceImpl implements ActivityService {
                 fixupVideoInfo(dto);
                 return dto;
                 //全部查速度太慢，先把查出的部分排序 by xiongying20161208
-            }).filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).collect(Collectors.toList());
+             // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+            })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
 
             return activityDtos;
         }
@@ -3166,4 +3249,38 @@ public class ActivityServiceImpl implements ActivityService {
             return dto;
         }
     }
+
+	@Override
+	public ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd) {
+		if (cmd.getNamespaceId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"namespaceId cannot be null");
+		}
+		
+		List<ActivityCategories> ActivityCategoryList = activityProvider.listActivityCategory(cmd.getNamespaceId(), cmd.getCategoryId());
+		
+		List<ActivityCategoryDTO> resultList = ActivityCategoryList.stream().map(r->toActivityCategoryDTO(r)).collect(Collectors.toList());
+		
+		return new ListActivityCategoryReponse(resultList);
+	}
+
+	private ActivityCategoryDTO toActivityCategoryDTO(ActivityCategories activityCategory){
+		ActivityCategoryDTO categoryDTO = ConvertHelper.convert(activityCategory, ActivityCategoryDTO.class);
+		categoryDTO.setIconUrl(parserUri(categoryDTO.getIconUri(), EhActivityCategories.class.getSimpleName(), categoryDTO.getId()));
+		categoryDTO.setSelectedIconUrl(parserUri(categoryDTO.getSelectedIconUri(), EhActivityCategories.class.getSimpleName(), categoryDTO.getId()));
+		if (categoryDTO.getSelectedIconUrl() == null) {
+			categoryDTO.setSelectedIconUrl(categoryDTO.getIconUrl());
+		}
+		return categoryDTO;
+	}
+	
+	private String parserUri(String uri,String ownerType, long ownerId){
+		try {
+			if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
+				return contentServerService.parserUri(uri,ownerType,ownerId);
+		} catch (Exception e) {
+			LOGGER.error("Parser uri is error." + e.getMessage());
+		}
+		return null;
+	}
 }

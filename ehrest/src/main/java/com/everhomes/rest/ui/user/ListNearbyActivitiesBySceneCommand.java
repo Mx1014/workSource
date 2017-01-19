@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * <li>categoryId: 活动类型id</li>
  * <li>orderByCreateTime: 根据创建时间排序</li>
+ * <li>contentCategoryId: 主题分类id</li>
  *</ul>
  */
 public class ListNearbyActivitiesBySceneCommand {
@@ -25,10 +26,20 @@ public class ListNearbyActivitiesBySceneCommand {
     private Integer pageSize;
     
     private Long categoryId;
+    
+    private Long contentCategoryId;
 
     private Byte orderByCreateTime;
 
-    public Long getCategoryId() {
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
 		return categoryId;
 	}
 

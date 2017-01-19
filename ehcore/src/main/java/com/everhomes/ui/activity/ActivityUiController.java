@@ -1,5 +1,9 @@
 package com.everhomes.ui.activity;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
 import com.everhomes.activity.ActivityService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -11,9 +15,7 @@ import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneRepons
 import com.everhomes.rest.ui.activity.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RequireAuthentication;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+
 
 @RestDoc(value="ActivityUi controller", site="activityui")
 @RestController
