@@ -9,12 +9,15 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.quality.QualityService;
 import com.everhomes.rest.RestResponse;
+import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.quality.CountScoresCommand;
 import com.everhomes.rest.quality.CountScoresResponse;
@@ -24,6 +27,7 @@ import com.everhomes.rest.quality.CreatQualityStandardCommand;
 import com.everhomes.rest.quality.CreateQualityInspectionTaskCommand;
 import com.everhomes.rest.quality.CreateQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityCategoryCommand;
+import com.everhomes.rest.quality.DeleteUserQualityInspectionTaskTemplateCommand;
 import com.everhomes.rest.quality.DeleteQualitySpecificationCommand;
 import com.everhomes.rest.quality.DeleteQualityStandardCommand;
 import com.everhomes.rest.quality.DeleteFactorCommand;
@@ -32,8 +36,10 @@ import com.everhomes.rest.quality.GetQualitySpecificationCommand;
 import com.everhomes.rest.quality.GroupUserDTO;
 import com.everhomes.rest.quality.ListEvaluationsCommand;
 import com.everhomes.rest.quality.ListEvaluationsResponse;
+import com.everhomes.rest.quality.ListUserHistoryTasksCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesCommand;
 import com.everhomes.rest.quality.ListQualityCategoriesResponse;
+import com.everhomes.rest.quality.ListUserQualityInspectionTaskTemplatesCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsCommand;
 import com.everhomes.rest.quality.ListQualitySpecificationsResponse;
 import com.everhomes.rest.quality.ListQualityStandardsCommand;
@@ -65,6 +71,9 @@ public class QualityController extends ControllerBase {
 
 	@Autowired
 	private QualityService qualityService;
+	
+	@Autowired
+	private RolePrivilegeService rolePrivilegeService;
 	
 	/**
 	 * <b>URL: /quality/creatQualityStandard</b>
@@ -553,4 +562,68 @@ public class QualityController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /quality/listUserHistoryTasks</b>
+	 * <p>个人执行过的历史任务</p>
+	 */
+	@RequestMapping("listUserHistoryTasks")
+	@RestReturn(value = ListQualityInspectionTasksResponse.class)
+	public RestResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd) {
+		ListQualityInspectionTasksResponse tasks = qualityService.listUserHistoryTasks(cmd);
+		
+		RestResponse response = new RestResponse(tasks);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/listUserQualityInspectionTaskTemplates</b>
+	 * <p>获得用户模板列表</p>
+	 */
+	@RequestMapping("listUserQualityInspectionTaskTemplates")
+	@RestReturn(value = ListQualityInspectionTasksResponse.class)
+	public RestResponse listUserQualityInspectionTaskTemplates(ListUserQualityInspectionTaskTemplatesCommand cmd) {
+		
+		ListQualityInspectionTasksResponse task = qualityService.listUserQualityInspectionTaskTemplates(cmd);
+		
+		RestResponse response = new RestResponse(task);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/deleteUserQualityInspectionTaskTemplate</b>
+	 * <p>删除用户模板</p>
+	 */
+	@RequestMapping("deleteUserQualityInspectionTaskTemplate")
+	@RestReturn(value = String.class)
+	public RestResponse deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd) {
+		
+		qualityService.deleteUserQualityInspectionTaskTemplate(cmd);
+		
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	/**
+	 * <b>URL: /quality/listUserRelatedProjectByModuleId</b>
+	 * <p>用户关联项目</p>
+	 */
+	@RequestMapping("listUserRelatedProjectByModuleId")
+	@RestReturn(value = CommunityDTO.class, collection = true)
+	public RestResponse listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+		
+		List<CommunityDTO> communitydtos = rolePrivilegeService.listUserRelatedProjectByModuleId(cmd);
+		
+		RestResponse response = new RestResponse(communitydtos);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 }

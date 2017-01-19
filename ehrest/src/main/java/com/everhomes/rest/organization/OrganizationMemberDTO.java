@@ -85,6 +85,10 @@ public class OrganizationMemberDTO {
     private List<OrganizationDTO> jobLevels;
  
 	private Integer proccesingTaskCount;
+
+    private String groupType;
+
+    private String groupPath;
 	 
 	public OrganizationMemberDTO() {
     }
@@ -348,4 +352,20 @@ public class OrganizationMemberDTO {
 	public void setProccesingTaskCount(Integer proccesingTaskCount) {
 		this.proccesingTaskCount = proccesingTaskCount;
 	}
+
+    public String getGroupType() {
+        return groupType;
+    }
+
+    public void setGroupType(String groupType) {
+        this.groupType = groupType;
+    }
+
+    public String getGroupPath() {
+        return groupPath;
+    }
+
+    public void setGroupPath(String groupPath) {
+        this.groupPath = groupPath;
+    }
 }

@@ -32,6 +32,10 @@ public class OrganizationSimpleDTO {
 	
 	private String groupType;
 
+	private String contactName;
+
+	private String contactToken;
+
 	public Long getId() {
 		return id;
 	}
@@ -86,6 +90,22 @@ public class OrganizationSimpleDTO {
 
 	public void setGroupType(String groupType) {
 		this.groupType = groupType;
+	}
+
+	public String getContactName() {
+		return contactName;
+	}
+
+	public void setContactName(String contactName) {
+		this.contactName = contactName;
+	}
+
+	public String getContactToken() {
+		return contactToken;
+	}
+
+	public void setContactToken(String contactToken) {
+		this.contactToken = contactToken;
 	}
 
 	@Override

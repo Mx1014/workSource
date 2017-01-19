@@ -10,6 +10,7 @@ import com.everhomes.rest.statistics.terminal.*;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.sms.DateUtil;
+import com.everhomes.user.OSType;
 import com.everhomes.user.UserActivity;
 import com.everhomes.user.UserActivityProvider;
 import com.everhomes.user.UserContext;
@@ -489,25 +490,25 @@ public class StatTerminalServiceImpl implements StatTerminalService{
                 if(0L == yesterdayStatistics.getActiveUserNumber()){
                     toDayStatistics.setActiveChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setActiveChangeRate(new BigDecimal((yesterdayStatistics.getActiveUserNumber().doubleValue() - toDayStatistics.getActiveUserNumber().doubleValue()) / yesterdayStatistics.getActiveUserNumber().doubleValue()*100));
+                    toDayStatistics.setActiveChangeRate(new BigDecimal((toDayStatistics.getActiveUserNumber().doubleValue() - yesterdayStatistics.getActiveUserNumber().doubleValue()) / yesterdayStatistics.getActiveUserNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getCumulativeUserNumber()){
                     toDayStatistics.setCumulativeChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setCumulativeChangeRate(new BigDecimal((yesterdayStatistics.getCumulativeUserNumber().doubleValue() - toDayStatistics.getCumulativeUserNumber().doubleValue()) / yesterdayStatistics.getCumulativeUserNumber().doubleValue()*100));
+                    toDayStatistics.setCumulativeChangeRate(new BigDecimal((toDayStatistics.getCumulativeUserNumber().doubleValue() - yesterdayStatistics.getCumulativeUserNumber().doubleValue()) / yesterdayStatistics.getCumulativeUserNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getStartNumber()){
                     toDayStatistics.setStartChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setStartChangeRate(new BigDecimal((yesterdayStatistics.getStartNumber().doubleValue() - toDayStatistics.getStartNumber().doubleValue()) / yesterdayStatistics.getStartNumber().doubleValue()*100));
+                    toDayStatistics.setStartChangeRate(new BigDecimal((toDayStatistics.getStartNumber().doubleValue() - yesterdayStatistics.getStartNumber().doubleValue()) / yesterdayStatistics.getStartNumber().doubleValue()*100));
                 }
 
                 if(0L == yesterdayStatistics.getNewUserNumber()){
                     toDayStatistics.setNewChangeRate(new BigDecimal(0));
                 }else{
-                    toDayStatistics.setNewChangeRate(new BigDecimal((yesterdayStatistics.getNewUserNumber().doubleValue() - toDayStatistics.getNewUserNumber().doubleValue()) / yesterdayStatistics.getNewUserNumber().doubleValue()*100));
+                    toDayStatistics.setNewChangeRate(new BigDecimal((toDayStatistics.getNewUserNumber().doubleValue() - yesterdayStatistics.getNewUserNumber().doubleValue()) / yesterdayStatistics.getNewUserNumber().doubleValue()*100));
                 }
             }
             if(0L == toDayStatistics.getCumulativeUserNumber()){
@@ -592,29 +593,26 @@ public class StatTerminalServiceImpl implements StatTerminalService{
     }
 
     public static void main(String[] args) {
-//        String androidSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'android', 'version_name','', 999988, default_order, now())";
-//        String iosSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'ios', 'version_name','', 999988, default_order, now())";
-//        String[] androidVersions = {"3.9.2","3.10.2","3.10.4"};
-//        String[] iosVersions = {"3.9.0","3.9.2","3.10.0","3.10.3","3.10.4","3.10.6"};
-//        for (String version:androidVersions) {
-//            System.out.println(androidSql.replace("version_name", version));
-//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
-//            System.out.println(androidSql.replace("default_order", "" + versionRange.getUpperBound()));
-//        }
-//
-//        for (String version:iosVersions) {
-//            System.out.println(iosSql.replace("version_name", version));
-//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
-//            System.out.println(androidSql.replace("default_order", "" + versionRange.getUpperBound()));
-//        }
-
-        String updSql = "update `eh_app_version` set default_order = @default_order where name = '@version_name';";
-        String[] updVersions = {"1.0.0","1.0.10","1.0.12","1.0.13","1.0.15","1.0.2","1.0.8","1.0.9","1.1.0","1.1.2","2.0.0","2.0.2","2.0.4","2.1.0","2.2.0","2.2.2","2.3.0","2.4.0","2.4.1","2.4.2","2.5.0","2.6.0","2.7.0","2.7.2","2.8.0","2.8.2","3.0.0","3.0.2","3.0.4","3.0.6","3.1.0","3.10.0","3.10.1","3.10.2","3.10.3","3.10.4","3.10.6","3.11.0","3.11.2","3.11.3","3.2.0","3.2.2","3.2.4","3.4.0","3.6.0","3.6.1","3.6.2","3.7.0","3.7.1","3.7.4","3.8.0","3.8.1","3.8.2","3.9.0","3.9.2"};
-        for (String version:updVersions) {
+        String androidSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'android', 'version_name','', 999988, @default_order, now())";
+        String iosSql = "INSERT INTO eh_app_version (`id`,`type`,`name`,`realm`,`namespace_id`,`default_order`,`create_time`) VALUES((@version_id := @version_id + 1),'ios', 'version_name','', 999988, @default_order, now())";
+        String[] androidVersions = {"3.12.0","3.12.4","4.1.0","4.1.2","4.2.2"};
+        String[] iosVersions = {"3.12.0","3.12.4","4.1.0","4.1.2","4.2.2"};
+        for (String version:androidVersions) {
             VersionRange versionRange = new VersionRange("["+version+","+version+")");
-            System.out.println(updSql.replace("@version_name", version).replace("@default_order", "" + versionRange.getUpperBound()));
+            System.out.println(androidSql.replace("version_name", version).replace("@default_order", "" + versionRange.getUpperBound()));
         }
 
+        for (String version:iosVersions) {
+            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+            System.out.println(iosSql.replace("version_name", version).replace("@default_order", "" + versionRange.getUpperBound()));
+        }
+
+//        String updSql = "update `eh_app_version` set default_order = @default_order where name = '@version_name';";
+//        String[] updVersions = {"1.0.0","1.0.10","1.0.12","1.0.13","1.0.15","1.0.2","1.0.8","1.0.9","1.1.0","1.1.2","2.0.0","2.0.2","2.0.4","2.1.0","2.2.0","2.2.2","2.3.0","2.4.0","2.4.1","2.4.2","2.5.0","2.6.0","2.7.0","2.7.2","2.8.0","2.8.2","3.0.0","3.0.2","3.0.4","3.0.6","3.1.0","3.10.0","3.10.1","3.10.2","3.10.3","3.10.4","3.10.6","3.11.0","3.11.2","3.11.3","3.2.0","3.2.2","3.2.4","3.4.0","3.6.0","3.6.1","3.6.2","3.7.0","3.7.1","3.7.4","3.8.0","3.8.1","3.8.2","3.9.0","3.9.2"};
+//        for (String version:updVersions) {
+//            VersionRange versionRange = new VersionRange("["+version+","+version+")");
+//            System.out.println(updSql.replace("@version_name", version).replace("@default_order", "" + versionRange.getUpperBound()));
+//        }
 
 //        VersionRange versionRange = new VersionRange("["+"3.10.2"+","+"3.10.2"+")");
 //        System.out.println(versionRange.getUpperBound());

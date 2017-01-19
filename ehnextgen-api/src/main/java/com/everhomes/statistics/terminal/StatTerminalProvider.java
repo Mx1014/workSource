@@ -60,4 +60,8 @@ public interface StatTerminalProvider {
 	Long getTerminalAppVersionNewUserNumberByDay(String date, String version, Integer namespaceId);
 
 	Long getTerminalStartNumberByDay(String date, String version, Integer namespaceId);
+
+	void createAppVersion(AppVersion appVersion);
+
+	AppVersion findAppVersion(Integer namespaceId, String name, String type);
 }
