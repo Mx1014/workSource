@@ -1,5 +1,7 @@
 package com.everhomes.contentserver;
 
+import java.util.HashMap;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -52,6 +54,9 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             LOGGER.error("Failed to parse login token, reqToken=" + request.getToken(), e);
         }
 
+        // 由于返回给客户端的URL需要与客户端所使用的scheme保持一致，故需要从请求中分析出使用的是http还是https，
+        // 再来拼接URL by lqs 20170119
+        String schemeInRequest = getScheme(request);
         ContentServer server = contentServerService.selectContentServer();
         if (server == null) {
             LOGGER.error("Content server not found, userId=" + ids[0] + ", reqToken=" + request.getToken() + ", loginToken=" + login);
@@ -62,7 +67,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         if (result != null) {
             request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType()
                     .name()));
-            request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
+            request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken(), schemeInRequest));
             return;
         }
         // add transaction command
@@ -77,15 +82,19 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         });
         result = resource.first();
         request.setObjectId(Generator.createKey(server.getId(), result.getResourceId(), request.getObjectType().name()));
-        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken()));
+        request.setUrl(createUrl(server, result.getResourceId(), request.getObjectType().name(), request.getToken(), schemeInRequest));
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Upload resource file successfully, userId=" + ids[0] + ", reqToken=" + request.getToken() 
                 + ", loginToken=" + login + ", objectId=" + request.getObjectId() + ", url=" + request.getUrl());
         }
     }
 
-    private String createUrl(ContentServer content, String resourceId, String type, String token) {
-        return String.format("http://%s:%d/%s/%s?token=%s", content.getPublicAddress(), content.getPublicPort(), type,
+    private String createUrl(ContentServer content, String resourceId, String type, String token, String schemeInRequest) {
+        int port = content.getPublicPort();
+        if("https".equalsIgnoreCase(schemeInRequest)) {
+            port = 443;
+        }
+        return String.format("%s://%s:%d/%s/%s?token=%s", schemeInRequest, content.getPublicAddress(), port, type,
                 Generator.encodeUrl(resourceId), token);
     }
 
@@ -197,4 +206,30 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         return null;
     }
 
+    /**
+     * 从content server中分析出头，以便跟随客户端来决定返回的URL是http还是https
+     * @param request
+     * @return
+     */
+    private String getScheme(MessageHandleRequest request) {
+        String meta = request.getExt();
+        if(LOGGER.isInfoEnabled()) {
+            LOGGER.info("Try to strip the scheme from request, meta={}", meta);
+        }
+        
+        String scheme = "http";
+        if(meta != null && meta.trim().length() > 0) {
+            try {
+                HashMap map = (HashMap)StringHelper.fromJsonString(meta, HashMap.class);
+                String tmpScheme = (String)map.get("X-Forwarded-Scheme");
+                if(tmpScheme != null && tmpScheme.trim().length() > 0) {
+                    scheme = tmpScheme.trim();
+                }
+            } catch (Exception e) {
+                LOGGER.error("Failed to strip scheme, meta={}", meta, e);
+            }
+        }
+        
+        return scheme;
+    }
 }
