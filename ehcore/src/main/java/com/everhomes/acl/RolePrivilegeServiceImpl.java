@@ -1020,6 +1020,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
     public List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){
     	Organization org = organizationProvider.findOrganizationById(organizationId);
+		if(null == org){
+			LOGGER.debug("organization is null. organizationId = {}", organizationId);
+			return new ArrayList<>();
+		}
     	String path = org.getPath();
     	String[] orgIds = path.split("/");
     	List<RoleAssignment> userRoles = null;
@@ -1682,7 +1686,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			List<Acl> acls = aclProvider.getAcl(new QueryBuilder() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+					if(EntityType.fromCode(assignment.getOwnerType()) == EntityType.RESOURCE_CATEGORY){
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%.M" + assignment.getModuleId() + "." + assignment.getOwnerType() + assignment.getOwnerId()).or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+					}else{
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+					}
 					return null;
 				}
 			});
