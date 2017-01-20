@@ -185,8 +185,25 @@ select (@eh_service_module_scopes := @eh_service_module_scopes + 1), owner_id, m
 menu_id in (select id from eh_service_modules where id in (30000, 30500, 31000, 32000, 33000, 34000, 35000, 37000, 38000));
 
 -- 修改华润OE首页运营配置   add by xq.tian  2017/01/20
-UPDATE `eh_launch_pad_items` SET `action_data`='{\"publishPrivilege\":0,\"livePrivilege\":1,\"categoryId\": 1}' WHERE `namespace_id`='999985' AND `item_group`='OPPushActivity';
+UPDATE `eh_launch_pad_items` SET `action_type`='61', `action_data`='{"categoryId":1,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":2,"style":4}' WHERE `namespace_id`='999985' AND `item_group`='OPPushActivity';
 
--- UPDATE `eh_launch_pad_items` SET `item_label`='OE优选',`action_type`=13, `action_data`='{\"url\":\"https://www.zuolin.com/mobile/static/coming_soon/index.html\"}' WHERE `namespace_id`='999985' AND `item_group`='OPPushBiz';
+UPDATE `eh_launch_pad_items` SET `item_label`='OE优选',`action_type`=13, `action_data`='{\"url\":\"https://www.zuolin.com/mobile/static/coming_soon/index.html\"}' WHERE `namespace_id`='999985' AND `item_group`='OPPushBiz';
 
--- UPDATE `eh_business_promotions` SET `commodity_url` = '' WHERE `namespace_id` = '999985';
+DELETE FROM `eh_business_promotions`;
+INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES ('1', '999992', '释迦 4个/盒', '释迦 4个/盒', 'cs://1/image/aW1hZ2UvTVRwalpHVmlObU5oTWpCbFl6STVZakl6T1dabFlXUTFaak5pTjJSaU1EVTBZZw', '98', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fgood%2Fdetails%2F14780789803129873945%2F3632%2F1%3F_k%3Dzlbiz#sign_suffix', '6', '2017-01-10 16:20:23', '1', NULL, NULL);
+INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES ('2', '999992', '蓝莓 4盒/份', '蓝莓 4盒/份', 'cs://1/image/aW1hZ2UvTVRveVptVmxNR1V6TWpVd00yRXhNV0psTVRjMFlXTmhZbU0wTldZM01qQmhOZw', '60', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fgood%2Fdetails%2F14780789803129873945%2F3631%2F1%3F_k%3Dzlbiz#sign_suffix', '5', '2017-01-10 16:20:23', '1', NULL, NULL);
+INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES ('3', '999992', '金艳黄心猕猴桃 25-27个/箱', '金艳黄心猕猴桃 25-27个/箱', 'cs://1/image/aW1hZ2UvTVRwaE9HUTNaamhtTmpVMlpETTVNV1V6TUdNMlkyUmxOek5pWTJFeVl6aG1aQQ', '55', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fgood%2Fdetails%2F14780789803129873945%2F3630%2F1%3F_k%3Dzlbiz#sign_suffix', '4', '2017-01-10 16:20:23', '1', NULL, NULL);
+INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES ('4', '999992', '牛油果 8个/盒', '牛油果 8个/盒', 'cs://1/image/aW1hZ2UvTVRvek9URmhNak01TTJKaE1XWXdNVEUxT1dNeVlUVTBOek5tTVROak9EZGpOUQ', '68', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fgood%2Fdetails%2F14780789803129873945%2F3608%2F1%3F_k%3Dzlbiz#sign_suffix', '3', '2017-01-10 16:20:23', '1', NULL, NULL);
+INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES ('5', '999992', '减脂训练营', '减脂训练营', 'cs://1/image/aW1hZ2UvTVRwa09HUTVNVEF5TmpWbE5tUXlPVEEyTmpjd05qTXhaVFJoWW1JNVlUQXdZZw', '2899', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fgood%2Fdetails%2F14797145180329304737%2F4188%2F1%3F_k%3Dzlbiz#sign_suffix', '2', '2017-01-10 16:20:23', '1', NULL, NULL);
+INSERT INTO `eh_business_promotions` (`id`, `namespace_id`, `subject`, `description`, `poster_uri`, `price`, `commodity_url`, `default_order`, `create_time`, `creator_uid`, `update_time`, `update_uid`)
+VALUES ('6', '999992', 'Boxing训练营', 'Boxing训练营', 'cs://1/image/aW1hZ2UvTVRvNE9ESmpOV1JqTkRCaU5UZ3dOak5tTVRabFptTTFZVFV6T0RjNE16a3lOUQ', '899', 'https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%23%2Fgood%2Fdetails%2F14797145180329304737%2F4187%2F1%3F_k%3Dzlbiz#sign_suffix', '1', '2017-01-10 16:20:23', '1', NULL, NULL);
+
+
+
+
+
