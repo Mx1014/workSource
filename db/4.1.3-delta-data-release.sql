@@ -256,3 +256,18 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES (112593, 999985, 0, 0, 0, '/home', 'Bizs', '企办汇', '企办汇', 'cs://1/image/aW1hZ2UvTVRveFlqQTNPVGt4WlRVeVpqa3dZamN5WWpJMlpETTJNVGt4TURWbU1XRXlOUQ', 1, 1, 33, '{"type":150,"parentId":150,"displayType": "grid"}', 0, 0, 1, 1,'','0',NULL,NULL,NULL, '1', 'park_tourist');    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES (112702, 999985, 0, 0, 0, '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRvellqQTFaakkyWm1Rd09XTTJZbVJrTURSa1pEZzRZekJpWXpZek5tWm1Ndw', 1, 1, 1, '{\"itemLocation\":\"/home\", \"itemGroup\":\"Bizs\"}', 999, 0, 1, 1, '', '0', NULL, NULL, NULL, '0', 'park_tourist');
+
+	
+-- 设备巡检名称修改 by sfyan 20170120
+UPDATE `eh_web_menus` SET `name` = '物业巡检' WHERE `id` = 20800;
+UPDATE `eh_web_menus` SET `name` = '巡检关联审批' WHERE `id` = 20812;
+UPDATE `eh_web_menus` SET `name` = '巡检台账' WHERE `id` = 20820;
+UPDATE `eh_web_menus` SET `name` = '巡检对象' WHERE `id` = 20821;
+
+-- 应用统计的菜单配置给华润OE by sfyan 20170120
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 41300, '', 'EhNamespaces', 999985, 2);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40750, '', 'EhNamespaces', 999985, 2);
+
