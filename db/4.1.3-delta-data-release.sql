@@ -1,43 +1,94 @@
 -- merge from  activity-2.0.0-delta-data-release.sql by lqs 20170119
--- ³õÊ¼»¯Êı¾İ£¬°Ñ¹Ù·½»î¶¯µÄcategory_idÈ«²¿Åä³É1, add by tt, 20170116
+-- ï¿½ï¿½Ê¼ï¿½ï¿½ï¿½ï¿½ï¿½İ£ï¿½ï¿½Ñ¹Ù·ï¿½ï¿½î¶¯ï¿½ï¿½category_idÈ«ï¿½ï¿½ï¿½ï¿½ï¿½1, add by tt, 20170116
 update eh_activities set category_id = 1 where official_flag = 1;
 update eh_forum_posts set category_id = 1 where official_flag = 1;
 
--- ÅäÖÃ»ªÈóÉçÈºlayout£¬add by tt, 20170120
+-- ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½ï¿½ï¿½Èºlayoutï¿½ï¿½add by tt, 20170120
 select max(id) into @id from `eh_launch_pad_layouts`;
-INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES (@id:=@id+1, 999985, 'AssociationLayout', '{"versionCode":"2017012001","versionName":"4.1.2","layoutName":"AssociationLayout","displayName":"OE»î¶¯","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017012001, 0, 2, now(), 'park_tourist', 0, 0, 0);
-INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES (@id:=@id+1, 999985, 'AssociationLayout', '{"versionCode":"2017012001","versionName":"4.1.2","layoutName":"AssociationLayout","displayName":"OE»î¶¯","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017012001, 0, 2, now(), 'pm_admin', 0, 0, 0);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES (@id:=@id+1, 999985, 'AssociationLayout', '{"versionCode":"2017012001","versionName":"4.1.2","layoutName":"AssociationLayout","displayName":"OEï¿½î¶¯","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017012001, 0, 2, now(), 'park_tourist', 0, 0, 0);
+INSERT INTO `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) VALUES (@id:=@id+1, 999985, 'AssociationLayout', '{"versionCode":"2017012001","versionName":"4.1.2","layoutName":"AssociationLayout","displayName":"OEï¿½î¶¯","groups":[{"groupName":"","widget":"Tab","instanceConfig":{"itemGroup":"TabGroup"},"style":"1","defaultOrder":1,"separatorFlag":0,"separatorHeight":0}]}', 2017012001, 0, 2, now(), 'pm_admin', 0, 0, 0);
 
--- ÅäÖÃÉçÈºitem£¬add by tt, 20170120
+-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Èºitemï¿½ï¿½add by tt, 20170120
 select max(id) into @id from `eh_launch_pad_items`;
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', '°×Áì»î¶¯', '°×Áì»î¶¯', '', '', 1, 1, 61, '{"categoryId":1,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":2,"style":3}', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'ÆóÒµ¶¨ÖÆ', 'ÆóÒµ¶¨ÖÆ', '', '', 1, 1, 33, '{"type":200878,"parentId":200878,"displayType": "icontab"}', 2, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'OEÉçÍÅ', 'OEÉçÍÅ', '', '', 1, 1, 36, '{"privateFlag": 0}', 3, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', '°×Áì»î¶¯', '°×Áì»î¶¯', '', '', 1, 1, 61, '{"categoryId":1,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":2,"style":3}', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'ÆóÒµ¶¨ÖÆ', 'ÆóÒµ¶¨ÖÆ', '', '', 1, 1, 33, '{"type":200878,"parentId":200878,"displayType": "icontab"}', 2, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL);
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'OEÉçÍÅ', 'OEÉçÍÅ', '', '', 1, 1, 36, '{"privateFlag": 0}', 3, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'ï¿½ï¿½ï¿½ï¿½î¶¯', 'ï¿½ï¿½ï¿½ï¿½î¶¯', '', '', 1, 1, 61, '{"categoryId":1,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":2,"style":3}', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½', 'ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½', '', '', 1, 1, 33, '{"type":200878,"parentId":200878,"displayType": "icontab"}', 2, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'OEï¿½ï¿½ï¿½ï¿½', 'OEï¿½ï¿½ï¿½ï¿½', '', '', 1, 1, 36, '{"privateFlag": 0}', 3, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'park_tourist', 1, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'ï¿½ï¿½ï¿½ï¿½î¶¯', 'ï¿½ï¿½ï¿½ï¿½î¶¯', '', '', 1, 1, 61, '{"categoryId":1,"publishPrivilege":1,"livePrivilege":2,"listStyle":2,"scope":2,"style":3}', 1, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½', 'ï¿½ï¿½Òµï¿½ï¿½ï¿½ï¿½', '', '', 1, 1, 33, '{"type":200878,"parentId":200878,"displayType": "icontab"}', 2, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `selected_icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`) VALUES (@id:=@id+1, 999985, 0, 0, 0, '/association', 'TabGroup', 'OEï¿½ï¿½ï¿½ï¿½', 'OEï¿½ï¿½ï¿½ï¿½', '', '', 1, 1, 36, '{"privateFlag": 0}', 3, 0, 1, 1, '', 0, NULL, NULL, NULL, 0, 'pm_admin', 1, NULL);
 
--- ÅäÖÃ»ªÈó»î¶¯Ö÷Ìâ·ÖÀà£¬add by tt, 20170120
-INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1001, '', 0, 1, '¾«Ó¢»ã', '/1/1001', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw', 'cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ', NULL, 0);
-INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1002, '', 0, 1, 'Æ·ÖÊ»ã', '/1/1002', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvNE9USXpOek0wWWprNU9ERXdOak0zTVdKak9HUTVPREUwWkRjeU9XUmhNQQ', 'cs://1/image/aW1hZ2UvTVRvNU9EZzRPR1l6TlRJellUVmtPR0kyTmpVME5XUTFaVEptWkRBNVpUbGtOZw', NULL, 0);
-INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1003, '', 0, 1, 'ÒÕÊõ»ã', '/1/1003', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvd09UZGlZMlEzWVRkbVlUQmlPVEUyWmpreU1qazRZVEJpWmpka1ptTmhNdw', 'cs://1/image/aW1hZ2UvTVRwbU5tVmhOR0l3TUdabE1EQTROMk5qT1RjeFpqUmxPRFk1WWpBd1lUUTBZZw', NULL, 0);
-INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1004, '', 0, 1, 'OE´ó½²ÌÃ', '/1/1004', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvM09HWmxNRFptWldNM1lqQm1aakEyWVdRMVpEZ3dNelEzTVRrMk1XRmpPUQ', 'cs://1/image/aW1hZ2UvTVRvd016YzVZVE5tT1dFeU9XUTRPRGcxTkdNME5HUTFabVE1T0RBd00yWmpZdw', NULL, 0);
+-- ï¿½ï¿½ï¿½Ã»ï¿½ï¿½ï¿½î¶¯ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½à£¬add by tt, 20170120
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1001, '', 0, 1, 'ï¿½ï¿½Ó¢ï¿½ï¿½', '/1/1001', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvMU56bGpNMk5oTldSaU5tTXlOR0UwTkdaaE56TmlNMlk0WmpVeE9EUmxNdw', 'cs://1/image/aW1hZ2UvTVRvek1qWmpPV0V6TURjMU9EQmxZakk0TXpZd09HUmpaV0pqTlRZNFlXVmpPUQ', NULL, 0);
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1002, '', 0, 1, 'Æ·ï¿½Ê»ï¿½', '/1/1002', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvNE9USXpOek0wWWprNU9ERXdOak0zTVdKak9HUTVPREUwWkRjeU9XUmhNQQ', 'cs://1/image/aW1hZ2UvTVRvNU9EZzRPR1l6TlRJellUVmtPR0kyTmpVME5XUTFaVEptWkRBNVpUbGtOZw', NULL, 0);
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1003, '', 0, 1, 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', '/1/1003', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvd09UZGlZMlEzWVRkbVlUQmlPVEUyWmpreU1qazRZVEJpWmpka1ptTmhNdw', 'cs://1/image/aW1hZ2UvTVRwbU5tVmhOR0l3TUdabE1EQTROMk5qT1RjeFpqUmxPRFk1WWpBd1lUUTBZZw', NULL, 0);
+INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1004, '', 0, 1, 'OEï¿½ï¿½ï¿½ï¿½', '/1/1004', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvM09HWmxNRFptWldNM1lqQm1aakEyWVdRMVpEZ3dNelEzTVRrMk1XRmpPUQ', 'cs://1/image/aW1hZ2UvTVRvd016YzVZVE5tT1dFeU9XUTRPRGcxTkdNME5HUTFabVE1T0RBd00yWmpZdw', NULL, 0);
 
+-- åæ¶¦åˆå§‹åŒ–æ•°æ®ï¼Œadd by tt, 20170120
+update eh_activities set content_category_id = 1004 where subject like '%é‡‘èè®²åº§ç¬¬äºŒæ³¢ï¼Œå¸¦ä½ è¯»æ‡‚SDR%';
+update eh_activities set content_category_id = 1004 where subject like '%æ¥è¿™é‡Œï¼Œæ•™ä½ æœ‰æ•ˆèµ„äº§é…ç½®ï¼ŒæŠ‘åˆ¶é’±åŒ…ç¼©æ°´%';
+update eh_activities set content_category_id = 1004 where subject like '%åæ¶¦å‰æµ·å¤§å¦æºæ‰‹å´ä¼¯å‡¡ï¼Œä¸ºå‰æµ·é‡‘èåˆ›æ–°å†å‘å£°%';
+update eh_activities set content_category_id = 1004 where subject like '%Officeasyæ˜¨æ™šç››å¤§å‘å¸ƒ ã€Šæœ€å14å ‚æ˜ŸæœŸäºŒçš„è¯¾ã€‹æ·±åœ³é¦–æ¼”%';
+update eh_activities set content_category_id = 1004 where subject like '%Prodigy Networkä¸æ‚¨æ¢è®¨åœ°äº§ä¼—ç­¹æ–°æ¨¡å¼%';
+update eh_activities set content_category_id = 1003 where subject like '%å…¨çƒç¬¬ä¸€æ”¯OLèŠ­è•¾èˆå›¢ï¼Œæˆå‘˜ç«Ÿç„¶æ˜¯ä½ çš„å¥³ä¸Šå¸%';
+update eh_activities set content_category_id = 1003 where subject like '%åˆçº§ç­äºŒæœŸï¼Œ10æœˆ19æ—¥æ­£å¼å¼€è¯¾%';
+update eh_activities set content_category_id = 1003 where subject like '%ä»Šå¹´ä¸­ç§‹ï¼Œä½ æƒ³å’Œè°ä¸€èµ·è¿‡ï¼Ÿæœ—æœ—ã€æäº‘è¿ª%';
+update eh_activities set content_category_id = 1003 where subject like '%åˆçº§ç­äºŒæœŸè¯¾ç¨‹å®‰æ’æ–°é²œå‡ºç‚‰%';
+update eh_activities set content_category_id = 1003 where subject like '%å¦‚æœæ‹¥æœ‰ç¬¬äºŒäººç”Ÿï¼Œä½ ä¼šé€‰æ‹©æˆä¸ºéŸ³ä¹äººå—ï¼Ÿ%';
+update eh_activities set content_category_id = 1003 where subject like '%2ä¸ªæœˆï¼Œ10ä¸ªäººï¼Œå¦‚ä½•ä»é›¶åŸºç¡€åˆ°å‚ä¸èŠ­è•¾èˆè¡¨æ¼”ï¼Ÿ%';
+update eh_activities set content_category_id = 1003 where subject like '%èŠ­è•¾ç”·è€å¸ˆï¼Œå¸…å‡ºæ–°é«˜åº¦ï¼ç¬¬ä¸€æœŸèŠ­è•¾å­¦å‘˜æ‹›å‹Ÿä¸­%';
+update eh_activities set content_category_id = 1003 where subject like '%ä¼˜é›…çš„æ°”è´¨ï¼Œä¹Ÿæ˜¯ä¸€ç§å®åŠ›%';
+update eh_activities set content_category_id = 1003 where subject like '% å‰ä»–æ°‘è°£ï¼ŒéŸ³ä¹å®¶æ‹›å‹Ÿä¸­ï¼æ˜¯è°æ¥æ‹¨åŠ¨ç´å¼¦ï¼Ÿ%';
+update eh_activities set content_category_id = 1003 where subject like '%Officeasyåˆé—´éŸ³ä¹ä¼š%';
+update eh_activities set content_category_id = 1003 where subject like '%ç™½é¢†ç²¾éŸ³ä¼šï¼Œé’æ˜¥ä¸æ•£åœº%';
+update eh_activities set content_category_id = 1001 where subject like '%OEè½¦å‹ä¼šâ€”äº•æŸç„¶ã€é˜®ç»å¤©æœ€çˆ±çš„MINIï¼Œå…è´¹è¯•é©¾+æ‹æ‘„å¤§ç‰‡%';
+update eh_activities set content_category_id = 1001 where subject like '%ä¸ç»™ç³–å°±æ£ä¹±ï¼ä¸‡åœ£å¤§ç‰‡æ¼”å‘˜è¯•é•œæ‹›å‹Ÿ%';
+update eh_activities set content_category_id = 1001 where subject like '%Easy Runæ´»åŠ¨æµç¨‹ è®©500äººè§å…‰è¶´å¸®ä½ é©±æ•£èŠ‚åé˜´éœ¾%';
+update eh_activities set content_category_id = 1001 where subject like '%â€œæœ€ç¾â€åŠé©¬â€œæ˜¥èŒ§â€å¼€è·‘ï¼Œåæ¶¦ç½®åœ°ä¸ä½ ä¸€èµ·æ„Ÿå—ç¾å¥½ç”Ÿæ´»%';
+update eh_activities set content_category_id = 1001 where subject like '%500äººè§å…‰å¤§è¶´ä½“ï¼Œç‚¹äº®æ·±åœ³æ¹¾7å…¬é‡Œæµ·å²¸çº¿%';
+update eh_activities set content_category_id = 1001 where subject like '%ä¸ºäº†éƒ¨è½Â or è”ç›Ÿï¼Œç»„å›¢åˆ·ç”µå½±å‰¯æœ¬ï¼%';
+update eh_activities set content_category_id = 1001 where subject like '% åŠå…¬å®¤é‡ŒåŠ¨èµ·æ¥ï¼Œholdä½ä½ çš„æœ€ä½³çŠ¶æ€%';
+update eh_activities set content_category_id = 1001 where subject like '%ç¬¬äºŒå­£å¹³æ¿æ’‘æŒ‘æˆ˜èµ›æ¥è¢­ï¼ŒæŠ¥åæŒ‘æˆ˜ä½ çš„æé™%';
+update eh_activities set content_category_id = 1001 where subject like '%ç°åœ¨ï¼Œæˆ‘æƒ³å’Œä½ ä¸€èµ·åšä»¶%';
+update eh_activities set content_category_id = 1001 where subject like '% å¼€å¹´å‚ç›´é©¬æ‹‰æ¾å³å°†å¼€è·‘%';
+update eh_activities set content_category_id = 1001 where subject like '% Officeasyåœˆå±‚ç¤¾äº¤æ´»åŠ¨æ‹‰å¼€åºå¹•%';
+update eh_activities set content_category_id = 1001 where subject like '%å…¨åŸçƒ­è·‘â€”â€”ç»™çˆ¶æ¯99kmçš„çˆ±%';
+update eh_activities set content_category_id = 1001 where subject like '%ä¸TAå¿ƒæœ‰çµ"å¤•" ä¸€èµ·èµ¢å¤§å¥–%';
+update eh_activities set content_category_id = 1001 where subject like '%Officeasyé­”æ–¹é€Ÿæ‹§å¤§èµ›æŠ¥åå¼€å§‹å•¦ï¼%';
+update eh_activities set content_category_id = 1001 where subject like '%Officeasyæ·±åœ³åæ¶¦å¤§å¦ç§Ÿæˆ·æ‘„å½±å¤§èµ›%';
+update eh_activities set content_category_id = 1002 where subject like '%ä¸œé˜¿é˜¿èƒ¶73æŠ˜ï¼Œç•™ä½çˆ¶æ¯çš„å¹´è½»çŠ¶æ€%';
+update eh_activities set content_category_id = 1002 where subject like '%åä¸€å¤§é¤è½°ç‚¸ä¹‹åï¼Œæ¥ç‚¹æ¸…æ–°çš„%';
+update eh_activities set content_category_id = 1002 where subject like '%ä¸å»å·´é»æ—¶è£…å‘¨ï¼Œä¹Ÿèƒ½çœ‹ç§‹å†¬æ—¶è£…ç§€%';
+update eh_activities set content_category_id = 1002 where subject like '%æœ‰äº›äº‹ç°åœ¨ä¸åšï¼Œè¿™è¾ˆå­éƒ½ä¸ä¼šåšäº†%';
+update eh_activities set content_category_id = 1002 where subject like '%è¯´ä¸å‡ºå£çš„æƒ…è¯ï¼Œä¸å¦‚å†™ä¸‹æ¥ï¼Œç„¶å@TA%';
+update eh_activities set content_category_id = 1002 where subject like '%å‰æ‰‹é¢„è­¦ï¼ ä¸€å¤§æ³¢5æŠ˜MKåŒ…åŒ…ï¼Œæ¯”æµ·æ·˜æ›´åˆ’ç®—%';
+update eh_activities set content_category_id = 1002 where subject like '%æ²¡åƒè¿‡é¦™æ¸¯åŠå²›é…’åº—æœˆé¥¼ï¼Œè¿˜å¥½æ„æ€è¯´è‡ªå·±æ˜¯èµ„æ·±åƒè´§ï¼Ÿ%';
+update eh_activities set content_category_id = 1002 where subject like '%@æ‚¨ä¸€å°å®¶ä¹¦ï¼šçˆ¸ï¼Œåˆ«æ‹…å¿ƒï¼Œæˆ‘åœ¨æ·±åœ³è¿‡å¾—å¾ˆå¥½%';
+update eh_activities set content_category_id = 1002 where subject like '%æ¯å¤©ä¸“è½¦æ¥é€ä¸Šä¸‹ç­æ˜¯ä¸€ç§æ€æ ·çš„ä½“éªŒï¼Ÿ%';
+update eh_activities set content_category_id = 1002 where subject like '%5.28é™ªå­©å­å»çœ‹æµ·%';
+update eh_activities set content_category_id = 1002 where subject like '%æœ‰å¤šä¹…ï¼Œæ²¡å¯¹å¥¹è¯´â€œæˆ‘çˆ±ä½ â€ï¼Ÿ%';
+update eh_activities set content_category_id = 1002 where subject like '%ä»Šå¤©ä¸­åˆOEå›å‘Šè¯‰ä½ åˆé¤åƒä»€ä¹ˆï¼Œé€Ÿç‚¹%';
+update eh_activities set content_category_id = 1002 where subject like '% åœ¨è¿™ä¸‡ç‰©ç”Ÿé•¿çš„æ˜¥æ—¥é‡Œï¼ŒæŠŠå’–å•¡æ¬è¿›ä½ çš„åŠå…¬å®¤%';
+update eh_activities set content_category_id = 1002 where subject like '%æœ€inçš„Office Ladyå½©å¦†æ²™é¾™æ¥äº†ï¼Œä¸è¦é”™è¿‡å’¯~%';
+update eh_activities set content_category_id = 1002 where subject like '%ä½ çš„å®¶ä¹¡æ˜¯ä»€ä¹ˆå‘³é“ï¼Ÿ%';
+update eh_activities set content_category_id = 1002 where subject like '% æ–°é’&çºªå¿µå¸å…‘æ¢%';
+update eh_activities set content_category_id = 1002 where subject like '% é™æ—¶ç¦åˆ©ï¼å…è´¹åŠ ç­é¤ç°åœ¨æ´¾é€ï¼Œæˆ³æˆ‘é¢†å–ï¼%';
+update eh_activities set content_category_id = 1002 where subject like '%Officeasyä¸­ç§‹æ²¹ç”»ä½“éªŒ%';
+update eh_activities set content_category_id = 1002 where subject like '%å¿«ä¹å·¥ä½œï¼Œæ„Ÿè°¢æœ‰ä½ ä»¬ã€‚Officeasyå›¢é˜Ÿç…§æ‹æ‘„å¼€å§‹å•¦ï¼%';
 
 
 
 
 
 -- merge from equipment2.1-delta-data-release.sql by lqs 20170119
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('1', '999992', 'PM', '1000750', '0', 'Éè±¸', '/Éè±¸', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('2', '999992', 'PM', '1000750', '0', '×°ĞŞ', '/×°ĞŞ', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('3', '999992', 'PM', '1000750', '0', '¿ÕÖÃ·¿', '/¿ÕÖÃ·¿', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('4', '999992', 'PM', '1000750', '0', '°²±£', '/°²±£', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('5', '999992', 'PM', '1000750', '0', 'ÈÕ³£¹¤×÷¼ì²é', '/ÈÕ³£¹¤×÷¼ì²é', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('6', '999992', 'PM', '1000750', '0', '¹«¹²ÉèÊ©¼ì²é', '/¹«¹²ÉèÊ©¼ì²é', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('7', '999992', 'PM', '1000750', '0', 'ÖÜÄ©Öµ°à', '/ÖÜÄ©Öµ°à', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('8', '999992', 'PM', '1000750', '0', '°²È«¼ì²é', '/°²È«¼ì²é', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
-INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('9', '999992', 'PM', '1000750', '0', 'ÆäËû', '/ÆäËû', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('1', '999992', 'PM', '1000750', '0', 'ï¿½è±¸', '/ï¿½è±¸', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('2', '999992', 'PM', '1000750', '0', '×°ï¿½ï¿½', '/×°ï¿½ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('3', '999992', 'PM', '1000750', '0', 'ï¿½ï¿½ï¿½Ã·ï¿½', '/ï¿½ï¿½ï¿½Ã·ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('4', '999992', 'PM', '1000750', '0', 'ï¿½ï¿½ï¿½ï¿½', '/ï¿½ï¿½ï¿½ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('5', '999992', 'PM', '1000750', '0', 'ï¿½Õ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', '/ï¿½Õ³ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('6', '999992', 'PM', '1000750', '0', 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê©ï¿½ï¿½ï¿½', '/ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ê©ï¿½ï¿½ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('7', '999992', 'PM', '1000750', '0', 'ï¿½ï¿½Ä©Öµï¿½ï¿½', '/ï¿½ï¿½Ä©Öµï¿½ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('8', '999992', 'PM', '1000750', '0', 'ï¿½ï¿½È«ï¿½ï¿½ï¿½', '/ï¿½ï¿½È«ï¿½ï¿½ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
+INSERT INTO `eh_equipment_inspection_categories` (`id`, `namespace_id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `deletor_uid`, `delete_time`) VALUES ('9', '999992', 'PM', '1000750', '0', 'ï¿½ï¿½ï¿½ï¿½', '/ï¿½ï¿½ï¿½ï¿½', NULL, '2', '0', '2017-01-11 16:59:23', '0', NULL);
 
 
 update eh_equipment_inspection_equipments set inspection_category_id = 1;
@@ -51,69 +102,69 @@ update eh_equipment_inspection_tasks set inspection_category_id = 1;
 
 -- merge from authorization-delta-data-release.sql by lqs 20170120
 -- 
--- ¿Í»§×ÊÁÏ¹ÜÀíÏ¸·ÖÈ¨ÏŞ add by xq.tian  2017/01/16
+-- ï¿½Í»ï¿½ï¿½ï¿½ï¿½Ï¹ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ add by xq.tian  2017/01/16
 --
 SELECT max(id) FROM `eh_service_module_privileges` INTO @service_module_pri_id;
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10127, '0', 'Ìí¼Ó¿Í»§', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ Ìí¼Ó¿Í»§', NULL);
+VALUES (10127, '0', 'ï¿½ï¿½Ó¿Í»ï¿½', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ ï¿½ï¿½Ó¿Í»ï¿½', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10127, NULL, '0', NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10128, '0', 'ÅúÁ¿µ¼Èë¼°ÏÂÔØÄ£°æ', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ ÅúÁ¿µ¼Èë¼°ÏÂÔØÄ£°æ', NULL);
+VALUES (10128, '0', 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¼°ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¼°ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10128, NULL, '0', NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10129, '0', 'µ¼³öEXCEL', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ µ¼³öEXCEL', NULL);
+VALUES (10129, '0', 'ï¿½ï¿½ï¿½ï¿½EXCEL', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½EXCEL', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10129, NULL, '0', NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10130, '0', '²é¿´Í³¼ÆĞÅÏ¢', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ ²é¿´Í³¼ÆĞÅÏ¢', NULL);
+VALUES (10130, '0', 'ï¿½é¿´Í³ï¿½ï¿½ï¿½ï¿½Ï¢', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ ï¿½é¿´Í³ï¿½ï¿½ï¿½ï¿½Ï¢', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10130, NULL, '0', NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10131, '0', 'ĞŞ¸Ä¿Í»§×ÊÁÏ', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ ĞŞ¸Ä¿Í»§×ÊÁÏ', NULL);
+VALUES (10131, '0', 'ï¿½Ş¸Ä¿Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ ï¿½Ş¸Ä¿Í»ï¿½ï¿½ï¿½ï¿½ï¿½', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10131, NULL, '0', NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10132, '0', '²é¿´¿Í»§×ÊÁÏ', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ ²é¿´¿Í»§×ÊÁÏ', NULL);
+VALUES (10132, '0', 'ï¿½é¿´ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ ï¿½é¿´ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10132, NULL, '0', NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10133, '0', '¹ÜÀí¿Í»§×ÊÁÏ', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ ¹ÜÀí¿Í»§×ÊÁÏ', NULL);
+VALUES (10133, '0', 'ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10133, NULL, '0', NOW());
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
-VALUES (10134, '0', 'É¾³ı¿Í»§×ÊÁÏ', '¿Í»§×ÊÁÏÏ¸·ÖÈ¨ÏŞ É¾³ı¿Í»§×ÊÁÏ', NULL);
+VALUES (10134, '0', 'É¾ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 'ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½Ï¸ï¿½ï¿½È¨ï¿½ï¿½ É¾ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', NULL);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@service_module_pri_id := @service_module_pri_id + 1), '37000', '0', 10134, NULL, '0', NOW());
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10127, 37000, 'Ìí¼Ó¿Í»§', 1, 1, 'Ìí¼Ó¿Í»§ È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10127, 37000, 'ï¿½ï¿½Ó¿Í»ï¿½', 1, 1, 'ï¿½ï¿½Ó¿Í»ï¿½ È¨ï¿½ï¿½', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10128, 37000, 'ÅúÁ¿µ¼Èë¼°ÏÂÔØÄ£°æ', 1, 1, 'ÅúÁ¿µ¼Èë¼°ÏÂÔØÄ£°æ È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10128, 37000, 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¼°ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½', 1, 1, 'ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½ë¼°ï¿½ï¿½ï¿½ï¿½Ä£ï¿½ï¿½ È¨ï¿½ï¿½', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10129, 37000, 'µ¼³öEXCEL', 1, 1, 'µ¼³öEXCEL È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10129, 37000, 'ï¿½ï¿½ï¿½ï¿½EXCEL', 1, 1, 'ï¿½ï¿½ï¿½ï¿½EXCEL È¨ï¿½ï¿½', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10130, 37000, '²é¿´Í³¼ÆĞÅÏ¢', 1, 1, '²é¿´Í³¼ÆĞÅÏ¢ È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10130, 37000, 'ï¿½é¿´Í³ï¿½ï¿½ï¿½ï¿½Ï¢', 1, 1, 'ï¿½é¿´Í³ï¿½ï¿½ï¿½ï¿½Ï¢ È¨ï¿½ï¿½', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10131, 37000, 'ĞŞ¸Ä¿Í»§×ÊÁÏ', 1, 1, 'ĞŞ¸Ä¿Í»§×ÊÁÏ È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10131, 37000, 'ï¿½Ş¸Ä¿Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 1, 1, 'ï¿½Ş¸Ä¿Í»ï¿½ï¿½ï¿½ï¿½ï¿½ È¨ï¿½ï¿½', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10132, 37000, '²é¿´¿Í»§×ÊÁÏ', 1, 1, '²é¿´¿Í»§×ÊÁÏ È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10132, 37000, 'ï¿½é¿´ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 1, 1, 'ï¿½é¿´ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ È¨ï¿½ï¿½', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10133, 37000, '¹ÜÀí¿Í»§×ÊÁÏ', 1, 1, '¹ÜÀí¿Í»§×ÊÁÏ È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10133, 37000, 'ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 1, 1, 'ï¿½ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ È¨ï¿½ï¿½', 202);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10134, 37000, 'É¾³ı¿Í»§×ÊÁÏ', 1, 1, 'É¾³ı¿Í»§×ÊÁÏ È¨ÏŞ', 202);
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10134, 37000, 'É¾ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½', 1, 1, 'É¾ï¿½ï¿½ï¿½Í»ï¿½ï¿½ï¿½ï¿½ï¿½ È¨ï¿½ï¿½', 202);
 
 
--- ¿ª·ÅÏîÄ¿¹ÜÀíÒµÎñÄ£¿é by sfyan 20170119
+-- ï¿½ï¿½ï¿½ï¿½ï¿½ï¿½Ä¿ï¿½ï¿½ï¿½ï¿½Òµï¿½ï¿½Ä£ï¿½ï¿½ by sfyan 20170119
 UPDATE `eh_service_modules` SET `type` = 0 WHERE `id` in (30000, 30500, 31000, 32000, 33000, 34000, 35000, 37000, 38000);
 
 
