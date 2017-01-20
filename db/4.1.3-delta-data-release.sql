@@ -24,14 +24,14 @@ INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id
 INSERT INTO `eh_activity_categories` (`id`, `owner_type`, `owner_id`, `parent_id`, `name`, `path`, `default_order`, `status`, `creator_uid`, `create_time`, `delete_uid`, `delete_time`, `namespace_id`, `default_flag`, `enabled`, `icon_uri`, `selected_icon_uri`, `show_name`, `all_flag`) VALUES (1004, '', 0, 1, 'OE大讲堂', '/1/1004', 0, 2, 1, now(), 0, NULL, 999985, 0, 1, 'cs://1/image/aW1hZ2UvTVRvM09HWmxNRFptWldNM1lqQm1aakEyWVdRMVpEZ3dNelEzTVRrMk1XRmpPUQ', 'cs://1/image/aW1hZ2UvTVRvd016YzVZVE5tT1dFeU9XUTRPRGcxTkdNME5HUTFabVE1T0RBd00yWmpZdw', NULL, 0);
 
 -- 华润初始化数据，add by tt, 20170120
-update eh_activities set content_category_id = 1004 where subject like '%金融讲座第二波，带你读懂SDR%' and namespace_id=999985;
+update eh_activities set content_category_id = 1004 where subject like '%金融讲座第二波来袭，带你读懂SDR%' and namespace_id=999985;
 update eh_activities set content_category_id = 1004 where subject like '%来这里，教你有效资产配置，抑制钱包缩水%' and namespace_id=999985;
 update eh_activities set content_category_id = 1004 where subject like '%华润前海大厦携手吴伯凡，为前海金融创新再发声%' and namespace_id=999985;
 update eh_activities set content_category_id = 1004 where subject like '%Officeasy昨晚盛大发布 《最后14堂星期二的课》深圳首演%' and namespace_id=999985;
 update eh_activities set content_category_id = 1004 where subject like '%Prodigy Network与您探讨地产众筹新模式%' and namespace_id=999985;
 update eh_activities set content_category_id = 1003 where subject like '%全球第一支OL芭蕾舞团，成员竟然是你的女上司%' and namespace_id=999985;
 update eh_activities set content_category_id = 1003 where subject like '%初级班二期，10月19日正式开课%' and namespace_id=999985;
-update eh_activities set content_category_id = 1003 where subject like '%今年中秋，你想和谁一起过？朗朗、李云迪%' and namespace_id=999985;
+update eh_activities set content_category_id = 1003 where subject like '%今年中秋，你想和谁一起过%' and namespace_id=999985;
 update eh_activities set content_category_id = 1003 where subject like '%初级班二期课程安排新鲜出炉%' and namespace_id=999985;
 update eh_activities set content_category_id = 1003 where subject like '%如果拥有第二人生，你会选择成为音乐人吗？%' and namespace_id=999985;
 update eh_activities set content_category_id = 1003 where subject like '%2个月，10个人，如何从零基础到参与芭蕾舞表演？%' and namespace_id=999985;
@@ -39,15 +39,15 @@ update eh_activities set content_category_id = 1003 where subject like '%芭蕾�
 update eh_activities set content_category_id = 1003 where subject like '%优雅的气质，也是一种实力%' and namespace_id=999985;
 update eh_activities set content_category_id = 1003 where subject like '%吉他民谣，音乐家招募中！是谁来拨动琴弦？%' and namespace_id=999985;
 update eh_activities set content_category_id = 1003 where subject like '%Officeasy午间音乐会%' and namespace_id=999985;
-update eh_activities set content_category_id = 1003 where subject like '%白领精音会，青春不散场%' and namespace_id=999985;
-update eh_activities set content_category_id = 1001 where subject like '%OE车友会—井柏然、阮经天最爱的MINI，免费试驾+拍摄大片%' and namespace_id=999985;
+update eh_activities set content_category_id = 1003 where subject like '%青春不散场%' and namespace_id=999985;
+update eh_activities set content_category_id = 1001 where subject like '%井柏然、阮经天最爱的MINI%' and namespace_id=999985;
 update eh_activities set content_category_id = 1001 where subject like '%不给糖就捣乱！万圣大片演员试镜招募%' and namespace_id=999985;
-update eh_activities set content_category_id = 1001 where subject like '%Easy Run活动流程 让500人荧光趴帮你驱散节后阴霾%' and namespace_id=999985;
+update eh_activities set content_category_id = 1001 where subject like '%让500人荧光趴帮你驱散节后阴霾%' and namespace_id=999985;
 update eh_activities set content_category_id = 1001 where subject like '%“最美”半马“春茧”开跑，华润置地与你一起感受美好生活%' and namespace_id=999985;
 update eh_activities set content_category_id = 1001 where subject like '%500人荧光大趴体，点亮深圳湾7公里海岸线%' and namespace_id=999985;
-update eh_activities set content_category_id = 1001 where subject like '%为了部落 or 联盟，组团刷电影副本！%' and namespace_id=999985;
+update eh_activities set content_category_id = 1001 where subject like '%组团刷电影副本%' and namespace_id=999985;
 update eh_activities set content_category_id = 1001 where subject like '%办公室里动起来，hold住你的最佳状态%' and namespace_id=999985;
-update eh_activities set content_category_id = 1001 where subject like '%第二季平板撑挑战赛来袭，报名挑战你的极限%' and namespace_id=999985;
+update eh_activities set content_category_id = 1001 where subject like '%报名挑战你的极限%' and namespace_id=999985;
 update eh_activities set content_category_id = 1001 where subject like '%现在，我想和你一起做件%' and namespace_id=999985;
 update eh_activities set content_category_id = 1001 where subject like '%开年垂直马拉松即将开跑%' and namespace_id=999985;
 update eh_activities set content_category_id = 1001 where subject like '%Officeasy圈层社交活动拉开序幕%' and namespace_id=999985;
@@ -66,7 +66,7 @@ update eh_activities set content_category_id = 1002 where subject like '%@您一
 update eh_activities set content_category_id = 1002 where subject like '%每天专车接送上下班是一种怎样的体验？%' and namespace_id=999985;
 update eh_activities set content_category_id = 1002 where subject like '%5.28陪孩子去看海%' and namespace_id=999985;
 update eh_activities set content_category_id = 1002 where subject like '%有多久，没对她说“我爱你”？%' and namespace_id=999985;
-update eh_activities set content_category_id = 1002 where subject like '%今天中午OE君告诉你午餐吃什么，速点%' and namespace_id=999985;
+update eh_activities set content_category_id = 1002 where subject like '%今天中午OE君告诉你午餐吃什么%' and namespace_id=999985;
 update eh_activities set content_category_id = 1002 where subject like '%在这万物生长的春日里，把咖啡搬进你的办公室%' and namespace_id=999985;
 update eh_activities set content_category_id = 1002 where subject like '%最in的Office Lady彩妆沙龙来了，不要错过咯~%' and namespace_id=999985;
 update eh_activities set content_category_id = 1002 where subject like '%你的家乡是什么味道？%' and namespace_id=999985;
@@ -74,6 +74,14 @@ update eh_activities set content_category_id = 1002 where subject like '%新钞&
 update eh_activities set content_category_id = 1002 where subject like '%限时福利！免费加班餐现在派送，戳我领取！%' and namespace_id=999985;
 update eh_activities set content_category_id = 1002 where subject like '%Officeasy中秋油画体验%' and namespace_id=999985;
 update eh_activities set content_category_id = 1002 where subject like '%快乐工作，感谢有你们。Officeasy团队照拍摄开始啦！%' and namespace_id=999985;
+
+-- 更新帖子中的活动主题分类，add by tt, 20170120
+update eh_forum_posts t1 set activity_content_category_id = (select content_category_id from eh_activities t2 where t1.embedded_id=t2.id and t2.namespace_id=999985) 
+where t1.embedded_app_id=3 and exists (
+	select 1
+	from eh_activities t3
+	where t1.embedded_id=t3.id and t3.namespace_id=999985
+);
 
 
 
