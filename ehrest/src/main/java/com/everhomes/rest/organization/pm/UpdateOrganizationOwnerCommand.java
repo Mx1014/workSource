@@ -19,6 +19,8 @@ import javax.validation.constraints.Size;
  * <li>idCardNumber: 身份照号码</li>
  * <li>registeredResidence: 户籍</li>
  * <li>avatar: 头像URI地址</li>
+ * <li>ownerType: ownerType EhCommunities 权限校验时用的</li>
+ * <li>ownerId: ownerId, communityId</li>
  * </ul>
  */
 public class UpdateOrganizationOwnerCommand {
@@ -45,6 +47,25 @@ public class UpdateOrganizationOwnerCommand {
     private String registeredResidence;
     @Size(max = 1024)
     private String avatar;
+
+    private String ownerType;
+    private Long ownerId;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public String getContactName() {
         return contactName;

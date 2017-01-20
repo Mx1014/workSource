@@ -424,4 +424,8 @@ public interface OrganizationService {
 
 	List<OrganizationSimpleDTO> listUserRelateOrgs(
 			ListUserRelatedOrganizationsCommand cmd, User user);
+
+	List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, String token, String orgPath);
+
+	List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, Long userId, Long organizationId);
 }

@@ -1,4 +1,5 @@
-package com.everhomes.rest.organization.pm;
+package com.everhomes.rest.acl;
+
 
 import com.everhomes.util.StringHelper;
 
@@ -6,19 +7,25 @@ import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
- *  <li>communityId: 物业小区id</li>
- *  <li>organizationId: 公司id</li>
- *  <li>ownerType: ownerType EhCommunities 权限校验时用的</li>
- *  <li>ownerId: ownerId, communityId</li>
+ * <li>ownerType: 范围权限</li>
+ * <li>ownerId: 范围id</li>
+ * <li>organizationId: 机构id</li>
+ * <li>moduleId: 模块id</li>
  * </ul>
  */
-public class ExportOrganizationsOwnersCommand {
+public class ListUserRelatedPrivilegeByModuleIdCommand {
 
-    @NotNull private Long communityId;
-    @NotNull private Long organizationId;
-
+    @NotNull
     private String ownerType;
+
+    @NotNull
     private Long ownerId;
+
+    @NotNull
+    private Long organizationId;
+
+    @NotNull
+    private Long moduleId;
 
     public String getOwnerType() {
         return ownerType;
@@ -36,14 +43,6 @@ public class ExportOrganizationsOwnersCommand {
         this.ownerId = ownerId;
     }
 
-    public Long getCommunityId() {
-        return communityId;
-    }
-
-    public void setCommunityId(Long communityId) {
-        this.communityId = communityId;
-    }
-
     public Long getOrganizationId() {
         return organizationId;
     }
@@ -52,8 +51,17 @@ public class ExportOrganizationsOwnersCommand {
         this.organizationId = organizationId;
     }
 
+    public Long getModuleId() {
+        return moduleId;
+    }
+
+    public void setModuleId(Long moduleId) {
+        this.moduleId = moduleId;
+    }
+
     @Override
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
 }

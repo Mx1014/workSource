@@ -5902,29 +5902,38 @@ System.out.println();
 	}
 
 	@Override
-	public List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath){
-		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>(); 
-		
-		List<String> groupTypeList = new ArrayList<String>();
-		groupTypeList.add(organizationGroupType.getCode());
-		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypeList);
+	public List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, Long userId, Long organizationId){
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if(null != userIdentifier && null != organization){
+			return getOrganizationMemberGroups(groupTypes, userIdentifier.getIdentifierToken(), organization.getPath());
+		}
+		return new ArrayList<>();
+	}
+
+	@Override
+	public List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, String token, String orgPath){
+		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypes);
 		List<Long> deptIds = new ArrayList<Long>();
 		for (Organization organization : depts) {
 			deptIds.add(organization.getId());
 		}
-		
 		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(token, deptIds);
-		
 		for (OrganizationMember member : members) {
 			Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
-			if(null != group){
-				if(OrganizationGroupType.fromCode(group.getGroupType()) == organizationGroupType){
-					groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
-				}
+			if(null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE){
+				groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
 			}
 		}
-		
 		return groups;
+	}
+
+	@Override
+	public List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath){
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(organizationGroupType.getCode());
+		return getOrganizationMemberGroups(groupTypes, token, orgPath);
 	}
 
 	@Override
