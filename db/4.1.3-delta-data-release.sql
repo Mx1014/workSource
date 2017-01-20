@@ -187,6 +187,6 @@ menu_id in (select id from eh_service_modules where id in (30000, 30500, 31000, 
 -- 修改华润OE首页运营配置   add by xq.tian  2017/01/20
 UPDATE `eh_launch_pad_items` SET `action_data`='{\"publishPrivilege\":0,\"livePrivilege\":1,\"categoryId\": 1}' WHERE `namespace_id`='999985' AND `item_group`='OPPushActivity';
 
-UPDATE `eh_launch_pad_items` SET `item_label`='OE优选',`action_type`=13, `action_data`='{\"url\":\"https://www.zuolin.com/mobile/static/coming_soon/index.html\"}' WHERE `namespace_id`='999985' AND `item_group`='OPPushBiz';
+-- UPDATE `eh_launch_pad_items` SET `item_label`='OE优选',`action_type`=13, `action_data`='{\"url\":\"https://www.zuolin.com/mobile/static/coming_soon/index.html\"}' WHERE `namespace_id`='999985' AND `item_group`='OPPushBiz';
 
 -- UPDATE `eh_business_promotions` SET `commodity_url` = '' WHERE `namespace_id` = '999985';
