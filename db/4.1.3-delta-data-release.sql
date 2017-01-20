@@ -179,3 +179,10 @@ SELECT max(id) FROM `eh_service_module_scopes` INTO @eh_service_module_scopes;
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
 select (@eh_service_module_scopes := @eh_service_module_scopes + 1), owner_id, menu_id, '', owner_type, owner_id, NULL, '2' from eh_web_menu_scopes where 
 menu_id in (select id from eh_service_modules where id in (30000, 30500, 31000, 32000, 33000, 34000, 35000, 37000, 38000));
+
+-- 修改华润OE首页运营配置   add by xq.tian  2017/01/20
+UPDATE `eh_launch_pad_items` SET `action_data`='{\"publishPrivilege\":0,\"livePrivilege\":1,\"categoryId\": 1}' WHERE `namespace_id`='999985' AND `item_group`='OPPushActivity';
+
+UPDATE `eh_launch_pad_items` SET `item_label`='OE优选',`action_type`=13, `action_data`='{\"url\":\"https://www.zuolin.com/mobile/static/coming_soon/index.html\"}' WHERE `namespace_id`='999985' AND `item_group`='OPPushBiz';
+
+UPDATE `eh_business_promotions` SET `commodity_url` = '' WHERE `namespace_id` = '999985';
