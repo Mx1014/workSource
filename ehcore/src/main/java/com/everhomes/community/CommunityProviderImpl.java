@@ -1286,17 +1286,26 @@ public class CommunityProviderImpl implements CommunityProvider {
 	
 	@Override
 	public List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId) {
-		
+        return listResourceCategoryAssignment(categoryId, namespaceId, null, null);
+	}
+
+    @Override
+    public List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId, String resourceType, List<Long> resourceIds) {
+
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhResourceCategoryAssignments.class));
 
         SelectQuery<EhResourceCategoryAssignmentsRecord> query = context.selectQuery(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS);
         query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_CATEGRY_ID.eq(categoryId));
-//        query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_CATEGRY_ID.eq(resourceCategoryId));
         query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.NAMESPACE_ID.eq(namespaceId));
-
+        if(null != resourceType){
+            query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_TYPE.eq(resourceType));
+        }
+        if(null != resourceIds && resourceIds.size() > 0){
+            query.addConditions(Tables.EH_RESOURCE_CATEGORY_ASSIGNMENTS.RESOURCE_ID.in(resourceIds));
+        }
         return query.fetch().stream().map(r -> ConvertHelper.convert(r, ResourceCategoryAssignment.class))
-        		.collect(Collectors.toList());
-	}
+                .collect(Collectors.toList());
+    }
 	
 	@Override
 	public void deleteResourceCategoryAssignmentById(Long id) {
