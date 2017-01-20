@@ -87,6 +87,10 @@ where t1.embedded_app_id=3 and exists (
 delete from eh_web_menu_scopes where owner_type = 'EhNamespaces' and owner_id = '999985' and menu_id in (10610, 10620, 10700);
 update eh_web_menu_scopes set menu_name = '白领活动', apply_policy = 1 where owner_type = 'EhNamespaces' and owner_id = '999985' and menu_id = 10600;
 
+-- 设置华润活动列表的默认样式，add by tt, 20170120
+select max(id) into @id from eh_configurations;
+INSERT INTO `eh_configurations` (`id`, `name`, `value`, `description`, `namespace_id`, `display_name`) VALUES (@id+1, 'activity.default.list.style', '2', 'officeasy default activity list style', 999985, NULL);
+
 
 
 
