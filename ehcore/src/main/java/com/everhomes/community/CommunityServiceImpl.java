@@ -2534,6 +2534,7 @@ public class CommunityServiceImpl implements CommunityService {
 		category.setStatus(ResourceCategoryStatus.ACTIVE.getCode());
 		category.setOwnerType(ownerType);
 		category.setOwnerId(ownerId);
+		category.setType(ResourceCategoryType.CATEGORY.getCode());
 		communityProvider.createResourceCategory(category);
 		
 	}
