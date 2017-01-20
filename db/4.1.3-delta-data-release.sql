@@ -189,4 +189,4 @@ UPDATE `eh_launch_pad_items` SET `action_data`='{\"publishPrivilege\":0,\"livePr
 
 UPDATE `eh_launch_pad_items` SET `item_label`='OE优选',`action_type`=13, `action_data`='{\"url\":\"https://www.zuolin.com/mobile/static/coming_soon/index.html\"}' WHERE `namespace_id`='999985' AND `item_group`='OPPushBiz';
 
-UPDATE `eh_business_promotions` SET `commodity_url` = '' WHERE `namespace_id` = '999985';
+-- UPDATE `eh_business_promotions` SET `commodity_url` = '' WHERE `namespace_id` = '999985';
