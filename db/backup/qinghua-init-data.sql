@@ -2437,6 +2437,9 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
 	VALUES (2, '999984', '紫荆', '2', '', '', '移动平台聚合服务，助力园区效能提升');
 
 --北环门禁 by janson
-INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
-VALUES ('1112290', '999984', '0', '4', '0', '/home', 'Bizs', '北环门禁', '北环门禁', 'cs://1/image/aW1hZ2UvTVRvMk5UTmpOalprWldSak1EZzVaVEkzTmpCbE1URXdNRFUwT1RCaVlXSTROUQ', '1', '1', '63', '{\"hardwareId\":\"F9:86:16:F2:2F:8B\"}', '0', '0', '1', '1', NULL, '0', NULL, '', '', '1', 'park_tourist', '1');
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`,`service_categry_id`)
+VALUES ('1112290', '999984', '0', '4', '0', '/home', 'Bizs', '北环门禁', '北环门禁', 'cs://1/image/aW1hZ2UvTVRvMk5UTmpOalprWldSak1EZzVaVEkzTmpCbE1URXdNRFUwT1RCaVlXSTROUQ', '1', '1', '63', '{\"hardwareId\":\"C7:7C:FE:2A:AD:43\"}', '0', '0', '1', '0', NULL, '0', NULL, '', '', '1', 'park_tourist', '1', '5');
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`,`service_categry_id`)
+VALUES ('1112291', '999984', '0', '4', '0', '/home', 'Bizs', '北环门禁', '北环门禁', 'cs://1/image/aW1hZ2UvTVRvMk5UTmpOalprWldSak1EZzVaVEkzTmpCbE1URXdNRFUwT1RCaVlXSTROUQ', '1', '1', '63', '{\"hardwareId\":\"C7:7C:FE:2A:AD:43\"}', '0', '0', '1', '0', NULL, '0', NULL, '', '', '1', 'pm_admin', '1', '5');
 

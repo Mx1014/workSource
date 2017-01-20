@@ -326,7 +326,11 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 				}
 			}
 		}
-		String scheme = request.getScheme();
+		// String scheme = request.getScheme();
+		String scheme = request.getHeader("X-Forwarded-Scheme");
+		if(LOGGER.isDebugEnabled()) {
+		    LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
+		}
 		if(scheme == null || scheme.isEmpty()){
 			scheme = "https";
 		}
