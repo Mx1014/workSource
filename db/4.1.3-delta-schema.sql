@@ -21,7 +21,7 @@ ALTER TABLE `eh_launch_pad_items` ADD COLUMN `selected_icon_uri` VARCHAR(1024) N
 
 
 -- merge from equipment2.1-delta-schema.sql by lqs 20170119
-DROP TABLE IF EXISTS `eh_equipment_inspection_categories`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_categories`;
 CREATE TABLE `eh_equipment_inspection_categories` (
   `id` BIGINT NOT NULL,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
@@ -52,7 +52,7 @@ ALTER TABLE `eh_equipment_inspection_tasks` ADD COLUMN `position_id` BIGINT NOT 
 
 
   
-DROP TABLE IF EXISTS `eh_equipment_inspection_standard_group_map`;
+-- DROP TABLE IF EXISTS `eh_equipment_inspection_standard_group_map`;
 CREATE TABLE `eh_equipment_inspection_standard_group_map` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `group_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: executive group, 2: review group',
