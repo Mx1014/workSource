@@ -220,3 +220,6 @@ UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='20
 
 -- merge from serviceAlliance2.0 add by xiongying20170119
 UPDATE eh_service_alliance_categories SET selected_logo_url = logo_url;
+
+-- modify serviceDetail url add by xiongying20170120
+update eh_configurations set value = '/service-alliance/index.html#/service_detail/%s/%s?_k=%s&ownerType=%s&ownerId=%s' where name like '%serviceAlliance.serviceDetail.url%';
