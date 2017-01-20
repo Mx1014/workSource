@@ -192,6 +192,9 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			break;
 		case ABSORT_STEP:
 			tracker = new FlowEventLog();
+			if(ctx.getOperator() != null) {
+				templateMap.put("applierName", ctx.getOperator().getNickName());	
+			}
 			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
 			tracker.setStepCount(ctx.getFlowCase().getStepCount());
 			

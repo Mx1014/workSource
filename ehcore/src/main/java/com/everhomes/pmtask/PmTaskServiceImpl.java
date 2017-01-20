@@ -1765,24 +1765,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 		
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		
-		if(size == 1) {
-			
-			if(resolver.checkUserPrivilege(targetIds.get(0), EntityType.COMMUNITY.getCode(), 
-					cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
-				LOGGER.error("user privilege exist.");
-	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_USER_PRIVILEGE_EXIST,
-	    				"user privilege exist.");
-			}
-		}
-		
 		dbProvider.execute((TransactionStatus status) -> {
 			
 			for(int i=0,l=size; i<l;i++ ) {
+				
+				if(resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
+						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
+					continue;
+				}
+				
 				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
 						EntityType.USER.getCode(), targetIds.get(i));
-				if(!resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
-						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE) &&
-						null == pmTaskTarget) {
+				if(null == pmTaskTarget) {
 					pmTaskTarget = new PmTaskTarget();
 					pmTaskTarget.setRoleId(cmd.getOperateType());
 					pmTaskTarget.setOwnerId(cmd.getOwnerId());
@@ -1793,8 +1787,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 					
 					pmTaskProvider.createTaskTarget(pmTaskTarget);
 					
-					rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
-							EntityType.USER.getCode(), targetIds.get(i), "pmtask", privilegeIds);
+					//检查 （超级管理员，模块管理员都不添加物业报修子权限，会覆盖物业报修模块权限） 如果没有物业报修模块权限，才添加物业报修的权限  add by sw 20170120
+					if(!resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
+							cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
+						rolePrivilegeService.assignmentPrivileges(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
+								EntityType.USER.getCode(), targetIds.get(i), "pmtask", privilegeIds);
+					}
 					
 				}
 				

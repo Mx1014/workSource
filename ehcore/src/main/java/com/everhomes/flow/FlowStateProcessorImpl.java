@@ -157,10 +157,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     	User user = null;
     	if(stepDTO.getOperatorId() != null) {
     		user = userProvider.findUserById(stepDTO.getOperatorId());
-    		if(UserContext.current().getUser() == null) {
-    			UserContext.current().setUser(user);
-    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
-    		}
+    		//force to set context user
+			UserContext.current().setUser(user);
+			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
     	} else if(UserContext.current().getUser() != null) {
     		user = UserContext.current().getUser();
     	} else {

@@ -99,7 +99,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-	private String projectId = "240111044331055940";
+	private String projectId = null;
     
 	private static final Logger LOGGER = LoggerFactory.getLogger(EbeiPmTaskHandle.class);
 
@@ -131,6 +131,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	@PostConstruct
 	public void init() {
 		httpclient = HttpClients.createDefault();
+		//对接的科兴，所以默认科兴 园区id
+		projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
 	}
 
 	private List<CategoryDTO> listServiceType(String projectId) {
