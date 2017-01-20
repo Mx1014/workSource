@@ -260,9 +260,13 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	
 -- 设备巡检名称修改 by sfyan 20170120
 UPDATE `eh_web_menus` SET `name` = '物业巡检' WHERE `id` = 20800;
-UPDATE `eh_web_menus` SET `name` = '巡检关联审批' WHERE `id` = 20812;
+UPDATE `eh_web_menus` SET `data_type` = 'equipment--equipment_inspection_standard_list' WHERE `id` = 20811;
+UPDATE `eh_web_menus` SET `name` = '巡检关联审批', `data_type` = 'equipment--equipment_inspection_check_attachment'  WHERE `id` = 20812;
+UPDATE `eh_web_menus` SET `data_type` = 'equipment--equipment_inspection_sparepart_list' WHERE `id` = 20822;
 UPDATE `eh_web_menus` SET `name` = '巡检台账' WHERE `id` = 20820;
-UPDATE `eh_web_menus` SET `name` = '巡检对象' WHERE `id` = 20821;
+UPDATE `eh_web_menus` SET `name` = '巡检对象', `data_type` = 'equipment--equipment_inspection_equipment_list' WHERE `id` = 20821;
+UPDATE `eh_web_menus` SET `data_type` = 'equipment--equipment_inspection_task_list' WHERE `id` = 20831;
+UPDATE `eh_web_menus` SET `data_type` = 'equipment--equipment_inspection_inspection_item_list' WHERE `id` = 20841;
 
 -- 应用统计的菜单配置给华润OE by sfyan 20170120
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
