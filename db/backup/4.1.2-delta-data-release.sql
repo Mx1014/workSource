@@ -171,7 +171,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10010', 'zh_CN', '分类不能为空！');
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10011', 'zh_CN', '任务已在处理中，不能取消！');
 
-update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=205250&displayName=投诉建议"}' where action_type = 60 and item_label = '投诉建议' and namespace_id = 999983;
+-- 更新科兴投诉建议 add by sw 20170119
+update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=202564&displayName=投诉建议"}',action_type = 60 where id in (112844, 112874) and namespace_id = 999983;
 update eh_launch_pad_items set action_data = '{\"url\":\"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' where action_type = 14 and item_label = '报修' and namespace_id = 999983;
 
 -- 万科停车 add by sw 20160117
