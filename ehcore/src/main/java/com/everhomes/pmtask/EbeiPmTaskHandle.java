@@ -131,7 +131,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	@PostConstruct
 	public void init() {
 		httpclient = HttpClients.createDefault();
-		projectId = configProvider.getValue("pmtask.ebei.url", "240111044331055940");
+		projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
 	}
 
 	private List<CategoryDTO> listServiceType(String projectId) {
