@@ -63,3 +63,10 @@ CREATE TABLE `eh_equipment_inspection_standard_group_map` (
 
   PRIMARY KEY (`id`)
 )ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
+
+
+
+-- merge from authorization-delta-schema.sql by lqs 20170120
+ALTER TABLE `eh_service_module_assignments` ADD COLUMN `assignment_type` TINYINT NOT NULL DEFAULT '0';
