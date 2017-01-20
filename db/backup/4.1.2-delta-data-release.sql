@@ -351,8 +351,6 @@ INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, 
 	VALUES ('80520', '我的申请', '80500', NULL, 'service_list/154', '0', '2', '/80000/80500/80520', 'park', '820', NULL);
 
 SET @eh_web_menu_privileges = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10121', '80100', '服务联盟', '1', '1', '服务联盟 全部权限', '711');
-INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10121', '80110', '服务列表', '1', '1', '服务联盟 全部权限', '711');
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10121', '80120', '我的申请', '1', '1', '服务联盟 全部权限', '711');
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10122', '80220', '企业服务', '1', '1', '服务联盟 全部权限', '710');
 INSERT INTO `eh_web_menu_privileges` VALUES ((@eh_web_menu_privileges := @eh_web_menu_privileges + 1), '10123', '80320', '厂房出租', '1', '1', '服务联盟 全部权限', '710');
@@ -371,4 +369,6 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 80520, '', 'EhNamespaces', 999983, 2);
 
-
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_type`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
+	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10121', 'EhAclRoles' ,'1005', '0', '1', UTC_TIMESTAMP());
