@@ -161,7 +161,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20291, '', 'EhNamespaces', 999983, 2);
 
-delete from eh_web_menu_scopes where menu_id in (20100, 20140, 20150, 20155, 20158, 20160, 20170, 20180, 20190, 20191, 20192) and owner_id = 999983;
+DELETE FROM eh_web_menu_scopes WHERE menu_id IN (20100, 20140, 20150, 20155, 20158, 20160, 20170, 20180, 20190, 20191, 20192) AND owner_id = 999983;
 
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999983-1', 'ebei', '', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) VALUES ('pmtask.handler-999983-202564', 'flow', '', '0', NULL);
@@ -172,8 +172,8 @@ INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pm
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10011', 'zh_CN', '任务已在处理中，不能取消！');
 
 -- 更新科兴投诉建议 add by sw 20170119
-update eh_launch_pad_items set action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=202564&displayName=投诉建议"}',action_type = 60 where id in (112844, 112874) and namespace_id = 999983;
-update eh_launch_pad_items set action_data = '{\"url\":\"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' where action_type = 14 and item_label = '报修' and namespace_id = 999983;
+UPDATE eh_launch_pad_items SET action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=202564&displayName=投诉建议"}',action_type = 60 WHERE id IN (112844, 112874) AND namespace_id = 999983;
+UPDATE eh_launch_pad_items SET action_data = '{\"url\":\"http://core.zuolin.com/property_service/index.html?hideNavigationBar=1&taskCategoryId=1#/my_service#sign_suffix\"}' WHERE action_type = 14 AND item_label = '报修' AND namespace_id = 999983;
 
 -- 万科停车 add by sw 20160117
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
@@ -188,8 +188,8 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 
 
 -- 正中汇修改广场图标和名字 by xiongying20170117
-update eh_launch_pad_items set item_label = "物业查费" where item_label = "费用查询" and namespace_id = 999983;
-update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where item_label = "任务管理" and namespace_id = 999983;
+UPDATE eh_launch_pad_items SET item_label = "物业查费" WHERE item_label = "费用查询" AND namespace_id = 999983;
+UPDATE eh_launch_pad_items SET icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" WHERE item_label = "任务管理" AND namespace_id = 999983;
 
 
 -- 黑名单配置到清华信息港 by sfyan 20170117
@@ -223,8 +223,8 @@ UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='20
 UPDATE eh_service_alliance_categories SET selected_logo_url = logo_url;
 
 -- 删除下个节点处理人
-delete from `eh_flow_variables` where id=2003;
-delete from `eh_flow_variables` where id=2004;
+DELETE FROM `eh_flow_variables` WHERE id=2003;
+DELETE FROM `eh_flow_variables` WHERE id=2004;
 
 
 
@@ -329,3 +329,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 
 
 
+-- 增加新的error 字段 by wuhan 2017-1-20
+
+INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('general_approval', '10001', 'zh_CN', '暂不支持申请，请联系管理员');

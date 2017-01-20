@@ -110,8 +110,8 @@ VALUES ((@max_id := @max_id + 1), '999985', '三色金枪鱼沙拉', '简单的�
 
 
 -- 正中汇修改广场图标和名字 by xiongying20170117
-update eh_launch_pad_items set item_label = "物业查费" where id in(select id from eh_launch_pad_items where item_label = "费用查询" and namespace_id = 999983);
-update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where id in(select id from eh_launch_pad_items where item_label = "任务管理" and namespace_id = 999983);
+UPDATE eh_launch_pad_items SET item_label = "物业查费" WHERE id IN(SELECT id FROM eh_launch_pad_items WHERE item_label = "费用查询" AND namespace_id = 999983);
+UPDATE eh_launch_pad_items SET icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" WHERE id IN(SELECT id FROM eh_launch_pad_items WHERE item_label = "任务管理" AND namespace_id = 999983);
 
 
 -- 修改活动运营icon action_data   add by xq.tian  2017/01/18
@@ -120,6 +120,12 @@ UPDATE `eh_launch_pad_items` SET `action_data` = '{\"publishPrivilege\":1,\"live
 -- 上一步节点处理人 by janson
 UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='2001';
 
---北环门禁
+-- 北环门禁
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`)
 VALUES ('1112290', '1000000', '0', '4', '0', '/home', 'Bizs', '北环门禁', '北环门禁', 'cs://1/image/aW1hZ2UvTVRwa05ERmhNMlkzWW1SalpqYzROREEzTVRJM01qQXpNREl5TnpJM1ptVm1Ndw', '1', '1', '63', '{\"hardwareId\":\"F9:86:16:F2:2F:8B\"}', '0', '0', '1', '1', NULL, '0', NULL, '', '', '1', 'park_tourist', '1');
+
+
+
+-- 增加新的error 字段 by wuhan 2017-1-20
+
+INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('general_approval', '10001', 'zh_CN', '暂不支持申请，请联系管理员');
