@@ -39,6 +39,7 @@ import com.everhomes.rest.general_approval.CreateApprovalFormCommand;
 import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralApprovalIdCommand;
+import com.everhomes.rest.general_approval.GeneralApprovalServiceErrorCode;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
 import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormDataVisibleType;
@@ -89,6 +90,9 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 				GetTemplateByApprovalIdResponse.class);
 		GeneralForm form = this.generalFormProvider.getActiveGeneralFormByOriginId(ga
 				.getFormOriginId());
+		if(form == null )
+			throw RuntimeErrorException.errorWith(GeneralApprovalServiceErrorCode.SCOPE, 
+					GeneralApprovalServiceErrorCode.ERROR_FORM_NOTFOUND, "form not found");
 		form.setFormVersion(form.getFormVersion());
 		List<GeneralFormFieldDTO> fieldDTOs = new ArrayList<GeneralFormFieldDTO>();
 		fieldDTOs = JSONObject.parseArray(form.getTemplateText(), GeneralFormFieldDTO.class);
