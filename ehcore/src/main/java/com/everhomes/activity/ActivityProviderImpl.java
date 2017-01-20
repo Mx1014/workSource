@@ -450,13 +450,13 @@ public class ActivityProviderImpl implements ActivityProivider {
 //        });
 //
 //        activities.addAll(overdue);
-//        if (activities.size() >= count) {
-//            locator.setAnchor(pageOffset+1);
-//        }
-//
-//       if(activities.size()>=count){
-//            return activities.subList(0, count);
-//        }
+        if (activities.size() >= count) {
+            locator.setAnchor(pageOffset+1);
+        }
+
+        if(activities.size()>=count){
+            return activities.subList(0, count);
+        }
         return activities;
     }
 
