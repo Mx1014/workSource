@@ -222,10 +222,9 @@ UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='20
 -- merge from serviceAlliance2.0 add by xiongying20170119
 UPDATE eh_service_alliance_categories SET selected_logo_url = logo_url;
 
-<<<<<<< HEAD:db/4.1.2-delta-data-release.sql
 -- modify serviceDetail url add by xiongying20170120
 update eh_configurations set value = '/service-alliance/index.html#/service_detail/%s/%s?_k=%s&ownerType=%s&ownerId=%s' where name like '%serviceAlliance.serviceDetail.url%';
-=======
+
 -- 删除下个节点处理人
 DELETE FROM `eh_flow_variables` WHERE id=2003;
 DELETE FROM `eh_flow_variables` WHERE id=2004;
@@ -336,4 +335,6 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES
 -- 增加新的error 字段 by wuhan 2017-1-20
 
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('general_approval', '10001', 'zh_CN', '暂不支持申请，请联系管理员');
->>>>>>> 83186ddcde830e3c143bfa29f63f180f8f22887c:db/backup/4.1.2-delta-data-release.sql
+
+--办事指南 add by xiongying20170120
+update eh_web_menu_scopes set menu_name = '办事指南', apply_policy=1 where menu_id = 80100 and owner_id = 999983;
