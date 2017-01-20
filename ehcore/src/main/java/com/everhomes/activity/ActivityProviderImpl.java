@@ -418,7 +418,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         if(condition != null){
             query.addConditions(condition);
         }
-        Integer offset =  (int) ((pageOffset - 1 ) * count);
+        Integer offset =  (int) ((pageOffset - 1 ) * (count-1));
         query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
 
         if(orderByCreateTime) {
@@ -452,10 +452,12 @@ public class ActivityProviderImpl implements ActivityProivider {
 //        activities.addAll(overdue);
         if (activities.size() >= count) {
             locator.setAnchor(pageOffset+1);
-        }
+        }else {
+        	locator.setAnchor(null);
+		}
 
         if(activities.size()>=count){
-            return activities.subList(0, count);
+            return activities.subList(0, count-1);
         }
         return activities;
     }
