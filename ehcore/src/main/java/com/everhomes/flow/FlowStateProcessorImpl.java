@@ -157,10 +157,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
     	User user = null;
     	if(stepDTO.getOperatorId() != null) {
     		user = userProvider.findUserById(stepDTO.getOperatorId());
-    		if(UserContext.current().getUser() == null) {
-    			UserContext.current().setUser(user);
-    			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
-    		}
+    		//force to set context user
+			UserContext.current().setUser(user);
+			UserContext.current().setNamespaceId(flowCase.getNamespaceId());
     	} else if(UserContext.current().getUser() != null) {
     		user = UserContext.current().getUser();
     	} else {
@@ -412,7 +411,7 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 			ft.setJson(stepDTO.toString());
 			
 			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 60*1000l;
-//			Long timeoutTick = DateHelper.currentGMTTime().getTime() + curr.getFlowNode().getAutoStepMinute().intValue() * 1000;
+//			Long timeoutTick = DateHelper.currentGMTTime().getTime() + 6000;
 			ft.setTimeoutTick(new Timestamp(timeoutTick));
 			
 //			flowTimeoutService.pushTimeout(ft);

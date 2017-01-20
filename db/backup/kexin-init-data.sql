@@ -1452,4 +1452,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 
 -- 正中汇修改广场图标和名字 by xiongying20170117
 update eh_launch_pad_items set item_label = "物业查费" where item_label = "费用查询" and namespace_id = 999983;
-update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where item_label = "任务管理" and namespace_id = 999983;    
+update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ" where item_label = "任务管理" and namespace_id = 999983;
+
+-- 正中汇游客场景去掉 任务管理入口 by xiongying20170119
+delete from eh_launch_pad_items where item_label = "任务管理" and scene_type = 'park_tourist' and namespace_id = 999983;

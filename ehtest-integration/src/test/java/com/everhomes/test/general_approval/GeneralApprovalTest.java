@@ -17,6 +17,7 @@ import com.everhomes.rest.general_approval.CreateGeneralApprovalCommand;
 import com.everhomes.rest.general_approval.GeneralApprovalDTO;
 import com.everhomes.rest.general_approval.GeneralApprovalSupportType;
 import com.everhomes.rest.general_approval.GeneralFormDTO;
+import com.everhomes.rest.general_approval.GeneralFormDataSourceType;
 import com.everhomes.rest.general_approval.GeneralFormFieldDTO;
 import com.everhomes.rest.general_approval.GeneralFormFieldType;
 import com.everhomes.rest.general_approval.GeneralFormStatus;
@@ -210,6 +211,24 @@ public class GeneralApprovalTest extends BaseLoginAuthTestCase {
 		val.setText("刘亦菲");
 		e.setFieldValue(val.toString());
 		values.add(e);
+		
+//		e  = new PostApprovalFormItem();
+//		e.setFieldName(GeneralFormDataSourceType.SOURCE_ID.getCode());
+//		e.setFieldType(GeneralFormDataSourceType.SOURCE_ID.getCode());
+//		val = new PostApprovalFormTextValue();
+//		val.setText("1");
+//		e.setFieldValue(val.toString());
+//		values.add(e);
+		
+
+		e  = new PostApprovalFormItem();
+		e.setFieldName(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+		e.setFieldType(GeneralFormDataSourceType.ORGANIZATION_ID.getCode());
+		val = new PostApprovalFormTextValue();
+		val.setText("2");
+		e.setFieldValue(val.toString());
+		values.add(e);
+		
 		cmd.setValues(values);
 		String url = POSTAPPROVALFORM_URL;
 		PostApprovalFormRestResponse response= httpClientService.restPost(url , cmd, PostApprovalFormRestResponse.class);
@@ -275,6 +294,13 @@ public class GeneralApprovalTest extends BaseLoginAuthTestCase {
 		jsonFilePath = "data/json/energy-reading-log-3-test-data-161104.json";
 		fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
 		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+		
+		jsonFilePath = "data/json/service_modules-data.txt";
+		fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+		
+		
+		
 	}
 
 	@After

@@ -99,7 +99,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	
     SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
     SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-	private String projectId = "240111044331055940";
+	private String projectId = null;
     
 	private static final Logger LOGGER = LoggerFactory.getLogger(EbeiPmTaskHandle.class);
 
@@ -131,6 +131,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	@PostConstruct
 	public void init() {
 		httpclient = HttpClients.createDefault();
+		projectId = configProvider.getValue("pmtask.ebei.url", "240111044331055940");
 	}
 
 	private List<CategoryDTO> listServiceType(String projectId) {
@@ -177,8 +178,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	}
 	
 	public String postToEbei(JSONObject param, String method, Map<String, String> headers) {
-
-		String url = "http://120.24.88.192:13902/ebeitest/";
+		
+		String url = configProvider.getValue("pmtask.ebei.url", "");
 		HttpPost httpPost = new HttpPost(url + method);
 		CloseableHttpResponse response = null;
 		
