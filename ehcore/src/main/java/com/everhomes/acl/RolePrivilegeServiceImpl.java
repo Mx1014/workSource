@@ -1897,6 +1897,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
 
 		List<ProjectDTO> projectDTOs = new ArrayList<>();
+		List<Long> projectIds = new ArrayList<>();
 		for (WebMenuPrivilege webMenuPrivilege:webMenuPrivileges) {
 			// 用户有此菜单的权限，则获取全部的园区项目
 			if(privilegeIds.contains(webMenuPrivilege.getPrivilegeId())){
@@ -1906,6 +1907,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					dto.setProjectName(community.getName());
 					dto.setProjectType(EntityType.COMMUNITY.getCode());
 					projectDTOs.add(dto);
+					projectIds.add(dto.getProjectId());
 				}
 				break;
 			}
@@ -1950,6 +1952,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setProjectName(community.getName());
 					}
 					projectDTOs.add(dto);
+					projectIds.add(dto.getProjectId());
 				}
 			}
 		}
@@ -1992,7 +1995,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					projects.add(project);
 				}
 			}
-			setResourceDTOs(projects, namespaceId);
+			setResourceDTOs(projects, projectIds, namespaceId);
 		}
 		projects.addAll(entityts);
 		return projects;
@@ -2012,10 +2015,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return dto;
 	}
 
-	private void setResourceDTOs(List<ProjectDTO> list, Integer namespaceId){
+	private void setResourceDTOs(List<ProjectDTO> list, List<Long> projectIds, Integer namespaceId){
 		if(null != list) {
 			for(ProjectDTO project: list) {
-				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(project.getProjectId(), namespaceId);
+				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(project.getProjectId(), namespaceId, EntityType.COMMUNITY.getCode(), projectIds);
 				List<ProjectDTO> projects = resourceCategoryAssignments.stream().map(r -> {
 					ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
 					dto.setProjectId(r.getResourceId());
@@ -2029,7 +2032,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					dto.setParentId(r.getResourceCategryId());
 					return dto;
 				}).collect(Collectors.toList());
-				setResourceDTOs(project.getProjects(), namespaceId);
+				setResourceDTOs(project.getProjects(), projectIds, namespaceId);
 				if(null == project.getProjects()){
 					project.setProjects(projects);
 				}else{
