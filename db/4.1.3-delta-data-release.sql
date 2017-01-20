@@ -84,7 +84,7 @@ where t1.embedded_app_id=3 and exists (
 );
 
 -- 修改华润后台活动菜单，add by tt, 20170120
-update eh_web_menu_scopes set apply_policy = 0 where owner_type = 'EhNamespaces' and owner_id = '999985' and menu_id in (10610, 10620, 10700);
+delete from eh_web_menu_scopes where owner_type = 'EhNamespaces' and owner_id = '999985' and menu_id in (10610, 10620, 10700);
 update eh_web_menu_scopes set menu_name = '白领活动', apply_policy = 1 where owner_type = 'EhNamespaces' and owner_id = '999985' and menu_id = 10600;
 
 
