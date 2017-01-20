@@ -1,24 +1,17 @@
 // @formatter:off
 package com.everhomes.activity;
 
+
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import com.everhomes.naming.NameMapper;
-import com.everhomes.sequence.SequenceProvider;
-import com.everhomes.server.schema.tables.daos.*;
-import com.everhomes.server.schema.tables.pojos.*;
-import com.everhomes.server.schema.tables.records.*;
-import com.everhomes.util.DateHelper;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
-import org.jooq.Operator;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
-import org.jooq.Table;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -36,11 +29,27 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
-import com.everhomes.organization.Organization;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhActivitiesDao;
+import com.everhomes.server.schema.tables.daos.EhActivityAttachmentsDao;
+import com.everhomes.server.schema.tables.daos.EhActivityCategoriesDao;
+import com.everhomes.server.schema.tables.daos.EhActivityGoodsDao;
+import com.everhomes.server.schema.tables.daos.EhActivityRosterDao;
+import com.everhomes.server.schema.tables.pojos.EhActivities;
+import com.everhomes.server.schema.tables.pojos.EhActivityAttachments;
+import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
+import com.everhomes.server.schema.tables.pojos.EhActivityGoods;
+import com.everhomes.server.schema.tables.pojos.EhActivityRoster;
+import com.everhomes.server.schema.tables.records.EhActivitiesRecord;
+import com.everhomes.server.schema.tables.records.EhActivityAttachmentsRecord;
+import com.everhomes.server.schema.tables.records.EhActivityCategoriesRecord;
+import com.everhomes.server.schema.tables.records.EhActivityGoodsRecord;
+import com.everhomes.server.schema.tables.records.EhActivityRosterRecord;
 import com.everhomes.sharding.ShardIterator;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserActivityProvider;
@@ -48,10 +57,9 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProfileContstant;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
-import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.everhomes.util.RecordHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 import com.mysql.jdbc.StringUtils;
 
 @Component
@@ -440,7 +448,7 @@ public class ActivityProviderImpl implements ActivityProivider {
         }
 
        if(activities.size()>=count){
-            return activities.subList(0, count);
+            return activities.subList(0, count-1);
         }
         return activities;
     }

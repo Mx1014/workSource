@@ -1,7 +1,5 @@
 package com.everhomes.business;
 
-import java.util.List;
-
 import com.everhomes.rest.address.ApartmentDTO;
 import com.everhomes.rest.address.ApartmentFloorDTO;
 import com.everhomes.rest.address.BuildingDTO;
@@ -9,45 +7,11 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.address.ListApartmentFloorCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
-import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
-import com.everhomes.rest.business.BusinessDTO;
-import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
-import com.everhomes.rest.business.DeleteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.business.FindBusinessByIdCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
-import com.everhomes.rest.business.GetBusinessesByScopeCommand;
-import com.everhomes.rest.business.GetReceivedCouponCountCommand;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
-import com.everhomes.rest.business.ListUserByIdentifierCommand;
-import com.everhomes.rest.business.ListUserByKeywordCommand;
-import com.everhomes.rest.business.ReSyncBusinessCommand;
-import com.everhomes.rest.business.SyncBusinessCommand;
-import com.everhomes.rest.business.SyncDeleteBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
-import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
-import com.everhomes.rest.business.UserFavoriteCommand;
-import com.everhomes.rest.business.admin.CreateBusinessAdminCommand;
-import com.everhomes.rest.business.admin.DeletePromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommandResponse;
-import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
+import com.everhomes.rest.business.*;
+import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
-import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
-import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
-import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
-import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
-import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
-import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.openapi.ValidateUserPassCommand;
+import com.everhomes.rest.openapi.*;
 import com.everhomes.rest.region.ListRegionByKeywordCommand;
 import com.everhomes.rest.region.ListRegionCommand;
 import com.everhomes.rest.region.RegionDTO;
@@ -58,6 +22,8 @@ import com.everhomes.rest.user.ListUserCommand;
 import com.everhomes.rest.user.UserDtoForBiz;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.Tuple;
+
+import java.util.List;
 
 public interface BusinessService {
     void syncBusiness(SyncBusinessCommand cmd);
@@ -111,4 +77,14 @@ public interface BusinessService {
 	CreateBusinessGroupResponse createBusinessGroup(CreateBusinessGroupCommand cmd);
 	void joinBusinessGroup(JoinBusinessGroupCommand cmd);
 	Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(ListApartmentFloorCommand cmd);
+
+    /**
+     * 电商运营数据
+     */
+    ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd);
+
+    /**
+     * 新增或者修改运营数据
+     */
+    void createBusinessPromotion(CreateBusinessPromotionCommand cmd);
 }

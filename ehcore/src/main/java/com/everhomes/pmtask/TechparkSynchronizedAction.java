@@ -76,105 +76,104 @@ public class TechparkSynchronizedAction implements Runnable{
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private Long taskId;
+	private Long targetId;
+	private Long organizationId;
 	
-	public TechparkSynchronizedAction(final String taskId) {
-		this.taskId = Long.valueOf(taskId);
+	public TechparkSynchronizedAction(final String json) {
+		String[] ids = json.split(",");
+		this.taskId = Long.valueOf(ids[0]);
+		this.targetId = Long.valueOf(ids[1]);
+		this.organizationId = Long.valueOf(ids[2]);
+
 	}
 	
 	@Override
 	public void run() {
-		User user = UserContext.current().getUser();
+		
 		PmTask task = pmTaskProvider.findTaskById(taskId);
+		
+		UserContext userContext = UserContext.current();
+		User user = userContext.getUser();
+		
+//		if(null == user) {
+			user = userProvider.findUserById(task.getCreatorUid());
+			userContext.setUser(user);
+			userContext.setNamespaceId(task.getNamespaceId());
+			userContext.setScheme("http");
+//		}
+		
 		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
 		Category category = null;
 		if(null != task.getCategoryId())
 			category = categoryProvider.findCategoryById(task.getCategoryId());
 		
 		//查询图片
-//		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
-//		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
-//			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
-//			
-//			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
-//	                EntityType.USER.getCode(), r.getCreatorUid());
-//			attachmentDto.setContentUrl(contentUrl);
-//			return attachmentDto;
-//		}).collect(Collectors.toList());						
+		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
+		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
+			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
+			
+			String contentUrl = getResourceUrlByUir(r.getContentUri(), 
+	                EntityType.USER.getCode(), r.getCreatorUid());
+			attachmentDto.setContentUrl(contentUrl);
+			return attachmentDto;
+		}).collect(Collectors.toList());					
 		
-		synchronizedData(task, /*attachmentDtos,*/ taskCategory, category);
+		synchronizedData(task, attachmentDtos, taskCategory, category);
 	}
 
-	public void synchronizedData(PmTask task, /*List<PmTaskAttachmentDTO> attachments,*/ Category taskCategory, Category category) {
+	private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
+        String url = null;
+        if(uri != null && uri.length() > 0) {
+            try{
+                url = contentServerService.parserUri(uri, ownerType, ownerId);
+            }catch(Exception e){
+                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
+            }
+        }
+        
+        return url;
+    }
+	
+	public void synchronizedData(PmTask task, List<PmTaskAttachmentDTO> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
 		param.put("fileFlag", "1");
 		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
-		JSONArray headContent = new JSONArray();
-		JSONObject head1 = new JSONObject();
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		
 		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
-			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
 			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getAddressOrgId());
 			if(null != orgMember) {
-				head1.put("userName", orgMember.getContactName());
-				head1.put("userId", orgMember.getTargetId());
-				head1.put("phone", orgMember.getContactToken());
-				head1.put("company", organization.getName());
-				
-				param.put("submitUserId", orgMember.getContactToken());
-			}else {
-				
+				param.put("submitUserPhone", orgMember.getContactToken());
 			}
 		}else {
-			Organization organization = organizationProvider.findOrganizationById(task.getOrganizationId());
 			OrganizationMember orgMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(task.getCreatorUid(), task.getOrganizationId());
 			if(null != orgMember) {
-				head1.put("userName", orgMember.getContactName());
-				head1.put("userId", orgMember.getTargetId());
-				head1.put("phone", orgMember.getContactToken());
-				head1.put("company", organization.getName());
-				
-				param.put("submitUserId", orgMember.getContactToken());
+				param.put("submitUserPhone", orgMember.getContactToken());
 			}
 		}
-		
-		headContent.add(head1);
-		
-		JSONArray formContent = new JSONArray();
-		JSONObject form = new JSONObject();
-		if(null != task.getAddressId()) {
-			Address address = addressProvider.findAddressById(task.getAddressId());
-			if(null != address)
-				form.put("chooseStoried", address.getBuildingName());
-			else
-				form.put("chooseStoried", "");
-		}else{
-			form.put("chooseStoried", "");
-		}
-		
-		form.put("serviceType", taskCategory.getName());
-		form.put("serviceClassify", null != category?category.getName():"");
-		form.put("serviceContent", content);
-		form.put("fileType", "物业维修申请流程");
-		form.put("taskUrgencyLevel", "普通");
-		form.put("liaisonContent", "");
-		form.put("backDate", dateSF.format(new Date()));
-		formContent.add(form);
+		OrganizationMember orgMember2 = organizationProvider.findOrganizationMemberByOrgIdAndUId(targetId, organizationId);
+
+		param.put("acquiringDept", organization.getName());
+		param.put("acquiringUser", orgMember2.getContactToken());
+		param.put("serviceContent", content);
+		param.put("backDate", dateSF.format(new Date()));
 		
 		JSONArray enclosure = new JSONArray();
 		
-		String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
-        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-
-        String attachmentJson = valueOperations.get(key);
-        List<AttachmentDescriptor> attachments = JSONObject.parseArray(attachmentJson, AttachmentDescriptor.class);
-        LOGGER.error("Delete TechparkSynchronizedData key, key={}", key);
-        redisTemplate.delete(key);
+//		String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
+//        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
+//        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
+//        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
+//
+//        String attachmentJson = valueOperations.get(key);
+//        List<AttachmentDescriptor> attachments = JSONObject.parseArray(attachmentJson, AttachmentDescriptor.class);
+//        LOGGER.error("Delete TechparkSynchronizedData key, key={}", key);
+//        redisTemplate.delete(key);
 		
 		if(null != attachments) {
-			for(AttachmentDescriptor ad: attachments) {
+			for(PmTaskAttachmentDTO ad: attachments) {
 				JSONObject attachment = new JSONObject();
 				ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
 				String resourceName = resource.getResourceName();
@@ -188,13 +187,13 @@ public class TechparkSynchronizedAction implements Runnable{
 					attachment.put("fileName", "");
 				}
 				
-//				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
+				String contentUrl = getResourceUrlByUir(ad.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
 				
 				attachment.put("fileSuffix", fileSuffix);
 				
 				String fileContent = null;
 				try {
-					fileContent = getImageStr(ad.getContentUrl());
+					fileContent = getImageStr(contentUrl);
 //					String fileContent1 = getURLImage(contentUrl);
 //					
 //					System.out.println(fileContent.equals(fileContent1));
@@ -211,8 +210,6 @@ public class TechparkSynchronizedAction implements Runnable{
 			}
 		}
 		
-		param.put("headContent", headContent);
-		param.put("formContent", formContent);
 		param.put("enclosure", enclosure);
 		
         LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());

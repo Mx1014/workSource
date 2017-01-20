@@ -38,6 +38,8 @@ public class PmTaskLogDTO {
 	private Timestamp operatorTime;
 	private String text;
 	
+	private String statusName;
+	
 	@ItemType(PmTaskAttachmentDTO.class)
 	private List<PmTaskAttachmentDTO> attachments;
 	
@@ -137,5 +139,11 @@ public class PmTaskLogDTO {
 	}
 	public void setOperatorPhone(String operatorPhone) {
 		this.operatorPhone = operatorPhone;
+	}
+	public String getStatusName() {
+		return statusName;
+	}
+	public void setStatusName(String statusName) {
+		this.statusName = statusName;
 	}
 }

@@ -11,7 +11,7 @@ package com.everhomes.rest.parking;
  * </ul>
  */
 public enum ParkingLotVendor {
-    BOSIGAO("BOSIGAO"), ETCP("ETCP"), BOSIGAO2("BOSIGAO2"), KETUO("KETUO"), KETUO2("KETUO2");
+    BOSIGAO("BOSIGAO"), ETCP("ETCP"), BOSIGAO2("BOSIGAO2"), KETUO("KETUO"), KETUO2("KETUO2"), WANKE("WANKE");
     
     private String code;
     private ParkingLotVendor(String code) {

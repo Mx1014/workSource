@@ -12,7 +12,7 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowCaseEntityType {
-	LIST("list"), MULTI_LINE("multi_line"), TEXT("text"), IMAGE("image");
+	LIST("list"), MULTI_LINE("multi_line"), TEXT("text"), IMAGE("image"), FILE("file");
 	
 	private String code;
     private FlowCaseEntityType(String code) {

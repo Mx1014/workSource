@@ -1,33 +1,7 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import com.everhomes.contentserver.ContentServerProvider;
-import com.everhomes.contentserver.ContentServerResource;
-import com.everhomes.rest.activity.*;
-import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.Condition;
-import org.jooq.JoinType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import ch.hsr.geohash.GeoHash;
-import freemarker.template.SimpleDate;
-import net.greghaines.jesque.Job;
-
-import com.everhomes.aclink.AclinkConstant;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
@@ -36,6 +10,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -52,35 +27,21 @@ import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
-import com.everhomes.promotion.OpPromotionConstant;
-import com.everhomes.promotion.OpPromotionScheduleJob;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
-import com.everhomes.rentalv2.CancelUnsuccessRentalOrderAction;
-import com.everhomes.rest.aclink.DoorAccessDriverType;
+import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.forum.AttachmentDTO;
-import com.everhomes.rest.forum.ForumConstants;
-import com.everhomes.rest.forum.GetTopicCommand;
-import com.everhomes.rest.forum.ListActivityTopicByCategoryAndTagCommand;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PostFavoriteFlag;
-import com.everhomes.rest.forum.PostStatus;
-import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
-import com.everhomes.rest.forum.TopicPublishStatus;
+import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
 import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
 import com.everhomes.rest.group.RequestToJoinGroupCommand;
@@ -89,48 +50,42 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
-import com.everhomes.rest.organization.ListCommunitiesByOrganizationIdCommand;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.ui.user.ActivityLocationScope;
-import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
-import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
-import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserFavoriteDTO;
-import com.everhomes.rest.user.UserFavoriteTargetType;
-import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
+import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.rest.yellowPage.ServiceAllianceCategoryDTO;
-import com.everhomes.rest.yellowPage.ServiceAllianceLocalStringCode;
 import com.everhomes.scheduler.ScheduleProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.DateUtils;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StatusChecker;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
-import com.everhomes.yellowPage.ServiceAllianceCategories;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import net.greghaines.jesque.Job;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
 
 
 @Component
@@ -1619,8 +1574,8 @@ public class ActivityServiceImpl implements ActivityService {
         
         CrossShardListingLocator locator=new CrossShardListingLocator();
         locator.setAnchor(cmd.getPageAnchor());
-        int ipageSize = configurationProvider.getIntValue("pagination.page.size", AppConstants.PAGINATION_DEFAULT_SIZE);
-        
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+
         List<Activity> activities=new ArrayList<Activity>();
         
         //查第一页时，一部分为上次查询过后新发的贴 modified by xiongying 20160707
@@ -1642,7 +1597,7 @@ public class ActivityServiceImpl implements ActivityService {
 //
 //		List<Long> ids = getViewedActivityIds();
 		
-        List<Activity> ret = activityProvider.listActivities(locator, ipageSize - activities.size() + 1, condition, false);
+        List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false);
         
 //        if(ret != null && ret.size() > 0) {
 //        	for(Activity act : ret) {
@@ -2223,6 +2178,7 @@ public class ActivityServiceImpl implements ActivityService {
 		cmd.setPageAnchor(command.getPageAnchor());
 		cmd.setPageSize(command.getPageSize());
 		cmd.setCategoryId(command.getCategoryId());
+        cmd.setOrderByCreateTime(command.getOrderByCreateTime());
 		
 		ListActivitiesReponse activities = listOfficialActivities(cmd);
 		
@@ -2996,6 +2952,54 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
     @Override
+    public ListActivityPromotionEntitiesBySceneReponse listActivityPromotionEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd) {
+
+        ListNearbyActivitiesBySceneCommand listCmd = new ListNearbyActivitiesBySceneCommand();
+        listCmd.setCategoryId(cmd.getCategoryId());
+        listCmd.setSceneToken(cmd.getSceneToken());
+        listCmd.setPageSize(cmd.getPageSize());
+        listCmd.setPageAnchor(cmd.getPageAnchor());
+        listCmd.setOrderByCreateTime(Byte.valueOf("1"));
+
+        ListActivitiesReponse activityReponse;
+        if (OfficialFlag.fromCode(cmd.getPublishPrivilege()) == OfficialFlag.YES) {
+            // 官方活动
+            activityReponse = this.listOfficialActivitiesByScene(listCmd);
+        } else {
+            // 非官方活动
+            activityReponse = this.listNearbyActivitiesByScene(listCmd);
+        }
+        ListActivityPromotionEntitiesBySceneReponse promotionReponse = new ListActivityPromotionEntitiesBySceneReponse();
+
+        if (activityReponse != null && activityReponse.getActivities() != null) {
+            List<ModulePromotionEntityDTO> entities = activityReponse.getActivities().stream()
+                    .map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
+            promotionReponse.setEntities(entities);
+        }
+        return promotionReponse;
+    }
+
+    private ModulePromotionEntityDTO toModulePromotionEntityDTO(ActivityDTO activityDTO) {
+        ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+        dto.setId(activityDTO.getActivityId());
+        dto.setDescription(activityDTO.getDescription());
+        dto.setPosterUrl(activityDTO.getPosterUrl());
+        dto.setSubject(activityDTO.getTag() + " | " + activityDTO.getSubject());
+
+        Map<String, Long> metadata = new HashMap<>();
+        metadata.put("forumId", activityDTO.getForumId());
+        metadata.put("topicId", activityDTO.getPostId());
+
+        dto.setMetadata(StringHelper.toJsonString(metadata));
+
+        ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO();
+        LocalDateTime startTime = LocalDateTime.parse(activityDTO.getStartTime(), DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.0"));
+        infoDTO.setInfoType(ModulePromotionInfoType.TEXT.getCode());
+        infoDTO.setContent(startTime.format(DateTimeFormatter.ofPattern("yyyy-MM-dd")));
+        dto.setInfoList(Collections.singletonList(infoDTO));
+        return dto;
+    }
+
     public void setActivityAchievement(SetActivityAchievementCommand cmd) {
 
         Activity activity = activityProvider.findActivityById(cmd.getActivityId());
@@ -3162,5 +3166,4 @@ public class ActivityServiceImpl implements ActivityService {
             return dto;
         }
     }
-
 }

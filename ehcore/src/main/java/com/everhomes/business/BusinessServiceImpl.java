@@ -2,25 +2,7 @@
 package com.everhomes.business;
 
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Comparator;
-import java.util.List;
-import java.util.UUID;
-import java.util.stream.Collectors;
-
-import org.apache.commons.lang.StringUtils;
-import org.apache.commons.lang.math.NumberUtils;
-import org.apache.lucene.spatial.DistanceUtils;
-import org.apache.lucene.spatial.geohash.GeoHashUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-
 import ch.hsr.geohash.GeoHash;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.RoleAssignment;
 import com.everhomes.address.Address;
@@ -59,105 +41,41 @@ import com.everhomes.rest.address.ListBuildingByKeywordCommand;
 import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.business.BaiduGeocoderResponse;
-import com.everhomes.rest.business.BusinessAsignedNamespaceCommand;
-import com.everhomes.rest.business.BusinessAssignedNamespaceVisibleFlagType;
-import com.everhomes.rest.business.BusinessAssignedScopeDTO;
-import com.everhomes.rest.business.BusinessCommand;
-import com.everhomes.rest.business.BusinessDTO;
-import com.everhomes.rest.business.BusinessFavoriteStatus;
-import com.everhomes.rest.business.BusinessRecommendStatus;
-import com.everhomes.rest.business.BusinessScope;
-import com.everhomes.rest.business.BusinessServiceErrorCode;
-import com.everhomes.rest.business.BusinessTargetType;
-import com.everhomes.rest.business.CancelFavoriteBusinessCommand;
-import com.everhomes.rest.business.DeleteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessCommand;
-import com.everhomes.rest.business.FavoriteBusinessDTO;
-import com.everhomes.rest.business.FavoriteBusinessesCommand;
-import com.everhomes.rest.business.FavoriteFlagType;
-import com.everhomes.rest.business.FindBusinessByIdCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommand;
-import com.everhomes.rest.business.GetBusinessesByCategoryCommandResponse;
-import com.everhomes.rest.business.GetBusinessesByScopeCommand;
-import com.everhomes.rest.business.GetReceivedCouponCountCommand;
-import com.everhomes.rest.business.ListBusinessByCommonityIdCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommand;
-import com.everhomes.rest.business.ListBusinessByKeywordCommandResponse;
-import com.everhomes.rest.business.ListUserByIdentifierCommand;
-import com.everhomes.rest.business.ListUserByKeywordCommand;
-import com.everhomes.rest.business.ReSyncBusinessCommand;
-import com.everhomes.rest.business.SyncBusinessCommand;
-import com.everhomes.rest.business.SyncDeleteBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessCommand;
-import com.everhomes.rest.business.UpdateBusinessDistanceCommand;
-import com.everhomes.rest.business.UpdateReceivedCouponCountCommand;
-import com.everhomes.rest.business.UserFavoriteCommand;
-import com.everhomes.rest.business.admin.BusinessAdminDTO;
-import com.everhomes.rest.business.admin.BusinessPromoteScopeDTO;
-import com.everhomes.rest.business.admin.CreateBusinessAdminCommand;
-import com.everhomes.rest.business.admin.DeletePromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommand;
-import com.everhomes.rest.business.admin.ListBusinessesByKeywordAdminCommandResponse;
-import com.everhomes.rest.business.admin.PromoteBusinessAdminCommand;
-import com.everhomes.rest.business.admin.RecommendBusinessesAdminCommand;
+import com.everhomes.rest.business.*;
+import com.everhomes.rest.business.admin.*;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.common.ScopeType;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.GetCommunitiesByNameAndCityIdCommand;
 import com.everhomes.rest.community.GetCommunityByIdCommand;
 import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.launchpad.ActionType;
-import com.everhomes.rest.launchpad.ApplyPolicy;
-import com.everhomes.rest.launchpad.DeleteFlagType;
-import com.everhomes.rest.launchpad.ItemDisplayFlag;
-import com.everhomes.rest.launchpad.ItemGroup;
-import com.everhomes.rest.launchpad.ItemTargetType;
-import com.everhomes.rest.launchpad.ScaleType;
-import com.everhomes.rest.openapi.CreateBusinessGroupCommand;
-import com.everhomes.rest.openapi.CreateBusinessGroupResponse;
-import com.everhomes.rest.openapi.JoinBusinessGroupCommand;
-import com.everhomes.rest.openapi.UpdateUserCouponCountCommand;
-import com.everhomes.rest.openapi.UpdateUserOrderCountCommand;
-import com.everhomes.rest.openapi.UserCouponsCommand;
-import com.everhomes.rest.openapi.UserServiceAddressDTO;
-import com.everhomes.rest.openapi.ValidateUserPassCommand;
-import com.everhomes.rest.region.ListRegionByKeywordCommand;
-import com.everhomes.rest.region.ListRegionCommand;
-import com.everhomes.rest.region.RegionAdminStatus;
-import com.everhomes.rest.region.RegionDTO;
-import com.everhomes.rest.region.RegionScope;
+import com.everhomes.rest.launchpad.*;
+import com.everhomes.rest.openapi.*;
+import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
+import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.region.*;
 import com.everhomes.rest.ui.launchpad.FavoriteBusinessesBySceneCommand;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.ui.user.UserProfileDTO;
-import com.everhomes.rest.user.GetUserDefaultAddressCommand;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.ListUserCommand;
-import com.everhomes.rest.user.UserDtoForBiz;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.ValidatePassCommand;
+import com.everhomes.rest.user.*;
+import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.SignupToken;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityProvider;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProfile;
-import com.everhomes.user.UserProfileContstant;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.user.UserServiceAddress;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.ExecutorUtil;
-import com.everhomes.util.PaginationHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.math.NumberUtils;
+import org.apache.lucene.spatial.DistanceUtils;
+import org.apache.lucene.spatial.geohash.GeoHashUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class BusinessServiceImpl implements BusinessService {
@@ -212,6 +130,9 @@ public class BusinessServiceImpl implements BusinessService {
 	
 	@Autowired
 	private GroupService groupService;
+
+    @Autowired
+    private BusinessPromotionProvider businessPromotionProvider;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -2217,4 +2138,69 @@ public class BusinessServiceImpl implements BusinessService {
 			ListApartmentFloorCommand cmd) {
 		return addressService.listApartmentFloor(cmd);
 	}
+
+    @Override
+    public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
+        ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+        List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
+                UserContext.getCurrentNamespaceId(), pageSize, cmd.getPageAnchor());
+
+        List<ModulePromotionEntityDTO> entities =
+                promotions.stream().map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
+
+        reponse.setEntities(entities);
+        return reponse;
+    }
+
+    @Override
+    public void createBusinessPromotion(CreateBusinessPromotionCommand cmd) {
+        if (cmd.getId() != null) {
+            BusinessPromotion promotion = businessPromotionProvider.findById(cmd.getId());
+            if (cmd.getPrice() != null) {
+                promotion.setPrice(cmd.getPrice());
+            }
+            if (cmd.getCommodityUrl() != null) {
+                promotion.setCommodityUrl(cmd.getCommodityUrl());
+            }
+            if (cmd.getDefaultOrder() != null) {
+                promotion.setDefaultOrder(cmd.getDefaultOrder());
+            }
+            if (cmd.getSubject() != null) {
+                promotion.setSubject(cmd.getSubject());
+            }
+            if (cmd.getDescription() != null) {
+                promotion.setDescription(cmd.getDescription());
+            }
+            if (cmd.getPosterUri() != null) {
+                promotion.setPosterUri(cmd.getPosterUri());
+            }
+            businessPromotionProvider.updateBusinessPromotion(promotion);
+        } else {
+            BusinessPromotion promotion = ConvertHelper.convert(cmd, BusinessPromotion.class);
+            promotion.setNamespaceId(UserContext.getCurrentNamespaceId());
+            businessPromotionProvider.createBusinessPromotion(promotion);
+        }
+    }
+
+    private ModulePromotionEntityDTO toModulePromotionEntityDTO(BusinessPromotion promotion) {
+        ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+        dto.setId(promotion.getId());
+        dto.setSubject(promotion.getSubject());
+        dto.setDescription(promotion.getDescription());
+        dto.setPosterUrl(parserUri(promotion.getPosterUri(), EhBusinessPromotions.class.getSimpleName(), promotion.getId()));
+
+        Map<String, String> metadata = new HashMap<>();
+        metadata.put("url", promotion.getCommodityUrl());
+
+        dto.setMetadata(StringHelper.toJsonString(metadata));
+
+        ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO();
+        infoDTO.setContent("¥" + promotion.getPrice().toString());
+        infoDTO.setInfoType(ModulePromotionInfoType.TEXT.getCode());
+        dto.setInfoList(Collections.singletonList(infoDTO));
+        return dto;
+    }
 }

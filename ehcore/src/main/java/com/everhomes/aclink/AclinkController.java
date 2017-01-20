@@ -42,6 +42,7 @@ import com.everhomes.rest.aclink.AclinkLogDTO;
 import com.everhomes.rest.aclink.AclinkLogListResponse;
 import com.everhomes.rest.aclink.AclinkMessageTestCommand;
 import com.everhomes.rest.aclink.AclinkMgmtCommand;
+import com.everhomes.rest.aclink.AclinkRemoteOpenByHardwareIdCommand;
 import com.everhomes.rest.aclink.AclinkRemoteOpenCommand;
 import com.everhomes.rest.aclink.AclinkUpdateLinglingStoreyCommand;
 import com.everhomes.rest.aclink.AclinkUpgradeCommand;
@@ -568,13 +569,29 @@ public class AclinkController extends ControllerBase {
     /**
      * 
      * <b>URL: /aclink/remoteOpen</b>
-     * <p>删除一个组或者单独一个门禁设备</p>
+     * <p>远程开门</p>
      * @return
      */
     @RequestMapping("remoteOpen")
     @RestReturn(value=String.class)
     public RestResponse remoteOpen(@Valid AclinkRemoteOpenCommand cmd) {
         doorAccessService.remoteOpenDoor(cmd.getAuthId());
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;        
+    }
+    
+    /**
+     * 
+     * <b>URL: /aclink/remoteOpenByHardwareId</b>
+     * <p>远程开门</p>
+     * @return
+     */
+    @RequestMapping("remoteOpenByHardwareId")
+    @RestReturn(value=String.class)
+    public RestResponse remoteOpen(@Valid AclinkRemoteOpenByHardwareIdCommand cmd) {
+        doorAccessService.remoteOpenDoor(cmd.getHardwareId());
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

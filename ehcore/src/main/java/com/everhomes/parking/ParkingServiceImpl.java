@@ -56,6 +56,8 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.order.OrderEmbeddedHandler;
 import com.everhomes.order.OrderUtil;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
@@ -133,7 +135,6 @@ import com.everhomes.rest.parking.SetParkingLotConfigCommand;
 import com.everhomes.rest.parking.SetParkingRequestCardConfigCommand;
 import com.everhomes.rest.parking.SurplusCardCountDTO;
 import com.everhomes.rest.parking.GetParkingRequestCardAgreementCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.settings.PaginationConfigHelper;
@@ -179,6 +180,8 @@ public class ParkingServiceImpl implements ParkingService {
     private UserService userService;
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
+    @Autowired
+    private OrganizationProvider organizationProvider;
     
     @Override
     public List<ParkingCardDTO> listParkingCards(ListParkingCardsCommand cmd) {
@@ -191,6 +194,25 @@ public class ParkingServiceImpl implements ParkingService {
         ParkingVendorHandler handler = getParkingVendorHandler(venderName);
         
         List<ParkingCardDTO> cardList = handler.getParkingCardsByPlate(cmd.getOwnerType(), cmd.getOwnerId(), parkingLotId, cmd.getPlateNumber());
+        
+        Long organizationId = cmd.getOrganizationId();
+        User user = UserContext.current().getUser();
+        Long userId = user.getId();
+        String plateOwnerName = user.getNickName();
+        
+        if(null != organizationId) {
+        	OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(userId, organizationId);
+        	if(null != organizationMember) {
+        		plateOwnerName = organizationMember.getContactName();
+        	}
+        }
+        
+        for(ParkingCardDTO card: cardList) {
+        	
+			if(StringUtils.isBlank(card.getPlateOwnerName())) {
+				card.setPlateOwnerName(plateOwnerName);
+			}
+    	}
         
         return cardList;
     }
@@ -575,6 +597,7 @@ public class ParkingServiceImpl implements ParkingService {
 		param.setPlateNumber(cmd.getPlateNumber());
 		param.setPayerEnterpriseId(cmd.getPayerEnterpriseId());
 		param.setPrice(cmd.getPrice());
+		
 		return createParkingOrder(param, ParkingRechargeType.TEMPORARY.getCode());
 
 	}
@@ -590,6 +613,12 @@ public class ParkingServiceImpl implements ParkingService {
 		
 		User user = UserContext.current().getUser();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		
+		OrganizationMember organizationMember = organizationProvider.findOrganizationMemberByOrgIdAndUId(user.getId(), cmd.getPayerEnterpriseId());
+		if(null != organizationMember) {
+			if(null == cmd.getPlateOwnerName())
+				cmd.setPlateOwnerName(organizationMember.getContactName());
+		}
 		
 		parkingRechargeOrder.setRechargeType(rechargeType);
 		parkingRechargeOrder.setOwnerType(cmd.getOwnerType());
@@ -613,8 +642,6 @@ public class ParkingServiceImpl implements ParkingService {
 		parkingRechargeOrder.setRechargeStatus(ParkingRechargeOrderRechargeStatus.UNRECHARGED.getCode());
 		
 		parkingRechargeOrder.setOrderNo(createOrderNo(System.currentTimeMillis()));
-//		parkingRechargeOrder.setNewExpiredTime(addMonth(cmd.getExpiredTime(), cmd.getMonthCount()));
-//		parkingRechargeOrder.setOldExpiredTime(addDays(cmd.getExpiredTime(), 1));
 		
 		parkingRechargeOrder.setPrice(cmd.getPrice());
 		if(rechargeType.equals(ParkingRechargeType.TEMPORARY.getCode())) {

@@ -6,9 +6,9 @@ public interface PmTaskErrorCode {
 
 	int ERROR_CATEGORY_EXIST = 10001;  //任务分类已存在
 	
-    int ERROR_CATEGORY_NULL = 10002;  //任务分类不存在
-    
-    int ERROR_USER_NULL = 10003; //目标用户不存在
+	int ERROR_CATEGORY_NOT_EXIST = 10002;  //任务分类不存在
+
+    int ERROR_USER_NOT_EXIST = 10003; //目标用户不存在
     
     int ERROR_CONTENT_NULL = 10004; //内容不能为空
     
@@ -21,5 +21,9 @@ public interface PmTaskErrorCode {
     int ERROR_ENABLE_FLOW = 10008;  //请启用工作流
     
     int ERROR_USER_PRIVILEGE_EXIST = 10009;  //用户已有该权限，不能重复添加!
+
+    int ERROR_CATEGORY_NULL = 10010;  //分类不能为空！
     
+    int ERROR_CANCEL_TASK = 10011;  //任务已在处理中，不能取消！
+
 }

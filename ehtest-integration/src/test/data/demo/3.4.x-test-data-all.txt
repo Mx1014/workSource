@@ -1527,8 +1527,8 @@
     },
     {
       "namespace_id": "0",
-      "name": "sms.handler.type",
-      "description": "sms handler",
+      "name": "sms.itemName.type",
+      "description": "sms itemName",
       "id": "2",
       "value": "YZX"
     }

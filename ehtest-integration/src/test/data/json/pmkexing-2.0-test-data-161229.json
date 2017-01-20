@@ -86,5 +86,28 @@
       "create_time": "2014-08-01 14:30:16",
       "namespace_id": 0
     }
+  ],
+  "eh_configurations": [
+    {
+      "id": 153,
+      "name": "kexing.pmbill.api.host",
+      "value": "http://120.24.88.192:15902",
+      "description": "kexing pm bill api host",
+      "namespace_id": 0
+    },
+    {
+      "id": 154,
+      "name": "kexing.pmbill.api.billlist",
+      "value": "/tss/rest/chargeRecordInfo/billListForZhenzhong",
+      "description": "kexin pm bill api",
+      "namespace_id": 0
+    },
+    {
+      "id": 155,
+      "name": "kexing.pmbill.api.billcount",
+      "value": "/tss/rest/chargeRecordInfo/billCountForZhenzhong",
+      "description": "kexing pm bill api",
+      "namespace_id": 0
+    }
   ]
 }

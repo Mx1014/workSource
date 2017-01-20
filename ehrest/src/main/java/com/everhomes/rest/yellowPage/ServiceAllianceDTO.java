@@ -41,6 +41,7 @@ import java.util.List;
  *  <li>detailUrl: 服务详情页面URL</li>
  *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  *  <li>moduleUrl : 跳转模块路径</li>
+ *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
@@ -111,6 +112,8 @@ public class ServiceAllianceDTO {
 	private Long jumpType;
 
 	private String moduleUrl;
+	
+	private Byte supportType;
 	
 	public Long getId() {
 		return id;
@@ -322,6 +325,12 @@ public class ServiceAllianceDTO {
 		this.moduleUrl = moduleUrl;
 	}
 
+	public Byte getSupportType() {
+		return supportType;
+	}
+	public void setSupportType(Byte supportType) {
+		this.supportType = supportType;
+	}
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

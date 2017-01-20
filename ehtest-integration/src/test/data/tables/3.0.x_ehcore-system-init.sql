@@ -1,8 +1,8 @@
 SET foreign_key_checks = 0;
 
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'db.init.timestamp', UTC_TIMESTAMP(), 'Database seeding timestamp');
-INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'sms.handler.type','MW','sms handler');
-INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mw.port','9003','sms handler');
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'sms.itemName.type','MW','sms itemName');
+INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mw.port','9003','sms itemName');
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mw.password','223651','mw password');
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mw.user','J02300','mw user');
 INSERT INTO `eh_configurations`(`namespace_id`, `name`, `value`, `description`) VALUES (0, 'mw.host','61.145.229.29','mw host ,special line');

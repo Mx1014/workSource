@@ -37,8 +37,6 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.StringReader;
 import java.math.BigDecimal;
-import java.time.LocalDate;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -151,80 +149,20 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("projectName", currentOrganization().getCommunityName());
         params.put("companyName", organization.getName());
         if (cmd.getBillStatus() != null) {
-            params.put("isPay", cmd.getBillStatus()+"");
+            params.put("isPay", String.valueOf(cmd.getBillStatus()));
         }
-        params.put("pageCount", "1");
-        params.put("pageSize", "1000");
+        int pageOffset = cmd.getPageOffset() != null ? cmd.getPageOffset() : 1;
+        params.put("pageCount", String.valueOf(pageOffset));
+        params.put("pageSize", String.valueOf(pageSize));
 
-        LocalDate date = LocalDate.now().plusMonths(20);
-        // LocalDate date = LocalDate.now();
-
-        int pageOffset = cmd.getPageOffset() != null ? cmd.getPageOffset() - 1 : 0;
-        int monthOffset = pageOffset * pageSize + pageOffset;
-
-        params.put("sdateFrom", date.minusMonths(monthOffset + pageSize).format(DateTimeFormatter.ofPattern("yyyy-MM")));
-        params.put("sdateTo", date.minusMonths(monthOffset).format(DateTimeFormatter.ofPattern("yyyy-MM")));
-
-        BillItemList itemList = post(api, params, BillItemList.class);
-        return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset(), pageSize) : new ListPmKeXingBillsResponse();
+        BillBeans itemList = post(api, params, BillBeans.class);
+        return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset()) : new ListPmKeXingBillsResponse();
     }
 
     private void putLatestSelectedOrganizationToCache(Long organizationId) {
         CacheAccessor accessor = cacheProvider.getCacheAccessor(null);
         accessor.put("pmbill:kexing:latest-selected-organization:" + currUserId(), organizationId);
     }
-
-    /*@Override
-    public ListPmKeXingBillsResponse listPmKeXingBillsByMultiRequest(ListPmKeXingBillsCommand cmd) {
-        Organization organization = this.findOrganizationById(cmd.getOrganizationId());
-        String api = getAPI(ConfigConstants.KEXING_PMBILL_API_BILLLIST);
-
-        Map<String, String> params = new HashMap<>();
-        params.put("projectName", currentOrganization().getCommunityName());
-        params.put("companyName", organization.getName());
-        params.put("pageCount", "1");
-        params.put("pageSize", "1000");
-
-        List<PmKeXingBillDTO> dtoList = new ArrayList<>();
-
-        int monthOffset = (cmd.getPageOffset() != null ? cmd.getPageOffset() - 1 : 0) * cmd.getPageSize();
-        LocalDate date = LocalDate.now().plusMonths(10);
-        // LocalDate date = LocalDate.now();
-
-        boolean breakFlag = false;
-
-        // 发送pageSize此请求, 每次查询一个月的数据
-        for (Integer i = 0; i < cmd.getPageSize(); i++) {
-            params.put("sdate", date.minusMonths(i + monthOffset).format(DateTimeFormatter.ofPattern("yyyy-MM")));
-            BillItemList itemList = post(api, params, BillItemList.class);
-
-            if (itemList != null) {
-                List<PmKeXingBillDTO> billDTOList = itemList.toPmKeXingBillDTOList();
-                if (billDTOList.size() == 0) {
-                    breakFlag = true;
-                    break;
-                }
-                dtoList.addAll(billDTOList);
-            }
-        }
-
-        dtoList.sort((o1, o2) -> o2.getBillDate().compareTo(o1.getBillDate()));
-
-        ListPmKeXingBillsResponse response = new ListPmKeXingBillsResponse();
-        response.setBills(dtoList);
-
-        if (!breakFlag) {
-            params.put("sdate", date.minusMonths(monthOffset + cmd.getPageSize() + 1).format(DateTimeFormatter.ofPattern("yyyy-MM")));
-            BillItemList itemList = post(api, params, BillItemList.class);
-
-            if (itemList != null) {
-                if (itemList.toPmKeXingBillDTOList().size() > 0) {
-                    response.setNextPageOffset(cmd.getPageOffset() != null ? cmd.getPageOffset() + 1 : 2);
-                }
-            }
-        }
-        return response;
-    }*/
 
     @Override
     public PmKeXingBillDTO getPmKeXingBill(GetPmKeXingBillCommand cmd) {
@@ -234,13 +172,13 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("projectName", currentOrganization().getCommunityName());
         params.put("companyName", organization.getName());
         params.put("pageCount", "1");
-        params.put("pageSize", "1000");
+        params.put("pageSize", "1");
         params.put("sdateFrom", cmd.getDateStr());
         params.put("sdateTo", cmd.getDateStr());
 
-        BillItemList itemList = post(api, params, BillItemList.class);
-        if (itemList != null && itemList.result.size() > 0) {
-            return itemList.toPmKeXingBillDTO();
+        BillBeans billBeans = post(api, params, BillBeans.class);
+        if (billBeans != null && billBeans.bill.size() > 0) {
+            return billBeans.toPmKeXingBillDTO();
         }
         return new PmKeXingBillDTO();
     }
@@ -253,8 +191,6 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         Map<String, String> params = new HashMap<>();
         params.put("projectName", currentOrganization().getCommunityName());
         params.put("companyName", organization.getName());
-        // params.put("sdateFrom", "");// 不传查所有
-        // params.put("sdateTo", "");// 不传查所有
 
         BillStat billStat = post(api, params, BillStat.class);
         return billStat != null ? billStat.toBillStatDTO() : new PmKeXingBillStatDTO();
@@ -323,54 +259,60 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         return xmlToBean(post(api, params), clz);
     }
 
-    @XmlRootElement(name = "list")
-    private static class BillItemList extends ToStr {
+    @XmlRootElement(name = "billBeans")
+    private static class BillBeans extends ToStr {
+        // 订单状态字符串缓存 {0: "未缴", 1: "已缴"}
+        private Map<Byte, String> cacheMap = new HashMap<>();
+
         @XmlElement
-        private List<BillItem> result = new ArrayList<>();
+        private List<Bill> bill = new ArrayList<>();
 
-        ListPmKeXingBillsResponse toPmKeXingBillResponse(Integer pageOffset, Integer pageSize) {
+        ListPmKeXingBillsResponse toPmKeXingBillResponse(Integer pageOffset) {
             ListPmKeXingBillsResponse response = new ListPmKeXingBillsResponse();
-
-            Map<String, List<BillItem>> dateBillItemListMap = result.parallelStream().collect(Collectors.groupingBy(BillItem::getBillDate));
-
-            dateBillItemListMap.forEach((date, billItemList) -> {
-                PmKeXingBillDTO dto = this.toPmKeXingBillDTO(date, billItemList);
-                response.getBills().add(dto);
-            });
-
-            // 因为对方提供的分页机制有点问题, 所以我们这边只要取到数据就设置有下一页, 直到取不到数据为止
-            if (response.getBills().size() >= pageSize) {
-                response.setNextPageOffset(pageOffset != null ? pageOffset + 1 : 2);
+            for (Bill b : bill) {
+                PmKeXingBillDTO billDTO = this.toPmKeXingBillDTO(b);
+                response.getBills().add(billDTO);
+                if (response.getNextPageOffset() == null && b.hasNextPag == TrueOrFalseFlag.TRUE.getCode()) {
+                    response.setNextPageOffset(pageOffset != null ? ++pageOffset : 2);
+                }
             }
-            response.getBills().sort((o1, o2) -> o2.getBillDate().compareTo(o1.getBillDate()));
             return response;
         }
 
-        PmKeXingBillDTO toPmKeXingBillDTO(String date, List<BillItem> billItemList) {
+        PmKeXingBillDTO toPmKeXingBillDTO(Bill bill) {
             PmKeXingBillDTO dto = new PmKeXingBillDTO();
-            dto.setBillDate(date);
+            dto.setBillDate(bill.billDate);
+            dto.setReceivableAmount(bill.totalShouldMoney);
 
-            Optional<BigDecimal> receivableAmount = billItemList.parallelStream().map(BillItem::getReceivable).collect(Collectors.reducing(BigDecimal::add));
-            Optional<BigDecimal> unpaidAmount = billItemList.parallelStream().map(BillItem::getActualmoney).collect(Collectors.reducing(BigDecimal::add));
+            bill.billBeans.parallelStream()
+                    .filter(bean -> bean.isPay == 0)
+                    .map(BillBean::getActualmoney).collect(Collectors.reducing(BigDecimal::add))
+                    .ifPresent(dto::setUnpaidAmount);
 
-            receivableAmount.ifPresent(dto::setReceivableAmount);
-            unpaidAmount.ifPresent(dto::setUnpaidAmount);
+            dto.setBillStatus(processBillStatusLocaleString(cacheMap, bill.billBeans));
 
-            boolean haveUnpaidItem = billItemList.stream().map(BillItem::getIsPay).anyMatch(status -> Objects.equals(status, PmKeXingBillStatus.UNPAID.getCode()));
-            Byte billStatusLocaleCode = haveUnpaidItem ? PmKeXingBillStatus.UNPAID.getCode() : PmKeXingBillStatus.PAID.getCode();
-            String billStatus = localeStringService.getLocalizedString(PmKeXingBillLocalStringCode.SCOPE, String.valueOf(billStatusLocaleCode), currLocale(), "");
-            dto.setBillStatus(billStatus);
-
-            List<PmKeXingBillItemDTO> items = billItemList.parallelStream().map(BillItem::toBillItemDTO).collect(Collectors.toList());
+            List<PmKeXingBillItemDTO> items = bill.billBeans.parallelStream()
+                    .map(BillBean::toBillItemDTO).collect(Collectors.toList());
             dto.setItems(items);
             return dto;
         }
 
         PmKeXingBillDTO toPmKeXingBillDTO() {
-            Map<String, List<BillItem>> dateBillItemListMap = result.parallelStream().collect(Collectors.groupingBy(BillItem::getBillDate));
-            PmKeXingBillDTO[] dtoArr = new PmKeXingBillDTO[1];
-            dateBillItemListMap.forEach((date, itemList) -> dtoArr[0] = this.toPmKeXingBillDTO(date, itemList));
-            return dtoArr[0];
+            if (bill != null && bill.size() > 0) {
+                return this.toPmKeXingBillDTO(bill.get(0));
+            }
+            return new PmKeXingBillDTO();
+        }
+
+        private String processBillStatusLocaleString(Map<Byte, String> cacheMap, List<BillBean> billBeans) {
+            boolean haveUnpaidItem = billBeans.stream().map(BillBean::getIsPay).anyMatch(status -> Objects.equals(status, PmKeXingBillStatus.UNPAID.getCode()));
+            Byte billStatusLocaleCode = haveUnpaidItem ? PmKeXingBillStatus.UNPAID.getCode() : PmKeXingBillStatus.PAID.getCode();
+            String billStatus = cacheMap.get(billStatusLocaleCode);
+            if (billStatus == null) {
+                billStatus = localeStringService.getLocalizedString(PmKeXingBillLocalStringCode.SCOPE, String.valueOf(billStatusLocaleCode), currLocale(), "");
+                cacheMap.put(billStatusLocaleCode, billStatus);
+            }
+            return billStatus;
         }
     }
 
@@ -378,10 +320,21 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         return UserContext.current().getUser().getLocale();
     }
 
+    private static class Bill extends ToStr {
+        @XmlElement
+        private List<BillBean> billBeans;
+        @XmlElement
+        private String billDate;
+        @XmlElement
+        private Byte hasNextPag;
+        @XmlElement
+        private BigDecimal totalShouldMoney;
+    }
+
     /**
      * 账单
      */
-    private static class BillItem extends ToStr {
+    private static class BillBean extends ToStr {
         @XmlElement
         private Integer hasNextPag;
         @XmlElement
@@ -401,10 +354,6 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             dto.setName(fiName);
             dto.setAmount(receivable);
             return dto;
-        }
-
-        String getBillDate() {
-            return billDate != null ? billDate : "";
         }
 
         BigDecimal getReceivable() {
@@ -503,7 +452,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
                 "</list>";
 
         PmKeXingBillServiceImpl service = new PmKeXingBillServiceImpl();
-        BillItemList billItemList = service.xmlToBean(xml, BillItemList.class);
+        BillBeans billItemList = service.xmlToBean(xml, BillBeans.class);
         System.out.println(billItemList);
     }*/
 }

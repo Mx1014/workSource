@@ -14,7 +14,7 @@ import java.math.BigDecimal;
 public class PmKeXingBillItemDTO {
 
     private String name;
-    private BigDecimal amount;
+    private BigDecimal amount = BigDecimal.ZERO;
 
     public String getName() {
         return name;

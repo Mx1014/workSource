@@ -1192,9 +1192,21 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhServiceAllianceInvestRequests.class, Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_INVEST_REQUESTS).fetchOne().value1();
+        });        
+        syncTableSequence(null, EhGeneralApprovals.class, Tables.EH_GENERAL_APPROVALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_GENERAL_APPROVALS.ID.max()).from(Tables.EH_GENERAL_APPROVALS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhGeneralForms.class, Tables.EH_GENERAL_FORMS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_GENERAL_FORMS.ID.max()).from(Tables.EH_GENERAL_FORMS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhGeneralApprovalVals.class, Tables.EH_GENERAL_APPROVAL_VALS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_GENERAL_APPROVAL_VALS.ID.max()).from(Tables.EH_GENERAL_APPROVAL_VALS).fetchOne().value1();
         });
         syncTableSequence(null, EhQualityInspectionStandardSpecificationMap.class, Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP.ID.max()).from(Tables.EH_QUALITY_INSPECTION_STANDARD_SPECIFICATION_MAP).fetchOne().value1();
+        });
+        syncTableSequence(null, EhBusinessPromotions.class, Tables.EH_BUSINESS_PROMOTIONS.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_BUSINESS_PROMOTIONS.ID.max()).from(Tables.EH_BUSINESS_PROMOTIONS).fetchOne().value1();
         });
         syncTableSequence(null, EhQualityInspectionTaskTemplates.class, Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES.ID.max()).from(Tables.EH_QUALITY_INSPECTION_TASK_TEMPLATES).fetchOne().value1();
@@ -1202,7 +1214,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhDoorAuthLogs.class, Tables.EH_DOOR_AUTH_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOOR_AUTH_LOGS.ID.max()).from(Tables.EH_DOOR_AUTH_LOGS).fetchOne().value1();
         });
-
+        syncTableSequence(null, EhQualityInspectionSpecifications.class, Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
