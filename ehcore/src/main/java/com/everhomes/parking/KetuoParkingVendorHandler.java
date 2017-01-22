@@ -511,10 +511,11 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		return json;
 	}
 	
-	private Timestamp addDays(Long oldPeriod, int days) {
+	//储能月卡充值开始时间 只加一秒
+	private Timestamp addDays(Long oldPeriod, int seconds) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(oldPeriod);
-		calendar.add(Calendar.DATE, days);
+		calendar.add(Calendar.SECOND, seconds);
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;
