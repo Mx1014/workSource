@@ -275,3 +275,15 @@ VALUES ((@menu_scope_id := @menu_scope_id + 1), 41300, '', 'EhNamespaces', 99998
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), 40750, '', 'EhNamespaces', 999985, 2);
 
+
+-- 设备巡检配置统计菜单 by xiongying20170122
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('20850', '统计', '20800', NULL, 'react:/equipment-inspection/statistics', '1', '2', '/20000/20800/20850', 'park', '300', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show_flag`,`status`,`discription`,`sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1),10011,20850,'设备巡检',1,1,'设备巡检 管理员权限',710);
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20850, '', 'EhNamespaces', 999992, 2);
