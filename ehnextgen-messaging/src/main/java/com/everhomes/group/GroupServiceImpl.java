@@ -1033,6 +1033,15 @@ public class GroupServiceImpl implements GroupService {
         Group group = checkGroupParameter(groupId, userId, "requestToJoinGroup");
         
     	GroupMember member = this.groupProvider.findGroupMemberByMemberInfo(groupId, EntityType.USER.getCode(), user.getId());
+    	// fix bug: 如果一个俱乐部原来是加入需要验证，一个用户加入了一下，后面俱乐部改成了不需要验证，这里member表会一直有一条记录
+    	// 导致这个人始终无法加入该俱乐部， add by tt, 20171122
+    	if (member != null && GroupDiscriminator.GROUP == GroupDiscriminator.fromCode(group.getDiscriminator()) 
+        		&& GroupPrivacy.PUBLIC == GroupPrivacy.fromCode(group.getPrivateFlag())
+        		&& GroupJoinPolicy.fromCode(group.getJoinPolicy()) == GroupJoinPolicy.FREE
+        		&& GroupMemberStatus.fromCode(member.getMemberStatus()) == GroupMemberStatus.WAITING_FOR_APPROVAL) {
+    		deletePendingGroupMember(userId, member);
+    		member = null;
+    	}
         if(member == null) {
             member = new GroupMember();
             member.setCreatorUid(user.getId());
