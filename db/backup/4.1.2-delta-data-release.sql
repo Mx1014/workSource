@@ -222,7 +222,10 @@ UPDATE `eh_flow_variables` SET `label`='上一步节点处理人' WHERE `id`='20
 -- merge from serviceAlliance2.0 add by xiongying20170119
 UPDATE eh_service_alliance_categories SET selected_logo_url = logo_url;
 
+<<<<<<< HEAD
 
+=======
+>>>>>>> master
 -- modify serviceDetail url add by xiongying20170120
 update eh_configurations set value = '/service-alliance/index.html#/service_detail/%s/%s?_k=%s&ownerType=%s&ownerId=%s' where name like '%serviceAlliance.serviceDetail.url%';
 
@@ -372,3 +375,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_type`, `role_id`, `order_seq`, `creator_uid`, `create_time`) 
 	VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', NULL, '1', '10121', 'EhAclRoles' ,'1005', '0', '1', UTC_TIMESTAMP());
+
+--办事指南 add by xiongying20170120
+update eh_web_menu_scopes set menu_name = '办事指南', apply_policy=1 where menu_id = 80100 and owner_id = 999983;
+
