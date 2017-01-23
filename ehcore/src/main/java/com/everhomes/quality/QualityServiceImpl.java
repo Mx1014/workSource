@@ -1066,9 +1066,11 @@ public class QualityServiceImpl implements QualityService {
 			
 			if(position != null) {
 				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-");
+					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				} else {
+					dto.setGroupName(position.getName());
+
 				}
-				dto.setGroupName(dto.getGroupName() + position.getName());
 			}
 			
 			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
@@ -1828,10 +1830,13 @@ public class QualityServiceImpl implements QualityService {
 			
 			if(position != null) {
 				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-");
+					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				} else {
+					dto.setGroupName(position.getName());
+
 				}
-				dto.setGroupName(dto.getGroupName() + position.getName());
 			}
+			
         	return dto;
         }).collect(Collectors.toList());
 
@@ -1839,8 +1844,20 @@ public class QualityServiceImpl implements QualityService {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
 			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			if(group != null)
+			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+			if(group != null) {
 				dto.setGroupName(group.getName());
+				
+			} 
+			
+			if(position != null) {
+				if(dto.getGroupName() != null) {
+					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				} else {
+					dto.setGroupName(position.getName());
+
+				}
+			}
 			
         	return dto;
         }).collect(Collectors.toList());

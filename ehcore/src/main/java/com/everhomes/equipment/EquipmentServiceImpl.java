@@ -790,9 +790,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 				
 				if(position != null) {
 					if(dto.getGroupName() != null) {
-						dto.setGroupName(dto.getGroupName() + "-");
+						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+					} else {
+						dto.setGroupName(position.getName());
+
 					}
-					dto.setGroupName(dto.getGroupName() + position.getName());
 				}
 	        	
 	        	return dto;
@@ -805,8 +807,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 	        	
 				StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
 				Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-				if(group != null)
+				OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+				if(group != null) {
 					dto.setGroupName(group.getName());
+					
+				} 
+				
+				if(position != null) {
+					if(dto.getGroupName() != null) {
+						dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+					} else {
+						dto.setGroupName(position.getName());
+
+					}
+				}
 				
 	        	return dto;
 	        }).collect(Collectors.toList());
@@ -2023,9 +2037,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		if(position != null) {
 			if(dto.getGroupName() != null) {
-				dto.setGroupName(dto.getGroupName() + "-");
+				dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+			} else {
+				dto.setGroupName(position.getName());
+
 			}
-			dto.setGroupName(dto.getGroupName() + position.getName());
 		}
     	
     	if(task.getExecutorId() != null && task.getExecutorId() != 0) {
