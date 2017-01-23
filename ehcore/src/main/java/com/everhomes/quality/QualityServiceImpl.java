@@ -29,7 +29,9 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
+
 
 
 
@@ -47,6 +49,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -157,6 +160,7 @@ import com.everhomes.rest.quality.ReviewVerificationResultCommand;
 import com.everhomes.rest.quality.ScoreDTO;
 import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
 import com.everhomes.rest.quality.SpecificationApplyPolicy;
+import com.everhomes.rest.quality.SpecificationInspectionType;
 import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.StandardGroupDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
@@ -2644,9 +2648,15 @@ public class QualityServiceImpl implements QualityService {
 							score.setSpecificationWeight(dto.getWeight());
 
 							score.setSpecificationDescription(dto.getDescription());
-							Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
-							score.setScore(mark);
-
+							
+							//规范事项的话直接显示扣了多少分 by xiongying20170123
+							if(SpecificationInspectionType.SPECIFICATION_ITEM.equals(SpecificationInspectionType.fromStatus(score.getSpecificationInspectionType()))) {
+								score.setScore(score.getScore());
+							} else {
+								Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
+								score.setScore(mark);
+							}
+							
 						}
 						scores.add(score);
 					}
