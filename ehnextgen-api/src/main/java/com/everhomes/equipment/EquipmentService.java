@@ -72,7 +72,7 @@ public interface EquipmentService {
 	HttpServletResponse exportEquipmentStandards(SearchEquipmentStandardsCommand cmd,HttpServletResponse response);
 	void reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd);
 	void deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd);
-	EquipmentsDTO updateEquipments(UpdateEquipmentsCommand cmd);
+	void updateEquipments(UpdateEquipmentsCommand cmd);
 	void deleteEquipments(DeleteEquipmentsCommand cmd);
 	HttpServletResponse exportEquipments(SearchEquipmentsCommand cmd,HttpServletResponse response);
 	EquipmentAccessoriesDTO updateEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd);

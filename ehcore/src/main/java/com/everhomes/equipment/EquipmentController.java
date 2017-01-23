@@ -295,12 +295,12 @@ public class EquipmentController extends ControllerBase {
 	 * <p>创建或修改设备</p>
 	 */
 	@RequestMapping("updateEquipments")
-	@RestReturn(value = EquipmentsDTO.class)
+	@RestReturn(value = String.class)
 	public RestResponse updateEquipments(UpdateEquipmentsCommand cmd) {
 		
-		EquipmentsDTO equipment = equipmentService.updateEquipments(cmd);
+		equipmentService.updateEquipments(cmd);
 		
-		RestResponse response = new RestResponse(equipment);
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

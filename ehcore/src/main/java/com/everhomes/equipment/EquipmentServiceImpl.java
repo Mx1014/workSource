@@ -213,10 +213,13 @@ import java.util.stream.Collectors;
 
 
 
+
 import javax.servlet.http.HttpServletResponse;
 
 
+
 import com.everhomes.util.*;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -229,6 +232,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
+
 
 
 
@@ -460,6 +464,7 @@ import com.everhomes.repeat.RepeatSettings;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.acl.admin.RoleDTO;
 import com.everhomes.rest.address.CommunityAdminStatus;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
@@ -1172,7 +1177,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 	@Override
-	public EquipmentsDTO updateEquipments(UpdateEquipmentsCommand cmd) {
+	public void updateEquipments(UpdateEquipmentsCommand cmd) {
 
 		User user = UserContext.current().getUser();
 		EquipmentInspectionEquipments equipment = null; 
@@ -1204,23 +1209,97 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment.setCreatorUid(user.getId());
 			equipment.setOperatorUid(user.getId());
 		
-			equipmentProvider.creatEquipmentInspectionEquipment(equipment);
 			
-			if(eqStandardMap != null && eqStandardMap.size() > 0) {
-				for(EquipmentStandardMapDTO dto : eqStandardMap) {
-					EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
-					map.setTargetId(equipment.getId());
-					map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
-					map.setReviewerUid(0L);
-					map.setReviewTime(null);
-					map.setReviewResult(ReviewResult.NONE.getCode());
-					map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
-					map.setCreatorUid(user.getId());
-					
-					equipmentProvider.createEquipmentStandardMap(map);
-					equipmentStandardMapSearcher.feedDoc(map);
+			if(cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
+				List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOwnerId());
+				if(communities != null && communities.size() > 0) {
+					for(CommunityDTO community : communities) {
+						equipment.setTargetId(community.getId());
+						equipment.setTargetType(OwnerType.COMMUNITY.getCode());
+						
+						String tokenString = UUID.randomUUID().toString();
+						equipment.setQrCodeToken(tokenString);
+						equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+						equipmentSearcher.feedDoc(equipment);
+						
+						if(eqStandardMap != null && eqStandardMap.size() > 0) {
+							for(EquipmentStandardMapDTO dto : eqStandardMap) {
+								EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+								map.setTargetId(equipment.getId());
+								map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+								map.setReviewerUid(0L);
+								map.setReviewTime(null);
+								map.setReviewResult(ReviewResult.NONE.getCode());
+								map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+								map.setCreatorUid(user.getId());
+								
+								equipmentProvider.createEquipmentStandardMap(map);
+								equipmentStandardMapSearcher.feedDoc(map);
+							}
+						}
+						
+						List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
+					    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
+						
+						if(cmd.getEqAccessoryMap() != null) {
+							for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
+								map.setEquipmentId(equipment.getId());
+								updateEquipmentAccessoryMap(map);
+								eqAccessoryMap.add(map);
+							}
+						}
+						
+						if(cmd.getAttachments() != null) {
+							for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
+								attachment.setEquipmentId(equipment.getId());
+								updateEquipmentAttachment(attachment, user.getId());
+								attachments.add(attachment);
+							}
+						}
+					}
+				}
+			} else {
+				String tokenString = UUID.randomUUID().toString();
+				equipment.setQrCodeToken(tokenString);
+				equipmentProvider.creatEquipmentInspectionEquipment(equipment);
+				equipmentSearcher.feedDoc(equipment);
+				
+				if(eqStandardMap != null && eqStandardMap.size() > 0) {
+					for(EquipmentStandardMapDTO dto : eqStandardMap) {
+						EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
+						map.setTargetId(equipment.getId());
+						map.setTargetType(InspectionStandardMapTargetType.EQUIPMENT.getCode());
+						map.setReviewerUid(0L);
+						map.setReviewTime(null);
+						map.setReviewResult(ReviewResult.NONE.getCode());
+						map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+						map.setCreatorUid(user.getId());
+						
+						equipmentProvider.createEquipmentStandardMap(map);
+						equipmentStandardMapSearcher.feedDoc(map);
+					}
+				}
+				
+				List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
+			    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
+				
+				if(cmd.getEqAccessoryMap() != null) {
+					for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
+						map.setEquipmentId(equipment.getId());
+						updateEquipmentAccessoryMap(map);
+						eqAccessoryMap.add(map);
+					}
+				}
+				
+				if(cmd.getAttachments() != null) {
+					for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
+						attachment.setEquipmentId(equipment.getId());
+						updateEquipmentAttachment(attachment, user.getId());
+						attachments.add(attachment);
+					}
 				}
 			}
+			
 			
 		} else {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
@@ -1255,8 +1334,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 			
 			equipment.setOperatorUid(user.getId());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			
+			String tokenString = UUID.randomUUID().toString();
+			equipment.setQrCodeToken(tokenString);
+			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
+			equipmentSearcher.feedDoc(equipment);
 			
 			if(eqStandardMap != null && eqStandardMap.size() > 0) {
 				//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉 
@@ -1313,56 +1395,55 @@ public class EquipmentServiceImpl implements EquipmentService {
 				
 			}
 			
-		}
-		
-		equipmentSearcher.feedDoc(equipment);
-		
-//		EquipmentQrCodeTokenDTO qrCodeToken = new EquipmentQrCodeTokenDTO();
-//		qrCodeToken.setEquipmentId(equipment.getId());
-//		qrCodeToken.setOwnerId(equipment.getOwnerId());
-//		qrCodeToken.setOwnerType(equipment.getOwnerType());
-//		qrCodeToken.setUpdateTime(equipment.getUpdateTime());
-//		String tokenString = WebTokenGenerator.getInstance().toWebToken(qrCodeToken);
-		String tokenString = UUID.randomUUID().toString();
-		equipment.setQrCodeToken(tokenString);
-		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
-		
-	    List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
-	    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
-		
-		if(cmd.getEqAccessoryMap() != null) {
-			for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
-				map.setEquipmentId(equipment.getId());
-				updateEquipmentAccessoryMap(map);
-				eqAccessoryMap.add(map);
+			List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
+		    List<EquipmentAccessoryMapDTO> eqAccessoryMap = new ArrayList<EquipmentAccessoryMapDTO>();
+			
+			if(cmd.getEqAccessoryMap() != null) {
+				for(EquipmentAccessoryMapDTO map : cmd.getEqAccessoryMap()) {
+					map.setEquipmentId(equipment.getId());
+					updateEquipmentAccessoryMap(map);
+					eqAccessoryMap.add(map);
+				}
 			}
-		}
-		
-		if(cmd.getAttachments() != null) {
-			for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
-				attachment.setEquipmentId(equipment.getId());
-				updateEquipmentAttachment(attachment, user.getId());
-				attachments.add(attachment);
+			
+			if(cmd.getAttachments() != null) {
+				for(EquipmentAttachmentDTO attachment : cmd.getAttachments()) {
+					attachment.setEquipmentId(equipment.getId());
+					updateEquipmentAttachment(attachment, user.getId());
+					attachments.add(attachment);
+				}
 			}
+			
 		}
 		
+//		equipmentSearcher.feedDoc(equipment);
+//		
+////		EquipmentQrCodeTokenDTO qrCodeToken = new EquipmentQrCodeTokenDTO();
+////		qrCodeToken.setEquipmentId(equipment.getId());
+////		qrCodeToken.setOwnerId(equipment.getOwnerId());
+////		qrCodeToken.setOwnerType(equipment.getOwnerType());
+////		qrCodeToken.setUpdateTime(equipment.getUpdateTime());
+////		String tokenString = WebTokenGenerator.getInstance().toWebToken(qrCodeToken);
+//		String tokenString = UUID.randomUUID().toString();
+//		equipment.setQrCodeToken(tokenString);
+//		equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 		
-		EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
-		Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-		if(group != null)
-			dto.setTargetName(group.getName());
-
-//		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
-//        if(standard != null) {
-//        	dto.setStandardName(standard.getName());
-//        }
+//		EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
+//		Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+//		if(group != null)
+//			dto.setTargetName(group.getName());
+//
+////		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
+////        if(standard != null) {
+////        	dto.setStandardName(standard.getName());
+////        }
+//		
+//		dto.setAttachments(attachments);
+//		dto.setEqAccessoryMap(eqAccessoryMap);
+//		
+//		populateEquipmentStandards(dto);
 		
-		dto.setAttachments(attachments);
-		dto.setEqAccessoryMap(eqAccessoryMap);
-		
-		populateEquipmentStandards(dto);
-		
-		return dto;
+//		return dto;
 	}
 	
 	private void populateEquipmentStandards(EquipmentsDTO dto) {
