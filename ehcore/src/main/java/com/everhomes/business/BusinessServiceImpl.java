@@ -2142,7 +2142,7 @@ public class BusinessServiceImpl implements BusinessService {
     @Override
     public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
-
+        
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
         List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
