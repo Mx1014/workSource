@@ -117,7 +117,9 @@ public class PmProviderImpl implements PmTaskProvider{
         query.addConditions(Tables.EH_PM_TASK_TARGETS.TARGET_ID.eq(targetId));
         query.addConditions(Tables.EH_PM_TASK_TARGETS.STATUS.eq(PmTaskTargetStatus.ACTIVE.getCode()));
         
-        PmTaskTarget result = ConvertHelper.convert(query.fetchOne(), PmTaskTarget.class);
+        // 有可能有多行重复数据，此时使用fetchone会报错，但为什么会产生多行重复数据待春节后孙稳回来定位 by lqs 20170123
+        // PmTaskTarget result = ConvertHelper.convert(query.fetchOne(), PmTaskTarget.class);
+        PmTaskTarget result = ConvertHelper.convert(query.fetchAny(), PmTaskTarget.class);
         return result;
     }
 	
