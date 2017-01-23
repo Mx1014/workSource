@@ -63,6 +63,7 @@ public class ActivityUiController extends ControllerBase {
      */
     @RequestMapping("listActivityPromotionEntitiesByScene")
     @RestReturn(value = ListActivityPromotionEntitiesBySceneReponse.class)
+    @RequireAuthentication(false)
     public RestResponse listActivityPromotionEntitiesByScene(ListActivityPromotionEntitiesBySceneCommand cmd){
         RestResponse response = new RestResponse(activityService.listActivityPromotionEntitiesByScene(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);

@@ -7,6 +7,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.*;
+import com.everhomes.util.RequireAuthentication;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -158,6 +160,7 @@ public class BusinessController extends ControllerBase {
      */
     @RequestMapping("listBusinessPromotionEntities")
     @RestReturn(value = ListBusinessPromotionEntitiesReponse.class)
+    @RequireAuthentication(false)
     public RestResponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd){
         RestResponse response = new RestResponse(businessService.listBusinessPromotionEntities(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
