@@ -1760,6 +1760,8 @@ public class QualityProviderImpl implements QualityProvider {
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.CREATE_TIME.le(new Timestamp(endTime)));
 		}
 		
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_ID.in(getActiveSpecifications(ownerType, ownerId)));
+		
 		query.addGroupBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_TYPE, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID, Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.SPECIFICATION_PARENT_ID);
 		query.addOrderBy(Tables.EH_QUALITY_INSPECTION_SPECIFICATION_ITEM_RESULTS.TARGET_ID.desc());
 		
@@ -1784,6 +1786,23 @@ public class QualityProviderImpl implements QualityProvider {
 		return score;
 	}
 
+	private List<Long> getActiveSpecifications(String ownerType, Long ownerId) {
+		List<Long> specificationIds = new ArrayList<Long>();
+		
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhQualityInspectionSpecificationsRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS);
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_TYPE.eq(ownerType));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.STATUS.eq(QualityStandardStatus.ACTIVE.getCode()));
+		
+		query.fetch().map((r) -> {
+			specificationIds.add(r.getId());
+			return null;
+		});
+		
+		return specificationIds;
+	}
+	
 	@Override
 	public Set<Long> listRecordsTaskIdByOperatorId(Long operatorId, Long maxTaskId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
