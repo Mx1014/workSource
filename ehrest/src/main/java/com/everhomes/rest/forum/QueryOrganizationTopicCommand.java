@@ -1,10 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.forum;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -42,6 +42,9 @@ public class QueryOrganizationTopicCommand {
     private List<Long> excludeCategories;
     
     private Long contentCategoryId;
+
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
     
     public QueryOrganizationTopicCommand() {
     }
@@ -78,8 +81,15 @@ public class QueryOrganizationTopicCommand {
 	}
 
 
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
 
-	public void setCommunityId(Long communityId) {
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
+    }
+
+    public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
 
