@@ -687,7 +687,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setCreatorUid(user.getId());
 			standard.setOperatorUid(user.getId());
-
+			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
 			if(cmd.getRepeat() == null) {
 				throw RuntimeErrorException.errorWith(RepeatServiceErrorCode.SCOPE,
 						RepeatServiceErrorCode.ERROR_REPEAT_SETTING_NOT_EXIST,
@@ -714,6 +714,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			standard.setRepeatSettingId(exist.getRepeatSettingId());
 			standard.setStatus(exist.getStatus());
 			standard.setOperatorUid(user.getId());
+			standard.setNamespaceId(UserContext.getCurrentNamespaceId());
 			
 			if(EquipmentStandardStatus.NOT_COMPLETED.equals(EquipmentStandardStatus.fromStatus(standard.getStatus()))) {
 				if(cmd.getRepeat() == null) {
@@ -1222,6 +1223,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment.setGeohash(geohash);
 			equipment.setCreatorUid(user.getId());
 			equipment.setOperatorUid(user.getId());
+			equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
 		
 			
 			if(cmd.getTargetId() == null || cmd.getTargetId() == 0L) {
@@ -1319,6 +1321,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
+			equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
 			
 			if(cmd.getInstallationTime() != null)
 				equipment.setInstallationTime(new Timestamp(cmd.getInstallationTime()));
@@ -2318,6 +2321,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		EquipmentInspectionTasks task = new EquipmentInspectionTasks();
 		task.setOwnerType(equipment.getOwnerType());
 		task.setOwnerId(equipment.getOwnerId());
+		task.setNamespaceId(equipment.getNamespaceId());
 		task.setTargetId(equipment.getTargetId());
 		task.setTargetType(equipment.getTargetType());
 		task.setInspectionCategoryId(equipment.getInspectionCategoryId());

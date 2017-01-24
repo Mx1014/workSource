@@ -8801,7 +8801,8 @@ System.out.println();
 			}
 		}
 
-		if(organizationIds.size() > 0) {
+		//organizationIds改为jobPositionIds by xiongying20170124
+		if(jobPositionIds.size() > 0) {
 			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(jobPositionIds, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
