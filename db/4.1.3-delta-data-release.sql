@@ -287,3 +287,9 @@ INSERT INTO `eh_web_menu_privileges` (`id`,`privilege_id`,`menu_id`,`name`,`show
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 20850, '', 'EhNamespaces', 999992, 2);
+
+    
+-- 设备巡检设备数据迁移 由关联部门改为关联小区 by xiongying20170124
+update eh_equipment_inspection_equipments set target_type = 'community';
+update eh_equipment_inspection_equipments set target_id = 240111044331051304 where target_id = 1003859;
+update eh_equipment_inspection_equipments set target_id = 240111044331051302 where target_id = 1008875;
