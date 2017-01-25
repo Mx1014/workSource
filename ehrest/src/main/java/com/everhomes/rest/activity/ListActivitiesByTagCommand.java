@@ -1,6 +1,10 @@
 package com.everhomes.rest.activity;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
 /**
  * 
  *<ul>
@@ -29,6 +33,9 @@ public class ListActivitiesByTagCommand {
     private Long categoryId;
 
     private Long contentCategoryId;
+
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
     
     public Long getContentCategoryId() {
 		return contentCategoryId;
@@ -92,6 +99,14 @@ public class ListActivitiesByTagCommand {
 
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
+
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
     }
 
     @Override

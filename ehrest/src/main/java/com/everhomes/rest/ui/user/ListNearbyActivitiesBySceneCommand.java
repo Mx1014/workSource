@@ -1,6 +1,10 @@
 package com.everhomes.rest.ui.user;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
 /**
  * 
  *<ul>
@@ -10,7 +14,6 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * <li>categoryId: 活动类型id</li>
- * <li>orderByCreateTime: 根据创建时间排序</li>
  * <li>contentCategoryId: 主题分类id</li>
  *</ul>
  */
@@ -29,7 +32,8 @@ public class ListNearbyActivitiesBySceneCommand {
     
     private Long contentCategoryId;
 
-    private Byte orderByCreateTime;
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
 
     public Long getContentCategoryId() {
 		return contentCategoryId;
@@ -83,16 +87,16 @@ public class ListNearbyActivitiesBySceneCommand {
         return pageSize;
     }
 
-    public Byte getOrderByCreateTime() {
-        return orderByCreateTime;
-    }
-
-    public void setOrderByCreateTime(Byte orderByCreateTime) {
-        this.orderByCreateTime = orderByCreateTime;
-    }
-
     public void setPageSize(Integer pageSize) {
         this.pageSize = pageSize;
+    }
+
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
+
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
     }
 
     @Override

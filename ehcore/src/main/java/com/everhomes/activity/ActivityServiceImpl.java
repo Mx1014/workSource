@@ -1,30 +1,6 @@
 // @formatter:off
 package com.everhomes.activity;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-
-import com.everhomes.contentserver.ContentServerProvider;
-import com.everhomes.contentserver.ContentServerResource;
-import com.everhomes.rest.activity.*;
-import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
-import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
-import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
-import org.elasticsearch.common.geo.GeoHashUtils;
-import org.jooq.Condition;
-import org.jooq.JoinType;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
 import ch.hsr.geohash.GeoHash;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
@@ -34,6 +10,7 @@ import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -58,6 +35,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
+import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
@@ -79,8 +57,11 @@ import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
+import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
+import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.ui.forum.SelectorBooleanFlag;
 import com.everhomes.rest.ui.user.*;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.visibility.VisibleRegionType;
@@ -92,9 +73,27 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
 import net.greghaines.jesque.Job;
+import org.elasticsearch.common.geo.GeoHashUtils;
+import org.jooq.Condition;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
 
+import javax.annotation.PostConstruct;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.util.*;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import static com.everhomes.poll.ProcessStatus.NOTSTART;
+import static com.everhomes.poll.ProcessStatus.UNDERWAY;
 
 
 @Component
@@ -1477,6 +1476,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setOfficialFlag(cmd.getOfficialFlag());
         execCmd.setCategoryId(cmd.getCategoryId());
         execCmd.setContentCategoryId(cmd.getContentCategoryId());
+        execCmd.setActivityStatusList(cmd.getActivityStatusList());
         return listActivitiesByLocation(execCmd);
 		
         // 把公用的代码转移到listActivitiesByLocation()中，公司场景和小区场景获取经纬度的方式不一样 by lqs 20160419
@@ -1665,7 +1665,15 @@ public class ActivityServiceImpl implements ActivityService {
 //        }
 //
 //		List<Long> ids = getViewedActivityIds();
-		
+
+        // 添加活动状态筛选     add by xq.tian  2017/01/24
+        if (cmd.getActivityStatusList() != null) {
+            Condition statusCondition = this.buildActivityProcessStatusCondition(cmd.getActivityStatusList());
+            if (statusCondition != null) {
+                condition = condition.and(statusCondition);
+            }
+        }
+
         List<Activity> ret = activityProvider.listActivities(locator, pageSize - activities.size() + 1, condition, false);
         
 //        if(ret != null && ret.size() > 0) {
@@ -1722,15 +1730,34 @@ public class ActivityServiceImpl implements ActivityService {
             return dto;
             //全部查速度太慢，先把查出的部分排序 by xiongying20161208
          // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
-        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/collect(Collectors.toList());
+        })./*filter(r->r!=null).sorted((p1, p2) -> p2.getStartTime().compareTo(p1.getStartTime())).sorted((p1, p2) -> p1.getProcessStatus().compareTo(p2.getProcessStatus())).*/
+        collect(Collectors.toList());
 
         Long nextPageAnchor = locator.getAnchor();
 
         response = new ListActivitiesReponse(nextPageAnchor, activityDtos);
         return response;
 	}
-	
-	private String getActivityPosterUrl(Activity activity) {
+
+    private Condition buildActivityProcessStatusCondition(List<Integer> activityStatusList) {
+        Timestamp currTime = new Timestamp(DateHelper.currentGMTTime().getTime());
+        Condition notStartCond = null;
+        Condition underWayCond = null;
+        Condition endCond = null;
+        if (activityStatusList.contains(NOTSTART.getCode())) {
+            notStartCond = Tables.EH_ACTIVITIES.START_TIME.gt(currTime);
+        }
+        if (activityStatusList.contains(UNDERWAY.getCode())) {
+            underWayCond = Tables.EH_ACTIVITIES.START_TIME.le(currTime).and(Tables.EH_ACTIVITIES.END_TIME.gt(currTime));
+        }
+        if (activityStatusList.contains(ProcessStatus.END.getCode())) {
+            endCond = Tables.EH_ACTIVITIES.END_TIME.lt(currTime);
+        }
+        Optional<Condition> condition = Stream.of(notStartCond, underWayCond, endCond).filter(Objects::nonNull).reduce(Condition::or);
+        return condition.isPresent() ? condition.get() : null;
+    }
+
+    private String getActivityPosterUrl(Activity activity) {
 		
 		if(activity.getPosterUri() == null) {
 			String posterUrl = contentServerService.parserUri(configurationProvider.getValue(ConfigConstants.ACTIVITY_POSTER_DEFAULT_URL, ""), EntityType.ACTIVITY.getCode(), activity.getId());
@@ -2091,6 +2118,7 @@ public class ActivityServiceImpl implements ActivityService {
             execCmd.setRange(geoCharCount);
             execCmd.setCategoryId(cmd.getCategoryId());
             execCmd.setContentCategoryId(cmd.getContentCategoryId());
+            execCmd.setActivityStatusList(cmd.getActivityStatusList());
             if(999987L == namespaceId){
             	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
             }
@@ -2148,6 +2176,7 @@ public class ActivityServiceImpl implements ActivityService {
         execCmd.setNamespaceId(UserContext.getCurrentNamespaceId());
         execCmd.setCategoryId(cmd.getCategoryId());
         execCmd.setContentCategoryId(cmd.getContentCategoryId());
+        execCmd.setActivityStatusList(cmd.getActivityStatusList());
         if(999987L == namespaceId){
         	execCmd.setOfficialFlag(OfficialFlag.NO.getCode());
         }
@@ -2250,8 +2279,8 @@ public class ActivityServiceImpl implements ActivityService {
 		cmd.setPageAnchor(command.getPageAnchor());
 		cmd.setPageSize(command.getPageSize());
 		cmd.setCategoryId(command.getCategoryId());
-        cmd.setOrderByCreateTime(command.getOrderByCreateTime());
 		cmd.setContentCategoryId(command.getContentCategoryId());
+        cmd.setActivityStatusList(command.getActivityStatusList());
 		
 		ListActivitiesReponse activities = listOfficialActivities(cmd);
 		
@@ -2354,6 +2383,14 @@ public class ActivityServiceImpl implements ActivityService {
             condition = condition.and(visibleCondition);
         }
         condition = condition.and(Tables.EH_ACTIVITIES.OFFICIAL_FLAG.eq(OfficialFlag.YES.getCode()));
+
+        // 添加活动状态筛选     add by xq.tian  2017/01/24
+        if (cmd.getActivityStatusList() != null) {
+            Condition statusCondition = this.buildActivityProcessStatusCondition(cmd.getActivityStatusList());
+            if (statusCondition != null) {
+                condition = condition.and(statusCondition);
+            }
+        }
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         // TODO: Locator里设置系统论坛ID存在着分区的风险，因为上面的条件是多个论坛，需要后面理顺  by lqs 20160730
@@ -3042,7 +3079,8 @@ public class ActivityServiceImpl implements ActivityService {
         listCmd.setSceneToken(cmd.getSceneToken());
         listCmd.setPageSize(cmd.getPageSize());
         listCmd.setPageAnchor(cmd.getPageAnchor());
-        listCmd.setOrderByCreateTime(Byte.valueOf("1"));
+        // 只要查询预告中与进行中的活动
+        listCmd.setActivityStatusList(Arrays.asList(NOTSTART.getCode(), UNDERWAY.getCode()));
 
         ListActivitiesReponse activityReponse;
         if (OfficialFlag.fromCode(cmd.getPublishPrivilege()) == OfficialFlag.YES) {
