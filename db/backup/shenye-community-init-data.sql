@@ -354,3 +354,5 @@ INSERT INTO `eh_community_geopoints`(`id`, `community_id`, `description`, `longi
 	VALUES(240111044331052545, 240111044331056641, '', 113.21141, 22.92358, 'ws0d2jn59119');
 INSERT INTO `eh_organization_communities`(organization_id, community_id)VALUES(1000750, 240111044331056641);
 
+-- 修改以上数据小区类型 add by sw 20170205
+UPDATE eh_communities set community_type = 0 where namespace_id = 999992 and community_type = 1;
