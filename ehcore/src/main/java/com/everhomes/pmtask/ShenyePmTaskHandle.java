@@ -417,8 +417,9 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {
 		if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
 			Address address = addressProvider.findAddressById(task.getAddressId());
-			if(null != address) 
-				dto.setAddress(address.getAddress());
+			if(null != address)
+				// 
+				dto.setAddress(address.getCityName() + address.getAreaName() + address.getAddress());
 		}else {
 			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
 			Address address = addressProvider.findAddressById(task.getAddressId());
