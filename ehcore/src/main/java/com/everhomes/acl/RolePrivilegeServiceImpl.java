@@ -2051,8 +2051,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Acl> acls = aclProvider.getResourceAclByRole(ownerType,ownerId, descriptor);
 		for (Acl acl: acls) {
 			if(!StringUtils.isEmpty(scope)){
-				String s = ownerType + ownerId + "." + scope;
-				if(acl.getScope().equals(s)){
+				if(acl.getScope().equals(scope)){
 					Privilege privilege = aclProvider.getPrivilegeById(acl.getPrivilegeId());
 					privileges.add(privilege);
 				}
