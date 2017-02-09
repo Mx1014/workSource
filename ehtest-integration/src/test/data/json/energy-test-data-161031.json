@@ -58,23 +58,23 @@
     {
       "id": 1,
       "namespace_id": 0,
-      "name": "居民",
+      "name": "应收部分",
       "status": 2,
-      "category_type": 2,
+      "category_type": 1,
       "delete_flag": 1
     },
     {
       "id": 2,
       "namespace_id": 0,
-      "name": "商用",
+      "name": "应付部分",
       "status": 2,
-      "category_type": 2,
+      "category_type": 1,
       "delete_flag": 1
     },
     {
       "id": 3,
       "namespace_id": 0,
-      "name": "特种",
+      "name": "居民",
       "status": 2,
       "category_type": 2,
       "delete_flag": 1
@@ -82,17 +82,17 @@
     {
       "id": 4,
       "namespace_id": 0,
-      "name": "应收部分",
+      "name": "商用",
       "status": 2,
-      "category_type": 1,
+      "category_type": 2,
       "delete_flag": 1
     },
     {
       "id": 5,
       "namespace_id": 0,
-      "name": "应付部分",
+      "name": "特种",
       "status": 2,
-      "category_type": 1,
+      "category_type": 2,
       "delete_flag": 1
     },
     {

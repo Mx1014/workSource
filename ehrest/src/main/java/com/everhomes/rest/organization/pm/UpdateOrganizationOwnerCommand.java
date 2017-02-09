@@ -27,11 +27,10 @@ public class UpdateOrganizationOwnerCommand {
 
     @NotNull private Long id;
     @NotNull private Long organizationId;
-    @NotNull @Size(max = 20)
+    @Size(max = 20)
     private String contactName;
-    @NotNull @Size(max = 20)
+    @Size(max = 20)
     private String contactToken;
-    @NotNull
     private Long orgOwnerTypeId;
     private Byte gender;
     private Long birthday;

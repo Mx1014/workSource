@@ -24,8 +24,8 @@ public class CreateOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
         String api = "/pm/createOrganizationOwnerCar";
         CreateOrganizationOwnerCarCommand cmd = new CreateOrganizationOwnerCarCommand();
 
-        Long communityId = 111L;
-        String plateNumber = "粤B77777";
+        Long communityId = 24206890946790405L;
+        String plateNumber = "粤B77767";
         String white = "white";
         String brand = "Mercedes-G500";
         String parkingSpace = "20F";
@@ -78,7 +78,8 @@ public class CreateOrganizationOwnerCarTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-create-owner-car-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-create-owner-car-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

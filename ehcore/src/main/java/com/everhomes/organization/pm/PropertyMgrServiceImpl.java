@@ -4037,7 +4037,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             // 处理上传附件
             if (cmd.getOwnerAttachments() != null && !cmd.getOwnerAttachments().isEmpty()) {
                 cmd.getOwnerAttachments().forEach(r -> {
-                    r.setOwnerId(ownerId);
+                    r.setOrgOwnerId(ownerId);
                     r.setOrganizationId(cmd.getOrganizationId());
                     this.uploadOrganizationOwnerAttachment(r);
                 });
@@ -4065,7 +4065,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
             pmOwnerSearcher.feedDoc(owner);
             return null;
         });
-        return ConvertHelper.convert(owner, OrganizationOwnerDTO.class);
+        return convertOwnerToDTO(owner);
     }
 
     // 如果小区里有该手机号的用户, 则自动审核当前客户
@@ -4476,7 +4476,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (car != null && car.size() > 0) {
             LOGGER.error("The organization owner car is exist, plateNumber = {}", plateNumber);
             throw RuntimeErrorException.errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_CAR_EXIST,
-                    "The organization owner car is exist, plateNumber = %s", plateNumber);
+                    "The organization owner car already exist, plateNumber = %s", plateNumber);
         }
     }
 
@@ -4669,6 +4669,9 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         if (ownerType != null) {
             dto.setOrgOwnerType(ownerType.getDisplayName());
         }
+        if (owner.getBirthday() != null) {
+            dto.setBirthday(owner.getBirthday().getTime());
+        }
         return dto;
     }
 
@@ -4739,7 +4742,7 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
         ListOrganizationOwnerStatisticDTO otherAgeDto = totalDtoMap.remove("101+");
 
         List<ListOrganizationOwnerStatisticDTO> totalList = totalDtoMap.values().stream().collect(Collectors.toList());
-        Collections.sort(totalList, (o1, o2) -> o1.getFirst().compareTo(o2.getFirst()));
+        totalList.sort(Comparator.comparing(ListOrganizationOwnerStatisticDTO::getFirst));
         if (otherAgeDto != null) {
             totalList.add(otherAgeDto);
         }
