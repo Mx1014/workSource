@@ -1106,10 +1106,13 @@ public class QualityServiceImpl implements QualityService {
 	        	dto.setRecord(recordDto);
 			}
         	 
-        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getOwnerId());
-        	if(executor != null) {
-        		dto.setExecutorName(executor.getContactName());
-        	}
+			if(r.getExecutorId() != null && r.getExecutorId() != 0) {
+				OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getOwnerId());
+	        	if(executor != null) {
+	        		dto.setExecutorName(executor.getContactName());
+	        	}
+			}
+        	
         	
         	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
         		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), r.getOwnerId());
