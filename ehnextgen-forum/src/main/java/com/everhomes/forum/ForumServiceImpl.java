@@ -3820,14 +3820,14 @@ public class ForumServiceImpl implements ForumService {
         Long userId = UserContext.current().getUser().getId();
         Long privilegeId = null;
         SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-        if(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY == categoryId){
-            privilegeId = PrivilegeConstants.BLACKLIST_ACTIVITY_POST;
+        if(null == categoryId || -1 == categoryId || 1 == categoryId || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == categoryId|| CategoryConstants.CATEGORY_ID_TOPIC_POLLING == categoryId){
+            privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
         }else if(CategoryConstants.CATEGORY_ID_NOTICE == categoryId){
             privilegeId = PrivilegeConstants.BLACKLIST_NOTICE_POST;
         }else if(CategoryConstants.GA_PRIVACY_CATEGORIES.contains(categoryId)){
             privilegeId = PrivilegeConstants.BLACKLIST_PROPERTY_POST;
-        }else if(-1 == categoryId || 1 == categoryId || CategoryConstants.CATEGORY_ID_TOPIC_COMMON == categoryId|| CategoryConstants.CATEGORY_ID_TOPIC_POLLING == categoryId){
-            privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
+        }else if(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY == categoryId){
+            privilegeId = PrivilegeConstants.BLACKLIST_ACTIVITY_POST;
         }else{
             privilegeId = PrivilegeConstants.BLACKLIST_COMMON_POLLING_POST;
 

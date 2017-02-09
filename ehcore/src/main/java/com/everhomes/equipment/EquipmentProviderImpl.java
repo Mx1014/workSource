@@ -1413,17 +1413,20 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 
 			Condition conExecutive = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.lt(current);
-			conExecutive = conExecutive.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current));
-			
-			conExecutive.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+			conExecutive = conExecutive.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 			
 			Condition conMaintenance = Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.lt(current);
-			conMaintenance.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
+			conMaintenance = conMaintenance.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
 			
 			conExecutive = conExecutive.or(conMaintenance);
 			query.addConditions(conExecutive);
 			
 			query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.asc());
+			
+			if(LOGGER.isDebugEnabled()) {
+	            LOGGER.debug("closeDelayTasks, sql=" + query.getSQL());
+	            LOGGER.debug("closeDelayTasks, bindValues=" + query.getBindValues());
+	        }
 			
 			query.fetch().map((r) -> {
 				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
@@ -1455,6 +1458,12 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_EXPIRED_DATE.lt(current));
 			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 			query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.asc());
+			
+			
+			if(LOGGER.isDebugEnabled()) {
+	            LOGGER.debug("closeDelayTasks, sql=" + query.getSQL());
+	            LOGGER.debug("closeDelayTasks, bindValues=" + query.getBindValues());
+	        }
 			
 			query.fetch().map((r) -> {
 				EquipmentInspectionTasks task = ConvertHelper.convert(r, EquipmentInspectionTasks.class);
