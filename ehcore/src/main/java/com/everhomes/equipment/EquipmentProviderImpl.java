@@ -808,14 +808,26 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		Condition con = con1.or(con2);
 //		con = con.or(con3);
 		if(executiveGroups != null) {
+			if(LOGGER.isDebugEnabled()) {
+	            LOGGER.debug("Query tasks by count, executiveGroups = {}" + executiveGroups);
+	        }
 			Condition con5 = null;
 			for(ExecuteGroupAndPosition executiveGroup : executiveGroups) {
 				Condition con4 = null; 
 				con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(executiveGroup.getGroupId());
 				con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.POSITION_ID.eq(executiveGroup.getPositionId()));
-				con5 = con5.or(con4);
+				if(con5 == null) {
+					con5 = con4;
+				} else {
+					con5 = con5.or(con4);
+				}
+				
 			}
-			con = con.and(con5);
+			
+			if(con5 != null) {
+				con = con.and(con5);
+			}
+			
 		}
 		
 		query.addConditions(con);
