@@ -3041,35 +3041,32 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 		List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
-		members.stream().map(r -> {
-			Organization organization = organizationProvider.findOrganizationById(r.getOrganizationId());
-			if(organization == null) {
-				return null;
-			}
-			
-			if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-				List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
-				if(maps != null && maps.size() > 0) {
-					for(OrganizationJobPositionMap map : maps) {
-						ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-						group.setGroupId(map.getOrganizationId());
-						group.setPositionId(map.getJobPositionId());
-						groupDtos.add(group);
-						
-						group.setGroupId(0L);
-						group.setPositionId(map.getJobPositionId());
-						groupDtos.add(group);
+		for(OrganizationMember member : members) {
+			Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+			if(organization != null) {
+				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					if(maps != null && maps.size() > 0) {
+						for(OrganizationJobPositionMap map : maps) {
+							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
+							group.setGroupId(map.getOrganizationId());
+							group.setPositionId(map.getJobPositionId());
+							groupDtos.add(group);
+							
+							group.setGroupId(0L);
+							group.setPositionId(map.getJobPositionId());
+							groupDtos.add(group);
+						}
+							
 					}
-						
+				} else {
+					ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
+					group.setGroupId(organization.getId());
+					group.setPositionId(0L);
+					groupDtos.add(group);
 				}
-			} else {
-				ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-				group.setGroupId(organization.getId());
-				group.setPositionId(0L);
-				groupDtos.add(group);
 			}
-			return null;
-		});
+		}
 		return groupDtos;
 	}
 	
