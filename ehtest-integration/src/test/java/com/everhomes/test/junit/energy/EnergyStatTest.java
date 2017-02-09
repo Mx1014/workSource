@@ -1,57 +1,26 @@
 package com.everhomes.test.junit.energy;
 
 import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.approval.TrueOrFalseFlag;
-import com.everhomes.rest.energy.*;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhEnergyMeterFormulasDao;
-import com.everhomes.server.schema.tables.pojos.EhEnergyMeterFormulas;
-import com.everhomes.server.schema.tables.pojos.EhEnergyMeterSettingLogs;
-import com.everhomes.server.schema.tables.pojos.EhEnergyMeters;
-import com.everhomes.server.schema.tables.records.*;
+import com.everhomes.rest.energy.EnergyStatCommand;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.test.core.search.SearchProvider;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
-
 import org.jooq.DSLContext;
-import org.jooq.Result;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 
-import java.io.File;
-import java.io.IOException;
-import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.time.LocalDateTime;
-import java.util.ArrayList;
 import java.util.Calendar;
-import java.util.List;
-
-import static com.everhomes.server.schema.Tables.EH_ENERGY_METERS;
-import static com.everhomes.server.schema.Tables.EH_ENERGY_METER_SETTING_LOGS;
 
 /**
  * Created by xq.tian on 2016/10/31.
  */
 public class EnergyStatTest extends BaseLoginAuthTestCase{
 
-    //1. 新建表记(水表,电表等)
     private static final String CACULATE_MONTH_STAT = "/energy/caculateEnergyMonthStatByDate";
-    //2. 修改表记(水表,电表等),表记分类,性质,账单项目不能修改
-    private static final String CACULATE_DAY_STAT = "/energy/caculateEnergyDayStatByDate"; 
-    //24. 每日水电总表
-    private static final String GET_ENERGY_STAT_BY_DAY_URL = "/energy/getEnergyStatByDay";
-    //25. 月度水电分析表
-    private static final String GET_ENERGY_STAT_BY_MONTH_URL = "/energy/getEnergyStatByMonth";
-    //26. 年度水电用量收支对比表
-    private static final String GET_ENERGY_STATISTIC_BY_YEAR_URL = "/energy/getEnergyStatisticByYear";
-    //27. 各项目月水电能耗情况（与去年同期相比)
-    private static final String GET_ENERGY_STATISTIC_BY_YOY_URL = "/energy/getEnergyStatisticByYoy";
+    private static final String CACULATE_DAY_STAT = "/energy/caculateEnergyDayStatByDate";
 
     @Autowired
     private SearchProvider searchProvider;
@@ -125,10 +94,5 @@ public class EnergyStatTest extends BaseLoginAuthTestCase{
         jsonFilePath = "data/json/energy-reading-log-3-test-data-161104.json";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
-    }
-
-    @After
-    public void tearDown() {
-        logoff();
     }
 }

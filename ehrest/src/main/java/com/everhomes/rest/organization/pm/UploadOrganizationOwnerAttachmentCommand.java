@@ -16,7 +16,7 @@ import javax.validation.constraints.NotNull;
  */
 public class UploadOrganizationOwnerAttachmentCommand {
 
-    @NotNull private Long orgOwnerId;
+    private Long orgOwnerId;
     @NotNull private Long organizationId;
     @NotNull private String contentUri;
     @NotNull private String attachmentName;
