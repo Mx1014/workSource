@@ -293,3 +293,19 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 update eh_equipment_inspection_equipments set target_type = 'community';
 update eh_equipment_inspection_equipments set target_id = 240111044331051304 where target_id = 1003859;
 update eh_equipment_inspection_equipments set target_id = 240111044331051302 where target_id = 1008875;
+
+-- 更新菜单 add by sw 20170207
+update eh_web_menus set data_type = 'access_manage/inside' where data_type = 'access_manage_inside' and name = '门禁管理';
+update eh_web_menus set data_type = 'version_manage/inside' where data_type = 'version_manage_inside' and name = '版本管理';
+update eh_web_menus set data_type = 'access_group/inside' where data_type = 'access_group_inside' and name = '门禁分组';
+update eh_web_menus set data_type = 'user_auth/inside' where data_type = 'user_auth_inside' and name = '用户授权';
+update eh_web_menus set data_type = 'visitor_auth/inside' where data_type = 'visitor_auth_inside' and name = '访客授权';
+update eh_web_menus set data_type = 'access_log/inside' where data_type = 'access_log_inside' and name = '门禁日志';
+
+update eh_web_menus set data_type = 'forum_activity/road' where data_type = 'road_show' and name = '路演表演';
+update eh_web_menus set data_type = 'forum_activity/whiteCollar' where data_type = 'white_collar_activity' and name = '白领活动';
+update eh_web_menus set data_type = 'forum_activity/OE' where data_type = 'OE_auditorium' and name = 'OE大讲堂';
+update eh_web_menus set data_type = 'news_management/industry' where data_type = 'industry_dynamics' and name = '行业动态';
+
+update eh_web_menus set data_type = 'task/all' where data_type = 'all_task' and name = '全部任务';
+update eh_web_menus set data_type = 'task/my' where data_type = 'my_task' and name = '我的任务';
