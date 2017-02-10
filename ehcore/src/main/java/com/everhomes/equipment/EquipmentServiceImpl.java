@@ -2344,6 +2344,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			task.setPositionId(executiveGroup.getPositionId());
 				
 			if(timeRanges != null && timeRanges.size() > 0) {
+				if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("creatTaskByStandard, timeRanges = {}" + timeRanges);
+	            }
 				long current = System.currentTimeMillis();
 				SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");
 				String day = sdf.format(current);
@@ -3043,9 +3046,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 		List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
 		for(OrganizationMember member : members) {
 			Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+			
 			if(organization != null) {
+				if(LOGGER.isInfoEnabled()) {
+	                LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
+	            }
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
 					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					if(LOGGER.isInfoEnabled()) {
+		                LOGGER.info("listUserRelateGroups, OrganizationJobPositionMaps = {}" + maps);
+		            }
+					
 					if(maps != null && maps.size() > 0) {
 						for(OrganizationJobPositionMap map : maps) {
 							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
