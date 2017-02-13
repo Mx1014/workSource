@@ -311,7 +311,7 @@ update eh_web_menus set data_type = 'task/all' where data_type = 'all_task' and 
 update eh_web_menus set data_type = 'task/my' where data_type = 'my_task' and name = '我的任务';
 
 
--- 设备巡检对象类型增加
+-- 设备巡检对象类型增加 by xiongying20170213
 SET @categories_id = (SELECT MAX(id) FROM `eh_categories`);
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@categories_id := @categories_id + 1), '7', '0', '空置房', '设备类型/空置房', '0', '2', NOW(), NULL, NULL, NULL, '0');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@categories_id := @categories_id + 1), '7', '0', '装修', '设备类型/装修', '0', '2', NOW(), NULL, NULL, NULL, '0');
