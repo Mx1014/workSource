@@ -282,29 +282,30 @@ public class ActivityServiceImpl implements ActivityService {
     //活动报名
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
-        User user = UserContext.current().getUser();
-        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
-        if (activity == null) {
-            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
-        }
-        //检查是否超过报名人数限制, add by tt, 20161012
-        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
-        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
-					"beyond contraint quantity!");
-		}
-        
-        Post post = forumProvider.findPostById(activity.getPostId());
-        if (post == null) {
-            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
-        }
-        ActivityRoster roster = createRoster(cmd, user, activity);
-        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
-	        dbProvider.execute((status) -> {
+    	// 把锁放在查询语句的外面，update by tt, 20170210
+        return this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+	        return dbProvider.execute((status) -> {
+		        User user = UserContext.current().getUser();
+		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+		        if (activity == null) {
+		            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+		        }
+		        //检查是否超过报名人数限制, add by tt, 20161012
+		        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
+		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+							"beyond contraint quantity!");
+				}
+		        
+		        Post post = forumProvider.findPostById(activity.getPostId());
+		        if (post == null) {
+		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
+		        }
+		        ActivityRoster roster = createRoster(cmd, user, activity);
 	        	//去掉报名评论 by xiongying 20160615
 	//            Post comment = new Post();
 	//            comment.setParentPostId(post.getId());
@@ -342,33 +343,33 @@ public class ActivityServiceImpl implements ActivityService {
 	            }
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
-	            return status;
+//	            return status;
+	            ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
+	            dto.setActivityId(activity.getId());
+	            dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
+	            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
+	            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
+	            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	            dto.setUserActivityStatus(getActivityStatus(roster).getCode());
+	            dto.setFamilyId(activity.getCreatorFamilyId());
+	            dto.setGroupId(activity.getGroupId());
+	            dto.setStartTime(activity.getStartTime().toString());
+	            dto.setStopTime(activity.getEndTime().toString());
+	            dto.setProcessStatus(getStatus(activity).getCode());
+	            dto.setForumId(post.getForumId());
+	            dto.setPosterUrl(getActivityPosterUrl(activity));
+	            fixupVideoInfo(dto);//added by janson
+	            
+	            //Send message to creator
+	            Map<String, String> map = new HashMap<String, String>();
+	            map.put("userName", user.getNickName());
+	            map.put("postName", activity.getSubject());
+	            sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR);
+	            
+	            return dto;
 	        });
-	        return null;
-        });
-        ActivityDTO dto = ConvertHelper.convert(activity, ActivityDTO.class);
-        dto.setActivityId(activity.getId());
-        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
-        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
-        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
-        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
-        dto.setUserActivityStatus(getActivityStatus(roster).getCode());
-        dto.setFamilyId(activity.getCreatorFamilyId());
-        dto.setGroupId(activity.getGroupId());
-        dto.setStartTime(activity.getStartTime().toString());
-        dto.setStopTime(activity.getEndTime().toString());
-        dto.setProcessStatus(getStatus(activity).getCode());
-        dto.setForumId(post.getForumId());
-        dto.setPosterUrl(getActivityPosterUrl(activity));
-        fixupVideoInfo(dto);//added by janson
-        
-        //Send message to creator
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("userName", user.getNickName());
-        map.put("postName", activity.getSubject());
-        sendMessageCode(activity.getCreatorUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_SIGNUP_TO_CREATOR);
-        
-        return dto;
+//	        return null;
+        }).first();
     }
     
     private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {

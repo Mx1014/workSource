@@ -911,6 +911,8 @@ public class NewsServiceImpl implements NewsService {
 		// 检查参数
 		checkCommentParameter(userId, cmd);
 
+		//黑名单权限校验 by sfyan20160213
+		checkBlacklist(null, null);
 		final List<Comment> comments = new ArrayList<>();
 		final List<Attachment> attachments = new ArrayList<>();
 
