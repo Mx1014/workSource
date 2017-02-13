@@ -768,7 +768,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Override
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasks(
 			String ownerType, Long ownerId, Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
-			List<ExecuteGroupAndPosition> executiveGroups, Integer offset, Integer pageSize) {
+			List<Long> standardIds, Integer offset, Integer pageSize) {
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -807,30 +807,35 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		Condition con = con1.or(con2);
 //		con = con.or(con3);
-		if(executiveGroups != null) {
-			if(LOGGER.isDebugEnabled()) {
-	            LOGGER.debug("Query tasks by count, executiveGroups = {}" + executiveGroups);
-	        }
-			Condition con5 = null;
-			for(ExecuteGroupAndPosition executiveGroup : executiveGroups) {
-				Condition con4 = null; 
-				con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(executiveGroup.getGroupId());
-				con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.POSITION_ID.eq(executiveGroup.getPositionId()));
-				if(con5 == null) {
-					con5 = con4;
-				} else {
-					con5 = con5.or(con4);
-				}
-				
-			}
-			
-			if(con5 != null) {
-				con = con.and(con5);
-			}
-			
-		}
+		//产品修改需求，生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以根据用户关联的部门岗位先去eh_equipment_inspection_standard_group_map查出standardIds再根据standardIds来查 by xiongying20170213
+//		if(executiveGroups != null) {
+//			if(LOGGER.isDebugEnabled()) {
+//	            LOGGER.debug("Query tasks by count, executiveGroups = {}" + executiveGroups);
+//	        }
+//			Condition con5 = null;
+//			for(ExecuteGroupAndPosition executiveGroup : executiveGroups) {
+//				Condition con4 = null;
+//				con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(executiveGroup.getGroupId());
+//				con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.POSITION_ID.eq(executiveGroup.getPositionId()));
+//				if(con5 == null) {
+//					con5 = con4;
+//				} else {
+//					con5 = con5.or(con4);
+//				}
+//
+//			}
+//
+//			if(con5 != null) {
+//				con = con.and(con5);
+//			}
+//
+//		}
 		
 		query.addConditions(con);
+
+		if(standardIds != null) {
+			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
+		}
 		
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 //        query.addLimit(pageSize);
@@ -1805,7 +1810,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 	@Override
 	public List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(
-			List<ExecuteGroupAndPosition> reviewGroups) {
+			List<ExecuteGroupAndPosition> reviewGroups, byte groupType) {
 		final List<EquipmentInspectionStandardGroupMap> maps = new ArrayList<EquipmentInspectionStandardGroupMap>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class));
  
@@ -1823,7 +1828,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			con = con5;
 		}
         
-        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(QualityGroupType.REVIEW_GROUP.getCode()));
+        query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
         query.addConditions(con);
         query.fetch().map((r) -> {
         	maps.add(ConvertHelper.convert(r, EquipmentInspectionStandardGroupMap.class));
