@@ -678,11 +678,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public EquipmentStandardsDTO updateEquipmentStandard(
 			UpdateEquipmentStandardCommand cmd) {
-		
+
 		User user = UserContext.current().getUser();
 		RepeatSettings repeat = null;
 		EquipmentInspectionStandards standard = null;
-		
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("updateEquipmentStandard: userId = " + user.getId() + "time = " + DateHelper.currentGMTTime()
+					+ "UpdateEquipmentStandardCommand cmd = {}" + cmd);
+		}
 		if(cmd.getId() == null) {
 			standard = ConvertHelper.convert(cmd, EquipmentInspectionStandards.class);
 			standard.setCreatorUid(user.getId());
@@ -741,7 +744,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<EquipmentStandardMap> maps = equipmentProvider.findByStandardId(standard.getId());
 			if(maps != null && maps.size() > 0) {
 				for(EquipmentStandardMap map : maps) {
-					inActiveEquipmentStandardRelations(map);
+
+					unReviewEquipmentStandardRelations(map);
 				}
 			}
 			
@@ -758,6 +762,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 		
 		EquipmentStandardsDTO dto = converStandardToDto(standard);
 		return dto;
+	}
+
+	private void unReviewEquipmentStandardRelations(EquipmentStandardMap map) {
+		map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
+		map.setReviewResult(ReviewResult.NONE.getCode());
+		equipmentProvider.updateEquipmentStandardMap(map);
+		equipmentStandardMapSearcher.feedDoc(map);
+
 	}
 	
 	private EquipmentStandardsDTO converStandardToDto(EquipmentInspectionStandards standard) {
@@ -839,6 +851,12 @@ public class EquipmentServiceImpl implements EquipmentService {
         List<EquipmentInspectionStandardGroupMap> executiveGroup = null;
 		List<EquipmentInspectionStandardGroupMap> reviewGroup = null;
         this.equipmentProvider.deleteEquipmentInspectionStandardGroupMapByStandardId(standard.getId());
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("processStandardGroups: deleteEquipmentInspectionStandardGroupMapByStandardId, standardId=" + standard.getId()
+			+ "userId = " + UserContext.current().getUser().getId() + "time = " + DateHelper.currentGMTTime()
+			+ "new standard groupList = {}" + groupList);
+		}
         
         if(groupList != null && groupList.size() >0) {
         	executiveGroup = new ArrayList<EquipmentInspectionStandardGroupMap>();

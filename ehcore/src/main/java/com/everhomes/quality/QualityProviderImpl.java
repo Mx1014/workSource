@@ -303,19 +303,49 @@ public class QualityProviderImpl implements QualityProvider {
 			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
 			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 
-			if(groupIds != null) {
-				Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode());
+			if (groupIds != null) {
+				//主动生成的任务按部门岗位查 by xiongying20170214
+				Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(1L);
+				con1 = con1.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode()));
+				Condition con3 = null;
 				for(ExecuteGroupAndPosition groupId : groupIds) {
-					Condition con4 = null;
-					con4 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
-					con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(groupId.getPositionId()));
-					con5 = con5.or(con4);
+					Condition con2 = null;
+					con2 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
+					con2 = con2.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(groupId.getPositionId()));
+					if(con3 == null) {
+						con3 = con2;
+					} else {
+						con3 = con3.or(con2);
+					}
 				}
+				con1 = con1.and(con3);
+				//产品修改需求，自动生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以先查出standardIds再根据standardIds来查 by xiongying20170214
+				List<QualityInspectionStandardGroupMap> maps = listQualityInspectionStandardGroupMapByGroupAndPosition(groupIds);
+				if (maps != null && maps.size() > 0) {
+					Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(0L);
+					Condition con6 = null;
+					for(QualityInspectionStandardGroupMap map : maps ) {
+						Condition con4 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.eq(map.getStandardId());
+						if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+							con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+						}
+						if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
+							con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()));
+						}
 
-				con = con.or(con5);
+						if(con6 == null) {
+							con6 = con4;
+						} else {
+							con6 = con6.or(con4);
+						}
+
+					}
+					con5 = con5.and(con6);
+					con1 = con1.or(con5);
+				}
+				con = con.or(con1);
+				query.addConditions(con);
 			}
-
-			query.addConditions(con);
 		}
 
 		if(executeStatus != null) {
@@ -361,6 +391,34 @@ public class QualityProviderImpl implements QualityProvider {
         }
         
 		return tasks;
+	}
+
+	private List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupIds) {
+		final List<QualityInspectionStandardGroupMap> maps = new ArrayList<QualityInspectionStandardGroupMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(QualityInspectionStandardGroupMap.class));
+
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+
+		Condition con = null;
+		if(groupIds != null) {
+			Condition con5 = null;
+			for(ExecuteGroupAndPosition executiveGroup : groupIds) {
+				Condition con4 = null;
+				con4 = Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
+				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
+				con5 = con5.or(con4);
+			}
+			con = con5;
+		}
+
+		query.addConditions(con);
+		query.fetch().map((r) -> {
+			maps.add(ConvertHelper.convert(r, QualityInspectionStandardGroupMap.class));
+			return null;
+		});
+
+
+		return maps;
 	}
 
 	@Override
