@@ -62,11 +62,7 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
     public void deleteEnergyMeterReadingLog(EnergyMeterReadingLog log) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
         EhEnergyMeterReadingLogsDao dao = new EhEnergyMeterReadingLogsDao(context.configuration());
-        log.setStatus(EnergyCommonStatus.INACTIVE.getCode());
-        prepareObj(log);
-        log.setUpdateUid(UserContext.current().getUser().getId());
-        log.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        dao.update(log);
+        dao.delete(log);
     }
 
     @Override
@@ -183,8 +179,7 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
     @Override
     public void deleteMeterReadingLogsByMeterId(Integer namespaceId, Long meterId) {
         DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-        context.update(Tables.EH_ENERGY_METER_READING_LOGS)
-                .set(Tables.EH_ENERGY_METER_READING_LOGS.STATUS, EnergyCommonStatus.INACTIVE.getCode())
+        context.delete(Tables.EH_ENERGY_METER_READING_LOGS)
                 .where(Tables.EH_ENERGY_METER_READING_LOGS.NAMESPACE_ID.eq(namespaceId))
                 .and(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId))
                 .execute();
