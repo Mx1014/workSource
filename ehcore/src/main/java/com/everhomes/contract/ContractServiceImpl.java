@@ -38,6 +38,7 @@ import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsCommand;
 import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.organization.OrganizationServiceUser;
@@ -328,5 +329,12 @@ public class ContractServiceImpl implements ContractService {
 			return "";
 		}
 		return community.getName();
+	}
+
+	@Override
+	public ListContractsResponse listContractsByOraganizationId(
+			ListContractsByOraganizationIdCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
 	}
 }

@@ -10,8 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>buildingName: 楼栋名称</li>
  * <li>keywords: 查询关键词</li>
  * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页大小</li>
- * <li>organizationId: 公司id</li>
+ * <li>pageSize: 每页大小</li> 
  * </ul>
  */
 public class ListContractsCommand {
@@ -26,7 +25,6 @@ public class ListContractsCommand {
 
 	private Integer pageSize;
 	
-	private Long organizationId;
 
 	public ListContractsCommand() {
 
@@ -75,14 +73,6 @@ public class ListContractsCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
-	}
-
-	public Long getOrganizationId() {
-		return organizationId;
-	}
-
-	public void setOrganizationId(Long organizationId) {
-		this.organizationId = organizationId;
-	}
+	} 
 
 }

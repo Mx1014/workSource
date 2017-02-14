@@ -1,5 +1,28 @@
 package com.everhomes.techpark.expansion;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
+
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -12,6 +35,7 @@ import com.everhomes.enterprise.EnterpriseCommunityMap;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
@@ -26,9 +50,37 @@ import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
+import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
+import com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO;
+import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
+import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryDTO;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyRenewCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
+import com.everhomes.rest.techpark.expansion.ExpansionConst;
+import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
+import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
+import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
+import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
+import com.everhomes.rest.techpark.expansion.LeasePromotionType;
+import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
+import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
+import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -37,21 +89,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
-
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 @Component
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
@@ -264,7 +301,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 
-        boolean createFlowCaseSuccess = dbProvider.execute(status -> {
+        FlowCase flowCase = dbProvider.execute(status -> {
             enterpriseApplyEntryProvider.createApplyEntry(request);
             return this.createFlowCase(request);
         });
@@ -295,8 +332,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         // 1.如果创建flowCase成功, 则不在这里发送短信, 移到工作流中配置
         // 2.如果创建flowCase不成功, 说明没有配置使用工作流, 则保持原来的发短信功能不变   add by xq.tian  2016/12/22
-        if (createFlowCaseSuccess) {
+        if (flowCase != null ) {
         	//TODO: 组装resp
+        	String url = processFlowURL(flowCase.getId(), FlowCaseSearchType.APPLIER.getCode(), flowCase.getModuleId());
             return resp;
         }
 
@@ -345,7 +383,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return resp;
 	}
 
-    private boolean createFlowCase(EnterpriseOpRequest request) {
+	private String processFlowURL(Long flowCaseId, byte flowUserType, Long moduleId) {
+		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
+		paramMap.add("flowCaseId",URLEncoder.encode(String.valueOf(flowCaseId)));
+		paramMap.add("flowUserType",URLEncoder.encode(String.valueOf(flowUserType)));
+		paramMap.add("moduleId",URLEncoder.encode(String.valueOf(moduleId)));
+		String url = UriComponentsBuilder.fromHttpUrl("zl://workflow/detail").queryParams(paramMap).build().toUriString();
+		return url;
+		
+	}
+    private FlowCase createFlowCase(EnterpriseOpRequest request) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
         if (flow != null) {
             CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
@@ -357,13 +404,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             // flowCase摘要内容
             flowCaseCmd.setContent(this.getBriefContent(request));
 
-            flowService.createFlowCase(flowCaseCmd);
-            return true;
+            return flowService.createFlowCase(flowCaseCmd);
         } else {
             if(LOGGER.isWarnEnabled()) {
                 LOGGER.warn("There is no expansion workflow enabled for ownerId: {}", request.getCommunityId());
             }
-            return false;
+            return null;
         }
     }
 
