@@ -4,6 +4,14 @@ import javax.validation.constraints.NotNull;
 
 import com.everhomes.util.StringHelper;
 
+
+/**
+ * <ul> 
+ * <li>ownerType:  </li>
+ * <li>ownerId:  </li>
+ * <li>type:  </li> 
+ * </ul>
+ */
 public class GetYellowPageTopicCommand { 
 
 	private String ownerType;

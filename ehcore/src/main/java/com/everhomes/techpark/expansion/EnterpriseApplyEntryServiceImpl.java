@@ -37,6 +37,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.Tuple;
+
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -253,7 +254,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	@Override
-	public boolean applyEntry(EnterpriseApplyEntryCommand cmd) {
+	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
+		ApplyEntryResponse resp = new ApplyEntryResponse();
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
 		if(null != cmd.getContactPhone())
@@ -294,7 +296,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         // 1.如果创建flowCase成功, 则不在这里发送短信, 移到工作流中配置
         // 2.如果创建flowCase不成功, 说明没有配置使用工作流, 则保持原来的发短信功能不变   add by xq.tian  2016/12/22
         if (createFlowCaseSuccess) {
-            return true;
+        	//TODO: 组装resp
+            return resp;
         }
 
         // 根据apply type来区分
@@ -339,7 +342,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     break;
             }
         }
-		return true;
+		return resp;
 	}
 
     private boolean createFlowCase(EnterpriseOpRequest request) {

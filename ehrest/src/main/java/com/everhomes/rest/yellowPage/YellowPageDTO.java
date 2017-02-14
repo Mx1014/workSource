@@ -27,7 +27,8 @@ import com.everhomes.util.StringHelper;
 *<li> contactMobile:  联系人电话</li>
 *<li> serviceType: 服务联盟的子类别</li>
 *<li> attachments: 附件列表</li>
-
+*<li> buildingId: 楼栋id</li>
+*<li> buildingName: 楼栋名称</li>
  * */
 public class YellowPageDTO {
 	private java.lang.Long     id;
@@ -52,6 +53,8 @@ public class YellowPageDTO {
 	private java.lang.String   serviceType;
 	@ItemType(YellowPageAattchmentDTO.class)
 	private List<YellowPageAattchmentDTO> attachments;
+	private java.lang.Long     buildingId;
+	private java.lang.String     buildingName;
 	
 	 public java.lang.Long getId() {
 		return id;
@@ -184,6 +187,18 @@ public class YellowPageDTO {
 	}
 	public void setAttachments(List<YellowPageAattchmentDTO> attachments) {
 		this.attachments = attachments;
+	}
+	public java.lang.Long getBuildingId() {
+		return buildingId;
+	}
+	public void setBuildingId(java.lang.Long buildingId) {
+		this.buildingId = buildingId;
+	}
+	public java.lang.String getBuildingName() {
+		return buildingName;
+	}
+	public void setBuildingName(java.lang.String buildingName) {
+		this.buildingName = buildingName;
 	}
 	
 }

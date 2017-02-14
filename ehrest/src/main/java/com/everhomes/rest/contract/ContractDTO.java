@@ -22,7 +22,7 @@ import com.everhomes.util.StringHelper;
  * <li>serviceUserId: 客服人员id</li>
  * <li>serviceUserName: 客服人员名称</li>
  * <li>serviceUserPhone: 客服人员电话</li>
- * <li>buildings: 楼栋门牌信息</li>
+ * <li>buildings: 楼栋门牌信息{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  * </ul>
  */
 public class ContractDTO {
