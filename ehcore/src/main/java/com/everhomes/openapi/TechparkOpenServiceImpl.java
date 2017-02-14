@@ -431,6 +431,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setLayout(customerApartment.getLayout());
 		address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
 		address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
+		
+		//添加电商用到的楼栋和门牌
+		String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+		address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+		
 		addressProvider.createAddress(address);
 		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
@@ -459,7 +465,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					return source.indexOf("-", offset);
 				}else {
 					count--;
-					return indexOf(source, count, source.indexOf("-"));
+					return indexOf(source, count, source.indexOf("-")+1);
 				}
 			}
 			return -1;
@@ -473,7 +479,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			Integer offset = 0; //在横线基础上的偏移量
 			Integer lineCount = null; //第几个横线
 			if (rule.contains("+")) {
-				String[] arr = rule.split("+");
+				String[] arr = rule.split("\\+");
 				lineCount = Integer.parseInt(arr[0]);
 				offset = Integer.parseInt(arr[1]);
 			}else {
@@ -495,6 +501,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				if (ruleArray.length >= 3) {
 					int buildingStart = getActualPos(apartmentName, ruleArray[0]) + 1;
 					int buildingEnd = getActualPos(apartmentName, ruleArray[1]);
+					if (apartmentName.charAt(buildingEnd) >= '0' && apartmentName.charAt(buildingEnd) <= '9') {
+						throw new Exception();
+					}
+					if (apartmentName.charAt(buildingEnd) != '-') {
+						buildingEnd++;
+					}
 					result[0] = apartmentName.substring(buildingStart, buildingEnd);
 					int apartmentStart = getActualPos(apartmentName, ruleArray[2]) + 1;
 					if (ruleArray.length == 4) {
@@ -607,6 +619,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setOperatorUid(1L);
 		address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		address.setStatus(CommonStatus.ACTIVE.getCode());
+
+		//添加电商用到的楼栋和门牌
+		String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+		address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+		
 		addressProvider.updateAddress(address);
 		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
