@@ -319,7 +319,12 @@ public class QualityServiceImpl implements QualityService {
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
 		
 		User user = UserContext.current().getUser();
-		
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("updateQualityStandard: userId = " + user.getId() + "time = " + DateHelper.currentGMTTime()
+					+ "UpdateQualityStandardCommand cmd = {}" + cmd);
+		}
+
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getId());
 		standard.setOwnerId(cmd.getOwnerId());
 		standard.setOwnerType(cmd.getOwnerType());
@@ -892,6 +897,7 @@ public class QualityServiceImpl implements QualityService {
 //						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, standardIds, cmd.getManualFlag());
 //
 //			} else {
+
 				tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
 						cmd.getTaskType(), user.getId(), startDate, endDate, groupDtos,
 						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
@@ -1437,10 +1443,10 @@ public class QualityServiceImpl implements QualityService {
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
 			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
-				
-				task.setExecutiveGroupId(executiveGroup.getGroupId());
-				task.setExecutivePositionId(executiveGroup.getPositionId());
+//			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
+//
+//				task.setExecutiveGroupId(executiveGroup.getGroupId());
+//				task.setExecutivePositionId(executiveGroup.getPositionId());
 //				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
 //																	, executiveGroup.getGroupId());
 //				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
@@ -1448,55 +1454,64 @@ public class QualityServiceImpl implements QualityService {
 //				if(members != null) {
 //					task.setExecutorType(member.getTargetType());
 //					task.setExecutorId(member.getTargetId());
-					List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
-					
-					if(timeRanges != null && timeRanges.size() > 0) {
-						for(TimeRangeDTO timeRange : timeRanges) {
-							this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
-								String duration = timeRange.getDuration();
-								String start = timeRange.getStartTime();
-								String str = day + " " + start;
-								Timestamp startTime = strToTimestamp(str);
-								Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
-								task.setExecutiveStartTime(startTime);
-								task.setExecutiveExpireTime(expiredTime);
-								long now = System.currentTimeMillis();
-								String taskNum = timestampToStr(new Timestamp(now)) + now;
-								task.setTaskNumber(taskNum);
-								qualityProvider.createVerificationTasks(task);
-								
-								Map<String, Object> map = new HashMap<String, Object>();
-							    map.put("taskName", task.getTaskName());
-							    map.put("deadline", timeToStr(expiredTime));
-								String scope = QualityNotificationTemplateCode.SCOPE;
-								int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
-								String locale = "zh_CN";
-								String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-								
-								
-								if(executiveGroup.getPositionId() != null) {
+				List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
+
+				if(timeRanges != null && timeRanges.size() > 0) {
+					for(TimeRangeDTO timeRange : timeRanges) {
+						this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
+							String duration = timeRange.getDuration();
+							String start = timeRange.getStartTime();
+							String str = day + " " + start;
+							Timestamp startTime = strToTimestamp(str);
+							Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+							task.setExecutiveStartTime(startTime);
+							task.setExecutiveExpireTime(expiredTime);
+							long now = System.currentTimeMillis();
+							String taskNum = timestampToStr(new Timestamp(now)) + now;
+							task.setTaskNumber(taskNum);
+							qualityProvider.createVerificationTasks(task);
+
+							Map<String, Object> map = new HashMap<String, Object>();
+							map.put("taskName", task.getTaskName());
+							map.put("deadline", timeToStr(expiredTime));
+							String scope = QualityNotificationTemplateCode.SCOPE;
+							int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
+							String locale = "zh_CN";
+							String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+							if(LOGGER.isInfoEnabled()) {
+								LOGGER.info("createTaskByStandard, executiveGroups = {}" + standard.getExecutiveGroup());
+							}
+							for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
+								if (executiveGroup.getPositionId() != null) {
 									ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
 									command.setOrganizationId(executiveGroup.getGroupId());
 									command.setJobPositionId(executiveGroup.getPositionId());
 									List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
-									if(contacts != null && contacts.size() > 0) {
-										for(OrganizationContactDTO contact : contacts) {
+									if(LOGGER.isInfoEnabled()) {
+										LOGGER.info("creatTaskByStandard, executiveGroup = {}" + executiveGroup +"contacts = {}" + contacts);
+									}
+									if (contacts != null && contacts.size() > 0) {
+										for (OrganizationContactDTO contact : contacts) {
 											sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
 										}
 									}
 								} else {
 									List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
-									if(members != null) {
-										for(OrganizationMember member : members) {
+									if(LOGGER.isInfoEnabled()) {
+										LOGGER.info("creatTaskByStandard, executiveGroup = {}" + executiveGroup +"members = {}" + members);
+									}
+									if (members != null) {
+										for (OrganizationMember member : members) {
 											sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
 										}
 									}
 								}
+							}
 								
-							});
-						}
-							
+						});
 					}
+
+				}
 					
 //				} else {
 //					LOGGER.error("the group which id="+executiveGroup.getGroupId()+" don't have any hecha member!");
@@ -1513,7 +1528,7 @@ public class QualityServiceImpl implements QualityService {
 //				}
 				
 			}
-		} 
+//		}
 	}
 	
 	

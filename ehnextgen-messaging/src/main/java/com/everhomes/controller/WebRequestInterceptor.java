@@ -13,6 +13,7 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +41,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.WebTokenGenerator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -60,6 +57,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	private static final String ZUOLIN_APP_KEY = "zuolin.appKey";
 	private static final String SIGN_APP_KEY = "sign.appKey";
 	private static final String APP_KEY_NAME = "appKey";
+	private static final int VERSION_UPPERBOUND = 4195330; // 区分4.1.2之前的版本,小于这个数字代表4.1.2以前的版本
 
 	@Autowired
 	private UserService userService;
@@ -225,7 +223,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
 	private void setupScheme(Map<String, String> userAgents) {
 		UserContext context = UserContext.current();
-		context.setScheme(userAgents.get("scheme"));
+		VersionRange versionRange = new VersionRange("["+context.getVersion()+","+context.getVersion()+")");
+		if(versionRange.getUpperBound() < VERSION_UPPERBOUND){
+			context.setScheme("http");
+		}else{
+			context.setScheme(userAgents.get("scheme"));
+		}
+
 	}
 
 	private void setupVersionContext(Map<String, String> userAgents) {

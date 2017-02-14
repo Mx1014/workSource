@@ -6332,10 +6332,9 @@ System.out.println();
 
 		// send notification to all the other members in the group
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
-		//传入groupId，排除自己 by sfyan 20160706
-		List<Long> excludeList = new ArrayList<Long>();
-		excludeList.add(member.getTargetId());
-		sendEnterpriseNotification(groupId, null, excludeList, notifyTextForApplicant, null, null);
+		// 消息只发给公司的管理人员  by sfyan 20170213
+		includeList = this.includeOrgList(org, member.getTargetId());
+		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, null, null);
 		
 	}
 	
@@ -6391,25 +6390,44 @@ System.out.println();
 
        // send notification to all the other members in the enterprise
        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER);
-       
+
+	   //消息只发给公司的管理人员  by sfyan 20170213
        includeList = this.includeOrgList(org, member.getTargetId());
-       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+       sendEnterpriseNotification(org.getGroupId(), includeList, null, notifyTextForApplicant, null, null);
    }
    
    /**
-    * 获取初自己以外所有公司人员
+    * 获取初自己以外所有管理人员
     * @param org
     * @param excludeUserId
     * @return
     */
    private List<Long> includeOrgList(Organization org, Long excludeUserId){
-	   List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(org.getId());
-	   List<Long> includeList = new ArrayList<Long>();
-	   for (OrganizationMember member : members) {
-		   if(OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType()) && excludeUserId != member.getTargetId()){
-			   includeList.add(member.getTargetId());
+
+	   List<OrganizationContactDTO> contacts = new ArrayList<>();
+	   ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+	   cmd.setOrganizationId(org.getId());
+	   //获取企业管理员 by sfyan 20170213
+	   List<OrganizationContactDTO> orgAdmin = rolePrivilegeService.listOrganizationAdministrators(cmd);
+	   if(null != orgAdmin){
+		   contacts.addAll(orgAdmin);
+	   }
+
+	   //是管理公司的情况下，需要再获取超级管理员 by sfyan 20170213
+	   if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.PM){
+		   List<OrganizationContactDTO> superAdmin =  rolePrivilegeService.listOrganizationSuperAdministrators(cmd);
+		   if(null != superAdmin){
+			   contacts.addAll(superAdmin);
 		   }
-		   
+	   }
+
+//	   List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(org.getId());
+	   List<Long> includeList = new ArrayList<Long>();
+	   for (OrganizationContactDTO contact : contacts) {
+		   if(OrganizationMemberTargetType.USER.getCode().equals(contact.getTargetType()) && excludeUserId != contact.getTargetId()){
+			   includeList.add(contact.getTargetId());
+		   }
+
 	   }
 	   return includeList;
    }

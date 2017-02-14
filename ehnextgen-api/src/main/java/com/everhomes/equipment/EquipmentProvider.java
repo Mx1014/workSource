@@ -55,7 +55,7 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionEquipments> listEquipments(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
-			List<String> targetType, List<Long> targetId, List<ExecuteGroupAndPosition> executiveGroups, Integer offset, Integer pageSize);
+			List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionReviewTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
 			List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset, Integer pageSize);
 	
@@ -117,7 +117,7 @@ public interface EquipmentProvider {
 	void deleteEquipmentInspectionStandardGroupMap(Long standardGroupId);
 	void deleteEquipmentInspectionStandardGroupMapByStandardId(Long standardId);
 	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
-	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups);
+	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups, byte groupType );
 	
 	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
 	void populateStandardGroups(EquipmentInspectionStandards standard);
