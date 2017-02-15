@@ -13,7 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListQuestionnairesCommand {
+public class ListOrganizationQuestionnairesCommand {
 
 	private Integer namespaceId;
 
@@ -25,11 +25,11 @@ public class ListQuestionnairesCommand {
 
 	private Integer pageSize;
 
-	public ListQuestionnairesCommand() {
+	public ListOrganizationQuestionnairesCommand() {
 
 	}
 
-	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
+	public ListOrganizationQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
 		super();
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;

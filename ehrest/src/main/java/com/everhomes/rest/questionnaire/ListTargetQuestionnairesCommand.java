@@ -9,11 +9,13 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属类型，community</li>
  * <li>ownerId: 所属id，communityId</li>
+ * <li>targetType: 目标类型，organization</li>
+ * <li>targetId: 目标id，organization</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListQuestionnairesCommand {
+public class ListTargetQuestionnairesCommand {
 
 	private Integer namespaceId;
 
@@ -21,19 +23,25 @@ public class ListQuestionnairesCommand {
 
 	private Long ownerId;
 
+	private String targetType;
+
+	private Long targetId;
+
 	private Long pageAnchor;
 
 	private Integer pageSize;
 
-	public ListQuestionnairesCommand() {
+	public ListTargetQuestionnairesCommand() {
 
 	}
 
-	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
+	public ListTargetQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, String targetType, Long targetId, Long pageAnchor, Integer pageSize) {
 		super();
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
+		this.targetType = targetType;
+		this.targetId = targetId;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
@@ -60,6 +68,22 @@ public class ListQuestionnairesCommand {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	public Long getPageAnchor() {

@@ -9,11 +9,10 @@ import com.everhomes.util.StringHelper;
  * <li>namespaceId: 域空间id</li>
  * <li>ownerType: 所属类型，community</li>
  * <li>ownerId: 所属id，communityId</li>
- * <li>pageAnchor: 锚点</li>
- * <li>pageSize: 每页大小</li>
+ * <li>questionnaire: 问卷调查，参考{@link com.everhomes.rest.questionnaire.QuestionnaireDTO}</li>
  * </ul>
  */
-public class ListQuestionnairesCommand {
+public class CreateQuestionnaireCommand {
 
 	private Integer namespaceId;
 
@@ -21,21 +20,18 @@ public class ListQuestionnairesCommand {
 
 	private Long ownerId;
 
-	private Long pageAnchor;
+	private QuestionnaireDTO questionnaire;
 
-	private Integer pageSize;
-
-	public ListQuestionnairesCommand() {
+	public CreateQuestionnaireCommand() {
 
 	}
 
-	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
+	public CreateQuestionnaireCommand(Integer namespaceId, String ownerType, Long ownerId, QuestionnaireDTO questionnaire) {
 		super();
 		this.namespaceId = namespaceId;
 		this.ownerType = ownerType;
 		this.ownerId = ownerId;
-		this.pageAnchor = pageAnchor;
-		this.pageSize = pageSize;
+		this.questionnaire = questionnaire;
 	}
 
 	public Integer getNamespaceId() {
@@ -62,20 +58,12 @@ public class ListQuestionnairesCommand {
 		this.ownerId = ownerId;
 	}
 
-	public Long getPageAnchor() {
-		return pageAnchor;
+	public QuestionnaireDTO getQuestionnaire() {
+		return questionnaire;
 	}
 
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
+	public void setQuestionnaire(QuestionnaireDTO questionnaire) {
+		this.questionnaire = questionnaire;
 	}
 
 	@Override

@@ -7,33 +7,29 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
- * <li>ownerType: 所属类型，community</li>
- * <li>ownerId: 所属id，communityId</li>
+ * <li>optionId: 选项id</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListQuestionnairesCommand {
+public class ListOptionOrganizationsCommand {
 
 	private Integer namespaceId;
 
-	private String ownerType;
-
-	private Long ownerId;
+	private Long optionId;
 
 	private Long pageAnchor;
 
 	private Integer pageSize;
 
-	public ListQuestionnairesCommand() {
+	public ListOptionOrganizationsCommand() {
 
 	}
 
-	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
+	public ListOptionOrganizationsCommand(Integer namespaceId, Long optionId, Long pageAnchor, Integer pageSize) {
 		super();
 		this.namespaceId = namespaceId;
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
+		this.optionId = optionId;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
@@ -46,20 +42,12 @@ public class ListQuestionnairesCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public String getOwnerType() {
-		return ownerType;
+	public Long getOptionId() {
+		return optionId;
 	}
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
-	}
-
-	public Long getOwnerId() {
-		return ownerId;
-	}
-
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
+	public void setOptionId(Long optionId) {
+		this.optionId = optionId;
 	}
 
 	public Long getPageAnchor() {

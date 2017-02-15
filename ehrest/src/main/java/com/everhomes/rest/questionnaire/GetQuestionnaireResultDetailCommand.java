@@ -7,33 +7,33 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
- * <li>ownerType: 所属类型，community</li>
- * <li>ownerId: 所属id，communityId</li>
+ * <li>questionnaireId: 问卷id</li>
+ * <li>keywords: 查询关键字</li>
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListQuestionnairesCommand {
+public class GetQuestionnaireResultDetailCommand {
 
 	private Integer namespaceId;
 
-	private String ownerType;
+	private Long questionnaireId;
 
-	private Long ownerId;
+	private String keywords;
 
 	private Long pageAnchor;
 
 	private Integer pageSize;
 
-	public ListQuestionnairesCommand() {
+	public GetQuestionnaireResultDetailCommand() {
 
 	}
 
-	public ListQuestionnairesCommand(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor, Integer pageSize) {
+	public GetQuestionnaireResultDetailCommand(Integer namespaceId, Long questionnaireId, String keywords, Long pageAnchor, Integer pageSize) {
 		super();
 		this.namespaceId = namespaceId;
-		this.ownerType = ownerType;
-		this.ownerId = ownerId;
+		this.questionnaireId = questionnaireId;
+		this.keywords = keywords;
 		this.pageAnchor = pageAnchor;
 		this.pageSize = pageSize;
 	}
@@ -46,20 +46,20 @@ public class ListQuestionnairesCommand {
 		this.namespaceId = namespaceId;
 	}
 
-	public String getOwnerType() {
-		return ownerType;
+	public Long getQuestionnaireId() {
+		return questionnaireId;
 	}
 
-	public void setOwnerType(String ownerType) {
-		this.ownerType = ownerType;
+	public void setQuestionnaireId(Long questionnaireId) {
+		this.questionnaireId = questionnaireId;
 	}
 
-	public Long getOwnerId() {
-		return ownerId;
+	public String getKeywords() {
+		return keywords;
 	}
 
-	public void setOwnerId(Long ownerId) {
-		this.ownerId = ownerId;
+	public void setKeywords(String keywords) {
+		this.keywords = keywords;
 	}
 
 	public Long getPageAnchor() {
