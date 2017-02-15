@@ -134,7 +134,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@Autowired
     private ConfigurationProvider configurationProvider;
 	
-	@Aut
+	@Autowired
 	private EquipmentTasksSearcher equipmentTasksSearcher;
 	
 	@PostConstruct
