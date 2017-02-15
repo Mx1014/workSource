@@ -319,7 +319,12 @@ public class QualityServiceImpl implements QualityService {
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
 		
 		User user = UserContext.current().getUser();
-		
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("updateQualityStandard: userId = " + user.getId() + "time = " + DateHelper.currentGMTTime()
+					+ "UpdateQualityStandardCommand cmd = {}" + cmd);
+		}
+
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getId());
 		standard.setOwnerId(cmd.getOwnerId());
 		standard.setOwnerType(cmd.getOwnerType());
