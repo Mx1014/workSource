@@ -331,10 +331,21 @@ public class ContractServiceImpl implements ContractService {
 		return community.getName();
 	}
 
+	/**
+	 * 获取某机构(一般是企业)的所有有效合同
+	 * */
 	@Override
 	public ListContractsResponse listContractsByOraganizationId(
 			ListContractsByOraganizationIdCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<Contract> contractList = contractProvider.listContractByOrganizationId(cmd.getOrganizationId());
+		List<ContractDTO> resultList = contractList.stream().map(c->{
+			ContractDTO contractDTO = organizationService.processContract(c);
+			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
+			contractDTO.setBuildings(buildings);
+			return contractDTO;
+		}).collect(Collectors.toList());
+		
+		return new ListContractsResponse(null, resultList);
 	}
 }
