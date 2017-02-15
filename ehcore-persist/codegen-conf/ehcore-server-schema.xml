@@ -138,6 +138,7 @@
         eh_quality_inspection_task_templates |   
         eh_general_forms | eh_general_approvals | eh_general_approval_vals  |
 		eh_door_auth_logs |
+        eh_os_objects | eh_os_object_download_logs |
 
         </includes>
 

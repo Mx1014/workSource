@@ -1,27 +1,6 @@
 // @formatter:off
 package com.everhomes.controller;
 
-import java.net.InetAddress;
-import java.net.URLEncoder;
-import java.util.ArrayList;
-import java.util.Enumeration;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.jooq.tools.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.slf4j.MDC;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.method.HandlerMethod;
-import org.springframework.web.servlet.HandlerInterceptor;
-import org.springframework.web.servlet.ModelAndView;
-
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -35,17 +14,28 @@ import com.everhomes.rest.user.LoginToken;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.version.VersionRealmType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserLogin;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
+import com.everhomes.user.*;
 import com.everhomes.util.RequireAuthentication;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.WebTokenGenerator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import org.jooq.tools.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.slf4j.MDC;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.method.HandlerMethod;
+import org.springframework.web.servlet.HandlerInterceptor;
+import org.springframework.web.servlet.ModelAndView;
+
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.net.InetAddress;
+import java.net.URLEncoder;
+import java.util.*;
 
 /**
  * Interceptor that checks REST API signatures
@@ -332,7 +322,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		    LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
 		}
 		if(scheme == null || scheme.isEmpty()){
-			scheme = "https";
+			scheme = "http";
 		}
 		map.put("scheme", scheme);
 

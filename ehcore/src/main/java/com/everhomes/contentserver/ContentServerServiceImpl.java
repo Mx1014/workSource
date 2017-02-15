@@ -1,15 +1,15 @@
 package com.everhomes.contentserver;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.contentserver.*;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.messaging.ImageBody;
+import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,21 +28,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.contentserver.AddConfigItemCommand;
-import com.everhomes.rest.contentserver.AddContentServerCommand;
-import com.everhomes.rest.contentserver.ContentServerDTO;
-import com.everhomes.rest.contentserver.ContentServerErrorCode;
-import com.everhomes.rest.contentserver.UpdateContentServerCommand;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
-import com.everhomes.rest.contentserver.WebSocketConstant;
-import com.everhomes.rest.messaging.ImageBody;
-import com.everhomes.rest.rpc.PduFrame;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ContentServerServiceImpl implements ContentServerService {
@@ -349,6 +342,11 @@ public class ContentServerServiceImpl implements ContentServerService {
     public String getContentServer(){
         try {
             ContentServer server = selectContentServer();
+
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("selectContentServer public address is: {}, public port is: {}", server.getPublicPort(), server.getPublicAddress());
+                LOGGER.debug("current scheme is: {}", UserContext.current().getScheme());
+            }
 
             // https 默认端口443 by sfyan 20161226
             Integer port = server.getPublicPort();
