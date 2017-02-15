@@ -9,6 +9,7 @@ import java.util.Set;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -834,7 +835,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addConditions(con);
 
 		if(standardIds != null) {
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
+			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds);
+			con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+
+			Condition con5 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.OPERATOR_ID.eq(UserContext.current().getUser().getId());
+			con5 = con5.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
+
+			con4 = con4.or(con5);
+			query.addConditions(con4);
 		}
 		
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
