@@ -1874,7 +1874,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.eq(new Timestamp(createTime)));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
 
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listTodayEquipmentInspectionTasks, sql=" + query.getSQL());

@@ -1041,7 +1041,7 @@ public class QualityProviderImpl implements QualityProvider {
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
 		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
 
-		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.eq(new Timestamp(createTime)));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
 
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("listTodayQualityInspectionTasks, sql=" + query.getSQL());
