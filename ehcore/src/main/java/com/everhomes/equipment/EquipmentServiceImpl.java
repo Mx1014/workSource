@@ -13,14 +13,7 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 
 
@@ -229,6 +222,7 @@ import org.elasticsearch.common.geo.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
@@ -2396,46 +2390,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipmentProvider.creatEquipmentTask(task);
 				equipmentTasksSearcher.feedDoc(task);
 
-				Map<String, Object> map = new HashMap<String, Object>();
-				map.put("deadline", timeToStr(expiredTime));
-				String scope = EquipmentNotificationTemplateCode.SCOPE;
-				int code = EquipmentNotificationTemplateCode.GENERATE_EQUIPMENT_TASK_NOTIFY;
-				String locale = "zh_CN";
-				String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-
-				if(LOGGER.isInfoEnabled()) {
-					LOGGER.info("creatTaskByStandard, executiveGroups = {}" + standardDto.getExecutiveGroup());
-				}
-				for (StandardGroupDTO executiveGroup : standardDto.getExecutiveGroup()) {
-					if (executiveGroup.getPositionId() != null) {
-						ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
-						command.setOrganizationId(executiveGroup.getGroupId());
-						command.setJobPositionId(executiveGroup.getPositionId());
-						List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
-						if(LOGGER.isInfoEnabled()) {
-							LOGGER.info("creatTaskByStandard, executiveGroup = {}" + executiveGroup +"contacts = {}" + contacts);
-						}
-
-						if (contacts != null && contacts.size() > 0) {
-							for (OrganizationContactDTO contact : contacts) {
-								sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
-							}
-						}
-					} else {
-						List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
-						if(LOGGER.isInfoEnabled()) {
-							LOGGER.info("creatTaskByStandard, executiveGroup = {}" + executiveGroup +"members = {}" + members);
-						}
-
-						if (members != null) {
-							for (OrganizationMember member : members) {
-								sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
-							}
-						}
-					}
-
-				}
-
 			}
 		}
 			
@@ -2477,6 +2431,59 @@ public class EquipmentServiceImpl implements EquipmentService {
 		}
 		
 		return task;
+	}
+
+	@Scheduled(cron = "0 0 7 * * ? ")
+	public void sendTaskMsg() {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+			long current = System.currentTimeMillis();//当前时间毫秒数
+			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+
+			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(zero);
+
+			if (tasks != null && tasks.size() > 0) {
+				for (EquipmentInspectionTasks task : tasks) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("deadline", timeToStr(task.getExecutiveExpireTime()));
+					String scope = EquipmentNotificationTemplateCode.SCOPE;
+					int code = EquipmentNotificationTemplateCode.GENERATE_EQUIPMENT_TASK_NOTIFY;
+					String locale = "zh_CN";
+					String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+					List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), QualityGroupType.EXECUTIVE_GROUP.getCode());
+
+					for (EquipmentInspectionStandardGroupMap executiveGroup : maps) {
+						if (executiveGroup.getPositionId() != null) {
+							ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+							command.setOrganizationId(executiveGroup.getGroupId());
+							command.setJobPositionId(executiveGroup.getPositionId());
+							List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+							if (LOGGER.isInfoEnabled()) {
+								LOGGER.info("creatTaskByStandard, executiveGroup = {}" + executiveGroup + "contacts = {}" + contacts);
+							}
+
+							if (contacts != null && contacts.size() > 0) {
+								for (OrganizationContactDTO contact : contacts) {
+									sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
+								}
+							}
+						} else {
+							List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
+							if (LOGGER.isInfoEnabled()) {
+								LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "members = {}" + members);
+							}
+
+							if (members != null) {
+								for (OrganizationMember member : members) {
+									sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+								}
+							}
+						}
+					}
+				}
+
+			}
+		});
 	}
 
 	@Override
