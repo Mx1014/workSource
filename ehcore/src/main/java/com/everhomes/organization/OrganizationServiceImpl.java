@@ -8836,6 +8836,9 @@ System.out.println();
 
 	@Override
 	public List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd) {
+		if(null == cmd.getUserId()){
+			cmd.setUserId(UserContext.current().getUser().getId());
+		}
 		List<OrgAddressDTO> dtos = new ArrayList<>();
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(cmd.getUserId());
 		for (OrganizationMember member: members) {
