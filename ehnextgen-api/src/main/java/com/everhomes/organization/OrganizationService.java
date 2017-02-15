@@ -428,4 +428,6 @@ public interface OrganizationService {
 	List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, String token, String orgPath);
 
 	List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, Long userId, Long organizationId);
+
+	List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
 }

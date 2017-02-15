@@ -8833,5 +8833,37 @@ System.out.println();
 		}
 		return new ArrayList<>();
 	}
+
+	@Override
+	public List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd) {
+		List<OrgAddressDTO> dtos = new ArrayList<>();
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(cmd.getUserId());
+		for (OrganizationMember member: members) {
+			if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
+				Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+				if(null != organization){
+					List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+					if(null != addresses && addresses.size() > 0){
+						for (OrganizationAddress organizationAddress: addresses) {
+							Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+							if(null != address){
+								OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+								dto.setAddressId(address.getId());
+								dto.setOrganizationId(organization.getId());
+								dto.setDisplayName(organization.getName());
+								Community community = communityProvider.findCommunityById(address.getCommunityId());
+								if(null != community){
+									dto.setCommunityName(community.getName());
+								}
+								dtos.add(dto);
+							}
+						}
+					}
+
+				}
+			}
+		}
+		return dtos;
+	}
 }
 

@@ -58,6 +58,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	private static final String SIGN_APP_KEY = "sign.appKey";
 	private static final String APP_KEY_NAME = "appKey";
 	private static final int VERSION_UPPERBOUND = 4195330; // 区分4.1.2之前的版本,小于这个数字代表4.1.2以前的版本
+	private static final String HTTP = "http";
+	private static final String HTTPS = "https";
 
 	@Autowired
 	private UserService userService;
@@ -225,7 +227,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		UserContext context = UserContext.current();
 		VersionRange versionRange = new VersionRange("["+context.getVersion()+","+context.getVersion()+")");
 		if(versionRange.getUpperBound() < VERSION_UPPERBOUND){
-			context.setScheme("http");
+			context.setScheme(HTTP);
 		}else{
 			context.setScheme(userAgents.get("scheme"));
 		}
@@ -336,7 +338,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		    LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
 		}
 		if(scheme == null || scheme.isEmpty()){
-			scheme = "https";
+			scheme = HTTPS;
 		}
 		map.put("scheme", scheme);
 
