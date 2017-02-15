@@ -75,3 +75,19 @@ ALTER TABLE `eh_service_module_assignments` ADD COLUMN `assignment_type` TINYINT
 -- 地址表添加两列存储电商使用的楼栋和门牌， add by tt, 20170213（这样写速度快点）
 ALTER TABLE `eh_addresses` ADD COLUMN `business_building_name` VARCHAR(128),
 	ADD COLUMN `business_apartment_name` VARCHAR(128);
+    
+-- 设备巡检和品质核查任务表建索引 add by xiongying20170215
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(standard_id);
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(status);
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(target_id);
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(inspection_category_id);
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(executive_expire_time);
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(process_expire_time);
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(operator_id); 
+
+ALTER TABLE eh_quality_inspection_tasks ADD INDEX(standard_id);
+ALTER TABLE eh_quality_inspection_tasks ADD INDEX(status);
+ALTER TABLE eh_quality_inspection_tasks ADD INDEX(target_id);
+ALTER TABLE eh_quality_inspection_tasks ADD INDEX(executive_expire_time);
+ALTER TABLE eh_quality_inspection_tasks ADD INDEX(process_expire_time); 
+ALTER TABLE eh_quality_inspection_tasks ADD INDEX(operator_id); 
