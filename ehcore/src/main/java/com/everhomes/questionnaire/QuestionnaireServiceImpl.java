@@ -27,6 +27,8 @@ import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
 
 @Component
 public class QuestionnaireServiceImpl implements QuestionnaireService {
+	
+	
 
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {

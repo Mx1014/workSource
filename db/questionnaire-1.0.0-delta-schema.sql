@@ -38,8 +38,9 @@ CREATE TABLE `eh_questionnaire_questions` (
 CREATE TABLE `eh_questionnaire_options` (
   `id` BIGINT NOT NULL,
   `question_id` BIGINT NOT NULL,
-  `option_name` VARCHAR(50) NOT NULL,
-  `option_uri` VARCHAR(1024) NOT NULL,
+  `option_name` VARCHAR(50),
+  `option_uri` VARCHAR(1024),
+  `checked_count` INTEGER,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   
@@ -48,8 +49,8 @@ CREATE TABLE `eh_questionnaire_options` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 目标选中的选项表
--- DROP TABLE IF EXISTS  `eh_questionnaire_target_option_mappings`;
-CREATE TABLE `eh_questionnaire_target_option_mappings` (
+-- DROP TABLE IF EXISTS  `eh_questionnaire_answers`;
+CREATE TABLE `eh_questionnaire_answers` (
   `id` BIGINT NOT NULL,
   `questionnaire_id` BIGINT NOT NULL,
   `question_id` BIGINT NOT NULL,
@@ -57,6 +58,7 @@ CREATE TABLE `eh_questionnaire_target_option_mappings` (
   `target_type` VARCHAR(32) COMMENT 'organization',
   `target_id` BIGINT NOT NULL,
   `target_name` VARCHAR(128),
+  `option_content` VARCHAR(1024) COMMENT 'if question_type is blank, then this field has value',
   `creator_uid` BIGINT,
   `create_time` DATETIME,
   

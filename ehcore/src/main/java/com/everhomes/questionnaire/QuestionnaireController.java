@@ -42,7 +42,7 @@ public class QuestionnaireController extends ControllerBase {
 	 * <b>URL: /questionnaire/listQuestionnaires</b>
 	 */
 	@RequestMapping("listQuestionnaires")
-	@RestReturn(ListQuestionnairesResponse.class)
+	@RestReturn(ListQuestionnairesResponse.class) 
 	public RestResponse listQuestionnaires(ListQuestionnairesCommand cmd){
 		return new RestResponse(questionnaireService.listQuestionnaires(cmd));
 	}

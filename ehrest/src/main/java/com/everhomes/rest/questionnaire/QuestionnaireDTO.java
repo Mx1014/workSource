@@ -21,7 +21,7 @@ import com.everhomes.util.StringHelper;
  * <li>publishTime: 发布时间</li>
  * <li>createTime: 创建时间</li>
  * <li>submitTime: 企业问卷提交时间</li>
- * <li>questions: 题目列表，参考{com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO}</li>
+ * <li>questions: 题目列表，参考{@link com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO}</li>
  * </ul>
  */
 public class QuestionnaireDTO {

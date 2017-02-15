@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  * <li>questionType: 题目类型，1. 单选，2. 多选， 3. 填空， 4. 图片单选， 5. 图片多选</li>
  * <li>questionName: 题目名称</li>
  * <li>nextPageAnchor: 下一页锚点，仅当填空题时有效</li>
+ * <li>options: 选项列表，参考{@link com.everhomes.rest.questionnaire.QuestionnaireOptionDTO}</li>
  * </ul>
  */
 public class QuestionnaireQuestionDTO {
