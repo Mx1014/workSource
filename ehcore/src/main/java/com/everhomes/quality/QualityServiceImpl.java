@@ -1412,12 +1412,17 @@ public class QualityServiceImpl implements QualityService {
 		return dto;
 	}
 
+	@Override
 	@Scheduled(cron = "0 0 7 * * ? ")
 	public void sendTaskMsg() {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_QUALITY_TASK.getCode()).tryEnter(()-> {
 			long current = System.currentTimeMillis();//当前时间毫秒数
 			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
-
+			
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("sendTaskMsg, zero = " + zero);
+			}
+			
 			List<QualityInspectionTasks> tasks = qualityProvider.listTodayQualityInspectionTasks(zero);
 
 			if (tasks != null && tasks.size() > 0) {
@@ -1439,7 +1444,7 @@ public class QualityServiceImpl implements QualityService {
 							command.setJobPositionId(executiveGroup.getPositionId());
 							List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
 							if (LOGGER.isInfoEnabled()) {
-								LOGGER.info("creatTaskByStandard, executiveGroup = {}" + executiveGroup + "contacts = {}" + contacts);
+								LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "contacts = {}" + contacts);
 							}
 
 							if (contacts != null && contacts.size() > 0) {
