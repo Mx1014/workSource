@@ -219,7 +219,7 @@ public class QualityProviderImpl implements QualityProvider {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_QUALITY_TASK.getCode()).tryEnter(()-> {
 			String QUALITY_INSPECTION_TRIGGER_NAME = "QualityInspection " + System.currentTimeMillis();
 			scheduleProvider.scheduleCronJob(QUALITY_INSPECTION_TRIGGER_NAME, QUALITY_INSPECTION_TRIGGER_NAME,
-					"0 0 7 * * ? ", QualityInspectionScheduleJob.class, null);
+					"0 0 0 * * ? ", QualityInspectionScheduleJob.class, null);
         });
 		
 	}
@@ -264,8 +264,8 @@ public class QualityProviderImpl implements QualityProvider {
 
 	@Override
 	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
-    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds, 
-    		Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag) {
+    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds,
+			List<QualityInspectionStandardGroupMap> maps, Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class, locator.getEntityId()));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
@@ -320,7 +320,7 @@ public class QualityProviderImpl implements QualityProvider {
 				}
 				con1 = con1.and(con3);
 				//产品修改需求，自动生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以先查出standardIds再根据standardIds来查 by xiongying20170214
-				List<QualityInspectionStandardGroupMap> maps = listQualityInspectionStandardGroupMapByGroupAndPosition(groupIds);
+
 				if (maps != null && maps.size() > 0) {
 					Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(0L);
 					Condition con6 = null;
@@ -393,7 +393,8 @@ public class QualityProviderImpl implements QualityProvider {
 		return tasks;
 	}
 
-	private List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupIds) {
+	@Override
+	public List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupIds) {
 		final List<QualityInspectionStandardGroupMap> maps = new ArrayList<QualityInspectionStandardGroupMap>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(QualityInspectionStandardGroupMap.class));
 
@@ -420,6 +421,26 @@ public class QualityProviderImpl implements QualityProvider {
 
 		return maps;
 	}
+
+	@Override
+	public List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType) {
+		final List<QualityInspectionStandardGroupMap> maps = new ArrayList<QualityInspectionStandardGroupMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(QualityInspectionStandardGroupMap.class));
+
+		SelectQuery<EhQualityInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP);
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
+
+		query.fetch().map((r) -> {
+			maps.add(ConvertHelper.convert(r, QualityInspectionStandardGroupMap.class));
+			return null;
+		});
+
+
+		return maps;
+	}
+
 
 	@Override
 	public void createQualityInspectionStandards(
@@ -1011,6 +1032,27 @@ public class QualityProviderImpl implements QualityProvider {
         	tasks.add(ConvertHelper.convert(record, QualityInspectionTasks.class));
         	return null;
         });
+		return tasks;
+	}
+
+	@Override
+	public List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long createTime) {
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class));
+		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
+		SelectQuery<EhQualityInspectionTasksRecord> query = context.selectQuery(Tables.EH_QUALITY_INSPECTION_TASKS);
+
+		query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listTodayQualityInspectionTasks, sql=" + query.getSQL());
+			LOGGER.debug("listTodayQualityInspectionTasks, bindValues=" + query.getBindValues());
+		}
+
+		query.fetch().map((EhQualityInspectionTasksRecord record) -> {
+			tasks.add(ConvertHelper.convert(record, QualityInspectionTasks.class));
+			return null;
+		});
+
 		return tasks;
 	}
 
