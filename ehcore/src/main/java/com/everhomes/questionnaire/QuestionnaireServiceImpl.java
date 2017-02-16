@@ -1,12 +1,12 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
-import java.sql.Timestamp;
-
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireResponse;
@@ -29,9 +29,13 @@ import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
+import com.everhomes.rest.questionnaire.QuestionType;
 import com.everhomes.rest.questionnaire.QuestionnaireDTO;
+import com.everhomes.rest.questionnaire.QuestionnaireOptionDTO;
+import com.everhomes.rest.questionnaire.QuestionnaireOwnerType;
 import com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
+import com.everhomes.rest.questionnaire.QuestionnaireStatus;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -48,6 +52,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
 	@Autowired
 	private QuestionnaireAnswerProvider questionnaireAnswerProvider;
+	
+	@Autowired
+	private CommunityProvider communityProvider;
 	
 
 	@Override
@@ -73,50 +80,70 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		return new CreateQuestionnaireResponse();
 	}
 
-	private void checkQuestionnaireParameters(QuestionnaireDTO questionnaire) {
-		if (questionnaire.getNamespaceId() == null || StringUtils.isBlank(questionnaire.getOwnerType())
-				|| questionnaire.getOwnerId() == null) {
+	private void checkOwner(Integer namespaceId, String ownerType, Long ownerId){
+		QuestionnaireOwnerType questionnaireOwnerType;
+		if (namespaceId == null || (questionnaireOwnerType=QuestionnaireOwnerType.fromCode(ownerType)) == null
+				|| ownerId == null) {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid parameters, namespaceId=" + questionnaire.getNamespaceId() + ", ownerType=" + questionnaire.getOwnerType() + ", ownerId=" + questionnaire.getOwnerId());
+					"Invalid parameters, namespaceId=" + namespaceId + ", ownerType=" + ownerType + ", ownerId=" + ownerId);
 		}
+		switch (questionnaireOwnerType) {
+		case COMMUNITY:
+			Community community = communityProvider.findCommunityById(ownerId);
+			if (community == null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"there is no such community, ownerId="+ownerId);
+			}
+			break;
+
+		default:
+			break;
+		}
+	}
+	
+	private void checkQuestionnaireParameters(QuestionnaireDTO questionnaire) {
+		checkOwner(questionnaire.getNamespaceId(), questionnaire.getOwnerType(), questionnaire.getOwnerId());
 		if (StringUtils.isBlank(questionnaire.getQuestionnaireName())) {
 			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTIONNAIRE_NAME_EMPTY,
-					"Invalid parameters");
+					"Invalid parameters, questionnaire name cannot be null");
 		}
 		if (questionnaire.getQuestionnaireName().length() > 50) {
 			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTIONNAIRE_NAME_LENGTH_BEYOND_50,
-					"Invalid parameters");
+					"Invalid parameters, questionnaire name length cannot be beyond 50");
 		}
 		if (questionnaire.getQuestions() == null || questionnaire.getQuestions().size() == 0) {
 			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.NO_QUESTIONS,
-					"Invalid parameters");
+					"Invalid parameters, there are no questions");
 		}
-		if () {
-			
+		QuestionnaireStatus status;
+		if ((status=QuestionnaireStatus.fromCode(questionnaire.getStatus())) == null || status == QuestionnaireStatus.INACTIVE) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters,status="+questionnaire.getStatus());
 		}
 		
 		for (QuestionnaireQuestionDTO question: questionnaire.getQuestions()) {
 			if (StringUtils.isBlank(question.getQuestionName())) {
-				throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.NO_QUESTIONS,
-						"Invalid parameters");
+				throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTION_NAME_EMPTY,
+						"Invalid parameters, question name cannot be null");
 			}
-			
+			QuestionType questionType;
+			if ((questionType=QuestionType.fromCode(question.getQuestionType()))==null) {
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Invalid parameters, question type error, question type="+question.getQuestionType());
+			}
+			if (questionType != QuestionType.BLANK) {
+				if ((question.getOptions() == null || question.getOptions().size() == 0)) {
+					throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.NO_OPTIONS,
+							"Invalid parameters, there are no options");
+				}
+				for (QuestionnaireOptionDTO option : question.getOptions()) {
+					if (StringUtils.isBlank(option.getOptionName())) {
+						throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.OPTION_NAME_EMPTY,
+								"Invalid parameters, option name cannot be null");
+					}
+				}
+			}
 		}
-		
-		
-//		private Long id;
-//		private Integer namespaceId;
-//		private String ownerType;
-//		private Long ownerId;
-//		private String questionnaireName;
-//		private String description;
-//		private Integer collectionCount;
-//		private Byte status;
-//		private Timestamp publishTime;
-//		private Timestamp createTime;
-//		private Timestamp submitTime;
-		
-		
 	}
 
 	@Override

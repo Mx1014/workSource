@@ -36,7 +36,8 @@ CREATE TABLE `eh_questionnaire_questions` (
 -- 选项表
 -- DROP TABLE IF EXISTS  `eh_questionnaire_options`;
 CREATE TABLE `eh_questionnaire_options` (
-  `id` BIGINT NOT NULL,
+  `id` BIGINT NOT NULL,  
+  `questionnaire_id` BIGINT NOT NULL,
   `question_id` BIGINT NOT NULL,
   `option_name` VARCHAR(50),
   `option_uri` VARCHAR(1024),
