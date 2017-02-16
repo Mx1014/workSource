@@ -167,7 +167,7 @@ class PmTaskCommonServiceImpl {
             if (null != address) {
                 task.setBuildingName(address.getBuildingName());
 
-                if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
+                if(cmd.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
                     Community community = communityProvider.findCommunityById(address.getCommunityId());
                     task.setAddress(address.getCityName() + address.getAreaName() + community.getName() + address.getAddress());
                 }
