@@ -55,6 +55,11 @@ public class QuestionnaireOptionProviderImpl implements QuestionnaireOptionProvi
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireOption.class));
 	}
 	
+	@Override
+	public void deleteOptionsByQuestionnaireId(Long questionnaireId) {
+		getReadWriteContext().delete(Tables.EH_QUESTIONNAIRE_OPTIONS).where(Tables.EH_QUESTIONNAIRE_OPTIONS.QUESTIONNAIRE_ID.eq(questionnaireId)).execute();
+	}
+
 	private EhQuestionnaireOptionsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

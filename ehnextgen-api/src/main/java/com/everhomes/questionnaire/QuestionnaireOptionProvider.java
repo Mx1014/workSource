@@ -13,4 +13,6 @@ public interface QuestionnaireOptionProvider {
 
 	List<QuestionnaireOption> listQuestionnaireOption();
 
+	void deleteOptionsByQuestionnaireId(Long questionnaireId);
+
 }

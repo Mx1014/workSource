@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -16,7 +17,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhQuestionnairesDao;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaires;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class QuestionnaireProviderImpl implements QuestionnaireProvider {
@@ -31,6 +34,10 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	public void createQuestionnaire(Questionnaire questionnaire) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQuestionnaires.class));
 		questionnaire.setId(id);
+		questionnaire.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		questionnaire.setCreatorUid(UserContext.current().getUser().getId());
+		questionnaire.setUpdateTime(questionnaire.getCreateTime());
+		questionnaire.setOperatorUid(questionnaire.getCreatorUid());
 		getReadWriteDao().insert(questionnaire);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQuestionnaires.class, null);
 	}
@@ -38,6 +45,8 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 	@Override
 	public void updateQuestionnaire(Questionnaire questionnaire) {
 		assert (questionnaire.getId() != null);
+		questionnaire.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		questionnaire.setOperatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().update(questionnaire);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQuestionnaires.class, questionnaire.getId());
 	}

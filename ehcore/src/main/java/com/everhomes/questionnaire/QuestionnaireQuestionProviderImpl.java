@@ -55,6 +55,11 @@ public class QuestionnaireQuestionProviderImpl implements QuestionnaireQuestionP
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireQuestion.class));
 	}
 	
+	@Override
+	public void deleteQuestionsByQuestionnaireId(Long questionnaireId) {
+		getReadWriteContext().delete(Tables.EH_QUESTIONNAIRE_QUESTIONS).where(Tables.EH_QUESTIONNAIRE_QUESTIONS.QUESTIONNAIRE_ID.eq(questionnaireId)).execute();
+	}
+
 	private EhQuestionnaireQuestionsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

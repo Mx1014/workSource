@@ -1,6 +1,8 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.util.List;
+
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -8,6 +10,9 @@ import org.springframework.stereotype.Component;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireResponse;
 import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireCommand;
@@ -36,6 +41,7 @@ import com.everhomes.rest.questionnaire.QuestionnaireOwnerType;
 import com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
 import com.everhomes.rest.questionnaire.QuestionnaireStatus;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component
@@ -56,6 +62,12 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Autowired
 	private CommunityProvider communityProvider;
 	
+	@Autowired
+	private DbProvider dbProvider;
+	
+	@Autowired
+	private CoordinationProvider coordinationProvider;
+	
 
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
@@ -71,13 +83,81 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
-		QuestionnaireDTO questionnaire = cmd.getQuestionnaire();
-		checkQuestionnaireParameters(questionnaire);
+		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();
+		checkQuestionnaireParameters(questionnaireDTO);
 		
 		
+		QuestionnaireDTO result = (QuestionnaireDTO)dbProvider.execute(s->{
+			//如果是重新编辑问卷，则把之前的题目和选项删除
+			Questionnaire questionnaire;
+			if (questionnaireDTO.getId() != null) {
+				questionnaire = (Questionnaire)coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + questionnaireDTO.getId()).enter(()->{
+					Questionnaire q = findQuestionnaireForUpdate(questionnaireDTO);
+					updateQuestionnaire(q, questionnaireDTO);
+					return q;
+				}).first();
+				
+				questionnaireQuestionProvider.deleteQuestionsByQuestionnaireId(questionnaireDTO.getId());
+				questionnaireOptionProvider.deleteOptionsByQuestionnaireId(questionnaireDTO.getId());
+			} else {
+				questionnaire = ConvertHelper.convert(questionnaireDTO, Questionnaire.class);
+				questionnaireProvider.createQuestionnaire(questionnaire);
+			}
+			
+			List<QuestionnaireQuestionDTO> questionDTOs = createQuestions(questionnaireDTO.getQuestions());
+			
+			return convertToQuestionnaireDTO(questionnaire, questionDTOs);
+		});
 		
-		
-		return new CreateQuestionnaireResponse();
+		return new CreateQuestionnaireResponse(result);
+	}
+
+	private List<QuestionnaireQuestionDTO> createQuestions(List<QuestionnaireQuestionDTO> questions) {
+		return null;
+	}
+
+	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, List<QuestionnaireQuestionDTO> questionDTOs){
+		QuestionnaireDTO questionnaireDTO = ConvertHelper.convert(questionnaire, QuestionnaireDTO.class);
+		questionnaireDTO.setQuestions(questionDTOs);
+		return questionnaireDTO;
+	}
+	
+	// 只有草稿状态的问卷才可以更新
+	private Questionnaire findQuestionnaireForUpdate(QuestionnaireDTO questionnaireDTO) {
+		Questionnaire questionnaire = findQuestionnaire(questionnaireDTO);
+		if (QuestionnaireStatus.fromCode(questionnaire.getStatus()) != QuestionnaireStatus.DRAFT) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"status error, status=" + questionnaire.getStatus());
+		}
+		return questionnaire;
+	}
+	
+	private Questionnaire findQuestionnaire(QuestionnaireDTO questionnaireDTO) {
+		Questionnaire questionnaire = findQuestionnaireById(questionnaireDTO.getId());
+		if (questionnaire.getNamespaceId().intValue() != questionnaireDTO.getNamespaceId().intValue() ||
+				!questionnaire.getOwnerType().equals(questionnaireDTO.getOwnerType()) ||
+				questionnaire.getOwnerId().longValue() != questionnaireDTO.getOwnerId().longValue()) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"there is no such questionnaire in this context, questionnaireId=" + questionnaireDTO.getId());
+		}
+		return questionnaire;
+	}
+
+	private Questionnaire findQuestionnaireById(Long id) {
+		Questionnaire questionnaire = questionnaireProvider.findQuestionnaireById(id);
+		if (questionnaire == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"there is no such questionnaire, questionnaireId=" + id);
+		}
+		return questionnaire;
+	}
+
+	private void updateQuestionnaire(Questionnaire questionnaire, QuestionnaireDTO questionnaireDTO) {
+		questionnaire.setQuestionnaireName(questionnaireDTO.getQuestionnaireName());
+		questionnaire.setDescription(questionnaireDTO.getDescription());
+		questionnaire.setStatus(questionnaireDTO.getStatus());
+		questionnaire.setPublishTime(questionnaireDTO.getPublishTime());
+		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 
 	private void checkOwner(Integer namespaceId, String ownerType, Long ownerId){
