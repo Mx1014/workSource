@@ -140,13 +140,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@PostConstruct
 	public void init() {
 		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "59 59 23 * * ? ");
-		LOGGER.info("=======================init");
+		LOGGER.info("=======================init cronExpression={}", cronExpression);
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 			String EQUIPMENT_INSPECTION_TRIGGER_NAME = "EquipmentInspection " + System.currentTimeMillis();
+			LOGGER.info("=======================in lock EQUIPMENT_INSPECTION_TRIGGER_NAME={}", EQUIPMENT_INSPECTION_TRIGGER_NAME);
 			scheduleProvider.scheduleCronJob(EQUIPMENT_INSPECTION_TRIGGER_NAME, EQUIPMENT_INSPECTION_TRIGGER_NAME,
 					cronExpression, EquipmentInspectionScheduleJob.class, null);
         });
-		
+		LOGGER.info("=======================after ");
 	}
 
 	@Override
