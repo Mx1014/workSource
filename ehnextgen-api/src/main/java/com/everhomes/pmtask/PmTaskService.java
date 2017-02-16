@@ -47,7 +47,6 @@ import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
 import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
 import com.everhomes.rest.pmtask.UpdateTaskCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 
 public interface PmTaskService {
 	SearchTasksResponse searchTasks(SearchTasksCommand cmd);
@@ -59,7 +58,7 @@ public interface PmTaskService {
 	void completeTask(CompleteTaskCommand cmd);
 	
 	void closeTask(CloseTaskCommand cmd);
-	
+
 	void assignTask(AssignTaskCommand cmd);
 	
 	PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd);

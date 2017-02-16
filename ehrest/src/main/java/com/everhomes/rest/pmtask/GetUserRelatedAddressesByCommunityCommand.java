@@ -12,6 +12,7 @@ public class GetUserRelatedAddressesByCommunityCommand {
 	
 	private String ownerType;
     private Long ownerId;
+    private String keyword;
     
 	public String getOwnerType() {
 		return ownerType;
@@ -29,5 +30,13 @@ public class GetUserRelatedAddressesByCommunityCommand {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public String getKeyword() {
+		return keyword;
+	}
+
+	public void setKeyword(String keyword) {
+		this.keyword = keyword;
 	}
 }

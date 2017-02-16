@@ -25,6 +25,16 @@ public class ListAuthorizationCommunityCommand {
     
     private String keyword;
 
+	private Byte checkPrivilegeFlag;
+
+	public Byte getCheckPrivilegeFlag() {
+		return checkPrivilegeFlag;
+	}
+
+	public void setCheckPrivilegeFlag(Byte checkPrivilegeFlag) {
+		this.checkPrivilegeFlag = checkPrivilegeFlag;
+	}
+
 	public String getOwnerType() {
 		return ownerType;
 	}
