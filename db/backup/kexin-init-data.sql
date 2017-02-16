@@ -1456,3 +1456,12 @@ update eh_launch_pad_items set icon_uri = "cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4
 
 -- 正中汇游客场景去掉 任务管理入口 by xiongying20170119
 delete from eh_launch_pad_items where item_label = "任务管理" and scene_type = 'park_tourist' and namespace_id = 999983;
+
+
+-- 在"更多"中加上"店铺管理"配置
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+VALUES ('113972', '999983', '0', '0', '0', '/home', 'Bizs', '店铺管理', '店铺管理', 'cs://1/image/aW1hZ2UvTVRwaFlqUmpaVFkzTnpkalptVmxNelEyWXpjMlptUTFOek00WXpJM05ERTVOQQ', '1', '1', '14', '{\"url\":\"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '0', NULL, '0', NULL, '', '', '1', 'park_tourist', '1');
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+VALUES ('113973', '999983', '0', '0', '0', '/home', 'Bizs', '店铺管理', '店铺管理', 'cs://1/image/aW1hZ2UvTVRwaFlqUmpaVFkzTnpkalptVmxNelEyWXpjMlptUTFOek00WXpJM05ERTVOQQ', '1', '1', '14', '{\"url\":\"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '0', NULL, '0', NULL, '', '', '1', 'pm_admin', '1');
+
