@@ -1,8 +1,13 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.sql.Timestamp;
+
+import org.apache.commons.lang.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireResponse;
 import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireCommand;
@@ -24,15 +29,30 @@ import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
+import com.everhomes.rest.questionnaire.QuestionnaireDTO;
+import com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO;
+import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
+import com.everhomes.util.RuntimeErrorException;
 
 @Component
 public class QuestionnaireServiceImpl implements QuestionnaireService {
 	
+	@Autowired
+	private QuestionnaireProvider questionnaireProvider;
+	
+	@Autowired
+	private QuestionnaireQuestionProvider questionnaireQuestionProvider;
+	
+	@Autowired
+	private QuestionnaireOptionProvider questionnaireOptionProvider;
+	
+	@Autowired
+	private QuestionnaireAnswerProvider questionnaireAnswerProvider;
 	
 
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
-	
+		
 		return new ListQuestionnairesResponse();
 	}
 
@@ -44,8 +64,59 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
-	
+		QuestionnaireDTO questionnaire = cmd.getQuestionnaire();
+		checkQuestionnaireParameters(questionnaire);
+		
+		
+		
+		
 		return new CreateQuestionnaireResponse();
+	}
+
+	private void checkQuestionnaireParameters(QuestionnaireDTO questionnaire) {
+		if (questionnaire.getNamespaceId() == null || StringUtils.isBlank(questionnaire.getOwnerType())
+				|| questionnaire.getOwnerId() == null) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid parameters, namespaceId=" + questionnaire.getNamespaceId() + ", ownerType=" + questionnaire.getOwnerType() + ", ownerId=" + questionnaire.getOwnerId());
+		}
+		if (StringUtils.isBlank(questionnaire.getQuestionnaireName())) {
+			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTIONNAIRE_NAME_EMPTY,
+					"Invalid parameters");
+		}
+		if (questionnaire.getQuestionnaireName().length() > 50) {
+			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.QUESTIONNAIRE_NAME_LENGTH_BEYOND_50,
+					"Invalid parameters");
+		}
+		if (questionnaire.getQuestions() == null || questionnaire.getQuestions().size() == 0) {
+			throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.NO_QUESTIONS,
+					"Invalid parameters");
+		}
+		if () {
+			
+		}
+		
+		for (QuestionnaireQuestionDTO question: questionnaire.getQuestions()) {
+			if (StringUtils.isBlank(question.getQuestionName())) {
+				throw RuntimeErrorException.errorWith(QuestionnaireServiceErrorCode.SCOPE, QuestionnaireServiceErrorCode.NO_QUESTIONS,
+						"Invalid parameters");
+			}
+			
+		}
+		
+		
+//		private Long id;
+//		private Integer namespaceId;
+//		private String ownerType;
+//		private Long ownerId;
+//		private String questionnaireName;
+//		private String description;
+//		private Integer collectionCount;
+//		private Byte status;
+//		private Timestamp publishTime;
+//		private Timestamp createTime;
+//		private Timestamp submitTime;
+		
+		
 	}
 
 	@Override
