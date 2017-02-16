@@ -480,7 +480,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
-                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
+                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
+                                .or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.like(likeVal))
                         .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                         .and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.isNotNull())
@@ -520,7 +521,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
-                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
+                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
+                                .or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.equal(cmd.getBuildingName())))
                         .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal).or(Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME.like(likeVal)))
                         .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()));
                 	
