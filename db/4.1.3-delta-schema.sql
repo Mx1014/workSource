@@ -91,3 +91,6 @@ ALTER TABLE eh_quality_inspection_tasks ADD INDEX(target_id);
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(executive_expire_time);
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(process_expire_time); 
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(operator_id); 
+
+-- fix bug6188 add by xiongying20170216
+ALTER TABLE eh_equipment_inspection_templates ALTER COLUMN name SET DEFAULT '';

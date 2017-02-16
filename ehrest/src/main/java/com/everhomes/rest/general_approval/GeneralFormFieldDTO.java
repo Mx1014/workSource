@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * 数字类型：{@link com.everhomes.rest.general_approval.GeneralFormNumDTO}
  * 文本类型：{@link com.everhomes.rest.general_approval.GeneralFormTextDTO}
  * 图片类型：{@link com.everhomes.rest.general_approval.GeneralFormImageDTO}
- * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO.java}
+ * 文件类型：{@link com.everhomes.rest.general_approval.GeneralFormFileDTO}
  * </li>
  * <li>requiredFlag: 是否必填 </li>
  * <li>dynamicFlag: 是否动态获取数据</li>

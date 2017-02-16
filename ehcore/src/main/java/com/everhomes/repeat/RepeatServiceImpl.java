@@ -233,6 +233,8 @@ public class RepeatServiceImpl implements RepeatService {
 				} else {
 					result = (int)((now.getTime() - compareValue.getTime())/86400000);
 				}
+
+				results.add(result);
 			} else if(expressionDto != null && expressionDto.size() > 0) {
 				for(RepeatExpressionDTO exp : expressionDto) {
 					
@@ -270,9 +272,11 @@ public class RepeatServiceImpl implements RepeatService {
 							result = -1;
 						}
 					}
+
+					results.add(result);
 				}
 			}
-			results.add(result);
+
 		}
 		
 		return results;
