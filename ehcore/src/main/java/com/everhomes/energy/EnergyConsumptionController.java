@@ -346,7 +346,7 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(value = String.class)
     @RequestMapping("caculateEnergyDayStatByDate")
     public RestResponse caculateEnergyDayStatByDate(EnergyStatCommand cmd ) {
-    	energyConsumptionService.caculateEnergyDayStatByDate(new Date(cmd.getStatDate()));
+    	energyConsumptionService.calculateEnergyDayStatByDate(new Date(cmd.getStatDate()));
     	return success();
     }
 
@@ -357,7 +357,7 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(value = String.class)
     @RequestMapping("caculateEnergyMonthStatByDate")
     public RestResponse caculateEnergyMonthStatByDate(EnergyStatCommand cmd) {
-    	energyConsumptionService.caculateEnergyMonthStatByDate(new Date(cmd.getStatDate()));
+    	energyConsumptionService.calculateEnergyMonthStatByDate(new Date(cmd.getStatDate()));
     	return success();
     }
 }
