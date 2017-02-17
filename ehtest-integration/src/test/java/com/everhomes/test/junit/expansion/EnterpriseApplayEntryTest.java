@@ -41,16 +41,28 @@ public class EnterpriseApplayEntryTest extends BaseLoginAuthTestCase {
 		String jsonFilePath = "data/json/entry-2.4-test-data.txt";
 		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
 		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+		jsonFilePath = "data/json/3.4.x-test-data-userinfo_160618.txt";
+		fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
+		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
+		
+		
+	}
+	
+	private void logon() {
+		String userIdentifier = "12000000001";
+		String plainTexPassword = "123456";
+		logon(namespaceId, userIdentifier, plainTexPassword);
 	}
 
 	@Test
 	public void testApplyEntry() {
+		logon();
 		EnterpriseApplyEntryCommand cmd = new EnterpriseApplyEntryCommand();
 		cmd.setSourceType(ApplyEntrySourceType.FOR_RENT.getCode());
 		cmd.setSourceId(51L);
 		cmd.setApplyType(ApplyEntryApplyType.RENEW.getCode());
 		cmd.setContractId(1L);
-
+		cmd.setCommunityId(2L);
 		EntryApplyEntryRestResponse response = httpClientService.restPost(APPLY_ENTRY_URI, cmd,
 				EntryApplyEntryRestResponse.class);
 		assertNotNull(response);
@@ -66,7 +78,7 @@ public class EnterpriseApplayEntryTest extends BaseLoginAuthTestCase {
 		ListEnterpriseApplyEntryCommand cmd2 = new ListEnterpriseApplyEntryCommand();
 		cmd2.setBuildingId(1L);
 
-		EntryListApplyEntrysRestResponse response2 = httpClientService.restPost(LIST_APPLY_ENTRYS_URI, cmd,
+		EntryListApplyEntrysRestResponse response2 = httpClientService.restPost(LIST_APPLY_ENTRYS_URI, cmd2,
 				EntryListApplyEntrysRestResponse.class);
 
 		assertNotNull("The reponse of getting user info may not be null", response2);

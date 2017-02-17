@@ -3,6 +3,7 @@
         {
             "id": 1,
             "community_id": 2,
+            "namespace_id": 1000000,
             "name": "楼栋名-A座",
             "status": 2
         }

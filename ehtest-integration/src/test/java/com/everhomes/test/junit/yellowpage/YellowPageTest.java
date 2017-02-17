@@ -200,7 +200,7 @@ public class YellowPageTest extends BaseLoginAuthTestCase {
 	}
 	
 	@Test
-	private void testUpdateYellowPage(){
+	public void testUpdateYellowPage(){
 		String uri = this.UPDATE_YELLOW_PAGE_URI;
 		UpdateYellowPageCommand cmd = new UpdateYellowPageCommand();
 		cmd.setId(1L);
@@ -212,7 +212,7 @@ public class YellowPageTest extends BaseLoginAuthTestCase {
 	}
 	
 	@Test
-	private void testListYellowPageTopic(){
+	public void testListYellowPageTopic(){
 		String uri = this.GET_YELLOW_PAGE_TOPIC;
 		GetYellowPageTopicCommand cmd = new GetYellowPageTopicCommand();
 		cmd.setType((byte) 3);

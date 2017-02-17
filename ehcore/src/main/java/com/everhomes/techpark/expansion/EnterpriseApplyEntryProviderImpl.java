@@ -287,8 +287,11 @@ public class EnterpriseApplyEntryProviderImpl implements
 		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		pageSize = pageSize + 1;
-		Condition cond = Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
-		
+		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
+
+		if(!StringUtils.isEmpty(request.getNamespaceId())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId()));
+		}
 		if(!StringUtils.isEmpty(request.getCommunityId())){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
 		}
