@@ -194,12 +194,12 @@ public interface EnergyConsumptionService {
     /**
      * 计算某一天的读表数据
      * */
-	void caculateEnergyDayStatByDate(Date date);
+	void calculateEnergyDayStatByDate(Date date);
 
     /**
      * 计算某一月的读表数据
      * */  
-	void caculateEnergyMonthStatByDate(Date date);
+	void calculateEnergyMonthStatByDate(Date date);
 
     void syncEnergyMeterReadingLogIndex();
 
