@@ -117,7 +117,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
-		FlowCaseEntity e = new FlowCaseEntity();
+		FlowCaseEntity e;
 		
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());

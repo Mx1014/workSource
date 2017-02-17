@@ -21,7 +21,7 @@ public enum PmTaskCheckPrivilegeFlag {
         if(code != null) {
             PmTaskCheckPrivilegeFlag[] values = PmTaskCheckPrivilegeFlag.values();
             for(PmTaskCheckPrivilegeFlag value : values) {
-                if(value.code == code.byteValue()) {
+                if(value.code == code) {
                     return value;
                 }
             }

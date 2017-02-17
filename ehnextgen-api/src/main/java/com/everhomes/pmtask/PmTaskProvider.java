@@ -10,6 +10,8 @@ public interface PmTaskProvider {
 	void createTaskTarget(PmTaskTarget pmTaskTarget);
 	
 	void updateTaskTarget(PmTaskTarget pmTaskTarget);
+
+	void deleteTaskTarget(PmTaskTarget pmTaskTarget);
 	
 	void createTask(PmTask pmTask);
 	

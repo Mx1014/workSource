@@ -1512,7 +1512,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 		SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 		
 		dbProvider.execute((TransactionStatus status) -> {
-
 			targetIds.forEach(t -> {
 				// 有下面这段代码会导致：如果在业务授权那边指了权限，这些人会在报修模块这边添加不进去，故注释掉 by lqs 20170123
 //				if(resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(),
@@ -1530,6 +1529,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 					pmTaskTarget.setStatus(PmTaskTargetStatus.ACTIVE.getCode());
 					pmTaskTarget.setTargetType(EntityType.USER.getCode());
 					pmTaskTarget.setTargetId(t);
+					pmTaskTarget.setCreateTime(new Timestamp(System.currentTimeMillis()));
+					pmTaskTarget.setCreatorUid(UserContext.current().getUser().getId());
 
 					pmTaskProvider.createTaskTarget(pmTaskTarget);
 
@@ -1542,7 +1543,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 					}
 				}
 			});
-
 			return null;
 		});
 	}
@@ -1575,9 +1575,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 			}
 			PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
 					EntityType.USER.getCode(), cmd.getTargetId());
-			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
+//			pmTaskTarget.setStatus(PmTaskTargetStatus.INACTIVE.getCode());
 			
-			pmTaskProvider.updateTaskTarget(pmTaskTarget);
+			pmTaskProvider.deleteTaskTarget(pmTaskTarget);
 			
 			rolePrivilegeService.deleteAcls(EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), 
 					EntityType.USER.getCode(), cmd.getTargetId(), 20100L, null);
@@ -1924,7 +1924,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 			tempMap.put(id, Collections.singletonList(p));
 		}
 		
-		for(List<PmTaskTargetStatistic>  l:tempMap.values()){
+		for(List<PmTaskTargetStatistic> l:tempMap.values()){
 			l = mergeTaskOperatorCategoryList(l);
 			result.addAll(l);
 		}

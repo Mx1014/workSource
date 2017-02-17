@@ -130,6 +130,14 @@ public class PmProviderImpl implements PmTaskProvider{
     	dao.update(pmTaskTarget);
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskTargets.class, null);
     }
+
+	@Override
+	public void deleteTaskTarget(PmTaskTarget pmTaskTarget){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhPmTaskTargetsDao dao = new EhPmTaskTargetsDao(context.configuration());
+		dao.delete(pmTaskTarget);
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhPmTaskTargets.class, null);
+	}
 	
 //	@Caching(evict = { 
 //			@CacheEvict(value="PmTask", key="#pmTask.id")
