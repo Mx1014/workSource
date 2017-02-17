@@ -165,18 +165,19 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
 				NetworkInterface intf = en.nextElement();
 				String name = intf.getName();
-				LOGGER.info("=======================intf : {}" , intf);
-//				if (name.contains("eth0")) {
-//					for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-//						InetAddress inetAddress = enumIpAddr.nextElement();
-//						if (!inetAddress.isLoopbackAddress()) {
-//							String ipaddress = inetAddress.getHostAddress().toString();
-//							if (!ipaddress.contains("::") && !ipaddress.contains("0:0:") && !ipaddress.contains("fe80")) {
-//								ip = ipaddress;
-//							}
-//						}
-//					}
-//				}
+
+				if (name.contains("eth0")) {
+					for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+						InetAddress inetAddress = enumIpAddr.nextElement();
+						LOGGER.info("=====================inetAddress:{}" + inetAddress.toString());
+						if (!inetAddress.isLoopbackAddress()) {
+							String ipaddress = inetAddress.getHostAddress().toString();
+							if (!ipaddress.contains("::") && !ipaddress.contains("0:0:") && !ipaddress.contains("fe80")) {
+								ip = ipaddress;
+							}
+						}
+					}
+				}
 			}
 		} catch (SocketException ex) {
 			ex.printStackTrace();
