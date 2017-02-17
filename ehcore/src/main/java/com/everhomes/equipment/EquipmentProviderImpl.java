@@ -1,13 +1,11 @@
 package com.everhomes.equipment;
 
 import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
 import java.net.UnknownHostException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 
@@ -143,21 +141,47 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public void init() {
 		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
 		try {
-			InetAddress address = InetAddress.getLocalHost();
-			LOGGER.info("=======================================================" + address.getHostAddress());
+			String address = getLinuxLocalIp();
+//			LOGGER.info("=======================================================" + address.getHostAddress());
 
 			String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "0.0.0.0");
-			if(taskServer.equals(address.getHostAddress())) {
+			if(taskServer.equals(address)) {
 				this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 					String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
 					scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
 							cronExpression, EquipmentInspectionScheduleJob.class, null);
 				});
 			}
-		} catch (UnknownHostException e) {
+		} catch (SocketException e) {
 			e.printStackTrace();
 		}
 
+
+	}
+
+	public static String getLinuxLocalIp() throws SocketException {
+		String ip = "";
+		try {
+			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
+				NetworkInterface intf = en.nextElement();
+				String name = intf.getName();
+				LOGGER.info("=======================intf : {}" , intf);
+//				if (name.contains("eth0")) {
+//					for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
+//						InetAddress inetAddress = enumIpAddr.nextElement();
+//						if (!inetAddress.isLoopbackAddress()) {
+//							String ipaddress = inetAddress.getHostAddress().toString();
+//							if (!ipaddress.contains("::") && !ipaddress.contains("0:0:") && !ipaddress.contains("fe80")) {
+//								ip = ipaddress;
+//							}
+//						}
+//					}
+//				}
+			}
+		} catch (SocketException ex) {
+			ex.printStackTrace();
+		}
+		return ip;
 	}
 
 	@Override
