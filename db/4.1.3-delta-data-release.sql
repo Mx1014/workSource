@@ -320,3 +320,8 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@categories_id := @categories_id + 1), '7', '0', '公共设施检查', '设备类型/公共设施检查', '0', '2', NOW(), NULL, NULL, NULL, '0');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@categories_id := @categories_id + 1), '7', '0', '周末值班', '设备类型/周末值班', '0', '2', NOW(), NULL, NULL, NULL, '0');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@categories_id := @categories_id + 1), '7', '0', '安全检查', '设备类型/安全检查', '0', '2', NOW(), NULL, NULL, NULL, '0');
+
+
+-- 更新现网时间周期timeRange为负bug by xiongying20170217
+update eh_repeat_settings set time_ranges = '{"ranges":[{"startTime":"06:00:00","endTime":"05:45:00","duration":"1425m"}]}' where id = 11;
+update eh_repeat_settings set time_ranges = '{"ranges":[{"startTime":"07:00:00","endTime":"11:00:00","duration":"240m"},{"startTime":"11:05:00","endTime":"15:00:00","duration":"235m"},{"startTime":"15:05:00","endTime":"19:00:00","duration":"235m"},{"startTime":"19:05:00","endTime":"23:00:00","duration":"235m"},{"startTime":"23:05:00","endTime":"03:00:00","duration":"235m"},{"startTime":"03:05:00","endTime":"06:58:00","duration":"233m"}]}' where id = 194;

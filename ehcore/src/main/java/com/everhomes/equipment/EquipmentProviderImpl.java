@@ -141,8 +141,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public void init() {
 		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-			String EQUIPMENT_INSPECTION_TRIGGER_NAME = "EquipmentInspection " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(EQUIPMENT_INSPECTION_TRIGGER_NAME, EQUIPMENT_INSPECTION_TRIGGER_NAME,
+			String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
+			scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
 					cronExpression, EquipmentInspectionScheduleJob.class, null);
         });
 	}
@@ -913,8 +913,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     		if(endDate != null && !"".equals(endDate)) {
     			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endDate));
     		}
-            
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+			//产品要求把已失效的任务也显示出来 add by xiongying20170217
+//            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
             query.addLimit(pageSize - tasks.size());
             
