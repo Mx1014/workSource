@@ -1,5 +1,7 @@
 package com.everhomes.equipment;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -140,11 +142,22 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@PostConstruct
 	public void init() {
 		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
-		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-			String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
-					cronExpression, EquipmentInspectionScheduleJob.class, null);
-        });
+		try {
+			InetAddress address = InetAddress.getLocalHost();
+			LOGGER.info("=======================================================" + address.getHostAddress());
+
+			String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "0.0.0.0");
+			if(taskServer.equals(address.getHostAddress())) {
+				this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+					String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
+					scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
+							cronExpression, EquipmentInspectionScheduleJob.class, null);
+				});
+			}
+		} catch (UnknownHostException e) {
+			e.printStackTrace();
+		}
+
 	}
 
 	@Override
