@@ -92,7 +92,7 @@ public interface EquipmentProvider {
 	void updateEquipmentStandardMap(EquipmentStandardMap map);
 	EquipmentStandardMap findEquipmentStandardMapById(Long id);
 	EquipmentStandardMap findEquipmentStandardMap(Long id, Long standardId, Long targetId, String targetType);
-	
+
 	void createEquipmentInspectionItemResults(EquipmentInspectionItemResults result);
 	List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(Long logId);
 	
