@@ -159,17 +159,18 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 	}
 
 	private boolean checkTaskAlreadyCreated(EquipmentStandardMap equipmentStandardMap) {
-		if(equipmentStandardMap.getLastCreateTaskTime() != null) {
-			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
-			Long hours = (now.getTime() - equipmentStandardMap.getLastCreateTaskTime().getTime())/(1000*60*60);
-
-			LOGGER.info("checkTaskAlreadyCreated: current time = " + now + ", equipmentStandardMap id: " +equipmentStandardMap.getId()
-					+ ", LastCreateTaskTime  = "+ equipmentStandardMap.getLastCreateTaskTime() + ", interval hours: " + hours);
-			// 2小时之内已生成过任务则不再生成
-			if(hours < 2L) {
-				return false;
-			}
-		}
+		//只有一台指定的服务器会生成任务 所以不需要再做判断了 
+//		if(equipmentStandardMap.getLastCreateTaskTime() != null) {
+//			Timestamp now = new Timestamp(DateHelper.currentGMTTime().getTime());
+//			Long hours = (now.getTime() - equipmentStandardMap.getLastCreateTaskTime().getTime())/(1000*60*60);
+//
+//			LOGGER.info("checkTaskAlreadyCreated: current time = " + now + ", equipmentStandardMap id: " +equipmentStandardMap.getId()
+//					+ ", LastCreateTaskTime  = "+ equipmentStandardMap.getLastCreateTaskTime() + ", interval hours: " + hours);
+//			// 2小时之内已生成过任务则不再生成
+//			if(hours < 2L) {
+//				return false;
+//			}
+//		}
 		return true;
 	}
 	private void closeDelayTasks() {
