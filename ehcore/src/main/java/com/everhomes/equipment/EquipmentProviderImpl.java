@@ -149,6 +149,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
 		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
 		if(taskServer.equals(equipmentIp)) {
+			LOGGER.info("================================================taskServer equals equipmentIp");
 			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 				String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
 				scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
