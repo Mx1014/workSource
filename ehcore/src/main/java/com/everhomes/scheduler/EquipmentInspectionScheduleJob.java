@@ -8,6 +8,7 @@ import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
@@ -25,6 +26,7 @@ import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.util.DateHelper;
 
 @Component
+@Scope("prototype")
 public class EquipmentInspectionScheduleJob extends QuartzJobBean {
 	
 private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspectionScheduleJob.class);
