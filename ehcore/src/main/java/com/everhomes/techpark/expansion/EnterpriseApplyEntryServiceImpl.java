@@ -521,13 +521,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return resp;
 	}
 
-	private String processFlowURL(Long flowCaseId, byte flowUserType, Long moduleId) {
-		MultiValueMap<String, String> paramMap = new LinkedMultiValueMap<>();
-		paramMap.add("flowCaseId",URLEncoder.encode(String.valueOf(flowCaseId)));
-		paramMap.add("flowUserType",URLEncoder.encode(String.valueOf(flowUserType)));
-		paramMap.add("moduleId",URLEncoder.encode(String.valueOf(moduleId)));
-		String url = UriComponentsBuilder.fromHttpUrl("zl://workflow/detail").queryParams(paramMap).build().toUriString();
-		return url;
+	private String processFlowURL(Long flowCaseId, byte flowUserType, Long moduleId) { 
+		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+flowUserType+"&moduleId="+moduleId  ;
+		  
 		
 	}
     private FlowCase createFlowCase(EnterpriseOpRequest request) {
