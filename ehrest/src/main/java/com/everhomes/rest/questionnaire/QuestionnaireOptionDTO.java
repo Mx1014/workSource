@@ -8,7 +8,8 @@ import com.everhomes.util.StringHelper;
  * <ul>选项
  * <li>id: id</li>
  * <li>optionName: 选项名称（若为统计时的填空题，则为企业名称）</li>
- * <li>optionUrl: 图片链接</li>
+ * <li>optionUrl: 图片链接url</li>
+ * <li>optionUri: 图片链接uri</li>
  * <li>checkedCount: 被选择次数</li>
  * <li>optionContent: 选项内容，仅针对填空题统计时此字段有值</li>
  * <li>checked: 是否选中，0否1是，仅当企业查询时有效</li>
@@ -18,9 +19,18 @@ public class QuestionnaireOptionDTO {
 	private Long id;
 	private String optionName;
 	private String optionUrl;
+	private String optionUri;
 	private Integer checkedCount;
 	private String optionContent;
 	private Byte checked;
+
+	public String getOptionUri() {
+		return optionUri;
+	}
+
+	public void setOptionUri(String optionUri) {
+		this.optionUri = optionUri;
+	}
 
 	public Byte getChecked() {
 		return checked;

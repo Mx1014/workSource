@@ -23,8 +23,8 @@ import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailCommand;
 import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailResponse;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersCommand;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
-import com.everhomes.rest.questionnaire.ListOptionOrganizationsCommand;
-import com.everhomes.rest.questionnaire.ListOptionOrganizationsResponse;
+import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
+import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
 import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
@@ -100,12 +100,12 @@ public class QuestionnaireController extends ControllerBase {
 
 	/**
 	 * <p>7.某个选项的企业列表-园区</p>
-	 * <b>URL: /questionnaire/listOptionOrganizations</b>
+	 * <b>URL: /questionnaire/listOptionTargets</b>
 	 */
-	@RequestMapping("listOptionOrganizations")
-	@RestReturn(ListOptionOrganizationsResponse.class)
-	public RestResponse listOptionOrganizations(ListOptionOrganizationsCommand cmd){
-		return new RestResponse(questionnaireService.listOptionOrganizations(cmd));
+	@RequestMapping("listOptionTargets")
+	@RestReturn(ListOptionTargetsResponse.class)
+	public RestResponse listOptionTargets(ListOptionTargetsCommand cmd){
+		return new RestResponse(questionnaireService.listOptionTargets(cmd));
 	}
 
 	/**

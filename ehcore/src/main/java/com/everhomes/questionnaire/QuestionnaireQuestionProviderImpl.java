@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -16,7 +17,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhQuestionnaireQuestionsDao;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaireQuestions;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class QuestionnaireQuestionProviderImpl implements QuestionnaireQuestionProvider {
@@ -30,6 +33,8 @@ public class QuestionnaireQuestionProviderImpl implements QuestionnaireQuestionP
 	@Override
 	public void createQuestionnaireQuestion(QuestionnaireQuestion questionnaireQuestion) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQuestionnaireQuestions.class));
+		questionnaireQuestion.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		questionnaireQuestion.setCreatorUid(UserContext.current().getUser().getId());
 		questionnaireQuestion.setId(id);
 		getReadWriteDao().insert(questionnaireQuestion);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQuestionnaireQuestions.class, null);
@@ -51,6 +56,14 @@ public class QuestionnaireQuestionProviderImpl implements QuestionnaireQuestionP
 	@Override
 	public List<QuestionnaireQuestion> listQuestionnaireQuestion() {
 		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_QUESTIONS)
+				.orderBy(Tables.EH_QUESTIONNAIRE_QUESTIONS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireQuestion.class));
+	}
+	
+	@Override
+	public List<QuestionnaireQuestion> listQuestionsByQuestionnaireId(Long questionnaireId) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_QUESTIONS)
+				.where(Tables.EH_QUESTIONNAIRE_QUESTIONS.QUESTIONNAIRE_ID.eq(questionnaireId))
 				.orderBy(Tables.EH_QUESTIONNAIRE_QUESTIONS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireQuestion.class));
 	}

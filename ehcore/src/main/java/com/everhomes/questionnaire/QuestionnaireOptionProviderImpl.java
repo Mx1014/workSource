@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -16,7 +17,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhQuestionnaireOptionsDao;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaireOptions;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 
 @Component
 public class QuestionnaireOptionProviderImpl implements QuestionnaireOptionProvider {
@@ -31,6 +34,8 @@ public class QuestionnaireOptionProviderImpl implements QuestionnaireOptionProvi
 	public void createQuestionnaireOption(QuestionnaireOption questionnaireOption) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQuestionnaireOptions.class));
 		questionnaireOption.setId(id);
+		questionnaireOption.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		questionnaireOption.setCreatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().insert(questionnaireOption);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQuestionnaireOptions.class, null);
 	}
@@ -51,6 +56,22 @@ public class QuestionnaireOptionProviderImpl implements QuestionnaireOptionProvi
 	@Override
 	public List<QuestionnaireOption> listQuestionnaireOption() {
 		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_OPTIONS)
+				.orderBy(Tables.EH_QUESTIONNAIRE_OPTIONS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireOption.class));
+	}
+	
+	@Override
+	public List<QuestionnaireOption> listOptionsByQuestionId(Long questionId) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_OPTIONS)
+				.where(Tables.EH_QUESTIONNAIRE_OPTIONS.QUESTION_ID.eq(questionId))
+				.orderBy(Tables.EH_QUESTIONNAIRE_OPTIONS.ID.asc())
+				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireOption.class));
+	}
+	
+	@Override
+	public List<QuestionnaireOption> listOptionsByQuestionnaireId(Long questionnaireId) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_OPTIONS)
+				.where(Tables.EH_QUESTIONNAIRE_OPTIONS.QUESTIONNAIRE_ID.eq(questionnaireId))
 				.orderBy(Tables.EH_QUESTIONNAIRE_OPTIONS.ID.asc())
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireOption.class));
 	}

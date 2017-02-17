@@ -15,4 +15,6 @@ public interface QuestionnaireQuestionProvider {
 
 	void deleteQuestionsByQuestionnaireId(Long questionnaireId);
 
+	List<QuestionnaireQuestion> listQuestionsByQuestionnaireId(Long questionnaireId);
+
 }

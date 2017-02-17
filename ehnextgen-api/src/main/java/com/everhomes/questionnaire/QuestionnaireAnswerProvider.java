@@ -13,4 +13,10 @@ public interface QuestionnaireAnswerProvider {
 
 	List<QuestionnaireAnswer> listQuestionnaireAnswer();
 
+	List<QuestionnaireAnswer> listQuestionnaireTarget(Long questionnaireId, String keywords, int pageAnchor, int pageSize);
+
+	List<QuestionnaireAnswer> listQuestionnaireAnswerByOptionId(Long optionId, Long pageAnchor, Integer pageSize);
+
+	List<QuestionnaireAnswer> listQuestionnaireAnswerByQuestionId(Long questionId, Long pageAnchor, int pageSize);
+
 }

@@ -8,6 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>参数:
  * <li>namespaceId: 域空间id</li>
  * <li>questionnaireId: 问卷id</li>
+ * <li>pageSize: 填空题每页显示多少条</li>
  * </ul>
  */
 public class GetQuestionnaireResultSummaryCommand {
@@ -15,6 +16,8 @@ public class GetQuestionnaireResultSummaryCommand {
 	private Integer namespaceId;
 
 	private Long questionnaireId;
+	
+	private Integer pageSize;
 
 	public GetQuestionnaireResultSummaryCommand() {
 
@@ -24,6 +27,14 @@ public class GetQuestionnaireResultSummaryCommand {
 		super();
 		this.namespaceId = namespaceId;
 		this.questionnaireId = questionnaireId;
+	}
+
+	public Integer getPageSize() {
+		return pageSize;
+	}
+
+	public void setPageSize(Integer pageSize) {
+		this.pageSize = pageSize;
 	}
 
 	public Integer getNamespaceId() {

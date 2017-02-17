@@ -17,6 +17,7 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhQuestionnaireAnswersDao;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaireAnswers;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RecordHelper;
 
 @Component
 public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvider {
@@ -55,6 +56,41 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
 	}
 	
+	@Override
+	public List<QuestionnaireAnswer> listQuestionnaireTarget(Long questionnaireId, String keywords, int pageAnchor,
+			int pageSize) {
+		return getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID, Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE, 
+				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME, Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME)
+		.from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+		.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(questionnaireId))
+		.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME.like("%"+keywords+"%"))
+		.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME.asc())
+		.limit((pageAnchor-1)*pageSize, pageSize)
+		.fetch()
+		.map(r->RecordHelper.convert(r, QuestionnaireAnswer.class));
+	}
+
+	@Override
+	public List<QuestionnaireAnswer> listQuestionnaireAnswerByQuestionId(Long questionId, Long pageAnchor,
+			int pageSize) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID.eq(questionId))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.gt(pageAnchor==null?0:pageAnchor))
+				.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.asc())
+				.limit(pageSize)
+				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
+	}
+
+	@Override
+	public List<QuestionnaireAnswer> listQuestionnaireAnswerByOptionId(Long optionId, Long pageAnchor, Integer pageSize) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.OPTION_ID.eq(optionId))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.gt(pageAnchor==null?0:pageAnchor))
+				.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.asc())
+				.limit(pageSize)
+				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
+	}
+
 	private EhQuestionnaireAnswersDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}

@@ -15,4 +15,8 @@ public interface QuestionnaireOptionProvider {
 
 	void deleteOptionsByQuestionnaireId(Long questionnaireId);
 
+	List<QuestionnaireOption> listOptionsByQuestionId(Long questionId);
+
+	List<QuestionnaireOption> listOptionsByQuestionnaireId(Long questionnaireId);
+
 }

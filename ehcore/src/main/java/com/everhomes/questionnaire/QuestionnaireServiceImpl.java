@@ -1,7 +1,11 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 import org.apache.commons.lang.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -9,7 +13,9 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
@@ -28,8 +34,8 @@ import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailCommand;
 import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailResponse;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersCommand;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
-import com.everhomes.rest.questionnaire.ListOptionOrganizationsCommand;
-import com.everhomes.rest.questionnaire.ListOptionOrganizationsResponse;
+import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
+import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
 import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
@@ -39,10 +45,14 @@ import com.everhomes.rest.questionnaire.QuestionnaireDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireOptionDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireOwnerType;
 import com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO;
+import com.everhomes.rest.questionnaire.QuestionnaireResultTargetDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireServiceErrorCode;
 import com.everhomes.rest.questionnaire.QuestionnaireStatus;
+import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class QuestionnaireServiceImpl implements QuestionnaireService {
@@ -68,24 +78,99 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 	
+	@Autowired
+	private ContentServerService contentServerService;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+	
 
 	@Override
 	public ListQuestionnairesResponse listQuestionnaires(ListQuestionnairesCommand cmd) {
+		checkOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId());
 		
-		return new ListQuestionnairesResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		List<Questionnaire> questionnaires = questionnaireProvider.listQuestionnaireByOwner(cmd.getNamespaceId(), cmd.getOwnerType(), cmd.getOwnerId(), cmd.getPageAnchor(), pageSize+1);
+		Long nextPageAnchor = null;
+		if (questionnaires.size() > pageSize) {
+			questionnaires.remove(questionnaires.size()-1);
+			nextPageAnchor = questionnaires.get(questionnaires.size()-1).getId();
+		}
+		return new ListQuestionnairesResponse(nextPageAnchor, questionnaires.stream().map(q->convertToQuestionnaireDTO(q)).collect(Collectors.toList()));
 	}
 
 	@Override
 	public GetQuestionnaireDetailResponse getQuestionnaireDetail(GetQuestionnaireDetailCommand cmd) {
+		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
+		return new GetQuestionnaireDetailResponse(convertToQuestionnaireDTO(questionnaireOptions));
+	}
+
+	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions) {
+		return convertToQuestionnaireDTO(questionnaireOptions, false, null);
+	}
 	
-		return new GetQuestionnaireDetailResponse();
+	// 是否包含填空题，统计时用
+	private QuestionnaireDTO convertToQuestionnaireDTO(List<QuestionnaireOption> questionnaireOptions, boolean containBlank, Integer pageSize) {
+		List<QuestionnaireDTO> questionnaireDTOs = new ArrayList<>();
+		// k1为问卷的id，k2为问题的id
+		Map<Long, Map<Long, List<QuestionnaireOption>>> map = questionnaireOptions.parallelStream().collect(Collectors.groupingBy(QuestionnaireOption::getQuestionnaireId,Collectors.groupingBy(QuestionnaireOption::getQuestionId)));
+		map.forEach((k1, v1)->{
+			Questionnaire questionnaire = findQuestionnaireById(k1);
+			List<QuestionnaireQuestionDTO> questionDTOs = new ArrayList<>();
+			v1.forEach((k2, v2)->{
+				QuestionnaireQuestion question = questionnaireQuestionProvider.findQuestionnaireQuestionById(k2);
+				List<QuestionnaireOptionDTO> optionDTOs = null;
+				Long nextPageAnchor = null;
+				if (QuestionType.fromCode(question.getQuestionType()) == QuestionType.BLANK) {
+					// 如果是填空题，统计时补上答案，并分页显示
+					if (containBlank) {
+						Tuple<Long, List<QuestionnaireAnswer>> questionnaireAnswerTuple = findQuestionnaireAnswersByQuestionId(question.getId(), null, pageSize);
+						nextPageAnchor = questionnaireAnswerTuple.first();
+						optionDTOs = questionnaireAnswerTuple.second().stream().map(q->convertToOptionDTO(q)).collect(Collectors.toList());
+					}
+				}else {
+					optionDTOs = v2.stream().map(o->convertToOptionDTO(o)).collect(Collectors.toList());
+				}
+				questionDTOs.add(convertToQuestionDTO(question, optionDTOs, nextPageAnchor));
+			});
+			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
+		});
+		return questionnaireDTOs.get(0);
+	}
+	
+	private QuestionnaireOptionDTO convertToOptionDTO(QuestionnaireAnswer answer) {
+		QuestionnaireOptionDTO optionDTO = new QuestionnaireOptionDTO();
+		optionDTO.setOptionName(answer.getTargetName());
+		optionDTO.setOptionContent(answer.getOptionContent());
+		return optionDTO;
+	}
+	
+	private Tuple<Long, List<QuestionnaireAnswer>> findQuestionnaireAnswersByOptionId(Long optionId, Long pageAnchor, Integer pageSize) {
+		pageSize = pageSize==null?10:pageSize;
+		List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listQuestionnaireAnswerByOptionId(optionId, pageAnchor, pageSize+1);
+		Long nextPageAnchor = null;
+		if (questionnaireAnswers.size() > pageSize) {
+			questionnaireAnswers.remove(questionnaireAnswers.size()-1);
+			nextPageAnchor = questionnaireAnswers.get(questionnaireAnswers.size()-1).getId();
+		}
+		return new Tuple<>(nextPageAnchor, questionnaireAnswers);
+	}
+	
+	private Tuple<Long, List<QuestionnaireAnswer>> findQuestionnaireAnswersByQuestionId(Long questionId, Long pageAnchor, Integer pageSize) {
+		pageSize = pageSize==null?10:pageSize;
+		List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listQuestionnaireAnswerByQuestionId(questionId, pageAnchor, pageSize+1);
+		Long nextPageAnchor = null;
+		if (questionnaireAnswers.size() > pageSize) {
+			questionnaireAnswers.remove(questionnaireAnswers.size()-1);
+			nextPageAnchor = questionnaireAnswers.get(questionnaireAnswers.size()-1).getId();
+		}
+		return new Tuple<>(nextPageAnchor, questionnaireAnswers);
 	}
 
 	@Override
 	public CreateQuestionnaireResponse createQuestionnaire(CreateQuestionnaireCommand cmd) {
 		QuestionnaireDTO questionnaireDTO = cmd.getQuestionnaire();
 		checkQuestionnaireParameters(questionnaireDTO);
-		
 		
 		QuestionnaireDTO result = (QuestionnaireDTO)dbProvider.execute(s->{
 			//如果是重新编辑问卷，则把之前的题目和选项删除
@@ -104,7 +189,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				questionnaireProvider.createQuestionnaire(questionnaire);
 			}
 			
-			List<QuestionnaireQuestionDTO> questionDTOs = createQuestions(questionnaireDTO.getQuestions());
+			List<QuestionnaireQuestionDTO> questionDTOs = createQuestions(questionnaire.getId(), questionnaireDTO.getQuestions());
 			
 			return convertToQuestionnaireDTO(questionnaire, questionDTOs);
 		});
@@ -112,14 +197,84 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		return new CreateQuestionnaireResponse(result);
 	}
 
-	private List<QuestionnaireQuestionDTO> createQuestions(List<QuestionnaireQuestionDTO> questions) {
-		return null;
+	private List<QuestionnaireQuestionDTO> createQuestions(Long questionnaireId, List<QuestionnaireQuestionDTO> questions) {
+		List<QuestionnaireQuestionDTO> resultDTOs = new ArrayList<>();
+		for (QuestionnaireQuestionDTO questionDTO : questions) {
+			QuestionnaireQuestion question = ConvertHelper.convert(questionDTO, QuestionnaireQuestion.class);
+			question.setQuestionnaireId(questionnaireId);
+			questionnaireQuestionProvider.createQuestionnaireQuestion(question);
+			List<QuestionnaireOptionDTO> optionDTOs = null;
+			if (QuestionType.fromCode(questionDTO.getQuestionType()) != QuestionType.BLANK) {
+				optionDTOs = createOptions(questionnaireId, question.getId(), questionDTO.getOptions());
+			}else {
+				createBlankOption(questionnaireId, question.getId());
+			}
+			resultDTOs.add(convertToQuestionDTO(question, optionDTOs));
+		}
+		
+		return resultDTOs;
+	}
+
+	//针对填空题，创建一个空的选项，以便查询的时候使用
+	private List<QuestionnaireOptionDTO> createBlankOption(Long questionnaireId, Long questionId) {
+		QuestionnaireOption option = new QuestionnaireOption();
+		option.setQuestionnaireId(questionnaireId);
+		option.setQuestionId(questionId);
+		questionnaireOptionProvider.createQuestionnaireOption(option);
+		return Arrays.asList(convertToOptionDTO(option));
+	}
+	
+	private QuestionnaireQuestionDTO convertToQuestionDTO(QuestionnaireQuestion question,
+			List<QuestionnaireOptionDTO> optionDTOs) {
+		return convertToQuestionDTO(question, optionDTOs, null);
+	}
+
+	private QuestionnaireQuestionDTO convertToQuestionDTO(QuestionnaireQuestion question,
+			List<QuestionnaireOptionDTO> optionDTOs, Long nextPageAnchor) {
+		QuestionnaireQuestionDTO questionDTO = ConvertHelper.convert(question, QuestionnaireQuestionDTO.class);
+		questionDTO.setOptions(optionDTOs);
+		questionDTO.setNextPageAnchor(nextPageAnchor);
+		return questionDTO;
+	}
+
+	private List<QuestionnaireOptionDTO> createOptions(Long questionnaireId, Long questionId,
+			List<QuestionnaireOptionDTO> options) {
+		List<QuestionnaireOptionDTO> resultDTOs = new ArrayList<>();
+		for (QuestionnaireOptionDTO optionDTO : options) {
+			QuestionnaireOption option = ConvertHelper.convert(optionDTO, QuestionnaireOption.class);
+			option.setQuestionnaireId(questionnaireId);
+			option.setQuestionId(questionId);
+			questionnaireOptionProvider.createQuestionnaireOption(option);
+			resultDTOs.add(convertToOptionDTO(option));
+		}
+		return resultDTOs;
+	}
+
+	private QuestionnaireOptionDTO convertToOptionDTO(QuestionnaireOption option) {
+		QuestionnaireOptionDTO optionDTO = ConvertHelper.convert(option, QuestionnaireOptionDTO.class);
+		optionDTO.setOptionUrl(getUrl(option.getOptionUri()));
+		return optionDTO;
+	}
+
+	private String getUrl(String uri) {
+		if (uri != null && uri.length() > 0) {
+			try {
+				return contentServerService.parserUri(uri, "", UserContext.current().getUser().getId());
+			} catch (Exception e) {
+
+			}
+		}
+		return "";
 	}
 
 	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, List<QuestionnaireQuestionDTO> questionDTOs){
 		QuestionnaireDTO questionnaireDTO = ConvertHelper.convert(questionnaire, QuestionnaireDTO.class);
 		questionnaireDTO.setQuestions(questionDTOs);
 		return questionnaireDTO;
+	}
+	
+	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire){
+		return ConvertHelper.convert(questionnaire, QuestionnaireDTO.class);
 	}
 	
 	// 只有草稿状态的问卷才可以更新
@@ -226,34 +381,65 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		}
 	}
 
+	private Questionnaire findQuestionnaireById(Integer namespaceId, Long questionnaireId) {
+		Questionnaire questionnaire = findQuestionnaireById(questionnaireId);
+		if (questionnaire.getNamespaceId().intValue() != namespaceId) {
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"invalid parameters, no questionnaire in this namespace");
+		}
+		return questionnaire;
+	}
+	
 	@Override
 	public void deleteQuestionnaire(DeleteQuestionnaireCommand cmd) {
-	
-
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + cmd.getQuestionnaireId()).enter(()->{
+			Questionnaire questionnaire = findQuestionnaireById(cmd.getNamespaceId(), cmd.getQuestionnaireId());
+			questionnaire.setStatus(QuestionnaireStatus.INACTIVE.getCode());
+			questionnaireProvider.updateQuestionnaire(questionnaire);
+			return null;
+		});
 	}
 
 	@Override
 	public GetQuestionnaireResultDetailResponse getQuestionnaireResultDetail(GetQuestionnaireResultDetailCommand cmd) {
-	
-		return new GetQuestionnaireResultDetailResponse();
+		// 主要用于检查问卷是否存在
+		findQuestionnaireById(cmd.getNamespaceId(), cmd.getQuestionnaireId());
+		
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageAnchor = cmd.getPageAnchor()==null?1:cmd.getPageAnchor().intValue();
+		List<QuestionnaireAnswer> questionnaireAnswers = questionnaireAnswerProvider.listQuestionnaireTarget(cmd.getQuestionnaireId(), cmd.getKeywords(), pageAnchor, pageSize+1);
+		Long nextPageAnchor = null;
+		if (questionnaireAnswers.size() > pageSize) {
+			questionnaireAnswers.remove(questionnaireAnswers.size()-1);
+			nextPageAnchor = Long.valueOf(++pageAnchor);
+		}
+		return new GetQuestionnaireResultDetailResponse(nextPageAnchor, questionnaireAnswers.stream().map(q->convertToTargetDTO(q)).collect(Collectors.toList()));
 	}
 
+	private QuestionnaireResultTargetDTO convertToTargetDTO(QuestionnaireAnswer answer) {
+		QuestionnaireResultTargetDTO dto = ConvertHelper.convert(answer, QuestionnaireResultTargetDTO.class);
+		dto.setSubmitTime(answer.getCreateTime());
+		return dto;
+	}
+	
 	@Override
 	public GetQuestionnaireResultSummaryResponse getQuestionnaireResultSummary(GetQuestionnaireResultSummaryCommand cmd) {
-	
-		return new GetQuestionnaireResultSummaryResponse();
+		List<QuestionnaireOption> questionnaireOptions = questionnaireOptionProvider.listOptionsByQuestionnaireId(cmd.getQuestionnaireId());
+		return new GetQuestionnaireResultSummaryResponse(convertToQuestionnaireDTO(questionnaireOptions, true, cmd.getPageSize()));
 	}
 
 	@Override
-	public ListOptionOrganizationsResponse listOptionOrganizations(ListOptionOrganizationsCommand cmd) {
-	
-		return new ListOptionOrganizationsResponse();
+	public ListOptionTargetsResponse listOptionTargets(ListOptionTargetsCommand cmd) {
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Tuple<Long, List<QuestionnaireAnswer>> tuple = findQuestionnaireAnswersByOptionId(cmd.getOptionId(), cmd.getPageAnchor(), pageSize);
+		return new ListOptionTargetsResponse(tuple.first(), tuple.second().stream().map(q->convertToTargetDTO(q)).collect(Collectors.toList()));
 	}
 
 	@Override
 	public ListBlankQuestionAnswersResponse listBlankQuestionAnswers(ListBlankQuestionAnswersCommand cmd) {
-	
-		return new ListBlankQuestionAnswersResponse();
+		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Tuple<Long, List<QuestionnaireAnswer>> tuple = findQuestionnaireAnswersByQuestionId(cmd.getQuestionId(), cmd.getPageAnchor(), pageSize);
+		return new ListBlankQuestionAnswersResponse(tuple.first(), tuple.second().stream().map(q->convertToOptionDTO(q)).collect(Collectors.toList()));
 	}
 
 	@Override

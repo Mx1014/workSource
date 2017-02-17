@@ -10,7 +10,7 @@ import com.everhomes.util.StringHelper;
  * 
  * <ul>返回值:
  * <li>nextPageAnchor: 下页锚点</li>
- * <li>options: 填空题答案列表</li>
+ * <li>options: 填空题答案列表，参考{@link com.everhomes.rest.questionnaire.QuestionnaireOptionDTO}</li>
  * </ul>
  */
 public class ListBlankQuestionAnswersResponse {

@@ -23,8 +23,8 @@ import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailCommand;
 import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailResponse;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersCommand;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
-import com.everhomes.rest.questionnaire.ListOptionOrganizationsCommand;
-import com.everhomes.rest.questionnaire.ListOptionOrganizationsResponse;
+import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
+import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
 import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
@@ -217,7 +217,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 	public void testListOptionOrganizations() {
 		String url = LIST_OPTION_ORGANIZATIONS_URL;
 		logon();
-		ListOptionOrganizationsCommand cmd = new ListOptionOrganizationsCommand();
+		ListOptionTargetsCommand cmd = new ListOptionTargetsCommand();
 		cmd.setNamespaceId(0);
 		cmd.setOptionId(1L);
 		cmd.setPageAnchor(1L);
@@ -227,7 +227,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-		ListOptionOrganizationsResponse myResponse = response.getResponse();
+		ListOptionTargetsResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
 
 

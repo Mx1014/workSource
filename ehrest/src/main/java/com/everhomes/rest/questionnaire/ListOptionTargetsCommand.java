@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页大小</li>
  * </ul>
  */
-public class ListOptionOrganizationsCommand {
+public class ListOptionTargetsCommand {
 
 	private Integer namespaceId;
 
@@ -22,11 +22,11 @@ public class ListOptionOrganizationsCommand {
 
 	private Integer pageSize;
 
-	public ListOptionOrganizationsCommand() {
+	public ListOptionTargetsCommand() {
 
 	}
 
-	public ListOptionOrganizationsCommand(Integer namespaceId, Long optionId, Long pageAnchor, Integer pageSize) {
+	public ListOptionTargetsCommand(Integer namespaceId, Long optionId, Long pageAnchor, Integer pageSize) {
 		super();
 		this.namespaceId = namespaceId;
 		this.optionId = optionId;
