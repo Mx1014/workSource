@@ -425,6 +425,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     				}
     			}
     			
+    		}else if (cmd.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
+    			
     		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
     			//2. 创客空间带的地址
     			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
