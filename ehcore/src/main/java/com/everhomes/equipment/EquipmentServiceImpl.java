@@ -2357,7 +2357,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 				
 		if(timeRanges != null && timeRanges.size() > 0) {
 			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("creatTaskByStandard, timeRanges = {}" + timeRanges);
+				LOGGER.info("creatTaskByStandard, timeRanges = " + timeRanges);
 			}
 			long current = System.currentTimeMillis();
 			SimpleDateFormat sdf = new SimpleDateFormat("yyyyMMdd");

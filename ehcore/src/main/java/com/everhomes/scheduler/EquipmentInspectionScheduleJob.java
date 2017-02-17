@@ -64,17 +64,20 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 
 		Map<Long, Set<EquipmentStandardMap>> standardEquipmentMap = new HashMap<>();
-		maps.stream().map(map -> {
-			Set<EquipmentStandardMap> equipmentStandardMaps = standardEquipmentMap.get(map.getStandardId());
-			if(equipmentStandardMaps == null) {
-				equipmentStandardMaps = new HashSet<EquipmentStandardMap>();
+//		maps.stream().map(map -> {
+		if(maps != null && maps.size() > 0) {
+			for(EquipmentStandardMap map : maps) {
+				Set<EquipmentStandardMap> equipmentStandardMaps = standardEquipmentMap.get(map.getStandardId());
+				if(equipmentStandardMaps == null) {
+					equipmentStandardMaps = new HashSet<EquipmentStandardMap>();
+				}
+				equipmentStandardMaps.add(map);
+
+				standardEquipmentMap.put(map.getStandardId(), equipmentStandardMaps);
 			}
-			equipmentStandardMaps.add(map);
+		}
 
-			standardEquipmentMap.put(map.getStandardId(), equipmentStandardMaps);
-
-			return standardEquipmentMap;
-		});
+//		});
 
 		for (Map.Entry<Long, Set<EquipmentStandardMap>> entry : standardEquipmentMap.entrySet()) {
 			EquipmentInspectionStandards standard = equipmentProvider.findStandardById(entry.getKey());
@@ -92,6 +95,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 									equipmentStandardMap.setLastCreateTaskTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 									equipmentProvider.updateEquipmentStandardMap(equipmentStandardMap);
 								}
+
+								LOGGER.info("equipmentStandardMap: {} ", equipmentStandardMap);
 							}
 							return null;
 						});
