@@ -131,3 +131,5 @@ destination.dir: ${EVH_IOS_HOME}/ehrest-respios/src/main/ios/API-objects
 destination.dir.java: ${EVH_HOME}/ehrest-response/src/main/java/
 
 src.path: E:/workspace/ehnextgen
+
+equipment.ip: 127.0.0.1

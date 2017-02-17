@@ -11,6 +11,7 @@ import javax.annotation.PostConstruct;
 
 import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -20,6 +21,7 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigConstants;
@@ -116,6 +118,9 @@ import com.mysql.jdbc.StringUtils;
 public class EquipmentProviderImpl implements EquipmentProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentProviderImpl.class);
 	
+	@Value("${equipment.ip}")
+    private String equipmentIp;
+	
 	@Autowired
 	private DbProvider dbProvider;
 	
@@ -140,49 +145,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	@PostConstruct
 	public void init() {
 		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
-		try {
-			String address = getLinuxLocalIp();
-//			LOGGER.info("=======================================================" + address.getHostAddress());
 
-			String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "0.0.0.0");
-			if(taskServer.equals(address)) {
+			String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+			if(taskServer.equals(equipmentIp)) {
 				this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 					String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
 					scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
 							cronExpression, EquipmentInspectionScheduleJob.class, null);
 				});
 			}
-		} catch (SocketException e) {
-			e.printStackTrace();
-		}
 
 
-	}
-
-	public static String getLinuxLocalIp() throws SocketException {
-		String ip = "";
-		try {
-			for (Enumeration<NetworkInterface> en = NetworkInterface.getNetworkInterfaces(); en.hasMoreElements();) {
-				NetworkInterface intf = en.nextElement();
-				String name = intf.getName();
-
-				if (name.contains("eth0")) {
-					for (Enumeration<InetAddress> enumIpAddr = intf.getInetAddresses(); enumIpAddr.hasMoreElements();) {
-						InetAddress inetAddress = enumIpAddr.nextElement();
-						LOGGER.info("=====================inetAddress:{}" + inetAddress.toString());
-						if (!inetAddress.isLoopbackAddress()) {
-							String ipaddress = inetAddress.getHostAddress().toString();
-							if (!ipaddress.contains("::") && !ipaddress.contains("0:0:") && !ipaddress.contains("fe80")) {
-								ip = ipaddress;
-							}
-						}
-					}
-				}
-			}
-		} catch (SocketException ex) {
-			ex.printStackTrace();
-		}
-		return ip;
 	}
 
 	@Override
