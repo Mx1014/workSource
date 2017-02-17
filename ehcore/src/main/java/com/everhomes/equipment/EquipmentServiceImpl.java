@@ -2433,8 +2433,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return task;
 	}
 
-	@Override
 	@Scheduled(cron = "0 0 7 * * ? ")
+	@Override
 	public void sendTaskMsg() {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 			long current = System.currentTimeMillis();//当前时间毫秒数

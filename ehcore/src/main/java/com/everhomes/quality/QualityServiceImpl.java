@@ -1412,8 +1412,8 @@ public class QualityServiceImpl implements QualityService {
 		return dto;
 	}
 
-	@Override
 	@Scheduled(cron = "0 0 7 * * ? ")
+	@Override
 	public void sendTaskMsg() {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_QUALITY_TASK.getCode()).tryEnter(()-> {
 			long current = System.currentTimeMillis();//当前时间毫秒数
