@@ -139,7 +139,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	
 	@PostConstruct
 	public void init() {
-		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
+		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 18 * * ? ");
 		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 			String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
 			scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
@@ -1369,12 +1369,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
 		
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
-		 
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listQualifiedEquipmentStandardMap, sql=" + query.getSQL());
+			LOGGER.debug("listQualifiedEquipmentStandardMap, bindValues=" + query.getBindValues());
+		}
 		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
 			return null;
 		});
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listQualifiedEquipmentStandardMap, result={}" + result.toString());
+		}
+
 		if(result.size()==0)
 			return null;
 		

@@ -94,3 +94,6 @@ ALTER TABLE eh_quality_inspection_tasks ADD INDEX(operator_id);
 
 -- fix bug6188 add by xiongying20170216
 ALTER TABLE eh_equipment_inspection_templates ALTER COLUMN name SET DEFAULT '';
+
+-- 设备-标准关系表新增字段记录最近一次生成任务的时间 add by xiongying20170217
+ALTER TABLE `eh_equipment_inspection_equipment_standard_map` ADD COLUMN `last_create_task_time` DATETIME;
