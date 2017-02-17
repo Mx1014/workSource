@@ -423,7 +423,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		address.setOperatorUid(1L);
 		address.setOperateTime(address.getCreateTime());
-		address.setAreaSize(customerApartment.getAreaSize());
+		address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
 		address.setNamespaceId(namespaceId);
 		address.setRentArea(customerApartment.getRentArea());
 		address.setBuildArea(customerApartment.getBuildArea());
@@ -610,7 +610,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private void updateAddress(Address address, CustomerApartment customerApartment) {
 		address.setApartmentFloor(customerApartment.getApartmentFloor());
-		address.setAreaSize(customerApartment.getAreaSize());
+		address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
 		address.setRentArea(customerApartment.getRentArea());
 		address.setBuildArea(customerApartment.getBuildArea());
 		address.setInnerArea(customerApartment.getInnerArea());
@@ -696,6 +696,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		for (CustomerRental customerRental : theirRentalList) {
 			if (customerRental.getDealed() != null && customerRental.getDealed().booleanValue() == true) {
+				continue;
+			}
+			if (StringUtils.isBlank(customerRental.getName()) || StringUtils.isBlank(customerRental.getNumber())) {
 				continue;
 			}
 			rentalThreadPool.execute(()->{

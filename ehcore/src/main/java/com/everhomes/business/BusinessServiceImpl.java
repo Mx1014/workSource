@@ -1886,7 +1886,7 @@ public class BusinessServiceImpl implements BusinessService {
 		subcmd.setNamespaceId(cmd.getNamespaceId());
 		for(Long r:cmd.getCommunityIds()){
 			subcmd.setCommunityId(r);
-			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeyword(subcmd);
+			Tuple<Integer, List<BuildingDTO>> result = addressService.listBuildingsByKeywordForBusiness(subcmd);
 			if(result.second()!=null&&!result.second().isEmpty()){
 				List<BuildingDTO> tmpList = result.second().stream().map((r2) -> {
 					r2.setCommunityId(r);
@@ -1901,7 +1901,7 @@ public class BusinessServiceImpl implements BusinessService {
 	@Override
 	public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(
 			ListPropApartmentsByKeywordCommand cmd) {
-		return addressService.listApartmentsByKeyword(cmd);
+		return addressService.listApartmentsByKeywordForBusiness(cmd);
 	}
 
 	@Override
@@ -2136,7 +2136,7 @@ public class BusinessServiceImpl implements BusinessService {
 	@Override
 	public Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloor(
 			ListApartmentFloorCommand cmd) {
-		return addressService.listApartmentFloor(cmd);
+		return addressService.listApartmentFloorForBusiness(cmd);
 	}
 
     @Override
