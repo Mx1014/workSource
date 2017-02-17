@@ -23,6 +23,9 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import ch.qos.logback.core.joran.conditional.ElseAction;
+
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -44,8 +47,14 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
@@ -66,6 +75,7 @@ import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryDTO;
 import com.everhomes.rest.techpark.expansion.EnterpriseApplyRenewCommand;
 import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
+import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
 import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
@@ -88,7 +98,10 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
+import com.everhomes.yellowPage.YellowPage;
+import com.everhomes.yellowPage.YellowPageProvider;
 
 @Component
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
@@ -97,6 +110,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Autowired
 	private SmsProvider smsProvider;
 
+	@Autowired
+	private ContractProvider contractProvider;
+
+	@Autowired
+	private BuildingProvider buildingProvider;
+	
+	@Autowired
+	private ContractBuildingMappingProvider contractBuildingMappingProvider;
+	@Autowired
+	private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
+	
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
@@ -121,12 +145,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Autowired
 	private UserProvider userProvider;
 
+	@Autowired
+	private YellowPageProvider yellowPageProvider;
+	
     @Autowired
     private FlowService flowService;
 
     @Autowired
     private DbProvider dbProvider;
 
+	@Autowired
+	private OrganizationService organizationService;
+	
     @Autowired
     private LocaleTemplateService localeTemplateService;
 
@@ -268,26 +298,96 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
-		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize);
-		
+		List<EnterpriseOpRequest> enterpriseOpRequests = null;
+		//增加了判断buildingId
+		if(null == cmd.getBuildingId())
+			enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize);
+		else{
+			List<EnterpriseOpRequestBuilding> opRequestBuildings = this.enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(null,
+					Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+						@Override
+						public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+								SelectQuery<? extends Record> query) {
+							query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.BUILDING_ID.eq(cmd.getBuildingId()));  
+							return query;
+						}
+					});
+			List<Long> idList = new ArrayList<>();
+			for(EnterpriseOpRequestBuilding opBuilding : opRequestBuildings){
+				idList.add(opBuilding.getEnterpriseOpRequestsId());
+			}
+			if(idList.size() >0 )
+				enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize,idList);
+			
+		}
+		if(null == enterpriseOpRequests)
+			return res;
 		res.setNextPageAnchor(locator.getAnchor());
-		for (EnterpriseOpRequest enterpriseOpRequest : enterpriseOpRequests) {
-			if(ApplyEntrySourceType.BUILDING.getCode().equals(enterpriseOpRequest.getSourceType())){
-				Building building = communityProvider.findBuildingById(enterpriseOpRequest.getSourceId());
-				if(null != building)enterpriseOpRequest.setSourceName(building.getName());
-			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(enterpriseOpRequest.getSourceType())||
-					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(enterpriseOpRequest.getSourceType())){
-				LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(enterpriseOpRequest.getSourceId());
-				if(null != leasePromotion)enterpriseOpRequest.setSourceName(leasePromotion.getSubject());
+
+		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map((c) ->{
+			EnterpriseApplyEntryDTO dto = ConvertHelper.convert(c, EnterpriseApplyEntryDTO.class);
+			//对于有合同的(一定是续租)
+			if(null != c.getContractId()){
+				Contract contract = contractProvider.findContractById(c.getContractId());
+				if(null != contract)
+					dto.setContract(organizationService.processContract(contract));
+			}
+			return dto;
+		}).collect(Collectors.toList());
+		for (EnterpriseApplyEntryDTO dto : dtos) {
+			dto.setBuildings(new ArrayList<BuildingDTO>() );
+			//对于不同的类型有不同的sourceName 和 楼栋
+			if(ApplyEntryApplyType.fromType(dto.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
+				//续租的搜
+				dto.setSourceName("续租");
+				List<EnterpriseOpRequestBuilding> opBuildings = enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(null, Integer.MAX_VALUE,  new ListingQueryBuilderCallback() {
+					//续租申请，申请来源=续租 续租申请，楼栋=合同里关联的楼栋（可能多个）
+		            @Override
+		            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+		                    SelectQuery<? extends Record> query) {
+		                query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.ENTERPRISE_OP_REQUESTS_ID.eq(dto.getId())); 
+		                query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.STATUS.eq(EnterpriseOpRequestBuildingStatus.NORMAL.getCode())); 
+		                return query;
+		            }
+				});   
+				for(EnterpriseOpRequestBuilding opBuilding : opBuildings){
+					Building building = communityProvider.findBuildingById(opBuilding.getBuildingId());
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
+			}else if(ApplyEntrySourceType.BUILDING.getCode().equals(dto.getSourceType())){
+				//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
+				Building building = communityProvider.findBuildingById(dto.getSourceId());
+				if(null != building){
+					dto.setSourceName(building.getName());
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
+			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())||
+					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(dto.getSourceType())){
+				//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
+				LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
+				if(null != leasePromotion){
+					dto.setSourceName(leasePromotion.getSubject());
+					Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
+			}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
+				//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
+				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
+				if(null != yellowPage){
+					dto.setSourceName("创客申请");
+					Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
 			}
 		}
-		
-		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map((c) ->{
-			return ConvertHelper.convert(c, EnterpriseApplyEntryDTO.class);
-		}).collect(Collectors.toList());
-		
 		res.setEntrys(dtos);
 		return res;
+	}
+	private BuildingDTO proessBuildingDTO(Building building){
+		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class); 
+		buildingDTO.setBuildingName(buildingDTO.getName());
+		buildingDTO.setName(org.springframework.util.StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
+		return buildingDTO;
 	}
 
 	@Override
@@ -300,9 +400,47 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
-
+		
+			
         FlowCase flowCase = dbProvider.execute(status -> {
             enterpriseApplyEntryProvider.createApplyEntry(request);
+            EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
+            opRequestBuilding.setEnterpriseOpRequestsId(request.getId()); 
+            opRequestBuilding.setCreatorUid(UserContext.current().getUser().getId());
+            opRequestBuilding.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            opRequestBuilding.setStatus(EnterpriseOpRequestBuildingStatus.NORMAL.getCode());
+        	//TODO : 根据情况保存地址
+    		if(null != request.getContractId()){
+    			//1.保存合同带的地址
+    			Contract contract = contractProvider.findContractById(request.getContractId());
+    			if(null == contract )
+    				throw errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"can not find contract!!");
+    			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(UserContext.getCurrentNamespaceId(),
+    					contract.getContractNumber());
+    			for(BuildingApartmentDTO buildingApartmentDTO: buildings){
+    				com.everhomes.building.Building building = buildingProvider.findBuildingByName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), buildingApartmentDTO.getBuildingName());
+    				if(building !=null){
+    					opRequestBuilding.setBuildingId(building.getId());
+    					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    				}
+    			}
+    			
+    		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
+    			//2. 创客空间带的地址
+    			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
+    			opRequestBuilding.setBuildingId(yellowPage.getBuildingId());
+				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
+    			//3. 园区介绍直接就是楼栋的地址
+    			opRequestBuilding.setBuildingId(cmd.getSourceId());
+				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())||
+					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(cmd.getSourceType())){
+    			//4. 虚位以待的楼栋地址
+    			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+    			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
+				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    		}
             return this.createFlowCase(request);
         });
 

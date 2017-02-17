@@ -16,10 +16,13 @@ import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailCommand;
 import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseDetailRestResponse;
 import com.everhomes.rest.yellowPage.GetServiceAllianceEnterpriseListCommand;
 import com.everhomes.rest.yellowPage.GetServiceAllianceRestResponse;
+import com.everhomes.rest.yellowPage.GetYellowPageTopicCommand;
+import com.everhomes.rest.yellowPage.GetYellowPageTopicRestResponse;
 import com.everhomes.rest.yellowPage.ListServiceAllianceEnterpriseRestResponse;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCategoryCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceCommand;
 import com.everhomes.rest.yellowPage.UpdateServiceAllianceEnterpriseCommand;
+import com.everhomes.rest.yellowPage.UpdateYellowPageCommand;
 import com.everhomes.rest.yellowPage.YellowPageStatus;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhCategories;
@@ -38,6 +41,8 @@ public class YellowPageTest extends BaseLoginAuthTestCase {
 	private static final String UPDATE_SA_URI = "/yellowPage/updateServiceAlliance";
 	private static final String DELETE_SA_ENTERPRISE_URI = "/yellowPage/deleteServiceAllianceEnterprise";
 	private static final String UPDATE_SA_ENTERPRISE_URI = "/yellowPage/updateServiceAllianceEnterprise";
+	private static final String UPDATE_YELLOW_PAGE_URI = "/yellowPage/updateYellowPage";
+	private static final String GET_YELLOW_PAGE_TOPIC = "/yellowPage/getYellowPageTopic";
 
 	String ownerType = "community";
 	Long ownerId = 240111044331048623L;
@@ -184,14 +189,43 @@ public class YellowPageTest extends BaseLoginAuthTestCase {
 		command.setOwnerType(ownerType);
 		GetServiceAllianceRestResponse resp = httpClientService.restPost(uri, command, GetServiceAllianceRestResponse.class);
 		
-		assertNotNull("The reponse of getting user info may not be null", response);
-		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+		assertNotNull("The reponse of getting user info may not be null", resp);
+		assertTrue("response= " + StringHelper.toJsonString(resp), httpClientService.isReponseSuccess(resp));
         assertEquals("name", resp.getResponse().getName());
 	}
 
 	@After
 	public void tearDown() {
 		logoff();
+	}
+	
+	@Test
+	private void testUpdateYellowPage(){
+		String uri = this.UPDATE_YELLOW_PAGE_URI;
+		UpdateYellowPageCommand cmd = new UpdateYellowPageCommand();
+		cmd.setId(1L);
+		cmd.setBuildingId(2L);
+		DSLContext context = dbProvider.getDslContext();
+		EhYellowPages yellowPage = context.select().from(Tables.EH_YELLOW_PAGES).where(Tables.EH_YELLOW_PAGES.ID.eq(cmd.getId()))
+				.fetch().map(r -> ConvertHelper.convert(r, EhYellowPages.class)).get(0);
+		assertEquals(cmd.getBuildingId(), yellowPage.getBuildingId());
+	}
+	
+	@Test
+	private void testListYellowPageTopic(){
+		String uri = this.GET_YELLOW_PAGE_TOPIC;
+		GetYellowPageTopicCommand cmd = new GetYellowPageTopicCommand();
+		cmd.setType((byte) 3);
+		cmd.setOwnerType("community");
+		cmd.setOwnerId(240111044331048623L);
+		GetYellowPageTopicRestResponse resp = httpClientService.restPost(uri, cmd, GetYellowPageTopicRestResponse.class);
+		assertNotNull("The reponse of getting user info may not be null", resp);
+		assertTrue("response= " + StringHelper.toJsonString(resp), httpClientService.isReponseSuccess(resp));
+        assertEquals("楼栋名-A座", resp.getResponse().getBuildingName());
+        assertEquals(1, resp.getResponse().getBuildingId().intValue());
+		
+		
+		
 	}
 	
 	private void logon() {

@@ -3,6 +3,8 @@ package com.everhomes.yellowPage;
 import com.everhomes.activity.ActivityAttachment;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -66,6 +68,9 @@ public class YellowPageServiceImpl implements YellowPageService {
 	
     @Autowired
     private YellowPageProvider yellowPageProvider;
+
+    @Autowired
+    private BuildingProvider buildingProvider;
     
     @Autowired
     private CommunityProvider communityProvider;
@@ -351,6 +356,12 @@ public class YellowPageServiceImpl implements YellowPageService {
 			else{
 					response =  ConvertHelper.convert(yellowPage,YellowPageDTO.class);
 			}
+		}
+		
+		//增加building内容
+		if(null != response.getBuildingId()){
+			Building building = buildingProvider.findBuildingById(response.getBuildingId());
+			response.setBuildingName(building.getName());
 		}
 		return response;
 	}

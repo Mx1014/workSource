@@ -5,6 +5,7 @@ import java.util.List;
 
 import com.everhomes.discover.ItemType;
 import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -24,6 +25,7 @@ import com.everhomes.util.StringHelper;
  * <li>createTime： </li> 
  * <li>sourceName： </li>  
  * <li>buildings： 楼栋列表 {@link com.everhomes.rest.community.BuildingDTO}</li>  
+ * <li>contract： 合同 {@link com.everhomes.rest.contract.ContractDTO}</li>  
  * </ul>
  */
 public class EnterpriseApplyEntryDTO {
@@ -61,7 +63,7 @@ public class EnterpriseApplyEntryDTO {
 	@ItemType(BuildingDTO.class)
 	private List<BuildingDTO> buildings;
 
-
+	private ContractDTO contract;
 	public Long getId() {
 		return id;
 	}
@@ -289,6 +291,20 @@ public class EnterpriseApplyEntryDTO {
 
 	public void setBuildings(List<BuildingDTO> buildings) {
 		this.buildings = buildings;
+	}
+
+
+
+
+	public ContractDTO getContract() {
+		return contract;
+	}
+
+
+
+
+	public void setContract(ContractDTO contract) {
+		this.contract = contract;
 	}
 
 }
