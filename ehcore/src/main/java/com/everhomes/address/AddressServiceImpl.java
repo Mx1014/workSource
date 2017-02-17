@@ -57,6 +57,7 @@ import com.everhomes.util.file.DataProcessConstants;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
+import org.jooq.Record3;
 import org.jooq.Record4;
 import org.jooq.SelectConditionStep;
 import org.slf4j.Logger;
@@ -376,20 +377,18 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                 (DSLContext context, Object reducingContext)-> {
                     
                     String likeVal = "%" + cmd.getKeyword() + "%";
-                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME, Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME)
+                    context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))
-                                .or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.like(likeVal))
                                 ))
                          .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                         .fetch().map((r) -> {
                             BuildingDTO building = new BuildingDTO();
                             building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
                             building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
-                            building.setBusinessBuildingnName(r.getValue(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME));
                             results.add(building);
                             return null;
                         });
@@ -399,6 +398,47 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long endTime = System.currentTimeMillis();
         LOGGER.info("List buildings by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<BuildingDTO>>(ErrorCodes.SUCCESS, results);
+    }
+    
+    
+    @Override
+    public Tuple<Integer, List<BuildingDTO>> listBuildingsByKeywordForBusiness(ListBuildingByKeywordCommand cmd) {
+    	if(cmd.getCommunityId() == null)
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+    				"Invalid communityId or keyword parameter");
+    	
+    	if(cmd.getKeyword() == null)
+    		cmd.setKeyword("");;
+    		List<BuildingDTO> results = new ArrayList<BuildingDTO>();
+    		long startTime = System.currentTimeMillis();
+    		int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+    		this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+    				(DSLContext context, Object reducingContext)-> {
+    					
+    					String likeVal = "%" + cmd.getKeyword() + "%";
+    					context.selectDistinct(Tables.EH_ADDRESSES.BUILDING_NAME, Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME, Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME)
+    					.from(Tables.EH_ADDRESSES)
+    					.where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+    							.and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+    							.and(Tables.EH_ADDRESSES.BUILDING_NAME.like(likeVal)
+    									.or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.like(likeVal))
+    									.or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.like(likeVal))
+    									))
+    					.and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+    					.fetch().map((r) -> {
+    						BuildingDTO building = new BuildingDTO();
+    						building.setBuildingName(r.getValue(Tables.EH_ADDRESSES.BUILDING_NAME));
+    						building.setBuildingAliasName(r.getValue(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME));
+    						building.setBusinessBuildingnName(r.getValue(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME));
+    						results.add(building);
+    						return null;
+    					});
+    					
+    					return true;
+    				});
+    		long endTime = System.currentTimeMillis();
+    		LOGGER.info("List buildings by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
+    		return new Tuple<Integer, List<BuildingDTO>>(ErrorCodes.SUCCESS, results);
     }
     
     @Override
@@ -427,8 +467,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
-                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
-                                .or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.equal(cmd.getBuildingName()))))
+                                .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))))
                         .and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.like(likeVal))
                         .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
                         .and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.isNotNull())
@@ -447,6 +486,53 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         LOGGER.info("List apartmentFloor by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<ApartmentFloorDTO>>(ErrorCodes.SUCCESS, results);
     }
+    
+    @Override
+    public Tuple<Integer, List<ApartmentFloorDTO>> listApartmentFloorForBusiness(ListApartmentFloorCommand cmd) {
+    	if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()) {
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+    				"Invalid communityId parameter");
+    	}
+    	if(cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty()) {
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+    				"Invalid buildingName parameter");
+    	}
+    	
+    	if(cmd.getKeyword() == null) {
+    		cmd.setKeyword("");
+    	}
+    	
+    	List<ApartmentFloorDTO> results = new ArrayList<ApartmentFloorDTO>();
+    	String likeVal = "%" + cmd.getKeyword() + "%";
+    	long startTime = System.currentTimeMillis();
+    	int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+    	this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+    			(DSLContext context, Object reducingContext)-> {
+    				context.selectDistinct(Tables.EH_ADDRESSES.APARTMENT_FLOOR)
+    				.from(Tables.EH_ADDRESSES)
+    				.where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+    						.and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+    						.and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
+    								.or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
+    								.or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.equal(cmd.getBuildingName()))))
+    				.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.like(likeVal))
+    				.and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode()))
+    				.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.isNotNull())
+    				.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.trim().ne(""))
+    				.orderBy(Tables.EH_ADDRESSES.APARTMENT_FLOOR.asc())
+    				.fetch().map((r) -> {
+    					ApartmentFloorDTO floor = new ApartmentFloorDTO();
+    					floor.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
+    					results.add(floor);
+    					return null;
+    				});
+    				
+    				return true;
+    			});
+    	long endTime = System.currentTimeMillis();
+    	LOGGER.info("List apartmentFloor by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
+    	return new Tuple<Integer, List<ApartmentFloorDTO>>(ErrorCodes.SUCCESS, results);
+    }
 
     @Override
     public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeyword(ListPropApartmentsByKeywordCommand cmd) {
@@ -462,15 +548,15 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
 
-                	SelectConditionStep<Record4<Long, String, Double, String>> selectSql =
-                			context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME)
+                	SelectConditionStep<Record3<Long, String, Double>> selectSql =
+                			context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
                         .and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
                                 .or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
-                                .or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.equal(cmd.getBuildingName())))
-                        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal).or(Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME.like(likeVal)))
+                                )
+                        .and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal))
                         .and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode())));
 
                 	if(cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
@@ -481,7 +567,6 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                             ApartmentDTO apartment = new ApartmentDTO();
                             apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
                             apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
-                            apartment.setBusinessApartmentName(r.getValue(Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME));
                             apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
                             results.add(apartment);
                             return null;
@@ -492,6 +577,52 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         long endTime = System.currentTimeMillis();
         LOGGER.info("List apartments by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
         return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
+    }
+    
+    @Override
+    public Tuple<Integer, List<ApartmentDTO>> listApartmentsByKeywordForBusiness(ListPropApartmentsByKeywordCommand cmd) {
+    	if(cmd.getCommunityId() == null || cmd.getBuildingName() == null || cmd.getBuildingName().isEmpty())
+    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+    				"Invalid communityId, buildingName or keyword parameter");
+    	if(cmd.getKeyword() == null)
+    		cmd.setKeyword("");
+    	List<ApartmentDTO> results = new ArrayList<>();
+    	String likeVal = "%" + cmd.getKeyword() + "%";
+    	long startTime = System.currentTimeMillis();
+    	int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+    	this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
+    			(DSLContext context, Object reducingContext)-> {
+    				
+    				SelectConditionStep<Record4<Long, String, Double, String>> selectSql =
+    						context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME)
+    						.from(Tables.EH_ADDRESSES)
+    						.where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
+    								.and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
+    								.and(Tables.EH_ADDRESSES.BUILDING_NAME.equal(cmd.getBuildingName())
+    										.or(Tables.EH_ADDRESSES.BUILDING_ALIAS_NAME.equal(cmd.getBuildingName()))
+    										.or(Tables.EH_ADDRESSES.BUSINESS_BUILDING_NAME.equal(cmd.getBuildingName())))
+    								.and(Tables.EH_ADDRESSES.APARTMENT_NAME.like(likeVal).or(Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME.like(likeVal)))
+    								.and(Tables.EH_ADDRESSES.STATUS.equal(AddressAdminStatus.ACTIVE.getCode())));
+    				
+    				if(cmd.getApartmentFloor() != null && !cmd.getApartmentFloor().isEmpty()) {
+    					selectSql = selectSql.and(Tables.EH_ADDRESSES.APARTMENT_FLOOR.eq(cmd.getApartmentFloor()));
+    				}
+    				
+    				selectSql.fetch().map((r) -> {
+    					ApartmentDTO apartment = new ApartmentDTO();
+    					apartment.setAddressId(r.getValue(Tables.EH_ADDRESSES.ID));
+    					apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
+    					apartment.setBusinessApartmentName(r.getValue(Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME));
+    					apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
+    					results.add(apartment);
+    					return null;
+    				});
+    				
+    				return true;
+    			});
+    	long endTime = System.currentTimeMillis();
+    	LOGGER.info("List apartments by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
+    	return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
     }
     
     @Override
