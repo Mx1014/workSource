@@ -146,14 +146,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public void init() {
 		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
 
-			String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
-			if(taskServer.equals(equipmentIp)) {
-				this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-					String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
-					scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
-							cronExpression, EquipmentInspectionScheduleJob.class, null);
-				});
-			}
+		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		if(taskServer.equals(equipmentIp)) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+				String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
+				scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
+						cronExpression, EquipmentInspectionScheduleJob.class, null);
+			});
+		}
 
 
 	}
