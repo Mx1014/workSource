@@ -521,6 +521,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         if (flowCase != null ) {
         	//TODO: 组装resp
         	String url = processFlowURL(flowCase.getId(), FlowCaseSearchType.APPLIER.getCode(), flowCase.getModuleId());
+        	resp.setUrl(url);
         }
 		return resp;
 	}
