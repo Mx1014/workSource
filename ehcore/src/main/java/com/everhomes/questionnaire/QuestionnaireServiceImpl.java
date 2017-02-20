@@ -282,7 +282,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 			}
 		}
-		return "";
+		return null;
 	}
 
 	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, List<QuestionnaireQuestionDTO> questionDTOs){
@@ -468,7 +468,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	public ListBlankQuestionAnswersResponse listBlankQuestionAnswers(ListBlankQuestionAnswersCommand cmd) {
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		Tuple<Long, List<QuestionnaireAnswer>> tuple = findQuestionnaireAnswersByQuestionId(cmd.getQuestionId(), cmd.getPageAnchor(), pageSize);
-		return new ListBlankQuestionAnswersResponse(tuple.first(), tuple.second().stream().map(q->convertToOptionDTO(q)).collect(Collectors.toList()));
+		return new ListBlankQuestionAnswersResponse(cmd.getQuestionId(), tuple.first(), tuple.second().stream().map(q->convertToOptionDTO(q)).collect(Collectors.toList()));
 	}
 
 	@Override
@@ -525,6 +525,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 						updateOptionCheckedCount(optionDTO.getId());
 					}
 				}
+				updateQuestionnaireCollectionCount(cmd.getQuestionnaire().getId());
 				return null;
 			});
 			return null;
@@ -533,10 +534,19 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		return new CreateTargetQuestionnaireResponse(getTargetQuestionnaireDetail(cmd.getQuestionnaire().getId(), cmd.getTargetType(), cmd.getTargetId()));
 	}
 
+	private void updateQuestionnaireCollectionCount(Long questionnaireId) {
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + questionnaireId).enter(()->{
+			Questionnaire questionnaire = questionnaireProvider.findQuestionnaireById(questionnaireId);
+			questionnaire.setCollectionCount((questionnaire.getCollectionCount()==null?0:questionnaire.getCollectionCount())+1);
+			questionnaireProvider.updateQuestionnaire(questionnaire);
+			return null;
+		});
+	}
+
 	private void updateOptionCheckedCount(Long optionId) {
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE_OPTION.getCode() + optionId).enter(()->{
 			QuestionnaireOption option = questionnaireOptionProvider.findQuestionnaireOptionById(optionId);
-			option.setCheckedCount(option.getCheckedCount()+1);
+			option.setCheckedCount((option.getCheckedCount()==null?0:option.getCheckedCount())+1);
 			questionnaireOptionProvider.updateQuestionnaireOption(option);
 			return null;
 		});

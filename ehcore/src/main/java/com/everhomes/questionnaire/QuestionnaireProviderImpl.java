@@ -13,6 +13,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.questionnaire.QuestionnaireStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhQuestionnairesDao;
@@ -71,6 +72,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_QUESTIONNAIRES.STATUS.ne(QuestionnaireStatus.INACTIVE.getCode()))
 				.and(Tables.EH_QUESTIONNAIRES.ID.lt(pageAnchor==null?Long.MAX_VALUE:pageAnchor))
 				.orderBy(Tables.EH_QUESTIONNAIRES.ID.desc())
 				.limit(pageSize)
@@ -84,6 +86,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_QUESTIONNAIRES.STATUS.ne(QuestionnaireStatus.INACTIVE.getCode()))
 				.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.lt(new Timestamp(pageAnchor==null?Long.MAX_VALUE:pageAnchor)))
 				.orderBy(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc())
 				.limit(pageSize)

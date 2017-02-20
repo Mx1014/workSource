@@ -1,11 +1,13 @@
 package com.everhomes.test.junit.questionnaire;
 
-import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.jooq.Record;
 import org.junit.After;
 import org.junit.Before;
+import org.junit.Test;
+import org.springframework.beans.factory.annotation.Value;
 
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
@@ -32,6 +34,7 @@ import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersRestResponse;
 import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
 import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
+import com.everhomes.rest.questionnaire.ListOptionTargetsRestResponse;
 import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
 import com.everhomes.rest.questionnaire.ListQuestionnairesRestResponse;
@@ -41,11 +44,16 @@ import com.everhomes.rest.questionnaire.ListTargetQuestionnairesRestResponse;
 import com.everhomes.rest.questionnaire.QuestionnaireDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireOptionDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.pojos.EhQuestionnaires;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
-import com.everhomes.util.DateHelper;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 
 public class QuestionnaireTest extends BaseLoginAuthTestCase {
+	@Value("${namespace.id:1000000}")
+    private Integer namespaceId;
+	
 	//1. 问卷调查列表-园区
 	private static final String LIST_QUESTIONNAIRES_URL = "/questionnaire/listQuestionnaires";
 	//2. 问卷调查详情-园区
@@ -76,11 +84,11 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = LIST_QUESTIONNAIRES_URL;
 		logon();
 		ListQuestionnairesCommand cmd = new ListQuestionnairesCommand();
-		cmd.setNamespaceId(0);
-		cmd.setOwnerType("");
+		cmd.setNamespaceId(namespaceId);
+		cmd.setOwnerType("community");
 		cmd.setOwnerId(1L);
-		cmd.setPageAnchor(1L);
-		cmd.setPageSize(0);
+//		cmd.setPageAnchor(114L);
+		cmd.setPageSize(2);
 
 		ListQuestionnairesRestResponse response = httpClientService.restPost(url, cmd, ListQuestionnairesRestResponse.class);
 		assertNotNull(response);
@@ -88,7 +96,8 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 
 		ListQuestionnairesResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getQuestionnaires());
+		assertEquals(2, cmd.getPageSize().intValue());
 
 	}
 
@@ -98,8 +107,8 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = GET_QUESTIONNAIRE_DETAIL_URL;
 		logon();
 		GetQuestionnaireDetailCommand cmd = new GetQuestionnaireDetailCommand();
-		cmd.setNamespaceId(0);
-		cmd.setQuestionnaireId(1L);
+		cmd.setNamespaceId(namespaceId);
+		cmd.setQuestionnaireId(113L);
 
 		GetQuestionnaireDetailRestResponse response = httpClientService.restPost(url, cmd, GetQuestionnaireDetailRestResponse.class);
 		assertNotNull(response);
@@ -107,6 +116,9 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 
 		GetQuestionnaireDetailResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
+		assertNotNull(myResponse.getQuestionnaire());
+		assertEquals(5, myResponse.getQuestionnaire().getQuestions().size());
+		assertEquals(3, myResponse.getQuestionnaire().getQuestions().get(0).getOptions().size());
 
 
 	}
@@ -118,35 +130,89 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		logon();
 		CreateQuestionnaireCommand cmd = new CreateQuestionnaireCommand();
 		QuestionnaireDTO questionnaireDTO = new QuestionnaireDTO();
-		questionnaireDTO.setId(1L);
-		questionnaireDTO.setNamespaceId(0);
-		questionnaireDTO.setOwnerType("");
+		questionnaireDTO.setNamespaceId(namespaceId);
+		questionnaireDTO.setOwnerType("community");
 		questionnaireDTO.setOwnerId(1L);
-		questionnaireDTO.setQuestionnaireName("");
-		questionnaireDTO.setDescription("");
-		questionnaireDTO.setCollectionCount(0);
+		questionnaireDTO.setQuestionnaireName("第一份问卷");
+		questionnaireDTO.setDescription("我是第一份问卷");
 		questionnaireDTO.setStatus((byte)1);
-		questionnaireDTO.setPublishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		questionnaireDTO.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		questionnaireDTO.setSubmitTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		List<QuestionnaireQuestionDTO> questionnaireQuestionDTOList = new ArrayList<>();
+		
 		QuestionnaireQuestionDTO questionnaireQuestionDTO = new QuestionnaireQuestionDTO();
-		questionnaireQuestionDTO.setId(1L);
 		questionnaireQuestionDTO.setQuestionType((byte)1);
-		questionnaireQuestionDTO.setQuestionName("");
+		questionnaireQuestionDTO.setQuestionName("我是单选题");
 		List<QuestionnaireOptionDTO> questionnaireOptionDTOList = new ArrayList<>();
 		QuestionnaireOptionDTO questionnaireOptionDTO = new QuestionnaireOptionDTO();
-		questionnaireOptionDTO.setId(1L);
-		questionnaireOptionDTO.setOptionName("");
-		questionnaireOptionDTO.setOptionUrl("");
-		questionnaireOptionDTO.setOptionUri("");
-		questionnaireOptionDTO.setCheckedCount(0);
-		questionnaireOptionDTO.setOptionContent("");
-		questionnaireOptionDTO.setChecked((byte)1);
+		questionnaireOptionDTO.setOptionName("选项1");
 		questionnaireOptionDTOList.add(questionnaireOptionDTO);
+		QuestionnaireOptionDTO questionnaireOptionDTO2 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO2.setOptionName("选项2");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO2);
+		QuestionnaireOptionDTO questionnaireOptionDTO3 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO3.setOptionName("选项3");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO3);
 		questionnaireQuestionDTO.setOptions(questionnaireOptionDTOList);
-		questionnaireQuestionDTO.setNextPageAnchor(1L);
 		questionnaireQuestionDTOList.add(questionnaireQuestionDTO);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO2 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO2.setQuestionType((byte)2);
+		questionnaireQuestionDTO2.setQuestionName("我是复选题");
+		List<QuestionnaireOptionDTO> questionnaireOptionDTOList2 = new ArrayList<>();
+		QuestionnaireOptionDTO questionnaireOptionDTO4 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO4.setOptionName("选项1");
+		questionnaireOptionDTOList2.add(questionnaireOptionDTO4);
+		QuestionnaireOptionDTO questionnaireOptionDTO5 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO5.setOptionName("选项2");
+		questionnaireOptionDTOList2.add(questionnaireOptionDTO5);
+		QuestionnaireOptionDTO questionnaireOptionDTO6 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO6.setOptionName("选项3");
+		questionnaireOptionDTOList2.add(questionnaireOptionDTO6);
+		questionnaireQuestionDTO2.setOptions(questionnaireOptionDTOList2);
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO2);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO4 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO4.setQuestionType((byte)4);
+		questionnaireQuestionDTO4.setQuestionName("我是图片单选题");
+		List<QuestionnaireOptionDTO> questionnaireOptionDTOList4 = new ArrayList<>();
+		QuestionnaireOptionDTO questionnaireOptionDTO41 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO41.setOptionName("选项1");
+		questionnaireOptionDTO41.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList4.add(questionnaireOptionDTO41);
+		QuestionnaireOptionDTO questionnaireOptionDTO42 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO42.setOptionName("选项2");
+		questionnaireOptionDTO42.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList4.add(questionnaireOptionDTO42);
+		QuestionnaireOptionDTO questionnaireOptionDTO43 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO43.setOptionName("选项3");
+		questionnaireOptionDTO43.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList4.add(questionnaireOptionDTO43);
+		questionnaireQuestionDTO4.setOptions(questionnaireOptionDTOList4);
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO4);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO5 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO5.setQuestionType((byte)5);
+		questionnaireQuestionDTO5.setQuestionName("我是图片复选题");
+		List<QuestionnaireOptionDTO> questionnaireOptionDTOList5 = new ArrayList<>();
+		QuestionnaireOptionDTO questionnaireOptionDTO51 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO51.setOptionName("选项1");
+		questionnaireOptionDTO51.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList5.add(questionnaireOptionDTO51);
+		QuestionnaireOptionDTO questionnaireOptionDTO52 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO52.setOptionName("选项2");
+		questionnaireOptionDTO52.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList5.add(questionnaireOptionDTO52);
+		QuestionnaireOptionDTO questionnaireOptionDTO53 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO53.setOptionName("选项3");
+		questionnaireOptionDTO53.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList5.add(questionnaireOptionDTO53);
+		questionnaireQuestionDTO5.setOptions(questionnaireOptionDTOList5);
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO5);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO3 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO3.setQuestionType((byte)3);
+		questionnaireQuestionDTO3.setQuestionName("我是填空题");
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO3);
+		
 		questionnaireDTO.setQuestions(questionnaireQuestionDTOList);
 		cmd.setQuestionnaire(questionnaireDTO);
 
@@ -156,7 +222,14 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 
 		CreateQuestionnaireResponse myResponse = response.getResponse();
 		assertNotNull(myResponse);
-
+		assertNotNull(myResponse.getQuestionnaire());
+		assertEquals(5, myResponse.getQuestionnaire().getQuestions().size());
+		assertEquals(3, myResponse.getQuestionnaire().getQuestions().get(0).getOptions().size());
+		
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_QUESTIONNAIRES).fetchOne();
+		assertNotNull(record);
+		EhQuestionnaires questionnaire = ConvertHelper.convert(record, EhQuestionnaires.class);
+		assertEquals("第一份问卷", questionnaire.getQuestionnaireName());
 
 	}
 
@@ -166,14 +239,17 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = DELETE_QUESTIONNAIRE_URL;
 		logon();
 		DeleteQuestionnaireCommand cmd = new DeleteQuestionnaireCommand();
-		cmd.setNamespaceId(0);
-		cmd.setQuestionnaireId(1L);
+		cmd.setNamespaceId(namespaceId);
+		cmd.setQuestionnaireId(114L);
 
 		RestResponseBase response = httpClientService.restPost(url, cmd, RestResponseBase.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-
+		Record record = dbProvider.getDslContext().select().from(Tables.EH_QUESTIONNAIRES).where(Tables.EH_QUESTIONNAIRES.ID.eq(114L)).fetchOne();
+		assertNotNull(record);
+		EhQuestionnaires questionnaire = ConvertHelper.convert(record, EhQuestionnaires.class);
+		assertEquals((byte)0, questionnaire.getStatus().byteValue());
 
 	}
 
@@ -183,7 +259,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = GET_QUESTIONNAIRE_RESULT_DETAIL_URL;
 		logon();
 		GetQuestionnaireResultDetailCommand cmd = new GetQuestionnaireResultDetailCommand();
-		cmd.setNamespaceId(0);
+		cmd.setNamespaceId(namespaceId);
 		cmd.setQuestionnaireId(1L);
 		cmd.setKeywords("");
 		cmd.setPageAnchor(1L);
@@ -205,7 +281,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = GET_QUESTIONNAIRE_RESULT_SUMMARY_URL;
 		logon();
 		GetQuestionnaireResultSummaryCommand cmd = new GetQuestionnaireResultSummaryCommand();
-		cmd.setNamespaceId(0);
+		cmd.setNamespaceId(namespaceId);
 		cmd.setQuestionnaireId(1L);
 		cmd.setPageSize(0);
 
@@ -225,7 +301,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = LIST_OPTION_TARGETS_URL;
 		logon();
 		ListOptionTargetsCommand cmd = new ListOptionTargetsCommand();
-		cmd.setNamespaceId(0);
+		cmd.setNamespaceId(namespaceId);
 		cmd.setOptionId(1L);
 		cmd.setPageAnchor(1L);
 		cmd.setPageSize(0);
@@ -246,7 +322,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = LIST_BLANK_QUESTION_ANSWERS_URL;
 		logon();
 		ListBlankQuestionAnswersCommand cmd = new ListBlankQuestionAnswersCommand();
-		cmd.setNamespaceId(0);
+		cmd.setNamespaceId(namespaceId);
 		cmd.setQuestionId(1L);
 		cmd.setPageAnchor(1L);
 		cmd.setPageSize(0);
@@ -267,8 +343,8 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = LIST_TARGET_QUESTIONNAIRES_URL;
 		logon();
 		ListTargetQuestionnairesCommand cmd = new ListTargetQuestionnairesCommand();
-		cmd.setNamespaceId(0);
-		cmd.setOwnerType("");
+		cmd.setNamespaceId(namespaceId);
+		cmd.setOwnerType("community");
 		cmd.setOwnerId(1L);
 		cmd.setTargetType("");
 		cmd.setTargetId(1L);
@@ -291,7 +367,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = GET_TARGET_QUESTIONNAIRE_DETAIL_URL;
 		logon();
 		GetTargetQuestionnaireDetailCommand cmd = new GetTargetQuestionnaireDetailCommand();
-		cmd.setNamespaceId(0);
+		cmd.setNamespaceId(namespaceId);
 		cmd.setQuestionnaireId(1L);
 		cmd.setTargetType("");
 		cmd.setTargetId(1L);
@@ -316,34 +392,89 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		cmd.setTargetId(1L);
 		QuestionnaireDTO questionnaireDTO = new QuestionnaireDTO();
 		questionnaireDTO.setId(1L);
-		questionnaireDTO.setNamespaceId(0);
-		questionnaireDTO.setOwnerType("");
+		questionnaireDTO.setNamespaceId(namespaceId);
+		questionnaireDTO.setOwnerType("community");
 		questionnaireDTO.setOwnerId(1L);
-		questionnaireDTO.setQuestionnaireName("");
-		questionnaireDTO.setDescription("");
-		questionnaireDTO.setCollectionCount(0);
+		questionnaireDTO.setQuestionnaireName("第一份问卷");
+		questionnaireDTO.setDescription("我是第一份问卷");
 		questionnaireDTO.setStatus((byte)1);
-		questionnaireDTO.setPublishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		questionnaireDTO.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		questionnaireDTO.setSubmitTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		List<QuestionnaireQuestionDTO> questionnaireQuestionDTOList = new ArrayList<>();
+		
 		QuestionnaireQuestionDTO questionnaireQuestionDTO = new QuestionnaireQuestionDTO();
-		questionnaireQuestionDTO.setId(1L);
 		questionnaireQuestionDTO.setQuestionType((byte)1);
-		questionnaireQuestionDTO.setQuestionName("");
+		questionnaireQuestionDTO.setQuestionName("我是单选题");
 		List<QuestionnaireOptionDTO> questionnaireOptionDTOList = new ArrayList<>();
 		QuestionnaireOptionDTO questionnaireOptionDTO = new QuestionnaireOptionDTO();
-		questionnaireOptionDTO.setId(1L);
-		questionnaireOptionDTO.setOptionName("");
-		questionnaireOptionDTO.setOptionUrl("");
-		questionnaireOptionDTO.setOptionUri("");
-		questionnaireOptionDTO.setCheckedCount(0);
-		questionnaireOptionDTO.setOptionContent("");
-		questionnaireOptionDTO.setChecked((byte)1);
+		questionnaireOptionDTO.setOptionName("选项1");
 		questionnaireOptionDTOList.add(questionnaireOptionDTO);
+		QuestionnaireOptionDTO questionnaireOptionDTO2 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO2.setOptionName("选项2");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO2);
+		QuestionnaireOptionDTO questionnaireOptionDTO3 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO3.setOptionName("选项3");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO3);
 		questionnaireQuestionDTO.setOptions(questionnaireOptionDTOList);
-		questionnaireQuestionDTO.setNextPageAnchor(1L);
 		questionnaireQuestionDTOList.add(questionnaireQuestionDTO);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO2 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO2.setQuestionType((byte)2);
+		questionnaireQuestionDTO2.setQuestionName("我是复选题");
+		List<QuestionnaireOptionDTO> questionnaireOptionDTOList2 = new ArrayList<>();
+		QuestionnaireOptionDTO questionnaireOptionDTO4 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO4.setOptionName("选项1");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO4);
+		QuestionnaireOptionDTO questionnaireOptionDTO5 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO5.setOptionName("选项2");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO5);
+		QuestionnaireOptionDTO questionnaireOptionDTO6 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO6.setOptionName("选项3");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO6);
+		questionnaireQuestionDTO.setOptions(questionnaireOptionDTOList2);
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO2);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO4 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO4.setQuestionType((byte)4);
+		questionnaireQuestionDTO4.setQuestionName("我是图片单选题");
+		List<QuestionnaireOptionDTO> questionnaireOptionDTOList4 = new ArrayList<>();
+		QuestionnaireOptionDTO questionnaireOptionDTO41 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO41.setOptionName("选项1");
+		questionnaireOptionDTO41.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO41);
+		QuestionnaireOptionDTO questionnaireOptionDTO42 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO42.setOptionName("选项2");
+		questionnaireOptionDTO42.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO42);
+		QuestionnaireOptionDTO questionnaireOptionDTO43 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO43.setOptionName("选项3");
+		questionnaireOptionDTO43.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO43);
+		questionnaireQuestionDTO.setOptions(questionnaireOptionDTOList4);
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO4);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO5 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO5.setQuestionType((byte)4);
+		questionnaireQuestionDTO5.setQuestionName("我是图片复选题");
+		List<QuestionnaireOptionDTO> questionnaireOptionDTOList5 = new ArrayList<>();
+		QuestionnaireOptionDTO questionnaireOptionDTO51 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO51.setOptionName("选项1");
+		questionnaireOptionDTO51.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO51);
+		QuestionnaireOptionDTO questionnaireOptionDTO52 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO52.setOptionName("选项2");
+		questionnaireOptionDTO52.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO52);
+		QuestionnaireOptionDTO questionnaireOptionDTO53 = new QuestionnaireOptionDTO();
+		questionnaireOptionDTO53.setOptionName("选项3");
+		questionnaireOptionDTO53.setOptionUri("http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY");
+		questionnaireOptionDTOList.add(questionnaireOptionDTO53);
+		questionnaireQuestionDTO.setOptions(questionnaireOptionDTOList5);
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO5);
+		
+		QuestionnaireQuestionDTO questionnaireQuestionDTO3 = new QuestionnaireQuestionDTO();
+		questionnaireQuestionDTO3.setQuestionType((byte)3);
+		questionnaireQuestionDTO3.setQuestionName("我是填空题");
+		questionnaireQuestionDTOList.add(questionnaireQuestionDTO3);
+		
 		questionnaireDTO.setQuestions(questionnaireQuestionDTOList);
 		cmd.setQuestionnaire(questionnaireDTO);
 
@@ -370,7 +501,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 
 	@Override
 	protected void initCustomData() {
-		String jsonFilePath = "data/json/1.0.0-approval-test-data-160907.txt";
+		String jsonFilePath = "data/json/1.0.0-questionnaire-test-data-170220.txt";
 		String fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
 		dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
 	}
