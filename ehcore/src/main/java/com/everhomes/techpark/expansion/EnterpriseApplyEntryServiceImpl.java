@@ -61,6 +61,7 @@ import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
@@ -530,22 +531,29 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
     private FlowCase createFlowCase(EnterpriseOpRequest request) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+
+        CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
+        flowCaseCmd.setApplyUserId(request.getApplyUserId());
+        flowCaseCmd.setReferId(request.getId());
+        flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
         if (flow != null) {
-            CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
-            flowCaseCmd.setApplyUserId(request.getApplyUserId());
             flowCaseCmd.setFlowMainId(flow.getFlowMainId());
             flowCaseCmd.setFlowVersion(flow.getFlowVersion());
-            flowCaseCmd.setReferId(request.getId());
-            flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
+           
             // flowCase摘要内容
             flowCaseCmd.setContent(this.getBriefContent(request));
 
             return flowService.createFlowCase(flowCaseCmd);
         } else {
-            if(LOGGER.isWarnEnabled()) {
-                LOGGER.warn("There is no expansion workflow enabled for ownerId: {}", request.getCommunityId());
-            }
-            return null;
+        	GeneralModuleInfo gm = new GeneralModuleInfo();
+        	gm.setOrganizationId(request.getEnterpriseId());
+        	gm.setProjectType(EntityType.COMMUNITY.getCode());
+        	gm.setProjectId(request.getCommunityId());
+        	gm.setNamespaceId(UserContext.getCurrentNamespaceId());
+        	gm.setModuleId(ExpansionConst.MODULE_ID);
+			gm.setOwnerId(request.getCommunityId());
+			gm.setOwnerType(FlowOwnerType.COMMUNITY.getCode());
+			return flowService.createDumpFlowCase(gm, flowCaseCmd);
         }
     }
 
