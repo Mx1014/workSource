@@ -4,17 +4,26 @@ package com.everhomes.techpark.expansion;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.*;
+import com.everhomes.listing.ListingLocator;
+import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
 import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
+import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
 import com.everhomes.rest.techpark.expansion.ExpansionConst;
 import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
+import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
+import com.everhomes.yellowPage.YellowPage;
+import com.everhomes.yellowPage.YellowPageProvider;
 
+import org.jooq.Record;
+import org.jooq.SelectQuery;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +51,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     @Autowired
     private LocaleStringService localeStringService;
 
+    @Autowired
+    private YellowPageProvider yellowPageProvider;
     @Autowired
     private FlowService flowService;
 
@@ -125,16 +136,40 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     private void processSourceName(EnterpriseOpRequest applyEntry) {
         applyEntry.setSourceName("");
-        if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
-            Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
-            if(null != building)
-                applyEntry.setSourceName(building.getName());
-        } else if (ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType()) ||
-                ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())) {
-            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
-            if (null != leasePromotion)
-                applyEntry.setSourceName(leasePromotion.getSubject());
-        }
+        if(ApplyEntryApplyType.fromType(applyEntry.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
+			//续租的 
+        	applyEntry.setSourceName("续租"); 
+			 
+		}else if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
+			//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
+			Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
+			if(null != building){
+				applyEntry.setSourceName(building.getName());
+			}
+		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType())||
+				ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())){
+			//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
+			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
+			if(null != leasePromotion){
+				applyEntry.setSourceName(leasePromotion.getSubject()); 
+			}
+		}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(applyEntry.getSourceType())){
+			//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
+			YellowPage yellowPage = yellowPageProvider.getYellowPageById(applyEntry.getSourceId());
+			if(null != yellowPage){
+				applyEntry.setSourceName("创客申请"); 
+			}
+		}
+//        if(ApplyEntrySourceType.BUILDING.getCode().equals(applyEntry.getSourceType())){
+//            Building building = communityProvider.findBuildingById(applyEntry.getSourceId());
+//            if(null != building)
+//                applyEntry.setSourceName(building.getName());
+//        } else if (ApplyEntrySourceType.FOR_RENT.getCode().equals(applyEntry.getSourceType()) ||
+//                ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(applyEntry.getSourceType())) {
+//            LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(applyEntry.getSourceId());
+//            if (null != leasePromotion)
+//                applyEntry.setSourceName(leasePromotion.getSubject());
+//        }
     }
 
     @Override

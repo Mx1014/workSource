@@ -61,6 +61,7 @@ import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
 import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
@@ -520,14 +521,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         
         if (flowCase != null ) {
         	//TODO: 组装resp
-        	String url = processFlowURL(flowCase.getId(), FlowCaseSearchType.APPLIER.getCode(), flowCase.getModuleId());
+        	String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
         	resp.setUrl(url);
         }
 		return resp;
 	}
 
-	private String processFlowURL(Long flowCaseId, byte flowUserType, Long moduleId) { 
-		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+flowUserType+"&moduleId="+moduleId  ;
+	private String processFlowURL(Long flowCaseId, String string, Long moduleId) { 
+		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
 		  
 		
 	}
