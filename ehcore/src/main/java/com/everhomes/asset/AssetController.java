@@ -2,6 +2,7 @@ package com.everhomes.asset;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
+import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.asset.*;
@@ -22,6 +23,7 @@ import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 import java.util.List;
 
+@RestDoc(value = "Asset Controller", site = "core")
 @RestController
 @RequestMapping("/asset")
 public class AssetController extends ControllerBase {
@@ -219,7 +221,7 @@ public class AssetController extends ControllerBase {
      * <p>设置用户的资产账单模板</p>
      * @return 资产账单模板字段列表
      */
-    @RequestMapping("listAssetBillTemplate")
+    @RequestMapping("updateAssetBillTemplate")
     @RestReturn(value=AssetBillTemplateFieldDTO.class, collection = true)
     public RestResponse updateAssetBillTemplate(@Valid UpdateAssetBillTemplateCommand cmd) {
         List<AssetBillTemplateFieldDTO> dtos = this.assetService.updateAssetBillTemplate(cmd);
@@ -230,5 +232,4 @@ public class AssetController extends ControllerBase {
         return response;
     }
 //    脚本配置设置用户模板
-
 }
