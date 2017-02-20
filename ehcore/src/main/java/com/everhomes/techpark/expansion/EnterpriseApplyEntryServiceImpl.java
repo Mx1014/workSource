@@ -473,11 +473,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         // 1.如果创建flowCase成功, 则不在这里发送短信, 移到工作流中配置
         // 2.如果创建flowCase不成功, 说明没有配置使用工作流, 则保持原来的发短信功能不变   add by xq.tian  2016/12/22
-        if (flowCase != null ) {
-        	//TODO: 组装resp
-        	String url = processFlowURL(flowCase.getId(), FlowCaseSearchType.APPLIER.getCode(), flowCase.getModuleId());
-            return resp;
-        }
+
 
         // 根据apply type来区分
         String phoneNumber = null;
@@ -520,6 +516,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     }
                     break;
             }
+        }
+        
+        if (flowCase != null ) {
+        	//TODO: 组装resp
+        	String url = processFlowURL(flowCase.getId(), FlowCaseSearchType.APPLIER.getCode(), flowCase.getModuleId());
         }
 		return resp;
 	}
