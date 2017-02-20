@@ -335,3 +335,4 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 滚动广告增加行数高度配置	by sfyan 20170120
 UPDATE `eh_launch_pad_layouts` SET `layout_json` = REPLACE(`layout_json`,'"widget":"Bulletins","instanceConfig":{"itemGroup":""}', '"widget":"Bulletins","instanceConfig":{"itemGroup":"","contentHeight":20}');
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001 WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"","rowCount":2}%';
