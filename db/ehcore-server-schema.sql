@@ -304,6 +304,7 @@ CREATE TABLE `eh_activities` (
   `achievement_type` VARCHAR(32) COMMENT 'richtext, link',
   `achievement_richtext_url` VARCHAR(512) COMMENT 'richtext page',
   `update_time` DATETIME,
+  `content_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'content category id',
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
@@ -350,7 +351,11 @@ CREATE TABLE `eh_activity_categories` (
   `delete_time` DATETIME,
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
   `default_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no , 1: yes',
-  
+  `enabled` TINYINT NOT NULL DEFAULT 1 COMMENT '0: no, 1: yes',		  
+  `icon_uri` VARCHAR(1024),		
+  `selected_icon_uri` VARCHAR(1024),		
+  `show_name` VARCHAR(64),		
+  `all_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: no, 1: yes',
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -508,7 +513,8 @@ CREATE TABLE `eh_addresses` (
   `living_status` TINYINT,
   `namespace_address_type` VARCHAR(128),
   `namespace_address_token` VARCHAR(128),
-  
+  `business_building_name` VARCHAR(128),		  
+  `business_apartment_name` VARCHAR(128),
   PRIMARY KEY (`id`),
   KEY `i_eh_addr_city` (`city_id`),
   KEY `i_eh_addr_community` (`community_id`),
@@ -2523,6 +2529,24 @@ CREATE TABLE `eh_equipment_inspection_accessory_map` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 巡检对象类型表
+DROP TABLE IF EXISTS `eh_equipment_inspection_categories`;		
+CREATE TABLE `eh_equipment_inspection_categories` (		
+  `id` BIGINT NOT NULL,		
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,		
+  `owner_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the type of who own the category, enterprise, etc',		
+  `owner_id` BIGINT NOT NULL DEFAULT 0,		
+  `parent_id` BIGINT NOT NULL DEFAULT 0,		
+  `name` VARCHAR(64) NOT NULL,		
+  `path` VARCHAR(128),		
+  `default_order` INTEGER,		
+  `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: waiting for confirmation, 2: active',		
+  `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',		
+  `create_time` DATETIME,		
+  `deletor_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record deleter user id',		
+  `delete_time` DATETIME,		
+  PRIMARY KEY (`id`)		  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 设备操作图示表 attachments 及说明书  type区分
 DROP TABLE IF EXISTS `eh_equipment_inspection_equipment_attachments`;
@@ -2567,7 +2591,7 @@ CREATE TABLE `eh_equipment_inspection_equipment_standard_map` (
   `status` TINYINT NOT NULL DEFAULT 0 COMMENT '0: inactive, 1: active',
   `deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
   `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
-	
+  `last_create_task_time` DATETIME,
   PRIMARY KEY (`id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -2610,6 +2634,8 @@ CREATE TABLE `eh_equipment_inspection_equipments` (
   `update_time` DATETIME,
   `deleter_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'deleter id',
   `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
+  `inspection_category_id` BIGINT,		
+  `namespace_id` INTEGER,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
   
@@ -2649,6 +2675,17 @@ CREATE TABLE `eh_equipment_inspection_items` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 巡检标准和部门岗位关联关系表
+DROP TABLE IF EXISTS `eh_equipment_inspection_standard_group_map`;		
+CREATE TABLE `eh_equipment_inspection_standard_group_map` (		
+  `id` BIGINT NOT NULL COMMENT 'id',		
+  `group_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: none, 1: executive group, 2: review group',		
+  `standard_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_equipment_inspection_standards',		
+  `group_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organizations',		
+  `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',		
+  `create_time` DATETIME,		
+  PRIMARY KEY (`id`)		
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 参考标准表：
 DROP TABLE IF EXISTS `eh_equipment_inspection_standards`;
@@ -2672,7 +2709,8 @@ CREATE TABLE `eh_equipment_inspection_standards` (
   `delete_time` DATETIME COMMENT 'mark-deletion policy. historic data may be useful',
   `review_expired_days` INTEGER NOT NULL DEFAULT 0,
   `template_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'reference to the id of eh_inspection_template',
-  
+  `inspection_category_id` BIGINT,		  
+  `namespace_id` INTEGER,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -2744,8 +2782,19 @@ CREATE TABLE `eh_equipment_inspection_tasks` (
   `review_time` DATETIME,
   `create_time` DATETIME,
   `review_expired_date` DATETIME,
-
-  PRIMARY KEY (`id`)
+  `inspection_category_id` BIGINT,		
+  `namespace_id` INTEGER,		  PRIMARY KEY (`id`)
+  `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, etc',		
+  `target_id` BIGINT NOT NULL DEFAULT 0,		
+  `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',		
+  PRIMARY KEY (`id`),		
+  KEY `standard_id` (`standard_id`),		
+  KEY `status` (`status`),		
+  KEY `target_id` (`target_id`),		
+  KEY `inspection_category_id` (`inspection_category_id`),		
+  KEY `executive_expire_time` (`executive_expire_time`),		
+  KEY `process_expire_time` (`process_expire_time`),		
+  KEY `operator_id` (`operator_id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -3522,7 +3571,8 @@ CREATE TABLE `eh_forum_posts` (
   `official_flag` TINYINT DEFAULT 0 COMMENT 'whether it is an official activity, 0 not, 1 yes',
   `media_display_flag` TINYINT NOT NULL DEFAULT 1 COMMENT 'whether display image',
   `max_quantity` INTEGER COMMENT 'max person quantity',
-
+  `activity_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity category id',		
+  `activity_content_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'activity content category id',
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
   KEY `i_eh_post_seqs` (`modify_seq`),
@@ -6625,8 +6675,13 @@ CREATE TABLE `eh_quality_inspection_tasks` (
   `target_type` VARCHAR(32) NOT NULL DEFAULT '',
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
   `executive_position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',
-  
-  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`),		  
+  KEY `standard_id` (`standard_id`),		  PRIMARY KEY (`id`)
+  KEY `status` (`status`),		)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `target_id` (`target_id`),		
+  KEY `executive_expire_time` (`executive_expire_time`),		
+  KEY `process_expire_time` (`process_expire_time`),		
+  KEY `operator_id` (`operator_id`)
 )ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 
@@ -8045,7 +8100,7 @@ CREATE TABLE `eh_service_module_assignments` (
   `create_uid` BIGINT NOT NULL,
   `create_time` DATETIME,
   `update_time` DATETIME,
-  
+  `assignment_type` TINYINT NOT NULL DEFAULT 0,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
