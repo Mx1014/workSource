@@ -54,7 +54,7 @@ CREATE TABLE `eh_asset_bills` (
 
 -- 用户模板字段表（给一组初始数据）
 DROP TABLE IF EXISTS `eh_asset_bill_template_fields`;
-CREATE TABLE `eh_asset_bill_user_template_fields` (
+CREATE TABLE `eh_asset_bill_template_fields` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `required_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: optional, 1: required',
