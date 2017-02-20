@@ -3114,12 +3114,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 							group.setGroupId(map.getOrganizationId());
 							group.setPositionId(map.getJobPositionId());
 							groupDtos.add(group);
-							
-//							group.setGroupId(0L);
-//							group.setPositionId(map.getJobPositionId());
-//							groupDtos.add(group);
+
+							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
+							if(groupOrg != null) {
+								group.setGroupId(groupOrg.getDirectlyEnterpriseId());
+								group.setPositionId(map.getJobPositionId());
+								groupDtos.add(group);
+							}
+
 						}
-							
+
 					}
 				} else {
 					ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
