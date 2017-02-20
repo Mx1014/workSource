@@ -16,4 +16,7 @@ public interface QuestionnaireProvider {
 	List<Questionnaire> listQuestionnaireByOwner(Integer namespaceId, String ownerType, Long ownerId, Long pageAnchor,
 			int pageSize);
 
+	List<Questionnaire> listTargetQuestionnaireByOwner(Integer namespaceId, String ownerType, Long ownerId,
+			Long pageAnchor, int pageSize);
+
 }

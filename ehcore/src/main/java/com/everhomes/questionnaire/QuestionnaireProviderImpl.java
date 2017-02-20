@@ -76,6 +76,19 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
 	}
+	
+	@Override
+	public List<Questionnaire> listTargetQuestionnaireByOwner(Integer namespaceId, String ownerType, Long ownerId,
+			Long pageAnchor, int pageSize) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRES)
+				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
+				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
+				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
+				.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.lt(new Timestamp(pageAnchor==null?Long.MAX_VALUE:pageAnchor)))
+				.orderBy(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc())
+				.limit(pageSize)
+				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
+	}
 
 	private EhQuestionnairesDao getReadWriteDao() {
 		return getDao(getReadWriteContext());

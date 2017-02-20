@@ -52,7 +52,8 @@ public enum CoordinationLocks {
     ENERGY_METER_CATEGORY("energyMeter.category"),
     ENERGY_METER_FORMULA("energyMeter.formula"),
     
-    UPDATE_QUESTIONNAIRE("update.questionnaire");
+    UPDATE_QUESTIONNAIRE("update.questionnaire"),
+	UPDATE_QUESTIONNAIRE_OPTION("update.questionnaire.option");
 
     private String code;
     private CoordinationLocks(String code) {

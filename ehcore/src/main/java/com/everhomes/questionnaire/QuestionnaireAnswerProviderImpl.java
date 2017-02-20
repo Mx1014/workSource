@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -16,7 +17,9 @@ import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhQuestionnaireAnswersDao;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaireAnswers;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
 
 @Component
@@ -32,6 +35,8 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 	public void createQuestionnaireAnswer(QuestionnaireAnswer questionnaireAnswer) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQuestionnaireAnswers.class));
 		questionnaireAnswer.setId(id);
+		questionnaireAnswer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		questionnaireAnswer.setCreatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().insert(questionnaireAnswer);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQuestionnaireAnswers.class, null);
 	}
@@ -88,6 +93,24 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.gt(pageAnchor==null?0:pageAnchor))
 				.orderBy(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.asc())
 				.limit(pageSize)
+				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
+	}
+
+	@Override
+	public QuestionnaireAnswer findAnyAnswerByTarget(Long questionnaireId, String targetType, Long targetId) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(questionnaireId))
+				.fetchAny()
+				.map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
+	}
+
+	@Override
+	public List<QuestionnaireAnswer> listTargetQuestionnaireAnswerByQuestionId(Long questionId, String targetType,
+			Long targetId) {
+		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTION_ID.eq(questionId))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(targetType))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(targetId))
 				.fetch().map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
 	}
 

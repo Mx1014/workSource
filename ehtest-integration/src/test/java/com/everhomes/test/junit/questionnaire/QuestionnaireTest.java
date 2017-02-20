@@ -1,4 +1,4 @@
-package com.everhomes.test.junit.approval;
+package com.everhomes.test.junit.questionnaire;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -10,25 +10,34 @@ import org.junit.Before;
 import com.everhomes.rest.RestResponseBase;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireCommand;
 import com.everhomes.rest.questionnaire.CreateQuestionnaireResponse;
+import com.everhomes.rest.questionnaire.CreateQuestionnaireRestResponse;
 import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireCommand;
 import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireResponse;
+import com.everhomes.rest.questionnaire.CreateTargetQuestionnaireRestResponse;
 import com.everhomes.rest.questionnaire.DeleteQuestionnaireCommand;
 import com.everhomes.rest.questionnaire.GetQuestionnaireDetailCommand;
 import com.everhomes.rest.questionnaire.GetQuestionnaireDetailResponse;
+import com.everhomes.rest.questionnaire.GetQuestionnaireDetailRestResponse;
 import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailCommand;
 import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailResponse;
+import com.everhomes.rest.questionnaire.GetQuestionnaireResultDetailRestResponse;
 import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryCommand;
 import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryResponse;
+import com.everhomes.rest.questionnaire.GetQuestionnaireResultSummaryRestResponse;
 import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailCommand;
 import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailResponse;
+import com.everhomes.rest.questionnaire.GetTargetQuestionnaireDetailRestResponse;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersCommand;
 import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersResponse;
+import com.everhomes.rest.questionnaire.ListBlankQuestionAnswersRestResponse;
 import com.everhomes.rest.questionnaire.ListOptionTargetsCommand;
 import com.everhomes.rest.questionnaire.ListOptionTargetsResponse;
 import com.everhomes.rest.questionnaire.ListQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListQuestionnairesResponse;
+import com.everhomes.rest.questionnaire.ListQuestionnairesRestResponse;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesCommand;
 import com.everhomes.rest.questionnaire.ListTargetQuestionnairesResponse;
+import com.everhomes.rest.questionnaire.ListTargetQuestionnairesRestResponse;
 import com.everhomes.rest.questionnaire.QuestionnaireDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireOptionDTO;
 import com.everhomes.rest.questionnaire.QuestionnaireQuestionDTO;
@@ -37,7 +46,6 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
 
 public class QuestionnaireTest extends BaseLoginAuthTestCase {
-
 	//1. 问卷调查列表-园区
 	private static final String LIST_QUESTIONNAIRES_URL = "/questionnaire/listQuestionnaires";
 	//2. 问卷调查详情-园区
@@ -51,7 +59,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 	//6. 问卷调查结果统计-园区
 	private static final String GET_QUESTIONNAIRE_RESULT_SUMMARY_URL = "/questionnaire/getQuestionnaireResultSummary";
 	//7. 某个选项的企业列表-园区
-	private static final String LIST_OPTION_ORGANIZATIONS_URL = "/questionnaire/listOptionOrganizations";
+	private static final String LIST_OPTION_TARGETS_URL = "/questionnaire/listOptionTargets";
 	//8. 填空题答案列表-园区
 	private static final String LIST_BLANK_QUESTION_ANSWERS_URL = "/questionnaire/listBlankQuestionAnswers";
 	//9. 问卷调查列表-企业
@@ -109,9 +117,6 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = CREATE_QUESTIONNAIRE_URL;
 		logon();
 		CreateQuestionnaireCommand cmd = new CreateQuestionnaireCommand();
-		cmd.setNamespaceId(0);
-		cmd.setOwnerType("");
-		cmd.setOwnerId(1L);
 		QuestionnaireDTO questionnaireDTO = new QuestionnaireDTO();
 		questionnaireDTO.setId(1L);
 		questionnaireDTO.setNamespaceId(0);
@@ -134,6 +139,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		questionnaireOptionDTO.setId(1L);
 		questionnaireOptionDTO.setOptionName("");
 		questionnaireOptionDTO.setOptionUrl("");
+		questionnaireOptionDTO.setOptionUri("");
 		questionnaireOptionDTO.setCheckedCount(0);
 		questionnaireOptionDTO.setOptionContent("");
 		questionnaireOptionDTO.setChecked((byte)1);
@@ -201,6 +207,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		GetQuestionnaireResultSummaryCommand cmd = new GetQuestionnaireResultSummaryCommand();
 		cmd.setNamespaceId(0);
 		cmd.setQuestionnaireId(1L);
+		cmd.setPageSize(0);
 
 		GetQuestionnaireResultSummaryRestResponse response = httpClientService.restPost(url, cmd, GetQuestionnaireResultSummaryRestResponse.class);
 		assertNotNull(response);
@@ -214,8 +221,8 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 
 	//7. 某个选项的企业列表-园区
 	//@Test
-	public void testListOptionOrganizations() {
-		String url = LIST_OPTION_ORGANIZATIONS_URL;
+	public void testListOptionTargets() {
+		String url = LIST_OPTION_TARGETS_URL;
 		logon();
 		ListOptionTargetsCommand cmd = new ListOptionTargetsCommand();
 		cmd.setNamespaceId(0);
@@ -223,7 +230,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		cmd.setPageAnchor(1L);
 		cmd.setPageSize(0);
 
-		ListOptionOrganizationsRestResponse response = httpClientService.restPost(url, cmd, ListOptionOrganizationsRestResponse.class);
+		ListOptionTargetsRestResponse response = httpClientService.restPost(url, cmd, ListOptionTargetsRestResponse.class);
 		assertNotNull(response);
 		assertTrue("response= " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
@@ -305,8 +312,6 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		String url = CREATE_TARGET_QUESTIONNAIRE_URL;
 		logon();
 		CreateTargetQuestionnaireCommand cmd = new CreateTargetQuestionnaireCommand();
-		cmd.setNamespaceId(0);
-		cmd.setQuestionnaireId(1L);
 		cmd.setTargetType("");
 		cmd.setTargetId(1L);
 		QuestionnaireDTO questionnaireDTO = new QuestionnaireDTO();
@@ -331,6 +336,7 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 		questionnaireOptionDTO.setId(1L);
 		questionnaireOptionDTO.setOptionName("");
 		questionnaireOptionDTO.setOptionUrl("");
+		questionnaireOptionDTO.setOptionUri("");
 		questionnaireOptionDTO.setCheckedCount(0);
 		questionnaireOptionDTO.setOptionContent("");
 		questionnaireOptionDTO.setChecked((byte)1);
@@ -350,6 +356,12 @@ public class QuestionnaireTest extends BaseLoginAuthTestCase {
 
 
 	}
+
+
+
+	
+	
+	
 	
 	@Before
 	public void setUp() {
