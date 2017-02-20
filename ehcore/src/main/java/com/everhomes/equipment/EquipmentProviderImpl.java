@@ -1863,6 +1863,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
         query.addConditions(con);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listEquipmentInspectionStandardGroupMapByGroupAndPosition, sql=" + query.getSQL());
+			LOGGER.debug("listEquipmentInspectionStandardGroupMapByGroupAndPosition, bindValues=" + query.getBindValues());
+		}
         query.fetch().map((r) -> {
         	maps.add(ConvertHelper.convert(r, EquipmentInspectionStandardGroupMap.class));
              return null;
