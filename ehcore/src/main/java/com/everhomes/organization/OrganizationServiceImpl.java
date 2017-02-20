@@ -8343,7 +8343,7 @@ System.out.println();
 
 	@Override
 	public ContractDTO processContract(Contract contract) {
-		ContractDTO contractDTO = new ContractDTO();
+		ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
 		contractDTO.setContractNumber(contract.getContractNumber());
 		contractDTO.setContractEndDate(contract.getContractEndDate());
 		contractDTO.setOrganizationName(contract.getOrganizationName());
