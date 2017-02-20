@@ -551,9 +551,13 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 			
 		}
-		
+
 		this.processDetailUrl(response);
 //		response.setDisplayName(serviceAlliance.getNickName());
+		Community community = communityProvider.findCommunityById(response.getOwnerId());
+		if(community != null) {
+			response.setNamespaceId(community.getNamespaceId());
+		}
 		
 		return response;
 	}
