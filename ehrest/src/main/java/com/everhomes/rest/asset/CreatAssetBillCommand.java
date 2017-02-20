@@ -1,5 +1,7 @@
 package com.everhomes.rest.asset;
 
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
 
 /**
@@ -19,4 +21,8 @@ public class CreatAssetBillCommand {
     @NotNull
     private String targetType;
 
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
+    }
 }
