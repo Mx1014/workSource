@@ -87,4 +87,6 @@ public interface BusinessService {
      * 新增或者修改运营数据
      */
     void createBusinessPromotion(CreateBusinessPromotionCommand cmd);
+
+    void switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd);
 }
