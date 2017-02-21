@@ -56,6 +56,9 @@ public class ContentServerServiceImpl implements ContentServerService {
     private ContentServerProvider contentServerProvider;
     
     private CloseableHttpClient httpClient;
+
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
     
     @PostConstruct
     protected void init() {
@@ -205,12 +208,11 @@ public class ContentServerServiceImpl implements ContentServerService {
         if(StringUtils.isEmpty(uri)){
             return null;
         }
-        
+
         //added by Janson if UserContext.current().getScheme() == null 
         // 如果uri本身已经是以http开头的完整链接，则不需要解释，直接返回（方便用一些测试链接）  by lqs 20160715
         uri = uri.trim();
-        if(UserContext.current().getScheme() != null 
-        		&& uri.startsWith(UserContext.current().getScheme())) {
+        if(uri.startsWith(HTTP) || uri.startsWith(HTTPS)) {
             return uri;
         }
         
@@ -274,12 +276,12 @@ public class ContentServerServiceImpl implements ContentServerService {
 
         // https 默认端口443 by sfyan 20161226
         Integer port = cache.get(serverId).getPublicPort();
-        if(null != UserContext.current().getScheme() && UserContext.current().getScheme().equals("https")){
+        if(getScheme(port).equals(HTTPS)){
             port = 443;
         }
 
         return String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
-                UserContext.current().getScheme(), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
+                getScheme(port), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
                 token, width, height);
     }
 
@@ -344,7 +346,32 @@ public class ContentServerServiceImpl implements ContentServerService {
 		
 		return imageBody;
     }
-    
+
+    private String getScheme(){
+        return getScheme(null);
+    }
+
+    private String getScheme(Integer port){
+        if(null == UserContext.current().getScheme()){
+            if(null == port){
+                try {
+                    ContentServer server = selectContentServer();
+                    port = server.getPublicPort();
+                } catch (Exception e) {
+                    LOGGER.error("Get scheme. Failed to find content server", e);
+                    return null;
+                }
+            }
+            if(80 == port || 443 == port){
+                return HTTPS;
+            }else{
+                return HTTP;
+            }
+        }else{
+            return UserContext.current().getScheme();
+        }
+    }
+
     @Override
     public String getContentServer(){
         try {
@@ -352,7 +379,8 @@ public class ContentServerServiceImpl implements ContentServerService {
 
             // https 默认端口443 by sfyan 20161226
             Integer port = server.getPublicPort();
-            if(null != UserContext.current().getScheme() && UserContext.current().getScheme().equals("https")){
+
+            if(getScheme(port).equals(HTTPS)){
                 port = 443;
             }
             return String.format("%s:%d",server.getPublicAddress(),port);
@@ -419,7 +447,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         String mediaType = ContentMediaHelper.getContentMediaType(fileSuffix);
 
         // https 默认端口443 by sfyan 20161226
-        String url = String.format("%s://%s/upload/%s?token=%s",UserContext.current().getScheme(), contentServerUri, mediaType, token);
+        String url = String.format("%s://%s/upload/%s?token=%s",getScheme(), contentServerUri, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
         
         CloseableHttpResponse response = null;
