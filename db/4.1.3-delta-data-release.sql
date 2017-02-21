@@ -334,5 +334,20 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999986', '0', '0', '0', '/home', 'Bizs', '健身房', '健身房', 'cs://1/image/aW1hZ2UvTVRvek5UUTBObU0wT0dReU1tWmhNbVZpTTJNMU1UVTVNRGN4WVRobE5qbGtPUQ', '1', '1', '14', '{"url":"http://core.zuolin.com/mobile/static/banner/jsf.html"}', '40', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL);
 
 -- 滚动广告增加行数高度配置	by sfyan 20170120
-UPDATE `eh_launch_pad_layouts` SET `layout_json` = REPLACE(`layout_json`,'"widget":"Bulletins","instanceConfig":{"itemGroup":""}', '"widget":"Bulletins","instanceConfig":{"itemGroup":"","contentHeight":20}');
-UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016100901"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `layout_json` = REPLACE(`layout_json`,'"widget":"Bulletins","instanceConfig":{"itemGroup":""}', '"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}');
+UPDATE `eh_launch_pad_layouts` SET `layout_json` = REPLACE(`layout_json`,'"widget":"Bulletins","instanceConfig":{"itemGroup":"Default"}', '"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}');
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016100901"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2017012003"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2017011302"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016081701"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2015082914"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016100901"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016110101"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016121201"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016121601"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+
+
+
+
+
+
