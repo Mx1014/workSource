@@ -346,7 +346,9 @@ UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = 
 UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016121201"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
 UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016121601"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
 
-
+-- 更新线网深业短信模版 add by sw 20170221
+update eh_locale_templates set text = 29478 where code = 10 and namespace_id = 999992 and scope = 'sms.default.yzx';
+update eh_locale_templates set text = 29479 where code = 11 and namespace_id = 999992 and scope = 'sms.default.yzx';
 
 
 
