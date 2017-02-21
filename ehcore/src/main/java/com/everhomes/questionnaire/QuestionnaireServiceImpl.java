@@ -290,6 +290,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, List<QuestionnaireQuestionDTO> questionDTOs){
 		QuestionnaireDTO questionnaireDTO = ConvertHelper.convert(questionnaire, QuestionnaireDTO.class);
 		questionnaireDTO.setQuestions(questionDTOs);
+		questionnaireDTO.setCreateTime(questionnaire.getCreateTime()==null?null:questionnaire.getCreateTime().getTime());
+		questionnaireDTO.setPublishTime(questionnaire.getPublishTime()==null?null:questionnaire.getPublishTime().getTime());
 		return questionnaireDTO;
 	}
 	
@@ -298,11 +300,11 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 	
 	private QuestionnaireDTO convertToQuestionnaireDTO(Questionnaire questionnaire, boolean containTarget, String targetType, Long targetId){
-		QuestionnaireDTO questionnaireDTO = ConvertHelper.convert(questionnaire, QuestionnaireDTO.class);
+		QuestionnaireDTO questionnaireDTO = convertToQuestionnaireDTO(questionnaire, null);
 		if (containTarget) {
 			QuestionnaireAnswer answer = questionnaireAnswerProvider.findAnyAnswerByTarget(questionnaire.getId(), targetType, targetId);
 			if (answer != null) {
-				questionnaireDTO.setSubmitTime(answer.getCreateTime());
+				questionnaireDTO.setSubmitTime(answer.getCreateTime().getTime());
 			}
 		}
 		return questionnaireDTO;
@@ -451,7 +453,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	private QuestionnaireResultTargetDTO convertToTargetDTO(QuestionnaireAnswer answer) {
 		QuestionnaireResultTargetDTO dto = ConvertHelper.convert(answer, QuestionnaireResultTargetDTO.class);
-		dto.setSubmitTime(answer.getCreateTime());
+		dto.setSubmitTime(answer.getCreateTime().getTime());
 		return dto;
 	}
 	

@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.questionnaire;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import com.everhomes.discover.ItemType;
@@ -33,19 +32,11 @@ public class QuestionnaireDTO {
 	private String description;
 	private Integer collectionCount;
 	private Byte status;
-	private Timestamp publishTime;
-	private Timestamp createTime;
-	private Timestamp submitTime;
+	private Long publishTime;
+	private Long createTime;
+	private Long submitTime;
 	@ItemType(QuestionnaireQuestionDTO.class)
 	private List<QuestionnaireQuestionDTO> questions;
-
-	public Timestamp getSubmitTime() {
-		return submitTime;
-	}
-
-	public void setSubmitTime(Timestamp submitTime) {
-		this.submitTime = submitTime;
-	}
 
 	public Long getId() {
 		return id;
@@ -111,28 +102,36 @@ public class QuestionnaireDTO {
 		this.status = status;
 	}
 
-	public Timestamp getPublishTime() {
-		return publishTime;
-	}
-
-	public void setPublishTime(Timestamp publishTime) {
-		this.publishTime = publishTime;
-	}
-
-	public Timestamp getCreateTime() {
-		return createTime;
-	}
-
-	public void setCreateTime(Timestamp createTime) {
-		this.createTime = createTime;
-	}
-
 	public List<QuestionnaireQuestionDTO> getQuestions() {
 		return questions;
 	}
 
 	public void setQuestions(List<QuestionnaireQuestionDTO> questions) {
 		this.questions = questions;
+	}
+
+	public Long getPublishTime() {
+		return publishTime;
+	}
+
+	public void setPublishTime(Long publishTime) {
+		this.publishTime = publishTime;
+	}
+
+	public Long getCreateTime() {
+		return createTime;
+	}
+
+	public void setCreateTime(Long createTime) {
+		this.createTime = createTime;
+	}
+
+	public Long getSubmitTime() {
+		return submitTime;
+	}
+
+	public void setSubmitTime(Long submitTime) {
+		this.submitTime = submitTime;
 	}
 
 	@Override

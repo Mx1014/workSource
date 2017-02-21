@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.questionnaire;
 
-import java.sql.Timestamp;
-
 import com.everhomes.util.StringHelper;
 
 /**
@@ -18,7 +16,7 @@ public class QuestionnaireResultTargetDTO {
 	private String targetType;
 	private Long targetId;
 	private String targetName;
-	private Timestamp submitTime;
+	private Long submitTime;
 
 	public String getTargetType() {
 		return targetType;
@@ -44,11 +42,11 @@ public class QuestionnaireResultTargetDTO {
 		this.targetName = targetName;
 	}
 
-	public Timestamp getSubmitTime() {
+	public Long getSubmitTime() {
 		return submitTime;
 	}
 
-	public void setSubmitTime(Timestamp submitTime) {
+	public void setSubmitTime(Long submitTime) {
 		this.submitTime = submitTime;
 	}
 
