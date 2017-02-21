@@ -227,7 +227,6 @@ class PmTaskCommonServiceImpl {
 
         checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
         Category taskCategory = checkCategory(taskCategoryId);
-        checkCategory(categoryId);
 
         final PmTask task = new PmTask();
 
