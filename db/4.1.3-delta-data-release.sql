@@ -350,6 +350,10 @@ UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = 
 update eh_locale_templates set text = 29478 where code = 10 and namespace_id = 999992 and scope = 'sms.default.yzx';
 update eh_locale_templates set text = 29479 where code = 11 and namespace_id = 999992 and scope = 'sms.default.yzx';
 
+-- 园区配套 item配置修改 add by sfyan 20170221
+SET @eh_service_alliance_skip_rule = (SELECT max(id) FROM `eh_service_alliance_skip_rule`);
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999986', '60');
+UPDATE eh_launch_pad_items SET action_data = REPLACE(action_data,'"displayType": "grid"}','"displayType": "list"}') WHERE namespace_id = 999986 AND item_label = '园区配套';
 
 
 
