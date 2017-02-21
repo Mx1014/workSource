@@ -116,9 +116,6 @@ public class UserContext {
     }
 
     public String getScheme() {
-        if(StringUtils.isEmpty(scheme)){
-            scheme = "https";
-        }
         return scheme;
     }
 

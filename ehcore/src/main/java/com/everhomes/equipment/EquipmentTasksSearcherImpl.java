@@ -126,10 +126,12 @@ public class EquipmentTasksSearcherImpl extends AbstractElasticSearch implements
             builder.addHighlightedField("taskName");
 
         }
-
-        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
-        FilterBuilder fb = FilterBuilders.notFilter(nfb);
-        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
+//
+//        FilterBuilder nfb = FilterBuilders.termFilter("status", EquipmentTaskStatus.NONE.getCode());
+//        FilterBuilder fb = FilterBuilders.notFilter(nfb);
+//产品要求把已失效的任务也显示出来 add by xiongying20170217
+        FilterBuilder fb = FilterBuilders.termFilter("ownerId", cmd.getOwnerId());
+//        fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerId", cmd.getOwnerId()));
         fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("ownerType", OwnerType.fromCode(cmd.getOwnerType()).getCode()));
         
         if(cmd.getTargetId() != null)

@@ -1664,6 +1664,7 @@ public class CommunityServiceImpl implements CommunityService {
 		for (User user : users) {
 			CommunityUserDto dto = new CommunityUserDto();
 			dto.setUserId(user.getId());
+			dto.setGender(user.getGender());
 			dto.setUserName(user.getNickName());
 			dto.setPhone(user.getIdentifierToken());
 			List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());

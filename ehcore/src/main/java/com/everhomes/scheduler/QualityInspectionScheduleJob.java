@@ -22,6 +22,7 @@ import com.everhomes.repeat.RepeatService;
 import com.everhomes.util.DateHelper;
 
 @Component
+@Scope("prototype")
 public class QualityInspectionScheduleJob  extends QuartzJobBean {
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(QualityInspectionScheduleJob.class);

@@ -19,12 +19,21 @@ public class ApartmentDTO {
     private Long addressId;
     private Long familyId;
     private String apartmentName;
+    private String businessApartmentName;
     private String address;
     private Byte livingStatus;
     private Double areaSize;
     private String enterpriseName;
     
-    public ApartmentDTO() {
+    public String getBusinessApartmentName() {
+		return businessApartmentName;
+	}
+
+	public void setBusinessApartmentName(String businessApartmentName) {
+		this.businessApartmentName = businessApartmentName;
+	}
+
+	public ApartmentDTO() {
     }
     
     public String getAddress() {

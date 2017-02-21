@@ -92,11 +92,12 @@ public interface EquipmentProvider {
 	void updateEquipmentStandardMap(EquipmentStandardMap map);
 	EquipmentStandardMap findEquipmentStandardMapById(Long id);
 	EquipmentStandardMap findEquipmentStandardMap(Long id, Long standardId, Long targetId, String targetType);
-	
+
 	void createEquipmentInspectionItemResults(EquipmentInspectionItemResults result);
 	List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(Long logId);
 	
 	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(Long equipmentId);
+
 	List<EquipmentStandardMap> listEquipmentStandardMap(CrossShardListingLocator locator, Integer pageSize);
 	
 	void closeDelayTasks();
@@ -118,7 +119,9 @@ public interface EquipmentProvider {
 	void deleteEquipmentInspectionStandardGroupMapByStandardId(Long standardId);
 	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
 	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups, byte groupType );
-	
+	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
 	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
 	void populateStandardGroups(EquipmentInspectionStandards standard);
+
+	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long createTime);
 }

@@ -329,3 +329,33 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) 
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999986', '0', '0', '0', '/home', 'Bizs', '健身房', '健身房', 'cs://1/image/aW1hZ2UvTVRvek5UUTBObU0wT0dReU1tWmhNbVZpTTJNMU1UVTVNRGN4WVRobE5qbGtPUQ', '1', '1', '14', '{"url":"http://core.zuolin.com/mobile/static/banner/jsf.html"}', '40', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL);
 
+-- 更新现网时间周期timeRange为负bug by xiongying20170217
+update eh_repeat_settings set time_ranges = '{"ranges":[{"startTime":"06:00:00","endTime":"05:45:00","duration":"1425m"}]}' where id = 11;
+update eh_repeat_settings set time_ranges = '{"ranges":[{"startTime":"07:00:00","endTime":"11:00:00","duration":"240m"},{"startTime":"11:05:00","endTime":"15:00:00","duration":"235m"},{"startTime":"15:05:00","endTime":"19:00:00","duration":"235m"},{"startTime":"19:05:00","endTime":"23:00:00","duration":"235m"},{"startTime":"23:05:00","endTime":"03:00:00","duration":"235m"},{"startTime":"03:05:00","endTime":"06:58:00","duration":"233m"}]}' where id = 194;
+
+-- 添加服务广场健身房 add by sw 20170217
+SET @eh_launch_pad_items = (SELECT max(id) FROM `eh_launch_pad_items`);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) 
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999986', '0', '0', '0', '/home', 'Bizs', '健身房', '健身房', 'cs://1/image/aW1hZ2UvTVRvek5UUTBObU0wT0dReU1tWmhNbVZpTTJNMU1UVTVNRGN4WVRobE5qbGtPUQ', '1', '1', '14', '{"url":"http://core.zuolin.com/mobile/static/banner/jsf.html"}', '40', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) 
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999986', '0', '0', '0', '/home', 'Bizs', '健身房', '健身房', 'cs://1/image/aW1hZ2UvTVRvek5UUTBObU0wT0dReU1tWmhNbVZpTTJNMU1UVTVNRGN4WVRobE5qbGtPUQ', '1', '1', '14', '{"url":"http://core.zuolin.com/mobile/static/banner/jsf.html"}', '40', '0', '1', '0', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL);
+
+-- 滚动广告增加行数高度配置	by sfyan 20170120
+UPDATE `eh_launch_pad_layouts` SET `layout_json` = REPLACE(`layout_json`,'"widget":"Bulletins","instanceConfig":{"itemGroup":""}', '"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}');
+UPDATE `eh_launch_pad_layouts` SET `layout_json` = REPLACE(`layout_json`,'"widget":"Bulletins","instanceConfig":{"itemGroup":"Default"}', '"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}');
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016100901"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2017012003"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2017011302"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016081701"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2015082914"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016100901"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016110101"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016121201"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = replace(`layout_json`,'"versionCode":"2016121601"','"versionCode":"2017022001"') WHERE `layout_json` LIKE '%"widget":"Bulletins","instanceConfig":{"itemGroup":"Default","rowCount":2}%';
+
+-- 更新线网深业短信模版 add by sw 20170221
+update eh_locale_templates set text = 29478 where code = 10 and namespace_id = 999992 and scope = 'sms.default.yzx';
+update eh_locale_templates set text = 29479 where code = 11 and namespace_id = 999992 and scope = 'sms.default.yzx';
+
+
+

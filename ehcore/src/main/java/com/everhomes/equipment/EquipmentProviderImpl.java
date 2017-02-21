@@ -1,15 +1,17 @@
 package com.everhomes.equipment;
 
+import java.net.InetAddress;
+import java.net.NetworkInterface;
+import java.net.SocketException;
+import java.net.UnknownHostException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.user.UserContext;
 import com.everhomes.util.DateUtils;
+
 import org.jooq.Condition;
 import org.jooq.DSLContext;
 import org.jooq.Field;
@@ -19,6 +21,7 @@ import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigConstants;
@@ -115,6 +118,9 @@ import com.mysql.jdbc.StringUtils;
 public class EquipmentProviderImpl implements EquipmentProvider {
 	private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentProviderImpl.class);
 	
+	@Value("${equipment.ip}")
+    private String equipmentIp;
+	
 	@Autowired
 	private DbProvider dbProvider;
 	
@@ -138,13 +144,20 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	
 	@PostConstruct
 	public void init() {
-		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 7 * * ? ");
-		this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-			String EQUIPMENT_INSPECTION_TRIGGER_NAME = "EquipmentInspection " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(EQUIPMENT_INSPECTION_TRIGGER_NAME, EQUIPMENT_INSPECTION_TRIGGER_NAME,
-					cronExpression, EquipmentInspectionScheduleJob.class, null);
-        });
-		
+		String cronExpression = configurationProvider.getValue(ConfigConstants.SCHEDULE_EQUIPMENT_TASK_TIME, "0 0 0 * * ? ");
+
+		String taskServer = configurationProvider.getValue(ConfigConstants.TASK_SERVER_ADDRESS, "127.0.0.1");
+		LOGGER.info("================================================taskServer: " + taskServer + ", equipmentIp: " + equipmentIp);
+		if(taskServer.equals(equipmentIp)) {
+			LOGGER.info("================================================taskServer equals equipmentIp");
+			this.coordinationProvider.getNamedLock(CoordinationLocks.SCHEDULE_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+				String equipmentInspectionTriggerName = "EquipmentInspection " + System.currentTimeMillis();
+				scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
+						cronExpression, EquipmentInspectionScheduleJob.class, null);
+			});
+		}
+
+
 	}
 
 	@Override
@@ -834,7 +847,14 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addConditions(con);
 
 		if(standardIds != null) {
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
+			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds);
+			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+
+			Condition con5 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.OPERATOR_ID.eq(UserContext.current().getUser().getId());
+			con5 = con5.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
+
+			con4 = con4.or(con5);
+			query.addConditions(con4);
 		}
 		
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
@@ -906,8 +926,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
     		if(endDate != null && !"".equals(endDate)) {
     			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.le(endDate));
     		}
-            
-            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
+			//产品要求把已失效的任务也显示出来 add by xiongying20170217
+//            query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
             query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.ID.desc());
             query.addLimit(pageSize - tasks.size());
             
@@ -1362,12 +1382,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.REVIEW_RESULT.eq(ReviewResult.QUALIFIED.getCode()));
 		
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_EQUIPMENT_STANDARD_MAP.STATUS.eq(Status.ACTIVE.getCode()));
-		 
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listQualifiedEquipmentStandardMap, sql=" + query.getSQL());
+			LOGGER.debug("listQualifiedEquipmentStandardMap, bindValues=" + query.getBindValues());
+		}
 		List<EquipmentStandardMap> result = new ArrayList<EquipmentStandardMap>();
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, EquipmentStandardMap.class));
 			return null;
 		});
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listQualifiedEquipmentStandardMap, result=" + result.toString());
+		}
+
 		if(result.size()==0)
 			return null;
 		
@@ -1834,6 +1863,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
         query.addConditions(con);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listEquipmentInspectionStandardGroupMapByGroupAndPosition, sql=" + query.getSQL());
+			LOGGER.debug("listEquipmentInspectionStandardGroupMapByGroupAndPosition, bindValues=" + query.getBindValues());
+		}
         query.fetch().map((r) -> {
         	maps.add(ConvertHelper.convert(r, EquipmentInspectionStandardGroupMap.class));
              return null;
@@ -1843,4 +1877,42 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         return maps;
 	}
 
+	@Override
+	public List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType) {
+		final List<EquipmentInspectionStandardGroupMap> maps = new ArrayList<EquipmentInspectionStandardGroupMap>();
+		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class));
+
+		SelectQuery<EhEquipmentInspectionStandardGroupMapRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP);
+
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.STANDARD_ID.eq(standardId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
+		query.fetch().map((r) -> {
+			maps.add(ConvertHelper.convert(r, EquipmentInspectionStandardGroupMap.class));
+			return null;
+		});
+
+		return maps;
+	}
+
+	@Override
+	public List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long createTime) {
+		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.CREATE_TIME.ge(new Timestamp(createTime)));
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listTodayEquipmentInspectionTasks, sql=" + query.getSQL());
+			LOGGER.debug("listTodayEquipmentInspectionTasks, bindValues=" + query.getBindValues());
+		}
+
+		query.fetch().map((EhEquipmentInspectionTasksRecord record) -> {
+			result.add(ConvertHelper.convert(record, EquipmentInspectionTasks.class));
+			return null;
+		});
+
+
+		return result;
+	}
 }

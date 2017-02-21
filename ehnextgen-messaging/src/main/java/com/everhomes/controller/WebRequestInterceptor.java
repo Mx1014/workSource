@@ -13,6 +13,8 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.contentserver.ContentServer;
+import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
@@ -58,6 +60,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	private static final String SIGN_APP_KEY = "sign.appKey";
 	private static final String APP_KEY_NAME = "appKey";
 	private static final int VERSION_UPPERBOUND = 4195330; // 区分4.1.2之前的版本,小于这个数字代表4.1.2以前的版本
+	private static final String HTTP = "http";
+	private static final String HTTPS = "https";
 
 	@Autowired
 	private UserService userService;
@@ -74,6 +78,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     @Autowired
     private MessagingKickoffService kickoffService;
 
+	@Autowired
+	private ContentServerService contentServerService;
 
 	public WebRequestInterceptor() {
 	}
@@ -225,7 +231,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		UserContext context = UserContext.current();
 		VersionRange versionRange = new VersionRange("["+context.getVersion()+","+context.getVersion()+")");
 		if(versionRange.getUpperBound() < VERSION_UPPERBOUND){
-			context.setScheme("http");
+			context.setScheme(HTTP);
 		}else{
 			context.setScheme(userAgents.get("scheme"));
 		}
@@ -336,10 +342,21 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		    LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
 		}
 		if(scheme == null || scheme.isEmpty()){
-			scheme = "https";
+			try {
+				ContentServer server = contentServerService.selectContentServer();
+				Integer port = server.getPublicPort();
+				if(80 == port || 443 == port){
+					scheme = HTTPS;
+				}else{
+					scheme = HTTP;
+				}
+			} catch (Exception e) {
+				LOGGER.error("Get user agent. Failed to find content server", e);
+				scheme = HTTP;
+				return null;
+			}
 		}
 		map.put("scheme", scheme);
-
 		return map;
 	}
 

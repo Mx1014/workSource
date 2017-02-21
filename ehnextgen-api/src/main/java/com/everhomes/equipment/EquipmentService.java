@@ -118,4 +118,5 @@ public interface EquipmentService {
 	ListEquipmentTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
 	
 	StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd);
+	void sendTaskMsg();
 }

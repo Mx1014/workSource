@@ -107,26 +107,21 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
 
     @Override
     public List<EnergyMeterReadingLog> listMeterReadingLogByDate(Long meterId, Timestamp startBegin, Timestamp endBegin) {
-    	 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+    	 DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
 
          SelectQuery<EhEnergyMeterReadingLogsRecord> query = context.selectQuery(Tables.EH_ENERGY_METER_READING_LOGS);
  
          query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(meterId)); 
          query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.CREATE_TIME.between(startBegin , endBegin)); 
-         query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode())); 
-         List<EnergyMeterReadingLog> objs = query.fetch().map((r) -> {
-             return ConvertHelper.convert(r, EnergyMeterReadingLog.class);
-         });
-         if(objs == null || objs.size() == 0)
-        	 return null;
-         return objs;
+         query.addConditions(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
+        return query.fetch().map((r) -> ConvertHelper.convert(r, EnergyMeterReadingLog.class));
     }
 
     @Override
     public EnergyMeterReadingLog getLastMeterReadingLogByDate(Long id, Timestamp startBegin, Timestamp endBegin) {
     	try {
             EnergyMeterReadingLog[] result = new EnergyMeterReadingLog[1];
-            DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
+            DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readOnly());
             SelectConditionStep<Record> step =  context.select().from(Tables.EH_ENERGY_METER_READING_LOGS)
             .where(Tables.EH_ENERGY_METER_READING_LOGS.METER_ID.eq(id))
             .and(Tables.EH_ENERGY_METER_READING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()));
@@ -139,10 +134,10 @@ public class EnergyMeterReadingLogProviderImpl implements EnergyMeterReadingLogP
                 });
 
             return result[0];
-            } catch (Exception ex) {
-                //fetchAny() maybe return null
-                return null;
-            }
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
     }
 
     @Override

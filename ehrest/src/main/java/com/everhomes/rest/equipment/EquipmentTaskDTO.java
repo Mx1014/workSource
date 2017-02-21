@@ -67,6 +67,10 @@ public class EquipmentTaskDTO {
 	private String ownerType;
 	
 	private Long ownerId;
+
+	private String targetType;
+
+	private Long targetId;
 	
 	private Byte taskType;
 	
@@ -210,6 +214,22 @@ public class EquipmentTaskDTO {
 
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
+	}
+
+	public String getTargetType() {
+		return targetType;
+	}
+
+	public void setTargetType(String targetType) {
+		this.targetType = targetType;
+	}
+
+	public Long getTargetId() {
+		return targetId;
+	}
+
+	public void setTargetId(Long targetId) {
+		this.targetId = targetId;
 	}
 
 	public Byte getTaskType() {

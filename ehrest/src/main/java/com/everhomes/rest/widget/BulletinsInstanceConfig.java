@@ -13,6 +13,8 @@ public class BulletinsInstanceConfig implements Serializable  {
 
     private String itemGroup;
 
+	private Integer rowCount;
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -27,4 +29,15 @@ public class BulletinsInstanceConfig implements Serializable  {
 		this.itemGroup = itemGroup;
 	}
 
+	public static long getSerialVersionUID() {
+		return serialVersionUID;
+	}
+
+	public Integer getRowCount() {
+		return rowCount;
+	}
+
+	public void setRowCount(Integer rowCount) {
+		this.rowCount = rowCount;
+	}
 }
