@@ -244,6 +244,11 @@ class PmTaskCommonServiceImpl {
         task.setUnprocessedTime(now);
         task.setCreatorUid(user.getId());
         task.setCreateTime(now);
+        //代发，设置创建者为被代发的人（如果是注册用户）userId
+        if (null != cmd.getOrganizationId() && null != requestorUid) {
+            task.setCreatorUid(requestorUid);
+            task.setOrganizationUid(user.getId());
+        }
         if(null != cmd.getReserveTime())
             task.setReserveTime(new Timestamp(cmd.getReserveTime()));
         task.setPriority(cmd.getPriority());

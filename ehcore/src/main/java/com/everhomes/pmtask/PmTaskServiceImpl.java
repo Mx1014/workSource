@@ -547,10 +547,9 @@ public class PmTaskServiceImpl implements PmTaskService {
 		//黑名单权限校验 by sfyan20161213
 		checkBlacklist(null, null);
 
-		User user = UserContext.current().getUser();
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 		cmd.setSourceType(PmTaskSourceType.APP.getCode());
-		
+
+		User user = UserContext.current().getUser();
 		Integer namespaceId = user.getNamespaceId();
 		
 		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
@@ -562,8 +561,30 @@ public class PmTaskServiceImpl implements PmTaskService {
 		}
 		
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-		
-		return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
+
+		if (null == cmd.getOrganizationId()) {
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			return handler.createTask(cmd, user.getId(), user.getNickName(), userIdentifier.getIdentifierToken());
+		}else {
+			String requestorPhone = cmd.getRequestorPhone();
+			String requestorName = cmd.getRequestorName();
+			if(StringUtils.isBlank(requestorPhone)){
+				LOGGER.error("RequestorPhone cannot be null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"RequestorPhone cannot be null.");
+			}
+			if(StringUtils.isBlank(requestorName)){
+				LOGGER.error("RequestorName cannot be null.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+						"RequestorName cannot be null.");
+			}
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(user.getNamespaceId(), requestorPhone);
+			Long requestorUid = null;
+			if (null != userIdentifier) {
+				requestorUid = userIdentifier.getOwnerUid();
+			}
+			return handler.createTask(cmd, requestorUid, requestorName, requestorPhone);
+		}
 	}
 	
 	@Override
