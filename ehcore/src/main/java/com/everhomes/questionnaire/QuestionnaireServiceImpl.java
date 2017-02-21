@@ -520,12 +520,13 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 
 	@Override
 	public CreateTargetQuestionnaireResponse createTargetQuestionnaire(CreateTargetQuestionnaireCommand cmd) {
+		final Timestamp currentTime = new Timestamp(DateHelper.currentGMTTime().getTime());
 		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_QUESTIONNAIRE.getCode() + cmd.getTargetType() +"_" + cmd.getTargetId() + "_" + cmd.getQuestionnaire().getId()).enter(()->{
 			checkCreateTargetQuestionnaireParameters(cmd);  //防止重复提交，检查放这儿
 			dbProvider.execute(s->{
 				for (QuestionnaireQuestionDTO questionDTO : cmd.getQuestionnaire().getQuestions()) {
 					for (QuestionnaireOptionDTO optionDTO : questionDTO.getOptions()) {
-						createQuestionnaireAnswer(cmd.getQuestionnaire(), questionDTO, optionDTO, cmd.getTargetType(), cmd.getTargetId());
+						createQuestionnaireAnswer(cmd.getQuestionnaire(), questionDTO, optionDTO, cmd.getTargetType(), cmd.getTargetId(), currentTime);
 						updateOptionCheckedCount(optionDTO.getId());
 					}
 				}
@@ -557,7 +558,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 	}
 
 	private void createQuestionnaireAnswer(QuestionnaireDTO questionnaireDTO, QuestionnaireQuestionDTO questionDTO,
-			QuestionnaireOptionDTO optionDTO, String targetType, Long targetId) {
+			QuestionnaireOptionDTO optionDTO, String targetType, Long targetId, Timestamp currentTime) {
 		QuestionnaireAnswer answer = new QuestionnaireAnswer();
 		answer.setQuestionnaireId(questionnaireDTO.getId());
 		answer.setQuestionId(questionDTO.getId());
@@ -566,6 +567,7 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		answer.setTargetId(targetId);
 		answer.setTargetName(getTargetName(targetType, targetId));
 		answer.setOptionContent(optionDTO.getOptionContent());
+		answer.setCreateTime(currentTime);
 		questionnaireAnswerProvider.createQuestionnaireAnswer(answer);
 	}
 

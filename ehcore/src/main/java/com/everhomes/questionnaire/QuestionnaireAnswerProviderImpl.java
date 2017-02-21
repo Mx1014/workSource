@@ -1,7 +1,6 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
-import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
@@ -20,7 +19,6 @@ import com.everhomes.server.schema.tables.daos.EhQuestionnaireAnswersDao;
 import com.everhomes.server.schema.tables.pojos.EhQuestionnaireAnswers;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
 import com.everhomes.util.RecordHelper;
 
 @Component
@@ -36,7 +34,7 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 	public void createQuestionnaireAnswer(QuestionnaireAnswer questionnaireAnswer) {
 		Long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhQuestionnaireAnswers.class));
 		questionnaireAnswer.setId(id);
-		questionnaireAnswer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//		questionnaireAnswer.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		questionnaireAnswer.setCreatorUid(UserContext.current().getUser().getId());
 		getReadWriteDao().insert(questionnaireAnswer);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQuestionnaireAnswers.class, null);
@@ -65,6 +63,7 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 	@Override
 	public List<QuestionnaireAnswer> listQuestionnaireTarget(Long questionnaireId, String keywords, int pageAnchor,
 			int pageSize) {
+		keywords = keywords == null ? "" : keywords;
 		return getReadOnlyContext().selectDistinct(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID, Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE, 
 				Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_NAME, Tables.EH_QUESTIONNAIRE_ANSWERS.CREATE_TIME)
 		.from(Tables.EH_QUESTIONNAIRE_ANSWERS)
