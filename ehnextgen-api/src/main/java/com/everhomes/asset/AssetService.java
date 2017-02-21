@@ -16,9 +16,9 @@ public interface AssetService {
     ListSimpleAssetBillsResponse listSimpleAssetBills(ListSimpleAssetBillsCommand cmd);
     HttpServletResponse exportAssetBills(ListSimpleAssetBillsCommand cmd,HttpServletResponse response);
     ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId);
-    AssetBillDTO creatAssetBill(CreatAssetBillCommand cmd);
-    AssetBillDTO findAssetBill(FindAssetBillCommand cmd);
-    AssetBillDTO updateAssetBill(UpdateAssetBillCommand cmd);
+    AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd);
+    AssetBillTemplateValueDTO findAssetBill(FindAssetBillCommand cmd);
+    AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
     void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
     void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
     List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);

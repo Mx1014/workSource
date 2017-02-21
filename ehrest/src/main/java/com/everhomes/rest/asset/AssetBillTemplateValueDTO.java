@@ -1,27 +1,19 @@
 package com.everhomes.rest.asset;
 
-import com.everhomes.util.StringHelper;
-
 import javax.validation.constraints.NotNull;
 
 /**
  * <ul>
  *     <li>id: 模板字段id</li>
- *     <li>namespaceId: 域空间id</li>
  *     <li>ownerId：账单所属物业公司id</li>
- *     <li>ownerType：账单模板字段所属物业公司类型</li>
- *     <li>targetId：账单模板字段所属园区id</li>
- *     <li>targetType：账单模板字段所属园区类型</li>
- *     <li>fieldDisplayName:字段展示名</li>
- *     <li>fieldName:字段对应数据库字段名</li>
- *     <li>fieldType:字段类型 参考{@link com.everhomes.rest.asset.FieldType}</li>
- *     <li>fieldCustomName:用户重命名字段值</li>
- *     <li>requiredFlag:能否禁用</li>
- *     <li>defaultOrder:顺序</li>
- *     <li>templateVersion: 模板字段版本号</li>
+ *     <li>ownerType：账单所属物业公司类型</li>
+ *     <li>targetId：账单所属园区id</li>
+ *     <li>targetType：账单所属园区类型</li>
+ *
+ *     <li>templateVersion: 版本号</li>
  * </ul>
  */
-public class AssetBillTemplateFieldDTO {
+public class AssetBillTemplateValueDTO {
 
     private Long id;
 
@@ -45,13 +37,7 @@ public class AssetBillTemplateFieldDTO {
 
     private String fieldType;
 
-    private String fieldCustomName;
-
-    private Byte requiredFlag;
-
-    private Integer defaultOrder;
-
-    private Long templateVersion;
+    private String fieldValue;
 
     public Long getId() {
         return id;
@@ -125,41 +111,11 @@ public class AssetBillTemplateFieldDTO {
         this.fieldType = fieldType;
     }
 
-    public String getFieldCustomName() {
-        return fieldCustomName;
+    public String getFieldValue() {
+        return fieldValue;
     }
 
-    public void setFieldCustomName(String fieldCustomName) {
-        this.fieldCustomName = fieldCustomName;
+    public void setFieldValue(String fieldValue) {
+        this.fieldValue = fieldValue;
     }
-
-    public Byte getRequiredFlag() {
-        return requiredFlag;
-    }
-
-    public void setRequiredFlag(Byte requiredFlag) {
-        this.requiredFlag = requiredFlag;
-    }
-
-    public Integer getDefaultOrder() {
-        return defaultOrder;
-    }
-
-    public void setDefaultOrder(Integer defaultOrder) {
-        this.defaultOrder = defaultOrder;
-    }
-
-    public Long getTemplateVersion() {
-        return templateVersion;
-    }
-
-    public void setTemplateVersion(Long templateVersion) {
-        this.templateVersion = templateVersion;
-    }
-
-    @Override
-    public String toString() {
-        return StringHelper.toJsonString(this);
-    }
-
 }

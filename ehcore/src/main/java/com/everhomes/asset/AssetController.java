@@ -106,10 +106,10 @@ public class AssetController extends ControllerBase {
 	 * <p>新增账单</p>
 	 */
 	@RequestMapping("creatAssetBill")
-	@RestReturn(value = AssetBillDTO.class)
+	@RestReturn(value = AssetBillTemplateValueDTO.class)
 	public RestResponse creatAssetBill(@Valid CreatAssetBillCommand cmd) {
 
-        AssetBillDTO bill = assetService.creatAssetBill(cmd);
+        AssetBillTemplateValueDTO bill = assetService.creatAssetBill(cmd);
 
 		RestResponse response = new RestResponse(bill);
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -122,10 +122,10 @@ public class AssetController extends ControllerBase {
      * <p>查看账单</p>
      */
     @RequestMapping("findAssetBill")
-    @RestReturn(value = AssetBillDTO.class)
+    @RestReturn(value = AssetBillTemplateValueDTO.class)
     public RestResponse findAssetBill(@Valid FindAssetBillCommand cmd) {
 
-        AssetBillDTO bill = assetService.findAssetBill(cmd);
+        AssetBillTemplateValueDTO bill = assetService.findAssetBill(cmd);
 
         RestResponse response = new RestResponse(bill);
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -138,10 +138,10 @@ public class AssetController extends ControllerBase {
      * <p>编辑账单</p>
      */
     @RequestMapping("updateAssetBill")
-    @RestReturn(value = AssetBillDTO.class)
+    @RestReturn(value = AssetBillTemplateValueDTO.class)
     public RestResponse updateAssetBill(@Valid UpdateAssetBillCommand cmd) {
 
-        AssetBillDTO bill = assetService.updateAssetBill(cmd);
+        AssetBillTemplateValueDTO bill = assetService.updateAssetBill(cmd);
 
         RestResponse response = new RestResponse(bill);
         response.setErrorCode(ErrorCodes.SUCCESS);
