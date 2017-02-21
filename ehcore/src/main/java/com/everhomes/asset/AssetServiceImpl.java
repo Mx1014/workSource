@@ -25,7 +25,8 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
-        return null;
+        List<AssetBillTemplateFieldDTO> dtos = assetProvider.findLastVersionTemplateField(cmd.getOwnerId(),cmd.getOwnerType(),cmd.getTargetId(),cmd.getTargetType());
+        return dtos;
     }
 
     @Override
@@ -59,10 +60,15 @@ public class AssetServiceImpl implements AssetService {
         bill.setPeriodUnpaidAccountAmount(bill.getPeriodAccountAmount());
         assetProvider.creatAssetBill(bill);
 
-        AssetBillTemplateValueDTO dto = ConvertHelper.convert(bill, AssetBillTemplateValueDTO.class);
+        FindAssetBillCommand command = new FindAssetBillCommand();
+        command.setId(bill.getId());
+        command.setOwnerId(bill.getOwnerId());
+        command.setOwnerType(bill.getOwnerType());
+        command.setTargetId(bill.getTargetId());
+        command.setTargetType(bill.getTargetType());
+        AssetBillTemplateValueDTO dto = findAssetBill(command);
 
-
-        return null;
+        return dto;
     }
 
     @Override

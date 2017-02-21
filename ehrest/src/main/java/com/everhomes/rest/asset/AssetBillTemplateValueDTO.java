@@ -1,6 +1,10 @@
 package com.everhomes.rest.asset;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.util.StringHelper;
+
 import javax.validation.constraints.NotNull;
+import java.util.List;
 
 /**
  * <ul>
@@ -9,7 +13,7 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerType：账单所属物业公司类型</li>
  *     <li>targetId：账单所属园区id</li>
  *     <li>targetType：账单所属园区类型</li>
- *
+ *     <li>targetType：账单所属园区类型</li>
  *     <li>templateVersion: 版本号</li>
  * </ul>
  */
@@ -31,13 +35,10 @@ public class AssetBillTemplateValueDTO {
     @NotNull
     private String targetType;
 
-    private String fieldDisplayName;
+    private Long templateVersion;
 
-    private String fieldName;
-
-    private String fieldType;
-
-    private String fieldValue;
+    @ItemType(FieldValueDTO.class)
+    private List<FieldValueDTO> dtos;
 
     public Long getId() {
         return id;
@@ -87,35 +88,8 @@ public class AssetBillTemplateValueDTO {
         this.targetType = targetType;
     }
 
-    public String getFieldDisplayName() {
-        return fieldDisplayName;
-    }
-
-    public void setFieldDisplayName(String fieldDisplayName) {
-        this.fieldDisplayName = fieldDisplayName;
-    }
-
-    public String getFieldName() {
-        return fieldName;
-    }
-
-    public void setFieldName(String fieldName) {
-        this.fieldName = fieldName;
-    }
-
-    public String getFieldType() {
-        return fieldType;
-    }
-
-    public void setFieldType(String fieldType) {
-        this.fieldType = fieldType;
-    }
-
-    public String getFieldValue() {
-        return fieldValue;
-    }
-
-    public void setFieldValue(String fieldValue) {
-        this.fieldValue = fieldValue;
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

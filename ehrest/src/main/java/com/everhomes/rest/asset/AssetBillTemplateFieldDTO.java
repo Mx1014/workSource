@@ -17,6 +17,7 @@ import javax.validation.constraints.NotNull;
  *     <li>fieldType:字段类型 参考{@link com.everhomes.rest.asset.FieldType}</li>
  *     <li>fieldCustomName:用户重命名字段值</li>
  *     <li>requiredFlag:能否禁用</li>
+ *     <li>selectedFlag:是否启用</li>
  *     <li>defaultOrder:顺序</li>
  *     <li>templateVersion: 模板字段版本号</li>
  * </ul>
@@ -48,6 +49,8 @@ public class AssetBillTemplateFieldDTO {
     private String fieldCustomName;
 
     private Byte requiredFlag;
+
+    private Byte selectedFlag;
 
     private Integer defaultOrder;
 
@@ -139,6 +142,14 @@ public class AssetBillTemplateFieldDTO {
 
     public void setRequiredFlag(Byte requiredFlag) {
         this.requiredFlag = requiredFlag;
+    }
+
+    public Byte getSelectedFlag() {
+        return selectedFlag;
+    }
+
+    public void setSelectedFlag(Byte selectedFlag) {
+        this.selectedFlag = selectedFlag;
     }
 
     public Integer getDefaultOrder() {
