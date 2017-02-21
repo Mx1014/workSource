@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.questionnaire;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
@@ -55,6 +56,7 @@ import com.everhomes.rest.questionnaire.QuestionnaireTargetType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 
@@ -340,7 +342,9 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaire.setQuestionnaireName(questionnaireDTO.getQuestionnaireName());
 		questionnaire.setDescription(questionnaireDTO.getDescription());
 		questionnaire.setStatus(questionnaireDTO.getStatus());
-		questionnaire.setPublishTime(questionnaireDTO.getPublishTime());
+		if (QuestionnaireStatus.fromCode(questionnaireDTO.getStatus()) == QuestionnaireStatus.ACTIVE) {
+			questionnaire.setPublishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		}
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 
