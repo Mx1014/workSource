@@ -116,7 +116,9 @@
 			"owner_id": 1,
 			"questionnaire_name": "第一份问卷",
 			"description": "我是第一份问卷",
-			"status": 1,
+			"collection_count": 1,
+			"status": 2,
+			"publish_time": "2017-02-20 17:10:34",
 			"creator_uid": 11,
 			"create_time": "2017-02-20 17:10:33",
 			"update_time": "2017-02-20 17:10:33",
@@ -130,8 +132,7 @@
 			"questionnaire_name": "第一份问卷",
 			"description": "我是第一份问卷",
 			"collection_count": 2,
-			"status": 2,
-			"publish_time": "2017-02-20 17:10:34",
+			"status": 1,
 			"creator_uid": 11,
 			"create_time": "2017-02-20 17:10:34",
 			"update_time": "2017-02-20 17:10:34",
@@ -234,6 +235,7 @@
 			"questionnaire_id": 113,
 			"question_id": 113,
 			"option_name": "选项1",
+			"checked_count": 1,
 			"creator_uid": 11,
 			"create_time": "2017-02-20 17:10:33"
 		},
@@ -355,6 +357,65 @@
 			"option_uri": "http://beta-cs.zuolin.com:80/image/aW1hZ2UvTVRvelkyTmpZelptWmpRME9UZG1PV1U1TXpJeU1HRTNZekV6TkRBeE9XRXhPQQ?token=2JdRW4GairgBo3qPkaDDMcJv4vhu8vU-POfRazGZEzes_udZWepmGMDY7SgjhNvBmt9M5AX9Y-IX7hHEdaExVpumxa768JSlFlhF-oSLyuY",
 			"creator_uid": 11,
 			"create_time": "2017-02-20 17:10:33"
+		}
+	],
+	"eh_questionnaire_answers":
+	[
+		{
+			"id": 3,
+			"questionnaire_id": 113,
+			"question_id": 113,
+			"option_id": 113,
+			"target_type": "organization",
+			"target_id": 2,
+			"target_name": "龙悦居物业管理处",
+			"creator_uid": 11,
+			"create_time": "2017-02-21 09:51:11"
+		},
+		{
+			"id": 4,
+			"questionnaire_id": 113,
+			"question_id": 114,
+			"option_id": 117,
+			"target_type": "organization",
+			"target_id": 2,
+			"target_name": "龙悦居物业管理处",
+			"creator_uid": 11,
+			"create_time": "2017-02-21 09:51:11"
+		},
+		{
+			"id": 5,
+			"questionnaire_id": 113,
+			"question_id": 115,
+			"option_id": 119,
+			"target_type": "organization",
+			"target_id": 2,
+			"target_name": "龙悦居物业管理处",
+			"creator_uid": 11,
+			"create_time": "2017-02-21 09:51:11"
+		},
+		{
+			"id": 6,
+			"questionnaire_id": 113,
+			"question_id": 116,
+			"option_id": 1113,
+			"target_type": "organization",
+			"target_id": 2,
+			"target_name": "龙悦居物业管理处",
+			"creator_uid": 11,
+			"create_time": "2017-02-21 09:51:11"
+		},
+		{
+			"id": 7,
+			"questionnaire_id": 113,
+			"question_id": 117,
+			"option_id": 1115,
+			"target_type": "organization",
+			"target_id": 2,
+			"target_name": "龙悦居物业管理处",
+			"option_content": "我是填空题答案，哈哈~~",
+			"creator_uid": 11,
+			"create_time": "2017-02-21 09:51:11"
 		}
 	]
 }

@@ -5,6 +5,7 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -98,10 +99,15 @@ public class QuestionnaireAnswerProviderImpl implements QuestionnaireAnswerProvi
 
 	@Override
 	public QuestionnaireAnswer findAnyAnswerByTarget(Long questionnaireId, String targetType, Long targetId) {
-		return getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
+		Record record = getReadOnlyContext().select().from(Tables.EH_QUESTIONNAIRE_ANSWERS)
 				.where(Tables.EH_QUESTIONNAIRE_ANSWERS.QUESTIONNAIRE_ID.eq(questionnaireId))
-				.fetchAny()
-				.map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_TYPE.eq(targetType))
+				.and(Tables.EH_QUESTIONNAIRE_ANSWERS.TARGET_ID.eq(targetId))
+				.fetchAny();
+		if (record != null) {
+			return record.map(r -> ConvertHelper.convert(r, QuestionnaireAnswer.class));
+		}
+		return null;
 	}
 
 	@Override

@@ -86,7 +86,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.where(Tables.EH_QUESTIONNAIRES.NAMESPACE_ID.eq(namespaceId))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
-				.and(Tables.EH_QUESTIONNAIRES.STATUS.ne(QuestionnaireStatus.INACTIVE.getCode()))
+				.and(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
 				.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.lt(new Timestamp(pageAnchor==null?Long.MAX_VALUE:pageAnchor)))
 				.orderBy(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc())
 				.limit(pageSize)
