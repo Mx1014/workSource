@@ -3133,6 +3133,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 				}
 			}
 		}
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("listUserRelateGroups, groupDtos = {}" , groupDtos);
+		}
 		return groupDtos;
 	}
 	
