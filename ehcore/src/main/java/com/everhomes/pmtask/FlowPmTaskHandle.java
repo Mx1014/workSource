@@ -59,8 +59,8 @@ class FlowPmTaskHandle implements PmTaskHandle {
 		PmTask task1 = dbProvider.execute((TransactionStatus status) -> {
 			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, requestorName, requestorPhone);
 			//新建flowcase
-			User user = UserContext.current().getUser();
-			Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), FlowConstants.PM_TASK_MODULE,
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
 					FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
 			if(null == flow) {
 				LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
@@ -68,7 +68,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 						"Enable pmtask flow not found.");
 			}
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-			createFlowCaseCommand.setApplyUserId(user.getId());
+			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
 			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());
@@ -93,7 +93,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	public void cancelTask(CancelTaskCommand cmd) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
-		//为科兴与一碑对接
+		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983) {
 			
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
