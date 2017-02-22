@@ -1780,16 +1780,6 @@ public class PmTaskServiceImpl implements PmTaskService {
 				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
 						"Not privilege");
 			}
-
-			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
-
-			User user = UserContext.current().getUser();
-
-			if (!resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
-				LOGGER.error("Not privilege", cmd);
-				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
-						"Not privilege");
-			}
 		}else {
 			checkOrganizationId(cmd.getOrganizationId());
 		}
@@ -1801,8 +1791,21 @@ public class PmTaskServiceImpl implements PmTaskService {
 		listUserRelatedProjectByModuleIdCommand.setModuleId(FlowConstants.PM_TASK_MODULE);
 		
 		List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
-		
-		response.setCommunities(dtos);
+
+		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+			User user = UserContext.current().getUser();
+			List<CommunityDTO> result = new ArrayList<>();
+			dtos.forEach(r -> {
+				if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
+					result.add(r);
+				}
+			});
+			response.setCommunities(result);
+
+		}else{
+			response.setCommunities(dtos);
+		}
 		return response;
 	}
 
