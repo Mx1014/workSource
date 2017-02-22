@@ -848,10 +848,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		if(standardIds != null) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds);
-			con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
+			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
 			Condition con5 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.OPERATOR_ID.eq(UserContext.current().getUser().getId());
-			con5 = con5.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
+			con5 = con5.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
 
 			con4 = con4.or(con5);
 			query.addConditions(con4);
@@ -1863,6 +1863,11 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         
         query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.GROUP_TYPE.eq(groupType));
         query.addConditions(con);
+
+		if(LOGGER.isDebugEnabled()) {
+			LOGGER.debug("listEquipmentInspectionStandardGroupMapByGroupAndPosition, sql=" + query.getSQL());
+			LOGGER.debug("listEquipmentInspectionStandardGroupMapByGroupAndPosition, bindValues=" + query.getBindValues());
+		}
         query.fetch().map((r) -> {
         	maps.add(ConvertHelper.convert(r, EquipmentInspectionStandardGroupMap.class));
              return null;
