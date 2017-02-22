@@ -121,8 +121,12 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
             this.processSourceName(applyEntry);
             map.put("sourceType", defaultIfNull(applyEntry.getSourceName(), ""));
             map.put("description", defaultIfNull(applyEntry.getDescription(), ""));
-
-            String jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
+            
+            String jsonStr = "";
+            if(null != applyEntry.getAreaSize())
+            	jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_CODE, locale, map, "[]");
+            else
+            	jsonStr = localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE, ExpansionLocalStringCode.FLOW_DETAIL_CONTENT_NOAREA_CODE, locale, map, "[]");
             return (FlowCaseEntityList) StringHelper.fromJsonString(jsonStr, FlowCaseEntityList.class);
         } else {
             LOGGER.warn("Not found EhEnterpriseOpRequests instance for flowCase: {}", StringHelper.toJsonString(flowCase));
