@@ -541,13 +541,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
         flowCaseCmd.setApplyUserId(request.getApplyUserId());
         flowCaseCmd.setReferId(request.getId());
+        // flowCase摘要内容
+        flowCaseCmd.setContent(this.getBriefContent(request));
         flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
         if (flow != null) {
             flowCaseCmd.setFlowMainId(flow.getFlowMainId());
             flowCaseCmd.setFlowVersion(flow.getFlowVersion());
            
-            // flowCase摘要内容
-            flowCaseCmd.setContent(this.getBriefContent(request));
 
             return flowService.createFlowCase(flowCaseCmd);
         } else {
