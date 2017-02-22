@@ -567,11 +567,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
         String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, request.getApplyType() + "", locale, "");
-        map.put("applyType", applyType);
-        map.put("areaSize", request.getAreaSize());
+        map.put("applyType", defaultIfNull(applyType,""));
+        map.put("areaSize", defaultIfNull(request.getAreaSize(),""));
 
         return localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE,
                 ExpansionLocalStringCode.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
+    }
+
+    private Object defaultIfNull(Object obj, Object defaultValue) {
+        return obj != null ? obj : defaultValue;
     }
 
     /**
