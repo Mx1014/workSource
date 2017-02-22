@@ -10,10 +10,13 @@ import java.util.List;
 public interface AssetProvider {
 
     void creatAssetBill(AssetBill bill);
+    void updateAssetBill(AssetBill bill);
     AssetBill findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType);
 
-    List<AssetBillTemplateFieldDTO> findLastVersionTemplateField(Long ownerId, String ownerType, Long targetId, String targetType);
     List<AssetBillTemplateFieldDTO> findTemplateFieldByTemplateVersion(Long ownerId, String ownerType, Long targetId, String targetType, Long templateVersion);
+    Long getTemplateVersion(Long ownerId, String ownerType, Long targetId, String targetType);
+
+    void creatTemplateField(AssetBillTemplateFields field);
 
 
 }

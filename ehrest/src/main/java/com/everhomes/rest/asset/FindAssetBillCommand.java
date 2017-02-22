@@ -11,6 +11,7 @@ import javax.validation.constraints.NotNull;
  *     <li>ownerType：账单所属物业公司类型</li>
  *     <li>targetId：账单所属园区id</li>
  *     <li>targetType：账单所属园区类型</li>
+ *     <li>templateVersion: 版本号</li>
  * </ul>
  */
 public class FindAssetBillCommand {
@@ -28,6 +29,8 @@ public class FindAssetBillCommand {
 
     @NotNull
     private String targetType;
+
+    private Long templateVersion;
 
     public Long getId() {
         return id;
@@ -67,6 +70,14 @@ public class FindAssetBillCommand {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public Long getTemplateVersion() {
+        return templateVersion;
+    }
+
+    public void setTemplateVersion(Long templateVersion) {
+        this.templateVersion = templateVersion;
     }
 
     @Override
