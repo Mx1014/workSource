@@ -350,6 +350,27 @@ UPDATE `eh_launch_pad_layouts` SET `version_code` = 2017022001, `layout_json` = 
 update eh_locale_templates set text = 29478 where code = 10 and namespace_id = 999992 and scope = 'sms.default.yzx';
 update eh_locale_templates set text = 29479 where code = 11 and namespace_id = 999992 and scope = 'sms.default.yzx';
 
+-- 园区配套 item配置修改 add by sfyan 20170221
+SET @eh_service_alliance_skip_rule = (SELECT max(id) FROM `eh_service_alliance_skip_rule`);
+INSERT INTO `eh_service_alliance_skip_rule` (`id`, `namespace_id`, `service_alliance_category_id`) VALUES ((@eh_service_alliance_skip_rule := @eh_service_alliance_skip_rule + 1), '999986', '60');
+UPDATE eh_launch_pad_items SET action_data = REPLACE(action_data,'"displayType": "grid"}','"displayType": "list"}') WHERE namespace_id = 999986 AND item_label = '园区配套';
 
+-- 华润OE 图书馆 item配置修改 add by sfyan 20170222
+SET @item_id = (SELECT MAX(id) FROM `eh_launch_pad_items`);
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) values((@item_id := @item_id + 1),'999985','0','0','0','/association','TabGroup','OE图书馆','OE图书馆','','1','1','2','{"itemLocation":"/association/ad","layoutName":"libraryLayout"}','4','0','1','1','','0',NULL,NULL,NULL,'0','pm_admin','1',NULL,'');
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) values((@item_id := @item_id + 1),'999985','0','0','0','/association','TabGroup','OE图书馆','OE图书馆','','1','1','2','{"itemLocation":"/association/ad","layoutName":"libraryLayout"}','4','0','1','1','','0',NULL,NULL,NULL,'0','park_tourist','1',NULL,'');
+
+SET @layout_id = (SELECT MAX(id) FROM `eh_launch_pad_layouts`);
+
+insert into `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) values((@layout_id := @layout_id + 1),'999985','libraryLayout','{\"versionCode\":\"2017022201\",\"versionName\":\"4.1.3\",\"layoutName\":\"libraryLayout\",\"displayName\":\"图书馆\",\"groups\":[{\"groupName\":\"图书馆Banner\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"libraryBanner\"},\"style\":\"Gallery\",\"defaultOrder\":1,\"separatorFlag\":0,\"separatorHeight\":0,\"columnCount\": 1,\"editFlag\":0}]}','2017022201','0','2',now(),'pm_admin','0','0','0');
+insert into `eh_launch_pad_layouts` (`id`, `namespace_id`, `name`, `layout_json`, `version_code`, `min_version_code`, `status`, `create_time`, `scene_type`, `scope_code`, `scope_id`, `apply_policy`) values((@layout_id := @layout_id + 1),'999985','libraryLayout','{\"versionCode\":\"2017022201\",\"versionName\":\"4.1.3\",\"layoutName\":\"libraryLayout\",\"displayName\":\"图书馆\",\"groups\":[{\"groupName\":\"图书馆Banner\",\"widget\":\"Navigator\",\"instanceConfig\":{\"itemGroup\":\"libraryBanner\"},\"style\":\"Gallery\",\"defaultOrder\":1,\"separatorFlag\":0,\"separatorHeight\":0,\"columnCount\": 1,\"editFlag\":0}]}','2017022201','0','2',now(),'park_tourist','0','0','0');
+
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) values((@item_id := @item_id + 1),'999985','0','0','0','/association/ad','libraryBanner','','','cs://1/image/aW1hZ2UvTVRvellUVmpOVGcxWkdabU1UUTFaREU0WmpaaFlqbGxaVGMxT0RBMVpqQXpNUQ','1','1','0',NULL,'1','0','1','1','','0',NULL,NULL,NULL,'0','pm_admin','0',NULL,NULL);
+insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) values((@item_id := @item_id + 1),'999985','0','0','0','/association/ad','libraryBanner','','','cs://1/image/aW1hZ2UvTVRvellUVmpOVGcxWkdabU1UUTFaREU0WmpaaFlqbGxaVGMxT0RBMVpqQXpNUQ','1','1','0',NULL,'1','0','1','1','','0',NULL,NULL,NULL,'0','park_tourist','0',NULL,NULL);
+
+-- 科兴 服务广场的item不准删除和添加 add by sfyan 20170222
+UPDATE `eh_launch_pad_items` SET `delete_flag` = 0 WHERE `item_group` = 'Bizs' AND `item_location` = '/home' AND `namespace_id` = 999983;
 
 
