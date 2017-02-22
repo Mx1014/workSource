@@ -371,6 +371,6 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) values((@item_id := @item_id + 1),'999985','0','0','0','/association/ad','libraryBanner','','','cs://1/image/aW1hZ2UvTVRvellUVmpOVGcxWkdabU1UUTFaREU0WmpaaFlqbGxaVGMxT0RBMVpqQXpNUQ','1','1','0',NULL,'1','0','1','1','','0',NULL,NULL,NULL,'0','park_tourist','0',NULL,NULL);
 
 -- 科兴 服务广场的item不准删除和添加 add by sfyan 20170222
-UPDATE `eh_launch_pad_items` SET `item_group` = 'Bizs' AND `item_location` = '/home'  AND `namespace_id` = 999983;
+UPDATE `eh_launch_pad_items` SET `delete_flag` = 0 WHERE `item_group` = 'Bizs' AND `item_location` = '/home' AND `namespace_id` = 999983;
 
 
