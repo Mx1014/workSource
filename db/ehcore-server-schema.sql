@@ -2783,7 +2783,7 @@ CREATE TABLE `eh_equipment_inspection_tasks` (
   `create_time` DATETIME,
   `review_expired_date` DATETIME,
   `inspection_category_id` BIGINT,		
-  `namespace_id` INTEGER,		  PRIMARY KEY (`id`)
+  `namespace_id` INTEGER,
   `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, etc',		
   `target_id` BIGINT NOT NULL DEFAULT 0,		
   `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',		
