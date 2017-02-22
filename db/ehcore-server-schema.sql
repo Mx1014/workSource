@@ -2545,7 +2545,7 @@ CREATE TABLE `eh_equipment_inspection_categories` (
   `create_time` DATETIME,		
   `deletor_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record deleter user id',		
   `delete_time` DATETIME,		
-  PRIMARY KEY (`id`)		  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 设备操作图示表 attachments 及说明书  type区分
