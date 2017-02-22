@@ -6677,7 +6677,7 @@ CREATE TABLE `eh_quality_inspection_tasks` (
   `executive_position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',
   PRIMARY KEY (`id`),		  
   KEY `standard_id` (`standard_id`),		  PRIMARY KEY (`id`)
-  KEY `status` (`status`),		)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `status` (`status`),
   KEY `target_id` (`target_id`),		
   KEY `executive_expire_time` (`executive_expire_time`),		
   KEY `process_expire_time` (`process_expire_time`),		
