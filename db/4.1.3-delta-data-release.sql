@@ -373,4 +373,16 @@ insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 科兴 服务广场的item不准删除和添加 add by sfyan 20170222
 UPDATE `eh_launch_pad_items` SET `delete_flag` = 0 WHERE `item_group` = 'Bizs' AND `item_location` = '/home' AND `namespace_id` = 999983;
 
+-- 科兴 服务广场item的排序 add by sfyan 20170222
+update eh_launch_pad_items set `default_order` = 1 where item_label = "物业查费" and namespace_id = 999983;
+update eh_launch_pad_items set `default_order` = 2 where item_label = "报修" and namespace_id = 999983;
+update eh_launch_pad_items set `default_order` = 3 where item_label = "停车" and namespace_id = 999983;
+update eh_launch_pad_items set `default_order` = 4 where item_label = "通知" and namespace_id = 999983;
+update eh_launch_pad_items set `default_order` = 5 where item_label = "服务热线" and namespace_id = 999983;
+update eh_launch_pad_items set `default_order` = 6 where item_label = "办事指南" and namespace_id = 999983;
+update eh_launch_pad_items set `default_order` = 7, `display_flag` = 0 where item_label = "投诉建议" and namespace_id = 999983;
+
+-- 科兴 服务广场增加item 任务管理 add by sfyan 20170222
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);   
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) VALUES ((@item_id := @item_id + 1), '999983', '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRwaU1tVTJNbUV4Wm1Jd05HRTBZV1F4T0Roa09HUXhNMkUwTldReFpHVXpOUQ', '1', '1', '56', '', '8', '0', '1', '0', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1', NULL, NULL);
 
