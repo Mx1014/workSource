@@ -1364,8 +1364,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment.setOperatorUid(user.getId());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			
-			String tokenString = UUID.randomUUID().toString();
-			equipment.setQrCodeToken(tokenString);
+
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
 			
