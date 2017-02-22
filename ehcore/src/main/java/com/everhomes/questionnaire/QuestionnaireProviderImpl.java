@@ -39,6 +39,9 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		questionnaire.setCreatorUid(UserContext.current().getUser().getId());
 		questionnaire.setUpdateTime(questionnaire.getCreateTime());
 		questionnaire.setOperatorUid(questionnaire.getCreatorUid());
+		if (QuestionnaireStatus.fromCode(questionnaire.getStatus()) == QuestionnaireStatus.ACTIVE) {
+			questionnaire.setPublishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		}
 		getReadWriteDao().insert(questionnaire);
 		DaoHelper.publishDaoAction(DaoAction.CREATE, EhQuestionnaires.class, null);
 	}
@@ -48,6 +51,9 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 		assert (questionnaire.getId() != null);
 		questionnaire.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		questionnaire.setOperatorUid(UserContext.current().getUser().getId());
+		if (QuestionnaireStatus.fromCode(questionnaire.getStatus()) == QuestionnaireStatus.ACTIVE) {
+			questionnaire.setPublishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		}
 		getReadWriteDao().update(questionnaire);
 		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhQuestionnaires.class, questionnaire.getId());
 	}

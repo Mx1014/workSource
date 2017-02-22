@@ -344,9 +344,6 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 		questionnaire.setQuestionnaireName(questionnaireDTO.getQuestionnaireName());
 		questionnaire.setDescription(questionnaireDTO.getDescription());
 		questionnaire.setStatus(questionnaireDTO.getStatus());
-		if (QuestionnaireStatus.fromCode(questionnaireDTO.getStatus()) == QuestionnaireStatus.ACTIVE) {
-			questionnaire.setPublishTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-		}
 		questionnaireProvider.updateQuestionnaire(questionnaire);
 	}
 
