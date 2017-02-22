@@ -1,10 +1,17 @@
 package com.everhomes.asset;
 
 import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
+import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
+import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
+import com.everhomes.util.DateHelper;
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -13,6 +20,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,9 +35,23 @@ public class AssetProviderImpl implements AssetProvider {
     @Autowired
     private DbProvider dbProvider;
 
+    @Autowired
+    private SequenceProvider sequenceProvider;
+
     @Override
     public void creatAssetBill(AssetBill bill) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetBills.class));
 
+        bill.setId(id);
+        bill.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+
+        LOGGER.info("creatAssetBill: " + bill);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetBills.class, id));
+        EhAssetBillsDao dao = new EhAssetBillsDao(context.configuration());
+        dao.insert(bill);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetBills.class, null);
     }
 
     @Override

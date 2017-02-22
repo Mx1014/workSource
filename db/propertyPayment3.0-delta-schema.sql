@@ -43,6 +43,8 @@ CREATE TABLE `eh_asset_bills` (
   `template_version` BIGINT NOT NULL,
   `creator_uid` BIGINT,
   `create_time` DATETIME,
+  `update_uid` BIGINT,
+  `update_time` DATETIME,
   `delete_uid` BIGINT,
   `delete_time` DATETIME,
 
