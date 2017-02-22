@@ -381,6 +381,7 @@ update eh_launch_pad_items set `default_order` = 4 where item_label = "通知" a
 update eh_launch_pad_items set `default_order` = 5 where item_label = "服务热线" and namespace_id = 999983;
 update eh_launch_pad_items set `default_order` = 6 where item_label = "办事指南" and namespace_id = 999983;
 update eh_launch_pad_items set `default_order` = 7, `display_flag` = 0 where item_label = "投诉建议" and namespace_id = 999983;
+update eh_launch_pad_items set `default_order` = 10000 where item_label = "更多" and namespace_id = 999983;
 
 -- 科兴 服务广场增加item 任务管理 add by sfyan 20170222
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);   
