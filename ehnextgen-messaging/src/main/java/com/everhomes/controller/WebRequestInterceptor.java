@@ -341,6 +341,7 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		if(LOGGER.isDebugEnabled()) {
 		    LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
 		}
+		// 当请求没有过nginx的时候scheme为null，则需要根据数据库的content server配置项来决定scheme by sfyan 20170221
 		if(scheme == null || scheme.isEmpty()){
 			try {
 				ContentServer server = contentServerService.selectContentServer();

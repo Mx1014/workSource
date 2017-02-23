@@ -352,6 +352,7 @@ public class ContentServerServiceImpl implements ContentServerService {
     }
 
     private String getScheme(Integer port){
+        //当后台执行任务的时候UserContext.current().getScheme() 为null，则需要根据数据库content server的配置来确定scheme  by sfyan 20170221
         if(null == UserContext.current().getScheme()){
             if(null == port){
                 try {
