@@ -98,21 +98,3 @@ ALTER TABLE eh_equipment_inspection_templates ALTER COLUMN NAME SET DEFAULT '';
 -- 设备-标准关系表新增字段记录最近一次生成任务的时间 add by xiongying20170217
 ALTER TABLE `eh_equipment_inspection_equipment_standard_map` ADD COLUMN `last_create_task_time` DATETIME;
 
-
--- 园区入驻2.4
-ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `contract_id` BIGINT COMMENT 'eh_contracts id';
-
-ALTER TABLE `eh_yellow_pages` ADD COLUMN `building_id` BIGINT COMMENT 'eh_buildings id';
-
---
--- 园区入驻申请的关联楼栋表
---
-CREATE TABLE `eh_enterprise_op_request_buildings` (
-  `id` BIGINT NOT NULL COMMENT 'id of the record',
-  `enterprise_op_requests_id` BIGINT NOT NULL COMMENT 'eh_enterprise_op_requests id',
-  `building_id` BIGINT  COMMENT 'building id ', 
-  `status` TINYINT ,
-  `creator_uid` BIGINT ,
-  `create_time` DATETIME ,
-  PRIMARY KEY (`id`)
-) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 

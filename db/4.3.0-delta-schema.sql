@@ -1,4 +1,22 @@
 
+-- 园区入驻2.4
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `contract_id` BIGINT COMMENT 'eh_contracts id';
+
+ALTER TABLE `eh_yellow_pages` ADD COLUMN `building_id` BIGINT COMMENT 'eh_buildings id';
+
+--
+-- 园区入驻申请的关联楼栋表
+--
+CREATE TABLE `eh_enterprise_op_request_buildings` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `enterprise_op_requests_id` BIGINT NOT NULL COMMENT 'eh_enterprise_op_requests id',
+  `building_id` BIGINT  COMMENT 'building id ', 
+  `status` TINYINT ,
+  `creator_uid` BIGINT ,
+  `create_time` DATETIME ,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
+
 -- 问卷调查表, add by tt, 20170223
 -- DROP TABLE IF EXISTS  `eh_questionnaires`;
 CREATE TABLE `eh_questionnaires` (
@@ -17,7 +35,7 @@ CREATE TABLE `eh_questionnaires` (
   `operator_uid` BIGINT,
 	
   PRIMARY KEY (`id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 题目表, add by tt, 20170223
 -- DROP TABLE IF EXISTS  `eh_questionnaire_questions`;
@@ -31,7 +49,7 @@ CREATE TABLE `eh_questionnaire_questions` (
 	
   PRIMARY KEY (`id`),
   INDEX `i_questionnaire_id` (`questionnaire_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 选项表, add by tt, 20170223
 -- DROP TABLE IF EXISTS  `eh_questionnaire_options`;
@@ -47,7 +65,7 @@ CREATE TABLE `eh_questionnaire_options` (
   
   PRIMARY KEY (`id`),  
   INDEX `i_question_id` (`question_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
 -- 目标选中的选项表, add by tt, 20170223
 -- DROP TABLE IF EXISTS  `eh_questionnaire_answers`;
@@ -68,4 +86,4 @@ CREATE TABLE `eh_questionnaire_answers` (
   INDEX `i_question_id` (`question_id`),
   INDEX `i_option_id` (`option_id`),
   INDEX `i_target` (`target_type`, `target_id`)
-) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
