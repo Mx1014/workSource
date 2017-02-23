@@ -13,6 +13,9 @@ import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.contentserver.ContentServer;
+import com.everhomes.contentserver.ContentServerService;
+import com.everhomes.util.*;
 import org.jooq.tools.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -40,10 +43,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserLogin;
 import com.everhomes.user.UserProvider;
 import com.everhomes.user.UserService;
-import com.everhomes.util.RequireAuthentication;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.WebTokenGenerator;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 
@@ -60,6 +59,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 	private static final String ZUOLIN_APP_KEY = "zuolin.appKey";
 	private static final String SIGN_APP_KEY = "sign.appKey";
 	private static final String APP_KEY_NAME = "appKey";
+	private static final int VERSION_UPPERBOUND = 4195330; // 区分4.1.2之前的版本,小于这个数字代表4.1.2以前的版本
+	private static final String HTTP = "http";
+	private static final String HTTPS = "https";
 
 	@Autowired
 	private UserService userService;
@@ -76,6 +78,8 @@ public class WebRequestInterceptor implements HandlerInterceptor {
     @Autowired
     private MessagingKickoffService kickoffService;
 
+	@Autowired
+	private ContentServerService contentServerService;
 
 	public WebRequestInterceptor() {
 	}
@@ -225,7 +229,13 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
 	private void setupScheme(Map<String, String> userAgents) {
 		UserContext context = UserContext.current();
-		context.setScheme(userAgents.get("scheme"));
+		VersionRange versionRange = new VersionRange("["+context.getVersion()+","+context.getVersion()+")");
+		if(versionRange.getUpperBound() < VERSION_UPPERBOUND){
+			context.setScheme(HTTP);
+		}else{
+			context.setScheme(userAgents.get("scheme"));
+		}
+
 	}
 
 	private void setupVersionContext(Map<String, String> userAgents) {
@@ -331,11 +341,23 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 		if(LOGGER.isDebugEnabled()) {
 		    LOGGER.debug("Strip the scheme from header, X-Forwarded-Scheme={}, scheme={}", scheme, request.getScheme());
 		}
+		// 当请求没有过nginx的时候scheme为null，则需要根据数据库的content server配置项来决定scheme by sfyan 20170221
 		if(scheme == null || scheme.isEmpty()){
-			scheme = "https";
+			try {
+				ContentServer server = contentServerService.selectContentServer();
+				Integer port = server.getPublicPort();
+				if(80 == port || 443 == port){
+					scheme = HTTPS;
+				}else{
+					scheme = HTTP;
+				}
+			} catch (Exception e) {
+				LOGGER.error("Get user agent. Failed to find content server", e);
+				scheme = HTTP;
+				return null;
+			}
 		}
 		map.put("scheme", scheme);
-
 		return map;
 	}
 

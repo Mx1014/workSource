@@ -6,6 +6,8 @@ import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
+import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
@@ -127,4 +129,6 @@ public interface ActivityService {
     ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd);
 
     ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
+
+	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);
 }

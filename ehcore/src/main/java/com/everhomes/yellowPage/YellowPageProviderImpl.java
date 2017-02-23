@@ -312,7 +312,7 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		 
-		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategoriesDao.class));
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceCategories.class));
 		category.setId(id);
 		category.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		category.setCreatorUid(UserContext.current().getUser().getId());

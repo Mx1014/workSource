@@ -12,6 +12,8 @@ import com.everhomes.util.StringHelper;
  *  <li>targetType: 任务所属管理处类型</li>
  *  <li>pageAnchor: 锚点</li>
  *  <li>pageSize: 页面大小</li>
+ *  <li>inspectionCategoryId: 巡检对象类型id</li>
+ *  <li>isReview: 是否查审阅任务</li>
  * </ul>
  */
 public class ListEquipmentTasksCommand {
@@ -28,6 +30,26 @@ public class ListEquipmentTasksCommand {
 	private Long pageAnchor;
 	
 	private Integer pageSize;
+	
+	private Long inspectionCategoryId;
+	
+	private Byte isReview;
+	
+	public Byte getIsReview() {
+		return isReview;
+	}
+
+	public void setIsReview(Byte isReview) {
+		this.isReview = isReview;
+	}
+
+	public Long getInspectionCategoryId() {
+		return inspectionCategoryId;
+	}
+
+	public void setInspectionCategoryId(Long inspectionCategoryId) {
+		this.inspectionCategoryId = inspectionCategoryId;
+	}
 	
 	public Long getOwnerId() {
 		return ownerId;

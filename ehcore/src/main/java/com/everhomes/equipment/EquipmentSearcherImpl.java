@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.techpark.punch.PunchTimeRule;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -56,6 +59,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -144,6 +150,9 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         if(cmd.getCategoryId() != null)
         	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("categoryId", cmd.getCategoryId()));
         
+        if(cmd.getInspectionCategoryId() != null)
+        	fb = FilterBuilders.andFilter(fb, FilterBuilders.termFilter("inspectionCategoryId", cmd.getInspectionCategoryId()));
+        
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         Long anchor = 0l;
         if(cmd.getPageAnchor() != null) {
@@ -173,10 +182,13 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
         	EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(id);
         	if(equipment != null) {
 	        	EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
-	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-	    		if(group != null)
-	    			dto.setTargetName(group.getName());
-	
+//	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+//	    		if(group != null)
+//	    			dto.setTargetName(group.getName());
+                Community community = communityProvider.findCommunityById(dto.getTargetId());
+                if(community != null)
+                    dto.setTargetName(community.getName());
+
 	    		dtos.add(dto);
         	}
         }
@@ -282,6 +294,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
             b.field("status", equipment.getStatus());
             b.field("categoryId", equipment.getCategoryId());
             b.field("name", equipment.getName());
+            b.field("inspectionCategoryId", equipment.getInspectionCategoryId());
 //            b.field("reviewResult", equipment.getReviewResult());
 //            b.field("reviewStatus", equipment.getReviewStatus());
 //            

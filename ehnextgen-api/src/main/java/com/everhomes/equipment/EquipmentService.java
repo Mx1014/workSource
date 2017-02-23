@@ -15,12 +15,15 @@ import com.everhomes.rest.equipment.DeleteEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.DeleteInspectionTemplateCommand;
 import com.everhomes.rest.equipment.EquipmentAccessoriesDTO;
 import com.everhomes.rest.equipment.EquipmentAttachmentDTO;
+import com.everhomes.rest.equipment.EquipmentInspectionCategoryDTO;
 import com.everhomes.rest.equipment.EquipmentParameterDTO;
 import com.everhomes.rest.equipment.EquipmentTaskDTO;
+import com.everhomes.rest.equipment.GetInspectionObjectByQRCodeCommand;
 import com.everhomes.rest.equipment.ImportOwnerCommand;
 import com.everhomes.rest.equipment.InspectionItemDTO;
 import com.everhomes.rest.equipment.InspectionTemplateDTO;
 import com.everhomes.rest.equipment.ListAttachmentsByEquipmentIdCommand;
+import com.everhomes.rest.equipment.ListEquipmentInspectionCategoriesCommand;
 import com.everhomes.rest.equipment.ListEquipmentTasksCommand;
 import com.everhomes.rest.equipment.ListInspectionTemplatesCommand;
 import com.everhomes.rest.equipment.ListParametersByStandardIdCommand;
@@ -28,6 +31,7 @@ import com.everhomes.rest.equipment.ListRelatedOrgGroupsCommand;
 import com.everhomes.rest.equipment.ListTaskByIdCommand;
 import com.everhomes.rest.equipment.ListTasksByEquipmentIdCommand;
 import com.everhomes.rest.equipment.ListTasksByTokenCommand;
+import com.everhomes.rest.equipment.ListUserHistoryTasksCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.SearchEquipmentAccessoriesResponse;
 import com.everhomes.rest.equipment.SearchEquipmentTasksCommand;
@@ -38,6 +42,8 @@ import com.everhomes.rest.equipment.ListLogsByTaskIdCommand;
 import com.everhomes.rest.equipment.ListLogsByTaskIdResponse;
 import com.everhomes.rest.equipment.ReportEquipmentTaskCommand;
 import com.everhomes.rest.equipment.ReviewEquipmentTaskCommand;
+import com.everhomes.rest.equipment.StatEquipmentTasksCommand;
+import com.everhomes.rest.equipment.StatEquipmentTasksResponse;
 import com.everhomes.rest.equipment.UpdateEquipmentAccessoriesCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentCategoryCommand;
 import com.everhomes.rest.equipment.UpdateEquipmentStandardCommand;
@@ -66,7 +72,7 @@ public interface EquipmentService {
 	HttpServletResponse exportEquipmentStandards(SearchEquipmentStandardsCommand cmd,HttpServletResponse response);
 	void reviewEquipmentStandardRelations(ReviewEquipmentStandardRelationsCommand cmd);
 	void deleteEquipmentStandardRelations(DeleteEquipmentStandardRelationsCommand cmd);
-	EquipmentsDTO updateEquipments(UpdateEquipmentsCommand cmd);
+	void updateEquipments(UpdateEquipmentsCommand cmd);
 	void deleteEquipments(DeleteEquipmentsCommand cmd);
 	HttpServletResponse exportEquipments(SearchEquipmentsCommand cmd,HttpServletResponse response);
 	EquipmentAccessoriesDTO updateEquipmentAccessories(UpdateEquipmentAccessoriesCommand cmd);
@@ -105,4 +111,12 @@ public interface EquipmentService {
 	InspectionTemplateDTO findInspectionTemplate(DeleteInspectionTemplateCommand cmd);
 	List<InspectionTemplateDTO> listInspectionTemplates(ListInspectionTemplatesCommand cmd);
 	ListEquipmentTasksResponse listTasksByToken(ListTasksByTokenCommand cmd);
+	
+	List<EquipmentInspectionCategoryDTO> listEquipmentInspectionCategories(ListEquipmentInspectionCategoriesCommand cmd);
+	EquipmentsDTO getInspectionObjectByQRCode(GetInspectionObjectByQRCodeCommand cmd);
+	
+	ListEquipmentTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
+	
+	StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd);
+	void sendTaskMsg();
 }

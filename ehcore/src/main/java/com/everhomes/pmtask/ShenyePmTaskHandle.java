@@ -29,6 +29,8 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -116,6 +118,8 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	private OrganizationProvider organizationProvider;
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
 	
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
@@ -417,8 +421,10 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {
 		if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
 			Address address = addressProvider.findAddressById(task.getAddressId());
-			if(null != address) 
-				dto.setAddress(address.getAddress());
+			if(null != address) {
+				Community community = communityProvider.findCommunityById(address.getCommunityId());
+				dto.setAddress(address.getCityName() + address.getAreaName() + community.getName() + address.getAddress());
+			}
 		}else {
 			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
 			Address address = addressProvider.findAddressById(task.getAddressId());

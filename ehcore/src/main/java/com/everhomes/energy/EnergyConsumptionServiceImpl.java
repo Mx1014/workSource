@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
@@ -10,6 +11,7 @@ import com.everhomes.db.DbProvider;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.mail.MailHandler;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.approval.MeterFormulaVariable;
@@ -42,6 +44,8 @@ import javax.script.ScriptException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+import java.io.ByteArrayOutputStream;
+import java.io.PrintStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Date;
@@ -513,23 +517,25 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public void updateEnergyMeterStatus(UpdateEnergyMeterStatusCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        EnergyMeter meter = this.findMeterById(cmd.getMeterId());
-        meter.setStatus(cmd.getStatus());
-        dbProvider.execute(s -> {
-            meterProvider.updateEnergyMeter(meter);
-            if (EnergyMeterStatus.fromCode(cmd.getStatus()) == EnergyMeterStatus.INACTIVE) {
-                // 删除表记索引
-                meterSearcher.deleteById(meter.getId());
-
-                List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
-                // 1.先删除读表记录的索引
-                logs.forEach(log -> readingLogSearcher.deleteById(log.getId()));
-                // 2.再删除表记对应的读表记录
-                meterReadingLogProvider.deleteMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
-            } else {
-                meterSearcher.feedDoc(meter);
-            }
-            return true;
+        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER.getCode() + cmd.getMeterId()).tryEnter(() -> {
+            EnergyMeter meter = this.findMeterById(cmd.getMeterId());
+            meter.setStatus(cmd.getStatus());
+            dbProvider.execute(s -> {
+                // 1.更新表记状态
+                meterProvider.updateEnergyMeter(meter);
+                if (EnergyMeterStatus.fromCode(cmd.getStatus()) == EnergyMeterStatus.INACTIVE) {
+                    // 2.删除表记对应的读表记录
+                    meterReadingLogProvider.deleteMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
+                    List<EnergyMeterReadingLog> logs = meterReadingLogProvider.listMeterReadingLogsByMeterId(currNamespaceId(), meter.getId());
+                    // 3.删除读表记录的索引
+                    logs.forEach(log -> readingLogSearcher.deleteById(log.getId()));
+                    // 4.删除表记索引
+                    meterSearcher.deleteById(meter.getId());
+                } else {
+                    meterSearcher.feedDoc(meter);
+                }
+                return true;
+            });
         });
     }
 
@@ -845,15 +851,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             if (NumberUtils.isNumber(result.getF())) {
                 meter.setMaxReading(new BigDecimal(result.getF()));
+            } else {
+                LOGGER.error("Import energy meter error, error field meterType");
+                throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field category");
             }
             if (NumberUtils.isNumber(result.getG())) {
                 meter.setStartReading(new BigDecimal(result.getG()));
+            } else {
+                meter.setStartReading(new BigDecimal("0"));
             }
             if (NumberUtils.isNumber(result.getH())) {
                 meter.setPrice(new BigDecimal(result.getH()));
+            } else {
+                meter.setStartReading(new BigDecimal("1"));
             }
             if (NumberUtils.isNumber(result.getI())) {
                 meter.setRate(new BigDecimal(result.getI()));
+            } else {
+                meter.setStartReading(new BigDecimal("1"));
             }
             EnergyMeterFormula formula = meterFormulaProvider.findByName(currNamespaceId(), result.getJ());
             if (formula != null) {
@@ -915,11 +930,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         }
         return sheetContentHandler.getResultList();
     }
+
     /**
      * 获取月份起始日期
-     * @param date
-     * @return
-     * @throws ParseException
      */
     public static Calendar getStartDate(Date date)  {
         Calendar calendar = Calendar.getInstance();
@@ -931,13 +944,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     /**
      * 获取月份最后日期 -如果是本月就取今天
-     * @param date
-     * @return
-     * @throws ParseException
      */
-    public static Calendar getMaxMonthDate(Date date) {
-
-
+    private static Calendar getMaxMonthDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         //本月则就是今天了
         if (monthSF.get().format(date).equals(monthSF.get().format(DateHelper.currentGMTTime()))){
@@ -952,11 +960,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     /**
      * 获取去年12月
-     * @param date
-     * @return
-     * @throws ParseException
      */
-    public static Calendar getYearBeginDate(Date date) {
+    private static Calendar getYearBeginDate(Date date) {
         Calendar calendar = Calendar.getInstance();
         calendar.setTime(date);
         calendar.add(Calendar.YEAR, -1);
@@ -1008,32 +1013,36 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public EnergyStatDTO getEnergyStatByDay(EnergyStatCommand cmd) {
-        //TODO: check cmd
         //查所有符合条件的记录
-
-
         EnergyStatDTO result = new EnergyStatDTO();
-        result.setBillDayStats(new ArrayList<BillStatDTO>());
-        result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+        result.setBillDayStats(new ArrayList<>());
+        result.setDayBurdenStats(new ArrayList<>());
         SimpleDateFormat dateStrSF = new SimpleDateFormat("yyyy年MM月");
         result.setDateStr(dateStrSF.format(new Date(cmd.getStatDate())));
         Community com = this.communityProvider.findCommunityById(cmd.getCommunityId());
-        if(null == com)
+        if (null == com) {
             return null;
+        }
         result.setCommunityName(com.getName());
-        result.setMeterType(EnergyMeterType.WATER.getCode().equals(cmd.getMeterType())?"用水分析"
-                :EnergyMeterType.ELECTRIC.getCode().equals(cmd.getMeterType())?"用电分析":"");
-        Date startDate =new Date(getStartDate(new Date(cmd.getStatDate())).getTime().getTime());
-        Date endDate =new Date(getMaxMonthDate(new Date(cmd.getStatDate())).getTime().getTime());
+        result.setMeterType(EnergyMeterType.fromCode(cmd.getMeterType()) == EnergyMeterType.WATER ? "用水分析"
+                : (EnergyMeterType.fromCode(cmd.getMeterType()) == EnergyMeterType.ELECTRIC ? "用电分析" : ""));
+
+        // 参数日期的开始
+        Date startDate = new Date(getStartDate(new Date(cmd.getStatDate())).getTime().getTime());
+        Date endDate = new Date(getMaxMonthDate(new Date(cmd.getStatDate())).getTime().getTime());
+
         List<EnergyDateStatistic> dayStats = this.energyDateStatisticProvider.listEnergyDateStatistics(cmd.getMeterType(),
-                cmd.getCommunityId(),cmd.getBillCategoryIds(),cmd.getServiceCategoryIds(),startDate,endDate);
+                cmd.getCommunityId(), cmd.getBillCategoryIds(), cmd.getServiceCategoryIds(), startDate, endDate);
+
         Calendar beginCalendar = Calendar.getInstance();
         beginCalendar.setTime(startDate);
+
         Calendar endCalendar = Calendar.getInstance();
         endCalendar.setTime(endDate);
-        int looptimes = 0;
-        result.setDates(new ArrayList<DayStatDTO>());
-        while(beginCalendar.compareTo(endCalendar) <1 ){
+        int loopTimes = 0;
+        result.setDates(new ArrayList<>());
+
+        while(beginCalendar.compareTo(endCalendar) < 1) {
             dateStrSF = new SimpleDateFormat("MM月dd日");
             DayStatDTO date = new DayStatDTO();
             date.setStatDate(new Date(beginCalendar.getTime().getTime()).getTime());
@@ -1041,21 +1050,23 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             result.getDates().add(date);
             //日期增加每一天,循环不能超过33天
             beginCalendar.add(Calendar.DAY_OF_MONTH, 1);
-            if(looptimes ++ > 33)
+            if(loopTimes ++ > 33)
                 break;
         }
+
         //查不到就返回null
         if(null == dayStats)
             return null;
 
-        for(EnergyDateStatistic dayStat : dayStats){
+        for(EnergyDateStatistic dayStat : dayStats) {
             dateStrSF = new SimpleDateFormat("MM月dd日");
             DayStatDTO dayDTO = ConvertHelper.convert(dayStat, DayStatDTO.class);
             dayDTO.setStatDate(dayStat.getStatDate().getTime());
             dayDTO.setDateStr(dateStrSF.format(dayStat.getStatDate()));
+
             //查询是否有项目dto,没有则添加,有则累加用量
-            BillStatDTO billDTO =  findBillDTO(result, dayStat.getBillCategoryId());
-            if(null == billDTO){
+            BillStatDTO billDTO = findBillDTO(result, dayStat.getBillCategoryId());
+            if(null == billDTO) {
                 billDTO = new BillStatDTO();
                 EnergyMeterCategory billCategory = this.meterCategoryProvider.findById(dayStat.getBillCategoryId());
                 billDTO.setBillCategoryId(billCategory.getId());
@@ -1067,10 +1078,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             DayStatDTO dayBillStat = findDayStat(billDTO.getDayBillStats(), dayDTO.getStatDate());
             dayBillStat.setCurrentAmount(dayBillStat.getCurrentAmount().add(dayDTO.getCurrentAmount()));
             dayBillStat.setCurrentCost(dayBillStat.getCurrentCost().add(dayDTO.getCurrentCost()));
-            //查询是否有性质dto,没有则添加,有则累加用量
 
+            //查询是否有性质dto,没有则添加,有则累加用量
             ServiceStatDTO serviceDTO = findServiceStatDTO(billDTO, dayStat.getServiceCategoryId());
-            if(null == serviceDTO){
+            if(null == serviceDTO) {
                 serviceDTO = new ServiceStatDTO();
                 EnergyMeterCategory serviceCategory = this.meterCategoryProvider.findById(dayStat.getServiceCategoryId());
                 serviceDTO.setServiceCategoryId(serviceCategory.getId());
@@ -1085,7 +1096,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
             //查询是否有表DTO 没有则添加 有则累加用量
             MeterStatDTO meterDTO = findMeterStatDTO(serviceDTO, dayStat.getMeterId());
-            if(meterDTO == null){
+            if(meterDTO == null) {
                 meterDTO = ConvertHelper.convert(dayStat, MeterStatDTO.class);
                 meterDTO.setDayStats(deepCopyStatDays(result.getDates()));
                 serviceDTO.getMeterDayStats().add(meterDTO);
@@ -1095,25 +1106,27 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             meterDayStat.setCurrentCost(dayDTO.getCurrentCost());
             meterDayStat.setCurrentReading(dayDTO.getCurrentReading());
             meterDayStat.setLastReading(dayDTO.getLastReading());
-
         }
 
         //最终计算实际负担
-        result.setDayBurdenStats(new ArrayList<DayStatDTO>());
+        result.setDayBurdenStats(new ArrayList<>());
         BillStatDTO receivableDTO = findBillDTO(result, EnergyCategoryDefault.RECEIVABLE.getCode());
         BillStatDTO payableDTO = findBillDTO(result, EnergyCategoryDefault.PAYABLE.getCode());
-        Set<Long> statDates = new HashSet<Long>();
-        if(receivableDTO!=null&&receivableDTO.getDayBillStats()  != null)
-            receivableDTO.getDayBillStats().stream().forEach(r->{
-                statDates.add(r.getStatDate());
-            });
-        if(payableDTO!=null&&payableDTO.getDayBillStats()  != null)
-            payableDTO.getDayBillStats().stream().forEach(r->{
-                statDates.add(r.getStatDate());
-            });
 
-        if(null != receivableDTO && null != payableDTO)
-            for(Long statDate: statDates){
+        Set<Long> statDates = new HashSet<>();
+        if (receivableDTO != null && receivableDTO.getDayBillStats() != null) {
+            receivableDTO.getDayBillStats().forEach(r -> {
+                statDates.add(r.getStatDate());
+            });
+        }
+        if (payableDTO != null && payableDTO.getDayBillStats() != null) {
+            payableDTO.getDayBillStats().forEach(r -> {
+                statDates.add(r.getStatDate());
+            });
+        }
+
+        if (null != receivableDTO && null != payableDTO) {
+            for (Long statDate : statDates) {
                 DayStatDTO receivableDay = findDayStat(receivableDTO.getDayBillStats(), statDate);
                 DayStatDTO payableDay = findDayStat(payableDTO.getDayBillStats(), statDate);
                 DayStatDTO burdenDay = new DayStatDTO();
@@ -1122,10 +1135,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 burdenDay.setCurrentCost(payableDay.getCurrentCost().subtract(receivableDay.getCurrentCost()));
                 result.getDayBurdenStats().add(burdenDay);
             }
+        }
 
         sumStatDTO(result);
-        return result ;
-
+        return result;
     }
 
     /**
@@ -1134,19 +1147,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private void sumStatDTO(EnergyStatDTO result) {
         sumStatDTO(result.getDayBurdenStats());
         sumStatDTO(result.getLastYearPayableStats());
-        if(null!=result.getBillDayStats())
-            for(BillStatDTO bill : result.getBillDayStats()){
+        if (null != result.getBillDayStats()) {
+            for (BillStatDTO bill : result.getBillDayStats()) {
                 sumStatDTO(bill.getDayBillStats());
-                if(null != bill.getServiceDayStats())
-                    for(ServiceStatDTO service : bill.getServiceDayStats()){
+                if (null != bill.getServiceDayStats()) {
+                    for (ServiceStatDTO service : bill.getServiceDayStats()) {
                         sumStatDTO(service.getDayServiceStats());
-                        if(null!=service.getMeterDayStats())
-                            for(MeterStatDTO meter : service.getMeterDayStats()){
+                        if (null != service.getMeterDayStats()) {
+                            for (MeterStatDTO meter : service.getMeterDayStats()) {
                                 sumStatDTO(meter.getDayStats());
                             }
+                        }
                     }
+                }
             }
-
+        }
     }
 
     /**
@@ -1631,8 +1646,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         throw errorWith(SCOPE, ERR_METER_NOT_EXIST, "The meter is not exist id = %s", id);
     }
 
-    public Timestamp getDayBegin( Calendar cal) {
-
+    private Timestamp getDayBegin(Calendar cal) {
         cal.set(Calendar.HOUR_OF_DAY, 0);
         cal.set(Calendar.SECOND, 0);
         cal.set(Calendar.MINUTE, 0);
@@ -1677,14 +1691,47 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * 每天早上1点10分刷前一天的读表
      * */
     @Scheduled(cron = "0 10 1 * * ?")
-    public void caculateEnergyDayStat(){
-        //刷今天的
-        caculateEnergyDayStatByDate(DateHelper.currentGMTTime());
+    public void calculateEnergyDayStat(){
+        try {
+            LOGGER.info("calculate energy day stat start...");
+            //刷今天的
+            calculateEnergyDayStatByDate(DateHelper.currentGMTTime());
+            LOGGER.info("calculate energy day stat end...");
+        } catch (Exception e) {
+            LOGGER.error("calculate energy day stat error...", e);
+            sendErrorMessage(e);
+            e.printStackTrace();
+        }
+    }
+
+    private void sendErrorMessage(Exception e) {
+        String xiaoqiang = "xq.tian@zuolin.com";
+        String wuhan = "han.wu@zuolin.com";
+        String handlerName = MailHandler.MAIL_RESOLVER_PREFIX + MailHandler.HANDLER_JSMTP;
+        MailHandler handler = PlatformContext.getComponent(handlerName);
+        String account = configurationProvider.getValue(0,"mail.smtp.account", "zuolin@zuolin.com");
+
+        try (   ByteArrayOutputStream out = new ByteArrayOutputStream();
+                PrintStream stream = new PrintStream(out))
+        {
+            e.printStackTrace(stream);
+            String message = out.toString("UTF-8");
+            handler.sendMail(0, account, xiaoqiang, "calculateEnergyDayStat error", message);
+            handler.sendMail(0, account, wuhan, "calculateEnergyDayStat error", message);
+            // out.reset();
+            e.getCause().printStackTrace(stream);
+            message = out.toString("UTF-8");
+            handler.sendMail(0, account, xiaoqiang, "calculateEnergyDayStat error cause", message);
+            handler.sendMail(0, account, wuhan, "calculateEnergyDayStat error cause", message);
+
+        } catch (Exception ignored) {
+            //
+        }
     }
 
     @Override
-    public void caculateEnergyDayStatByDate(java.util.Date date){
-        //查出所有的表
+    public void calculateEnergyDayStatByDate(java.util.Date date){
+        // 查出所有的表
         List<EnergyMeter> meters = meterProvider.listEnergyMeters();
         Calendar cal = Calendar.getInstance();
         cal.setTime(date);
@@ -1692,108 +1739,131 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         cal.add(Calendar.DAY_OF_MONTH, -1);
         Timestamp yesterdayBegin = getDayBegin(cal);
         cal.add(Calendar.DAY_OF_MONTH, -1);
-        Timestamp dayBeforeYestBegin = getDayBegin(cal);
+        // Timestamp dayBeforeYestBegin = getDayBegin(cal);
         for(EnergyMeter meter : meters){
-            EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class)  ;
-            //拿前天的度数
-            EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
-            EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,todayBegin);
-            /**读表用量差*/
-            BigDecimal amount = new BigDecimal(0);
+            try {
+                EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class);
+                // 前天的最后的读数
+                EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
+                // 昨天的最后的读数
+                EnergyMeterReadingLog yesterdayLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,todayBegin);
 
-            //默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
-            BigDecimal ReadingAnchor = meter.getStartReading();
-            BigDecimal dayLastReading = meter.getStartReading();
-            BigDecimal dayCurrReading = meter.getStartReading();
-            if(null != dayBeforeYestLastLog){
-                ReadingAnchor = dayBeforeYestLastLog.getReading();
-                dayLastReading =  dayBeforeYestLastLog.getReading();
-            }
+                // 读表用量差
+                BigDecimal amount = new BigDecimal("0");
 
-            if(null != yesterdayLastLog){
-                dayCurrReading = yesterdayLastLog.getReading();
-            }
-            //拿出单个表前一天所有的读表记录
-            List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);
+                // 默认初始值为表的初始值，如果有昨天之前和前天之前的读表记录则置换初始值
+                BigDecimal readingAnchor = meter.getStartReading();
+                // 统计当天的开始读数
+                BigDecimal dayLastReading = meter.getStartReading();
+                // 统计当天的最后读数
+                BigDecimal dayCurrReading = meter.getStartReading();
+                if(null != dayBeforeYestLastLog){
+                    readingAnchor = dayBeforeYestLastLog.getReading();
+                    dayLastReading =  dayBeforeYestLastLog.getReading();
+                }
 
+                if(null != yesterdayLastLog){
+                    dayCurrReading = yesterdayLastLog.getReading();
+                }
 
-            Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
-            Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
-            //查看是否有换表,是否有归零
-            if(meterReadingLogs != null){
-                for(EnergyMeterReadingLog log : meterReadingLogs){
+                // 拿出单个表统计当天的所有的读表记录
+                List<EnergyMeterReadingLog> meterReadingLogs = meterReadingLogProvider.listMeterReadingLogByDate(meter.getId(),yesterdayBegin,todayBegin);
 
-                    //有归零 量程设置为最大值-锚点,锚点设置为0
-                    if(log.getResetMeterFlag()!=null && TrueOrFalseFlag.TRUE.getCode() == log.getResetMeterFlag().byteValue()){
-                        resetFlag = TrueOrFalseFlag.TRUE.getCode();
-                        amount = amount.add(meter.getMaxReading().subtract(ReadingAnchor));
-                        ReadingAnchor = new BigDecimal(0);
-                        dayStat.setResetMeterFlag(TrueOrFalseFlag.TRUE.getCode());
-                    }
-                    //有换表 量程加上旧表读数-锚点,锚点重置为新读数
-                    if(log.getChangeMeterFlag() != null && TrueOrFalseFlag.TRUE.getCode() == log.getChangeMeterFlag().byteValue()){
-                        changeFlag = TrueOrFalseFlag.TRUE.getCode();
-                        EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
-                        amount = amount.add(changeLog.getOldReading().subtract(ReadingAnchor));
-                        ReadingAnchor = changeLog.getNewReading();
-                        dayStat.setChangeMeterFlag(TrueOrFalseFlag.TRUE.getCode());
+                // 重置flag
+                Byte resetFlag = TrueOrFalseFlag.FALSE.getCode();
+                // 换表flag
+                Byte changeFlag = TrueOrFalseFlag.FALSE.getCode();
+
+                //查看是否有换表,是否有归零
+                if(meterReadingLogs != null) {
+                    for(EnergyMeterReadingLog log : meterReadingLogs) {
+                        // 有归零 量程设置为最大值-锚点,锚点设置为0
+                        if(TrueOrFalseFlag.fromCode(log.getResetMeterFlag()) == TrueOrFalseFlag.TRUE) {
+                            resetFlag = TrueOrFalseFlag.TRUE.getCode();
+                            amount = amount.add(meter.getMaxReading().subtract(readingAnchor));
+                            readingAnchor = new BigDecimal(0);
+                            dayStat.setResetMeterFlag(resetFlag);
+                        }
+                        // 有换表 量程加上旧表读数-锚点,锚点重置为新读数
+                        if(TrueOrFalseFlag.fromCode(log.getChangeMeterFlag()) == TrueOrFalseFlag.TRUE) {
+                            changeFlag = TrueOrFalseFlag.TRUE.getCode();
+                            EnergyMeterChangeLog changeLog = this.meterChangeLogProvider.getEnergyMeterChangeLogByLogId(log.getId());
+                            amount = amount.add(changeLog.getOldReading().subtract(readingAnchor));
+                            readingAnchor = changeLog.getNewReading();
+                            dayStat.setChangeMeterFlag(changeFlag);
+                        }
                     }
                 }
+
+                //计算当天走了多少字 量程+昨天最后一次读数-锚点
+                amount = amount.add(dayCurrReading.subtract(readingAnchor));
+
+                //获取公式,计算当天的费用
+                EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
+                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
+                EnergyMeterSettingLog rateSetting   = meterSettingLogProvider
+                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
+                EnergyMeterSettingLog amountSetting = meterSettingLogProvider
+                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
+                EnergyMeterSettingLog costSetting   = meterSettingLogProvider
+                        .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
+
+                Stream<EnergyMeterSettingLog> settings = Stream.of(amountSetting, rateSetting, priceSetting, costSetting);
+                if (settings.anyMatch(Objects::isNull)) {
+                    LOGGER.error("not found energy meter settings, meterId={}, priceSetting={}, rateSetting={}, amountSetting={}, costSetting={}",
+                            meter.getId(), priceSetting, rateSetting, amountSetting, costSetting);
+                    continue;
+                }
+                String amountFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
+                String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+
+                ScriptEngineManager manager = new ScriptEngineManager();
+                ScriptEngine engine = manager.getEngineByName("js");
+
+                engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+
+                BigDecimal realAmount = new BigDecimal(0);
+                BigDecimal realCost = new BigDecimal(0);
+
+                try {
+                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
+                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+                } catch (ScriptException e) {
+                    String paramsStr = "{AMOUNT:" + amount +
+                            ", PRICE:" + priceSetting.getSettingValue() +
+                            ", TIMES:" + rateSetting.getSettingValue() +
+                            "}";
+                    LOGGER.error("evaluate formula error, amountFormula={}, costFormula={}, params={}", amountFormula, costFormula, paramsStr);
+                    e.printStackTrace();
+                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+                }
+
+                //删除昨天的记录（手工刷的时候）
+                energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(), new Date(yesterdayBegin.getTime()));
+
+                //写数据库
+                dayStat.setMeterId(meter.getId());
+                dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
+                dayStat.setMeterName(meter.getName());
+                dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
+                dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
+                dayStat.setMeterRate(rateSetting.getSettingValue());
+                dayStat.setMeterPrice(priceSetting.getSettingValue());
+                dayStat.setLastReading(dayLastReading);
+                dayStat.setCurrentReading(dayCurrReading);
+                dayStat.setCurrentAmount(realAmount);
+                dayStat.setCurrentCost(realCost);
+                dayStat.setResetMeterFlag(resetFlag);
+                dayStat.setChangeMeterFlag(changeFlag);
+                dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
+			    // dayStat.setCreatorUid(UserContext.current().getUser().getId());
+                dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+                energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
+            } catch (Exception e) {
+                throw new RuntimeException(String.format("meter id = %s, meterName = %s", meter.getId(), meter.getName()), e);
             }
-            //计算当天走了多少字 量程+昨天最后一次读数-锚点
-            amount = amount.add(dayCurrReading.subtract(ReadingAnchor));
-            //获取公式,计算当天的费用
-            EnergyMeterSettingLog priceSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,yesterdayBegin);
-            EnergyMeterSettingLog rateSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.RATE ,yesterdayBegin);
-            EnergyMeterSettingLog amountSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.AMOUNT_FORMULA ,yesterdayBegin);
-            EnergyMeterSettingLog costSetting = meterSettingLogProvider.findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,yesterdayBegin);
-            if(amountSetting == null || rateSetting == null || priceSetting == null || costSetting == null)
-                continue;
-            String aoumtFormula = meterFormulaProvider.findById(amountSetting.getNamespaceId(), amountSetting.getFormulaId()).getExpression();
-            String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
-
-            ScriptEngineManager manager = new ScriptEngineManager();
-            ScriptEngine engine = manager.getEngineByName("js");
-
-            engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-            engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
-            engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
-
-            BigDecimal realAmount = new BigDecimal(0);
-            BigDecimal realCost = new BigDecimal(0);
-
-            try {
-                realAmount = BigDecimal.valueOf((double) engine.eval(aoumtFormula));
-                realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
-            } catch (ScriptException e) {
-                e.printStackTrace();
-                LOGGER.error("The energy meter error");
-                throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "The energy meter error");
-
-            }
-            //删除昨天的记录（手工刷的时候）
-            energyDateStatisticProvider.deleteEnergyDateStatisticByDate(meter.getId(),new Date(yesterdayBegin.getTime()));
-            //写数据库
-
-//			dayStat.set
-            dayStat.setMeterId(meter.getId());
-            dayStat.setStatDate(new Date(yesterdayBegin.getTime()));
-            dayStat.setMeterName(meter.getName());
-            dayStat.setMeterBill(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getBillCategoryId()).getName());
-            dayStat.setMeterService(meterCategoryProvider.findById(meter.getNamespaceId(), meter.getServiceCategoryId()).getName());
-            dayStat.setMeterRate(rateSetting.getSettingValue());
-            dayStat.setMeterPrice(priceSetting.getSettingValue());
-            dayStat.setLastReading(dayLastReading);
-            dayStat.setCurrentReading(dayCurrReading);
-            dayStat.setCurrentAmount(realAmount);
-            dayStat.setCurrentCost(realCost);
-            dayStat.setResetMeterFlag(resetFlag);
-            dayStat.setChangeMeterFlag(changeFlag);
-            dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
-//			dayStat.setCreatorUid(UserContext.current().getUser().getId());
-            dayStat.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-                    .getTime()));
-            energyDateStatisticProvider.createEnergyDateStatistic(dayStat);
         }
     }
 
@@ -1801,12 +1871,20 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * 每月1日  早上3点10分刷前一个月的读表
      * */
     @Scheduled(cron = "0 10 3 1 * ?")
-    public void caculateEnergyMonthStat(){
-        caculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+    public void calculateEnergyMonthStat() {
+        try {
+            LOGGER.info("calculate energy month stat start...");
+            calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+            LOGGER.info("calculate energy month stat end...");
+        } catch (Exception e) {
+            LOGGER.error("calculate energy month stat error...", e);
+            sendErrorMessage(e);
+            e.printStackTrace();
+        }
     }
 
     @Override
-    public void caculateEnergyMonthStatByDate(java.util.Date date){
+    public void calculateEnergyMonthStatByDate(java.util.Date date){
         //查出所有的表
         List<EnergyMeter> meters = meterProvider.listEnergyMeters();
         Calendar cal = Calendar.getInstance();
@@ -1824,14 +1902,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             //取月初的上次度数和月末的当前读数
             EnergyDateStatistic monthEndStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(meter.getId(),new Date(monthEnd.getTime()));
             EnergyMonthStatistic monthStat = ConvertHelper.convert(monthEndStat, EnergyMonthStatistic.class);
-            if(null == monthEndStat)
+            if (null == monthEndStat) {
+                LOGGER.error("energy meter monthEndStat is null, meterId={}, month={}", meter.getId(), monthEnd.toLocalDateTime());
                 continue;
+            }
             monthStat.setMeterId(meter.getId());
             monthStat.setDateStr(monthSF.get().format(monthBegin));
             EnergyDateStatistic monthBeginStat = energyDateStatisticProvider.getEnergyDateStatisticByStatDate(meter.getId(),new Date(monthBegin.getTime()));
 
-            if(null == monthBeginStat)
+            if (null == monthBeginStat) {
+                LOGGER.error("energy meter monthBeginStat is null, meterId={}, month={}", meter.getId(), monthBegin.toLocalDateTime());
                 continue;
+            }
             monthStat.setLastReading(monthBeginStat.getLastReading());
             //统计该表sum 用量和费用
             monthStat.setCurrentAmount(energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));

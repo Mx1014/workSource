@@ -385,7 +385,8 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
 		
 		param.put("cardId", Integer.parseInt(order.getCardNumber()));
-		param.put("ruleType", order.getRateToken());
+		//修改科托ruleType 固定为1 表示月卡车
+		param.put("ruleType", RULE_TYPE);
 	    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
 	    param.put("payMoney", order.getPrice().intValue()*100);
 	    param.put("startTime", validStart);
@@ -511,10 +512,11 @@ public class KetuoParkingVendorHandler implements ParkingVendorHandler {
 		return json;
 	}
 	
-	private Timestamp addDays(Long oldPeriod, int days) {
+	//储能月卡充值开始时间 只加一秒
+	private Timestamp addDays(Long oldPeriod, int seconds) {
 		Calendar calendar = Calendar.getInstance();
 		calendar.setTimeInMillis(oldPeriod);
-		calendar.add(Calendar.DATE, days);
+		calendar.add(Calendar.SECOND, seconds);
 		Timestamp time = new Timestamp(calendar.getTimeInMillis());
 		
 		return time;

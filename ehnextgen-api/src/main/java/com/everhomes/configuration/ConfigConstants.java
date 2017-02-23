@@ -86,5 +86,9 @@ public interface ConfigConstants {
     String KEXING_PMBILL_API_BILLCOUNT = "kexing.pmbill.api.billcount";
 
 	public static final String JINDI_SYNC_NAMESPACE = "jindi.sync.namespace"; 
+	
+	public static final String ACTIVITY_DEFAULT_LIST_STYLE = "activity.default.list.style";
+
+    public static final String TASK_SERVER_ADDRESS = "task.server.address";
      
 }

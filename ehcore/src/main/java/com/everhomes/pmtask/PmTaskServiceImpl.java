@@ -1768,11 +1768,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 		dbProvider.execute((TransactionStatus status) -> {
 			
 			for(int i=0,l=size; i<l;i++ ) {
-				
-				if(resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
-						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
-					continue;
-				}
+
+			    // 有下面这段代码会导致：如果在业务授权那边指了权限，这些人会在报修模块这边添加不进去，故注释掉 by lqs 20170123
+//				if(resolver.checkUserPrivilege(targetIds.get(i), EntityType.COMMUNITY.getCode(), 
+//						cmd.getOwnerId(), cmd.getOrganizationId(), PrivilegeConstants.PM_TASK_MODULE)) {
+//					continue;
+//				}
 				
 				PmTaskTarget pmTaskTarget = pmTaskProvider.findTaskTarget(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOperateType(),
 						EntityType.USER.getCode(), targetIds.get(i));

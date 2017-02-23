@@ -11,6 +11,7 @@ import com.everhomes.util.StringHelper;
  *<ul>
  *<li>activityId:活动ID</li>
  *<li>categoryId: 类型</li>
+ *<li>contentCategoryId: 主题分类</li>
  *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss<li>
  *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>location:位置</li>
@@ -44,6 +45,7 @@ public class ActivityDTO {
     private Long postId;
     private Long forumId;
     private Long categoryId;
+    private Long contentCategoryId;
     private String startTime;
     private String stopTime;
     private String location;
@@ -93,7 +95,15 @@ public class ActivityDTO {
 
     private String achievementRichtextUrl;
 
-    public String getAchievementRichtextUrl() {
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public String getAchievementRichtextUrl() {
         return achievementRichtextUrl;
     }
 

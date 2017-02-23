@@ -189,12 +189,40 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
             post.setTag(cmd.getTag());
         }
         
-        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
-			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
-			post.setOfficialFlag(OfficialFlag.NO.getCode());
+//        if (OfficialFlag.fromCode(cmd.getOfficialFlag())!=OfficialFlag.YES) {
+//			cmd.setOfficialFlag(OfficialFlag.NO.getCode());
+//			post.setOfficialFlag(OfficialFlag.NO.getCode());
+//		}else {
+//			post.setOfficialFlag(cmd.getOfficialFlag());
+//		}
+        
+        // 旧版本发布的活动只有officialFlag，新版本发布的活动有categoryId，当然更老的版本两者都没有
+        // 为了兼容，规定categoryId为0对应发现里的活动（非官方活动），categoryId为1对应原官方活动
+        // add by tt, 20170116
+        OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
+        Long categoryId = cmd.getCategoryId();
+        if (categoryId == null) {
+			if(officialFlag == null) officialFlag = OfficialFlag.NO;
+			categoryId = officialFlag == OfficialFlag.YES?1L:0L;
 		}else {
-			post.setOfficialFlag(cmd.getOfficialFlag());
+			if (categoryId.longValue() == 1L) {
+				officialFlag = OfficialFlag.YES;
+			}else if (categoryId.longValue() == 0L) {
+				officialFlag = OfficialFlag.NO;
+			}else {
+				// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
+				officialFlag = OfficialFlag.UNKOWN;
+			}
 		}
+        cmd.setOfficialFlag(officialFlag.getCode());
+        post.setOfficialFlag(officialFlag.getCode());
+        cmd.setCategoryId(categoryId);
+        post.setActivityCategoryId(categoryId);
+        if (cmd.getContentCategoryId() == null) {
+			cmd.setContentCategoryId(0L);
+		}
+        post.setActivityContentCategoryId(cmd.getContentCategoryId());
+        
         
         cmd.setVideoState(VideoState.UN_READY.getCode());
         
@@ -216,9 +244,13 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
                     ActivityPostCommand.class);
             cmd.setId(post.getEmbeddedId());
             cmd.setMaxQuantity(post.getMaxQuantity());
-            if(cmd.getCategoryId() == null) {
-            	cmd.setCategoryId(0L);
-            }
+            //comment by tt, 已经在preProcess里面处理过了
+//            if(cmd.getCategoryId() == null) {
+//            	cmd.setCategoryId(0L);
+//            }
+//            if (cmd.getContentCategoryId() == null) {
+//				cmd.setContentCategoryId(0L);
+//			}
             
             if(activityService.isPostIdExist(post.getId())){
             	activityService.updatePost(cmd, post.getId());

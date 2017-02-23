@@ -4,11 +4,14 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
 import org.elasticsearch.action.search.SearchType;
 import org.elasticsearch.client.Requests;
+import org.elasticsearch.common.recycler.Recycler;
 import org.elasticsearch.common.xcontent.XContentBuilder;
 import org.elasticsearch.common.xcontent.XContentFactory;
 import org.elasticsearch.index.query.FilterBuilder;
@@ -49,6 +52,9 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private CommunityProvider communityProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -157,10 +163,12 @@ public class EquipmentAccessoriesSearcherImpl extends AbstractElasticSearch impl
         for(Long id : ids) {
         	EquipmentInspectionAccessories accessory = equipmentProvider.findAccessoryById(id);
         	EquipmentAccessoriesDTO dto = ConvertHelper.convert(accessory, EquipmentAccessoriesDTO.class);
-        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-    		if(group != null)
-    			dto.setTargetName(group.getName());
-
+//        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+//    		if(group != null)
+//    			dto.setTargetName(group.getName());
+            Community community = communityProvider.findCommunityById(dto.getTargetId());
+            if(community != null)
+                dto.setTargetName(community.getName());
         	accessories.add(dto);
         }
         response.setAccessories(accessories);

@@ -569,9 +569,55 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			return null;
 		});
 	}
-	
+
+	@Override
+	public List<Long> listUserRelatedPrivilegeByModuleId(ListUserRelatedPrivilegeByModuleIdCommand cmd){
+		return listUserPrivilegeByModuleId(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getOrganizationId(), UserContext.current().getUser().getId(), cmd.getModuleId());
+	}
 
 
+	@Override
+	public List<Long> listUserPrivilegeByModuleId(String ownerType, Long ownerId, Long organizationId, Long userId, Long moduleId){
+		List<Long> privilegeIds = getUserPrivileges(null ,organizationId, userId);
+		// 用户在当前机构自身权限
+		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), organizationId, EntityType.USER.getCode(), userId));
+
+		List<Long> userPIds = this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.USER.getCode(), userId);
+		if(null == userPIds || userPIds.size() == 0){
+			List<String> groupTypes = new ArrayList<>();
+			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+			groupTypes.add(OrganizationGroupType.GROUP.getCode());
+			List<OrganizationDTO> organizations = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
+			for (OrganizationDTO organization:organizations) {
+				privilegeIds.addAll(this.getResourceAclPrivilegeIds(ownerType, ownerId, EntityType.ORGANIZATIONS.getCode(), organization.getId()));
+			}
+		}else{
+			privilegeIds.addAll(userPIds);
+		}
+
+
+		List<Long> pIds = new ArrayList<>();
+
+		List<ServiceModulePrivilege> moduleSuperPrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.SUPER);
+		for (ServiceModulePrivilege moduleSuperPrivilege:  moduleSuperPrivileges) {
+			if(privilegeIds.contains(moduleSuperPrivilege.getPrivilegeId())){
+				List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, null);
+				for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
+					pIds.add(modulePrivilege.getPrivilegeId());
+				}
+				return pIds;
+			}
+		}
+
+		List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(moduleId, ServiceModulePrivilegeType.ORDINARY);
+		for (ServiceModulePrivilege modulePrivilege:  modulePrivileges) {
+			if(privilegeIds.contains(modulePrivilege.getPrivilegeId())){
+				pIds.add(modulePrivilege.getPrivilegeId());
+			}
+		}
+
+		return pIds;
+	}
 
 	 /**
      * 获取用户的权限列表
@@ -588,7 +634,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
     	
     	List<Long> roleIds = new ArrayList<Long>();
     	for (RoleAssignment role : userRoles) {
-    		roleIds.add(role.getRoleId());
+			if(RoleConstants.BLACKLIST != role.getRoleId()){
+				roleIds.add(role.getRoleId());
+			}
 		}
 
 		List<Privilege> s = null;
@@ -979,6 +1027,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
     public List<RoleAssignment> getUserAllOrgRoles(Long organizationId, Long userId){
     	Organization org = organizationProvider.findOrganizationById(organizationId);
+		if(null == org){
+			LOGGER.debug("organization is null. organizationId = {}", organizationId);
+			return new ArrayList<>();
+		}
     	String path = org.getPath();
     	String[] orgIds = path.split("/");
     	List<RoleAssignment> userRoles = null;
@@ -1266,7 +1318,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				acl.setOwnerId(ownerId);
 				acl.setPrivilegeId(privilegeId);
 				acl.setRoleType(targetType);
-				acl.setScope(ownerType + ownerId + "." + scope);
+				acl.setScope(scope);
 				acl.setNamespaceId(UserContext.getCurrentNamespaceId());
 				aclProvider.createAcl(acl);
 			}
@@ -1511,10 +1563,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 				//业务模块授权
 				if(0 == authorizationServiceModule.getAllModuleFlag()){
-					if(null != authorizationServiceModule.getModuleIds()){
-						for (Long moduleId: authorizationServiceModule.getModuleIds()) {
-							ServiceModuleAssignment assignment = new ServiceModuleAssignment();
-							assignment.setModuleId(moduleId);
+					if(null != authorizationServiceModule.getAssignments()){
+						for (ModuleAssignment moduleAssignment: authorizationServiceModule.getAssignments()) {
+							ServiceModuleAssignment assignment = ConvertHelper.convert(moduleAssignment, ServiceModuleAssignment.class);
 							assignment.setOrganizationId(cmd.getOrganizationId());
 							assignment.setNamespaceId(namespaceId);
 							assignment.setTargetType(cmd.getTargetType());
@@ -1524,14 +1575,25 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 							assignment.setCreateUid(user.getId());
 							serviceModuleProvider.createServiceModuleAssignment(assignment);
 
-							if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
-								List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
-								for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
-									this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + moduleId + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleId,ServiceModulePrivilegeType.SUPER);
-								}
-							}else{
-								this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + moduleId, moduleId,ServiceModulePrivilegeType.SUPER);
-							}
+//							if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
+//								List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
+//								for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
+//									if(ServiceModuleAssignmentType.fromCode(moduleAssignment.getAssignmentType()) == ServiceModuleAssignmentType.PORTION
+//											&& null != moduleAssignment.getPrivilegeIds() && moduleAssignment.getPrivilegeIds().size() > 0)
+//										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleAssignment.getPrivilegeIds());
+//									else
+//										this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
+//
+//								}
+//
+//							}else{
+								if(ServiceModuleAssignmentType.fromCode(moduleAssignment.getAssignmentType()) == ServiceModuleAssignmentType.PORTION
+										&& null != moduleAssignment.getPrivilegeIds() && moduleAssignment.getPrivilegeIds().size() > 0)
+									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), moduleAssignment.getPrivilegeIds());
+								else
+									this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), assignment.getModuleId(),ServiceModulePrivilegeType.SUPER);
+
+//							}
 							/**
 							 * 业务模块权限授权
 							 */
@@ -1552,14 +1614,14 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					/**
 					 * 业务模块权限授权
 					 */
-					if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
-						List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
-						for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
-							this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleIds,ServiceModulePrivilegeType.SUPER);
-						}
-					}else{
-						this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
-					}
+//					if(EntityType.fromCode(authorizationServiceModule.getResourceType()) == EntityType.RESOURCE_CATEGORY){
+//						List<ResourceCategoryAssignment> buildingAssignments = communityProvider.listResourceCategoryAssignment(authorizationServiceModule.getResourceId(), namespaceId);
+//						for (ResourceCategoryAssignment buildingAssignment: buildingAssignments) {
+//							this.assignmentPrivileges(buildingAssignment.getResourceType(),buildingAssignment.getResourceId(),assignment.getTargetType(),assignment.getTargetId(),"M" + assignment.getModuleId() + "." + authorizationServiceModule.getResourceType() + authorizationServiceModule.getResourceId(), moduleIds,ServiceModulePrivilegeType.SUPER);
+//						}
+//					}else{
+						this.assignmentPrivileges(assignment.getOwnerType(),assignment.getOwnerId(),assignment.getTargetType(),assignment.getTargetId(),assignment.getOwnerType() +  assignment.getOwnerId() + ".M" + assignment.getModuleId(), moduleIds,ServiceModulePrivilegeType.SUPER);
+//					}
 				}
 			}
 
@@ -1578,8 +1640,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		AuthorizationServiceModuleDTO dto = null;
 		for (ServiceModuleAssignment assignment: assignments) {
 			if(key.equals(assignment.getOwnerType() + assignment.getOwnerId())){
-				ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
-				dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+				dto.getAssignments().add(convertServiceModuleAssignmentDTO(assignment));
 			}else{
 				dto = new AuthorizationServiceModuleDTO();
 				dto.setAllModuleFlag((byte)0);
@@ -1608,12 +1669,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						}
 					}
 				}
-				dto.setServiceModules(new ArrayList<>());
+				dto.setAssignments(new ArrayList<>());
 				if(0L == assignment.getModuleId()){
 					dto.setAllModuleFlag((byte)1);
 				}else{
-					ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
-					dto.getServiceModules().add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+					dto.getAssignments().add(convertServiceModuleAssignmentDTO(assignment));
 				}
 				dtos.add(dto);
 				key = assignment.getOwnerType() + assignment.getOwnerId(); // 拼装Key
@@ -1621,6 +1681,50 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		}
 		return dtos;
 	}
+
+	private ServiceModuleAssignmentDTO convertServiceModuleAssignmentDTO(ServiceModuleAssignment assignment){
+		ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(assignment.getModuleId());
+		ServiceModuleAssignmentDTO assignmentDTO = ConvertHelper.convert(assignment, ServiceModuleAssignmentDTO.class);
+		assignmentDTO.setModuleId(assignment.getModuleId());
+		if(null != serviceModule)
+			assignmentDTO.setModuleName(serviceModule.getName());
+
+		if(ServiceModuleAssignmentType.PORTION == ServiceModuleAssignmentType.fromCode(assignment.getAssignmentType())){
+			List<Acl> acls = aclProvider.getAcl(new QueryBuilder() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
+//					if(EntityType.fromCode(assignment.getOwnerType()) == EntityType.RESOURCE_CATEGORY){
+//						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%.M" + assignment.getModuleId() + "." + assignment.getOwnerType() + assignment.getOwnerId()).or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getTargetType() + assignment.getTargetId() + ".M0" + "%")));
+//					}else{
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M" + assignment.getModuleId() + "%").or(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like(assignment.getOwnerType() + assignment.getOwnerId() + ".M0" + "%")));
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(assignment.getTargetType()));
+						selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(assignment.getTargetId()));
+//					}
+					return null;
+				}
+			});
+
+			List<PrivilegeDTO> ps = new ArrayList<>();
+			List<Long> pIds = new ArrayList<>();
+			for (Acl acl: acls) {
+				if(!pIds.contains(acl.getPrivilegeId())){
+					Privilege p = aclProvider.getPrivilegeById(acl.getPrivilegeId());
+					PrivilegeDTO pDTO = new PrivilegeDTO();
+					pDTO.setPrivilegeId(acl.getPrivilegeId());
+					if(null != p){
+						pDTO.setPrivilegeName(p.getName());
+					}
+					ps.add(pDTO);
+					pIds.add(acl.getPrivilegeId());
+				}
+
+			}
+			assignmentDTO.setPrivileges(ps);
+		}
+
+		return assignmentDTO;
+	}
+
 
 	@Override
 	public List<AuthorizationServiceModuleMembersDTO> listAuthorizationServiceModuleMembers(ListAuthorizationServiceModuleCommand cmd){
@@ -1646,7 +1750,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 						//如果个人有自己的分配业务模块则取自己的
 						if(0 != userAssignments.size()){
-							List<ServiceModuleDTO> serviceModules = new ArrayList<>();
+							List<ServiceModuleAssignmentDTO> serviceModuleAssignmentDTO = new ArrayList<>();
 							for (ServiceModuleAssignment userAssignment:userAssignments) {
 								if(0L == userAssignment.getModuleId()){
 									authorizationDTO.setAllModuleFlag((byte)1); // 加入moduleId是0 代表全部业务
@@ -1654,10 +1758,9 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 								}else{
 									authorizationDTO.setAllModuleFlag((byte)0);
 								}
-								ServiceModule serviceModule = serviceModuleProvider.findServiceModuleById(userAssignment.getModuleId());
-								serviceModules.add(ConvertHelper.convert(serviceModule, ServiceModuleDTO.class));
+								serviceModuleAssignmentDTO.add(convertServiceModuleAssignmentDTO(userAssignment));
 							}
-							authorizationDTO.setServiceModules(serviceModules);
+							authorizationDTO.setAssignments(serviceModuleAssignmentDTO);
 						}
 					}
 					dto.setAuthorizationServiceModules(authorizationDTOs);
@@ -1794,6 +1897,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
 
 		List<ProjectDTO> projectDTOs = new ArrayList<>();
+		List<Long> projectIds = new ArrayList<>();
 		for (WebMenuPrivilege webMenuPrivilege:webMenuPrivileges) {
 			// 用户有此菜单的权限，则获取全部的园区项目
 			if(privilegeIds.contains(webMenuPrivilege.getPrivilegeId())){
@@ -1803,6 +1907,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					dto.setProjectName(community.getName());
 					dto.setProjectType(EntityType.COMMUNITY.getCode());
 					projectDTOs.add(dto);
+					projectIds.add(dto.getProjectId());
 				}
 				break;
 			}
@@ -1847,6 +1952,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						dto.setProjectName(community.getName());
 					}
 					projectDTOs.add(dto);
+					projectIds.add(dto.getProjectId());
 				}
 			}
 		}
@@ -1889,7 +1995,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					projects.add(project);
 				}
 			}
-			setResourceDTOs(projects, namespaceId);
+			setResourceDTOs(projects, projectIds, namespaceId);
 		}
 		projects.addAll(entityts);
 		return projects;
@@ -1909,10 +2015,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		return dto;
 	}
 
-	private void setResourceDTOs(List<ProjectDTO> list, Integer namespaceId){
+	private void setResourceDTOs(List<ProjectDTO> list, List<Long> projectIds, Integer namespaceId){
 		if(null != list) {
 			for(ProjectDTO project: list) {
-				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(project.getProjectId(), namespaceId);
+				List<ResourceCategoryAssignment> resourceCategoryAssignments = communityProvider.listResourceCategoryAssignment(project.getProjectId(), namespaceId, EntityType.COMMUNITY.getCode(), projectIds);
 				List<ProjectDTO> projects = resourceCategoryAssignments.stream().map(r -> {
 					ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
 					dto.setProjectId(r.getResourceId());
@@ -1926,7 +2032,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					dto.setParentId(r.getResourceCategryId());
 					return dto;
 				}).collect(Collectors.toList());
-				setResourceDTOs(project.getProjects(), namespaceId);
+				setResourceDTOs(project.getProjects(), projectIds, namespaceId);
 				if(null == project.getProjects()){
 					project.setProjects(projects);
 				}else{
@@ -1945,8 +2051,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<Acl> acls = aclProvider.getResourceAclByRole(ownerType,ownerId, descriptor);
 		for (Acl acl: acls) {
 			if(!StringUtils.isEmpty(scope)){
-				String s = ownerType + ownerId + "." + scope;
-				if(acl.getScope().equals(s)){
+				if(acl.getScope().equals(scope)){
 					Privilege privilege = aclProvider.getPrivilegeById(acl.getPrivilegeId());
 					privileges.add(privilege);
 				}
@@ -1969,7 +2074,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
      */
 	private void deleteAcls(String resourceType, Long resourceId, String targetType, Long targetId, List<Long> moduleIds, List<Long> privilegeIds){
 		if(null != moduleIds && moduleIds.size() > 0){
-			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, ServiceModulePrivilegeType.SUPER);
+			List<ServiceModulePrivilege> privileges = serviceModuleProvider.listServiceModulePrivileges(moduleIds, null);
 			if(null == privilegeIds){
 				privilegeIds = new ArrayList<>();
 			}
@@ -1980,20 +2085,20 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 
 		List<Acl> acls = null;
-		if(EntityType.fromCode(resourceType) == EntityType.RESOURCE_CATEGORY){
-			acls = aclProvider.getAcl(new QueryBuilder() {
-				@Override
-				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%." + resourceType + resourceId));
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
-					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(targetId));
-					return null;
-				}
-			});
-		}else{
+//		if(EntityType.fromCode(resourceType) == EntityType.RESOURCE_CATEGORY){
+//			acls = aclProvider.getAcl(new QueryBuilder() {
+//				@Override
+//				public SelectQuery<? extends Record> buildCondition(SelectQuery<? extends Record> selectQuery) {
+//					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.SCOPE.like("%." + resourceType + resourceId));
+//					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_TYPE.eq(targetType));
+//					selectQuery.addConditions(com.everhomes.schema.Tables.EH_ACLS.ROLE_ID.eq(targetId));
+//					return null;
+//				}
+//			});
+//		}else{
 			AclRoleDescriptor descriptor = new AclRoleDescriptor(targetType, targetId);
 			acls = aclProvider.getResourceAclByRole(resourceType, resourceId, descriptor);
-		}
+//		}
 
 		if(null != acls){
 			for (Acl acl :acls) {

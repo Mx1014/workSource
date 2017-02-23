@@ -1217,6 +1217,12 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhQualityInspectionSpecifications.class, Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS.ID.max()).from(Tables.EH_QUALITY_INSPECTION_SPECIFICATIONS).fetchOne().value1();
         });
+        syncTableSequence(null, EhEquipmentInspectionCategories.class, Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhEquipmentInspectionStandardGroupMap.class, Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.getName(), (dbContext) -> {
+        	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

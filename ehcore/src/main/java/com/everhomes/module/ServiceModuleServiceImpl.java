@@ -4,6 +4,9 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.acl.AclProvider;
+import com.everhomes.acl.Privilege;
+import com.everhomes.rest.acl.ServiceModuleTreeVType;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -30,6 +33,9 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 
 	@Autowired
 	private ServiceModuleProvider serviceModuleProvider;
+
+	@Autowired
+	private AclProvider aclProvider;
 	
 	@Override
 	public List<ServiceModuleDTO> listServiceModules(ListServiceModulesCommand cmd) {
@@ -114,11 +120,30 @@ public class ServiceModuleServiceImpl implements ServiceModuleService{
 		List<ServiceModuleDTO> childrens = new ArrayList<ServiceModuleDTO>();
 		
 		for (ServiceModuleDTO serviceModuleDTO : list) {
+			serviceModuleDTO.setvType(ServiceModuleTreeVType.SERVICE_MODULE.getCode());
 			if(dto.getId().equals(serviceModuleDTO.getParentId())){
 				childrens.add(getChildServiceModules(list, serviceModuleDTO));
 			}
 		}
-		dto.setServiceModules(childrens);
+		if(childrens.size() > 0)
+			dto.setServiceModules(childrens);
+		else{
+			List<ServiceModulePrivilege> modulePrivileges = serviceModuleProvider.listServiceModulePrivileges(dto.getId(), ServiceModulePrivilegeType.ORDINARY);
+			List<ServiceModuleDTO> ps = new ArrayList<ServiceModuleDTO>();
+			for (ServiceModulePrivilege modulePrivilege: modulePrivileges) {
+				ServiceModuleDTO p = new ServiceModuleDTO();
+				p.setId(modulePrivilege.getPrivilegeId());
+				Privilege privilege = aclProvider.getPrivilegeById(modulePrivilege.getPrivilegeId());
+				if(null != privilege){
+					p.setName(privilege.getName());
+				}
+				p.setvType(ServiceModuleTreeVType.PRIVILEGE.getCode());
+				ps.add(p);
+			}
+			dto.setServiceModules(ps);
+		}
+
+
 		
 		return dto;
 	}
