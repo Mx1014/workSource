@@ -2220,15 +2220,15 @@ public class BusinessServiceImpl implements BusinessService {
                 for (Commodity commodity : resp.commodities) {
                     ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
                     // dto.setId(commodity.id);
-                    dto.setSubject(commodity.commoNo);
+                    dto.setSubject(commodity.commoName);
                     dto.setPosterUrl(commodity.defaultPic);
                     ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
                     dto.setInfoList(Collections.singletonList(infoDTO));
 
-                    Map<String, String> metadataMap = new HashMap<>();
-                    metadataMap.put("url", commodity.uri);
+                    // Map<String, String> metadataMap = new HashMap<>();
+                    // metadataMap.put("url", commodity.uri);
 
-                    dto.setMetadata(StringHelper.toJsonString(metadataMap));
+                    dto.setMetadata("{\"url\":\"" + commodity.uri + "\"}");
 
                     dtoList.add(dto);
                 }
