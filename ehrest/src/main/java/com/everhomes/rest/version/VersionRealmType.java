@@ -93,7 +93,9 @@ public enum VersionRealmType {
     ANDROID_TSPACE("Android_Tspace"),
     IOS_TSPACE("iOS_Tspace"),
     ANDROID_KEXIN("Android_Kexin"),
-    IOS_KEXIN("iOS_Kexin");
+    IOS_KEXIN("iOS_Kexin"),
+    ANDROID_QUANZHI("Android_Quanzhi"),
+    IOS_QUANZHI("iOS_Quanzhi");
     
     private String code;
     private VersionRealmType(String code) {
