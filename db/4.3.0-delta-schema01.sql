@@ -1,20 +1,20 @@
 -- merge from activity-2.0.0-delta-schema.sql by sql 20170119
--- Ôö¼ÓÖ÷Ìâ·ÖÀàid£¬added by tt, 20170106
+-- å¢åŠ ä¸»é¢˜åˆ†ç±»idï¼Œadded by tt, 20170106
 ALTER TABLE `eh_activities` ADD COLUMN `content_category_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'content category id';
 
--- Ôö¼Ó»î¶¯·ÖÀà¼°×Ó·ÖÀà£¬ÒòÎªºóÌ¨¹ÜÀí½Ó¿Ú»¹ÊÇ´ÓÌû×ÓÕâÀï²éµÄ£¬added by tt, 20170116
+-- å¢åŠ æ´»åŠ¨åˆ†ç±»åŠå­åˆ†ç±»ï¼Œå› ä¸ºåå°ç®¡ç†æ¥å£è¿˜æ˜¯ä»å¸–å­è¿™é‡ŒæŸ¥çš„ï¼Œadded by tt, 20170116
 ALTER TABLE `eh_forum_posts` ADD COLUMN `activity_category_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'activity category id';
 ALTER TABLE `eh_forum_posts` ADD COLUMN `activity_content_category_id` BIGINT NOT NULL DEFAULT '0' COMMENT 'activity content category id';
 
--- Ôö¼ÓÒ»Ğ©×Ö¶ÎÓÃÓÚÖ÷Ìâ·ÖÀà£¬added by tt, 20170106
--- ´Ë±í¶ÔÓÚparent_idÎª0µÄ±íÊ¾Èë¿Úid£¬·ñÔò±íÊ¾Ö÷Ìâ·ÖÀàid
+-- å¢åŠ ä¸€äº›å­—æ®µç”¨äºä¸»é¢˜åˆ†ç±»ï¼Œadded by tt, 20170106
+-- æ­¤è¡¨å¯¹äºparent_idä¸º0çš„è¡¨ç¤ºå…¥å£idï¼Œå¦åˆ™è¡¨ç¤ºä¸»é¢˜åˆ†ç±»id
 ALTER TABLE `eh_activity_categories` ADD COLUMN `enabled` TINYINT NOT NULL DEFAULT '1' COMMENT '0: no, 1: yes';
 ALTER TABLE `eh_activity_categories` ADD COLUMN `icon_uri` VARCHAR(1024) NULL;
 ALTER TABLE `eh_activity_categories` ADD COLUMN `selected_icon_uri` VARCHAR(1024) NULL;
 ALTER TABLE `eh_activity_categories` ADD COLUMN `show_name` VARCHAR(64) NULL;
 ALTER TABLE `eh_activity_categories` ADD COLUMN `all_flag` TINYINT NOT NULL DEFAULT '0' COMMENT '0: no, 1: yes';
 
--- Ôö¼ÓÑ¡ÖĞÊ±µÄÍ¼Æ¬£¬added by tt, 20170106
+-- å¢åŠ é€‰ä¸­æ—¶çš„å›¾ç‰‡ï¼Œadded by tt, 20170106
 ALTER TABLE `eh_launch_pad_items` ADD COLUMN `selected_icon_uri` VARCHAR(1024) NULL DEFAULT NULL;
 
 
@@ -72,13 +72,13 @@ CREATE TABLE `eh_equipment_inspection_standard_group_map` (
 ALTER TABLE `eh_service_module_assignments` ADD COLUMN `assignment_type` TINYINT NOT NULL DEFAULT '0';
 
 
--- µØÖ·±íÌí¼ÓÁ½ÁĞ´æ´¢µçÉÌÊ¹ÓÃµÄÂ¥¶°ºÍÃÅÅÆ£¬ add by tt, 20170213£¨ÕâÑùĞ´ËÙ¶È¿ìµã£©
+-- åœ°å€è¡¨æ·»åŠ ä¸¤åˆ—å­˜å‚¨ç”µå•†ä½¿ç”¨çš„æ¥¼æ ‹å’Œé—¨ç‰Œï¼Œ add by tt, 20170213ï¼ˆè¿™æ ·å†™é€Ÿåº¦å¿«ç‚¹ï¼‰
 ALTER TABLE `eh_addresses` ADD COLUMN `business_building_name` VARCHAR(128),
 	ADD COLUMN `business_apartment_name` VARCHAR(128);
     
--- Éè±¸Ñ²¼ìºÍÆ·ÖÊºË²éÈÎÎñ±í½¨Ë÷Òı add by xiongying20170215
+-- è®¾å¤‡å·¡æ£€å’Œå“è´¨æ ¸æŸ¥ä»»åŠ¡è¡¨å»ºç´¢å¼• add by xiongying20170215
 ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(standard_id);
-ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(status);
+ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(STATUS);
 ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(target_id);
 ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(inspection_category_id);
 ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(executive_expire_time);
@@ -86,14 +86,33 @@ ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(process_expire_time);
 ALTER TABLE eh_equipment_inspection_tasks ADD INDEX(operator_id); 
 
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(standard_id);
-ALTER TABLE eh_quality_inspection_tasks ADD INDEX(status);
+ALTER TABLE eh_quality_inspection_tasks ADD INDEX(STATUS);
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(target_id);
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(executive_expire_time);
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(process_expire_time); 
 ALTER TABLE eh_quality_inspection_tasks ADD INDEX(operator_id); 
 
 -- fix bug6188 add by xiongying20170216
-ALTER TABLE eh_equipment_inspection_templates ALTER COLUMN name SET DEFAULT '';
+ALTER TABLE eh_equipment_inspection_templates ALTER COLUMN NAME SET DEFAULT '';
 
--- Éè±¸-±ê×¼¹ØÏµ±íĞÂÔö×Ö¶Î¼ÇÂ¼×î½üÒ»´ÎÉú³ÉÈÎÎñµÄÊ±¼ä add by xiongying20170217
+-- è®¾å¤‡-æ ‡å‡†å…³ç³»è¡¨æ–°å¢å­—æ®µè®°å½•æœ€è¿‘ä¸€æ¬¡ç”Ÿæˆä»»åŠ¡çš„æ—¶é—´ add by xiongying20170217
 ALTER TABLE `eh_equipment_inspection_equipment_standard_map` ADD COLUMN `last_create_task_time` DATETIME;
+
+
+-- å›­åŒºå…¥é©»2.4
+ALTER TABLE `eh_enterprise_op_requests` ADD COLUMN `contract_id` BIGINT COMMENT 'eh_contracts id';
+
+ALTER TABLE `eh_yellow_pages` ADD COLUMN `building_id` BIGINT COMMENT 'eh_buildings id';
+
+--
+-- å›­åŒºå…¥é©»ç”³è¯·çš„å…³è”æ¥¼æ ‹è¡¨
+--
+CREATE TABLE `eh_enterprise_op_request_buildings` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `enterprise_op_requests_id` BIGINT NOT NULL COMMENT 'eh_enterprise_op_requests id',
+  `building_id` BIGINT  COMMENT 'building id ', 
+  `status` TINYINT ,
+  `creator_uid` BIGINT ,
+  `create_time` DATETIME ,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4; 
