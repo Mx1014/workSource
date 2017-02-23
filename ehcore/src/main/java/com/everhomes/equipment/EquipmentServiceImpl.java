@@ -2432,7 +2432,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return task;
 	}
 
-	@Scheduled(cron = "0 0 7 * * ? ")
+//	@Scheduled(cron = "0 0 7 * * ? ")
 	@Override
 	public void sendTaskMsg() {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
