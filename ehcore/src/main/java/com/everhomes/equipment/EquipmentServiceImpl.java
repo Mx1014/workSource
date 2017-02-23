@@ -1333,6 +1333,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
+			equipment.setQrCodeToken(exist.getQrCodeToken());
 			equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
 			
 			if(cmd.getInstallationTime() != null)
