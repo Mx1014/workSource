@@ -5,6 +5,9 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.SelectOffsetStep;
+import org.jooq.impl.DSL;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -79,7 +82,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_QUESTIONNAIRES.STATUS.ne(QuestionnaireStatus.INACTIVE.getCode()))
-				.and(Tables.EH_QUESTIONNAIRES.ID.lt(pageAnchor==null?Long.MAX_VALUE:pageAnchor))
+				.and(pageAnchor==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.ID.lt(pageAnchor))
 				.orderBy(Tables.EH_QUESTIONNAIRES.ID.desc())
 				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
@@ -93,7 +96,7 @@ public class QuestionnaireProviderImpl implements QuestionnaireProvider {
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_TYPE.eq(ownerType))
 				.and(Tables.EH_QUESTIONNAIRES.OWNER_ID.eq(ownerId))
 				.and(Tables.EH_QUESTIONNAIRES.STATUS.eq(QuestionnaireStatus.ACTIVE.getCode()))
-				.and(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.lt(new Timestamp(pageAnchor==null?Long.MAX_VALUE:pageAnchor)))
+				.and(pageAnchor==null?DSL.trueCondition():Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.lt(new Timestamp(pageAnchor)))
 				.orderBy(Tables.EH_QUESTIONNAIRES.PUBLISH_TIME.desc())
 				.limit(pageSize)
 				.fetch().map(r -> ConvertHelper.convert(r, Questionnaire.class));
