@@ -16,6 +16,14 @@ public class ModulePromotionInfoDTO {
     private String iconUrl;
     private String content;
 
+    public ModulePromotionInfoDTO(Byte infoType, String iconUrl, String content) {
+        this.infoType = infoType;
+        this.iconUrl = iconUrl;
+        this.content = content;
+    }
+
+    public ModulePromotionInfoDTO() { }
+
     public String getIconUrl() {
         return iconUrl;
     }

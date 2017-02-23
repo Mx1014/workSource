@@ -14,6 +14,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityGeoPoint;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.community.CommunityService;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -23,22 +24,17 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
+import com.everhomes.http.HttpUtils;
 import com.everhomes.launchpad.LaunchPadConstants;
 import com.everhomes.launchpad.LaunchPadItem;
 import com.everhomes.launchpad.LaunchPadProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.oauth2.Clients;
+import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
-import com.everhomes.rest.address.AddressType;
-import com.everhomes.rest.address.ApartmentDTO;
-import com.everhomes.rest.address.ApartmentFloorDTO;
-import com.everhomes.rest.address.BuildingDTO;
-import com.everhomes.rest.address.CommunityDTO;
-import com.everhomes.rest.address.ListApartmentFloorCommand;
-import com.everhomes.rest.address.ListBuildingByKeywordCommand;
-import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
+import com.everhomes.rest.address.*;
 import com.everhomes.rest.address.admin.ListBuildingByCommunityIdsCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.*;
@@ -63,6 +59,7 @@ import com.everhomes.server.schema.tables.pojos.EhBusinessPromotions;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.google.gson.annotations.SerializedName;
 import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.math.NumberUtils;
 import org.apache.lucene.spatial.DistanceUtils;
@@ -73,6 +70,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.*;
 import java.util.stream.Collectors;
@@ -133,6 +131,9 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Autowired
     private BusinessPromotionProvider businessPromotionProvider;
+
+    @Autowired
+    private BizHttpRestCallProvider bizHttpRestCallProvider;
 
 	@Override
 	public void syncBusiness(SyncBusinessCommand cmd) {
@@ -2139,19 +2140,107 @@ public class BusinessServiceImpl implements BusinessService {
 		return addressService.listApartmentFloorForBusiness(cmd);
 	}
 
+	private String source = "biz";// 电商运营数据获取来源 biz：从电商那里获取数据， db: 从数据库获取数据
+
     @Override
     public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
+        if ("biz".equals(source)) {// 从电商服务器获取数据
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId);
+        }
+        // 从数据库获取数据
+        else {
+            ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
+
+            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
+            List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
+                    UserContext.getCurrentNamespaceId(), pageSize, cmd.getPageAnchor());
+
+            List<ModulePromotionEntityDTO> entities =
+                    promotions.stream().map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
+
+            reponse.setEntities(entities);
+            return reponse;
+        }
+    }
+
+    // 商品对象
+    private static class Commodity {
+        private String id;// 商品id
+        private String commoNo;// 商品编号
+        private String commoName;// 商品名称
+        private String defaultPic;// 商品图片
+        private BigDecimal price;// 商品价格
+        private String shopNo;// 店铺编号
+        private String uri;// 商品详情链接
+
+        @Override
+        public String toString() {
+            return StringHelper.toJsonString(this);
+        }
+    }
+
+    // 电商服务器响应对象
+    private static class Resp {
+        private String version;
+        private Integer errorCode;
+        @SerializedName("responseObject")
+        private List<Commodity> commodities = new ArrayList<>();
+
+        @Override
+        public String toString() {
+            return StringHelper.toJsonString(this);
+        }
+    }
+
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId) {
+        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "");
+        String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
+
+        // bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
+        // bizServer = "https://biz-beta.zuolin.com";
+
+        if (StringUtils.isEmpty(bizApi)) {
+            LOGGER.error("biz promotion api config are empty");
+            throw RuntimeErrorException.errorWith(BusinessServiceErrorCode.SCOPE, BusinessServiceErrorCode.ERROR_BIZ_API_NOT_EXIST,
+                    "biz promotion api config are empty");
+        }
+
+        Map<String, String> param = new HashMap<>();
+        param.put("namespaceId", String.valueOf(namespaceId));
+
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
-        
-        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
-        List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
-                UserContext.getCurrentNamespaceId(), pageSize, cmd.getPageAnchor());
+        try {
+            String jsonStr = HttpUtils.post((bizServer + bizApi), param, 10, "UTF-8");
 
-        List<ModulePromotionEntityDTO> entities =
-                promotions.stream().map(this::toModulePromotionEntityDTO).collect(Collectors.toList());
+            Resp resp = (Resp) StringHelper.fromJsonString(jsonStr, Resp.class);
 
-        reponse.setEntities(entities);
+            if (resp != null) {
+                List<ModulePromotionEntityDTO> dtoList = new ArrayList<>();
+                for (Commodity commodity : resp.commodities) {
+                    ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
+                    // dto.setId(commodity.id);
+                    dto.setSubject(commodity.commoNo);
+                    dto.setPosterUrl(commodity.defaultPic);
+                    ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
+                    dto.setInfoList(Collections.singletonList(infoDTO));
+
+                    Map<String, String> metadataMap = new HashMap<>();
+                    metadataMap.put("url", commodity.uri);
+
+                    dto.setMetadata(StringHelper.toJsonString(metadataMap));
+
+                    dtoList.add(dto);
+                }
+                reponse.setEntities(dtoList);
+            }
+            return reponse;
+        } catch (Exception e) {
+            // e.printStackTrace();
+            LOGGER.error("biz server response error", e);
+        }
         return reponse;
     }
 
@@ -2182,6 +2271,13 @@ public class BusinessServiceImpl implements BusinessService {
             BusinessPromotion promotion = ConvertHelper.convert(cmd, BusinessPromotion.class);
             promotion.setNamespaceId(UserContext.getCurrentNamespaceId());
             businessPromotionProvider.createBusinessPromotion(promotion);
+        }
+    }
+
+    @Override
+    public void switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd) {
+        if (cmd.getSource() != null) {
+            this.source = cmd.getSource();
         }
     }
 
