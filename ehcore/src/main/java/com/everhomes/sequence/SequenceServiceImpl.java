@@ -1223,6 +1223,18 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhEquipmentInspectionStandardGroupMap.class, Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.getName(), (dbContext) -> {
         	return dbContext.select(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP.ID.max()).from(Tables.EH_EQUIPMENT_INSPECTION_STANDARD_GROUP_MAP).fetchOne().value1();
         });
+        syncTableSequence(null, EhQuestionnaires.class, Tables.EH_QUESTIONNAIRES.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUESTIONNAIRES.ID.max()).from(Tables.EH_QUESTIONNAIRES).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQuestionnaireQuestions.class, Tables.EH_QUESTIONNAIRE_QUESTIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUESTIONNAIRE_QUESTIONS.ID.max()).from(Tables.EH_QUESTIONNAIRE_QUESTIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQuestionnaireOptions.class, Tables.EH_QUESTIONNAIRE_OPTIONS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUESTIONNAIRE_OPTIONS.ID.max()).from(Tables.EH_QUESTIONNAIRE_OPTIONS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhQuestionnaireAnswers.class, Tables.EH_QUESTIONNAIRE_ANSWERS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.max()).from(Tables.EH_QUESTIONNAIRE_ANSWERS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")

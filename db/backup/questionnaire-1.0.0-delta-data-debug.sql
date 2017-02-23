@@ -1,12 +1,3 @@
--- 更改威新LINK+的两条活动为官方活动，add by tt, 20170222
-UPDATE eh_activities SET official_flag = 1, category_id = 1 WHERE id IN (1508,1509);
-UPDATE eh_forum_posts SET official_flag = 1, activity_category_id = 1 WHERE id IN (188703, 188704);
-
--- 园区入驻2.4
-SET @id := (SELECT MAX(id) FROM eh_locale_templates);
-INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES(( @id := @id +1),'expansion','3','zh_CN','园区入驻工作流详情内容','[{\"key\":\"发起人\",\"value\":\"${applyUserName}\",\"entityType\":\"list\"},{\"key\":\"联系电话\",\"value\":\"${contactPhone}\",\"entityType\":\"list\"},{\"key\":\"企业\",\"value\":\"${enterpriseName}\",\"entityType\":\"list\"},{\"key\":\"申请类型\",\"value\":\"${applyType}\",\"entityType\":\"list\"},{\"key\":\"申请来源\",\"value\":\"${sourceType}\",\"entityType\":\"list\"},{\"key\":\"备注\",\"value\":\"${description}\",\"entityType\":\"multi_line\"}]','0');
-
-
 -- 问卷调查的错误提示， add by tt, 20170220
 select max(id) into @id from eh_locale_strings;
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'questionnaire', '1', 'zh_CN', '问卷名称不能为空');
@@ -40,16 +31,15 @@ VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 20025, 1001, 0, 1, NOW()
 INSERT INTO `eh_acls` (`id`, `owner_type`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `role_type`)
 VALUES ((@acl_id := @acl_id + 1), 'EhOrganizations', 1, 20026, 1005, 0, 1, NOW(), 'EhAclRoles');
 
--- 配置到清华信息港，add by tt, 20170221
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 40150, '', 'EhNamespaces', 999984, 2);
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 40150, '', 'EhNamespaces', 1000000, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 80800, '', 'EhNamespaces', 999984, 2);
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 80800, '', 'EhNamespaces', 1000000, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
-VALUES ((@menu_scope_id := @menu_scope_id + 1), 80000, '', 'EhNamespaces', 999984, 2);
+VALUES ((@menu_scope_id := @menu_scope_id + 1), 80000, '', 'EhNamespaces', 1000000, 2);
 
--- 以下数据不一定用得到，我看alpha环境是有的，我本地没有，add by tt, 20170221
+-- 以下数据不一定用得到，add by tt, 20170221
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) VALUES (80000, '园区服务', 0, 'fa fa-group', NULL, 1, 2, '/80000', 'park', 800, NULL);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) VALUES (11911, 10120, 80000, '园区服务', 1, 1, '园区服务 全部权限', 710);
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10120, 0, '园区服务 管理员', '园区服务 业务模块权限', NULL);

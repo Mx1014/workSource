@@ -140,6 +140,8 @@
 		eh_door_auth_logs | 
 		eh_enterprise_op_request_buildings | 
         eh_equipment_inspection_categories | eh_equipment_inspection_standard_group_map |  
+		eh_questionnaires | eh_questionnaire_questions | eh_questionnaire_options | eh_questionnaire_answers |
+
         </includes>
 
             <!-- All elements that are excluded from your schema

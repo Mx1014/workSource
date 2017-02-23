@@ -51,6 +51,9 @@ public enum CoordinationLocks {
     ENERGY_METER("energyMeter"),
     ENERGY_METER_CATEGORY("energyMeter.category"),
     ENERGY_METER_FORMULA("energyMeter.formula"),
+    
+    UPDATE_QUESTIONNAIRE("update.questionnaire"),
+	UPDATE_QUESTIONNAIRE_OPTION("update.questionnaire.option"),
 
     WARNING_EQUIPMENT_TASK("warning.equipment.task"),
     WARNING_QUALITY_TASK("warning.quality.task");
