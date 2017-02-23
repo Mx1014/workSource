@@ -110,8 +110,6 @@ import java.util.stream.Collectors;
 @Component
 public class ForumServiceImpl implements ForumService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ForumServiceImpl.class);
-
-    private static final Long NOTICE_CATEGORY_ID = 1003L;
     
     @Autowired
     private AclProvider aclProvider;
@@ -1248,7 +1246,7 @@ public class ForumServiceImpl implements ForumService {
 	         
 	        
 	         
-	         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
+	         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId(), cmd.getContentCategory());
 	         
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
@@ -3188,8 +3186,8 @@ public class ForumServiceImpl implements ForumService {
     private Condition notEqPostCategoryCondition(List<Long> unCategorys, Long embeddedAppId, Long contentCategory) {
     	// 排除掉公告，直接在这添加，客户端和前端不用改，add by tt, 170223
     	Condition condition = null;
-    	if (contentCategory == null || contentCategory.longValue() != NOTICE_CATEGORY_ID) {
-    		Category category = this.categoryProvider.findCategoryById(NOTICE_CATEGORY_ID);
+    	if (contentCategory == null || contentCategory.longValue() != CategoryConstants.CATEGORY_ID_NOTICE) {
+    		Category category = this.categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_NOTICE);
     		if (category != null) {
     			condition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(category.getPath() + "%");
     		}
