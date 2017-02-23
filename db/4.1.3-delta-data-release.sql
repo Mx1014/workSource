@@ -390,4 +390,6 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- added by janson 20170322
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (0, 'aclink.user_key_timeout', '3600', 'timeout in second for qr');
 INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (1000000, 'aclink.user_key_timeout', '1800', 'timeout in second for qr');
+INSERT INTO `eh_configurations` (`namespace_id`,  `name`, `value`, `description`) VALUES (999982, 'aclink.user_key_timeout', '1800', 'timeout in second for qr qinghuatianan');
+
 
