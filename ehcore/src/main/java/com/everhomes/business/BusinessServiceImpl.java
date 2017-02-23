@@ -2197,8 +2197,8 @@ public class BusinessServiceImpl implements BusinessService {
         String bizApi = configurationProvider.getValue("biz.business.promotion.api", "");
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
 
-        bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
-        bizServer = "https://biz-beta.zuolin.com";
+        // bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
+        // bizServer = "https://biz-beta.zuolin.com";
 
         if (StringUtils.isEmpty(bizApi)) {
             LOGGER.error("biz promotion api config are empty");
