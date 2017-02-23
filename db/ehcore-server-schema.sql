@@ -2545,7 +2545,7 @@ CREATE TABLE `eh_equipment_inspection_categories` (
   `create_time` DATETIME,		
   `deletor_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record deleter user id',		
   `delete_time` DATETIME,		
-  PRIMARY KEY (`id`)		  PRIMARY KEY (`id`)
+  PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 设备操作图示表 attachments 及说明书  type区分
@@ -2783,7 +2783,7 @@ CREATE TABLE `eh_equipment_inspection_tasks` (
   `create_time` DATETIME,
   `review_expired_date` DATETIME,
   `inspection_category_id` BIGINT,		
-  `namespace_id` INTEGER,		  PRIMARY KEY (`id`)
+  `namespace_id` INTEGER,
   `target_type` VARCHAR(32) NOT NULL DEFAULT '' COMMENT 'the group of who own the task, etc',		
   `target_id` BIGINT NOT NULL DEFAULT 0,		
   `position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',		
@@ -6676,8 +6676,8 @@ CREATE TABLE `eh_quality_inspection_tasks` (
   `creator_uid` BIGINT NOT NULL DEFAULT 0 COMMENT 'record creator user id',
   `executive_position_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'refernece to the id of eh_organization_job_positions',
   PRIMARY KEY (`id`),		  
-  KEY `standard_id` (`standard_id`),		  PRIMARY KEY (`id`)
-  KEY `status` (`status`),		)ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+  KEY `standard_id` (`standard_id`),
+  KEY `status` (`status`),
   KEY `target_id` (`target_id`),		
   KEY `executive_expire_time` (`executive_expire_time`),		
   KEY `process_expire_time` (`process_expire_time`),		
