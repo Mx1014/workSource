@@ -90,5 +90,7 @@ public interface ConfigConstants {
 	public static final String ACTIVITY_DEFAULT_LIST_STYLE = "activity.default.list.style";
 
     public static final String TASK_SERVER_ADDRESS = "task.server.address";
-     
+
+    public static final String BIZ_BUSINESS_PROMOTION_API = "biz.business.promotion.api";
+
 }
