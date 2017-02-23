@@ -42,11 +42,11 @@ CREATE TABLE `eh_asset_bills` (
 
   `template_version` BIGINT NOT NULL,
   `creator_uid` BIGINT,
-  `create_time` DATETIME,
+  `create_time` DATETIME(3),
   `update_uid` BIGINT,
-  `update_time` DATETIME,
+  `update_time` DATETIME(3),
   `delete_uid` BIGINT,
-  `delete_time` DATETIME,
+  `delete_time` DATETIME(3),
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_bill_account_period_address`(`account_period`, `address_id`)

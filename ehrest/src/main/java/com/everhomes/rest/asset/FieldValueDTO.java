@@ -1,7 +1,12 @@
 package com.everhomes.rest.asset;
 
 /**
- * Created by Administrator on 2017/2/21.
+ * <ul>
+ *     <li>fieldDisplayName:字段展示名</li>
+ *     <li>fieldName:字段对应数据库字段名</li>
+ *     <li>fieldType:字段类型 参考{@link com.everhomes.rest.asset.FieldType}</li>
+ *     <li>fieldValue:字段值</li>
+ * </ul>
  */
 public class FieldValueDTO {
     private String fieldDisplayName;

@@ -1,7 +1,10 @@
 package com.everhomes.asset;
 
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 
+import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 
 /**
@@ -18,5 +21,11 @@ public interface AssetProvider {
 
     void creatTemplateField(AssetBillTemplateFields field);
 
+    List<AssetBill> listAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, List<Long> tenantIds, String tenantType,
+                                  Long addressId, Byte status, Long startTime, Long endTime, CrossShardListingLocator locator, Integer pageSize);
 
+    List<BigDecimal> listPeriodUnpaidAccountAmount(Long ownerId, String ownerType, Long targetId, String targetType, Long addressId,
+                                                   String tenantType, Long tenantId, Timestamp currentAccountPeriod);
+
+    List<AssetBill> listCurrentPeriodUnpaidBills(Long ownerId, String ownerType, Long targetId, String targetType);
 }

@@ -13,8 +13,8 @@ import java.util.List;
  *     <li>ownerType：账单所属物业公司类型</li>
  *     <li>targetId：账单所属园区id</li>
  *     <li>targetType：账单所属园区类型</li>
- *     <li>targetType：账单所属园区类型</li>
  *     <li>templateVersion: 版本号</li>
+ *     <li>dtos: 账单字段列表 参考{@link com.everhomes.rest.asset.FieldValueDTO}</li>
  * </ul>
  */
 public class AssetBillTemplateValueDTO {
@@ -86,6 +86,22 @@ public class AssetBillTemplateValueDTO {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public Long getTemplateVersion() {
+        return templateVersion;
+    }
+
+    public void setTemplateVersion(Long templateVersion) {
+        this.templateVersion = templateVersion;
+    }
+
+    public List<FieldValueDTO> getDtos() {
+        return dtos;
+    }
+
+    public void setDtos(List<FieldValueDTO> dtos) {
+        this.dtos = dtos;
     }
 
     @Override

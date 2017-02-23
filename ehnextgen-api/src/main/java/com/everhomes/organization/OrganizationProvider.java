@@ -297,4 +297,5 @@ public interface OrganizationProvider {
 	List<CommunityAddressMapping> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 	List<CommunityAddressMapping> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 
+	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 }

@@ -7,7 +7,21 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 
 /**
- * Created by Administrator on 2017/2/21.
+ * <ul>
+ *     <li>id: 账单主键id</li>
+ *     <li>ownerId：账单所属物业公司id</li>
+ *     <li>ownerType：账单所属物业公司类型</li>
+ *     <li>targetId：账单所属园区id</li>
+ *     <li>targetType：账单所属园区类型</li>
+ *     <li>templateVersion: 版本号</li>
+ *     <li>accountPeriod: 账期</li>
+ *     <li>addressId: 地址id</li>
+ *     <li>buildingName: 楼栋名</li>
+ *     <li>apartmentName: 门牌名</li>
+ *     <li>contactNo: 催缴手机号</li>
+ *     <li>periodAccountAmount: 总计应收</li>
+ *     <li>status: 状态 参考{@link com.everhomes.rest.asset.AssetBillStatus}</li>
+ * </ul>
  */
 public class SimpleAssetBillDTO {
 
@@ -33,7 +47,7 @@ public class SimpleAssetBillDTO {
 
     private String contactNo;
 
-    private BigDecimal periodUnpaidAccountAmount;
+    private BigDecimal periodAccountAmount;
 
     private Byte status;
 
@@ -125,12 +139,12 @@ public class SimpleAssetBillDTO {
         this.contactNo = contactNo;
     }
 
-    public BigDecimal getPeriodUnpaidAccountAmount() {
-        return periodUnpaidAccountAmount;
+    public BigDecimal getPeriodAccountAmount() {
+        return periodAccountAmount;
     }
 
-    public void setPeriodUnpaidAccountAmount(BigDecimal periodUnpaidAccountAmount) {
-        this.periodUnpaidAccountAmount = periodUnpaidAccountAmount;
+    public void setPeriodAccountAmount(BigDecimal periodAccountAmount) {
+        this.periodAccountAmount = periodAccountAmount;
     }
 
     public Byte getStatus() {

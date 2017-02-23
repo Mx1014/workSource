@@ -21,6 +21,7 @@ public interface AssetService {
     AssetBillTemplateValueDTO updateAssetBill(UpdateAssetBillCommand cmd);
     void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd);
     void setBillsStatus(BillIdListCommand cmd, AssetBillStatus status);
+    void deleteBill(DeleteBillCommand cmd);
     List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
 
 }

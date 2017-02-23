@@ -3232,4 +3232,22 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 		}
 		return new ArrayList<CommunityAddressMapping>();
 	}
+
+	@Override
+	public List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds) {
+		List<Long> addressIds = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ORGANIZATION_ID.in(organizationIds));
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
+					query.fetch().map((EhOrganizationAddressesRecord record) -> {
+						addressIds.add(record.getAddressId());
+						return null;
+					});
+
+					return true;
+				});
+		return addressIds;
+	}
 }

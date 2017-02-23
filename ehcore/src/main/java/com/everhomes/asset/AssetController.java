@@ -205,9 +205,9 @@ public class AssetController extends ControllerBase {
      */
     @RequestMapping("deleteBill")
     @RestReturn(value = String.class)
-    public RestResponse deleteBills(@Valid BillIdListCommand cmd) {
+    public RestResponse deleteBill(@Valid DeleteBillCommand cmd) {
 
-        assetService.setBillsStatus(cmd, AssetBillStatus.INACTIVE);
+        assetService.deleteBill(cmd);
 
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

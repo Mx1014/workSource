@@ -4,14 +4,20 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
+import com.everhomes.equipment.EquipmentInspectionEquipments;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
+import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -20,6 +26,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -44,6 +51,10 @@ public class AssetProviderImpl implements AssetProvider {
 
         bill.setId(id);
         bill.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        bill.setStatus(AssetBillStatus.UNPAID.getCode());
+
+        bill.setUpdateTime(bill.getCreateTime());
+        bill.setUpdateUid(bill.getCreatorUid());
 
         LOGGER.info("creatAssetBill: " + bill);
 
@@ -56,7 +67,14 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void updateAssetBill(AssetBill bill) {
+        assert(bill.getId() != null);
 
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetBills.class, bill.getId()));
+        EhAssetBillsDao dao = new EhAssetBillsDao(context.configuration());
+        bill.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        dao.update(bill);
+
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhAssetBills.class, bill.getId());
     }
 
     @Override
@@ -66,7 +84,28 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public List<AssetBillTemplateFieldDTO> findTemplateFieldByTemplateVersion(Long ownerId, String ownerType, Long targetId, String targetType, Long templateVersion) {
-        return null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillTemplateFieldsRecord> query = context.selectQuery(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS);
+
+        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.TARGET_TYPE.eq(targetType));
+        query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.TEMPLATE_VERSION.eq(templateVersion));
+
+        query.addOrderBy(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.DEFAULT_ORDER.desc());
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("findTemplateFieldByTemplateVersion, sql=" + query.getSQL());
+            LOGGER.debug("findTemplateFieldByTemplateVersion, bindValues=" + query.getBindValues());
+        }
+       
+        List<AssetBillTemplateFieldDTO> templateVersions = new ArrayList<>();
+        query.fetch().map((EhAssetBillTemplateFieldsRecord record) -> {
+            templateVersions.add(ConvertHelper.convert(record, AssetBillTemplateFieldDTO.class));
+            return null;
+        });
+
+        return templateVersions;
     }
 
     @Override
@@ -102,5 +141,111 @@ public class AssetProviderImpl implements AssetProvider {
     @Override
     public void creatTemplateField(AssetBillTemplateFields field) {
 
+    }
+
+    @Override
+    public List<AssetBill> listAssetBill(Long ownerId, String ownerType, Long targetId, String targetType, List<Long> tenantIds, String tenantType,
+                                         Long addressId, Byte status, Long startTime, Long endTime, CrossShardListingLocator locator, Integer pageSize) {
+        List<AssetBill> bills = new ArrayList<>();
+
+        long pageOffset = 0L;
+        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
+            locator.setAnchor(0L);
+            pageOffset = 1L;
+        }
+        if(locator.getAnchor() != 0L){
+            pageOffset = locator.getAnchor();
+        }
+        Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
+
+
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_ASSET_BILLS.STATUS.ne(AssetBillStatus.INACTIVE.getCode()));
+
+        if(targetId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
+        }
+        if(targetType != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
+        }
+
+        if(tenantIds != null && tenantIds.size() > 0) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TENANT_ID.in(tenantIds));
+        }
+        if(tenantType != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.TENANT_TYPE.eq(tenantType));
+        }
+
+        if(addressId != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
+        }
+
+        if(status !=null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.STATUS.eq(status));
+        }
+
+        if(startTime != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.ge(new Timestamp(startTime)));
+        }
+
+        if(endTime != null) {
+            query.addConditions(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.le(new Timestamp(endTime)));
+        }
+        query.addOrderBy(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.desc());
+        query.addLimit(offset, pageSize);
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listAssetBill, sql=" + query.getSQL());
+            LOGGER.debug("listAssetBill, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((EhAssetBillsRecord record) -> {
+            bills.add(ConvertHelper.convert(record, AssetBill.class));
+            return null;
+        });
+
+        if (bills.size() >= pageSize) {
+            locator.setAnchor(pageOffset+1);
+        }
+
+        return bills;
+    }
+
+    @Override
+    public List<BigDecimal> listPeriodUnpaidAccountAmount(Long ownerId, String ownerType, Long targetId, String targetType,
+                                Long addressId, String tenantType, Long tenantId, Timestamp currentAccountPeriod) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+
+        query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
+
+        query.addConditions(Tables.EH_ASSET_BILLS.TENANT_ID.eq(tenantId));
+        query.addConditions(Tables.EH_ASSET_BILLS.TENANT_TYPE.eq(tenantType));
+
+        query.addConditions(Tables.EH_ASSET_BILLS.ADDRESS_ID.eq(addressId));
+
+        query.addConditions(Tables.EH_ASSET_BILLS.STATUS.eq(AssetBillStatus.UNPAID.getCode()));
+        query.addConditions(Tables.EH_ASSET_BILLS.ACCOUNT_PERIOD.lt(currentAccountPeriod));
+
+        List<BigDecimal> accountAmounts = new ArrayList<>();
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listPeriodUnpaidAccountAmount, sql=" + query.getSQL());
+            LOGGER.debug("listPeriodUnpaidAccountAmount, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((EhAssetBillsRecord record) -> {
+            accountAmounts.add(record.getPeriodUnpaidAccountAmount());
+            return null;
+        });
+
+        return accountAmounts;
     }
 }
