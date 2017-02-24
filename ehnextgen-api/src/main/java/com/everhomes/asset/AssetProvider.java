@@ -27,5 +27,5 @@ public interface AssetProvider {
     List<BigDecimal> listPeriodUnpaidAccountAmount(Long ownerId, String ownerType, Long targetId, String targetType, Long addressId,
                                                    String tenantType, Long tenantId, Timestamp currentAccountPeriod);
 
-    List<AssetBill> listCurrentPeriodUnpaidBills(Long ownerId, String ownerType, Long targetId, String targetType);
+    List<AssetBill> listUnpaidBillsGroupByTenant(Long ownerId, String ownerType, Long targetId, String targetType);
 }

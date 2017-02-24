@@ -250,19 +250,9 @@ public class AssetProviderImpl implements AssetProvider {
     }
 
     @Override
-    public List<AssetBill> listCurrentPeriodUnpaidBills(Long ownerId, String ownerType, Long targetId, String targetType) {
+    public List<AssetBill> listUnpaidBillsGroupByTenant(Long ownerId, String ownerType, Long targetId, String targetType) {
 
         List<AssetBill> bills = new ArrayList<>();
-
-        long pageOffset = 0L;
-        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
-            locator.setAnchor(0L);
-            pageOffset = 1L;
-        }
-        if(locator.getAnchor() != 0L){
-            pageOffset = locator.getAnchor();
-        }
-        Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
 
         DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
         SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
@@ -274,10 +264,12 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
         query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
 
+        query.addGroupBy(Tables.EH_ASSET_BILLS.TENANT_ID, Tables.EH_ASSET_BILLS.TENANT_TYPE);
+
 
         if(LOGGER.isDebugEnabled()) {
-            LOGGER.debug("listAssetBill, sql=" + query.getSQL());
-            LOGGER.debug("listAssetBill, bindValues=" + query.getBindValues());
+            LOGGER.debug("listUnpaidBillsGroupByTenant, sql=" + query.getSQL());
+            LOGGER.debug("listUnpaidBillsGroupByTenant, bindValues=" + query.getBindValues());
         }
 
         query.fetch().map((EhAssetBillsRecord record) -> {

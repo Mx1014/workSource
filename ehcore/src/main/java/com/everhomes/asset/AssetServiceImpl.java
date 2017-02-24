@@ -1,20 +1,40 @@
 package com.everhomes.asset;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.entity.EntityType;
+import com.everhomes.group.GroupMember;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
+import com.everhomes.locale.LocaleString;
+import com.everhomes.locale.LocaleStringProvider;
+import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
+import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.search.GroupQueryResult;
+import com.everhomes.rest.user.Contact;
+import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.techpark.rental.RentalServiceImpl;
+import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -58,10 +78,22 @@ public class AssetServiceImpl implements AssetService {
     private OrganizationSearcher organizationSearcher;
 
     @Autowired
-    private OrganizationProvider organizationProvider;
+    private RolePrivilegeService rolePrivilegeService;
 
     @Autowired
     private AddressProvider addressProvider;
+
+    @Autowired
+    private MessagingService messagingService;
+
+    @Autowired
+    private UserProvider userProvider;
+
+    @Autowired
+    private LocaleStringProvider localeStringProvider;
+
+    @Autowired
+    private GroupProvider groupProvider;
 
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
@@ -416,6 +448,68 @@ public class AssetServiceImpl implements AssetService {
     public void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd) {
     //只要有未缴账单就推送 但根据租户信息 一个租户在一个园区多月未缴 有多个地址未缴 只推一条
 
+        List<AssetBill> bills = assetProvider.listUnpaidBillsGroupByTenant(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+
+        if(bills != null && bills.size() > 0) {
+            Integer namespaceId = UserContext.getCurrentNamespaceId();
+            LocaleString localeString = localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.NOTIFY_FEE,
+                    "zh_CN");
+            String content = localeString.getText();
+            bills.stream().map(bill -> {
+                if(bill.getContactNo() != null) {
+                    UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, bill.getContactNo());
+                    if(identifier != null) {
+                        sendMessageToUser(identifier.getOwnerUid(), content);
+                    }
+                } else {
+                    //没有contactNo的家庭 通知所有家庭成员
+                    if(TenantType.FAMILY.equals(TenantType.fromCode(bill.getTenantType()))) {
+                        List<GroupMember> groupMembers = groupProvider.findGroupMemberByGroupId(bill.getTenantId());
+                        if(groupMembers != null && groupMembers.size() > 0) {
+                            groupMembers.stream().map(groupMember -> {
+                                if(EntityType.USER.equals(EntityType.fromCode(groupMember.getMemberType()))) {
+                                    sendMessageToUser(groupMember.getMemberId(), content);
+                                }
+                                return null;
+                            });
+                        }
+                    }
+
+                    //没有contactNo的企业 通知所有企业管理员
+                    if(TenantType.ENTERPRISE.equals(TenantType.fromCode(bill.getTenantType()))) {
+                        ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
+                        command.setOwnerId(bill.getTenantId());
+                        command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
+                        command.setOrganizationId(bill.getTenantId());
+                        List<OrganizationContactDTO> orgContact = rolePrivilegeService.listOrganizationAdministrators(command);
+                        if(orgContact != null && orgContact.size() > 0) {
+                            orgContact.stream().map(contact -> {
+                                if(OrganizationMemberTargetType.USER.equals(OrganizationMemberTargetType.fromCode(contact.getTargetType()))) {
+                                    sendMessageToUser(contact.getTargetId(), content);
+                                }
+                               return null;
+                            });
+
+                        }
+                    }
+                }
+                return null;
+            });
+        }
+    }
+
+    private void sendMessageToUser(Long userId, String content) {
+        MessageDTO messageDto = new MessageDTO();
+        messageDto.setAppId(AppConstants.APPID_MESSAGING);
+        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
+        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
+        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBody(content);
+        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+
+        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(),
+                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
     }
 
     @Override
