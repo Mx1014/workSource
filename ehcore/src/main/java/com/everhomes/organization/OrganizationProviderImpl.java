@@ -3250,4 +3250,26 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 				});
 		return addressIds;
 	}
+
+	@Override
+	public OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId) {
+		List<OrganizationAddress> orgAddr = new ArrayList<>();
+		dbProvider.mapReduce(AccessSpec.readOnly(), null,
+				(DSLContext context, Object reducingContext) -> {
+					SelectQuery<EhOrganizationAddressesRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_ADDRESSES);
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.ADDRESS_ID.in(addressId));
+					query.addConditions(Tables.EH_ORGANIZATION_ADDRESSES.STATUS.eq(OrganizationAddressStatus.ACTIVE.getCode()));
+					query.fetch().map((EhOrganizationAddressesRecord record) -> {
+						orgAddr.add(ConvertHelper.convert(record, OrganizationAddress.class));
+						return null;
+					});
+
+					return true;
+				});
+		if(orgAddr.size() == 0) {
+			return null;
+		}
+
+		return orgAddr.get(0);
+	}
 }

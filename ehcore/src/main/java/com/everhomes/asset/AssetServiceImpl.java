@@ -6,12 +6,15 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.entity.EntityType;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyProvider;
 import com.everhomes.group.GroupMember;
 import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.app.AppConstants;
@@ -31,10 +34,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.techpark.rental.RentalServiceImpl;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
+import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -94,6 +94,12 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private GroupProvider groupProvider;
+
+    @Autowired
+    private OrganizationProvider organizationProvider;
+
+    @Autowired
+    private FamilyProvider familyProvider;
 
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
@@ -338,6 +344,25 @@ public class AssetServiceImpl implements AssetService {
         AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
         bill.setCreatorUid(UserContext.current().getUser().getId());
         getTotalAmount(bill);
+
+        Community community = communityProvider.findCommunityById(cmd.getTargetId());
+        //园区 查公司表
+        if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+
+            OrganizationAddress organizationAddress = organizationProvider.findActiveOrganizationAddressByAddressId(cmd.getAddressId());
+            if(organizationAddress != null) {
+                bill.setTenantId(organizationAddress.getOrganizationId());
+                bill.setTenantType(TenantType.ENTERPRISE.getCode());
+            }
+        }
+        //小区 查家庭
+        else if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
+            Family family = familyProvider.findFamilyByAddressId(cmd.getAddressId());
+            if(family != null) {
+                bill.setTenantId(family.getId());
+                bill.setTenantType(TenantType.FAMILY.getCode());
+            }
+        }
         assetProvider.creatAssetBill(bill);
 
         FindAssetBillCommand command = new FindAssetBillCommand();
