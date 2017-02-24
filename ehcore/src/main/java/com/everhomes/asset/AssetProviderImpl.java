@@ -248,4 +248,43 @@ public class AssetProviderImpl implements AssetProvider {
 
         return accountAmounts;
     }
+
+    @Override
+    public List<AssetBill> listCurrentPeriodUnpaidBills(Long ownerId, String ownerType, Long targetId, String targetType) {
+
+        List<AssetBill> bills = new ArrayList<>();
+
+        long pageOffset = 0L;
+        if (locator.getAnchor() == null || locator.getAnchor() == 0L){
+            locator.setAnchor(0L);
+            pageOffset = 1L;
+        }
+        if(locator.getAnchor() != 0L){
+            pageOffset = locator.getAnchor();
+        }
+        Integer offset =  (int) ((pageOffset - 1 ) * pageSize);
+
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
+
+
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_ASSET_BILLS.STATUS.eq(AssetBillStatus.UNPAID.getCode()));
+        query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
+
+
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("listAssetBill, sql=" + query.getSQL());
+            LOGGER.debug("listAssetBill, bindValues=" + query.getBindValues());
+        }
+
+        query.fetch().map((EhAssetBillsRecord record) -> {
+            bills.add(ConvertHelper.convert(record, AssetBill.class));
+            return null;
+        });
+
+        return bills;
+    }
 }

@@ -414,7 +414,7 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public void notifyUnpaidBillsContact(NotifyUnpaidBillsContactCommand cmd) {
-
+    //只要有未缴账单就推送 但根据租户信息 一个租户在一个园区多月未缴 有多个地址未缴 只推一条
 
     }
 
