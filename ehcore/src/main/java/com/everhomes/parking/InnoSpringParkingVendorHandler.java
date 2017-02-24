@@ -345,6 +345,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 
 	private InnoSpringCardInfo bubble(List<InnoSpringCardInfo> list) {
 		int size = list.size();
+		if (size == 0)
+			return null;
 		for (int i = size - 1; i > 0 ; i--) {
 			for (int j = 0; j < i; j++) {
 				if (Long.valueOf(list.get(j).getEnd_time()) > Long.valueOf(list.get(j+1).getEnd_time())) {
@@ -423,10 +425,11 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	    param.put("car_id", order.getPlateNumber());
 	    param.put("amt", order.getPrice().setScale(2, RoundingMode.FLOOR));
 
-		String json = post(createRequestParam(PAY_TEMP_FEE, param));
+		JSONObject newParam = createRequestParam(PAY_TEMP_FEE, param);
+		String json = post(newParam);
 
 		if(LOGGER.isDebugEnabled())
-			LOGGER.debug("Result={}, param={}", json, param);
+			LOGGER.debug("Result={}, param={}", json, newParam);
 
 		String entityJson = parseJson(json);
 
