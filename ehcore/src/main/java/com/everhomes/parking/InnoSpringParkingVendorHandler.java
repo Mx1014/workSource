@@ -381,6 +381,8 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 		Long time = strToLong(oldValidEnd + "235959");
 		String validStart = sdf1.format(addSecond(time, 1));
 
+		param.put("version", version);
+		param.put("licensekey", licensekey);
 		param.put("car_id", order.getPlateNumber());
 	    param.put("park_name", parkName);
 	    param.put("start_date", validStart);
