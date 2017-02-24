@@ -48,6 +48,8 @@ import java.util.List;
 public class ServiceAllianceDTO {
 
 	private Long     id;
+
+	private Integer namespaceId;
 	
 	private Long     parentId;
 	@NotNull
@@ -124,6 +126,15 @@ public class ServiceAllianceDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	public Long getParentId() {
 		return parentId;
 	}
