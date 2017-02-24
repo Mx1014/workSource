@@ -1333,6 +1333,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentInspectionEquipments exist = verifyEquipment(cmd.getId(), cmd.getOwnerType(), cmd.getOwnerId());
 			equipment = ConvertHelper.convert(cmd, EquipmentInspectionEquipments.class);
 			equipment.setGeohash(exist.getGeohash());
+			equipment.setQrCodeToken(exist.getQrCodeToken());
 			equipment.setNamespaceId(UserContext.getCurrentNamespaceId());
 			
 			if(cmd.getInstallationTime() != null)
@@ -1364,15 +1365,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 			equipment.setOperatorUid(user.getId());
 			equipment.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 			
-			String tokenString = UUID.randomUUID().toString();
-			equipment.setQrCodeToken(tokenString);
+
 			equipmentProvider.updateEquipmentInspectionEquipment(equipment);
 			equipmentSearcher.feedDoc(equipment);
-			
+
+			//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉
+			List<Long> updateStandardIds = new ArrayList<Long>();
 			if(eqStandardMap != null && eqStandardMap.size() > 0) {
-				//不带id的create，其他的看map表中的standardId在不在cmd里面 不在的删掉 
-				List<Long> updateStandardIds = new ArrayList<Long>();
-				
+
 				for(EquipmentStandardMapDTO dto : eqStandardMap) {
 					if(dto.getId() == null) {
 						EquipmentStandardMap map = ConvertHelper.convert(dto, EquipmentStandardMap.class);
@@ -1400,28 +1400,28 @@ public class EquipmentServiceImpl implements EquipmentService {
 							map.setReviewResult(ReviewResult.NONE.getCode());
 							map.setReviewStatus(EquipmentReviewStatus.WAITING_FOR_APPROVAL.getCode());
 							map.setCreatorUid(user.getId());
-							
+
 							equipmentProvider.createEquipmentStandardMap(map);
 							equipmentStandardMapSearcher.feedDoc(map);
 						}
-						
+
 						updateStandardIds.add(map.getStandardId());
 					}
 				}
 				
-				List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
-				for(EquipmentStandardMap map : maps) {
-					if(!updateStandardIds.contains(map.getStandardId())) {
-						map.setStatus(Status.INACTIVE.getCode());
-						map.setDeleterUid(user.getId());
-						map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-						equipmentProvider.updateEquipmentStandardMap(map);
-						equipmentStandardMapSearcher.feedDoc(map);
-						
-						inactiveTasks(equipment.getId(), map.getStandardId());
-					}
+			}
+
+			List<EquipmentStandardMap> maps = equipmentProvider.findByTarget(equipment.getId(), InspectionStandardMapTargetType.EQUIPMENT.getCode());
+			for(EquipmentStandardMap map : maps) {
+				if(!updateStandardIds.contains(map.getStandardId())) {
+					map.setStatus(Status.INACTIVE.getCode());
+					map.setDeleterUid(user.getId());
+					map.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+					equipmentProvider.updateEquipmentStandardMap(map);
+					equipmentStandardMapSearcher.feedDoc(map);
+
+					inactiveTasks(equipment.getId(), map.getStandardId());
 				}
-				
 			}
 			
 			List<EquipmentAttachmentDTO> attachments = new ArrayList<EquipmentAttachmentDTO>();
@@ -2433,7 +2433,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		return task;
 	}
 
-	@Scheduled(cron = "0 0 7 * * ? ")
+//	@Scheduled(cron = "0 0 7 * * ? ")
 	@Override
 	public void sendTaskMsg() {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
