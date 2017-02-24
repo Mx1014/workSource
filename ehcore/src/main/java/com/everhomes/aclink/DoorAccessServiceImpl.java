@@ -204,6 +204,8 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     final static long TASK_TICK_TIMEOUT = 5*60*1000;
     public final static String Manufacturer = "zuolin001";
     private final static long MAX_KEY_ID = 1024;
+    private static final long KEY_TICK_15_MINUTE = 15*60*1000l;
+//    private static final long KEY_TICK_30_MINUTE = 30*60*1000l;
     private static final long KEY_TICK_ONE_HOUR = 3600*1000l;
     private static final long KEY_TICK_ONE_DAY = KEY_TICK_ONE_HOUR*24l;
     private static final long KEY_TICK_7_DAY = KEY_TICK_ONE_DAY*7;
@@ -1034,7 +1036,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     doorAuth.setOwnerId(doorAccess.getOwnerId());
                     doorAuth.setOwnerType(doorAccess.getOwnerType());
                     doorAuth.setValidFromMs(System.currentTimeMillis() -  60*1000);
-                    doorAuth.setValidEndMs(System.currentTimeMillis()+ KEY_TICK_7_DAY);//TODO 7 Days
+                    doorAuth.setValidEndMs(System.currentTimeMillis()+ getQrTimeout());
                     doorAuth.setUserId(user.getId());
                     doorAuth.setStatus(DoorAuthStatus.VALID.getCode());
                     UserIdentifier ui = userProvider.findIdentifierById(user.getId());
@@ -1053,8 +1055,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey.setCreatorUid(user.getId());
                     aesUserKey.setDoorId(doorAccess.getId());
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-                        //7 Days
-                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + KEY_TICK_7_DAY);
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + getQrTimeout());
                         aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
                         aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
@@ -1347,8 +1348,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
                     aesUserKey.setDoorId(doorAccess.getId());
                     aesUserKey.setAuthId(doorAuth.getId());
                     if(doorAuth.getAuthType().equals(DoorAuthType.FOREVER.getCode())) {
-                        //7 Days
-                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + KEY_TICK_7_DAY);
+                        aesUserKey.setExpireTimeMs(System.currentTimeMillis() + getQrTimeout());//origin is KEY_TICK_7_DAY
                         aesUserKey.setKeyType(AesUserKeyType.NORMAL.getCode());
                     } else {
                         aesUserKey.setExpireTimeMs(doorAuth.getValidEndMs());
@@ -1877,8 +1877,6 @@ public class DoorAccessServiceImpl implements DoorAccessService {
         List<DoorAccessQRKeyDTO> qrKeys = new ArrayList<DoorAccessQRKeyDTO>();
         resp.setKeys(qrKeys);
         
-        resp.setQrTimeout(this.configProvider.getLongValue(AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60*60));
-        
         for(DoorAuth auth : auths) {
             
             if(!(auth.getAuthType().equals(DoorAuthType.FOREVER.getCode()) && auth.getRightOpen().equals((byte)1))) {
@@ -1896,8 +1894,10 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             }
             
             if(auth.getDriver().equals(DoorAccessDriverType.LINGLING.getCode())) {
+            	resp.setQrTimeout(this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_QR_TIMEOUTS, 4*24*60));
                 doLinglingQRKey(user, doorAccess, auth, qrKeys);
             } else {
+            	resp.setQrTimeout(this.getQrTimeout()/1000l);
                 doZuolinQRKey(user, doorAccess, auth, qrKeys);
             }
            
@@ -2988,6 +2988,16 @@ public class DoorAccessServiceImpl implements DoorAccessService {
     	}
     	
     	LOGGER.info("delete all auths ok! orgId=" + orgId + " userId=" + userId);
+    }
+    
+    private long getQrTimeout() {
+    	long tick = this.configProvider.getLongValue(UserContext.getCurrentNamespaceId(), AclinkConstant.ACLINK_USERKEY_TIMEOUTS, KEY_TICK_ONE_DAY/1000l);
+    	tick = tick * 1000l;
+    	if(tick < KEY_TICK_15_MINUTE) {
+    		tick = KEY_TICK_15_MINUTE;
+    	}
+    	
+    	return tick;
     }
     
     @Override

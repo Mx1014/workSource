@@ -181,4 +181,18 @@ public class BusinessController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <p>切换电商运营数据源</p>
+     * <b>URL: /business/switchBusinessPromotionDataSource</b>
+     */
+    @RequestMapping("switchBusinessPromotionDataSource")
+    @RestReturn(value = String.class)
+    public RestResponse switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd){
+        businessService.switchBusinessPromotionDataSource(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 }
