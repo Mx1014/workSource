@@ -381,8 +381,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
 				if(null != yellowPage){
 					dto.setSourceName("创客申请");
-					Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
-					dto.getBuildings().add(proessBuildingDTO(building));
+					if(yellowPage.getBuildingId()!=null){
+						Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}
 				}
 			}
 		}
