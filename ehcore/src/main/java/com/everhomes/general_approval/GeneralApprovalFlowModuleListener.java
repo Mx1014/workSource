@@ -135,7 +135,7 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 						FlowCaseEntity e = new FlowCaseEntity();
 						GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
 						if(null == dto ){
-							LOGGER.error("+++++++++++++++++++出现了问题!!! form表单找不到用户提交的字段: 字段:["+val.getFieldName()+"] \n form 表单 "+JSON.toJSONString(fieldDTOs));
+							LOGGER.error("+++++++++++++++++++error! cannot fand this field  name :["+val.getFieldName()+"] \n form   "+JSON.toJSONString(fieldDTOs));
 							continue;
 						}
 							
