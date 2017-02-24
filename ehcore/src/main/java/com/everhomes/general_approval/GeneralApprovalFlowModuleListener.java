@@ -134,8 +134,13 @@ public abstract class GeneralApprovalFlowModuleListener implements FlowModuleLis
 						// 不在默认fields的就是自定义字符串，组装这些
 						FlowCaseEntity e = new FlowCaseEntity();
 						GeneralFormFieldDTO dto = getFieldDTO(val.getFieldName(),fieldDTOs); 
+						if(null == dto ){
+							LOGGER.error("+++++++++++++++++++出现了问题!!! form表单找不到用户提交的字段: 字段:["+val.getFieldName()+"] \n form 表单 "+JSON.toJSONString(fieldDTOs));
+							continue;
+						}
+							
 						e.setKey(dto.getFieldDisplayName()==null?dto.getFieldName():dto.getFieldDisplayName());
-						 
+						
 						switch (GeneralFormFieldType.fromCode(val.getFieldType())) {
 						case SINGLE_LINE_TEXT:
 							e.setEntityType(FlowCaseEntityType.LIST.getCode()); 
