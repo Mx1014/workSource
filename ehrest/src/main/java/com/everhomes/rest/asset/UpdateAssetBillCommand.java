@@ -13,6 +13,8 @@ import java.sql.Timestamp;
  *     <li>ownerType：账单所属物业公司类型</li>
  *     <li>targetId：账单所属园区id</li>
  *     <li>targetType：账单所属园区类型</li>
+ *     <li>buildingName：楼栋名</li>
+ *     <li>apartmentName：门牌名</li>
  *     <li>source：账单产生模式：0: auto 自动, 1: third party 第三方, 2: manual 手动导入</li>
  *     <li>accountPeriod：账期</li>
  *     <li>addressId：门牌id</li>
@@ -56,6 +58,10 @@ public class UpdateAssetBillCommand {
 
     @NotNull
     private String targetType;
+
+    private String buildingName;
+
+    private String apartmentName;
 
     private Byte source;
     private Timestamp accountPeriod;
@@ -121,6 +127,22 @@ public class UpdateAssetBillCommand {
 
     public void setTargetType(String targetType) {
         this.targetType = targetType;
+    }
+
+    public String getBuildingName() {
+        return buildingName;
+    }
+
+    public void setBuildingName(String buildingName) {
+        this.buildingName = buildingName;
+    }
+
+    public String getApartmentName() {
+        return apartmentName;
+    }
+
+    public void setApartmentName(String apartmentName) {
+        this.apartmentName = apartmentName;
     }
 
     public Byte getSource() {

@@ -12,6 +12,8 @@ CREATE TABLE `eh_asset_bills` (
   `source` TINYINT NOT NULL DEFAULT 0 COMMENT '0: auto, 1: third party, 2: manual',
   
   `account_period` DATETIME NOT NULL,
+  `building_name` VARCHAR(128),
+  `apartment_name` VARCHAR(128),
   `address_id` BIGINT NOT NULL,
   `contact_no` VARCHAR(32),
   

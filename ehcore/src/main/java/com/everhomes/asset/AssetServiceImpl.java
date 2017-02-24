@@ -5,6 +5,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
 import com.everhomes.family.FamilyProvider;
@@ -29,8 +30,8 @@ import com.everhomes.rest.organization.OrganizationMemberTargetType;
 import com.everhomes.rest.organization.SearchOrganizationCommand;
 import com.everhomes.rest.quality.QualityServiceErrorCode;
 import com.everhomes.rest.search.GroupQueryResult;
-import com.everhomes.rest.user.Contact;
 import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.techpark.rental.RentalServiceImpl;
@@ -38,6 +39,8 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -46,6 +49,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
@@ -100,6 +104,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private FamilyProvider familyProvider;
+
+    @Autowired
+    private DbProvider dbProvider;
 
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
@@ -322,7 +329,71 @@ public class AssetServiceImpl implements AssetService {
 
     @Override
     public ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
-        return null;
+        ListAssetBillTemplateCommand command = ConvertHelper.convert(cmd, ListAssetBillTemplateCommand.class);
+        List<Field> fields = getTemplateFields(command);
+
+        ImportDataResponse importDataResponse = new ImportDataResponse();
+        try {
+            //解析excel
+            List resultList = PropMrgOwnerHandler.processorExcel(mfile.getInputStream());
+
+            if(null == resultList || resultList.isEmpty()){
+                LOGGER.error("File content is empty。userId="+userId);
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_FILE_CONTEXT_ISNULL,
+                        "File content is empty");
+            }
+            LOGGER.debug("Start import data...,total:" + resultList.size());
+
+            List<String> errorDataLogs = importAssetBills(cmd, resultList, fields, userId);
+
+
+            LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
+            if(null == errorDataLogs || errorDataLogs.isEmpty()){
+                LOGGER.debug("Data import all success...");
+            }else{
+                //记录导入错误日志
+                for (String log : errorDataLogs) {
+                    LOGGER.error(log);
+                }
+            }
+
+            importDataResponse.setTotalCount((long)resultList.size()-1);
+            importDataResponse.setFailCount((long)errorDataLogs.size());
+            importDataResponse.setLogs(errorDataLogs);
+        } catch (IOException e) {
+            LOGGER.error("File can not be resolved...");
+            e.printStackTrace();
+        }
+        return importDataResponse;
+    }
+
+    private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId){
+        List<String> errorDataLogs = new ArrayList<String>();
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        for (String str : list) {
+            String[] s = str.split("\\|\\|");
+            dbProvider.execute((TransactionStatus status) -> {
+                CreatAssetBillCommand bill = new CreatAssetBillCommand();
+                bill.setOwnerId(cmd.getOwnerId());
+                bill.setOwnerType(cmd.getOwnerType());
+                bill.setTargetId(cmd.getTargetId());
+                bill.setTargetType(cmd.getTargetType());
+                int i = 0;
+                for(Field field : fields) {
+                    try {
+                        field.set(bill, s[i]);
+                        i++;
+                    } catch (Exception e) {
+                        e.printStackTrace();
+                    }
+                }
+                creatAssetBill(bill);
+                return null;
+            });
+        }
+        return errorDataLogs;
+
     }
 
     //非当月则没有滞纳金 所以数据库里面不加lateFee
@@ -345,6 +416,12 @@ public class AssetServiceImpl implements AssetService {
         bill.setCreatorUid(UserContext.current().getUser().getId());
         getTotalAmount(bill);
 
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        bill.setNamespaceId(namespaceId);
+        if(cmd.getAddressId() == null) {
+            Address address = addressProvider.findApartmentAddress(namespaceId, cmd.getTargetId(), cmd.getBuildingName(), cmd.getApartmentName());
+            bill.setAddressId(address.getId());
+        }
         Community community = communityProvider.findCommunityById(cmd.getTargetId());
         //园区 查公司表
         if(CommunityType.COMMERCIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
@@ -585,5 +662,23 @@ public class AssetServiceImpl implements AssetService {
 
         List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(command);
         return dtos;
+    }
+
+    private List<Field> getTemplateFields(ListAssetBillTemplateCommand cmd) {
+        List<Field> fields = new ArrayList<>();
+        List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(cmd);
+        if(dtos != null && dtos.size() > 0) {
+            Class c=CreatAssetBillCommand.class;
+            try {
+                for(AssetBillTemplateFieldDTO dto : dtos) {
+                    Field field = c.getDeclaredField(dto.getFieldName());
+                    fields.add(field);
+                }
+
+            } catch (Exception e) {
+                e.printStackTrace();
+            }
+        }
+        return fields;
     }
 }

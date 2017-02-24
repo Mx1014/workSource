@@ -15,8 +15,8 @@ import javax.validation.constraints.NotNull;
  *     <li>startTime：账期开始时间</li>
  *     <li>endTime：账期结束时间</li>
  *     <li>status: 状态 参考{@link com.everhomes.rest.asset.AssetBillStatus}</li>
- *     <li>pageAnchor: 状态 参考{@link com.everhomes.rest.asset.AssetBillStatus}</li>
- *     <li>pageSize: 状态 参考{@link com.everhomes.rest.asset.AssetBillStatus}</li>
+ *     <li>pageAnchor: 锚点</li>
+ *     <li>pageSize: 页面大小</li>
  * </ul>
  */
 public class ListSimpleAssetBillsCommand {
