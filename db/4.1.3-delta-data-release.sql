@@ -468,9 +468,11 @@ INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `modu
 INSERT INTO `eh_service_module_scopes` (`id`, `namespace_id`, `module_id`, `module_name`, `owner_type`, `owner_id`, `default_order`, `apply_policy`) 
 	VALUES ((@module_scope_id := @module_scope_id + 1), '999985', '20400', '', NULL, NULL, NULL, '2');
 	
+-- 华润OE 广场配置服务热线 add sfyan 20170224
 SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);
 insert into `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) values((@item_id := @item_id + 1),'999985','0','0','0','/home','Bizs','','服务热线','cs://1/image/aW1hZ2UvTVRwalpXTm1PVEJoWWpSbE0yRTJaVFUwTlRVNFpqVmxORGswT1RSaE1XSm1OUQ','1','1','45','{}','0','0','1','0','1','0',NULL,NULL,NULL,'1','pm_admin','0',NULL,NULL);
 
+-- 科兴 广场配置url修改 add sfyan 20170224
 UPDATE eh_launch_pad_items SET action_data = '{"url":"http://m.mafengwo.cn/"}' WHERE namespace_id = 999983 AND item_label = '旅游';
 UPDATE eh_launch_pad_items SET action_data = '{"url":"http://m.ziroom.com/"}' WHERE namespace_id = 999983 AND item_label = '租房';
 UPDATE eh_launch_pad_items SET action_data = '{"url":"http://m.maizuo.com/"}' WHERE namespace_id = 999983 AND item_label = '电影';
