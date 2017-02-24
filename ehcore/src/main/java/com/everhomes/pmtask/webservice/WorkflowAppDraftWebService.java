@@ -17,7 +17,6 @@ import javax.xml.ws.WebServiceFeature;
  * Generated source version: 2.2
  * 
  */
-@WebServiceClient(name = "WorkflowAppDraftWebService", targetNamespace = "http://interfaces.workflow.modules.firstsoft.cn", wsdlLocation = "http://oa.ssipc.com.cn:8890/oa/service/WorkflowAppDraftWebService?wsdl")
 public class WorkflowAppDraftWebService
     extends Service
 {
