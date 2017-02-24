@@ -5,3 +5,7 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 
 SET @id := (SELECT MAX(id) FROM eh_locale_strings);
 INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES(( @id := @id +1),'expansion.applyType','4','zh_CN','创客申请');
+
+-- 更改威新LINK+的两条活动为官方活动，add by tt, 20170222
+UPDATE eh_activities SET official_flag = 1, category_id = 1 WHERE id IN (1508,1509);
+UPDATE eh_forum_posts SET official_flag = 1, activity_category_id = 1 WHERE id IN (188703, 188704);
