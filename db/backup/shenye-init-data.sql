@@ -4183,9 +4183,8 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 
 
-
-
-
+-- 管理员场景下的任务icon名称修改为"客户沟通" add by xujuan 20170221
+update eh_launch_pad_items set item_label="客户沟通",item_name="客户沟通" where id = 110069 and namespace_id = 999992;
 
 
 

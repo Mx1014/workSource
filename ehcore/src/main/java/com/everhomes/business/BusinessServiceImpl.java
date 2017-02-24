@@ -2211,7 +2211,6 @@ public class BusinessServiceImpl implements BusinessService {
         param.put("namespaceId", String.valueOf(namespaceId));
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
-
         try {
             String jsonStr = HttpUtils.post((bizServer + bizApi), param, 10, "UTF-8");
 
