@@ -2195,7 +2195,7 @@ public class BusinessServiceImpl implements BusinessService {
     }
 
     private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId) {
-        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "");
+        String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml");
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
 
         // bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
@@ -2222,15 +2222,12 @@ public class BusinessServiceImpl implements BusinessService {
                 for (Commodity commodity : resp.commodities) {
                     ModulePromotionEntityDTO dto = new ModulePromotionEntityDTO();
                     // dto.setId(commodity.id);
-                    dto.setSubject(commodity.commoNo);
+                    dto.setSubject(commodity.commoName);
                     dto.setPosterUrl(commodity.defaultPic);
                     ModulePromotionInfoDTO infoDTO = new ModulePromotionInfoDTO(ModulePromotionInfoType.TEXT.getCode(), null, "¥" + commodity.price);
                     dto.setInfoList(Collections.singletonList(infoDTO));
 
-                    Map<String, String> metadataMap = new HashMap<>();
-                    metadataMap.put("url", commodity.uri);
-
-                    dto.setMetadata(StringHelper.toJsonString(metadataMap));
+                    dto.setMetadata(String.format("{\"url\":\"%s\"}", commodity.uri));
 
                     dtoList.add(dto);
                 }
