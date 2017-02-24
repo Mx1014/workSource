@@ -296,10 +296,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		ListEnterpriseApplyEntryResponse res = new ListEnterpriseApplyEntryResponse();
 		
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
-		if(request.getApplyType() != null &&ApplyEntryApplyType.MAKER_ZONE.getCode() == request.getApplyType().byteValue()){
-			request.setApplyType(null);
-			request.setSourceType(ApplyEntrySourceType.MARKET_ZONE.getCode());
-		}
+//		if(request.getApplyType() != null &&ApplyEntryApplyType.MAKER_ZONE.getCode() == request.getApplyType().byteValue()){
+//			request.setApplyType(null);
+//			request.setSourceType(ApplyEntrySourceType.MARKET_ZONE.getCode());
+//		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
