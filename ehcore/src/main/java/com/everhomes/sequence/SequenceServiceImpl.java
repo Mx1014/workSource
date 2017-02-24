@@ -1235,6 +1235,12 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhQuestionnaireAnswers.class, Tables.EH_QUESTIONNAIRE_ANSWERS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_QUESTIONNAIRE_ANSWERS.ID.max()).from(Tables.EH_QUESTIONNAIRE_ANSWERS).fetchOne().value1();
         });
+        syncTableSequence(null, EhOsObjects.class, Tables.EH_OS_OBJECTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_OS_OBJECTS.ID.max()).from(Tables.EH_OS_OBJECTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhOsObjectDownloadLogs.class, Tables.EH_OS_OBJECT_DOWNLOAD_LOGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_OS_OBJECT_DOWNLOAD_LOGS.ID.max()).from(Tables.EH_OS_OBJECT_DOWNLOAD_LOGS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
