@@ -80,8 +80,10 @@ public class BaseLoginAuthTestCase extends BaseServerTestCase {
     }
     
     protected void initNewSystemData() {
+    	long start = System.currentTimeMillis();
     	String serverInitfilePath = "data/tables/init_system_data.sql";
     	dbProvider.runClassPathSqlFile(serverInitfilePath);
+    	System.err.println("new set up need time: "+(System.currentTimeMillis()-start));
     }
     
     protected void initCustomData() {
