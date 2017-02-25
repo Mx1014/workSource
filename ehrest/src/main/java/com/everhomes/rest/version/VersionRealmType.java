@@ -43,6 +43,8 @@ package com.everhomes.rest.version;
  * <li>IOS_HUARUN("iOS_Huarun"): 华润 iOS版APP</li>
  * <li>ANDROID_KEXIN("Android_Kexin"): 科兴 Android版APP</li>
  * <li>IOS_KEXIN("iOS_Kexin"): 科兴 iOS版APP</li>
+ * <li>ANDROID_QUANZHI("Android_Quanzhi"): 全至100 Android版APP</li>
+ * <li>IOS_QUANZHI("iOS_Quanzhi"): 全至100 iOS版APP</li>
  * </ul>
  */
 public enum VersionRealmType {
@@ -93,7 +95,9 @@ public enum VersionRealmType {
     ANDROID_TSPACE("Android_Tspace"),
     IOS_TSPACE("iOS_Tspace"),
     ANDROID_KEXIN("Android_Kexin"),
-    IOS_KEXIN("iOS_Kexin");
+    IOS_KEXIN("iOS_Kexin"),
+    ANDROID_QUANZHI("Android_Quanzhi"),
+    IOS_QUANZHI("iOS_Quanzhi");
     
     private String code;
     private VersionRealmType(String code) {
