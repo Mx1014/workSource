@@ -163,8 +163,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private List<EbeiServiceType> getTypes(EbeiServiceType type, String parentId) {
 
 		List<EbeiServiceType> result = new ArrayList<>();
-
 		List<EbeiServiceType> types = type.getItems();
+
+		if (null == parentId)
+			return types;
+
 		if (parentId.equals(type.getServiceId())) {
 			result.addAll(types);
 			return result;
