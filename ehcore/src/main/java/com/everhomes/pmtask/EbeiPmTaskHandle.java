@@ -148,7 +148,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 //			List<EbeiServiceType> types = type.getItems();
 			type.setServiceId(String.valueOf(PmTaskHandle.EBEI_TASK_CATEGORY));
 			List<EbeiServiceType> types = getTypes(type, parentId);
-			
+
+			if (null == parentId)
+				types = type.getItems();
+			else
+				types = getTypes(type, parentId);
 			List<CategoryDTO> result = types.stream().map(c -> {
 				return convertCategory(c);
 				
@@ -164,9 +168,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
 		List<EbeiServiceType> result = new ArrayList<>();
 		List<EbeiServiceType> types = type.getItems();
-
-		if (null == parentId)
-			return types;
 
 		if (parentId.equals(type.getServiceId())) {
 			result.addAll(types);
