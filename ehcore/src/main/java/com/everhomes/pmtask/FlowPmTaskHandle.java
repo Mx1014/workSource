@@ -152,7 +152,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 			task.setNamespaceId(user.getNamespaceId());
 			task.setOwnerId(ownerId);
 			task.setOwnerType(ownerType);
-			task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
+			task.setStatus(PmTaskFlowStatus.ACCEPTING.getCode());
 			task.setUnprocessedTime(now);
 
 			if(null != cmd.getReserveTime())
