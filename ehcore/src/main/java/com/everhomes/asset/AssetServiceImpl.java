@@ -147,6 +147,8 @@ public class AssetServiceImpl implements AssetService {
                 //小区 查用户所在门牌
                 else if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
                     tenantType = TenantType.FAMILY.getCode();
+
+
                 }
 
             }
