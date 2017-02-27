@@ -231,5 +231,20 @@ public class AssetController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /asset/checkTokenRegister</b>
+     * <p>检查手机号是否是注册用户</p>
+     * @return 资产账单模板字段列表
+     */
+    @RequestMapping("checkTokenRegister")
+    @RestReturn(value=Boolean.class)
+    public RestResponse checkTokenRegister(@Valid CheckTokenRegisterCommand cmd) {
+
+        RestResponse response = new RestResponse(this.assetService.checkTokenRegister(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 //    脚本配置设置用户模板
 }

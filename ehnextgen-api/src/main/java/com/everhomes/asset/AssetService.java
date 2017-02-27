@@ -24,4 +24,6 @@ public interface AssetService {
     void deleteBill(DeleteBillCommand cmd);
     List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
 
+    Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
+
 }

@@ -679,6 +679,17 @@ public class AssetServiceImpl implements AssetService {
         return dtos;
     }
 
+    @Override
+    public Boolean checkTokenRegister(CheckTokenRegisterCommand cmd) {
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(UserContext.getCurrentNamespaceId(), cmd.getContactNo());
+
+        if(identifier == null) {
+            return false;
+        }
+
+        return true;
+    }
+
     private List<Field> getTemplateFields(ListAssetBillTemplateCommand cmd) {
         List<Field> fields = new ArrayList<>();
         List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(cmd);

@@ -1,0 +1,309 @@
+{
+  "eh_users": [
+    {
+      "gender": "2",
+      "locale": "zh_CN",
+      "uuid": "63c07961-fb8f-444d-9a56-dc628a6dbe28",
+      "points": "10",
+      "community_id": "240111044331051220",
+      "reg_channel_id": "1",
+      "account_name": "10003",
+      "password_hash": "4f8dfbe68e0d4c7cac0bef2754a612d6af2f9eb962fcc5c5b70663a3d6e0b602",
+      "id": "211307",
+      "namespace_user_token": "",
+      "address": "0",
+      "salt": "aabbe8981182ba60d43dc9481333080d",
+      "create_time": "2016-06-07 14:49:29",
+      "level": "2",
+      "address_id": "0",
+      "namespace_id": "999992",
+      "nick_name": "dd",
+      "reg_ip": "",
+      "reg_city_id": "0",
+      "status": "1"
+    }
+  ],
+  "eh_user_identifiers": [
+    {
+      "identifier_token": "19112349996",
+      "claim_status": "3",
+      "create_time": "2016-06-07 14:49:29",
+      "namespace_id": "999992",
+      "owner_uid": "211307",
+      "identifier_type": "0",
+      "id": "217887"
+    }
+  ],
+  "eh_organizations": [
+    {
+      "group_type": "ENTERPRISE",
+      "path": "/1000750",
+      "update_time": "2016-02-27 11:02:25",
+      "id": "1000750",
+      "level": "1",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "0",
+      "name": "深业集团（深圳）物业管理有限公司",
+      "directly_enterprise_id": "0",
+      "organization_type": "PM",
+      "status": "2"
+    },
+    {
+      "group_type": "GROUP",
+      "path": "/1000750/1000753",
+      "update_time": "2016-06-07 14:54:54",
+      "id": "1000753",
+      "level": "2",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "1000750",
+      "name": "执行一队",
+      "directly_enterprise_id": "1000750",
+      "organization_type": "PM",
+      "status": "2"
+    },
+    {
+      "group_type": "GROUP",
+      "path": "/1000750/1000754",
+      "update_time": "2016-06-07 14:54:54",
+      "id": "1000754",
+      "level": "2",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "1000750",
+      "name": "执行二队",
+      "directly_enterprise_id": "1000750",
+      "organization_type": "PM",
+      "status": "2"
+    },
+    {
+      "group_type": "DEPARTMENT",
+      "path": "/1000750/1000752",
+      "update_time": "2016-06-07 14:54:54",
+      "id": "1000752",
+      "level": "2",
+      "address_id": "0",
+      "show_flag": "1",
+      "namespace_id": "0",
+      "parent_id": "1000750",
+      "name": "核查部",
+      "directly_enterprise_id": "1000750",
+      "organization_type": "PM",
+      "status": "2"
+    }
+  ],
+  "eh_organization_members": [
+    {
+      "gender": "1",
+      "contact_type": "0",
+      "id": "2101304",
+      "contact_token": "19112349996",
+      "contact_name": "dd",
+      "target_type": "USER",
+      "target_id": "211307",
+      "member_group": "manager",
+      "namespace_id": "999992",
+      "group_id": "1000752",
+      "group_path": "/1000750/1000752",
+      "organization_id": "1000750",
+      "status": "3"
+    },
+    {
+      "gender": "1",
+      "contact_type": "0",
+      "id": "2101306",
+      "contact_token": "19112349996",
+      "contact_name": "dd",
+      "target_type": "USER",
+      "target_id": "211307",
+      "member_group": "manager",
+      "namespace_id": "999992",
+      "group_id": "0",
+      "organization_id": "1000753",
+      "status": "3"
+    },
+    {
+      "gender": "1",
+      "contact_type": "0",
+      "id": "2101310",
+      "contact_token": "19112349996",
+      "contact_name": "dd",
+      "target_type": "USER",
+      "target_id": "211307",
+      "member_group": "manager",
+      "namespace_id": "999992",
+      "group_id": "0",
+      "organization_id": "1000754",
+      "status": "3"
+    }
+  ],
+  "eh_quality_inspection_categories": [
+    {
+      "path": "/1",
+      "create_time": "2016-05-05 11:58:34",
+      "owner_id": "1000750",
+      "parent_id": "0",
+      "name": "环境服务",
+      "creator_uid": "212500",
+      "id": "1",
+      "owner_type": "PM",
+      "status": "2"
+    },
+    {
+      "path": "/1/2",
+      "create_time": "2016-05-05 11:58:51",
+      "owner_id": "1000750",
+      "parent_id": "1",
+      "name": "绿化",
+      "creator_uid": "212500",
+      "id": "2",
+      "owner_type": "PM",
+      "status": "2",
+      "score": "10",
+      "description": "隔热个人刚刚突然"
+    }
+  ],
+  "eh_communities":[
+	{
+	"id":240111044331051300,
+	"uuid":"02b9b391-d3bd-11e6-a9ba-005056965989",
+	"city_id":14956,
+	"city_name":"深圳市",
+	"area_id":14957,
+	"area_name":"福田区",
+	"name":"深业花园",
+	"alias_name":"深业花园",
+	"address":"深圳市福田区福中路106号",
+	"description":"深业花园是深业控股有限公司和深业集团（深圳）有限公司开发建设的园林式智能化高尚住宅小区，位于深圳市福田中心区东北片，东邻彩田北路、西邻海田路、南邻福中路、北面与中银花园一路之隔。深业花园由5栋楼高12层和5栋楼高22～30层主建筑组成，另设有楼高3层的会所和幼儿园各一栋。停车库设在地下，实行人车分流。小区的配套设施完善，布局合理，10栋住宅楼沿周边布置和首层架空6米，构成一个2万多平方米的园林绿地和庭园大空间。",
+	"apt_count":682,
+	"creator_uid":1,
+	"status":2,
+	"create_time":"2017-1-6 03:05:42",
+	"community_type":0,
+	"default_forum_id":179900,
+	"feedback_forum_id":179901,
+	"update_time":"2017-1-6 03:05:42",
+	"namespace_id":999992
+	},
+	{
+	"id":240111044331051301,
+	"uuid":"02f21c39-d3bd-11e6-a9ba-005056965989",
+	"city_id":14956,
+	"city_name":"深圳市",
+	"area_id":14957,
+	"area_name":"福田区",
+	"name":"岭秀名苑",
+	"alias_name":"岭秀名苑",
+	"address":"深圳市福田区青岭二路",
+	"description":"小区2004年7月入伙，由两座连体的高层塔楼组成住户342户，地面33层、地下一层为停车场",
+	"apt_count":342,
+	"creator_uid":1,
+	"status":2,
+	"create_time":"2017-1-6 03:05:43",
+	"community_type":0,
+	"default_forum_id":179900,
+	"feedback_forum_id":179901,
+	"update_time":"2017-1-6 03:05:43",
+	"namespace_id":999992
+	},
+	{
+	"id":240111044331051302,
+	"uuid":"031ec6ca-d3bd-11e6-a9ba-005056965989",
+	"city_id":14956,
+	"city_name":"深圳市",
+	"area_id":14958,
+	"area_name":"罗湖区",
+	"name":"深发花园",
+	"alias_name":"深发花园",
+	"address":"深圳市罗湖区深南东路1013-1015号",
+	"zipcode":null,
+	"description":"深发花园是由深业集团（深圳）有限公司负责开发兴建的高层商住大厦，位于深圳特区繁华的深南东路，1992年动工兴建，于1994年12月竣工入伙。深发花园由成发阁和恒发阁两座32层高的塔楼组成，占地面积为5980平米，总建筑面积为41400平米，停车场面积1500平米，共计有停车位45个，绿化面积2900平米，占商住区占地面积48.5%，花红草绿，曲径回环，布局合理。",
+	"apt_count":482,
+	"creator_uid":1,
+	"status":2,
+	"create_time":"2017-1-6 03:05:43",
+	"community_type":0,
+	"default_forum_id":179900,
+	"feedback_forum_id":179901,
+	"update_time":"2017-1-6 03:05:43",
+	"namespace_id":999992
+	},
+	{
+	"id":240111044331051303,
+	"uuid":"034c442d-d3bd-11e6-a9ba-005056965989",
+	"city_id":14956,
+	"city_name":"深圳市",
+	"area_id":14957,
+	"area_name":"福田区",
+	"name":"风临左岸",
+	"alias_name":"风临左岸",
+	"address":"深圳市福田区农林路53号",
+	"description":"风临左岸是深业鸿基南方（集团）有限公司开发建设的园林式智能化高尚住宅小区，位于深圳市福田农林路与深南市场交汇处。风临左岸由3栋组成，A栋3个单元楼高18层，B栋1个单元楼高24层，C栋2个单元楼高18层。方型顶层，外观色调优雅，区中心有大面积绿化带，加上竹林小溪绿地等。停车场设在地下，小区的配套设施完善，布局合理，3栋住宅楼沿周边布置和首层架空6米，构成一个1.5万多平方米的园林绿地和庭院大空间。",
+	"apt_count":423,
+	"creator_uid":1,
+	"status":2,
+	"create_time":"2017-1-6 03:05:43",
+	"community_type":0,
+	"default_forum_id":179900,
+	"feedback_forum_id":179901,
+	"update_time":"2017-1-6 03:05:43",
+	"namespace_id":999992
+	}
+	],
+	"eh_community_geopoints":[
+	{
+	"id":240111044331047900,
+	"community_id":240111044331051300,
+	"longitude":114.072751,
+	"latitude":22.551399,
+	"geohash":"ws107c35rv2n"
+	},
+	{
+	"id":240111044331047901,
+	"community_id":240111044331051301,
+	"longitude":114.0643,
+	"latitude":22.5664,
+	"geohash":"ws107s54fcfe"
+	},
+	{
+	"id":240111044331047902,
+	"community_id":240111044331051302,
+	"longitude":114.138834,
+	"latitude":22.546149,
+	"geohash":"ws10m23kgdg1"
+	},
+	{
+	"id":240111044331047903,
+	"community_id":240111044331051303,
+	"longitude":114.01525,
+	"latitude":22.54219,
+	"geohash":"ws104rxmgbu3"
+	}
+	],
+	"eh_organization_communities":[
+	{
+	"id":109,
+	"organization_id":1000750,
+	"community_id":240111044331051300
+	},
+	{
+	"id":110,
+	"organization_id":1000750,
+	"community_id":240111044331051301
+	},
+	{
+	"id":111,
+	"organization_id":1000750,
+	"community_id":240111044331051302
+	},
+	{
+	"id":112,
+	"organization_id":1000750,
+	"community_id":240111044331051303
+	}
+	]
+}
