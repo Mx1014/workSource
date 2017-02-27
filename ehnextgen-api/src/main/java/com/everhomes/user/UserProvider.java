@@ -102,4 +102,7 @@ public interface UserProvider {
 	List<User> listUserByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, Integer pageSize);
 	List<User> listUserByUpdateTime(Integer namespaceId, Long timestamp, Integer pageSize);
 	Organization findAnyUserRelatedOrganization(Long id, Integer namespaceId);
+
+    List<User> listUserByNickName(String keyword);
+    List<UserGroup> listUserActiveGroups(long uid, String groupDiscriminator);
 }

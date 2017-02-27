@@ -21,6 +21,8 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -144,10 +146,21 @@ public class AssetServiceImpl implements AssetService {
                     }
                 }
 
-                //小区 查用户所在门牌
+                //小区 查用户所属家庭
                 else if(CommunityType.RESIDENTIAL.equals(CommunityType.fromCode(community.getCommunityType()))) {
                     tenantType = TenantType.FAMILY.getCode();
+                    List<User> users = userProvider.listUserByNickName(cmd.getTenant());
 
+                    if(users != null && users.size() > 0) {
+                        for(User user : users) {
+                            List<UserGroup> list = userProvider.listUserActiveGroups(user.getId(), GroupDiscriminator.FAMILY.getCode());
+                            if(list != null && list.size() > 0) {
+                                for(UserGroup userGroup : list) {
+                                    tenantIds.add(userGroup.getGroupId());
+                                }
+                            }
+                        }
+                    }
 
                 }
 
