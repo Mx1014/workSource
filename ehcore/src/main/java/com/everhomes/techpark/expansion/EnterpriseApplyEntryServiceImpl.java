@@ -460,7 +460,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
     		}
-    		if(null!=resourceCategory.getResourceCategryId())
+    		if(null != resourceCategory && null!=resourceCategory.getResourceCategryId())
     			projectId = resourceCategory.getResourceCategryId();
             return this.createFlowCase(request,projectId);
         });
