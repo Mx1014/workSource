@@ -214,6 +214,7 @@ import javax.servlet.http.HttpServletResponse;
 import com.everhomes.util.*;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.commons.lang.SystemUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -3010,6 +3011,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	public ListEquipmentTasksResponse listEquipmentTasks(
 			ListEquipmentTasksCommand cmd) {
 
+		long startTime = System.currentTimeMillis();
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		User user = UserContext.current().getUser();
 		
@@ -3082,11 +3084,14 @@ public class EquipmentServiceImpl implements EquipmentService {
         }).filter(r->r!=null).collect(Collectors.toList());
         
 		response.setTasks(dtos);
-		
+
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse=" + (endTime - startTime));
 		return response;
 	}
 	
 	private List<ExecuteGroupAndPosition> listUserRelateGroups() {
+		Long startTime = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
@@ -3137,6 +3142,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("listUserRelateGroups, groupDtos = {}" , groupDtos);
 		}
+
+		Long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost: listUserRelateGroups userId = " + user.getId() + ", elapse=" + (endTime - startTime));
 		return groupDtos;
 	}
 	
