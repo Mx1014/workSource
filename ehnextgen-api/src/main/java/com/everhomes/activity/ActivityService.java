@@ -127,4 +127,6 @@ public interface ActivityService {
     ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd);
 
     ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
+
+	SignupInfoDTO manualSignup(ManualSignupCommand cmd);
 }

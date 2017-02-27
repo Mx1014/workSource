@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  *<li>contactPerson:联系人</li>
  *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ *<li>signupEndTime:活动报名截止时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>checkInFlag:签到标签，0-不需要签到、1-需要签到</li>
  *<li>confirmFlag:确认标签，0-不需要确认、1-需要确认</li>
  *<li>maxAttendeeCount:最大邀请人数</li>
@@ -52,6 +53,7 @@ public class ActivityPostCommand{
     private String contactNumber;
     private String startTime;
     private String endTime;
+    private String signupEndTime;
     private Byte checkinFlag;
     private Byte confirmFlag;
     private Integer maxAttendeeCount;
@@ -88,6 +90,14 @@ public class ActivityPostCommand{
     private Byte visibleRegionType;
     
     private Long visibleRegionId;
+
+	public String getSignupEndTime() {
+		return signupEndTime;
+	}
+
+	public void setSignupEndTime(String signupEndTime) {
+		this.signupEndTime = signupEndTime;
+	}
 
 	public String getContentType() {
 		return contentType;

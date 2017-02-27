@@ -362,7 +362,14 @@ public class ActivityServiceImpl implements ActivityService {
         return dto;
     }
     
-    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+    
+    
+    @Override
+	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
+		return null;
+	}
+
+	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
     	
         String scope = ActivityNotificationTemplateCode.SCOPE;
         

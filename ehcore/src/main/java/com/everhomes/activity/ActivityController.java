@@ -70,6 +70,17 @@ public class ActivityController extends ControllerBase {
         return response;
     }
     
+    @RequestMapping("manualSignup")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse manualSignup(@Valid ManualSignupCommand cmd) {
+    	SignupInfoDTO result = activityService.manualSignup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        response.setResponseObject(result);
+        return response;
+    }
+    
     /**
      * 
      * @return {@link }
