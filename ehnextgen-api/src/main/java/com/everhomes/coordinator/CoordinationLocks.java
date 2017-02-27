@@ -48,6 +48,8 @@ public enum CoordinationLocks {
     PARKING_CLEARANCE_LOG("parking.clearance.log"),
     PARKING_CLEARANCE_OPERATOR("parking.clearance.operator"),
 
+    ENERGY_DAY_STAT_SCHEDULE("energy.day.stat.schedule"),
+    ENERGY_MONTH_STAT_SCHEDULE("energy.month.stat.schedule"),
     ENERGY_METER("energyMeter"),
     ENERGY_METER_CATEGORY("energyMeter.category"),
     ENERGY_METER_FORMULA("energyMeter.formula"),

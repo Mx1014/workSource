@@ -28,6 +28,7 @@ import ch.qos.logback.core.joran.conditional.ElseAction;
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -380,8 +381,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
 				if(null != yellowPage){
 					dto.setSourceName("创客申请");
-					Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
-					dto.getBuildings().add(proessBuildingDTO(building));
+					if(yellowPage.getBuildingId()!=null){
+						Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}
 				}
 			}
 		}
@@ -406,15 +409,16 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		
-			
         FlowCase flowCase = dbProvider.execute(status -> {
             enterpriseApplyEntryProvider.createApplyEntry(request);
+            Long projectId = cmd.getCommunityId();
             EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
             opRequestBuilding.setEnterpriseOpRequestsId(request.getId()); 
             opRequestBuilding.setCreatorUid(UserContext.current().getUser().getId());
             opRequestBuilding.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
             opRequestBuilding.setStatus(EnterpriseOpRequestBuildingStatus.NORMAL.getCode());
-        	//TODO : 根据情况保存地址
+            ResourceCategoryAssignment resourceCategory = null;
+            //TODO : 根据情况保存地址
     		if(null != request.getContractId()){
     			//1.保存合同带的地址
     			Contract contract = contractProvider.findContractById(request.getContractId());
@@ -426,6 +430,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     				com.everhomes.building.Building building = buildingProvider.findBuildingByName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), buildingApartmentDTO.getBuildingName());
     				if(building !=null){
     					opRequestBuilding.setBuildingId(building.getId());
+    					resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(), 
+    							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
     					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
     				}
     			}
@@ -436,19 +442,27 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			//2. 创客空间带的地址
     			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
     			opRequestBuilding.setBuildingId(yellowPage.getBuildingId());
+    			resourceCategory = communityProvider.findResourceCategoryAssignment(yellowPage.getBuildingId(), 
+						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
     		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
     			//3. 园区介绍直接就是楼栋的地址
     			opRequestBuilding.setBuildingId(cmd.getSourceId());
+    			resourceCategory = communityProvider.findResourceCategoryAssignment(cmd.getSourceId(), 
+						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
     		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())||
 					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(cmd.getSourceType())){
     			//4. 虚位以待的楼栋地址
     			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
     			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
+    			resourceCategory = communityProvider.findResourceCategoryAssignment(leasePromotion.getBuildingId(), 
+						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
     		}
-            return this.createFlowCase(request);
+    		if(null != resourceCategory && null!=resourceCategory.getResourceCategryId())
+    			projectId = resourceCategory.getResourceCategryId();
+            return this.createFlowCase(request,projectId);
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
@@ -535,7 +549,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		  
 		
 	}
-    private FlowCase createFlowCase(EnterpriseOpRequest request) {
+    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 
         CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
@@ -544,17 +558,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         // flowCase摘要内容
         flowCaseCmd.setContent(this.getBriefContent(request));
         flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
+        flowCaseCmd.setProjectId(projectId);
         if (flow != null) {
             flowCaseCmd.setFlowMainId(flow.getFlowMainId());
             flowCaseCmd.setFlowVersion(flow.getFlowVersion());
-           
 
             return flowService.createFlowCase(flowCaseCmd);
         } else {
         	GeneralModuleInfo gm = new GeneralModuleInfo();
         	gm.setOrganizationId(request.getEnterpriseId());
         	gm.setProjectType(EntityType.COMMUNITY.getCode());
-        	gm.setProjectId(request.getCommunityId());
+        	gm.setProjectId(projectId);
         	gm.setNamespaceId(UserContext.getCurrentNamespaceId());
         	gm.setModuleId(ExpansionConst.MODULE_ID);
 			gm.setOwnerId(request.getCommunityId());
