@@ -137,7 +137,7 @@ public class TechparkSynchronizedAction implements Runnable{
 	public void synchronizedData(PmTask task, List<PmTaskAttachmentDTO> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
-		param.put("fileFlag", "1");
+		param.put("fileFlag", String.valueOf(null==task.getPriority()?1:task.getPriority()));
 		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
