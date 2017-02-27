@@ -8,6 +8,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -48,26 +49,6 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.PmTaskAddressType;
-import com.everhomes.rest.pmtask.PmTaskAttachmentType;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
-import com.everhomes.rest.pmtask.PmTaskOperateType;
-import com.everhomes.rest.pmtask.PmTaskSourceType;
-import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -171,7 +152,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 			task.setNamespaceId(user.getNamespaceId());
 			task.setOwnerId(ownerId);
 			task.setOwnerType(ownerType);
-			task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
+			task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
 			task.setUnprocessedTime(now);
 
 			if(null != cmd.getReserveTime())
