@@ -13,7 +13,7 @@ import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 
 /**
- * <p>launchPad信息
+ * <p>launchPad信息</p>
  * <ul>
  * <li>launchPadItems: 服务市场信息，参考{@link com.everhomes.rest.launchpad.LaunchPadItemDTO}</li>
  * </ul>

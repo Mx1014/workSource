@@ -5,7 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /***
- * 
+ * <ul>
  * <li> id: ID       </li>
 *<li> parentId:父节点ID  </li>
 *<li> ownerType: 拥有者类型：现在是comunity</li>
@@ -29,6 +29,7 @@ import com.everhomes.util.StringHelper;
 *<li> attachments: 附件列表</li>
 *<li> buildingId: 楼栋id</li>
 *<li> buildingName: 楼栋名称</li>
+*</ul>
  * */
 public class YellowPageDTO {
 	private java.lang.Long     id;
