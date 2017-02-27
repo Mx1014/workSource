@@ -113,7 +113,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
 		PmTaskDTO dto = pmTaskService.getTaskDetail(cmd);
-		
+
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
@@ -196,25 +196,28 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			if("ACCEPTING".equals(nodeType)) {
 				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
 				pmTaskProvider.updateTask(task);
-			}
-			else if("ASSIGNING".equals(nodeType)) {
+
 				//TODO: 同步数据到科技园
-				task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
-				pmTaskProvider.updateTask(task);
-				
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
 					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null && evt.getEntityId() != null 
+					if(evt != null && evt.getEntityId() != null
 							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
-						
+
 						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
 						Long targetId = sel.getSourceIdA();
-						
+
 						synchronizedTaskToTechpark(task, targetId, flow.getOrganizationId());
 					}
-					
+
 				}
+			}
+			else if("ASSIGNING".equals(nodeType)) {
+
+				task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
+				pmTaskProvider.updateTask(task);
+				
+
 			}else if("PROCESSING".equals(nodeType)) {
 				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
 				pmTaskProvider.updateTask(task);
