@@ -48,7 +48,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
-	private PmTaskService pmTaskService;
+	private PmTaskCommonServiceImpl pmTaskCommonService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
@@ -175,7 +175,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-		PmTaskDTO dto = pmTaskService.getTaskDetail(cmd);
+		PmTaskDTO dto = pmTaskCommonService.getTaskDetail(cmd, false);
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		

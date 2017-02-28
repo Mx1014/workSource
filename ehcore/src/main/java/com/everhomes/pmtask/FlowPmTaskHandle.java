@@ -2,9 +2,8 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
-import com.alibaba.fastjson.JSONObject;
+import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -16,9 +15,6 @@ import org.springframework.transaction.TransactionStatus;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowService;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
@@ -38,6 +34,10 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	private FlowService flowService;
 	@Autowired
 	private PmTaskCommonServiceImpl pmTaskCommonService;
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
+	@Autowired
+	private FlowNodeProvider flowNodeProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -59,12 +59,14 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
 			createFlowCaseCommand.setReferId(task.getId());
 			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
-			//    		createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
+			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 			createFlowCaseCommand.setContent(task.getContent());
 			createFlowCaseCommand.setProjectId(task.getOwnerId());
 			createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
+			task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
 			task.setFlowCaseId(flowCase.getId());
 			pmTaskProvider.updateTask(task);
 			return task;
