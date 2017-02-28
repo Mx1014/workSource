@@ -13,6 +13,7 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.*;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.flow.*;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.collections.CollectionUtils;
@@ -42,10 +43,6 @@ import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -532,5 +529,23 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		return handler.listUserTasks(cmd);
 	}
 
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		handler.updateTaskByOrg(cmd);
+
+		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowMainId(flowCase.getFlowMainId());
+		stepDTO.setFlowVersion(flowCase.getFlowVersion());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		stepDTO.setStepCount(flowCase.getStepCount());
+		flowService.processAutoStep(stepDTO);
+
+	}
 
 }

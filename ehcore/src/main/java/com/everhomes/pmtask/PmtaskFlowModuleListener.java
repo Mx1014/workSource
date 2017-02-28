@@ -81,9 +81,74 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		
 	}
 
+	//状态改变之后
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		//当前节点已经变成上一个节点
+		FlowGraphNode currentNode = ctx.getPrefixNode();
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+		//业务的下一个节点是当前节点
+		FlowNode nextNode = ctx.getCurrentNode().getFlowNode();
+
+		String stepType = ctx.getStepType().getCode();
+		String params = flowNode.getParams();
+
+		if(StringUtils.isBlank(params)) {
+			LOGGER.error("Invalid flowNode param.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+					"Invalid flowNode param.");
+		}
+
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
+
+		Long flowId = flowNode.getFlowMainId();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		String tag1 = flow.getStringTag1();
+
+		long now = System.currentTimeMillis();
+		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
+		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
+
+			if("ACCEPTING".equals(nodeType)) {
+//				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				pmTaskProvider.updateTask(task);
+
+				//TODO: 同步数据到科技园
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				if(namespaceId == 1000000) {
+					FlowGraphEvent evt = ctx.getCurrentEvent();
+					if(evt != null && evt.getEntityId() != null
+							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
+
+						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
+						Long targetId = sel.getSourceIdA();
+
+						synchronizedTaskToTechpark(task, targetId, flow.getOrganizationId());
+					}
+
+				}
+			}
+			else if("ASSIGNING".equals(nodeType)) {
+
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				pmTaskProvider.updateTask(task);
+
+			}else if("PROCESSING".equals(nodeType)) {
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				pmTaskProvider.updateTask(task);
+			}
+		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+
+			task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
+			pmTaskProvider.updateTask(task);
+		}
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 		
 	}
 
@@ -166,71 +231,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		return null;
 	}
 
+	//fireButton 之前
 	@Override
 	public void onFlowButtonFired(FlowCaseState ctx) {
 		
-		FlowGraphNode currentNode = ctx.getCurrentNode();
-		FlowNode flowNode = currentNode.getFlowNode();
-		FlowCase flowCase = ctx.getFlowCase();
-		FlowNode nextNode = ctx.getNextNode().getFlowNode();
 
-		String stepType = ctx.getStepType().getCode();
-		String params = flowNode.getParams();
-		
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-    				"Invalid flowNode param.");
-		}
-		
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
-		
-		Long flowId = flowNode.getFlowMainId();
-		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-		String tag1 = flow.getStringTag1();
-		
-		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
-		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if("ACCEPTING".equals(nodeType)) {
-//				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
-				pmTaskProvider.updateTask(task);
-
-				//TODO: 同步数据到科技园
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				if(namespaceId == 1000000) {
-					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null && evt.getEntityId() != null
-							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
-
-						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
-						Long targetId = sel.getSourceIdA();
-
-						synchronizedTaskToTechpark(task, targetId, flow.getOrganizationId());
-					}
-
-				}
-			}
-			else if("ASSIGNING".equals(nodeType)) {
-
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
-				pmTaskProvider.updateTask(task);
-
-			}else if("PROCESSING".equals(nodeType)) {
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
-				pmTaskProvider.updateTask(task);
-			}
-		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			
-			task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
-			pmTaskProvider.updateTask(task);
-		}
-		//elasticsearch更新
-		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
 	}
 
 	private Byte convertFlowStatus(String params) {

@@ -2022,28 +2022,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 
 	@Override
 	public void updateTaskByOrg(UpdateTaskCommand cmd) {
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		if(null == cmd.getTaskId()) {
-        	LOGGER.error("Invalid taskId parameter, cmd={}", cmd);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid taskId parameter.");
-        }
-		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
-		if(null == task) {
-        	LOGGER.error("PmTask not found.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"PmTask not found.");
-        }
-		if(null != cmd.getCategoryId()) 
-			checkCategory(cmd.getCategoryId());
-		task.setCategoryId(cmd.getCategoryId());
-		task.setPriority(cmd.getPriority());
-		if(null != cmd.getReserveTime())
-			task.setReserveTime(new Timestamp(cmd.getReserveTime()));
-		else
-			task.setReserveTime(null);
-		task.setSourceType(cmd.getSourceType());
-		pmTaskProvider.updateTask(task);
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		String handle = configProvider.getValue(HANDLER + namespaceId, PmTaskHandle.SHEN_YE);
+
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
+
+		handler.updateTaskByOrg(cmd);
 	}
 
 	@Override
