@@ -86,6 +86,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
 		//当前节点已经变成上一个节点
 		FlowGraphNode currentNode = ctx.getPrefixNode();
+
+		if (null == currentNode)
+			return;
+
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
 		//业务的下一个节点是当前节点
@@ -109,10 +113,10 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		String tag1 = flow.getStringTag1();
 
 		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
+		LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
-			if("ACCEPTING".equals(nodeType)) {
+			if ("ACCEPTING".equals(nodeType)) {
 //				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
 				task.setStatus(convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
@@ -131,13 +135,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 					}
 
 				}
-			}
-			else if("ASSIGNING".equals(nodeType)) {
+			}else if ("ASSIGNING".equals(nodeType)) {
 
 				task.setStatus(convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 
-			}else if("PROCESSING".equals(nodeType)) {
+			}else if ("PROCESSING".equals(nodeType)) {
 				task.setStatus(convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 			}
@@ -249,6 +252,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		JSONObject paramJson = JSONObject.parseObject(params);
 		String nodeType = paramJson.getString("nodeType");
 
+		LOGGER.debug("pmtask flow nodeTppe: {}", nodeType);
 		switch (nodeType) {
 			case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
 			case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
