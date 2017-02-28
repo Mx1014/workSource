@@ -1209,10 +1209,10 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
-	 * <b>URL: /org/listOrganizationsByModuleId</b>
+	 * <b>URL: /org/listOrganizationsContactByModuleId</b>
 	 * <p>获取获取业务部门的机构人员</p>
 	 */
-	@RequestMapping("listOrganizationsByModuleId")
+	@RequestMapping("listOrganizationsContactByModuleId")
 	@RestReturn(value=OrganizationContactDTO.class, collection = true)
 	public RestResponse listOrganizationsContactByModuleId(ListOrganizationByModuleIdCommand cmd){
 		RestResponse res = new RestResponse(organizationService.listOrganizationsContactByModuleId(cmd));
