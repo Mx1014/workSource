@@ -29,7 +29,9 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.poll.ProcessStatus;
@@ -53,6 +55,7 @@ import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -228,6 +231,12 @@ public class ActivityServiceImpl implements ActivityService {
         //if date time format is not ok,return now
         Date convertStartTime = convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss");
         Date convertEndTime = convert(cmd.getEndTime(), "yyyy-MM-dd HH:mm:ss");
+        Date signupEndTime = null;
+        if (org.apache.commons.lang.StringUtils.isBlank(cmd.getSignupEndTime())) {
+			signupEndTime = convertStartTime;
+		}else {
+			signupEndTime = convert(cmd.getSignupEndTime(), "yyyy-MM-dd HH:mm:ss");
+		}
         long endTimeMs=  DateHelper.currentGMTTime().getTime();
         long startTimeMs = DateHelper.currentGMTTime().getTime();
         if(convertStartTime!=null){
@@ -239,6 +248,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setPosterUri(cmd.getPosterUri());
         activity.setStartTime(new Timestamp(startTimeMs));
         activity.setEndTime(new Timestamp(endTimeMs));
+        activity.setSignupEndTime(new Timestamp(signupEndTime.getTime()));
         activity.setStartTimeMs(startTimeMs);
         activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -269,6 +279,10 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setConfirmFamilyId(user.getAddressId());
         roster.setAdultCount(0);
         roster.setChildCount(0);
+        
+        // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
+        addAdditionalInfo(roster, user, activity);
+        
         activityProvider.createActivityRoster(roster);
         
     }
@@ -288,6 +302,14 @@ public class ActivityServiceImpl implements ActivityService {
         	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
 					"beyond contraint quantity!");
+		}
+        
+        // 添加报名截止时间检查，add by tt, 20170228
+        Timestamp signupEndTime = getSignupEndTime(activity);
+        if (System.currentTimeMillis() > signupEndTime.getTime()) {
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME,
+					"beyond activity signup end time!");
 		}
         
         Post post = forumProvider.findPostById(activity.getPostId());
@@ -351,6 +373,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setGroupId(activity.getGroupId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -369,6 +392,10 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
+    	
+    	
+    	
+    	
 		return null;
 	}
 
@@ -431,10 +458,69 @@ public class ActivityServiceImpl implements ActivityService {
         if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
         	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
         }
+        
+        // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
+        addAdditionalInfo(roster, user, activity);
+        
         return roster;
     }
 
-    @Override
+    private void addAdditionalInfo(ActivityRoster roster, User user, Activity activity) {
+    	SignupInfoDTO signupInfoDTO = verifyPerson(activity.getNamespaceId(), user);
+    	roster.setPhone(signupInfoDTO.getPhone());
+    	roster.setRealName(signupInfoDTO.getRealName());
+    	roster.setGender(signupInfoDTO.getGender());
+    	roster.setCommunityName(signupInfoDTO.getCommunityName());
+    	roster.setOrganizationName(signupInfoDTO.getOrganizationName());
+    	roster.setPosition(signupInfoDTO.getPosition());
+	}
+    
+    private SignupInfoDTO verifyPerson(Integer namespaceId, User user) {
+    	SignupInfoDTO signupInfoDTO = new SignupInfoDTO();
+    	List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+    	if (userIdentifiers != null && userIdentifiers.size() > 0) {
+    		signupInfoDTO.setPhone(userIdentifiers.get(0).getIdentifierToken());
+		}
+    	signupInfoDTO.setGender(user.getGender());
+    	
+    	OrganizationMember organizationMember = findAnyOrganizationMember(namespaceId, user.getId());
+    	if (organizationMember != null) {
+    		signupInfoDTO.setRealName(organizationMember.getContactName());
+    		Organization organization = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
+    		//如果是职位，取之
+			if (OrganizationGroupType.fromCode(organizationMember.getGroupType()) == OrganizationGroupType.JOB_POSITION) {
+				if (organization != null) {
+					signupInfoDTO.setPosition(organization.getName());
+				}
+			}
+			//找出公司
+			Long organizationId = Long.parseLong(organization.getPath().split("/")[1]);
+			Organization rootOrganization = organizationProvider.findOrganizationById(organizationId);
+			if (rootOrganization != null) {
+				signupInfoDTO.setOrganizationName(rootOrganization.getName());
+				//找出园区
+				OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(rootOrganization.getId());
+				if (organizationCommunityRequest != null) {
+					Community community = communityProvider.findCommunityById(organizationCommunityRequest.getCommunityId());
+					if (community != null) {
+						signupInfoDTO.setCommunityName(community.getName());
+					}
+				}
+			}
+		}
+    	
+    	return signupInfoDTO;
+    }
+
+	private OrganizationMember findAnyOrganizationMember(Integer namespaceId, Long userId) {
+		OrganizationMember organizationMember = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(namespaceId, userId, OrganizationGroupType.JOB_POSITION.getCode());
+		if (organizationMember == null) {
+			organizationMember = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(namespaceId, userId, OrganizationGroupType.ENTERPRISE.getCode());
+		}
+		return organizationMember;
+	}
+
+	@Override
     public ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd) {
         User user = UserContext.current().getUser();
         Activity activity = activityProvider.findActivityById(cmd.getActivityId());
@@ -472,6 +558,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setGroupId(activity.getGroupId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -592,6 +679,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -641,6 +729,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -840,6 +929,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         fixupVideoInfo(dto);//added by janson
         
@@ -908,6 +998,7 @@ public class ActivityServiceImpl implements ActivityService {
 //        String convertEndTime = format.format(activity.getEndTime().getTime());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         fixupVideoInfo(dto);//added by janson
         return dto;
@@ -1042,6 +1133,7 @@ public class ActivityServiceImpl implements ActivityService {
 //        String convertEndTime = format.format(activity.getEndTime().getTime());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setForumId(post.getForumId());
@@ -1191,6 +1283,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setFamilyId(activity.getCreatorFamilyId());
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
+            dto.setSignupEndTime(getSignupEndTime(activity).toString());
             dto.setGroupId(activity.getGroupId());
             dto.setPosterUrl(getActivityPosterUrl(activity));
             dto.setForumId(post.getForumId());
@@ -1250,6 +1343,7 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setPosterUrl(getActivityPosterUrl(activity));
           dto.setStartTime(activity.getStartTime().toString());
           dto.setStopTime(activity.getEndTime().toString());
+          dto.setSignupEndTime(getSignupEndTime(activity).toString());
           dto.setGroupId(activity.getGroupId());
           dto.setForumId(post.getForumId());
           fixupVideoInfo(dto);//added by janson
@@ -1263,6 +1357,13 @@ public class ActivityServiceImpl implements ActivityService {
         return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), result);
     }
 
+    private Timestamp getSignupEndTime(Activity activity) {
+    	if (activity.getSignupEndTime() == null) {
+			return activity.getStartTime();
+		}
+    	return activity.getSignupEndTime();
+    }
+    
 	@Override
 	public boolean isPostIdExist(Long postId) {
 		Activity activity = activityProvider.findSnapshotByPostId(postId);
@@ -1339,6 +1440,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setPosterUrl(getActivityPosterUrl(activity));
 			dto.setStartTime(activity.getStartTime().toString());
 			dto.setStopTime(activity.getEndTime().toString());
+	        dto.setSignupEndTime(getSignupEndTime(activity).toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
 			fixupVideoInfo(dto);//added by janson
@@ -1410,6 +1512,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setPosterUrl(getActivityPosterUrl(activity));
 			dto.setStartTime(activity.getStartTime().toString());
 			dto.setStopTime(activity.getEndTime().toString());
+	        dto.setSignupEndTime(getSignupEndTime(activity).toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
 			fixupVideoInfo(dto);//added by janson
@@ -1666,6 +1769,7 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setFamilyId(activity.getCreatorFamilyId());
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
+            dto.setSignupEndTime(getSignupEndTime(activity).toString());
             dto.setGroupId(activity.getGroupId());
 //            dto.setPosterUrl(getActivityPosterUrl(activity));
             String posterUrl = getActivityPosterUrl(activity);
@@ -1882,6 +1986,7 @@ public class ActivityServiceImpl implements ActivityService {
 		    	        dto.setFamilyId(activity.getCreatorFamilyId());
 		    	        dto.setStartTime(activity.getStartTime().toString());
 		    	        dto.setStopTime(activity.getEndTime().toString());
+		    	        dto.setSignupEndTime(getSignupEndTime(activity).toString());
 		    	        dto.setGroupId(activity.getGroupId());
 		    	        dto.setPosterUrl(getActivityPosterUrl(activity));
 		    	        dto.setForumId(r.getForumId());
@@ -2148,6 +2253,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -2380,6 +2486,7 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setFamilyId(activity.getCreatorFamilyId());
                 dto.setStartTime(activity.getStartTime().toString());
                 dto.setStopTime(activity.getEndTime().toString());
+                dto.setSignupEndTime(getSignupEndTime(activity).toString());
                 dto.setGroupId(activity.getGroupId());
                 dto.setPosterUrl(getActivityPosterUrl(activity));
                 if (user != null) {
@@ -2427,6 +2534,7 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setFamilyId(activity.getCreatorFamilyId());
                 dto.setStartTime(activity.getStartTime().toString());
                 dto.setStopTime(activity.getEndTime().toString());
+                dto.setSignupEndTime(getSignupEndTime(activity).toString());
                 dto.setGroupId(activity.getGroupId());
                 dto.setPosterUrl(getActivityPosterUrl(activity));
                 if (user != null) {

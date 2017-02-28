@@ -21,6 +21,7 @@ import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityListResponse;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
 import com.everhomes.rest.activity.ActivityPostCommand;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
@@ -32,6 +33,7 @@ import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
 
@@ -176,6 +178,11 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         
         ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                 ActivityPostCommand.class);
+        
+        if (StringUtils.isNotBlank(cmd.getSignupEndTime()) && cmd.getSignupEndTime().compareTo(cmd.getEndTime()) > 0) {
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_SIGNUP_END_TIME,
+					"signup end time must less or equal to end time");
+		}
         
         if(null == cmd.getNamespaceId()){
         	Forum forum = forumProvider.findForumById(post.getForumId());
