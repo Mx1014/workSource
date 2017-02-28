@@ -642,20 +642,80 @@ public class ForumServiceImpl implements ForumService {
             return null;
         }
     }
-    
+
     @Override
     public void deletePost(Long forumId, Long postId) {
-        deletePost(forumId, postId, true);
+        deletePost(forumId, postId, true, null, null, null);
     }
-    
+
     @Override
-    public void deletePost(Long forumId, Long postId, boolean deleteUserPost) {
+    public void deletePost(Long forumId, Long postId, Long currentOrgId, String ownerType, Long ownerId) {
+        deletePost(forumId, postId, true, currentOrgId, ownerType, ownerId);
+    }
+
+    private void checkDeletePostPrivilege(Long currentOrgId, String ownerType, Long ownerId, Post post){
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        if(CategoryConstants.CATEGORY_ID_NOTICE == post.getContentCategory()){
+            if(post.getParentPostId() != null && post.getParentPostId() != 0){
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_NOTIC_COMMENT);
+            }else{
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_NOTIC_TOPIC);
+            }
+        }else if(CategoryConstants.CATEGORY_ID_ACTIVITY == post.getContentCategory() && post.getActivityCategoryId() == 0L){
+            if(post.getParentPostId() != null && post.getParentPostId() != 0){
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_COMMENT0);
+            }else{
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_TOPIC0);
+            }
+        }else if(CategoryConstants.CATEGORY_ID_ACTIVITY == post.getContentCategory() && post.getActivityCategoryId() == 0L){
+            if(post.getParentPostId() != null && post.getParentPostId() != 0 && post.getActivityCategoryId() == 1L){
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_COMMENT1);
+            }else{
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_TOPIC1);
+            }
+        }else{
+            if(post.getParentPostId() != null && post.getParentPostId() != 0 && post.getActivityCategoryId() == 1L){
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_OHTER_COMMENT);
+            }else{
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_OHTER_TOPIC);
+            }
+        }
+    }
+
+    @Override
+    public void deletePost(Long forumId, Long postId, boolean deleteUserPost){
+        deletePost(forumId, postId, true, null, null, null);
+    }
+
+    @Override
+    public void deletePost(Long forumId, Long postId, boolean deleteUserPost, Long currentOrgId, String ownerType, Long ownerId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
         checkForumParameter(userId, forumId, "getTopic");
         
         Post post = checkPostParameter(userId, forumId, postId, "deletePost");
+
+
+        Post pPost = null;
+        if(post.getParentPostId() != null && post.getParentPostId() != 0) {
+            pPost = this.forumProvider.findPostById(post.getParentPostId());
+            if(null != pPost){
+                post.setContentCategory(pPost.getContentCategory());
+                post.setActivityCategoryId(pPost.getActivityCategoryId());
+            }
+        }
+        Post parentPost = pPost;
+        //check权限 add sfyan 20170228
+        // 后台园区删除帖子或者评论的时候 currentOrgId 或者 ownerId 一定非空， 其他地方调用删除接口，暂时不做处理,代表不需要权限校验
+        if((null != ownerType && null != ownerId) || null != currentOrgId){
+            //不是自己发的贴或者评论 就要进行权限校验
+            if(post.getCreatorUid().longValue() != userId.longValue()){
+                checkDeletePostPrivilege(currentOrgId, ownerType, ownerId, post);
+            }
+        }
+
+
         Long embededAppId = post.getEmbeddedAppId();
         ForumEmbeddedHandler handler = getForumEmbeddedHandler(embededAppId);
         
@@ -684,12 +744,9 @@ public class ForumServiceImpl implements ForumService {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
                  // 删除评论时帖子的child count减1 mod by xiongying 20160428
-                    if(post.getParentPostId() != null && post.getParentPostId() != 0) {
-                    	Post parentPost = this.forumProvider.findPostById(post.getParentPostId());
-                    	if(parentPost != null) {
-                    		parentPost.setChildCount(parentPost.getChildCount() - 1);
-                            this.forumProvider.updatePost(parentPost);
-                    	}
+                    if(parentPost != null) {
+                        parentPost.setChildCount(parentPost.getChildCount() - 1);
+                        this.forumProvider.updatePost(parentPost);
                     }
                     if(deleteUserPost) {
                         if(userId.equals(post.getCreatorUid())){

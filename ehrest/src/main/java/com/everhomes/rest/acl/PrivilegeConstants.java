@@ -115,4 +115,15 @@ public interface PrivilegeConstants {
     public static final long CUSTOMER_LIST      = 10132L;// 查看客户资料
     public static final long CUSTOMER_MANAGE    = 10133L;// 管理客户资料
     public static final long CUSTOMER_DELETE    = 10134L;// 删除客户资料
+
+
+    public static final long DELETE_OHTER_TOPIC      = 10140L;// 普通贴删除权限
+    public static final long DELETE_NOTIC_TOPIC    = 10141L;// 公告贴删除权限
+    public static final long DELETE_ACTIVITY_TOPIC0    = 10142L;// 非官方活动贴删除权限
+    public static final long DELETE_ACTIVITY_TOPIC1    = 10143L;// 官方活动贴删除权限
+
+    public static final long DELETE_OHTER_COMMENT      = 10150L;// 普通评论删除权限
+    public static final long DELETE_NOTIC_COMMENT    = 10151L;// 公告评论删除权限
+    public static final long DELETE_ACTIVITY_COMMENT0    = 10152L;// 非官方活动评论删除权限
+    public static final long DELETE_ACTIVITY_COMMENT1    = 10153L;// 官方活动评论删除权限
 }
