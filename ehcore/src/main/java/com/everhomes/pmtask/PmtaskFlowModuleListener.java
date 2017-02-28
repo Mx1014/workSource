@@ -13,7 +13,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
@@ -102,18 +101,15 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		JSONObject paramJson = JSONObject.parseObject(params);
 		String nodeType = paramJson.getString("nodeType");
 
-		Long flowId = flowNode.getFlowMainId();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
 		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		String tag1 = flow.getStringTag1();
 
-		long now = System.currentTimeMillis();
 		LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
 			if ("ACCEPTING".equals(nodeType)) {
-//				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 
 				//TODO: 同步数据到科技园
@@ -132,11 +128,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 			}else if ("ASSIGNING".equals(nodeType)) {
 
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 
 			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -152,19 +148,16 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onFlowCaseActionFired(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public String onFlowCaseBriefRender(FlowCase flowCase) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -225,7 +218,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -280,27 +272,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	}
 
-	private Byte convertFlowStatus(String params) {
-
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
-		}
-
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
-
-		LOGGER.debug("pmtask flow nodeTppe: {}", nodeType);
-		switch (nodeType) {
-			case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
-			case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
-			case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
-			case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
-			default: return null;
-		}
-	}
-
 	//同步数据到科技园
 	private void synchronizedTaskToTechpark(PmTask task, Long targetId, Long organizationId) {
 		UserContext context = UserContext.current();
@@ -319,13 +290,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
+
 	}
 }

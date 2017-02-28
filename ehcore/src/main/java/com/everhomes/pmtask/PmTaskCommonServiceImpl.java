@@ -347,7 +347,7 @@ class PmTaskCommonServiceImpl {
         }
     }
 
-    public PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd, Boolean flag) {
+    PmTaskDTO getTaskDetail(GetTaskDetailCommand cmd, Boolean flag) {
 
         checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
         checkId(cmd.getId());
@@ -437,7 +437,7 @@ class PmTaskCommonServiceImpl {
         }).collect(Collectors.toList());
     }
 
-    void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
+    private void setParam(Map<String, Object> map, Long userId, PmTaskLogDTO dto) {
         User user = userProvider.findUserById(userId);
         UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
         map.put("operatorName", user.getNickName());

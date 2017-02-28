@@ -55,8 +55,6 @@ import com.everhomes.util.RuntimeErrorException;
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI)
 public class EbeiPmTaskHandle implements PmTaskHandle{
 	
-	public static final String CATEGORY_SEPARATOR = "/";
-	
 	private static final String LIST_SERVICE_TYPE = "/rest/crmFeedBackInfoJoin/serviceTypeList";
 	private static final String CREATE_TASK = "/rest/crmFeedBackInfoJoin/uploadFeedBackOrder";
 	private static final String GET_TASK_DETAIL = "/rest/crmFeedBackInfoJoin/feedBackOrderDetail";
@@ -65,7 +63,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private static final String GET_TOKEN = "/rest/ebeiInfo/sysQueryToken";
 
     private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm");
-    SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	private String projectId = null;
     
 	private static final Logger LOGGER = LoggerFactory.getLogger(EbeiPmTaskHandle.class);
@@ -132,12 +129,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 
 		types.forEach(t -> {
-//			if (parentId.equals(t.getParentId())) {
-//				result.addAll(t.getItems());
-//				return;
-//			}else{
 			result.addAll(getTypes(t, parentId));
-//			}
 		});
 
 		return result;
@@ -226,17 +218,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		param.put("userId", "");
 		param.put("address", task.getAddress());
-		
-//		if(null == task.getOrganizationId() || task.getOrganizationId() ==0){
-//        	LOGGER.debug("Create PmTaskDoc, taskId={}", task.getId());
-//			User user = userProvider.findUserById(task.getCreatorUid());
-//			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-//            param.put("linkName", user.getNickName());
-//    		param.put("linkTel", userIdentifier.getIdentifierToken());
-//		}else{
-//			param.put("linkName", task.getRequestorName());
-//			param.put("linkTel", task.getRequestorPhone());
-//		}
+
 		param.put("linkName", task.getRequestorName());
 		param.put("linkTel", task.getRequestorPhone());
 		String fileAddrs = "";
