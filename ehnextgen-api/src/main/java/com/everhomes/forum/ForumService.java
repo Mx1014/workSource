@@ -62,6 +62,7 @@ public interface ForumService {
     PostDTO getTopicById(Long topicId, Long communityId, boolean isDetail);
     PostDTO getTopicById(Long topicId, Long communityId, boolean isDetail, boolean getByOwnerId);
     void deletePost(Long forumId, Long postId);
+    void deletePost(Long forumId, Long postId, Long currentOrgId, String ownerType, Long ownerId);
     ListPostCommandResponse queryTopicsByEntityAndCategory(QueryTopicByEntityAndCategoryCommand cmd);
     ListPostCommandResponse queryTopicsByCategory(QueryTopicByCategoryCommand cmd);
     ListPostCommandResponse listTopics(ListTopicCommand cmd);
@@ -105,6 +106,7 @@ public interface ForumService {
     void checkForumModifyItemPrivilege(Long forumId, Long topicId);
     void checkForumDeleteItemPrivilege(Long forumId, Long topicId);
     void deletePost(Long forumId, Long postId, boolean deleteUserPost);
+    void deletePost(Long forumId, Long postId, boolean deleteUserPost, Long currentOrgId, String ownerType, Long ownerId);
     PostDTO createTopicByScene(NewTopicBySceneCommand cmd);
     List<TopicFilterDTO> getTopicQueryFilters(GetTopicQueryFilterCommand cmd);
     List<TopicScopeDTO> getTopicSentScopes(GetTopicSentScopeCommand cmd);
