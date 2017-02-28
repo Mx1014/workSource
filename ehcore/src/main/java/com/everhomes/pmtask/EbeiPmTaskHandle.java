@@ -355,8 +355,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			Timestamp now = new Timestamp(System.currentTimeMillis());
 
 			checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
-			Category taskCategory = pmTaskCommonService.checkCategory(taskCategoryId);
-			pmTaskCommonService.checkCategory(categoryId);
 
 			//设置门牌地址,楼栋地址,服务地点
 			pmTaskCommonService.setPmTaskAddressInfo(cmd, task);
