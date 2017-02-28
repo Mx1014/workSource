@@ -3,10 +3,10 @@ package com.everhomes.rest.techpark.rental;
 import com.everhomes.util.StringHelper;
 
 /**
- * <ul>
-*获取预定规则 
+ * <ul>获取预定规则 
  * <li>enterpriseCommunityId：园区id</li>
- * <li>siteType：场所类型</li>  * </ul>
+ * <li>siteType：场所类型</li>
+ * </ul>
  */
 public class GetRentalTypeRuleCommand {
 
