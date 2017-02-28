@@ -20,10 +20,11 @@ public interface FlowUserSelectionService {
 	 * 查询某一个岗位以及某一个部门下的所有用户
 	 * @param parentOrgId
 	 * @param jobPositionId
-	 * @param departmentId
+	 * @param departmentId 项目ID
 	 * @return
 	 */
-	List<Long> findUsersByJobPositionId(Long parentOrgId, Long jobPositionId, Long departmentId);
+	List<Long> findUsersByJobPositionId(Long parentOrgId, Long jobPositionId,
+			Long departmentId);
 	
 	/**
 	 * 查询某个部门下的所有经理
@@ -32,4 +33,8 @@ public interface FlowUserSelectionService {
 	 * @return
 	 */
 	List<Long> findManagersByDepartmentId(Long parentOrgId, Long departmentId, Flow flow);
+
+	List<Long> findUsersByDudy(Long parentOrgId, Long moduleId,
+			String departmentType, Long departmentId);
+
 }
