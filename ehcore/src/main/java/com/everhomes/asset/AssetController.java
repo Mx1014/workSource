@@ -235,7 +235,7 @@ public class AssetController extends ControllerBase {
     /**
      * <b>URL: /asset/checkTokenRegister</b>
      * <p>检查手机号是否是注册用户</p>
-     * @return 资产账单模板字段列表
+     * @return
      */
     @RequestMapping("checkTokenRegister")
     @RestReturn(value=Boolean.class)

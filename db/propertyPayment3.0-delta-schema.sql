@@ -72,6 +72,7 @@ CREATE TABLE `eh_asset_bill_template_fields` (
   `field_name` VARCHAR(64) NOT NULL,
   `field_display_name` VARCHAR(64) NOT NULL,
   `field_custom_name` VARCHAR(64),
+  `field_type` VARCHAR(64),
   `default_order` INTEGER,
   `template_version` BIGINT NOT NULL,
 
