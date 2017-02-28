@@ -1,4 +1,5 @@
 -- 活动报名表添加活动报名信息等字段, add by tt, 20170227
+ALTER TABLE `eh_activities` ADD COLUMN `signup_end_time` DATETIME;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `phone` VARCHAR(32);
 ALTER TABLE `eh_activity_roster` ADD COLUMN `real_name` VARCHAR(128);
 ALTER TABLE `eh_activity_roster` ADD COLUMN `gender` TINYINT;
