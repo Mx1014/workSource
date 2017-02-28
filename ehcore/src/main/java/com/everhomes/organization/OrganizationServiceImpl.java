@@ -42,6 +42,7 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -59,6 +60,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.family.LeaveFamilyCommand;
@@ -99,6 +101,7 @@ import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -118,6 +121,7 @@ import org.springframework.util.StringUtils;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -138,6 +142,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private DbProvider dbProvider;
 
+
+	@Autowired
+	private ContractBuildingMappingProvider contractBuildingMappingProvider;
+	
 	@Autowired
 	private NamespaceProvider namespaceProvider;
 	
@@ -2179,7 +2187,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
-	    List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:startTime:{}", System.currentTimeMillis());
+		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
         
         OrganizationGroupType tempGroupType = null;
         List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
@@ -2214,8 +2223,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
-        
-        return dtos;
+		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:endTime:{}", System.currentTimeMillis());
+		return dtos;
 	}
 	
 	private OrganizationDTO toOrganizationDTO(Long userId, Organization organization) {
@@ -2331,14 +2340,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 				}
 				else{
-					//Filter out the inactive organization add by sfyan 20130430
-					if(orgStatus != OrganizationStatus.ACTIVE){
-						LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
-			                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
-			                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
-						continue;
-					}
-					
+
 					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
 						//物业或业委增加小区Id和小区name信息
@@ -8367,8 +8369,14 @@ System.out.println();
 	}
 
 	@Override
-	public ContractDTO processContract(Contract contract) {
-		ContractDTO contractDTO = new ContractDTO();
+	public ContractDTO processContract(Contract contract ) {
+		return processContract(contract, null);
+	}
+	@Override
+	public ContractDTO processContract(Contract contract,Integer namespaceId) {
+		namespaceId = namespaceId==null?UserContext.getCurrentNamespaceId():namespaceId;
+		
+		ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
 		contractDTO.setContractNumber(contract.getContractNumber());
 		contractDTO.setContractEndDate(contract.getContractEndDate());
 		contractDTO.setOrganizationName(contract.getOrganizationName());
@@ -8386,7 +8394,8 @@ System.out.println();
 			contractDTO.setServiceUserName(user.getServiceUserName());
 			contractDTO.setServiceUserPhone(user.getServiceUserPhone());
 		}
-		
+		List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
+		contractDTO.setBuildings(buildings);
 		return contractDTO;
 	}
 	

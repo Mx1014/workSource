@@ -16,6 +16,7 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
@@ -110,9 +111,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 * <p>申请入住
 	 */
 	@RequestMapping("applyEntry")
-	@RestReturn(value=String.class)
+	@RestReturn(value=ApplyEntryResponse.class)
 	public RestResponse applyEntry(EnterpriseApplyEntryCommand cmd){
-		boolean b = enterpriseApplyEntryService.applyEntry(cmd);
+		ApplyEntryResponse b = enterpriseApplyEntryService.applyEntry(cmd);
 		RestResponse response = new RestResponse(b);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

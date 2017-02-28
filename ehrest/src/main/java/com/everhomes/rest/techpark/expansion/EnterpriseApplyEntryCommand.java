@@ -19,6 +19,7 @@ import com.everhomes.util.StringHelper;
  * <li>communityId：园区ID</li>
  * <li>namespaceId：命名空间</li>
  * <li>description：随便写一点什么</li> 
+ * <li>contractId：合同id-如果有的话</li> 
  * </ul>
  */
 public class EnterpriseApplyEntryCommand {
@@ -48,6 +49,7 @@ public class EnterpriseApplyEntryCommand {
 
 	private String description;
 
+	private Long contractId; 
 
 	public String getSourceType() {
 		return sourceType;
@@ -200,5 +202,17 @@ public class EnterpriseApplyEntryCommand {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+
+
+	public Long getContractId() {
+		return contractId;
+	}
+
+
+
+	public void setContractId(Long contractId) {
+		this.contractId = contractId;
+	}
 
 }

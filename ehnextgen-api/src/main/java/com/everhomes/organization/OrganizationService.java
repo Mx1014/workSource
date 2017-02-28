@@ -397,8 +397,7 @@ public interface OrganizationService {
 
 	List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, Long userId, Long organizationId);
 
-    CommunityOrganizationTreeResponse listCommunityOrganizationTree(ListCommunityOrganizationTreeCommand cmd);
-	ContractDTO processContract(Contract c);
+    CommunityOrganizationTreeResponse listCommunityOrganizationTree(ListCommunityOrganizationTreeCommand cmd); 
 	OrganizationMember createOrganizationAccount(CreateOrganizationAccountCommand cmd, Long roleId,
 			Integer namespaceId);
 	List<OrganizationContactDTO> getAdmins(Long organizationId);
@@ -430,4 +429,6 @@ public interface OrganizationService {
 	List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, Long userId, Long organizationId);
 
 	List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd);
+	ContractDTO processContract(Contract contract, Integer namespaceId);
+	ContractDTO processContract(Contract contract);
 }

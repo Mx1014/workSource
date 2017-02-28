@@ -123,7 +123,22 @@ public class ContractProviderImpl implements ContractProvider {
 		
 		return new ArrayList<Contract>();
 	}
-
+	
+	@Override
+	public List<Contract> listContractByOrganizationId(Long organizationId) {
+		Result<Record> result = getReadOnlyContext().select()
+				.from(Tables.EH_CONTRACTS)
+				.where(Tables.EH_CONTRACTS.ORGANIZATION_ID.eq(organizationId))
+				.and(Tables.EH_CONTRACTS.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+				.orderBy(Tables.EH_CONTRACTS.CONTRACT_NUMBER.asc()) 
+				.fetch();
+			
+		if (result != null) {
+			return result.map(r->ConvertHelper.convert(r, Contract.class));
+		}
+		
+		return new ArrayList<Contract>();
+	}
 	@Override
 	public List<Contract> listContractsByEndDateRange(Timestamp minValue, Timestamp maxValue) {
 		Result<Record> result = getReadOnlyContext().select()

@@ -1,12 +1,15 @@
 package com.everhomes.pmtask;
 
 import java.io.IOException;
+import java.net.MalformedURLException;
+import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
 import org.apache.commons.httpclient.HttpStatus;
+import com.everhomes.configuration.ConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
@@ -58,7 +61,9 @@ public class TechparkSynchronizedAction implements Runnable{
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
 	private CategoryProvider categoryProvider;
-	
+	@Autowired
+	private ConfigurationProvider configProvider;
+
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private Long taskId;
@@ -119,7 +124,7 @@ public class TechparkSynchronizedAction implements Runnable{
 	public void synchronizedData(PmTask task, List<PmTaskAttachmentDTO> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
-		param.put("fileFlag", "1");
+		param.put("fileFlag", String.valueOf(null==task.getPriority()?1:task.getPriority()));
 		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
@@ -184,7 +189,14 @@ public class TechparkSynchronizedAction implements Runnable{
 		if (LOGGER.isDebugEnabled())
         	LOGGER.debug("Synchronized pmTask data to techpark oa param={}", param.toJSONString());
 
-        WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
+		URL url = null;
+		try {
+			String value = configProvider.getValue("techpark.oa.url", "");
+			url = new URL(value);
+		} catch (MalformedURLException e) {
+			LOGGER.error("Connect techpark oa failed", e);
+		}
+		WorkflowAppDraftWebService service = new WorkflowAppDraftWebService(url);
     	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
 		String result = port.worflowAppDraft(param.toJSONString());
 

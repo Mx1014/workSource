@@ -352,7 +352,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 }
                 if (realAmount.doubleValue() > 0 && statistic.getCurrentAmount().doubleValue() != 0) {
                     BigDecimal percent = realAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
-                    if (percent.doubleValue() >= dayPromptSetting.getSettingValue().doubleValue()) {
+                    if ((percent.doubleValue() * 100) >= dayPromptSetting.getSettingValue().doubleValue()) {
                         return dayPromptSetting.getSettingValue();
                     }
                 }
@@ -374,7 +374,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 BigDecimal thisMonthAmount = energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(), lastReadingTimeLastMonthBegin, Date.valueOf(lastReadDateTime.toLocalDate().plusDays(1)));
                 if (thisMonthAmount.doubleValue() > 0 && statistic.getCurrentAmount().doubleValue() != 0) {
                     BigDecimal percent = thisMonthAmount.subtract(statistic.getCurrentAmount()).divide(statistic.getCurrentAmount(), BigDecimal.ROUND_HALF_UP);
-                    if (percent.doubleValue() >= monthPromptSetting.getSettingValue().doubleValue()) {
+                    if ((percent.doubleValue() * 100) >= monthPromptSetting.getSettingValue().doubleValue()) {
                         return monthPromptSetting.getSettingValue();
                     }
                 }
@@ -1692,16 +1692,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 1 * * ?")
     public void calculateEnergyDayStat(){
-        try {
-            LOGGER.info("calculate energy day stat start...");
-            //刷今天的
-            calculateEnergyDayStatByDate(DateHelper.currentGMTTime());
-            LOGGER.info("calculate energy day stat end...");
-        } catch (Exception e) {
-            LOGGER.error("calculate energy day stat error...", e);
-            sendErrorMessage(e);
-            e.printStackTrace();
-        }
+        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_DAY_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+            try {
+                LOGGER.info("calculate energy day stat start...");
+                //刷今天的
+                calculateEnergyDayStatByDate(DateHelper.currentGMTTime());
+                LOGGER.info("calculate energy day stat end...");
+            } catch (Exception e) {
+                LOGGER.error("calculate energy day stat error...", e);
+                sendErrorMessage(e);
+                e.printStackTrace();
+            }
+        });
     }
 
     private void sendErrorMessage(Exception e) {
@@ -1872,15 +1874,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
      * */
     @Scheduled(cron = "0 10 3 1 * ?")
     public void calculateEnergyMonthStat() {
-        try {
-            LOGGER.info("calculate energy month stat start...");
-            calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
-            LOGGER.info("calculate energy month stat end...");
-        } catch (Exception e) {
-            LOGGER.error("calculate energy month stat error...", e);
-            sendErrorMessage(e);
-            e.printStackTrace();
-        }
+        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_MONTH_STAT_SCHEDULE.getCode()).tryEnter(() -> {
+            try {
+                LOGGER.info("calculate energy month stat start...");
+                calculateEnergyMonthStatByDate(DateHelper.currentGMTTime());
+                LOGGER.info("calculate energy month stat end...");
+            } catch (Exception e) {
+                LOGGER.error("calculate energy month stat error...", e);
+                sendErrorMessage(e);
+                e.printStackTrace();
+            }
+        });
     }
 
     @Override

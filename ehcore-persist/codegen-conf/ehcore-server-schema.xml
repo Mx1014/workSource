@@ -138,7 +138,11 @@
         eh_quality_inspection_task_templates |   
         eh_general_forms | eh_general_approvals | eh_general_approval_vals  |
 		eh_door_auth_logs |
-        eh_equipment_inspection_categories | eh_equipment_inspection_standard_group_map | 
+		eh_enterprise_op_request_buildings | 
+        eh_equipment_inspection_categories | eh_equipment_inspection_standard_group_map |  
+		eh_questionnaires | eh_questionnaire_questions | eh_questionnaire_options | eh_questionnaire_answers |
+        eh_os_objects | eh_os_object_download_logs |
+
         </includes>
 
             <!-- All elements that are excluded from your schema

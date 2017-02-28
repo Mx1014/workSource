@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
@@ -91,7 +92,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
 	}
 
-	private List<CategoryDTO> listServiceType(String projectId) {
+	private List<CategoryDTO> listServiceType(String projectId, String parentId) {
 		JSONObject param = new JSONObject();
 		param.put("projectId", projectId);
 		
@@ -101,8 +102,14 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		if(entity.isSuccess()) {
 			EbeiServiceType type = entity.getData();
-			List<EbeiServiceType> types = type.getItems();
-			
+//			List<EbeiServiceType> types = type.getItems();
+			type.setServiceId(String.valueOf(PmTaskHandle.EBEI_TASK_CATEGORY));
+			List<EbeiServiceType> types;
+
+			if (null == parentId)
+				types = type.getItems();
+			else
+				types = getTypes(type, parentId);
 			List<CategoryDTO> result = types.stream().map(c -> {
 				return convertCategory(c);
 				
@@ -113,7 +120,29 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		return null;
 	}
-	
+
+	private List<EbeiServiceType> getTypes(EbeiServiceType type, String parentId) {
+
+		List<EbeiServiceType> result = new ArrayList<>();
+		List<EbeiServiceType> types = type.getItems();
+
+		if (parentId.equals(type.getServiceId())) {
+			result.addAll(types);
+			return result;
+		}
+
+		types.forEach(t -> {
+//			if (parentId.equals(t.getParentId())) {
+//				result.addAll(t.getItems());
+//				return;
+//			}else{
+			result.addAll(getTypes(t, parentId));
+//			}
+		});
+
+		return result;
+	}
+
 	private CategoryDTO convertCategory(EbeiServiceType ebeiServiceType) {
 		
 		CategoryDTO dto = new CategoryDTO();
@@ -346,8 +375,6 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
 			Category taskCategory = pmTaskCommonService.checkCategory(taskCategoryId);
 			pmTaskCommonService.checkCategory(categoryId);
-
-
 
 			//设置门牌地址,楼栋地址,服务地点
 			pmTaskCommonService.setPmTaskAddressInfo(cmd, task);
@@ -586,7 +613,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
-		List<CategoryDTO> childrens = listServiceType(projectId);
+		List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? String.valueOf(cmd.getParentId()) : null);
 		
 		if(null == cmd.getParentId()) {
 			CategoryDTO dto = createCategoryDTO();
@@ -604,7 +631,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	@Override
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 		
-		List<CategoryDTO> childrens = listServiceType(projectId);
+		List<CategoryDTO> childrens = listServiceType(projectId, null);
 		CategoryDTO dto = createCategoryDTO();
 		dto.setChildrens(childrens);
 		
@@ -698,5 +725,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     	}
 		
 		return response;
+	}
+
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		handler.updateTaskByOrg(cmd);
 	}
 }

@@ -1,5 +1,6 @@
 package com.everhomes.pmtask;
 
+import com.alibaba.fastjson.JSONObject;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.category.Category;
@@ -18,6 +19,7 @@ import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
@@ -322,6 +324,26 @@ class PmTaskCommonServiceImpl {
             LOGGER.error("Invalid ownerType parameter.");
             throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "Invalid ownerType parameter.");
+        }
+    }
+
+    Byte convertFlowStatus(String params) {
+
+        if(StringUtils.isBlank(params)) {
+            LOGGER.error("Invalid flowNode param.");
+            throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+                    "Invalid flowNode param.");
+        }
+
+        JSONObject paramJson = JSONObject.parseObject(params);
+        String nodeType = paramJson.getString("nodeType");
+
+        switch (nodeType) {
+            case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
+            case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
+            case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
+            case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
+            default: return null;
         }
     }
 }

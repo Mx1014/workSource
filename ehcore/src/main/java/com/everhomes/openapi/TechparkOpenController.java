@@ -41,6 +41,7 @@ public class TechparkOpenController extends ControllerBase {
 
 	/**
 	 * <b>URL: /openapi/techpark/syncData</b>
+	 * <p>同步数据</p>
 	 */
 	@SuppressDiscover
 	@RequireAuthentication(false)

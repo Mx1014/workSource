@@ -2,6 +2,10 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.parking.ParkingErrorCode;
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -16,34 +20,16 @@ import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.FLOW)
 class FlowPmTaskHandle implements PmTaskHandle {
-	
+
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowPmTaskHandle.class);
 	@Autowired
-    private DbProvider dbProvider;
+	private DbProvider dbProvider;
 	@Autowired
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
@@ -85,7 +71,7 @@ class FlowPmTaskHandle implements PmTaskHandle {
 		});
 
 		pmTaskSearch.feedDoc(task1);
-		
+
 		return ConvertHelper.convert(task1, PmTaskDTO.class);
 	}
 
@@ -95,13 +81,13 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983) {
-			
+
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-			
+
 			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-				
+
 				handler.cancelTask(cmd);
 			}
 		}
@@ -114,13 +100,13 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983) {
-			
+
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-			
+
 			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-				
+
 				handler.evaluateTask(cmd);
 			}
 		}
@@ -132,17 +118,17 @@ class FlowPmTaskHandle implements PmTaskHandle {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983) {
-			
+
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-			
+
 			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
 
 				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
-				
+
 				return handler.getTaskDetail(cmd);
 			}
 		}
-		
+
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
 		return handler.getTaskDetail(cmd);
 	}
@@ -150,28 +136,48 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.listTaskCategories(cmd);
 	}
 
 	@Override
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.listAllTaskCategories(cmd);
 	}
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.searchTasks(cmd);
 	}
 
 	@Override
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.listUserTasks(cmd);
 	}
+
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		handler.updateTaskByOrg(cmd);
+
+		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowMainId(flowCase.getFlowMainId());
+		stepDTO.setFlowVersion(flowCase.getFlowVersion());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		stepDTO.setStepCount(flowCase.getStepCount());
+		flowService.processAutoStep(stepDTO);
+
+	}
+
 }

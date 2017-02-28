@@ -1,7 +1,11 @@
 package com.everhomes.rest.techpark.expansion;
 
 import java.sql.Timestamp;
+import java.util.List;
 
+import com.everhomes.discover.ItemType;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.util.StringHelper;
 /**
  * <ul>
@@ -20,6 +24,8 @@ import com.everhomes.util.StringHelper;
  * <li>description： </li> 
  * <li>createTime： </li> 
  * <li>sourceName： </li>  
+ * <li>buildings： 楼栋列表 {@link com.everhomes.rest.community.BuildingDTO}</li>  
+ * <li>contract： 合同 {@link com.everhomes.rest.contract.ContractDTO}</li>  
  * </ul>
  */
 public class EnterpriseApplyEntryDTO {
@@ -53,8 +59,11 @@ public class EnterpriseApplyEntryDTO {
 	private Timestamp createTime;
 
 	private String sourceName;
+	
+	@ItemType(BuildingDTO.class)
+	private List<BuildingDTO> buildings;
 
-
+	private ContractDTO contract;
 	public Long getId() {
 		return id;
 	}
@@ -269,5 +278,33 @@ public class EnterpriseApplyEntryDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+ 
+
+
+	public List<BuildingDTO> getBuildings() {
+		return buildings;
+	}
+
+
+
+
+	public void setBuildings(List<BuildingDTO> buildings) {
+		this.buildings = buildings;
+	}
+
+
+
+
+	public ContractDTO getContract() {
+		return contract;
+	}
+
+
+
+
+	public void setContract(ContractDTO contract) {
+		this.contract = contract;
+	}
 
 }

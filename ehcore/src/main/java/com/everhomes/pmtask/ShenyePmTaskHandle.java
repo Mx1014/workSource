@@ -14,7 +14,7 @@ import java.util.Map;
 
 
 import java.util.stream.Collectors;
-
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -283,7 +283,33 @@ class ShenyePmTaskHandle implements PmTaskHandle {
         }
 		return pmTask;
 	}
-	
+
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getTaskId()) {
+			LOGGER.error("Invalid taskId parameter, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid taskId parameter.");
+		}
+		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
+		if(null == task) {
+			LOGGER.error("PmTask not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"PmTask not found.");
+		}
+		if(null != cmd.getCategoryId())
+			checkCategory(cmd.getCategoryId());
+		task.setCategoryId(cmd.getCategoryId());
+		task.setPriority(cmd.getPriority());
+		if(null != cmd.getReserveTime())
+			task.setReserveTime(new Timestamp(cmd.getReserveTime()));
+		else
+			task.setReserveTime(null);
+		task.setSourceType(cmd.getSourceType());
+		pmTaskProvider.updateTask(task);
+	}
+
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();

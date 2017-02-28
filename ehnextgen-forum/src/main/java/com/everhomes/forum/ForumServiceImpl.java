@@ -110,7 +110,7 @@ import java.util.stream.Collectors;
 @Component
 public class ForumServiceImpl implements ForumService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ForumServiceImpl.class);
-
+    
     @Autowired
     private AclProvider aclProvider;
     
@@ -856,7 +856,7 @@ public class ForumServiceImpl implements ForumService {
         Condition visibilityCondition = buildPostCategoryQryCondition(user, entityTag, community, 
             cmd.getContentCategory(), cmd.getActionCategory());
         
-        Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
+        Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId(), cmd.getContentCategory());
         
         int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
         CrossShardListingLocator locator = new CrossShardListingLocator(forum.getId());
@@ -1246,7 +1246,7 @@ public class ForumServiceImpl implements ForumService {
 	         
 	        
 	         
-	         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
+	         Condition unCateGoryCondition = notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId(), cmd.getContentCategory());
 	         
 	         Condition communityCondition = Tables.EH_FORUM_POSTS.VISIBLE_REGION_TYPE.eq(VisibleRegionType.COMMUNITY.getCode());
 	         communityCondition = communityCondition.and(Tables.EH_FORUM_POSTS.VISIBLE_REGION_ID.in(communityIdList));
@@ -1445,10 +1445,10 @@ public class ForumServiceImpl implements ForumService {
         	}
         }
         
-        Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId());
+        Condition cond = this.notEqPostCategoryCondition(cmd.getExcludeCategories(), cmd.getEmbeddedAppId(), cmd.getContentCategory());
         
         if(null != cond){
-        	condition.and(cond);
+        	condition = condition.and(cond);
         }
         List<PostDTO> dtos = this.getOrgTopics(locator, pageSize, condition, cmd.getPublishStatus());
         
@@ -3180,13 +3180,29 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private Condition notEqPostCategoryCondition(List<Long> unCategorys, Long embeddedAppId) {
+    	return notEqPostCategoryCondition(unCategorys, embeddedAppId, null);
+    }
+    
+    private Condition notEqPostCategoryCondition(List<Long> unCategorys, Long embeddedAppId, Long contentCategory) {
+    	// 排除掉公告，直接在这添加，客户端和前端不用改，add by tt, 170223
+    	Condition condition = null;
+    	if (contentCategory == null || contentCategory.longValue() != CategoryConstants.CATEGORY_ID_NOTICE) {
+    		Category category = this.categoryProvider.findCategoryById(CategoryConstants.CATEGORY_ID_NOTICE);
+    		if (category != null) {
+    			condition = Tables.EH_FORUM_POSTS.CATEGORY_PATH.notLike(category.getPath() + "%");
+    		}
+		}
+    	
     	//所有查帖子的地方排除掉官方活动，但不排除个人活动，add by tt, 160720
     	//但是查官方活动的时候不能排除
     	if (embeddedAppId != null && embeddedAppId.longValue() == AppConstants.APPID_ACTIVITY) {
-			return null;
+			return condition;
 		}
     	
-    	return Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.NO.getCode());
+    	if (condition == null) {
+			return Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.NO.getCode());
+		}
+    	return condition.and(Tables.EH_FORUM_POSTS.OFFICIAL_FLAG.eq(OfficialFlag.NO.getCode()));
     	
 //    	if(null == unCategorys || 0 == unCategorys.size()){
 //       	 	unCategorys = new ArrayList<Long>();
