@@ -4,6 +4,7 @@ package com.everhomes.activity;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import com.everhomes.rest.activity.*;
@@ -11,7 +12,9 @@ import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.category.Category;
@@ -70,6 +73,11 @@ public class ActivityController extends ControllerBase {
         return response;
     }
     
+    /**
+     * 
+     * <p>后台手动添加活动报名</p>
+     * <b>URL: /activity/manualSignup</b>
+     */
     @RequestMapping("manualSignup")
     @RestReturn(value=SignupInfoDTO.class)
     public RestResponse manualSignup(@Valid ManualSignupCommand cmd) {
@@ -79,6 +87,83 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         response.setResponseObject(result);
         return response;
+    }
+    
+    /**
+     * 
+     * <p>修改活动报名</p>
+     * <b>URL: /activity/updateSignupInfo</b>
+     */
+    @RequestMapping("updateSignupInfo")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse updateSignupInfo(@Valid UpdateSignupInfoCommand cmd) {
+    	SignupInfoDTO result = activityService.updateSignupInfo(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	response.setResponseObject(result);
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>导入活动报名</p>
+     * <b>URL: /activity/importSignupInfo</b>
+     */
+    @RequestMapping("importSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse importSignupInfo(@Valid ImportSignupInfoCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
+    	activityService.importSignupInfo(cmd, files);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>列出活动报名信息</p>
+     * <b>URL: /activity/listSignupInfo</b>
+     */
+    @RequestMapping("listSignupInfo")
+    @RestReturn(value=ListSignupInfoResponse.class)
+    public RestResponse listSignupInfo(@Valid ListSignupInfoCommand cmd) {
+    	ListSignupInfoResponse result = activityService.listSignupInfo(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	response.setResponseObject(result);
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>导出活动报名信息</p>
+     * <b>URL: /activity/exportSignupInfo</b>
+     */
+    @RequestMapping("exportSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse exportSignupInfo(@Valid ExportSignupInfoCommand cmd, HttpServletResponse response) {
+    	activityService.exportSignupInfo(cmd, response);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	return restResponse;
+    }
+    
+    /**
+     * 
+     * <p>导出活动报名信息</p>
+     * <b>URL: /activity/deleteSignupInfo</b>
+     */
+    @RequestMapping("deleteSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse deleteSignupInfo(@Valid DeleteSignupInfoCommand cmd) {
+    	activityService.deleteSignupInfo(cmd);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	return restResponse;
     }
     
     /**

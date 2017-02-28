@@ -77,8 +77,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -367,6 +370,30 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
 		return null;
+	}
+
+	@Override
+	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
+		
+	}
+
+	@Override
+	public ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd) {
+		return null;
+	}
+
+	@Override
+	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
+		
+	}
+
+	@Override
+	public void deleteSignupInfo(DeleteSignupInfoCommand cmd) {
 	}
 
 	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
