@@ -1,6 +1,6 @@
-UPDATE eh_launch_pad_items  SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFpqSTRObU0wTkRaaE1XRTVZemhoWVRKaU5UbG1ObVUwWldNek56TmxaZw'  WHERE item_label ='五丰水果' AND namespace_id = 999983;
-UPDATE eh_launch_pad_items  SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM09UQXlOelZrWWpsbE1HSm1PVGN3WWpRMFl6SXpNamszTUdJellqSmpNQQ'  WHERE item_label ='好色派沙拉' AND namespace_id = 999983;
-UPDATE eh_launch_pad_items  SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE9EUTFOR0prWlRjeFpEazFZVFl6WkdNMk5qQTJPV00zTURBNVl6YzVNQQ'  WHERE item_label ='太平洋咖啡' AND namespace_id = 999983; 
+UPDATE eh_launch_pad_items  SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvMFpqSTRObU0wTkRaaE1XRTVZemhoWVRKaU5UbG1ObVUwWldNek56TmxaZw' ,item_label ='五丰水果' WHERE item_label ='说粉' AND namespace_id = 999983;
+UPDATE eh_launch_pad_items  SET icon_uri = 'cs://1/image/aW1hZ2UvTVRvM09UQXlOelZrWWpsbE1HSm1PVGN3WWpRMFl6SXpNamszTUdJellqSmpNQQ' ,item_label ='好色派沙拉'  WHERE item_label ='够咖啡' AND namespace_id = 999983;
+UPDATE eh_launch_pad_items  SET icon_uri = 'cs://1/image/aW1hZ2UvTVRwaE9EUTFOR0prWlRjeFpEazFZVFl6WkdNMk5qQTJPV00zTURBNVl6YzVNQQ' ,item_label ='太平洋咖啡'  WHERE item_label ='Urban Table' AND namespace_id = 999983; 
 
 SET @eh_launch_pad_items =(SELECT MAX(id) FROM eh_launch_pad_items );
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) 
