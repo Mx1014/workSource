@@ -172,6 +172,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		FlowGraphNode currentNode = ctx.getCurrentNode();
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
+		FlowNode nextNode = ctx.getNextNode().getFlowNode();
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
@@ -194,7 +195,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if("ACCEPTING".equals(nodeType)) {
-				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
+//				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 
 				//TODO: 同步数据到科技园
@@ -214,12 +216,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			}
 			else if("ASSIGNING".equals(nodeType)) {
 
-				task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
-				
 
 			}else if("PROCESSING".equals(nodeType)) {
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -230,6 +231,26 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		//elasticsearch更新
 		pmTaskSearch.deleteById(task.getId());
 		pmTaskSearch.feedDoc(task);
+	}
+
+	private Byte convertFlowStatus(String params) {
+
+		if(StringUtils.isBlank(params)) {
+			LOGGER.error("Invalid flowNode param.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+					"Invalid flowNode param.");
+		}
+
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
+
+		switch (nodeType) {
+			case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
+			case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
+			case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
+			case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
+			default: return null;
+		}
 	}
 
 	//同步数据到科技园
