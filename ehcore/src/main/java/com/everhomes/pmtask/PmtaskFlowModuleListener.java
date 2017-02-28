@@ -1,8 +1,10 @@
 package com.everhomes.pmtask;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +34,6 @@ import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.PmTaskFlowStatus;
-import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -124,16 +121,16 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				//TODO: 同步数据到科技园
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
-					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null && evt.getEntityId() != null
-							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
 
-						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
-						Long targetId = sel.getSourceIdA();
-
-						synchronizedTaskToTechpark(task, targetId, flow.getOrganizationId());
+					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
+					if (null != logs && logs.size() != 0) {
+						for (PmTaskLog r: logs) {
+							if (null != r.getTargetId()) {
+								synchronizedTaskToTechpark(task, r.getTargetId(), flow.getOrganizationId());
+								break;
+							}
+						}
 					}
-
 				}
 			}else if ("ASSIGNING".equals(nodeType)) {
 
@@ -237,7 +234,51 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	//fireButton 之前
 	@Override
 	public void onFlowButtonFired(FlowCaseState ctx) {
-		
+
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+
+		String stepType = ctx.getStepType().getCode();
+		String params = flowNode.getParams();
+
+		if(StringUtils.isBlank(params)) {
+			LOGGER.error("Invalid flowNode param.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+					"Invalid flowNode param.");
+		}
+
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
+
+		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
+		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
+			if ("ASSIGNING".equals(nodeType)) {
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				if(namespaceId == 1000000) {
+					FlowGraphEvent evt = ctx.getCurrentEvent();
+					if(evt != null && evt.getEntityId() != null
+							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
+
+						PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
+						Long targetId = sel.getSourceIdA();
+
+						PmTaskLog pmTaskLog = new PmTaskLog();
+						pmTaskLog.setNamespaceId(task.getNamespaceId());
+						pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+						pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+						pmTaskLog.setOwnerId(task.getOwnerId());
+						pmTaskLog.setOwnerType(task.getOwnerType());
+						pmTaskLog.setStatus(task.getStatus());
+						pmTaskLog.setTargetId(targetId);
+						pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+						pmTaskLog.setTaskId(task.getId());
+						pmTaskProvider.createTaskLog(pmTaskLog);
+					}
+				}
+			}
+		}
 
 	}
 
@@ -267,25 +308,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		UserContext context = UserContext.current();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(namespaceId == 1000000) {
-		
-//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
-//			String value = "[]";
-//			
-//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
-//			if(null != attachments) {
-//				attachments.stream().forEach(a -> {
-//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-//					a.setContentUrl(contentUrl);
-//				});
-//				value = JSONObject.toJSONString(attachments);
-//			}
-//			
-//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-//	      
-//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-//	        valueOperations.set(key, value);
-			
 			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
 			handler.pushToQueque(task.getId() + "," + targetId + "," + organizationId);
 		}
