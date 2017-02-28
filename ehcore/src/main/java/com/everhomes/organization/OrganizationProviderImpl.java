@@ -2847,6 +2847,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId) {
+		LOGGER.debug("TrackUserRelatedCost:listOrganizationJobPositionMaps:startTime:{}", System.currentTimeMillis());
+
 		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
@@ -2855,6 +2857,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
 			return null;
 		});
+		LOGGER.debug("TrackUserRelatedCost:listOrganizationJobPositionMaps:endTime:{}", System.currentTimeMillis());
+
 		return results;
 	}
 

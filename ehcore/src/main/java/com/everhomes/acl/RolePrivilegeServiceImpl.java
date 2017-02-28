@@ -1830,6 +1830,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<CommunityDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
+
+		LOGGER.debug("TrackUserRelatedCost:listUserRelatedProjectByModuleId:startTime:{}", System.currentTimeMillis());
 		User user = UserContext.current().getUser();
 
 		List<CommunityDTO> communitydtos = new ArrayList<>();
@@ -1877,8 +1879,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					communitydtos.add(ConvertHelper.convert(community, CommunityDTO.class));
 				}
 			}
-		}	
-		
+		}
+		LOGGER.debug("TrackUserRelatedCost:listUserRelatedProjectByModuleId:endTime:{}", System.currentTimeMillis());
 		return communitydtos;
 	}
 

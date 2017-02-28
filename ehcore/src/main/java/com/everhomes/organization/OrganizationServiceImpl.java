@@ -2187,7 +2187,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
-	    List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:startTime:{}", System.currentTimeMillis());
+		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
         
         OrganizationGroupType tempGroupType = null;
         List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
@@ -2222,8 +2223,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
-        
-        return dtos;
+		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:endTime:{}", System.currentTimeMillis());
+		return dtos;
 	}
 	
 	private OrganizationDTO toOrganizationDTO(Long userId, Organization organization) {
@@ -2339,14 +2340,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 				}
 				else{
-					//Filter out the inactive organization add by sfyan 20130430
-					if(orgStatus != OrganizationStatus.ACTIVE){
-						LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
-			                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
-			                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
-						continue;
-					}
-					
+
 					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
 						//物业或业委增加小区Id和小区name信息
