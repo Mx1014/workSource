@@ -8760,6 +8760,37 @@ System.out.println();
 	}
 
 	@Override
+	public List<OrganizationContactDTO> listOrganizationsContactByModuleId(ListOrganizationByModuleIdCommand cmd) {
+		List<OrganizationDTO> organizations = listOrganizationsByModuleId(ConvertHelper.convert(cmd, ListOrganizationByModuleIdCommand.class));
+		List<Long> organizationIds = new ArrayList<>();
+		for (OrganizationDTO organization: organizations) {
+			organizationIds.add(organization.getId());
+		}
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
+
+		if(organizationIds.size() > 0) {
+			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(organizationIds, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+					return query;
+				}
+			});
+
+			if(null == members || members.size() == 0){
+				return new ArrayList<>();
+			}
+
+			for (OrganizationMember member: members) {
+				dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
+			}
+		}
+
+		return dtos;
+	}
+
+	@Override
 	public List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd) {
 		Organization organization = checkOrganization(cmd.getOrganizationId());
 		List<OrganizationMember> members = null;
