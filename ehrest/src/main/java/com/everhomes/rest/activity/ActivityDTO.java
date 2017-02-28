@@ -13,6 +13,7 @@ import com.everhomes.util.StringHelper;
  *<li>categoryId: 类型</li>
  *<li>startTime:开始时间,格式:YYYY-MM-DD hh:mm:ss<li>
  *<li>stopTime:结束时间,格式:YYYY-MM-DD hh:mm:ss</li>
+ *<li>signupEndTime:活动报名截止时间,格式:YYYY-MM-DD hh:mm:ss</li>
  *<li>location:位置</li>
  *<li>checkInFlag:报名标签</li>
  *<li>confirmFlag:确认</li>
@@ -46,6 +47,7 @@ public class ActivityDTO {
     private Long categoryId;
     private String startTime;
     private String stopTime;
+    private String signupEndTime;
     private String location;
     private Integer checkinFlag;
     private Integer confirmFlag;
@@ -93,7 +95,15 @@ public class ActivityDTO {
 
     private String achievementRichtextUrl;
 
-    public String getAchievementRichtextUrl() {
+    public String getSignupEndTime() {
+		return signupEndTime;
+	}
+
+	public void setSignupEndTime(String signupEndTime) {
+		this.signupEndTime = signupEndTime;
+	}
+
+	public String getAchievementRichtextUrl() {
         return achievementRichtextUrl;
     }
 
