@@ -41,7 +41,9 @@ import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
@@ -55,6 +57,7 @@ import org.springframework.transaction.TransactionStatus;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletResponse;
+
 import java.io.*;
 import java.lang.reflect.Field;
 import java.math.BigDecimal;
@@ -359,7 +362,7 @@ public class AssetServiceImpl implements AssetService {
             }
             LOGGER.debug("Start import data...,total:" + resultList.size());
 
-            List<String> errorDataLogs = importAssetBills(cmd, resultList, fields, userId);
+            List<String> errorDataLogs = importAssetBills(cmd, convertToStrList(resultList), fields, userId);
 
 
             LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
@@ -382,6 +385,47 @@ public class AssetServiceImpl implements AssetService {
         return importDataResponse;
     }
 
+    private List<String> convertToStrList(List list) {
+		List<String> result = new ArrayList<String>();
+		boolean firstRow = true;
+		for (Object o : list) {
+			if(firstRow){
+				firstRow = false;
+				continue;
+			}
+			RowResult r = (RowResult)o;
+			StringBuffer sb = new StringBuffer();
+			sb.append(r.getA()).append("||");
+			sb.append(r.getB()).append("||");
+			sb.append(r.getC()).append("||");
+			sb.append(r.getD()).append("||");
+			sb.append(r.getE()).append("||");
+			sb.append(r.getF()).append("||");
+			sb.append(r.getG()).append("||");
+			sb.append(r.getH()).append("||");
+			sb.append(r.getI()).append("||");
+			sb.append(r.getJ()).append("||");
+			sb.append(r.getK()).append("||");
+			sb.append(r.getL()).append("||");
+			sb.append(r.getM()).append("||");
+			sb.append(r.getN()).append("||");
+			sb.append(r.getO()).append("||");
+			sb.append(r.getP()).append("||");
+			sb.append(r.getQ()).append("||");
+			sb.append(r.getR()).append("||");
+			sb.append(r.getS()).append("||");
+			sb.append(r.getT()).append("||");
+			sb.append(r.getU()).append("||");
+			sb.append(r.getV()).append("||");
+			sb.append(r.getW()).append("||");
+			sb.append(r.getX()).append("||");
+				
+			
+			result.add(sb.toString());
+		}
+		return result;
+	}
+    
     private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId){
         List<String> errorDataLogs = new ArrayList<String>();
 

@@ -11,7 +11,9 @@ import com.everhomes.rest.asset.AssetBillStatus;
 import com.everhomes.rest.asset.AssetBillTemplateFieldDTO;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
+import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
@@ -79,7 +81,25 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public AssetBill findAssetBill(Long id, Long ownerId, String ownerType, Long targetId, String targetType) {
-        return null;
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillsRecord> query = context.selectQuery(Tables.EH_ASSET_BILLS);
+
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType));
+        query.addConditions(Tables.EH_ASSET_BILLS.ID.eq(id));
+
+        List<AssetBill> bills = new ArrayList<>();
+        query.fetch().map((EhAssetBillsRecord record) -> {
+            bills.add(ConvertHelper.convert(record, AssetBill.class));
+            return null;
+        });
+
+        if(bills.size() == 0) {
+            return null;
+        }
+        return bills.get(0);
     }
 
     @Override
@@ -140,7 +160,17 @@ public class AssetProviderImpl implements AssetProvider {
 
     @Override
     public void creatTemplateField(AssetBillTemplateFields field) {
+        long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhAssetBillTemplateFields.class));
 
+        field.setId(id);
+
+        LOGGER.info("creatTemplateField: " + field);
+
+        DSLContext context = this.dbProvider.getDslContext(AccessSpec.readWriteWith(EhAssetBillTemplateFields.class, id));
+        EhAssetBillTemplateFieldsDao dao = new EhAssetBillTemplateFieldsDao(context.configuration());
+        dao.insert(field);
+
+        DaoHelper.publishDaoAction(DaoAction.CREATE, EhAssetBillTemplateFields.class, null);
     }
 
     @Override
