@@ -1,8 +1,10 @@
 package com.everhomes.pmtask;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -32,11 +34,6 @@ import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingErrorCode;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.PmTaskFlowStatus;
-import com.everhomes.rest.pmtask.PmTaskOwnerType;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 
@@ -81,9 +78,77 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		
 	}
 
+	//状态改变之后
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
+		//当前节点已经变成上一个节点
+		FlowGraphNode currentNode = ctx.getPrefixNode();
+
+		if (null == currentNode)
+			return;
+
+		FlowNode flowNode = currentNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+		//业务的下一个节点是当前节点
+		FlowNode nextNode = ctx.getCurrentNode().getFlowNode();
+
+		String stepType = ctx.getStepType().getCode();
+		String params = flowNode.getParams();
+
+		if(StringUtils.isBlank(params)) {
+			LOGGER.error("Invalid flowNode param.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+					"Invalid flowNode param.");
+		}
+
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
+
+		Long flowId = flowNode.getFlowMainId();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
+		String tag1 = flow.getStringTag1();
+
+		long now = System.currentTimeMillis();
+		LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
+		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
+
+			if ("ACCEPTING".equals(nodeType)) {
+//				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				pmTaskProvider.updateTask(task);
+
+				//TODO: 同步数据到科技园
+				Integer namespaceId = UserContext.getCurrentNamespaceId();
+				if(namespaceId == 1000000) {
+
+					List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
+					if (null != logs && logs.size() != 0) {
+						for (PmTaskLog r: logs) {
+							if (null != r.getTargetId()) {
+								synchronizedTaskToTechpark(task, r.getTargetId(), flow.getOrganizationId());
+								break;
+							}
+						}
+					}
+				}
+			}else if ("ASSIGNING".equals(nodeType)) {
+
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				pmTaskProvider.updateTask(task);
+
+			}else if ("PROCESSING".equals(nodeType)) {
+				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				pmTaskProvider.updateTask(task);
+			}
+		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+
+			task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
+			pmTaskProvider.updateTask(task);
+		}
+		//elasticsearch更新
+		pmTaskSearch.deleteById(task.getId());
+		pmTaskSearch.feedDoc(task);
 		
 	}
 
@@ -113,7 +178,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
 		PmTaskDTO dto = pmTaskService.getTaskDetail(cmd);
-		
+
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
@@ -166,67 +231,76 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		return null;
 	}
 
+	//fireButton 之前
 	@Override
 	public void onFlowButtonFired(FlowCaseState ctx) {
-		
+
 		FlowGraphNode currentNode = ctx.getCurrentNode();
 		FlowNode flowNode = currentNode.getFlowNode();
 		FlowCase flowCase = ctx.getFlowCase();
 
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
-		
+
 		if(StringUtils.isBlank(params)) {
 			LOGGER.error("Invalid flowNode param.");
-    		throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-    				"Invalid flowNode param.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+					"Invalid flowNode param.");
 		}
-		
+
 		JSONObject paramJson = JSONObject.parseObject(params);
 		String nodeType = paramJson.getString("nodeType");
-		
-		Long flowId = flowNode.getFlowMainId();
-		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
-		String tag1 = flow.getStringTag1();
-		
-		long now = System.currentTimeMillis();
-		LOGGER.debug("update parking request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
+
+		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if("ACCEPTING".equals(nodeType)) {
-				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
-				pmTaskProvider.updateTask(task);
-			}
-			else if("ASSIGNING".equals(nodeType)) {
-				//TODO: 同步数据到科技园
-				task.setStatus(PmTaskFlowStatus.PROCESSING.getCode());
-				pmTaskProvider.updateTask(task);
-				
+			if ("ASSIGNING".equals(nodeType)) {
 				Integer namespaceId = UserContext.getCurrentNamespaceId();
 				if(namespaceId == 1000000) {
 					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null && evt.getEntityId() != null 
+					if(evt != null && evt.getEntityId() != null
 							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
-						
+
+						PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
 						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
 						Long targetId = sel.getSourceIdA();
-						
-						synchronizedTaskToTechpark(task, targetId, flow.getOrganizationId());
+
+						PmTaskLog pmTaskLog = new PmTaskLog();
+						pmTaskLog.setNamespaceId(task.getNamespaceId());
+						pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+						pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+						pmTaskLog.setOwnerId(task.getOwnerId());
+						pmTaskLog.setOwnerType(task.getOwnerType());
+						pmTaskLog.setStatus(task.getStatus());
+						pmTaskLog.setTargetId(targetId);
+						pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+						pmTaskLog.setTaskId(task.getId());
+						pmTaskProvider.createTaskLog(pmTaskLog);
 					}
-					
 				}
-			}else if("PROCESSING".equals(nodeType)) {
-				task.setStatus(PmTaskFlowStatus.COMPLETED.getCode());
-				pmTaskProvider.updateTask(task);
 			}
-		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-			
-			task.setStatus(PmTaskFlowStatus.INACTIVE.getCode());
-			pmTaskProvider.updateTask(task);
 		}
-		//elasticsearch更新
-		pmTaskSearch.deleteById(task.getId());
-		pmTaskSearch.feedDoc(task);
+
+	}
+
+	private Byte convertFlowStatus(String params) {
+
+		if(StringUtils.isBlank(params)) {
+			LOGGER.error("Invalid flowNode param.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+					"Invalid flowNode param.");
+		}
+
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
+
+		LOGGER.debug("pmtask flow nodeTppe: {}", nodeType);
+		switch (nodeType) {
+			case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
+			case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
+			case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
+			case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
+			default: return null;
+		}
 	}
 
 	//同步数据到科技园
@@ -234,25 +308,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		UserContext context = UserContext.current();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		if(namespaceId == 1000000) {
-		
-//			String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
-//			String value = "[]";
-//			
-//			List<AttachmentDescriptor> attachments = cmd.getAttachments();
-//			if(null != attachments) {
-//				attachments.stream().forEach(a -> {
-//					String contentUrl = getResourceUrlByUir(a.getContentUri(), EntityType.USER.getCode(), task.getCreatorUid());
-//					a.setContentUrl(contentUrl);
-//				});
-//				value = JSONObject.toJSONString(attachments);
-//			}
-//			
-//	        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-//	        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-//	      
-//	        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-//	        valueOperations.set(key, value);
-			
 			TechparkSynchronizedServiceImpl handler = PlatformContext.getComponent("techparkSynchronizedServiceImpl");
 			handler.pushToQueque(task.getId() + "," + targetId + "," + organizationId);
 		}

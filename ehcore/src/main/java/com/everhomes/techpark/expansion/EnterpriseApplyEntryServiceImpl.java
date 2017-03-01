@@ -410,6 +410,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
 		
         FlowCase flowCase = dbProvider.execute(status -> {
+        	//added by Janson
+        	String projectType = EntityType.COMMUNITY.getCode();
+        	
             enterpriseApplyEntryProvider.createApplyEntry(request);
             Long projectId = cmd.getCommunityId();
             EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
@@ -460,9 +463,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
 				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
     		}
-    		if(null!=resourceCategory.getResourceCategryId())
+    		if(null != resourceCategory && null!=resourceCategory.getResourceCategryId()) {
     			projectId = resourceCategory.getResourceCategryId();
-            return this.createFlowCase(request,projectId);
+    			projectType = EntityType.RESOURCE_CATEGORY.getCode();
+    		}
+
+            return this.createFlowCase(request,projectId, projectType);
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
@@ -549,7 +555,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		  
 		
 	}
-    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId) {
+    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
 
         CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
@@ -562,12 +568,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         if (flow != null) {
             flowCaseCmd.setFlowMainId(flow.getFlowMainId());
             flowCaseCmd.setFlowVersion(flow.getFlowVersion());
+            flowCaseCmd.setProjectType(projectType);
+            flowCaseCmd.setProjectId(projectId);
 
             return flowService.createFlowCase(flowCaseCmd);
         } else {
         	GeneralModuleInfo gm = new GeneralModuleInfo();
         	gm.setOrganizationId(request.getEnterpriseId());
-        	gm.setProjectType(EntityType.COMMUNITY.getCode());
+        	gm.setProjectType(projectType);
         	gm.setProjectId(projectId);
         	gm.setNamespaceId(UserContext.getCurrentNamespaceId());
         	gm.setModuleId(ExpansionConst.MODULE_ID);

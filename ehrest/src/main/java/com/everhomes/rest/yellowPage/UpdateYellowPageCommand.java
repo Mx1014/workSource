@@ -5,7 +5,7 @@ import java.util.List;
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
 /***
- * 
+ * <ul>
  * <li> id: ID       </li>
 *<li> parentId:父节点ID  </li>
 *<li> ownerType: 拥有者类型：现在是comunity</li>
@@ -28,7 +28,7 @@ import com.everhomes.util.StringHelper;
 *<li> serviceType: 服务联盟的子类别</li>
 *<li> attachments: 附件列表</li>
 *<li> buildingId: 楼栋id</li>
-
+*</ul>
  * */
 public class UpdateYellowPageCommand {
 	private java.lang.Long     id;

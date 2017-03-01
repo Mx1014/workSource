@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>
  * <li>namespaceId: 命名空间</li>
  * <li>appId: 应用Id</li>
- * <li>scopeType: item可见范围类型 参考{@link com.everhomes.launchpad.LaunchPadScopeType}</li>
+ * <li>scopeType: item可见范围类型 参考{@link com.everhomes.rest.common.ScopeType}</li>
  * <li>scopeId: 看见范围具体Id，全国为0,城市或小区Id</li>
  * <li>itemLocation: item 的路径</li>
  * <li>itemGroup: 当前item归属的组，参考{@link com.everhomes.rest.launchpad.ItemGroup}</li>

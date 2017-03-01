@@ -782,6 +782,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public List<EquipmentInspectionTasks> listEquipmentInspectionTasks(
 			String ownerType, Long ownerId, Long inspectionCategoryId, List<String> targetType, List<Long> targetId,
 			List<Long> standardIds, Integer offset, Integer pageSize) {
+		long startTime = System.currentTimeMillis();
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -870,7 +871,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         	result.add(ConvertHelper.convert(record, EquipmentInspectionTasks.class));
         	return null;
         });
-        
+
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost: listEquipmentInspectionTasks resultSize = " + result.size()
+				+ ", maxCount = " + pageSize + ", elapse=" + (endTime - startTime));
         
 		return result;
 	}
@@ -1784,6 +1788,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			String ownerType, Long ownerId, Long inspectionCategoryId,
 			List<String> targetType, List<Long> targetId,
 			List<Long> standardIds, Integer offset, Integer pageSize) {
+		long startTime = System.currentTimeMillis();
 		List<EquipmentInspectionTasks> result = new ArrayList<EquipmentInspectionTasks>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1832,14 +1837,17 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         	result.add(ConvertHelper.convert(record, EquipmentInspectionTasks.class));
         	return null;
         });
-        
-        
+
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost: listEquipmentInspectionReviewTasks resultSize = " + result.size()
+				+ ", maxCount = " + pageSize + ", elapse=" + (endTime - startTime));
 		return result;
 	}
 
 	@Override
 	public List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(
 			List<ExecuteGroupAndPosition> reviewGroups, byte groupType) {
+		long startTime = System.currentTimeMillis();
 		final List<EquipmentInspectionStandardGroupMap> maps = new ArrayList<EquipmentInspectionStandardGroupMap>();
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhEquipmentInspectionStandardGroupMap.class));
  
@@ -1872,7 +1880,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         	maps.add(ConvertHelper.convert(r, EquipmentInspectionStandardGroupMap.class));
              return null;
         });
-        
+
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost: listEquipmentInspectionStandardGroupMapByGroupAndPosition resultSize = " + maps.size()
+				+ ", elapse=" + (endTime - startTime));
        
         return maps;
 	}
