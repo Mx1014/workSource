@@ -8384,9 +8384,11 @@ System.out.println();
 		contractDTO.setSignupCount(getSignupCount(contract.getOrganizationId()));
 		
 		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getOrganizationId());
-		contractDTO.setContract(organizationDetail.getContact());
-		contractDTO.setContactor(organizationDetail.getContactor());
-		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+		if (organizationDetail != null) {
+			contractDTO.setContract(organizationDetail.getContact());
+			contractDTO.setContactor(organizationDetail.getContactor());
+			contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+		}
 		
 		OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
 		if (user != null) {
