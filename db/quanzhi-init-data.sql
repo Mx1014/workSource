@@ -49,28 +49,28 @@ INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `defau
     VALUES((@eh_categories := @eh_categories + 1), 1, 0, '紧急通知', '帖子/紧急通知', 1, 2, UTC_TIMESTAMP(), 999980);    
 
 INSERT INTO `eh_users` (`id`,  `uuid`,  `account_name`,  `nick_name`, `avatar`, `status`, `points`, `level`, `gender`, `locale`, `salt`, `password_hash`, `create_time`, `namespace_id`)
-	VALUES (248630, UUID(), '13823662850', '陈炯康', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999980);
+	VALUES (249500, UUID(), '13823662850', '陈炯康', 'cs://1/image/aW1hZ2UvTVRvMlkySmhNbVZqTm1SaU1UQXdPREkxWkRjME5HVmxNVFU1TXpBNE5UUTBZdw', 1, 45, '1', '1',  'zh_CN',  '3023538e14053565b98fdfb2050c7709', '3f2d9e5202de37dab7deea632f915a6adc206583b3f228ad7e101e5cb9c4b199', UTC_TIMESTAMP(), 999980);
 
 SET @eh_user_identifiers = (SELECT max(id) FROM `eh_user_identifiers`);   
 INSERT INTO `eh_user_identifiers` (`id`,  `owner_uid`,  `identifier_type`,  `identifier_token`,  `verification_code`,  `claim_status`, `create_time`, `namespace_id`)
-	VALUES ((@eh_user_identifiers := @eh_user_identifiers + 1) , 248630 ,  '0',  '13823662850',  '221616',  3, UTC_TIMESTAMP(), 999980);
+	VALUES ((@eh_user_identifiers := @eh_user_identifiers + 1) , 249500 ,  '0',  '13823662850',  '221616',  3, UTC_TIMESTAMP(), 999980);
 
 SET @eh_core_serverURL = "http://core.zuolin.com";
 SET @eh_biz_serverURL = "https://biz.zuolin.com";
-SET @group_id = 1009500;  
-SET @organization_id = 1011090;  	
-SET @forum_id = 188120;
+SET @group_id = 1009550;  
+SET @organization_id = 1011200;  	
+SET @forum_id = 188150;
 SET @feedback_forum_id = @forum_id + 1; 
 SET @community_forum_id = @forum_id + 2;   
-SET @community_id = 240111044331056650; 
-SET @org_member_id = 2123830; 
-SET @role_assignment_id = 15485; 
-SET @namespace_resource_id = 17800; 
-SET @sheng_id = 16005; 
+SET @community_id = 240111044331056700; 
+SET @org_member_id = 2124300; 
+SET @role_assignment_id = 15550; 
+SET @namespace_resource_id = 17900; 
+SET @sheng_id = 16050; 
 SET @shi_id = @sheng_id + 1; 
 SET @qu_id = @shi_id + 1; 
-SET @community_geopoint_id = 240111044331052546; 
-SET @building1_id = 182720;
+SET @community_geopoint_id = 240111044331052600; 
+SET @building1_id = 182730;
 SET @building2_id = @building1_id + 1;
 SET @building3_id = @building1_id + 2;
 SET @building4_id = @building1_id + 3;
@@ -96,10 +96,10 @@ INSERT INTO `eh_organization_community_requests` (id, community_id, member_type,
 	VALUES((@organization_community_request_id := @organization_community_request_id + 1), @community_id, 'organization', @organization_id, 3, 0, UTC_TIMESTAMP());
 
 INSERT INTO `eh_organization_members`(id, organization_id, target_type, target_id, member_group, contact_name, contact_type, contact_token, status, `namespace_id`)
-	VALUES(@org_member_id, @organization_id, 'USER', 248630  , 'manager', '陈炯康', 0, '13823662850', 3, 999980);	
+	VALUES(@org_member_id, @organization_id, 'USER', 249500  , 'manager', '陈炯康', 0, '13823662850', 3, 999980);	
 
 INSERT INTO `eh_acl_role_assignments`(id, owner_type, owner_id, target_type, target_id, role_id, creator_uid, create_time)
-	VALUES(@role_assignment_id, 'EhOrganizations', @organization_id, 'EhUsers', 248630  , 1001, 1, UTC_TIMESTAMP());
+	VALUES(@role_assignment_id, 'EhOrganizations', @organization_id, 'EhUsers', 249500  , 1001, 1, UTC_TIMESTAMP());
 
 	
 
