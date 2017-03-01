@@ -2,6 +2,10 @@ package com.everhomes.pmtask;
 
 import java.util.List;
 
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.pmtask.*;
@@ -38,6 +42,10 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	private FlowCaseProvider flowCaseProvider;
 	@Autowired
 	private FlowNodeProvider flowNodeProvider;
+	@Autowired
+	private BuildingProvider buildingProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -61,8 +69,20 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
 			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 			createFlowCaseCommand.setContent(task.getContent());
-			createFlowCaseCommand.setProjectId(task.getOwnerId());
-			createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+
+			if (StringUtils.isNotBlank(task.getBuildingName())) {
+				Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
+						task.getBuildingName());
+				if(building != null){
+					ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
+							EntityType.BUILDING.getCode(), namespaceId);
+					createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
+					createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+				}
+			}else {
+				createFlowCaseCommand.setProjectId(task.getOwnerId());
+				createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+			}
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
