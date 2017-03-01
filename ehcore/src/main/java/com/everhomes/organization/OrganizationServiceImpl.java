@@ -8388,14 +8388,15 @@ System.out.println();
 			contractDTO.setContract(organizationDetail.getContact());
 			contractDTO.setContactor(organizationDetail.getContactor());
 			contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+			
+			OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
+			if (user != null) {
+				contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+				contractDTO.setServiceUserName(user.getServiceUserName());
+				contractDTO.setServiceUserPhone(user.getServiceUserPhone());
+			}
 		}
 		
-		OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
-		if (user != null) {
-			contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
-			contractDTO.setServiceUserName(user.getServiceUserName());
-			contractDTO.setServiceUserPhone(user.getServiceUserPhone());
-		}
 		List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
 		contractDTO.setBuildings(buildings);
 		return contractDTO;
