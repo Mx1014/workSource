@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
+ * <li>activityId: 活动id</li>
  * <li>phone: 手机</li>
  * <li>realName: 真实姓名</li>
  * <li>gender: 性别，0未知1男2女，参考{@link com.everhomes.rest.user.UserGender}</li>
@@ -16,6 +17,7 @@ import com.everhomes.util.StringHelper;
  * </ul>
  */
 public class ManualSignupCommand {
+	private Long activityId;
 	private String phone;
 	private String realName;
 	private Byte gender;
@@ -23,6 +25,14 @@ public class ManualSignupCommand {
 	private String organizationName;
 	private String position;
 	private Byte leaderFlag;
+
+	public Long getActivityId() {
+		return activityId;
+	}
+
+	public void setActivityId(Long activityId) {
+		this.activityId = activityId;
+	}
 
 	public String getPhone() {
 		return phone;

@@ -392,11 +392,91 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
-    	
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
+	        dbProvider.execute((status) -> {
+		    	User user = UserContext.current().getUser();
+		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+		        if (activity == null) {
+		            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+		        }
+		        //检查是否超过报名人数限制, add by tt, 20161012
+		        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
+		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+							"beyond contraint quantity!");
+				}
+		        
+		        Post post = forumProvider.findPostById(activity.getPostId());
+		        if (post == null) {
+		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
+		        }
+		        ActivityRoster roster = newRoster(cmd, user, activity);
+		        
+	            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
+	                RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
+	                joinCmd.setGroupId(activity.getGroupId());
+	                joinCmd.setRequestText("request to join activity group");
+	                try{
+	                    groupService.requestToJoinGroup(joinCmd);
+	                }catch(Exception e){
+	                    LOGGER.error("join to group failed",e);
+	                }
+	               
+	            }
+	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
+	            activityProvider.createActivityRoster(roster);
+	            activityProvider.updateActivity(activity);
+	            return status;
+	        });
+	        return null;
+        });
     	
     	
     	
 		return null;
+	}
+
+	private ActivityRoster newRoster(ManualSignupCommand cmd, User user, Activity activity) {
+		ActivityRoster roster = ConvertHelper.convert(cmd, ActivityRoster.class);
+        roster.setFamilyId(user.getAddressId());
+        roster.setUid(user.getId());
+        roster.setUuid(UUID.randomUUID().toString());
+        roster.setActivityId(activity.getId());
+        roster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        roster.setConfirmFamilyId(user.getAddressId());
+        if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
+        	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+        }
+
+//    	private String uuid;
+//    	private Long activityId;
+//    	private Long uid;
+//    	private Long familyId;
+//    	private Integer adultCount;
+//    	private Integer childCount;
+//    	private Byte checkinFlag;
+//    	private Long checkinUid;
+//    	private Byte confirmFlag;
+//    	private Long confirmUid;
+//    	private Long confirmFamilyId;
+//    	private Timestamp confirmTime;
+//    	private Byte lotteryFlag;
+//    	private Timestamp lotteryTime;
+//    	private Timestamp createTime;
+//    	private String phone;
+//    	private String realName;
+//    	private Byte gender;
+//    	private String communityName;
+//    	private String organizationName;
+//    	private String position;
+//    	private Byte leaderFlag;
+//    	private Byte sourceFlag;
+        
+        return roster;
 	}
 
 	@Override
