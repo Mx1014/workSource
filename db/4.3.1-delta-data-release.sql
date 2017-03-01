@@ -48,7 +48,7 @@ INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) V
 INSERT INTO `eh_acls` (`id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `order_seq`, `creator_uid`, `create_time`, `namespace_id`, `role_type`, `scope`, `integral_tag1`, `integral_tag2`, `integral_tag3`, `integral_tag4`, `integral_tag5`, `comment_tag1`, `comment_tag2`, `comment_tag3`, `comment_tag4`, `comment_tag5`) VALUES (9983, 'EhOrganizations', NULL, 1, 10120, 1005, 0, 1, '2017-01-06 18:36:05', 0, 'EhAclRoles', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL);
 -- 以上数据不一定用得到
 
-
+-- 物业报修2.8 add by sw 20170301
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) VALUES (10138, '0', '物业报修 代发权限', '物业报修 代发权限', NULL);
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 
