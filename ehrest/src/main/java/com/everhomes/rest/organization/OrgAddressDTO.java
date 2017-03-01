@@ -11,6 +11,9 @@ package com.everhomes.rest.organization;
  * <li>areaName：区域名称</li>
  * <li>buildingName：楼栋名称</li>
  * <li>apartmentName: 门牌号</li>
+ * <li>businessBuildingName: 电商楼栋名称</li>
+ * <li>businessApartmentName: 电商门牌号</li>
+ * <li>apartmentFloor: 楼层</li>
  * </ul>
  */
 public class OrgAddressDTO {
@@ -32,6 +35,8 @@ public class OrgAddressDTO {
     private java.lang.String   addressAlias;
     private java.lang.String   buildingName;
     private java.lang.String   buildingAliasName;
+	private String businessBuildingName;
+	private String businessApartmentName;
     private java.lang.String   apartmentName;
     private java.lang.String   apartmentFloor;
 	public Long getOrganizationId() {
@@ -147,5 +152,21 @@ public class OrgAddressDTO {
 
 	public void setCommunityName(String communityName) {
 		this.communityName = communityName;
+	}
+
+	public String getBusinessApartmentName() {
+		return businessApartmentName;
+	}
+
+	public void setBusinessApartmentName(String businessApartmentName) {
+		this.businessApartmentName = businessApartmentName;
+	}
+
+	public String getBusinessBuildingName() {
+		return businessBuildingName;
+	}
+
+	public void setBusinessBuildingName(String businessBuildingName) {
+		this.businessBuildingName = businessBuildingName;
 	}
 }
