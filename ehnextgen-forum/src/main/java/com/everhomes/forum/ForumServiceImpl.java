@@ -667,14 +667,14 @@ public class ForumServiceImpl implements ForumService {
             }else{
                 resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_TOPIC0);
             }
-        }else if(CategoryConstants.CATEGORY_ID_ACTIVITY == post.getContentCategory() && post.getActivityCategoryId() == 0L){
-            if(post.getParentPostId() != null && post.getParentPostId() != 0 && post.getActivityCategoryId() == 1L){
+        }else if(CategoryConstants.CATEGORY_ID_ACTIVITY == post.getContentCategory() && post.getActivityCategoryId() == 1L){
+            if(post.getParentPostId() != null && post.getParentPostId() != 0){
                 resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_COMMENT1);
             }else{
                 resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_TOPIC1);
             }
         }else{
-            if(post.getParentPostId() != null && post.getParentPostId() != 0 && post.getActivityCategoryId() == 1L){
+            if(post.getParentPostId() != null && post.getParentPostId() != 0){
                 resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_OHTER_COMMENT);
             }else{
                 resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_OHTER_TOPIC);
