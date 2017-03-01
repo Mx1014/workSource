@@ -37,6 +37,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
@@ -183,14 +184,17 @@ public class AssetServiceImpl implements AssetService {
         if(cmd.getPageAnchor()!=null){
             locator.setAnchor(cmd.getPageAnchor());
         }
+        
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+        
         List<AssetBill> bills  = assetProvider.listAssetBill(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(),
-                tenantIds, tenantType, cmd.getAddressId(), cmd.getStatus(), cmd.getStartTime(),cmd.getEndTime(), locator, cmd.getPageSize() + 1);
+                tenantIds, tenantType, cmd.getAddressId(), cmd.getStatus(), cmd.getStartTime(),cmd.getEndTime(), locator, pageSize + 1);
 
 
         ListSimpleAssetBillsResponse response = new ListSimpleAssetBillsResponse();
-        if (bills.size() > cmd.getPageSize()) {
+        if (bills.size() > pageSize) {
             response.setNextPageAnchor(locator.getAnchor());
-            bills = bills.subList(0, cmd.getPageSize());
+            bills = bills.subList(0, pageSize);
         }
 
         List<SimpleAssetBillDTO> dtos = convertAssetBillToSimpleDTO(bills);
@@ -465,7 +469,7 @@ public class AssetServiceImpl implements AssetService {
                     	if("class java.sql.Timestamp".equals(field.getType().toString())) {
                     		field.set(bill, covertStrToTimestamp(s[i]));
                     	} else if("class java.math.BigDecimal".equals(field.getType().toString())) {
-                    		if(s[i] != null) {
+                    		if(s[i] != null && !"null".equals(s[i])) {
                     			field.set(bill, new BigDecimal(s[i]));
                     		}
                     			
@@ -595,38 +599,40 @@ public class AssetServiceImpl implements AssetService {
             List<FieldValueDTO> valueDTOs = new ArrayList<>();
             Field[] fields = bill.getClass().getDeclaredFields();
             for(AssetBillTemplateFieldDTO fieldDTO : templateFields) {
-                FieldValueDTO valueDTO = new FieldValueDTO();
-                if(fieldDTO.getFieldCustomName() != null) {
-                    valueDTO.setFieldDisplayName(fieldDTO.getFieldCustomName());
-                } else {
-                    valueDTO.setFieldDisplayName(fieldDTO.getFieldDisplayName());
-                }
-                valueDTO.setFieldName(fieldDTO.getFieldName());
-                valueDTO.setFieldType(fieldDTO.getFieldType());
+                if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(fieldDTO.getSelectedFlag()))) {
+                    FieldValueDTO valueDTO = new FieldValueDTO();
+                    if(fieldDTO.getFieldCustomName() != null) {
+                        valueDTO.setFieldDisplayName(fieldDTO.getFieldCustomName());
+                    } else {
+                        valueDTO.setFieldDisplayName(fieldDTO.getFieldDisplayName());
+                    }
+                    valueDTO.setFieldName(fieldDTO.getFieldName());
+                    valueDTO.setFieldType(fieldDTO.getFieldType());
 
-                for (Field requestField : fields) {
-                    requestField.setAccessible(true);
-                    // private类型
-                    if (requestField.getModifiers() == 2) {
-                        if(requestField.getName().equals(fieldDTO.getFieldName())){
-                            // 字段值
-                            try {
-                                if(requestField.get(bill) != null)
-                                    valueDTO.setFieldValue(requestField.get(bill).toString());
+                    for (Field requestField : fields) {
+                        requestField.setAccessible(true);
+                        // private类型
+                        if (requestField.getModifiers() == 2) {
+                            if(requestField.getName().equals(fieldDTO.getFieldName())){
+                                // 字段值
+                                try {
+                                    if(requestField.get(bill) != null)
+                                        valueDTO.setFieldValue(requestField.get(bill).toString());
 
-                                break;
-                            } catch (IllegalArgumentException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
-                            } catch (IllegalAccessException e) {
-                                // TODO Auto-generated catch block
-                                e.printStackTrace();
+                                    break;
+                                } catch (IllegalArgumentException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                } catch (IllegalAccessException e) {
+                                    // TODO Auto-generated catch block
+                                    e.printStackTrace();
+                                }
                             }
                         }
                     }
-                }
 
-                valueDTOs.add(valueDTO);
+                    valueDTOs.add(valueDTO);
+                }
             }
             
             BigDecimal totalAmounts = bill.getPeriodAccountAmount();
@@ -841,9 +847,11 @@ public class AssetServiceImpl implements AssetService {
             try {
             	Long templateVersion = 0L;
                 for(AssetBillTemplateFieldDTO dto : dtos) {
-                	templateVersion = dto.getTemplateVersion();
-                    Field field = c.getDeclaredField(dto.getFieldName());
-                    fields.add(field);
+                    if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(dto.getSelectedFlag()))) {
+                        templateVersion = dto.getTemplateVersion();
+                        Field field = c.getDeclaredField(dto.getFieldName());
+                        fields.add(field);
+                    }
                 }
                 fieldMap.put(templateVersion, fields);
 
