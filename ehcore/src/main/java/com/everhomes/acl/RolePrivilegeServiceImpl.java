@@ -1860,9 +1860,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 		// 没有，则获取个人所在公司节点的业务模块下的项目
 		if(serviceModuleAssignments.size() == 0){
-			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, user.getId(), cmd.getOrganizationId()));
-			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, user.getId(), cmd.getOrganizationId()));
-			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.GROUP, user.getId(), cmd.getOrganizationId()));
+			List<String> groupTypes = new ArrayList<>();
+			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+			groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+			groupTypes.add(OrganizationGroupType.GROUP.getCode());
+			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 			List<Long> targetIds = new ArrayList<>();
 			for (OrganizationDTO orgDTO: orgDTOs) {
 				targetIds.add(orgDTO.getId());
@@ -1932,9 +1934,11 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			// 没有，则获取个人所在公司节点的业务模块下的项目
 			if(serviceModuleAssignments.size() == 0){
-				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.ENTERPRISE, user.getId(), cmd.getOrganizationId()));
-				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, user.getId(), cmd.getOrganizationId()));
-				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(OrganizationGroupType.GROUP, user.getId(), cmd.getOrganizationId()));
+				List<String> groupTypes = new ArrayList<>();
+				groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+				groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+				groupTypes.add(OrganizationGroupType.GROUP.getCode());
+				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 				List<Long> targetIds = new ArrayList<>();
 				for (OrganizationDTO orgDTO: orgDTOs) {
 					targetIds.add(orgDTO.getId());
