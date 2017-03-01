@@ -14,7 +14,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>organizationName: 企业名称</li>
  * <li>position: 职位</li>
  * <li>leaderFlag: 是否高管，1是0否</li>
- * <li>leaderFlag: 是否高管，1是0否</li>
+ * <li>checkinFlag: 是否签到，1是0否</li>
  * </ul>
  */
 public class UpdateSignupInfoCommand {

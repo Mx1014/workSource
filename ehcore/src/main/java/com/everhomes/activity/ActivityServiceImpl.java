@@ -34,15 +34,18 @@ import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -57,6 +60,9 @@ import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -73,8 +79,13 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import net.greghaines.jesque.Job;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
@@ -89,6 +100,7 @@ import org.springframework.web.multipart.MultipartFile;
 import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -100,6 +112,7 @@ import java.util.stream.Stream;
 
 import static com.everhomes.poll.ProcessStatus.NOTSTART;
 import static com.everhomes.poll.ProcessStatus.UNDERWAY;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
@@ -400,7 +413,7 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
-    	ActivityRoster activityRoster = this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
+    	ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
 	        return (ActivityRoster)dbProvider.execute((status) -> {
 		    	User user = UserContext.current().getUser();
 		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
@@ -436,6 +449,7 @@ public class ActivityServiceImpl implements ActivityService {
 	               
 	            }
 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
+	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + 1);
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
 	            return roster;
@@ -446,16 +460,33 @@ public class ActivityServiceImpl implements ActivityService {
 	}
 
 	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster) {
-		return null;
+		SignupInfoDTO signupInfoDTO = ConvertHelper.convert(activityRoster, SignupInfoDTO.class);
+		User user = getUserFromPhone(activityRoster.getPhone());
+		signupInfoDTO.setNickName(user.getNickName());
+		signupInfoDTO.setType(getAuthFlag(user));
+		
+		return signupInfoDTO;
+	}
+
+	private Byte getAuthFlag(User user) {
+		if (user.getId().longValue() == 0L) {
+			return UserAuthFlag.NOT_REGISTER.getCode();
+		}
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
+		for (OrganizationMember organizationMember : members) {
+			if (OrganizationMemberStatus.fromCode(organizationMember.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+				return UserAuthFlag.AUTH.getCode();
+			}
+		}
+		return UserAuthFlag.NOT_AUTH.getCode();
 	}
 
 	private ActivityRoster newRoster(ManualSignupCommand cmd, User createUser, Activity activity) {
-		User user = getUserIdFromPhone(cmd.getPhone());
+		User user = getUserFromPhone(cmd.getPhone());
 		ActivityRoster roster = new ActivityRoster();
 		roster.setUuid(UUID.randomUUID().toString());
 		roster.setActivityId(activity.getId());
 		roster.setUid(user.getId());
-        roster.setFamilyId(user.getAddressId());
         roster.setAdultCount(1);
         roster.setChildCount(0);
         roster.setCheckinFlag(CheckInStatus.UN_CHECKIN.getCode());
@@ -475,7 +506,7 @@ public class ActivityServiceImpl implements ActivityService {
         return roster;
 	}
 
-	private User getUserIdFromPhone(String phone) {
+	private User getUserFromPhone(String phone) {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
 		if (userIdentifier != null) {
@@ -492,26 +523,234 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
-		return null;
+		ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
+	        return (ActivityRoster)dbProvider.execute((status) -> {
+	        	ActivityRoster roster = convertToRoster(cmd);
+	        	if (cmd.getCheckinFlag().byteValue() != roster.getCheckinFlag().byteValue()) {
+	        		updateActivityCheckin(roster, cmd.getCheckinFlag());
+	        		roster.setCheckinFlag(cmd.getCheckinFlag());
+	        		roster.setCheckinUid(UserContext.current().getUser().getId());
+	    		}
+	        	activityProvider.updateRoster(roster);
+	        	return roster;
+	        });
+		}).first();
+		return convertActivityRoster(activityRoster);
+	}
+
+	private ActivityRoster convertToRoster(UpdateSignupInfoCommand cmd) {
+		ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
+		roster.setRealName(cmd.getRealName());
+		roster.setGender(cmd.getGender());
+		roster.setCommunityName(cmd.getCommunityName());
+		roster.setOrganizationName(cmd.getOrganizationName());
+		roster.setPosition(cmd.getPosition());
+		roster.setLeaderFlag(cmd.getLeaderFlag());
+		return roster;
+	}
+
+	private void updateActivityCheckin(ActivityRoster roster, Byte toCheckinFlag) {
+		// 签到的话活动表对应字段+1
+		if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.UN_CHECKIN && CheckInStatus.fromCode(toCheckinFlag) == CheckInStatus.CHECKIN) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+				Activity activity = activityProvider.findActivityById(roster.getActivityId());
+				activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
+		                + (roster.getAdultCount() + roster.getChildCount()));
+		        if (roster.getFamilyId() != null) {
+		        	activity.setCheckinFamilyCount(activity.getCheckinFamilyCount() + 1);
+		        }
+		        activityProvider.updateActivity(activity);
+				return null;
+			});
+			//取消签到的话活动表对应字段-1
+		}else if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.CHECKIN && CheckInStatus.fromCode(toCheckinFlag) == CheckInStatus.UN_CHECKIN) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+				int result = 0;
+				Activity activity = activityProvider.findActivityById(roster.getActivityId());
+				activity.setCheckinAttendeeCount((result = activity.getCheckinAttendeeCount() - (roster.getAdultCount() + roster.getChildCount())) < 0 ? 0 : result);
+		        if (roster.getFamilyId() != null){
+		        	activity.setCheckinFamilyCount((result = activity.getCheckinFamilyCount() - 1) < 0 ? 0 : result);
+		        }
+		        activityProvider.updateActivity(activity);
+				return null;
+			});
+		}
 	}
 
 	@Override
 	public void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+			User user = UserContext.current().getUser();
+			Activity activity = checkActivityExist(cmd.getActivityId());
+			List<ActivityRoster> rosters = getRostersFromExcel(files[0]);
+			//检查是否超过报名人数限制, add by tt, 20161012
+	        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount().intValue() + rosters.size() > activity.getMaxQuantity().intValue()) {
+	        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+						"beyond contraint quantity!");
+			}
+			
+			dbProvider.execute(s->{
+				rosters.forEach(r -> {
+					r.setConfirmUid(user.getId());
+					r.setActivityId(cmd.getActivityId());
+					activityProvider.createActivityRoster(r);
+				});
+				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size());
+	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size());
+	            activityProvider.updateActivity(activity);
+	            
+				return null;
+			});
+			return null;
+		});
 		
+	}
+
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file) {
+		@SuppressWarnings("rawtypes")
+		ArrayList rows = processorExcel(file);
+		List<ActivityRoster> rosters = new ArrayList<>();
+		for(int i=1, len=rows.size(); i<len; i++) {
+			RowResult row = (RowResult) rows.get(i);
+			if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
+				continue;
+			}
+			if (row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_PHONE, "invalid phone " + row.getA());
+			}
+			User user = getUserFromPhone(row.getA().trim());
+			ActivityRoster roster = new ActivityRoster();
+			roster.setUuid(UUID.randomUUID().toString());
+			roster.setUid(user.getId());
+	        roster.setAdultCount(1);
+	        roster.setChildCount(0);
+	        roster.setCheckinFlag(CheckInStatus.UN_CHECKIN.getCode());
+	        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+	        roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        roster.setLotteryFlag((byte) 0);
+	        roster.setPhone(row.getA().trim());
+	        roster.setRealName(row.getB().trim());
+	        roster.setGender(getGender(row.getC().trim()));
+	        roster.setCommunityName(row.getD().trim());
+	        roster.setOrganizationName(row.getE().trim());
+	        roster.setPosition(row.getF().trim());
+	        roster.setLeaderFlag(getLeaderFlag(row.getG().trim()));
+	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
+	        
+	        rosters.add(roster);
+		}
+		return rosters;
+	}
+
+	private Byte getLeaderFlag(String leaderFlag) {
+		if ("是".equals(leaderFlag)) {
+			return TrueOrFalseFlag.TRUE.getCode();
+		}
+		return TrueOrFalseFlag.FALSE.getCode();
+	}
+
+	private Byte getGender(String gender) {
+		if ("男".equals(gender)) {
+			return UserGender.MALE.getCode();
+		}else if ("女".equals(gender)) {
+			return UserGender.FEMALE.getCode();
+		}
+		return UserGender.UNDISCLOSURED.getCode();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private ArrayList processorExcel(MultipartFile file) {
+		try {
+            return PropMrgOwnerHandler.processorExcel(file.getInputStream());
+        } catch (IOException e) {
+			LOGGER.error("Process excel error.", e);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Process excel error.");
+        }
+	}
+	
+	private Activity checkActivityExist(Long activityId) {
+		Activity activity = activityProvider.findActivityById(activityId);
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", activityId);
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + activityId);
+        }
+        return activity;
 	}
 
 	@Override
 	public ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd) {
+		
+		
+		
+		
+		
+		
+		
 		return null;
 	}
 
 	@Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
-		
+		Activity activity = checkActivityExist(cmd.getActivityId());
+
+        List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwnersByCommunity(
+                currentNamespaceId(), cmd.getCommunityId());
+
+        if (ownerList != null && ownerList.size() > 0) {
+            List<OrganizationOwnerDTO> ownerDTOs = ownerList.stream().map(this::convertOwnerToDTO).collect(Collectors.toList());
+
+            String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+            ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
+            String[] propertyNames = {"contactName", "gender", "orgOwnerType", "contactToken", "birthday", "maritalStatus", "job", "company",
+                    "idCardNumber", "registeredResidence"};
+            String[] titleNames = {"姓名", "性别", "客户类型", "手机", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
+            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30};
+            excelUtils.writeExcel(propertyNames, titleNames, titleSizes, ownerDTOs);
+        } else {
+            // LOGGER.error("Organization owner are not exist.");
+            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
+                    "Organization owner are not exist.");
+        }
 	}
 
 	@Override
 	public void deleteSignupInfo(DeleteSignupInfoCommand cmd) {
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
+	        dbProvider.execute((status) -> {
+	        	ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
+	        	activityProvider.deleteRoster(roster);
+	        	updateActivityWhenDeleteRoster(roster);
+	        	return null;
+	        });
+	        return null;
+		});
+	}
+
+	private void updateActivityWhenDeleteRoster(ActivityRoster roster) {
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+			int total = roster.getAdultCount() + roster.getChildCount();
+			int result = 0;
+			Activity activity = activityProvider.findActivityById(roster.getActivityId());
+			activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() - total);
+			if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
+				activity.setConfirmAttendeeCount((result = activity.getConfirmAttendeeCount() - total) < 0 ? 0 : result);
+				if (roster.getFamilyId() != null) {
+					activity.setConfirmFamilyCount((result = activity.getConfirmFamilyCount() -1) < 0 ? 0 : result);
+				}
+			}
+			if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.CHECKIN) {
+				activity.setCheckinAttendeeCount((result = activity.getCheckinAttendeeCount() - total) < 0 ? 0 : result);
+				if (roster.getFamilyId() != null) {
+					activity.setCheckinFamilyCount((result = activity.getCheckinFamilyCount() - 1) < 0 ? 0 : result);
+				}
+			}
+			activityProvider.updateActivity(activity);
+			return null;
+		});
 	}
 
 	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
@@ -564,6 +803,8 @@ public class ActivityServiceImpl implements ActivityService {
     	roster.setCommunityName(signupInfoDTO.getCommunityName());
     	roster.setOrganizationName(signupInfoDTO.getOrganizationName());
     	roster.setPosition(signupInfoDTO.getPosition());
+    	roster.setLeaderFlag(user.getExecutiveTag());
+    	roster.setSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
 	}
     
     private SignupInfoDTO verifyPerson(Integer namespaceId, User user) {
