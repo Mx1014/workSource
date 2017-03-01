@@ -2146,7 +2146,7 @@ public class BusinessServiceImpl implements BusinessService {
     public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
         if ("biz".equals(source)) {// 从电商服务器获取数据
             Integer namespaceId = UserContext.getCurrentNamespaceId();
-            return fetchBusinessPromotionEntitiesFromBiz(namespaceId);
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, cmd.getPageSize());
         }
         // 从数据库获取数据
         else {
@@ -2194,8 +2194,10 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId) {
+
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
         String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml");
+
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
 
         // bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
@@ -2209,6 +2211,7 @@ public class BusinessServiceImpl implements BusinessService {
 
         Map<String, String> param = new HashMap<>();
         param.put("namespaceId", String.valueOf(namespaceId));
+        param.put("pageSize", String.valueOf(pageSize));
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {
