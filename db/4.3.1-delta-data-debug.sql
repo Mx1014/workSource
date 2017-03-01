@@ -65,3 +65,9 @@ VALUES ((@menu_scope_id := @menu_scope_id + 1), 80600, '', 'EhNamespaces', 99998
 SET @eh_service_module_privileges_id = (SELECT MAX(id) FROM `eh_service_module_privileges`);
 INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`)
 VALUES ((@eh_service_module_privileges_id := @eh_service_module_privileges_id + 1), 41500, 1, 10136, NULL, 0, UTC_TIMESTAMP());
+
+--
+-- 华润OE首页布局修改   add by xq.tian 2017/03/01
+--
+UPDATE `eh_launch_pad_layouts` SET version_code='2017030101', `layout_json`='{"versionCode": "2017030101","versionName": "4.3.1","layoutName": "ServiceMarketLayout","displayName": "服务市场","groups": [{"groupName": "","widget": "Banners","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 1,"separatorFlag": 0,"separatorHeight": 0}, {"groupName": "","widget": "Bulletins","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 3,"separatorFlag": 1,"separatorHeight": 2}, {"groupName": "商家服务","widget": "Navigator","instanceConfig": {"itemGroup": "Bizs"},"style": "Default","defaultOrder": 5,"separatorFlag": 1,"separatorHeight": 21}, {"groupName": "","widget": "OPPush","instanceConfig": {"itemGroup": "OPPushActivity","newsSize": 3,"entityCount": 3,"subjectHeight": 1,"descriptionHeight": 0},"style": "ListView","defaultOrder": 6,"separatorFlag": 1,"separatorHeight": 21,"columnCount": 1}, {"groupName": "","widget": "OPPush","instanceConfig": {"itemGroup": "OPPushBiz","newsSize": 6,"entityCount": 6,"subjectHeight": 1,"descriptionHeight": 0},"style": "HorizontalScrollView","defaultOrder": 7,"separatorFlag": 1,"separatorHeight": 0,"columnCount": 0}]}'
+WHERE `namespace_id`=999985 AND `name`='ServiceMarketLayout';
