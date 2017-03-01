@@ -13,6 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>buildingName: 楼栋名称</li>
  * <li>addressId: 地址id</li>
  * <li>apartmentName: 门牌名称</li>
+ * <li>ownerType: ownerType EhCommunities 权限校验时用的</li>
+ * <li>ownerId: ownerId, communityId</li>
  * </ul>
  */
 public class SearchOrganizationOwnersCommand {
@@ -26,6 +28,25 @@ public class SearchOrganizationOwnersCommand {
     private String buildingName;
     private Long addressId;
     private String apartmentName;
+
+    private String ownerType;
+    private Long ownerId;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public Long getCommunityId() {
         return communityId;

@@ -2172,6 +2172,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		if(rs != null &&NormalFlag.NONEED.getCode() == rs.getExclusiveFlag().byteValue() 
 				&& NormalFlag.NONEED.getCode() == rs.getAutoAssign().byteValue() )
 			dto.setRentalCount(bill.getRentalCount());
+		else
+			dto.setRentalCount(null);
 		if (null == bill.getStartTime()) {
 
 		} else {

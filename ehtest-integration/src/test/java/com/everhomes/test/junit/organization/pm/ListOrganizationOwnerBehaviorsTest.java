@@ -21,7 +21,7 @@ public class ListOrganizationOwnerBehaviorsTest extends BaseLoginAuthTestCase {
         String api = "/pm/listOrganizationOwnerBehaviors";
         ListOrganizationOwnerBehaviorsCommand cmd = new ListOrganizationOwnerBehaviorsCommand();
         cmd.setOrganizationId(1000001L);
-        cmd.setOwnerId(1L);
+        cmd.setOrgOwnerId(1L);
 
         ListOrganizationOwnerBehaviorsRestResponse response = httpClientService.restPost(api, cmd, ListOrganizationOwnerBehaviorsRestResponse.class);
 
@@ -45,7 +45,7 @@ public class ListOrganizationOwnerBehaviorsTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-delete-owner-behavior-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

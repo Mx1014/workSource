@@ -338,7 +338,6 @@ public class EnergyConsumptionController extends ControllerBase {
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
     }
-    
 
     /**
      * <p>测试:计算某一天的度数费用到日报表</p>
@@ -347,17 +346,18 @@ public class EnergyConsumptionController extends ControllerBase {
     @RestReturn(value = String.class)
     @RequestMapping("caculateEnergyDayStatByDate")
     public RestResponse caculateEnergyDayStatByDate(EnergyStatCommand cmd ) {
-    	energyConsumptionService.caculateEnergyDayStatByDate(new Date(cmd.getStatDate()));
+    	energyConsumptionService.calculateEnergyDayStatByDate(new Date(cmd.getStatDate()));
     	return success();
     }
+
     /**
      * <p>测试:汇总某一个月的度数费用到月报表</p>
      * <b>URL: /energy/caculateEnergyMonthStatByDate</b>
-   +  */
+     */
     @RestReturn(value = String.class)
     @RequestMapping("caculateEnergyMonthStatByDate")
     public RestResponse caculateEnergyMonthStatByDate(EnergyStatCommand cmd) {
-    	energyConsumptionService.caculateEnergyMonthStatByDate(new Date(cmd.getStatDate()));
+    	energyConsumptionService.calculateEnergyMonthStatByDate(new Date(cmd.getStatDate()));
     	return success();
     }
 }

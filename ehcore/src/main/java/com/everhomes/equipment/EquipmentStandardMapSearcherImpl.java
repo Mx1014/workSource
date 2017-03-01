@@ -4,6 +4,9 @@ import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.organization.OrganizationMember;
 import org.elasticsearch.action.bulk.BulkRequestBuilder;
 import org.elasticsearch.action.search.SearchRequestBuilder;
 import org.elasticsearch.action.search.SearchResponse;
@@ -50,6 +53,9 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	
 	@Autowired
 	private OrganizationProvider organizationProvider;
+
+	@Autowired
+	private CommunityProvider communityProvider;
 	
 	@Override
 	public void deleteById(Long id) {
@@ -171,9 +177,10 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	        	dto.setId(map.getId());
 	        	dto.setEquipmentId(equipment.getId());
 	        	dto.setTargetId(equipment.getTargetId());
-	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-	    		if(group != null)
-	    			dto.setTargetName(group.getName());
+//	        	Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+				Community community = communityProvider.findCommunityById(dto.getTargetId());
+	    		if(community != null)
+	    			dto.setTargetName(community.getName());
 	    		
 	    		dto.setEquipmentName(equipment.getName());
 	    		dto.setEquipmentModel(equipment.getEquipmentModel());
@@ -186,7 +193,14 @@ public class EquipmentStandardMapSearcherImpl extends AbstractElasticSearch impl
 	            
 	            dto.setReviewResult(map.getReviewResult());
 	            dto.setReviewStatus(map.getReviewStatus());
-	
+				dto.setReviewTime(map.getReviewTime());
+
+				if(map.getReviewerUid() != null && map.getReviewerUid() != 0L) {
+					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(map.getReviewerUid(), equipment.getOwnerId());
+					if(member != null) {
+						dto.setReviewer(member.getContactName());
+					}
+				}
 	    		dtos.add(dto);
         	}
         }

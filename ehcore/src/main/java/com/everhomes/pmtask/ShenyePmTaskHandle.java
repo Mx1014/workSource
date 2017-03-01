@@ -16,6 +16,7 @@ import java.util.Map;
 
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -29,6 +30,8 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -46,29 +49,6 @@ import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.PmTaskAddressType;
-import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
-import com.everhomes.rest.pmtask.PmTaskAttachmentType;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
-import com.everhomes.rest.pmtask.PmTaskOperateType;
-import com.everhomes.rest.pmtask.PmTaskProcessStatus;
-import com.everhomes.rest.pmtask.PmTaskSourceType;
-import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -116,6 +96,8 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	private OrganizationProvider organizationProvider;
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
 	
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
@@ -417,8 +399,10 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
 	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {
 		if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
 			Address address = addressProvider.findAddressById(task.getAddressId());
-			if(null != address) 
-				dto.setAddress(address.getAddress());
+			if(null != address) {
+				Community community = communityProvider.findCommunityById(address.getCommunityId());
+				dto.setAddress(address.getCityName() + address.getAreaName() + community.getName() + address.getAddress());
+			}
 		}else {
 			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
 			Address address = addressProvider.findAddressById(task.getAddressId());
@@ -528,7 +512,33 @@ public class ShenyePmTaskHandle implements PmTaskHandle {
         }
 		return pmTask;
 	}
-	
+
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		if(null == cmd.getTaskId()) {
+			LOGGER.error("Invalid taskId parameter, cmd={}", cmd);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid taskId parameter.");
+		}
+		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
+		if(null == task) {
+			LOGGER.error("PmTask not found.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"PmTask not found.");
+		}
+		if(null != cmd.getCategoryId())
+			checkCategory(cmd.getCategoryId());
+		task.setCategoryId(cmd.getCategoryId());
+		task.setPriority(cmd.getPriority());
+		if(null != cmd.getReserveTime())
+			task.setReserveTime(new Timestamp(cmd.getReserveTime()));
+		else
+			task.setReserveTime(null);
+		task.setSourceType(cmd.getSourceType());
+		pmTaskProvider.updateTask(task);
+	}
+
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
 		Integer namespaceId = cmd.getNamespaceId();

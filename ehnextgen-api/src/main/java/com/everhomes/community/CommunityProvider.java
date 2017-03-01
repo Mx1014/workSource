@@ -104,4 +104,6 @@ public interface CommunityProvider {
     List<Community> listCommunitiesByFeedbackForumId(Long feedbackForumId);
     List<ResourceCategory> listResourceCategory(Long ownerId, String ownerType, List<Long> ids, Byte type);
     void deleteResourceCategoryById(Long id);
+
+    List<ResourceCategoryAssignment> listResourceCategoryAssignment(Long categoryId, Integer namespaceId, String resourceType, List<Long> resourceIds);
 }

@@ -13,14 +13,9 @@ import java.sql.Date;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Calendar;
-import java.util.Collections;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
+
 
 
 
@@ -38,6 +33,7 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -47,6 +43,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
+
 
 
 
@@ -157,6 +154,7 @@ import com.everhomes.rest.quality.ReviewVerificationResultCommand;
 import com.everhomes.rest.quality.ScoreDTO;
 import com.everhomes.rest.quality.ScoreGroupByTargetDTO;
 import com.everhomes.rest.quality.SpecificationApplyPolicy;
+import com.everhomes.rest.quality.SpecificationInspectionType;
 import com.everhomes.rest.quality.SpecificationScopeCode;
 import com.everhomes.rest.quality.StandardGroupDTO;
 import com.everhomes.rest.quality.TaskCountDTO;
@@ -315,7 +313,12 @@ public class QualityServiceImpl implements QualityService {
 	public QualityStandardsDTO updateQualityStandard(UpdateQualityStandardCommand cmd) {
 		
 		User user = UserContext.current().getUser();
-		
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("updateQualityStandard: userId = " + user.getId() + "time = " + DateHelper.currentGMTTime()
+					+ "UpdateQualityStandardCommand cmd = {}" + cmd);
+		}
+
 		QualityInspectionStandards standard = verifiedStandardById(cmd.getId());
 		standard.setOwnerId(cmd.getOwnerId());
 		standard.setOwnerType(cmd.getOwnerType());
@@ -876,7 +879,7 @@ public class QualityServiceImpl implements QualityService {
 		if(isAdmin) {
 			//管理员查询所有任务
 			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
-            		cmd.getTaskType(), null, startDate, endDate, null,
+            		cmd.getTaskType(), null, startDate, endDate, null, null,
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
@@ -888,8 +891,9 @@ public class QualityServiceImpl implements QualityService {
 //						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, standardIds, cmd.getManualFlag());
 //
 //			} else {
-				tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
-						cmd.getTaskType(), user.getId(), startDate, endDate, groupDtos,
+			List<QualityInspectionStandardGroupMap> maps = qualityProvider.listQualityInspectionStandardGroupMapByGroupAndPosition(groupDtos);
+			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
+						cmd.getTaskType(), user.getId(), startDate, endDate, groupDtos, maps,
 						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
 //			}
 		}
@@ -1062,9 +1066,11 @@ public class QualityServiceImpl implements QualityService {
 			
 			if(position != null) {
 				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-");
+					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				} else {
+					dto.setGroupName(position.getName());
+
 				}
-				dto.setGroupName(dto.getGroupName() + position.getName());
 			}
 			
 			List<GroupUserDTO> groupUsers = getGroupMembers(r.getExecutiveGroupId(), false);
@@ -1100,10 +1106,13 @@ public class QualityServiceImpl implements QualityService {
 	        	dto.setRecord(recordDto);
 			}
         	 
-        	OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getOwnerId());
-        	if(executor != null) {
-        		dto.setExecutorName(executor.getContactName());
-        	}
+			if(r.getExecutorId() != null && r.getExecutorId() != 0) {
+				OrganizationMember executor = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getExecutorId(), r.getOwnerId());
+	        	if(executor != null) {
+	        		dto.setExecutorName(executor.getContactName());
+	        	}
+			}
+        	
         	
         	if(r.getOperatorId() != null && r.getOperatorId() != 0) {
         		OrganizationMember operator = organizationProvider.findOrganizationMemberByOrgIdAndUId(r.getOperatorId(), r.getOwnerId());
@@ -1402,6 +1411,65 @@ public class QualityServiceImpl implements QualityService {
 		QualityInspectionTaskDTO dto = updateVerificationTasks(task, record, cmd.getAttachments(), null);
 		return dto;
 	}
+
+	@Scheduled(cron = "0 0 7 * * ? ")
+	@Override
+	public void sendTaskMsg() {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_QUALITY_TASK.getCode()).tryEnter(()-> {
+			long current = System.currentTimeMillis();//当前时间毫秒数
+			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+			
+			if (LOGGER.isInfoEnabled()) {
+				LOGGER.info("sendTaskMsg, zero = " + zero);
+			}
+			
+			List<QualityInspectionTasks> tasks = qualityProvider.listTodayQualityInspectionTasks(zero);
+
+			if (tasks != null && tasks.size() > 0) {
+				for (QualityInspectionTasks task : tasks) {
+					Map<String, Object> map = new HashMap<String, Object>();
+					map.put("taskName", task.getTaskName());
+					map.put("deadline", timeToStr(task.getExecutiveExpireTime()));
+					String scope = QualityNotificationTemplateCode.SCOPE;
+					int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
+					String locale = "zh_CN";
+					String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+
+					List<QualityInspectionStandardGroupMap> maps = qualityProvider.listQualityInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), QualityGroupType.EXECUTIVE_GROUP.getCode());
+
+					for (QualityInspectionStandardGroupMap executiveGroup : maps) {
+						if (executiveGroup.getPositionId() != null) {
+							ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+							command.setOrganizationId(executiveGroup.getGroupId());
+							command.setJobPositionId(executiveGroup.getPositionId());
+							List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+							if (LOGGER.isInfoEnabled()) {
+								LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "contacts = {}" + contacts);
+							}
+
+							if (contacts != null && contacts.size() > 0) {
+								for (OrganizationContactDTO contact : contacts) {
+									sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
+								}
+							}
+						} else {
+							List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
+							if (LOGGER.isInfoEnabled()) {
+								LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "members = {}" + members);
+							}
+
+							if (members != null) {
+								for (OrganizationMember member : members) {
+									sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
+								}
+							}
+						}
+					}
+				}
+
+			}
+		});
+	}
 	
 	@Override
 	public void createTaskByStandard(QualityStandardsDTO standard) {
@@ -1428,10 +1496,10 @@ public class QualityServiceImpl implements QualityService {
 			task.setTaskName(standard.getName());
 			task.setTaskType((byte) 1);
 			task.setStatus(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode());
-			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
-				
-				task.setExecutiveGroupId(executiveGroup.getGroupId());
-				task.setExecutivePositionId(executiveGroup.getPositionId());
+//			for(StandardGroupDTO executiveGroup : standard.getExecutiveGroup()) {
+//
+//				task.setExecutiveGroupId(executiveGroup.getGroupId());
+//				task.setExecutivePositionId(executiveGroup.getPositionId());
 //				OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(executiveGroup.getInspectorUid()
 //																	, executiveGroup.getGroupId());
 //				List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgIdAndMemberGroup(
@@ -1439,55 +1507,27 @@ public class QualityServiceImpl implements QualityService {
 //				if(members != null) {
 //					task.setExecutorType(member.getTargetType());
 //					task.setExecutorId(member.getTargetId());
-					List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
-					
-					if(timeRanges != null && timeRanges.size() > 0) {
-						for(TimeRangeDTO timeRange : timeRanges) {
-							this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
-								String duration = timeRange.getDuration();
-								String start = timeRange.getStartTime();
-								String str = day + " " + start;
-								Timestamp startTime = strToTimestamp(str);
-								Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
-								task.setExecutiveStartTime(startTime);
-								task.setExecutiveExpireTime(expiredTime);
-								long now = System.currentTimeMillis();
-								String taskNum = timestampToStr(new Timestamp(now)) + now;
-								task.setTaskNumber(taskNum);
-								qualityProvider.createVerificationTasks(task);
+				List<TimeRangeDTO> timeRanges = repeatService.analyzeTimeRange(standard.getRepeat().getTimeRanges());
+
+				if(timeRanges != null && timeRanges.size() > 0) {
+					for(TimeRangeDTO timeRange : timeRanges) {
+						this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_QUALITY_TASK.getCode()).tryEnter(()-> {
+							String duration = timeRange.getDuration();
+							String start = timeRange.getStartTime();
+							String str = day + " " + start;
+							Timestamp startTime = strToTimestamp(str);
+							Timestamp expiredTime = repeatService.getEndTimeByAnalyzeDuration(startTime, duration);
+							task.setExecutiveStartTime(startTime);
+							task.setExecutiveExpireTime(expiredTime);
+							long now = System.currentTimeMillis();
+							String taskNum = timestampToStr(new Timestamp(now)) + now;
+							task.setTaskNumber(taskNum);
+							qualityProvider.createVerificationTasks(task);
 								
-								Map<String, Object> map = new HashMap<String, Object>();
-							    map.put("taskName", task.getTaskName());
-							    map.put("deadline", timeToStr(expiredTime));
-								String scope = QualityNotificationTemplateCode.SCOPE;
-								int code = QualityNotificationTemplateCode.GENERATE_QUALITY_TASK_NOTIFY_EXECUTOR;
-								String locale = "zh_CN";
-								String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-								
-								
-								if(executiveGroup.getPositionId() != null) {
-									ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
-									command.setOrganizationId(executiveGroup.getGroupId());
-									command.setJobPositionId(executiveGroup.getPositionId());
-									List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
-									if(contacts != null && contacts.size() > 0) {
-										for(OrganizationContactDTO contact : contacts) {
-											sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
-										}
-									}
-								} else {
-									List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
-									if(members != null) {
-										for(OrganizationMember member : members) {
-											sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
-										}
-									}
-								}
-								
-							});
-						}
-							
+						});
 					}
+
+				}
 					
 //				} else {
 //					LOGGER.error("the group which id="+executiveGroup.getGroupId()+" don't have any hecha member!");
@@ -1504,7 +1544,7 @@ public class QualityServiceImpl implements QualityService {
 //				}
 				
 			}
-		} 
+//		}
 	}
 	
 	
@@ -1824,10 +1864,13 @@ public class QualityServiceImpl implements QualityService {
 			
 			if(position != null) {
 				if(dto.getGroupName() != null) {
-					dto.setGroupName(dto.getGroupName() + "-");
+					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				} else {
+					dto.setGroupName(position.getName());
+
 				}
-				dto.setGroupName(dto.getGroupName() + position.getName());
 			}
+			
         	return dto;
         }).collect(Collectors.toList());
 
@@ -1835,8 +1878,20 @@ public class QualityServiceImpl implements QualityService {
         	
 			StandardGroupDTO dto = ConvertHelper.convert(r, StandardGroupDTO.class);  
 			Organization group = organizationProvider.findOrganizationById(r.getGroupId());
-			if(group != null)
+			OrganizationJobPosition position = organizationProvider.findOrganizationJobPositionById(r.getPositionId());
+			if(group != null) {
 				dto.setGroupName(group.getName());
+				
+			} 
+			
+			if(position != null) {
+				if(dto.getGroupName() != null) {
+					dto.setGroupName(dto.getGroupName() + "-" + position.getName());
+				} else {
+					dto.setGroupName(position.getName());
+
+				}
+			}
 			
         	return dto;
         }).collect(Collectors.toList());
@@ -2644,9 +2699,15 @@ public class QualityServiceImpl implements QualityService {
 							score.setSpecificationWeight(dto.getWeight());
 
 							score.setSpecificationDescription(dto.getDescription());
-							Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
-							score.setScore(mark);
-
+							
+							//规范事项的话直接显示扣了多少分 by xiongying20170123
+							if(SpecificationInspectionType.SPECIFICATION_ITEM.equals(SpecificationInspectionType.fromStatus(score.getSpecificationInspectionType()))) {
+								score.setScore(score.getScore());
+							} else {
+								Double mark = (score.getSpecificationScore() - score.getScore()) * score.getSpecificationWeight();
+								score.setScore(mark);
+							}
+							
 						}
 						scores.add(score);
 					}

@@ -57,6 +57,10 @@ public class YellowPageController  extends ControllerBase {
          return response;
     }
 
+    /**
+	 * <b>URL: /yellowPage/getYellowPageTopic</b>
+	 * <p>获取黄页topic-创客空间,服务联盟等 </p>
+	 */
     @RequireAuthentication(false)
     @RequestMapping("getYellowPageTopic")
     @RestReturn(value=YellowPageDTO.class)
@@ -100,6 +104,10 @@ public class YellowPageController  extends ControllerBase {
          return response;
     }
 
+    /**
+	 * <b>URL: /yellowPage/updateYellowPage</b>
+	 * <p>更新黄页 </p>
+	 */
     
     @RequestMapping("updateYellowPage")
     @RestReturn(value=String.class)

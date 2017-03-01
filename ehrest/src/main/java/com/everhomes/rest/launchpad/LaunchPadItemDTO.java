@@ -11,7 +11,7 @@ import com.everhomes.util.StringHelper;
  * <li>id: id</li>
  * <li>namespaceId: 命名空间</li>
  * <li>appId: 应用Id</li>
- * <li>scopeType: item可见范围类型 参考{@link com.everhomes.launchpad.LaunchPadScopeType}</li>
+ * <li>scopeType: item可见范围类型 参考{@link com.everhomes.rest.common.ScopeType}</li>
  * <li>scopeId: 看见范围具体Id，全国为0,城市或小区Id</li>
  * <li>itemLocation: item 的路径</li>
  * <li>itemGroup: 当前item归属的组，参考{@link com.everhomes.rest.launchpad.ItemGroup}</li>
@@ -19,6 +19,8 @@ import com.everhomes.util.StringHelper;
  * <li>itemLabel: 显示标签</li>
  * <li>iconUri: 图标uri</li>
  * <li>iconUrl: 图标url</li>
+ * <li>selectedIconUri: 选中图标uri</li>
+ * <li>selectedIconUrl: 选中图标url</li>
  * <li>itemWidth: 图标的宽</li>
  * <li>itemHeight: 图标的高</li>
  * <li>actionType: 动作类型，参考{@link com.everhomes.rest.launchpad.ActionType}</li>
@@ -46,6 +48,8 @@ public class LaunchPadItemDTO {
     private String  itemLabel;
     private String  iconUri;
     private String  iconUrl;
+    private String  selectedIconUri;
+    private String  selectedIconUrl;
     private Integer itemWidth;
     private Integer itemHeight;
     private Byte    actionType;
@@ -60,7 +64,23 @@ public class LaunchPadItemDTO {
     private Byte deleteFlag;
     private Byte editFlag;
 
-    public Long getId() {
+    public String getSelectedIconUri() {
+		return selectedIconUri;
+	}
+
+	public void setSelectedIconUri(String selectedIconUri) {
+		this.selectedIconUri = selectedIconUri;
+	}
+
+	public String getSelectedIconUrl() {
+		return selectedIconUrl;
+	}
+
+	public void setSelectedIconUrl(String selectedIconUrl) {
+		this.selectedIconUrl = selectedIconUrl;
+	}
+
+	public Long getId() {
         return id;
     }
 

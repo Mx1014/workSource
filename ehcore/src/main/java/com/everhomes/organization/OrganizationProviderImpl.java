@@ -2718,13 +2718,14 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			List<Organization> organizationList = result.map(r->ConvertHelper.convert(r, Organization.class));
 			if (organizationList.size() > 1) {
 				for (Organization organization : organizationList) {
-					if (OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE && organization.getNamespaceOrganizationToken() == null) {
+					if (OrganizationStatus.fromCode(organization.getStatus()) == OrganizationStatus.ACTIVE 
+							&& (organization.getNamespaceOrganizationToken() == null || organization.getNamespaceOrganizationToken().equals(namespaceToken))) {
 						return organization;
 					}
 				}
-			}else if (organizationList.get(0).getNamespaceOrganizationToken() == null) {
+			}else if (organizationList.get(0).getNamespaceOrganizationToken() == null || organizationList.get(0).getNamespaceOrganizationToken().equals(namespaceToken)) {
 				return organizationList.get(0);
-			} 
+			}
 		}
 		
 		return null;
@@ -2862,6 +2863,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId) {
+		LOGGER.debug("TrackUserRelatedCost:listOrganizationJobPositionMaps:startTime:{}", System.currentTimeMillis());
+
 		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
@@ -2870,6 +2873,8 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
 			return null;
 		});
+		LOGGER.debug("TrackUserRelatedCost:listOrganizationJobPositionMaps:endTime:{}", System.currentTimeMillis());
+
 		return results;
 	}
 

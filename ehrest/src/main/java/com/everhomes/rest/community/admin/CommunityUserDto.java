@@ -8,6 +8,7 @@ import java.sql.Timestamp;
  * <li>executiveFlag：是否高管 0-否 1-是</li>
  * <li>position：职位</li>
  * <li>identityNumber：身份证号</li> 
+ * <li>gender：性别</li> 
  * </ul>
  */
 public class CommunityUserDto {
@@ -41,6 +42,7 @@ public class CommunityUserDto {
     private Byte executiveFlag;
     private String position;
     private String identityNumber;
+    private Byte gender;
 	
 	public Byte getExecutiveFlag() {
 		return executiveFlag;
@@ -168,6 +170,14 @@ public class CommunityUserDto {
 
 	public void setNikeName(String nikeName) {
 		this.nikeName = nikeName;
+	}
+
+	public Byte getGender() {
+		return gender;
+	}
+
+	public void setGender(Byte gender) {
+		this.gender = gender;
 	}
 
 	

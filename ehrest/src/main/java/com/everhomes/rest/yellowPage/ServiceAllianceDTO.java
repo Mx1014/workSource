@@ -42,11 +42,14 @@ import java.util.List;
  *  <li>jumpType : 跳转类型 0：无， 1：普通模板，2：功能模块 参考{@link com.everhomes.rest.yellowPage.JumpType}</li>
  *  <li>moduleUrl : 跳转模块路径</li>
  *  <li>supportType : 是否支持申请 参考{@link com.everhomes.rest.general_approval.GeneralApprovalSupportType}</li>
+ *  <li>jumpId : 跳转模块id</li>
  * </ul>
  */
 public class ServiceAllianceDTO {
 
 	private Long     id;
+
+	private Integer namespaceId;
 	
 	private Long     parentId;
 	@NotNull
@@ -114,6 +117,8 @@ public class ServiceAllianceDTO {
 	private String moduleUrl;
 	
 	private Byte supportType;
+
+	private Long jumpId;
 	
 	public Long getId() {
 		return id;
@@ -121,6 +126,15 @@ public class ServiceAllianceDTO {
 	public void setId(Long id) {
 		this.id = id;
 	}
+
+	public Integer getNamespaceId() {
+		return namespaceId;
+	}
+
+	public void setNamespaceId(Integer namespaceId) {
+		this.namespaceId = namespaceId;
+	}
+
 	public Long getParentId() {
 		return parentId;
 	}
@@ -331,6 +345,15 @@ public class ServiceAllianceDTO {
 	public void setSupportType(Byte supportType) {
 		this.supportType = supportType;
 	}
+
+	public Long getJumpId() {
+		return jumpId;
+	}
+
+	public void setJumpId(Long jumpId) {
+		this.jumpId = jumpId;
+	}
+
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);

@@ -6,11 +6,12 @@ package com.everhomes.rest.launchpad;
  * <ul>
  *     <li>LIST_VIEW("ListView"): 列表</li>
  *     <li>HORIZONTAL_SCROLL_VIEW("HorizontalScrollView"): 左右滑动</li>
+ *     <li>LARGE_IMAGE_LIST_VIEW("LargeImageListView"): 大图列表</li>
  * </ul>
  */
 public enum OPPushWidgetStyle {
 
-    LIST_VIEW("ListView"), HORIZONTAL_SCROLL_VIEW("HorizontalScrollView");
+    LIST_VIEW("ListView"), HORIZONTAL_SCROLL_VIEW("HorizontalScrollView"), LARGE_IMAGE_LIST_VIEW("LargeImageListView");
 
 	private String code;
 

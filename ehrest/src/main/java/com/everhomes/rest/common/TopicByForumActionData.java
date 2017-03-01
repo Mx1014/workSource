@@ -16,8 +16,29 @@ public class TopicByForumActionData implements Serializable{
     private static final long serialVersionUID = -742724365939053762L;
     
     private Long forumId;
+    
+    private Byte visibilityScope;
+    
+    private Long communityId;
+    
 
-    public Long getForumId() {
+    public Byte getVisibilityScope() {
+		return visibilityScope;
+	}
+
+	public void setVisibilityScope(Byte visibilityScope) {
+		this.visibilityScope = visibilityScope;
+	}
+
+	public Long getCommunityId() {
+		return communityId;
+	}
+
+	public void setCommunityId(Long communityId) {
+		this.communityId = communityId;
+	}
+
+	public Long getForumId() {
         return forumId;
     }
 

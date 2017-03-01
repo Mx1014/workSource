@@ -1,6 +1,10 @@
 package com.everhomes.rest.activity;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
+
 /**
  * 
  *<ul>
@@ -25,7 +29,20 @@ public class ListOrgNearbyActivitiesCommand {
     
     private Long categoryId;
 
-    public Long getCategoryId() {
+    private Long contentCategoryId;
+
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
+
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
 		return categoryId;
 	}
 
@@ -55,6 +72,14 @@ public class ListOrgNearbyActivitiesCommand {
 
     public void setScope(Byte scope) {
         this.scope = scope;
+    }
+
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
+
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
     }
 
     public Long getPageAnchor() {

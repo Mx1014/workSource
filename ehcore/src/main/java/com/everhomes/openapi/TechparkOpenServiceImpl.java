@@ -5,8 +5,10 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
@@ -112,6 +114,24 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
 	
 	private ExecutorService rentalThreadPool = Executors.newFixedThreadPool(6); 
+	
+	// 从同步过来的数据中取出真正的楼栋和门牌号，以便电商使用，add by tt, 20170213
+	private static List<String> ruleList = new ArrayList<>();
+	private static Map<String, String> ruleMap = new HashMap<>();
+	
+	static {
+		ruleList.add("生产力大楼");
+		ruleList.add("科技工业大厦");
+		ruleList.add("金融基地");
+		ruleList.add("金融科技大厦");
+		
+		//规则为1-2-3-4，前两个数字表示楼栋的分隔线，后两个数字表示门牌的分隔线，最后一个省略表示分隔到底，未指明规则的按最后一个分隔线分隔
+		
+		ruleMap.put("生产力大楼", "1-2+1-2+1");	//生产力大楼-生产力大楼-A101，2+1表示第二个横线+1个字符的位置
+		ruleMap.put("科技工业大厦", "0-1-2");
+		ruleMap.put("金融基地", "1-2-2");
+		ruleMap.put("金融科技大厦", "0-1-2");
+	}
 	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
@@ -403,7 +423,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		address.setOperatorUid(1L);
 		address.setOperateTime(address.getCreateTime());
-		address.setAreaSize(customerApartment.getAreaSize());
+		address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
 		address.setNamespaceId(namespaceId);
 		address.setRentArea(customerApartment.getRentArea());
 		address.setBuildArea(customerApartment.getBuildArea());
@@ -411,10 +431,117 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setLayout(customerApartment.getLayout());
 		address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
 		address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
+		
+		//添加电商用到的楼栋和门牌
+		String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+		address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+		
 		addressProvider.createAddress(address);
 		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
 	
+	private String getRulePrefix(String apartmentName) {
+		if (apartmentName != null) {
+			for (String str : ruleList) {
+				if (apartmentName.startsWith(str)) {
+					return str;
+				}
+			}
+		}
+		return null;
+	}
+	
+	// 查找“-”第几次出现的位置
+	private int indexOf(String source, Integer count, Integer offset) {
+		try {
+			if (count != null) {
+				if (count.intValue() <= 0) {
+					return -1;
+				}else if (count.intValue() == 1) {
+					if (offset == null || offset.intValue() == 0) {
+						return source.indexOf("-");
+					}
+					return source.indexOf("-", offset);
+				}else {
+					count--;
+					return indexOf(source, count, source.indexOf("-")+1);
+				}
+			}
+			return -1;
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+	
+	private int getActualPos(String apartmentName, String rule) {
+		try {
+			Integer offset = 0; //在横线基础上的偏移量
+			Integer lineCount = null; //第几个横线
+			if (rule.contains("+")) {
+				String[] arr = rule.split("\\+");
+				lineCount = Integer.parseInt(arr[0]);
+				offset = Integer.parseInt(arr[1]);
+			}else {
+				lineCount = Integer.parseInt(rule);
+			}
+			return indexOf(apartmentName, lineCount, 0) + offset.intValue();			
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+	
+	// 0存储楼栋名称，1存储门牌名称
+	private String[] getBusinessBuildingApartmentName(String apartmentName) {
+		String[] result = new String[2];
+		try {
+			String rule = ruleMap.get(getRulePrefix(apartmentName));
+			if (rule != null) {
+				String[] ruleArray = rule.split("-");
+				if (ruleArray.length >= 3) {
+					int buildingStart = getActualPos(apartmentName, ruleArray[0]) + 1;
+					int buildingEnd = getActualPos(apartmentName, ruleArray[1]);
+					if (apartmentName.charAt(buildingEnd) >= '0' && apartmentName.charAt(buildingEnd) <= '9') {
+						throw new Exception();
+					}
+					if (apartmentName.charAt(buildingEnd) != '-') {
+						buildingEnd++;
+					}
+					result[0] = apartmentName.substring(buildingStart, buildingEnd);
+					int apartmentStart = getActualPos(apartmentName, ruleArray[2]) + 1;
+					if (ruleArray.length == 4) {
+						int apartmentEnd = getActualPos(apartmentName, ruleArray[3]);
+						result[1] = apartmentName.substring(apartmentStart, apartmentEnd);
+					}else {
+						result[1] = apartmentName.substring(apartmentStart);
+					}
+				}else {
+					result = getDefaultBusinessBuildingApartmentName(apartmentName);
+				}
+			}else {
+				result = getDefaultBusinessBuildingApartmentName(apartmentName);
+			}
+		} catch (Exception e) {
+			result = getDefaultBusinessBuildingApartmentName(apartmentName);
+		}
+		
+		return result;
+	}
+	
+	private String[] getDefaultBusinessBuildingApartmentName(String apartmentName) {
+		String[] result = new String[2];
+		if (apartmentName != null) {
+			if (apartmentName.contains("-")) {
+				int lastIndex = apartmentName.lastIndexOf("-");
+				result[0] = apartmentName.substring(0, lastIndex);
+				result[1] = apartmentName.substring(lastIndex + 1);
+			}else {
+				result[0] = result[1] = apartmentName;
+			}
+		}
+		return result;
+	}
+
 	// 插入或更新招租管理
 	private void insertOrUpdateLeasePromotion(Byte theirLivingStatus, Integer namespaceId, Long communityId, Double rentArea, String buildingName, String apartmentName){
 		CustomerLivingStatus livingStatus = CustomerLivingStatus.fromCode(theirLivingStatus);
@@ -483,7 +610,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private void updateAddress(Address address, CustomerApartment customerApartment) {
 		address.setApartmentFloor(customerApartment.getApartmentFloor());
-		address.setAreaSize(customerApartment.getAreaSize());
+		address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
 		address.setRentArea(customerApartment.getRentArea());
 		address.setBuildArea(customerApartment.getBuildArea());
 		address.setInnerArea(customerApartment.getInnerArea());
@@ -492,6 +619,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setOperatorUid(1L);
 		address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		address.setStatus(CommonStatus.ACTIVE.getCode());
+
+		//添加电商用到的楼栋和门牌
+		String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+		address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+		
 		addressProvider.updateAddress(address);
 		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
@@ -563,6 +696,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		}
 		for (CustomerRental customerRental : theirRentalList) {
 			if (customerRental.getDealed() != null && customerRental.getDealed().booleanValue() == true) {
+				continue;
+			}
+			if (StringUtils.isBlank(customerRental.getName()) || StringUtils.isBlank(customerRental.getNumber())) {
 				continue;
 			}
 			rentalThreadPool.execute(()->{
