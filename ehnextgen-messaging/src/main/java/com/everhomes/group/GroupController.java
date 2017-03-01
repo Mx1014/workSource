@@ -1,100 +1,24 @@
 // @formatter:off
 package com.everhomes.group;
 
-import java.sql.Timestamp;
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.Valid;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
-
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.group.AcceptJoinGroupInvitation;
-import com.everhomes.rest.group.ApprovalGroupRequestCommand;
-import com.everhomes.rest.group.ApproveAdminRoleCommand;
-import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
-import com.everhomes.rest.group.CancelGroupRequestCommand;
-import com.everhomes.rest.group.CommandResult;
-import com.everhomes.rest.group.CreateBroadcastCommand;
-import com.everhomes.rest.group.CreateBroadcastResponse;
-import com.everhomes.rest.group.CreateGroupCategoryCommand;
-import com.everhomes.rest.group.CreateGroupCategoryResponse;
-import com.everhomes.rest.group.CreateGroupCommand;
-import com.everhomes.rest.group.DeleteGroupByIdCommand;
-import com.everhomes.rest.group.DeleteGroupCategoryCommand;
-import com.everhomes.rest.group.GetAdminRoleStatusCommand;
-import com.everhomes.rest.group.GetBroadcastByTokenCommand;
-import com.everhomes.rest.group.GetBroadcastByTokenResponse;
-import com.everhomes.rest.group.GetClubPlaceholderNameCommand;
-import com.everhomes.rest.group.GetClubPlaceholderNameResponse;
-import com.everhomes.rest.group.GetGroupCommand;
-import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
-import com.everhomes.rest.group.GetGroupParametersCommand;
-import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
-import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
-import com.everhomes.rest.group.GetShareInfoCommand;
-import com.everhomes.rest.group.GetShareInfoResponse;
-import com.everhomes.rest.group.GroupDTO;
-import com.everhomes.rest.group.GroupMemberDTO;
-import com.everhomes.rest.group.GroupMemberSnapshotDTO;
-import com.everhomes.rest.group.InviteToBeAdminCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByFamilyCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByPhoneCommand;
-import com.everhomes.rest.group.InviteToJoinGroupCommand;
-import com.everhomes.rest.group.LeaveGroupCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommandResponse;
-import com.everhomes.rest.group.ListBroadcastsCommand;
-import com.everhomes.rest.group.ListBroadcastsResponse;
-import com.everhomes.rest.group.ListGroupByTagCommand;
-import com.everhomes.rest.group.ListGroupCategoriesCommand;
-import com.everhomes.rest.group.ListGroupCategoriesResponse;
-import com.everhomes.rest.group.ListGroupCommandResponse;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommand;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommandResponse;
-import com.everhomes.rest.group.ListGroupsByApprovalStatusCommand;
-import com.everhomes.rest.group.ListGroupsByApprovalStatusResponse;
-import com.everhomes.rest.group.ListGroupsByNamespaceIdCommand;
-import com.everhomes.rest.group.ListMemberCommandResponse;
-import com.everhomes.rest.group.ListMemberInRoleCommand;
-import com.everhomes.rest.group.ListMemberInStatusCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
-import com.everhomes.rest.group.ListPublicGroupCommand;
-import com.everhomes.rest.group.ListUserGroupPostCommand;
-import com.everhomes.rest.group.ListUserGroupPostResponse;
-import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
-import com.everhomes.rest.group.RejectAdminRoleCommand;
-import com.everhomes.rest.group.RejectGroupRequestCommand;
-import com.everhomes.rest.group.RejectJoinGroupInvitation;
-import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
-import com.everhomes.rest.group.RequestAdminRoleCommand;
-import com.everhomes.rest.group.RequestToJoinGroupCommand;
-import com.everhomes.rest.group.ResignAdminRoleCommand;
-import com.everhomes.rest.group.RevokeAdminRoleCommand;
-import com.everhomes.rest.group.RevokeGroupMemberCommand;
-import com.everhomes.rest.group.SearchGroupCommand;
-import com.everhomes.rest.group.SetGroupParametersCommand;
-import com.everhomes.rest.group.GroupParametersResponse;
-import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
-import com.everhomes.rest.group.UpdateGroupCategoryCommand;
-import com.everhomes.rest.group.UpdateGroupCategoryResponse;
-import com.everhomes.rest.group.UpdateGroupCommand;
-import com.everhomes.rest.group.UpdateGroupMemberCommand;
-import com.everhomes.util.EtagHelper;
+import com.everhomes.rest.group.*;
 import com.everhomes.util.RequireAuthentication;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RestController;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.Valid;
+import java.util.List;
 
 /**
  * <ul>圈管理：
@@ -170,8 +94,9 @@ public class GroupController extends ControllerBase {
      * <p>获取指定ID对应的group信息</p>
      */
     @RequestMapping("get")
+    @RequireAuthentication(false)
     @RestReturn(value=GroupDTO.class)
-    public RestResponse get(@Valid GetGroupCommand cmd, HttpServletRequest request, HttpServletResponse paramResponse) {
+    public RestResponse get(@Valid GetGroupCommand cmd) {
         GroupDTO groupDto = this.groupService.getGroup(cmd);
         RestResponse response = new RestResponse();
         // 由于涉及到订阅人数和是否已经订阅该圈的变化，不宜做Etag
@@ -219,6 +144,7 @@ public class GroupController extends ControllerBase {
      * <p>获取全部的group</p>
      */
     @RequestMapping("listGroupsByNamespaceId")
+    @RequireAuthentication(false)
     @RestReturn(value=ListGroupCommandResponse.class)
     public RestResponse listGroupsByNamespaceId(ListGroupsByNamespaceIdCommand cmd){
     	RestResponse response = new RestResponse(groupService.listGroupsByNamespaceId(cmd));
@@ -771,6 +697,17 @@ public class GroupController extends ControllerBase {
 		return new RestResponse(groupService.createBroadcast(cmd));
 	}
 
+    /**
+     * <p>删除广播</p>
+     * <b>URL: /group/deleteBroadcastByToken</b>
+     */
+    @RequestMapping("deleteBroadcastByToken")
+    @RestReturn(String.class)
+    public RestResponse deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd){
+        groupService.deleteBroadcastByToken(cmd);
+        return new RestResponse();
+    }
+
 	/**
 	 * <p>4.获取广播详情</p>
 	 * <b>URL: /group/getBroadcastByToken</b>
@@ -787,6 +724,7 @@ public class GroupController extends ControllerBase {
 	 * <b>URL: /group/listBroadcasts</b>
 	 */
 	@RequestMapping("listBroadcasts")
+    @RequireAuthentication(false)
 	@RestReturn(ListBroadcastsResponse.class)
 	public RestResponse listBroadcasts(ListBroadcastsCommand cmd){
 		return new RestResponse(groupService.listBroadcasts(cmd));

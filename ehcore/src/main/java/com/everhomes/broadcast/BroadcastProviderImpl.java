@@ -1,21 +1,6 @@
 // @formatter:off
 package com.everhomes.broadcast;
 
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-
-import org.apache.tools.ant.taskdefs.condition.And;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
@@ -26,6 +11,19 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhBroadcastsDao;
 import com.everhomes.server.schema.tables.pojos.EhBroadcasts;
 import com.everhomes.util.ConvertHelper;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.List;
 
 @Component
 public class BroadcastProviderImpl implements BroadcastProvider {
@@ -103,7 +101,14 @@ public class BroadcastProviderImpl implements BroadcastProvider {
 			.fetchAny().value1();
 	}
 
-	private EhBroadcastsDao getReadWriteDao() {
+    @Override
+    public void deleteBroadcast(Broadcast broadcast) {
+        assert (broadcast.getId() != null);
+        getReadWriteDao().delete(broadcast);
+        DaoHelper.publishDaoAction(DaoAction.MODIFY, EhBroadcasts.class, broadcast.getId());
+    }
+
+    private EhBroadcastsDao getReadWriteDao() {
 		return getDao(getReadWriteContext());
 	}
 
