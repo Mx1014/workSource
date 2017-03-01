@@ -388,12 +388,10 @@ public class ActivityServiceImpl implements ActivityService {
         return dto;
     }
     
-    
-    
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
         this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
-	        dbProvider.execute((status) -> {
+	        return (ActivityRoster)dbProvider.execute((status) -> {
 		    	User user = UserContext.current().getUser();
 		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
 		        if (activity == null) {
@@ -430,9 +428,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
 	            activityProvider.createActivityRoster(roster);
 	            activityProvider.updateActivity(activity);
-	            return status;
+	            return roster;
 	        });
-	        return null;
         });
     	
     	
@@ -440,43 +437,45 @@ public class ActivityServiceImpl implements ActivityService {
 		return null;
 	}
 
-	private ActivityRoster newRoster(ManualSignupCommand cmd, User user, Activity activity) {
-		ActivityRoster roster = ConvertHelper.convert(cmd, ActivityRoster.class);
+	private ActivityRoster newRoster(ManualSignupCommand cmd, User createUser, Activity activity) {
+		User user = getUserIdFromPhone(cmd.getPhone());
+		ActivityRoster roster = new ActivityRoster();
+		roster.setUuid(UUID.randomUUID().toString());
+		roster.setActivityId(activity.getId());
+		roster.setUid(user.getId());
         roster.setFamilyId(user.getAddressId());
-        roster.setUid(user.getId());
-        roster.setUuid(UUID.randomUUID().toString());
-        roster.setActivityId(activity.getId());
-        roster.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        roster.setConfirmFamilyId(user.getAddressId());
-        if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
-        	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
-        }
-
-//    	private String uuid;
-//    	private Long activityId;
-//    	private Long uid;
-//    	private Long familyId;
-//    	private Integer adultCount;
-//    	private Integer childCount;
-//    	private Byte checkinFlag;
-//    	private Long checkinUid;
-//    	private Byte confirmFlag;
-//    	private Long confirmUid;
-//    	private Long confirmFamilyId;
-//    	private Timestamp confirmTime;
-//    	private Byte lotteryFlag;
-//    	private Timestamp lotteryTime;
-//    	private Timestamp createTime;
-//    	private String phone;
-//    	private String realName;
-//    	private Byte gender;
-//    	private String communityName;
-//    	private String organizationName;
-//    	private String position;
-//    	private Byte leaderFlag;
-//    	private Byte sourceFlag;
+        roster.setAdultCount(1);
+        roster.setChildCount(0);
+        roster.setCheckinFlag(CheckInStatus.UN_CHECKIN.getCode());
+        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+        roster.setConfirmUid(createUser.getId());
+        roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        roster.setLotteryFlag((byte) 0);
+        roster.setPhone(cmd.getPhone());
+        roster.setRealName(cmd.getRealName());
+        roster.setGender(cmd.getGender());
+        roster.setCommunityName(cmd.getCommunityName());
+        roster.setOrganizationName(cmd.getOrganizationName());
+        roster.setPosition(cmd.getPosition());
+        roster.setLeaderFlag(cmd.getLeaderFlag());
+        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
         
         return roster;
+	}
+
+	private User getUserIdFromPhone(String phone) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+		if (userIdentifier != null) {
+			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			if (user != null) {
+				return user;
+			}
+		}
+		User user = new User();
+		user.setId(0L);
+		user.setExecutiveTag((byte) 0);
+		return user;
 	}
 
 	@Override

@@ -8,3 +8,5 @@ ALTER TABLE `eh_activity_roster` ADD COLUMN `organization_name` VARCHAR(128);
 ALTER TABLE `eh_activity_roster` ADD COLUMN `position` VARCHAR(64);
 ALTER TABLE `eh_activity_roster` ADD COLUMN `leader_flag` TINYINT;
 ALTER TABLE `eh_activity_roster` ADD COLUMN `source_flag` TINYINT;
+
+ALTER TABLE `eh_activity_roster` DROP INDEX `u_eh_act_roster_user`;
