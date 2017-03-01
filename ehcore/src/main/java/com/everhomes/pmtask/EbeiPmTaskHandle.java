@@ -14,6 +14,7 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -52,27 +53,6 @@ import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiServiceType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.PmTaskAddressType;
-import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
-import com.everhomes.rest.pmtask.PmTaskAttachmentType;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.PmTaskProcessStatus;
-import com.everhomes.rest.pmtask.PmTaskSourceType;
-import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -874,5 +854,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     	}
 		
 		return response;
+	}
+
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		handler.updateTaskByOrg(cmd);
 	}
 }

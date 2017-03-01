@@ -409,6 +409,7 @@ public interface OrganizationService {
 
 	List<OrganizationDTO> listOrganizationsByModuleId(ListOrganizationByModuleIdCommand cmd);
 
+	List<OrganizationContactDTO> listOrganizationsContactByModuleId(ListOrganizationByModuleIdCommand cmd);
 
 	List<OrganizationManagerDTO> listOrganizationManagers(ListOrganizationManagersCommand cmd);
 
