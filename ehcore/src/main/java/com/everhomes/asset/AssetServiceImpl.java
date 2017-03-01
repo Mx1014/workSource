@@ -5,6 +5,7 @@ import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
@@ -63,9 +64,14 @@ import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.net.URL;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Calendar;
+import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.stream.Collectors;
 
 /**
@@ -112,6 +118,9 @@ public class AssetServiceImpl implements AssetService {
 
     @Autowired
     private DbProvider dbProvider;
+	
+	@Autowired
+	private ConfigurationProvider configurationProvider;
 
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
@@ -198,6 +207,7 @@ public class AssetServiceImpl implements AssetService {
                 dto.setApartmentName(address.getApartmentName());
             }
 
+            BigDecimal totalAmount = bill.getPeriodAccountAmount();
             // 当月的账单要把滞纳金和往期未付的账单一起计入总计应收
             if(compareMonth(bill.getAccountPeriod()) == 0) {
 
@@ -210,10 +220,12 @@ public class AssetServiceImpl implements AssetService {
                         pastUnpaid = pastUnpaid.add(unpaid);
                     }
 
-                    dto.setPeriodAccountAmount(dto.getPeriodAccountAmount().add(pastUnpaid));
+                    totalAmount.add(pastUnpaid);
+                    
                 }
             }
 
+            dto.setPeriodAccountAmount(totalAmount);
             return dto;
         }).collect(Collectors.toList());
 
@@ -348,7 +360,14 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public ImportDataResponse importAssetBills(ImportOwnerCommand cmd, MultipartFile mfile, Long userId) {
         ListAssetBillTemplateCommand command = ConvertHelper.convert(cmd, ListAssetBillTemplateCommand.class);
-        List<Field> fields = getTemplateFields(command);
+        Map<Long,List<Field>> fieldMap = getTemplateFields(command);
+        Long templateVersion = 0L;
+        List<Field> fields = new ArrayList<Field>();
+        if(fieldMap.keySet().size() > 0) {
+        	templateVersion = fieldMap.keySet().iterator().next();
+        	fields = fieldMap.get(templateVersion);
+        }
+        
 
         ImportDataResponse importDataResponse = new ImportDataResponse();
         try {
@@ -362,7 +381,7 @@ public class AssetServiceImpl implements AssetService {
             }
             LOGGER.debug("Start import data...,total:" + resultList.size());
 
-            List<String> errorDataLogs = importAssetBills(cmd, convertToStrList(resultList), fields, userId);
+            List<String> errorDataLogs = importAssetBills(cmd, convertToStrList(resultList), fields, userId, templateVersion);
 
 
             LOGGER.debug("End import data...,fail:" + errorDataLogs.size());
@@ -426,7 +445,7 @@ public class AssetServiceImpl implements AssetService {
 		return result;
 	}
     
-    private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId){
+    private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId, Long templateVersion){
         List<String> errorDataLogs = new ArrayList<String>();
 
         Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -438,10 +457,22 @@ public class AssetServiceImpl implements AssetService {
                 bill.setOwnerType(cmd.getOwnerType());
                 bill.setTargetId(cmd.getTargetId());
                 bill.setTargetType(cmd.getTargetType());
+                bill.setTemplateVersion(templateVersion);
                 int i = 0;
                 for(Field field : fields) {
                     try {
-                        field.set(bill, s[i]);
+                    	field.setAccessible(true);
+                    	if("class java.sql.Timestamp".equals(field.getType().toString())) {
+                    		field.set(bill, covertStrToTimestamp(s[i]));
+                    	} else if("class java.math.BigDecimal".equals(field.getType().toString())) {
+                    		if(s[i] != null) {
+                    			field.set(bill, new BigDecimal(s[i]));
+                    		}
+                    			
+                    	} else {
+                    		field.set(bill, field.getType().getConstructor(field.getType()).newInstance(s[i]));
+                    	}
+                        
                         i++;
                     } catch (Exception e) {
                         e.printStackTrace();
@@ -454,19 +485,51 @@ public class AssetServiceImpl implements AssetService {
         return errorDataLogs;
 
     }
+    
+    private Timestamp covertStrToTimestamp(String str) {
+    	String formatStr = configurationProvider.getValue("asset.accountperiod.format", "yyyyMMdd");
+    	SimpleDateFormat format = new SimpleDateFormat(formatStr);
+    	try {
+			Date date=format.parse(str);
+			return new Timestamp(date.getTime());
+		} catch (ParseException e) {
+			e.printStackTrace();
+		}
+    	return null;
+    }
 
     //非当月则没有滞纳金 所以数据库里面不加lateFee
     private void getTotalAmount(AssetBill bill) {
-        BigDecimal periodAccountAmount = bill.getRental().add(bill.getPropertyManagementFee()).add(bill.getUnitMaintenanceFund())
-                .add(bill.getPrivateWaterFee()).add(bill.getPrivateElectricityFee()).add(bill.getPublicWaterFee())
-                .add(bill.getPublicElectricityFee()).add(bill.getWasteDisposalFee()).add(bill.getPollutionDischargeFee())
-                .add(bill.getExtraAirConditionFee()).add(bill.getCoolingWaterFee()).add(bill.getWeakCurrentSlotFee())
-                .add(bill.getDepositFromLease()).add(bill.getMaintenanceFee()).add(bill.getGasOilProcessFee())
-                .add(bill.getHatchServiceFee()).add(bill.getPressurizedFee()).add(bill.getParkingFee()).add(bill.getOther());
+    	BigDecimal rental = bill.getRental() == null ? new BigDecimal(0) : bill.getRental();
+    	BigDecimal propertyManagementFee = bill.getPropertyManagementFee() == null ? new BigDecimal(0) : bill.getPropertyManagementFee();
+    	BigDecimal unitMaintenanceFund = bill.getUnitMaintenanceFund() == null ? new BigDecimal(0) : bill.getUnitMaintenanceFund();
+    	BigDecimal privateWaterFee = bill.getPrivateWaterFee() == null ? new BigDecimal(0) : bill.getPrivateWaterFee();
+    	BigDecimal privateElectricityFee = bill.getPrivateElectricityFee() == null ? new BigDecimal(0) : bill.getPrivateElectricityFee();
+    	BigDecimal publicWaterFee = bill.getPublicWaterFee() == null ? new BigDecimal(0) : bill.getPublicWaterFee();
+    	BigDecimal publicElectricityFee = bill.getPublicElectricityFee() == null ? new BigDecimal(0) : bill.getPublicElectricityFee();
+    	BigDecimal wasteDisposalFee = bill.getWasteDisposalFee() == null ? new BigDecimal(0) : bill.getWasteDisposalFee();
+    	BigDecimal pollutionDischargeFee = bill.getPollutionDischargeFee() == null ? new BigDecimal(0) : bill.getPollutionDischargeFee();
+    	BigDecimal extraAirConditionFee = bill.getExtraAirConditionFee() == null ? new BigDecimal(0) : bill.getExtraAirConditionFee();
+    	BigDecimal coolingWaterFee = bill.getCoolingWaterFee() == null ? new BigDecimal(0) : bill.getCoolingWaterFee();
+    	BigDecimal weakCurrentSlotFee = bill.getWeakCurrentSlotFee() == null ? new BigDecimal(0) : bill.getWeakCurrentSlotFee();
+    	BigDecimal depositFromLease = bill.getDepositFromLease() == null ? new BigDecimal(0) : bill.getDepositFromLease();
+    	BigDecimal maintenanceFee = bill.getMaintenanceFee() == null ? new BigDecimal(0) : bill.getMaintenanceFee();
+    	BigDecimal gasOilProcessFee = bill.getGasOilProcessFee() == null ? new BigDecimal(0) : bill.getGasOilProcessFee();
+    	BigDecimal hatchServiceFee = bill.getHatchServiceFee() == null ? new BigDecimal(0) : bill.getHatchServiceFee();
+    	BigDecimal pressurizedFee = bill.getPressurizedFee() == null ? new BigDecimal(0) : bill.getPressurizedFee();
+    	BigDecimal parkingFee = bill.getParkingFee() == null ? new BigDecimal(0) : bill.getParkingFee();
+    	BigDecimal other = bill.getOther() == null ? new BigDecimal(0) : bill.getOther();
+        
+    	BigDecimal periodAccountAmount = rental.add(propertyManagementFee).add(unitMaintenanceFund)
+                .add(privateWaterFee).add(privateElectricityFee).add(publicWaterFee)
+                .add(publicElectricityFee).add(wasteDisposalFee).add(pollutionDischargeFee)
+                .add(extraAirConditionFee).add(coolingWaterFee).add(weakCurrentSlotFee)
+                .add(depositFromLease).add(maintenanceFee).add(gasOilProcessFee)
+                .add(hatchServiceFee).add(pressurizedFee).add(parkingFee).add(other);
 
         bill.setPeriodAccountAmount(periodAccountAmount);
         bill.setPeriodUnpaidAccountAmount(bill.getPeriodAccountAmount());
-
+        
     }
 
     @Override
@@ -479,6 +542,7 @@ public class AssetServiceImpl implements AssetService {
         bill.setNamespaceId(namespaceId);
         if(cmd.getAddressId() == null) {
             Address address = addressProvider.findApartmentAddress(namespaceId, cmd.getTargetId(), cmd.getBuildingName(), cmd.getApartmentName());
+            cmd.setAddressId(address.getId());
             bill.setAddressId(address.getId());
         }
         Community community = communityProvider.findCommunityById(cmd.getTargetId());
@@ -564,7 +628,41 @@ public class AssetServiceImpl implements AssetService {
 
                 valueDTOs.add(valueDTO);
             }
+            
+            BigDecimal totalAmounts = bill.getPeriodAccountAmount();
+         // 当月的账单要把滞纳金和往期未付的账单一起计入总计应收
+            if(compareMonth(bill.getAccountPeriod()) == 0) {
+            	BigDecimal pastUnpaid = new BigDecimal(0);
+                List<BigDecimal> unpaidAmounts = assetProvider.listPeriodUnpaidAccountAmount(bill.getOwnerId(), bill.getOwnerType(),
+                        bill.getTargetId(), bill.getTargetType(), bill.getAddressId(), bill.getTenantType(), bill.getTenantId(),bill.getAccountPeriod());
+
+                if(unpaidAmounts != null && unpaidAmounts.size() > 0) {
+                    
+                    for(BigDecimal unpaid : unpaidAmounts) {
+                        pastUnpaid = pastUnpaid.add(unpaid);
+                    }
+
+                    FieldValueDTO unpaidAmountsDTO = new FieldValueDTO();
+                    unpaidAmountsDTO.setFieldDisplayName("往期欠费");
+                    unpaidAmountsDTO.setFieldType("BigDecimal");
+                    unpaidAmountsDTO.setFieldValue(pastUnpaid.toString());
+                    
+                    valueDTOs.add(unpaidAmountsDTO);
+                    
+                }
+                totalAmounts.add(pastUnpaid).add(bill.getLateFee());
+            }
+            
+            FieldValueDTO totalAmountsDTO = new FieldValueDTO();
+            totalAmountsDTO.setFieldDisplayName("总计应收");
+            totalAmountsDTO.setFieldType("BigDecimal");
+            totalAmountsDTO.setFieldValue(totalAmounts.toString());
+            
+            valueDTOs.add(totalAmountsDTO);
+            
             dto.setDtos(valueDTOs);
+            	
+            	
         }
         return dto;
     }
@@ -734,21 +832,25 @@ public class AssetServiceImpl implements AssetService {
         return true;
     }
 
-    private List<Field> getTemplateFields(ListAssetBillTemplateCommand cmd) {
+    private Map<Long, List<Field>> getTemplateFields(ListAssetBillTemplateCommand cmd) {
         List<Field> fields = new ArrayList<>();
+        Map<Long, List<Field>> fieldMap = new HashMap<Long, List<Field>>();
         List<AssetBillTemplateFieldDTO> dtos = listAssetBillTemplate(cmd);
         if(dtos != null && dtos.size() > 0) {
             Class c=CreatAssetBillCommand.class;
             try {
+            	Long templateVersion = 0L;
                 for(AssetBillTemplateFieldDTO dto : dtos) {
+                	templateVersion = dto.getTemplateVersion();
                     Field field = c.getDeclaredField(dto.getFieldName());
                     fields.add(field);
                 }
+                fieldMap.put(templateVersion, fields);
 
             } catch (Exception e) {
                 e.printStackTrace();
             }
         }
-        return fields;
+        return fieldMap;
     }
 }
