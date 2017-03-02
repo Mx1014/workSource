@@ -16,7 +16,6 @@ import com.everhomes.util.StringHelper;
  * <li>contactToken：成员标识</li>
  * <li>contactDescription：描述</li>
  * </ul>
- * </ul>
  */
 public class CreatePropMemberCommand {
     @NotNull
