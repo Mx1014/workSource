@@ -6,6 +6,7 @@ import com.everhomes.util.StringHelper;
 import java.util.List;
 
 /**
+ * <ul>
  * <li>organizationId：机构ID</li>
  * <li>organizationName：机构名称</li>
  * <li>parentId：父机构ID</li>

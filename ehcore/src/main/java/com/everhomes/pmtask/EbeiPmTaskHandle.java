@@ -14,6 +14,15 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
+import com.everhomes.docking.DockingMapping;
+import com.everhomes.docking.DockingMappingProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.docking.DockingMappingScope;
+import com.everhomes.rest.pmtask.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -52,27 +61,6 @@ import com.everhomes.pmtask.ebei.EbeiJsonEntity;
 import com.everhomes.pmtask.ebei.EbeiServiceType;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.PmTaskAddressType;
-import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
-import com.everhomes.rest.pmtask.PmTaskAttachmentType;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.pmtask.PmTaskLogDTO;
-import com.everhomes.rest.pmtask.PmTaskProcessStatus;
-import com.everhomes.rest.pmtask.PmTaskSourceType;
-import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -127,6 +115,12 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     private ContentServerService contentServerService;
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private DockingMappingProvider dockingMappingProvider;
+	@Autowired
+	private SequenceProvider sequenceProvider;
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 	
 	@PostConstruct
 	public void init() {
@@ -135,7 +129,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
 	}
 
-	private List<CategoryDTO> listServiceType(String projectId) {
+	private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
 		JSONObject param = new JSONObject();
 		param.put("projectId", projectId);
 		
@@ -145,8 +139,17 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		if(entity.isSuccess()) {
 			EbeiServiceType type = entity.getData();
-			List<EbeiServiceType> types = type.getItems();
-			
+//			List<EbeiServiceType> types = type.getItems();
+			type.setServiceId(String.valueOf(PmTaskHandle.EBEI_TASK_CATEGORY));
+			List<EbeiServiceType> types;
+
+			if (null == parentId || PmTaskHandle.EBEI_TASK_CATEGORY == parentId) {
+				types = type.getItems();
+			}else {
+				String mappingId = getMappingIdByCategoryId(parentId);
+				types = getTypes(type, mappingId);
+
+			}
 			List<CategoryDTO> result = types.stream().map(c -> {
 				return convertCategory(c);
 				
@@ -157,13 +160,35 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		return null;
 	}
-	
+
+	private List<EbeiServiceType> getTypes(EbeiServiceType type, String parentId) {
+
+		List<EbeiServiceType> result = new ArrayList<>();
+		List<EbeiServiceType> types = type.getItems();
+
+		if (parentId.equals(type.getServiceId())) {
+			result.addAll(types);
+			return result;
+		}
+
+		types.forEach(t -> {
+//			if (parentId.equals(t.getParentId())) {
+//				result.addAll(t.getItems());
+//				return;
+//			}else{
+			result.addAll(getTypes(t, parentId));
+//			}
+		});
+
+		return result;
+	}
+
 	private CategoryDTO convertCategory(EbeiServiceType ebeiServiceType) {
 		
 		CategoryDTO dto = new CategoryDTO();
-		dto.setId(Long.valueOf(ebeiServiceType.getServiceId()));
+		dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
 		String parentId = ebeiServiceType.getParentId();
-		dto.setParentId("".equals(parentId)?0:Long.valueOf(parentId));
+		dto.setParentId("".equals(parentId)?PmTaskHandle.EBEI_TASK_CATEGORY:getCategoryIdByMapping(parentId));
 		dto.setName(ebeiServiceType.getServiceName());
 		dto.setIsSupportDelete((byte)0);
 		
@@ -177,7 +202,42 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		return dto;
 	}
-	
+
+	private Long getCategoryIdByMapping(String serviceId) {
+
+		if (StringUtils.isBlank(serviceId)) {
+			return 0L;
+		}
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		String scope = DockingMappingScope.EBEI_PM_TASK.getCode();
+
+		return coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).enter(()-> {
+		DockingMapping dockingMapping = dockingMappingProvider
+				.findDockingMappingByScopeAndMappingValue(namespaceId, scope, serviceId);
+
+		if (null == dockingMapping) {
+			dockingMapping = new DockingMapping();
+			long id = sequenceProvider.getNextSequence(NameMapper
+					.getSequenceDomainFromTablePojo(EhDockingMappings.class));
+			dockingMapping.setId(id);
+			dockingMapping.setScope(scope);
+			dockingMapping.setMappingValue(serviceId);
+
+			dockingMappingProvider.createDockingMapping(dockingMapping);
+		}
+			return dockingMapping;
+		}).first().getId();
+	}
+
+	private String getMappingIdByCategoryId(Long categoryId) {
+
+		DockingMapping dockingMapping = dockingMappingProvider
+				.findDockingMappingById(categoryId);
+
+		return dockingMapping.getMappingValue();
+	}
+
 	public String postToEbei(JSONObject param, String method, Map<String, String> headers) {
 		
 		String url = configProvider.getValue("pmtask.ebei.url", "");
@@ -270,7 +330,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 		
 		param.put("buildingId", "");
-		param.put("serviceId", task.getCategoryId());
+		param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
 		param.put("type", "1");
 		param.put("remarks", task.getContent());
 		param.put("projectId", projectId);
@@ -732,7 +792,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
-		List<CategoryDTO> childrens = listServiceType(projectId);
+		List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
 		
 		if(null == cmd.getParentId()) {
 			CategoryDTO dto = createCategoryDTO();
@@ -750,7 +810,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	@Override
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 		
-		List<CategoryDTO> childrens = listServiceType(projectId);
+		List<CategoryDTO> childrens = listServiceType(projectId, null);
 		CategoryDTO dto = createCategoryDTO();
 		dto.setChildrens(childrens);
 		
@@ -846,5 +906,11 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     	}
 		
 		return response;
+	}
+
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		handler.updateTaskByOrg(cmd);
 	}
 }

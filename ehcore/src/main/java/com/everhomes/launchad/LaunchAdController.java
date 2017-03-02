@@ -29,8 +29,8 @@ public class LaunchAdController extends ControllerBase {
     private LaunchAdService launchAdService;
 
     /**
-     * <p>获取启动广告数据</p>
      * <b>URL: /launchad/getLaunchad</b>
+     * <p>获取启动广告数据</p>
      */
     @RequestMapping("getLaunchad")
     @RestReturn(value = LaunchAdDTO.class)
@@ -40,8 +40,8 @@ public class LaunchAdController extends ControllerBase {
     }
 
     /**
-     * <p>设置启动广告信息</p>
      * <b>URL: /launchad/setLaunchAd</b>
+     * <p>设置启动广告信息</p>
      */
     @RequestMapping("setLaunchAd")
     @RestReturn(value = LaunchAdDTO.class)
@@ -50,8 +50,8 @@ public class LaunchAdController extends ControllerBase {
     }
 
     /**
-     * <p>上传广告附件</p>
      * <b>URL: /launchad/uploadLaunchAdFile</b>
+     * <p>上传广告附件</p>
      */
     @RequestMapping("uploadLaunchAdFile")
     @RestReturn(value = UploadCsFileResponse.class)
