@@ -80,8 +80,8 @@ CREATE TABLE `eh_asset_bill_template_fields` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 物业公司催缴记录
-DROP TABLE IF EXISTS `eh_asset_bill_notify_record`;
-CREATE TABLE `eh_asset_bill_notify_record` (
+DROP TABLE IF EXISTS `eh_asset_bill_notify_records`;
+CREATE TABLE `eh_asset_bill_notify_records` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   

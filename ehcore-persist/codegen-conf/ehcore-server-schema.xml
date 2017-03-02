@@ -138,7 +138,7 @@
         eh_quality_inspection_task_templates |   
         eh_general_forms | eh_general_approvals | eh_general_approval_vals  |
 		eh_door_auth_logs | 
-        eh_asset_bills | eh_asset_bill_template_fields |
+        eh_asset_bills | eh_asset_bill_template_fields | eh_asset_bill_notify_records |
 
         </includes>
 
