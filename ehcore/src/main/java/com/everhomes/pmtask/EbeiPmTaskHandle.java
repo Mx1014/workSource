@@ -14,6 +14,8 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.docking.DockingMapping;
 import com.everhomes.docking.DockingMappingProvider;
 import com.everhomes.naming.NameMapper;
@@ -117,6 +119,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private DockingMappingProvider dockingMappingProvider;
 	@Autowired
 	private SequenceProvider sequenceProvider;
+	@Autowired
+	private CoordinationProvider coordinationProvider;
 	
 	@PostConstruct
 	public void init() {
@@ -204,6 +208,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 
 		String scope = DockingMappingScope.EBEI_PM_TASK.getCode();
+
+		return coordinationProvider.getNamedLock(CoordinationLocks.PMTASK_STATISTICS.getCode()).enter(()-> {
 		DockingMapping dockingMapping = dockingMappingProvider
 				.findDockingMappingByScopeAndMappingValue(namespaceId, scope, serviceId);
 
@@ -217,8 +223,8 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 
 			dockingMappingProvider.createDockingMapping(dockingMapping);
 		}
-
-		return Long.valueOf(dockingMapping.getValue());
+			return dockingMapping;
+		}).first().getId();
 	}
 
 	private Long getMappingIdByCategoryId(Long categoryId) {
