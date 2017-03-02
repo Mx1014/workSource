@@ -1241,6 +1241,9 @@ public class SequenceServiceImpl implements SequenceService {
         syncTableSequence(null, EhOsObjectDownloadLogs.class, Tables.EH_OS_OBJECT_DOWNLOAD_LOGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_OS_OBJECT_DOWNLOAD_LOGS.ID.max()).from(Tables.EH_OS_OBJECT_DOWNLOAD_LOGS).fetchOne().value1();
         });
+        syncTableSequence(null, EhDockingMappings.class, Tables.EH_DOCKING_MAPPINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_DOCKING_MAPPINGS.ID.max()).from(Tables.EH_DOCKING_MAPPINGS).fetchOne().value1();
+        });
     }
 
     @SuppressWarnings("rawtypes")
