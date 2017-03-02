@@ -658,9 +658,17 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		 * eh_users
 		 * eh_user_identifiers
 		 */
-		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("begin sync all rentings, size="+backupList.size());
+		}
 		List<Organization> myOrganizationList = organizationProvider.listOrganizationByNamespaceType(appNamespaceMapping.getNamespaceId(), NamespaceOrganizationType.JINDIE.getCode());
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 1");
+		}
 		List<CustomerRental> theirRentalList = mergeBackupList(backupList, CustomerRental.class);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 2");
+		}
 		//有的组织名称过长，格式化一下
 		for (CustomerRental customerRental : theirRentalList) {
 			String name = customerRental.getName();
@@ -668,29 +676,58 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				customerRental.setName(name.substring(0,64).trim());
 			}
 		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 3");
+		}
 		formatBuildingName(theirRentalList);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 4");
+		}
 		for (Organization myOrganization : myOrganizationList) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("sync all rentings, flag 5");
+			}
 			CustomerRental customerRental = findFromTheirRentalList(myOrganization, theirRentalList);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("sync all rentings, flag 6");
+			}
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
 			rentalThreadPool.execute(()->{
-				dbProvider.execute(s->{
-					if (customerRental != null) {
-						if (LOGGER.isDebugEnabled()) {
-							LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
-						}
-						updateOrganization(myOrganization, customerRental);
-						insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-						insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
-						insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
-					}else {
-						deleteOrganization(myOrganization);
-						deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-						deleteContracts(myOrganization);
+				try {
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("sync all rentings, flag 7");
 					}
-					return true;
-				});
+					dbProvider.execute(s->{
+						try {
+							if (LOGGER.isDebugEnabled()) {
+								LOGGER.debug("sync all rentings, flag 8");
+							}
+							if (customerRental != null) {
+								if (LOGGER.isDebugEnabled()) {
+									LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
+								}
+								updateOrganization(myOrganization, customerRental);
+								insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+								insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+								insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+								insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
+								insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
+							}else {
+								deleteOrganization(myOrganization);
+								deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+								deleteContracts(myOrganization);
+							}
+							return true;
+						} catch (Exception e) {
+							LOGGER.error("transaction error", e);
+							throw e;
+						}
+					});
+				} catch (Exception e) {
+					LOGGER.error("thread error", e);
+					throw e;
+				}
+				
 			});
 			
 		}
