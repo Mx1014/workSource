@@ -14,7 +14,13 @@ import java.util.stream.Collectors;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 
+import com.everhomes.docking.DockingMapping;
+import com.everhomes.docking.DockingMappingProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.docking.DockingMappingScope;
 import com.everhomes.rest.pmtask.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhDockingMappings;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -107,6 +113,10 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
     private ContentServerService contentServerService;
 	@Autowired
     private ConfigurationProvider configProvider;
+	@Autowired
+	private DockingMappingProvider dockingMappingProvider;
+	@Autowired
+	private SequenceProvider sequenceProvider;
 	
 	@PostConstruct
 	public void init() {
@@ -169,9 +179,9 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 	private CategoryDTO convertCategory(EbeiServiceType ebeiServiceType) {
 		
 		CategoryDTO dto = new CategoryDTO();
-		dto.setId(Long.valueOf(ebeiServiceType.getServiceId()));
+		dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
 		String parentId = ebeiServiceType.getParentId();
-		dto.setParentId("".equals(parentId)?0:Long.valueOf(parentId));
+		dto.setParentId("".equals(parentId)?0:getCategoryIdByMapping(parentId));
 		dto.setName(ebeiServiceType.getServiceName());
 		dto.setIsSupportDelete((byte)0);
 		
@@ -185,7 +195,40 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		return dto;
 	}
-	
+
+	private Long getCategoryIdByMapping(String serviceId) {
+
+		if (StringUtils.isBlank(serviceId)) {
+			return 0L;
+		}
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		String scope = DockingMappingScope.EBEI_PM_TASK.getCode();
+		DockingMapping dockingMapping = dockingMappingProvider
+				.findDockingMappingByScopeAndMappingValue(namespaceId, scope, serviceId);
+
+		if (null == dockingMapping) {
+			dockingMapping = new DockingMapping();
+			long id = sequenceProvider.getNextSequence(NameMapper
+					.getSequenceDomainFromTablePojo(EhDockingMappings.class));
+			dockingMapping.setId(id);
+			dockingMapping.setScope(scope);
+			dockingMapping.setMappingValue(serviceId);
+
+			dockingMappingProvider.createDockingMapping(dockingMapping);
+		}
+
+		return Long.valueOf(dockingMapping.getValue());
+	}
+
+	private Long getMappingIdByCategoryId(Long categoryId) {
+
+		DockingMapping dockingMapping = dockingMappingProvider
+				.findDockingMappingById(categoryId);
+
+		return Long.valueOf(dockingMapping.getMappingValue());
+	}
+
 	public String postToEbei(JSONObject param, String method, Map<String, String> headers) {
 		
 		String url = configProvider.getValue("pmtask.ebei.url", "");
@@ -278,7 +321,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}
 		
 		param.put("buildingId", "");
-		param.put("serviceId", task.getCategoryId());
+		param.put("serviceId", getMappingIdByCategoryId(task.getCategoryId()));
 		param.put("type", "1");
 		param.put("remarks", task.getContent());
 		param.put("projectId", projectId);
