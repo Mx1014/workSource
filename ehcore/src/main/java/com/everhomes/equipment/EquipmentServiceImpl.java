@@ -2008,13 +2008,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
-		
+		long startTime = System.currentTimeMillis();
 		List<EquipmentTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
 			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);  
         	return dto;
         }).filter(task->task!=null).collect(Collectors.toList());
-		
+
+		long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost: convertEquipmentTasksToDTO  taskSize = "+ tasks.size() +", elapse=" + (endTime - startTime));
 		return dtoList;
 	}
 	
@@ -3077,11 +3079,12 @@ public class EquipmentServiceImpl implements EquipmentService {
         	response.setNextPageAnchor((long) (offset + 1));
         }
         
-        
-    	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-        	return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
+
+    	List<EquipmentTaskDTO> dtos = convertEquipmentTasksToDTO(tasks);
+//				tasks.stream().map(r -> {
+//        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+//        	return dto;
+//        }).filter(r->r!=null).collect(Collectors.toList());
         
 		response.setTasks(dtos);
 

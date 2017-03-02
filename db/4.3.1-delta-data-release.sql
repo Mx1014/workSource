@@ -170,3 +170,16 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
     VALUES ('31', '999981', '星商汇园区', '2', 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.vanke.xsh', 'cs://1/image/aW1hZ2UvTVRvNU5UaGlaV0U0WlRWaU1UZzNOVEU0Tm1Zd1lqTTRNVFZqWVRjek1EUXlPUQ', '移动平台聚合服务，助力园区效能提升');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) 
     VALUES ('32', '999981', '星商汇园区', '1', 'https://itunes.apple.com/cn/app/%E6%98%9F%E5%95%86%E6%B1%87%E5%9B%AD%E5%8C%BA/id1194430405?mt=8', 'cs://1/image/aW1hZ2UvTVRvNU5UaGlaV0U0WlRWaU1UZzNOVEU0Tm1Zd1lqTTRNVFZqWVRjek1EUXlPUQ', '移动平台聚合服务，助力园区效能提升');
+
+
+--
+-- 华润OE首页布局修改   add by xq.tian 2017/03/01
+--
+UPDATE `eh_launch_pad_layouts` SET version_code='2017030101', `layout_json`='{"versionCode": "2017030101","versionName": "4.3.1","layoutName": "ServiceMarketLayout","displayName": "服务市场","groups": [{"groupName": "","widget": "Banners","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 1,"separatorFlag": 0,"separatorHeight": 0}, {"groupName": "","widget": "Bulletins","instanceConfig": {"itemGroup": "Default"},"style": "Default","defaultOrder": 3,"separatorFlag": 1,"separatorHeight": 2}, {"groupName": "商家服务","widget": "Navigator","instanceConfig": {"itemGroup": "Bizs"},"style": "Default","defaultOrder": 5,"separatorFlag": 1,"separatorHeight": 21}, {"groupName": "","widget": "OPPush","instanceConfig": {"itemGroup": "OPPushActivity","newsSize": 3,"entityCount": 3,"subjectHeight": 1,"descriptionHeight": 0},"style": "ListView","defaultOrder": 6,"separatorFlag": 1,"separatorHeight": 21,"columnCount": 1}, {"groupName": "","widget": "OPPush","instanceConfig": {"itemGroup": "OPPushBiz","newsSize": 6,"entityCount": 6,"subjectHeight": 1,"descriptionHeight": 0},"style": "HorizontalScrollView","defaultOrder": 7,"separatorFlag": 1,"separatorHeight": 0,"columnCount": 0}]}'
+WHERE `namespace_id`=999985 AND `name`='ServiceMarketLayout';
+
+-- 创源停车缴费 add by sw 20170302
+INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`) 
+	VALUES ('10023', 'community', '240111044331054735', '创源停车场', 'INNOSPRING', '', '1', '2', '1025', '2017-03-02 17:07:20', '1', '1', '1', '1', '1', '999986', '0');
+UPDATE eh_launch_pad_items set action_data = '', action_type = 30 where namespace_id = 999986 and item_label = '智能停车场';
+
