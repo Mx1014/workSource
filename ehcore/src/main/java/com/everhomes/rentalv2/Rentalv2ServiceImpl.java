@@ -209,6 +209,8 @@ import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
 import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRecourseAttachementCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
@@ -5346,5 +5348,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //		rolePrivilegeService.
 	}
 	
- 
+
+	@Override
+	public void updateRentalDate(UpdateRentalDateCommand cmd){}
+
+
+	@Override
+	public void updateRecourseAttachement(UpdateRecourseAttachementCommand cmd){}
 }
