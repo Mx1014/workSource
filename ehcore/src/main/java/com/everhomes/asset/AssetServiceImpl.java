@@ -842,8 +842,35 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd) {
         NotifyTimesResponse response = new NotifyTimesResponse();
-        
-        return null;
+        long startTime = getTimesMonthmorning();
+        long endTime = getTimesMonthnight();
+
+        int count = assetProvider.countNotifyRecords(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(),
+                new Timestamp(startTime), new Timestamp(endTime));
+        response.setNotifyTimes(count);
+
+        AssetBillNotifyRecords lastRecord = assetProvider.getLastAssetBillNotifyRecords(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType());
+
+        if(lastRecord != null) {
+            response.setLastNotifyTime(lastRecord.getCreateTime());
+        }
+        return response;
+    }
+
+    //获得本月第一天0点时间
+    private long getTimesMonthmorning(){
+        Calendar cal = Calendar.getInstance();
+        cal.set(cal.get(Calendar.YEAR),cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0,0);
+        cal.set(Calendar.DAY_OF_MONTH,cal.getActualMinimum(Calendar.DAY_OF_MONTH));
+        return cal.getTimeInMillis();
+    }
+    //获得本月最后一天24点时间
+    private long getTimesMonthnight() {
+        Calendar cal = Calendar.getInstance();
+        cal.set(cal.get(Calendar.YEAR), cal.get(Calendar.MONDAY), cal.get(Calendar.DAY_OF_MONTH), 0, 0, 0);
+        cal.set(Calendar.DAY_OF_MONTH, cal.getActualMaximum(Calendar.DAY_OF_MONTH));
+        cal.set(Calendar.HOUR_OF_DAY, 24);
+        return cal.getTimeInMillis();
     }
 
     private Map<Long, List<Field>> getTemplateFields(ListAssetBillTemplateCommand cmd) {

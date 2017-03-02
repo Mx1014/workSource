@@ -15,6 +15,7 @@ import com.everhomes.server.schema.tables.daos.EhAssetBillTemplateFieldsDao;
 import com.everhomes.server.schema.tables.daos.EhAssetBillsDao;
 import com.everhomes.server.schema.tables.pojos.EhAssetBillTemplateFields;
 import com.everhomes.server.schema.tables.pojos.EhAssetBills;
+import com.everhomes.server.schema.tables.records.EhAssetBillNotifyRecordsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillTemplateFieldsRecord;
 import com.everhomes.server.schema.tables.records.EhAssetBillsRecord;
 import com.everhomes.util.ConvertHelper;
@@ -308,5 +309,46 @@ public class AssetProviderImpl implements AssetProvider {
         });
 
         return bills;
+    }
+
+    @Override
+    public int countNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType, Timestamp startTime, Timestamp endTime) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillNotifyRecordsRecord> query = context.selectQuery(Tables.EH_ASSET_BILL_NOTIFY_RECORDS);
+
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.TARGET_TYPE.eq(targetType));
+
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.CREATE_TIME.ge(startTime));
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.CREATE_TIME.le(endTime));
+
+        int count = query.fetchCount();
+        return count;
+    }
+
+    @Override
+    public AssetBillNotifyRecords getLastAssetBillNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType) {
+        DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+        SelectQuery<EhAssetBillNotifyRecordsRecord> query = context.selectQuery(Tables.EH_ASSET_BILL_NOTIFY_RECORDS);
+
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_ID.eq(ownerId));
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.OWNER_TYPE.eq(ownerType));
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.TARGET_ID.eq(targetId));
+        query.addConditions(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.TARGET_TYPE.eq(targetType));
+
+        query.addOrderBy(Tables.EH_ASSET_BILL_NOTIFY_RECORDS.CREATE_TIME.desc());
+        query.addLimit(1);
+        List<AssetBillNotifyRecords> records = new ArrayList<>();
+        query.fetch().map((EhAssetBillNotifyRecordsRecord record) -> {
+            records.add(ConvertHelper.convert(record, AssetBillNotifyRecords.class));
+            return null;
+        });
+
+        if(records.size() == 0) {
+            return null;
+        }
+        return records.get(0);
     }
 }

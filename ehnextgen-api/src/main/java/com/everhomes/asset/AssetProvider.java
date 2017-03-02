@@ -28,4 +28,8 @@ public interface AssetProvider {
                                                    String tenantType, Long tenantId, Timestamp currentAccountPeriod);
 
     List<AssetBill> listUnpaidBillsGroupByTenant(Long ownerId, String ownerType, Long targetId, String targetType);
+
+    int countNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType, Timestamp startTime, Timestamp endTime);
+
+    AssetBillNotifyRecords getLastAssetBillNotifyRecords(Long ownerId, String ownerType, Long targetId, String targetType);
 }
