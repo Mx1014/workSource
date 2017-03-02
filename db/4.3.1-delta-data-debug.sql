@@ -11,7 +11,7 @@ WHERE `namespace_id`=999985 AND `item_group`='OPPushBiz' AND `item_label`='OE优
 -- 文件管理菜单   add by xq.tian  2017/03/01
 --
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`)
-VALUES (41500, '文件管理', 40000, NULL, 'file_management', 0, 2, '/40000/41500', 'park', 390);
+VALUES (41500, '文件管理', 40000, NULL, 'react:/file-management/file-upload/41500', 0, 2, '/40000/41500', 'park', 390);
 
 INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES (10135, 0, '文件管理', '文件管理 全部权限', NULL);
