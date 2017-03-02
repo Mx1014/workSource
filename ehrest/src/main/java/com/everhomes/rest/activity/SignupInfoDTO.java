@@ -19,7 +19,7 @@ import com.fasterxml.jackson.annotation.JsonTypeInfo.Id;
  * <li>type: 类型，1认证2非认证3非注册</li>
  * <li>sourceFlag: 来源，1自发报名2后台录入</li>
  * <li>confirmFlag: 报名确认，1已确认0未确认</li>
- * <li>leaderFlag: 是否高管，1是0否</li>
+ * <li>checkinFlag: 是否已签到，1是0否</li>
  * </ul>
  */
 public class SignupInfoDTO {
@@ -28,15 +28,57 @@ public class SignupInfoDTO {
 	private String nickName;
 	private String realName;
 	private Byte gender;
+	private String genderText;
 	private String communityName;
 	private String organizationName;
 	private String position;
 	private Byte leaderFlag;
+	private String leaderFlagText;
 	private Byte type;
+	private String typeText;
 	private Byte sourceFlag;
+	private String sourceFlagText;
 	private Byte confirmFlag;
+	private String confirmFlagText;
 	private Byte checkinFlag;
+	private String checkinFlagText;
 	
+	public String getGenderText() {
+		return genderText;
+	}
+	public void setGenderText(String genderText) {
+		this.genderText = genderText;
+	}
+	public String getLeaderFlagText() {
+		return leaderFlagText;
+	}
+	public void setLeaderFlagText(String leaderFlagText) {
+		this.leaderFlagText = leaderFlagText;
+	}
+	public String getTypeText() {
+		return typeText;
+	}
+	public void setTypeText(String typeText) {
+		this.typeText = typeText;
+	}
+	public String getSourceFlagText() {
+		return sourceFlagText;
+	}
+	public void setSourceFlagText(String sourceFlagText) {
+		this.sourceFlagText = sourceFlagText;
+	}
+	public String getConfirmFlagText() {
+		return confirmFlagText;
+	}
+	public void setConfirmFlagText(String confirmFlagText) {
+		this.confirmFlagText = confirmFlagText;
+	}
+	public String getCheckinFlagText() {
+		return checkinFlagText;
+	}
+	public void setCheckinFlagText(String checkinFlagText) {
+		this.checkinFlagText = checkinFlagText;
+	}
 	public Long getId() {
 		return id;
 	}

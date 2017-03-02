@@ -24,5 +24,6 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_INVALID_ACTIVITY_SIGNUP_END_TIME=10018;
     static final int ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME=10019;
     static final int ERROR_PHONE=10020;
+	static final int ERROR_NO_ROSTER = 10021;
 
 }

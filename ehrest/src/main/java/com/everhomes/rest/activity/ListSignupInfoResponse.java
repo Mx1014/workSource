@@ -17,6 +17,16 @@ public class ListSignupInfoResponse {
 	@ItemType(SignupInfoDTO.class)
 	private List<SignupInfoDTO> signupInfoDTOs;
 
+	public ListSignupInfoResponse() {
+		super();
+	}
+
+	public ListSignupInfoResponse(Long nextPageAnchor, List<SignupInfoDTO> signupInfoDTOs) {
+		super();
+		this.nextPageAnchor = nextPageAnchor;
+		this.signupInfoDTOs = signupInfoDTOs;
+	}
+
 	public Long getNextPageAnchor() {
 		return nextPageAnchor;
 	}

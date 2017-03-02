@@ -683,38 +683,47 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd) {
-		
-		
-		
-		
-		
-		
-		
-		return null;
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getPageAnchor(), pageSize+1);
+		Long nextPageAnchor = null;
+		if (rosters.size() > pageSize) {
+			rosters.remove(rosters.size()-1);
+			nextPageAnchor = rosters.get(rosters.size()-1).getId();
+		}
+		return new ListSignupInfoResponse(nextPageAnchor, rosters.stream().map(this::convertActivityRoster).collect(Collectors.toList()));
 	}
 
 	@Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
-		Activity activity = checkActivityExist(cmd.getActivityId());
-
-        List<CommunityPmOwner> ownerList = propertyMgrProvider.listCommunityPmOwnersByCommunity(
-                currentNamespaceId(), cmd.getCommunityId());
-
-        if (ownerList != null && ownerList.size() > 0) {
-            List<OrganizationOwnerDTO> ownerDTOs = ownerList.stream().map(this::convertOwnerToDTO).collect(Collectors.toList());
-
-            String fileName = String.format("客户信息_%s_%s", community.getName(), DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
-            ExcelUtils excelUtils = new ExcelUtils(response, fileName, "客户信息");
-            String[] propertyNames = {"contactName", "gender", "orgOwnerType", "contactToken", "birthday", "maritalStatus", "job", "company",
-                    "idCardNumber", "registeredResidence"};
-            String[] titleNames = {"姓名", "性别", "客户类型", "手机", "生日", "婚姻状况", "职业", "工作单位", "证件号码", "户口所在地"};
-            int[] titleSizes = {20, 10, 10, 30, 20, 10, 20, 30, 40, 30};
-            excelUtils.writeExcel(propertyNames, titleNames, titleSizes, ownerDTOs);
-        } else {
-            // LOGGER.error("Organization owner are not exist.");
-            throw errorWith(PropertyServiceErrorCode.SCOPE, PropertyServiceErrorCode.ERROR_OWNER_NOT_EXIST,
-                    "Organization owner are not exist.");
-        }
+		checkActivityExist(cmd.getActivityId());
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), null, 100000);
+		if (rosters.size() > 0) {
+			List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(this::convertActivityRosterForExcel).collect(Collectors.toList());
+			for(int i=0; i<signupInfoDTOs.size(); i++) {
+				signupInfoDTOs.get(i).setId(i+1L);
+			}
+			String fileName = String.format("报名信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
+			String[] propertyNames = {"id", "phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
+					"typeText", "sourceFlagText", "confirmFlagText", "checkinFlagText"};
+			String[] titleNames = {"序号", "手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "类型", "报名来源", "报名确认", "是否签到"};
+			int[] titleSizes = {10, 20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 10};
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, signupInfoDTOs);
+		}else {
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_NO_ROSTER, "no roster in this activity");
+		}
+	}
+	
+	private SignupInfoDTO convertActivityRosterForExcel(ActivityRoster roster) {
+		SignupInfoDTO signupInfoDTO = convertActivityRoster(roster);
+		signupInfoDTO.setGenderText(UserGender.fromCode(signupInfoDTO.getGender()).getText());
+		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
+		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
+		signupInfoDTO.setSourceFlagText(ActivityRosterSourceFlag.fromCode(signupInfoDTO.getSourceFlag()).getText());
+		signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
+		signupInfoDTO.setCheckinFlagText(CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag()).getText());
+		return signupInfoDTO;
 	}
 
 	@Override
@@ -803,7 +812,7 @@ public class ActivityServiceImpl implements ActivityService {
     	roster.setCommunityName(signupInfoDTO.getCommunityName());
     	roster.setOrganizationName(signupInfoDTO.getOrganizationName());
     	roster.setPosition(signupInfoDTO.getPosition());
-    	roster.setLeaderFlag(user.getExecutiveTag());
+    	roster.setLeaderFlag(signupInfoDTO.getLeaderFlag());
     	roster.setSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
 	}
     
@@ -814,6 +823,8 @@ public class ActivityServiceImpl implements ActivityService {
     		signupInfoDTO.setPhone(userIdentifiers.get(0).getIdentifierToken());
 		}
     	signupInfoDTO.setGender(user.getGender());
+    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag());
+    	signupInfoDTO.setNickName(user.getNickName());
     	
     	OrganizationMember organizationMember = findAnyOrganizationMember(namespaceId, user.getId());
     	if (organizationMember != null) {
@@ -843,6 +854,19 @@ public class ActivityServiceImpl implements ActivityService {
     	
     	return signupInfoDTO;
     }
+
+	@Override
+	public SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		if (identifier != null) {
+			User user = userProvider.findUserById(identifier.getOwnerUid());
+			if (user != null) {
+				return verifyPerson(namespaceId, user);
+			}
+		}
+		return null;
+	}
 
 	private OrganizationMember findAnyOrganizationMember(Integer namespaceId, Long userId) {
 		OrganizationMember organizationMember = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(namespaceId, userId, OrganizationGroupType.JOB_POSITION.getCode());

@@ -146,4 +146,6 @@ public interface ActivityService {
 
 	void deleteSignupInfo(DeleteSignupInfoCommand cmd);
 
-	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);}
+	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);
+
+	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);}

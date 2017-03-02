@@ -9,12 +9,18 @@ package com.everhomes.rest.activity;
  * </ul>
  */
 public enum ActivityRosterSourceFlag {
-	SELF((byte) 1), BACKEND_ADD((byte) 2);
+	SELF((byte) 1, "自发报名"), BACKEND_ADD((byte) 2, "后台录入");
 	private byte code;
+	private String text;
 
-	private ActivityRosterSourceFlag(byte code) {
+	private ActivityRosterSourceFlag(byte code, String text) {
 		this.code = code;
+		this.text = text;
 	}
+
+	public String getText() {
+		return text;
+	} 
 
 	public byte getCode() {
 		return code;

@@ -77,6 +77,7 @@ import com.everhomes.rest.activity.SetActivityWarningCommand;
 import com.everhomes.rest.activity.SignupInfoDTO;
 import com.everhomes.rest.activity.UpdateActivityGoodsCommand;
 import com.everhomes.rest.activity.UpdateSignupInfoCommand;
+import com.everhomes.rest.activity.VertifyPersonByPhoneCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
 import com.everhomes.rest.category.CategoryDTO;
@@ -202,7 +203,7 @@ public class ActivityController extends ControllerBase {
     
     /**
      * 
-     * <p>导出活动报名信息</p>
+     * <p>删除活动报名信息</p>
      * <b>URL: /activity/deleteSignupInfo</b>
      */
     @RequestMapping("deleteSignupInfo")
@@ -212,6 +213,22 @@ public class ActivityController extends ControllerBase {
     	RestResponse restResponse = new RestResponse();
     	restResponse.setErrorCode(ErrorCodes.SUCCESS);
     	restResponse.setErrorDescription("OK");
+    	return restResponse;
+    }
+    
+    /**
+     * 
+     * <p>检查手机号</p>
+     * <b>URL: /activity/vertifyPersonByPhone</b>
+     */
+    @RequestMapping("vertifyPersonByPhone")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse vertifyPersonByPhone(@Valid VertifyPersonByPhoneCommand cmd) {
+    	SignupInfoDTO signupInfoDTO = activityService.vertifyPersonByPhone(cmd);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	restResponse.setResponseObject(signupInfoDTO);
     	return restResponse;
     }
     
