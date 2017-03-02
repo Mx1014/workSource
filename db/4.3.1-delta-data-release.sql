@@ -79,3 +79,4 @@ WHERE `namespace_id`=999985 AND `name`='ServiceMarketLayout';
 -- 创源停车缴费 add by sw 20170302
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`) 
 	VALUES ('10023', 'community', '240111044331054735', '创源停车场', 'INNOSPRING', '', '1', '2', '1025', '2017-03-02 17:07:20', '1', '1', '1', '1', '1', '999986', '0');
+UPDATE eh_launch_pad_items set action_data = '', action_type = 30 where namespace_id = 999986 and item_label = '智能停车场';
