@@ -1,15 +1,24 @@
 package com.everhomes.test.junit.asset;
 
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.rest.RestResponseBase;
-import com.everhomes.rest.asset.DeleteBillCommand;
-import com.everhomes.rest.asset.ListAssetBillTemplateCommand;
-import com.everhomes.rest.asset.ListAssetBillTemplateRestResponse;
-import com.everhomes.rest.asset.UpdateAssetBillTemplateCommand;
+import com.everhomes.rest.asset.*;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.EhAssetBills;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
+import org.jooq.DSLContext;
 import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
+
+import java.io.File;
+import java.io.IOException;
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 /**
  * Created by Administrator on 2017/2/27.
@@ -40,6 +49,16 @@ public class AssetTest extends BaseLoginAuthTestCase {
     //12. 删除账单
     private static final String DELETE_BILL_URL = "/asset/deleteBill";
 
+    Integer namespaceId = 999992;
+    String userIdentifier = "19112349996";
+    String plainTexPassword = "123456";
+
+    Long ownerId = (long) 1000750;
+    String ownerType = "PM";
+
+    Long targetId = 240111044331051300L;
+    String targetType = "community";
+
     @Before
     public void setUp() {
         super.setUp();
@@ -58,9 +77,6 @@ public class AssetTest extends BaseLoginAuthTestCase {
     }
 
     private void logon() {
-        String userIdentifier = "19112349996";
-        String plainTexPassword = "123456";
-        Integer namespaceId = 999992;
         logon(namespaceId, userIdentifier, plainTexPassword);
     }
 
@@ -69,17 +85,16 @@ public class AssetTest extends BaseLoginAuthTestCase {
     public void testListAssetBillTemplate() {
         logon();
         ListAssetBillTemplateCommand cmd = new ListAssetBillTemplateCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
 
         ListAssetBillTemplateRestResponse response = httpClientService.restPost(LIST_ASSET_BILL_TEMPLATE_URL, cmd, ListAssetBillTemplateRestResponse.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-        // ListAssetBillTemplateResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
+        assertEquals(24, response.getResponse().size());
     }
 
     //2. updateAssetBillTemplate
@@ -88,21 +103,35 @@ public class AssetTest extends BaseLoginAuthTestCase {
         logon();
         UpdateAssetBillTemplateCommand cmd = new UpdateAssetBillTemplateCommand();
         List<AssetBillTemplateFieldDTO> assetBillTemplateFieldDTOList = new ArrayList<>();
+
+        AssetBillTemplateFieldDTO assetBillTemplateFieldDTO2 = new AssetBillTemplateFieldDTO();
+        assetBillTemplateFieldDTO2.setNamespaceId(namespaceId);
+        assetBillTemplateFieldDTO2.setOwnerId(ownerId);
+        assetBillTemplateFieldDTO2.setOwnerType(ownerType);
+        assetBillTemplateFieldDTO2.setTargetId(targetId);
+        assetBillTemplateFieldDTO2.setTargetType(targetType);
+        assetBillTemplateFieldDTO2.setFieldDisplayName("楼栋");
+        assetBillTemplateFieldDTO2.setFieldName("buildingName");
+        assetBillTemplateFieldDTO2.setFieldType("String");
+        assetBillTemplateFieldDTO2.setRequiredFlag((byte)0);
+        assetBillTemplateFieldDTO2.setSelectedFlag((byte)0);
+        assetBillTemplateFieldDTO2.setDefaultOrder(0);
+        assetBillTemplateFieldDTO2.setTemplateVersion(0L);
+        assetBillTemplateFieldDTOList.add(assetBillTemplateFieldDTO2);
+
         AssetBillTemplateFieldDTO assetBillTemplateFieldDTO = new AssetBillTemplateFieldDTO();
-        assetBillTemplateFieldDTO.setId(1L);
-        assetBillTemplateFieldDTO.setNamespaceId(0);
-        assetBillTemplateFieldDTO.setOwnerId(1L);
-        assetBillTemplateFieldDTO.setOwnerType("");
-        assetBillTemplateFieldDTO.setTargetId(1L);
-        assetBillTemplateFieldDTO.setTargetType("");
-        assetBillTemplateFieldDTO.setFieldDisplayName("");
-        assetBillTemplateFieldDTO.setFieldName("");
-        assetBillTemplateFieldDTO.setFieldType("");
-        assetBillTemplateFieldDTO.setFieldCustomName("");
+        assetBillTemplateFieldDTO.setNamespaceId(namespaceId);
+        assetBillTemplateFieldDTO.setOwnerId(ownerId);
+        assetBillTemplateFieldDTO.setOwnerType(ownerType);
+        assetBillTemplateFieldDTO.setTargetId(targetId);
+        assetBillTemplateFieldDTO.setTargetType(targetType);
+        assetBillTemplateFieldDTO.setFieldDisplayName("账期");
+        assetBillTemplateFieldDTO.setFieldName("accountPeriod");
+        assetBillTemplateFieldDTO.setFieldType("Timestamp");
         assetBillTemplateFieldDTO.setRequiredFlag((byte)1);
         assetBillTemplateFieldDTO.setSelectedFlag((byte)1);
         assetBillTemplateFieldDTO.setDefaultOrder(0);
-        assetBillTemplateFieldDTO.setTemplateVersion(1L);
+        assetBillTemplateFieldDTO.setTemplateVersion(0L);
         assetBillTemplateFieldDTOList.add(assetBillTemplateFieldDTO);
         cmd.setDtos(assetBillTemplateFieldDTOList);
 
@@ -111,51 +140,38 @@ public class AssetTest extends BaseLoginAuthTestCase {
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-        // UpdateAssetBillTemplateResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
+        assertEquals("accountPeriod", response.getResponse().get(0).getFieldName());
     }
 
     //3. 搜索账单列表
     @Test
     public void testListSimpleAssetBills() {
         logon();
+
         ListSimpleAssetBillsCommand cmd = new ListSimpleAssetBillsCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
-        cmd.setAddressId(1L);
-        cmd.setTenant("");
-        cmd.setStatus((byte)1);
-        cmd.setStartTime(1L);
-        cmd.setEndTime(1L);
-        cmd.setPageAnchor(1L);
-        cmd.setPageSize(0);
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
+
 
         ListSimpleAssetBillsRestResponse response = httpClientService.restPost(LIST_SIMPLE_ASSET_BILLS_URL, cmd, ListSimpleAssetBillsRestResponse.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-        // ListSimpleAssetBillsResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
+        assertEquals("12342234123", response.getResponse().getBills().get(0).getContactNo());
+
     }
 
     //4. 导出账单
     @Test
     public void testExportAssetBills() {
         logon();
-        ExportAssetBillsCommand cmd = new ExportAssetBillsCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
-        cmd.setAddressId(1L);
-        cmd.setTenant("");
-        cmd.setStatus((byte)1);
-        cmd.setStartTime(1L);
-        cmd.setEndTime(1L);
-        cmd.setPageAnchor(1L);
-        cmd.setPageSize(0);
+        ListSimpleAssetBillsCommand cmd = new ListSimpleAssetBillsCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
 
         RestResponseBase response = httpClientService.restPost(EXPORT_ASSET_BILLS_URL, cmd, RestResponseBase.class);
         assertNotNull(response);
@@ -166,18 +182,9 @@ public class AssetTest extends BaseLoginAuthTestCase {
     @Test
     public void testImportAssetBills() {
         logon();
-        ImportAssetBillsCommand cmd = new ImportAssetBillsCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
+        deleteAssetbills();
+        ImportAssetBills();
 
-        ImportAssetBillsRestResponse response = httpClientService.restPost(IMPORT_ASSET_BILLS_URL, cmd, ImportAssetBillsRestResponse.class);
-        assertNotNull(response);
-        assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
-
-        // ImportAssetBillsResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
     }
 
     //6. 新增账单
@@ -185,14 +192,14 @@ public class AssetTest extends BaseLoginAuthTestCase {
     public void testCreatAssetBill() {
         logon();
         CreatAssetBillCommand cmd = new CreatAssetBillCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
-        cmd.setSource((byte)1);
-        cmd.setAccountPeriod(new Timestamp(DateHelper.currentGMTTime().getTime()));
-        cmd.setAddressId(1L);
-        cmd.setContactNo("");
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
+
+        cmd.setAccountPeriod(new Timestamp(System.currentTimeMillis()));
+        cmd.setBuildingName("A1");
+        cmd.setApartmentName("102");
         cmd.setRental(new BigDecimal("1"));
         cmd.setPropertyManagementFee(new BigDecimal("1"));
         cmd.setUnitMaintenanceFund(new BigDecimal("1"));
@@ -213,34 +220,35 @@ public class AssetTest extends BaseLoginAuthTestCase {
         cmd.setPressurizedFee(new BigDecimal("1"));
         cmd.setParkingFee(new BigDecimal("1"));
         cmd.setOther(new BigDecimal("1"));
-        cmd.setTemplateVersion(1L);
+        cmd.setTemplateVersion(0L);
 
         CreatAssetBillRestResponse response = httpClientService.restPost(CREAT_ASSET_BILL_URL, cmd, CreatAssetBillRestResponse.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-        // CreatAssetBillResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
+        List<EhAssetBills> bills = getDbAssetBills();
+        assertEquals(2, bills.size());
     }
 
     //7. 查看账单
     @Test
     public void testFindAssetBill() {
         logon();
+
         FindAssetBillCommand cmd = new FindAssetBillCommand();
-        cmd.setId(1L);
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
-        cmd.setTemplateVersion(1L);
+        cmd.setId(14L);
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
+        cmd.setTemplateVersion(0L);
 
-        FindAssetBillRestResponse response = httpClientService.restPost(FIND_ASSET_BILL_URL, cmd, FindAssetBillRestResponse.class);
-        assertNotNull(response);
-        assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+        FindAssetBillRestResponse billRestResponse = httpClientService.restPost(FIND_ASSET_BILL_URL, cmd, FindAssetBillRestResponse.class);
+        assertNotNull(billRestResponse);
+        assertTrue("response = " + StringHelper.toJsonString(billRestResponse), httpClientService.isReponseSuccess(billRestResponse));
 
-        // FindAssetBillResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
+        assertNotNull(billRestResponse.getResponse().getDtos());
+
     }
 
     //8. 编辑账单
@@ -248,15 +256,15 @@ public class AssetTest extends BaseLoginAuthTestCase {
     public void testUpdateAssetBill() {
         logon();
         UpdateAssetBillCommand cmd = new UpdateAssetBillCommand();
-        cmd.setId(1L);
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
+        cmd.setId(14L);
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
         cmd.setSource((byte)1);
-        cmd.setAccountPeriod(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        cmd.setAccountPeriod(new Timestamp(System.currentTimeMillis()));
         cmd.setAddressId(1L);
-        cmd.setContactNo("");
+        cmd.setContactNo("12200000001");
         cmd.setRental(new BigDecimal("1"));
         cmd.setPropertyManagementFee(new BigDecimal("1"));
         cmd.setUnitMaintenanceFund(new BigDecimal("1"));
@@ -277,14 +285,12 @@ public class AssetTest extends BaseLoginAuthTestCase {
         cmd.setPressurizedFee(new BigDecimal("1"));
         cmd.setParkingFee(new BigDecimal("1"));
         cmd.setOther(new BigDecimal("1"));
-        cmd.setTemplateVersion(1L);
+        cmd.setTemplateVersion(0L);
 
         UpdateAssetBillRestResponse response = httpClientService.restPost(UPDATE_ASSET_BILL_URL, cmd, UpdateAssetBillRestResponse.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
 
-        // UpdateAssetBillResponse myResponse = response.getResponse();
-        // assertNotNull(myResponse);
     }
 
     //9. 一键催缴
@@ -292,10 +298,10 @@ public class AssetTest extends BaseLoginAuthTestCase {
     public void testNotifyUnpaidBillsContact() {
         logon();
         NotifyUnpaidBillsContactCommand cmd = new NotifyUnpaidBillsContactCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
 
         RestResponseBase response = httpClientService.restPost(NOTIFY_UNPAID_BILLS_CONTACT_URL, cmd, RestResponseBase.class);
         assertNotNull(response);
@@ -306,32 +312,34 @@ public class AssetTest extends BaseLoginAuthTestCase {
     @Test
     public void testSetBillsPaid() {
         logon();
-        SetBillsPaidCommand cmd = new SetBillsPaidCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
+        BillIdListCommand cmd = new BillIdListCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
         List<Long> longList = new ArrayList<>();
-        longList.add(1L);
+        longList.add(14L);
         cmd.setIds(longList);
 
 
         RestResponseBase response = httpClientService.restPost(SET_BILLS_PAID_URL, cmd, RestResponseBase.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        List<EhAssetBills> bills = getDbAssetBills();
     }
 
     //11. 批量设置待缴
     @Test
     public void testSetBillsUnpaid() {
         logon();
-        SetBillsUnpaidCommand cmd = new SetBillsUnpaidCommand();
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
+        BillIdListCommand cmd = new BillIdListCommand();
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
         List<Long> longList = new ArrayList<>();
-        longList.add(1L);
+        longList.add(14L);
         cmd.setIds(longList);
 
 
@@ -345,14 +353,57 @@ public class AssetTest extends BaseLoginAuthTestCase {
     public void testDeleteBill() {
         logon();
         DeleteBillCommand cmd = new DeleteBillCommand();
-        cmd.setId(1L);
-        cmd.setOwnerId(1L);
-        cmd.setOwnerType("");
-        cmd.setTargetId(1L);
-        cmd.setTargetType("");
+        cmd.setId(14L);
+        cmd.setOwnerId(ownerId);
+        cmd.setOwnerType(ownerType);
+        cmd.setTargetId(targetId);
+        cmd.setTargetType(targetType);
 
         RestResponseBase response = httpClientService.restPost(DELETE_BILL_URL, cmd, RestResponseBase.class);
         assertNotNull(response);
         assertTrue("response = " + StringHelper.toJsonString(response), httpClientService.isReponseSuccess(response));
+
+        List<EhAssetBills> bills = getDbAssetBills();
+        assertEquals(0, bills.size());
+    }
+
+    private List<EhAssetBills> getDbAssetBills() {
+        DSLContext context = dbProvider.getDslContext();
+        return context.select().from(Tables.EH_ASSET_BILLS)
+                .where(Tables.EH_ASSET_BILLS.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_ASSET_BILLS.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_ASSET_BILLS.TARGET_ID.eq(targetId))
+                .and(Tables.EH_ASSET_BILLS.TARGET_TYPE.eq(targetType))
+                .fetch().map(r -> ConvertHelper.convert(r, EhAssetBills.class));
+    }
+
+    private void deleteAssetbills() {
+        DSLContext context = dbProvider.getDslContext();
+        context.truncate(Tables.EH_ASSET_BILLS).execute();
+    }
+    private void ImportAssetBills() {
+        try {
+            String uri = IMPORT_ASSET_BILLS_URL;
+            ImportOwnerCommand cmd = new ImportOwnerCommand();
+            cmd.setOwnerId(ownerId);
+            cmd.setOwnerType(ownerType);
+            cmd.setTargetId(targetId);
+            cmd.setTargetType(targetType);
+
+
+            File file;
+            file = new File(new File("").getCanonicalPath() + "/src/test/data/excel/assetBill.xlsx");
+            RestResponseBase response = httpClientService.postFile(uri, cmd, file, RestResponseBase.class);
+            assertNotNull(response);
+            assertTrue("response= " + StringHelper.toJsonString(response),
+                    httpClientService.isReponseSuccess(response));
+            assertTrue("errorCode should be 200", response.getErrorCode().intValue() == ErrorCodes.SUCCESS);
+
+            DSLContext context = dbProvider.getDslContext();
+            Integer count = (Integer) context.selectCount().from(Tables.EH_ASSET_BILLS).fetchOne().getValue(0);
+			assertTrue("the count should be 1", count.intValue() == 1);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
     }
 }
