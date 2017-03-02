@@ -129,7 +129,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		projectId = configProvider.getValue("pmtask.ebei.projectId", "240111044331055940");
 	}
 
-	private List<CategoryDTO> listServiceType(String projectId, String parentId) {
+	private List<CategoryDTO> listServiceType(String projectId, Long parentId) {
 		JSONObject param = new JSONObject();
 		param.put("projectId", projectId);
 		
@@ -143,10 +143,13 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 			type.setServiceId(String.valueOf(PmTaskHandle.EBEI_TASK_CATEGORY));
 			List<EbeiServiceType> types;
 
-			if (null == parentId)
+			if (null == parentId || PmTaskHandle.EBEI_TASK_CATEGORY == parentId) {
 				types = type.getItems();
-			else
-				types = getTypes(type, parentId);
+			}else {
+				String mappingId = getMappingIdByCategoryId(parentId);
+				types = getTypes(type, mappingId);
+
+			}
 			List<CategoryDTO> result = types.stream().map(c -> {
 				return convertCategory(c);
 				
@@ -185,7 +188,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		CategoryDTO dto = new CategoryDTO();
 		dto.setId(getCategoryIdByMapping(ebeiServiceType.getServiceId()));
 		String parentId = ebeiServiceType.getParentId();
-		dto.setParentId("".equals(parentId)?0:getCategoryIdByMapping(parentId));
+		dto.setParentId("".equals(parentId)?PmTaskHandle.EBEI_TASK_CATEGORY:getCategoryIdByMapping(parentId));
 		dto.setName(ebeiServiceType.getServiceName());
 		dto.setIsSupportDelete((byte)0);
 		
@@ -227,12 +230,12 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		}).first().getId();
 	}
 
-	private Long getMappingIdByCategoryId(Long categoryId) {
+	private String getMappingIdByCategoryId(Long categoryId) {
 
 		DockingMapping dockingMapping = dockingMappingProvider
 				.findDockingMappingById(categoryId);
 
-		return Long.valueOf(dockingMapping.getMappingValue());
+		return dockingMapping.getMappingValue();
 	}
 
 	public String postToEbei(JSONObject param, String method, Map<String, String> headers) {
@@ -789,7 +792,7 @@ public class EbeiPmTaskHandle implements PmTaskHandle{
 		
 		ListTaskCategoriesResponse response = new ListTaskCategoriesResponse();
 		
-		List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? String.valueOf(cmd.getParentId()) : null);
+		List<CategoryDTO> childrens = listServiceType(projectId, null != cmd.getParentId() ? cmd.getParentId() : null);
 		
 		if(null == cmd.getParentId()) {
 			CategoryDTO dto = createCategoryDTO();
