@@ -389,6 +389,8 @@ public class ActivityServiceImpl implements ActivityService {
 	            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 	            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 	            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+	            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 	            dto.setUserActivityStatus(getActivityStatus(roster).getCode());
 	            dto.setFamilyId(activity.getCreatorFamilyId());
 	            dto.setGroupId(activity.getGroupId());
@@ -909,6 +911,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
@@ -1126,7 +1130,10 @@ public class ActivityServiceImpl implements ActivityService {
                         .map((a) -> { return a.getIdentifierToken(); })
                         .collect(Collectors.toList());
                 d.setPhone(phones);
-            }
+            }else {
+				d.setUserName(r.getRealName());
+				d.setPhone(Arrays.asList(r.getPhone()));
+			}
 
             
             return d;
@@ -1278,6 +1285,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setUserActivityStatus(getActivityStatus(item).getCode());
@@ -1345,6 +1354,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
@@ -1482,6 +1493,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
 //        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -1524,7 +1537,10 @@ public class ActivityServiceImpl implements ActivityService {
                             .map((a) -> { return a.getIdentifierToken(); })
                             .collect(Collectors.toList());
                     d.setPhone(phones);
-                }
+                }else {
+					d.setUserName(r.getRealName());
+					d.setPhone(Arrays.asList(r.getPhone()));
+				}
 
             }
             return d;
@@ -1633,6 +1649,8 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
             dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
             dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
             dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
             dto.setProcessStatus(getStatus(activity).getCode());
@@ -1693,6 +1711,8 @@ public class ActivityServiceImpl implements ActivityService {
           }
           dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
           dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+          dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+          dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
           dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
           dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
           dto.setProcessStatus(getStatus(activity).getCode());
@@ -1805,6 +1825,8 @@ public class ActivityServiceImpl implements ActivityService {
             }
 			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+	        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 			dto.setProcessStatus(getStatus(activity).getCode());
@@ -1892,6 +1914,8 @@ public class ActivityServiceImpl implements ActivityService {
             }
 			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+	        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 			dto.setProcessStatus(getStatus(activity).getCode());
@@ -2187,6 +2211,8 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
             dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
             dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
             dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
             dto.setProcessStatus(getStatus(activity).getCode());
@@ -2424,6 +2450,8 @@ public class ActivityServiceImpl implements ActivityService {
 		    			dto.setActivityId(activity.getId());
 		    	        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 		    	        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+		    	        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+		    	        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 		    	        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 		    	        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 		    	        dto.setProcessStatus(getStatus(activity).getCode());
@@ -2946,6 +2974,8 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setActivityId(activity.getId());
                 dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
                 dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+                dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+                dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
                 dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
                 dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
                 dto.setProcessStatus(getStatus(activity).getCode());
@@ -2994,6 +3024,8 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setActivityId(activity.getId());
                 dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
                 dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+                dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+                dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
                 dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
                 dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
                 dto.setProcessStatus(getStatus(activity).getCode());
