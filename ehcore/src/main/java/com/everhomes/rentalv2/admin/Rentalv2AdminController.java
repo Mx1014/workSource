@@ -47,6 +47,8 @@ import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRecourseAttachementCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
@@ -408,6 +410,42 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+
+	/**
+	 * <b>URL: /rental/admin/updateRecourseAttachement</b>
+	 * <p>
+	 * 添加具体资源的规则
+	 * </p>
+	 */
+
+	@RequestMapping("updateRecourseAttachement")
+	@RestReturn(value = String.class)
+	public RestResponse updateRecourseAttachement(@Valid UpdateRecourseAttachementCommand cmd) {
+		rentalService.updateRecourseAttachement(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /rental/admin/updateRentalDate</b>
+	 * <p>
+	 * 添加具体资源的规则
+	 * </p>
+	 */
+
+	@RequestMapping("updateRentalDate")
+	@RestReturn(value = String.class)
+	public RestResponse updateRentalDate(@Valid UpdateRentalDateCommand cmd) {
+		rentalService.updateRentalDate(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
 	/**
 	 * <b>URL: /rental/admin/updateRentalSiteRules</b>
 	 * <p>

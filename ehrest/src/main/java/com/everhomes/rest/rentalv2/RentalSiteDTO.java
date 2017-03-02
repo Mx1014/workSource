@@ -53,6 +53,7 @@ import com.everhomes.util.StringHelper;
  * <li>	sitePics： List资源图片列表 {@link com.everhomes.rest.rentalv2.RentalSitePicDTO}</li>
  * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
  * <li>attachments: 可添加的附件{@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
+ * <li>confirmationPrompt: 确认提示(非必填)</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -105,6 +106,7 @@ public class RentalSiteDTO {
 	private List<SiteOwnerDTO> owners;
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
+	private String confirmationPrompt;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -525,6 +527,16 @@ public class RentalSiteDTO {
 
 	public void setAvgPriceStr(String avgPriceStr) {
 		this.avgPriceStr = avgPriceStr;
+	}
+
+
+	public String getConfirmationPrompt() {
+		return confirmationPrompt;
+	}
+
+
+	public void setConfirmationPrompt(String confirmationPrompt) {
+		this.confirmationPrompt = confirmationPrompt;
 	}
  
 }

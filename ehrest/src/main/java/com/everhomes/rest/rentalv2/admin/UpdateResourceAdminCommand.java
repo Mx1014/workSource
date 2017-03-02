@@ -24,6 +24,7 @@ import com.everhomes.util.StringHelper;
  * <li>detailUris: 详情图</li>
  * <li>owners: 可见社区</li>
  * <li>status: 是否开启，1是0否</li>
+ * <li>confirmationPrompt: 确认提示(非必填)</li>
  * </ul>
  */
 public class UpdateResourceAdminCommand {
@@ -52,6 +53,7 @@ public class UpdateResourceAdminCommand {
 	@ItemType(SiteOwnerDTO.class)
 	private List<SiteOwnerDTO> owners;
 	private Byte status;
+	private String confirmationPrompt;
 
 	@Override
     public String toString() {
@@ -184,6 +186,16 @@ public class UpdateResourceAdminCommand {
 
 	public void setNotice(String notice) {
 		this.notice = notice;
+	}
+
+
+	public String getConfirmationPrompt() {
+		return confirmationPrompt;
+	}
+
+
+	public void setConfirmationPrompt(String confirmationPrompt) {
+		this.confirmationPrompt = confirmationPrompt;
 	}
 
 }
