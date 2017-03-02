@@ -130,3 +130,15 @@ CREATE TABLE `eh_os_object_download_logs` (
   `create_time` DATETIME(3),
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHAR SET ='utf8mb4';
+
+-- 对接映射表
+CREATE TABLE `eh_docking_mappings` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',  
+  `scope` VARCHAR(64) NOT NULL,
+  `value` VARCHAR(256) NOT NULL,
+  `mapping_value` VARCHAR(256) NOT NULL,
+  `mapping_json` VARCHAR(1024),
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
