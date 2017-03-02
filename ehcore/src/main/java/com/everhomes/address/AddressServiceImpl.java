@@ -59,6 +59,7 @@ import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.jooq.Record3;
 import org.jooq.Record4;
+import org.jooq.Record5;
 import org.jooq.SelectConditionStep;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -593,8 +594,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     	this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
     			(DSLContext context, Object reducingContext)-> {
     				
-    				SelectConditionStep<Record4<Long, String, Double, String>> selectSql =
-    						context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME)
+    				SelectConditionStep<Record5<Long, String, Double, String, String>> selectSql =
+    						context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME,Tables.EH_ADDRESSES.APARTMENT_FLOOR)
     						.from(Tables.EH_ADDRESSES)
     						.where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
     								.and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
@@ -614,12 +615,14 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
     					apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
     					apartment.setBusinessApartmentName(r.getValue(Tables.EH_ADDRESSES.BUSINESS_APARTMENT_NAME));
     					apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
+    					apartment.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
     					results.add(apartment);
     					return null;
     				});
     				
     				return true;
     			});
+    	Collections.sort(results);
     	long endTime = System.currentTimeMillis();
     	LOGGER.info("List apartments by keyword,keyword=" + cmd.getKeyword() + ",elapse=" + (endTime - startTime));
     	return new Tuple<Integer, List<ApartmentDTO>>(ErrorCodes.SUCCESS, results);
