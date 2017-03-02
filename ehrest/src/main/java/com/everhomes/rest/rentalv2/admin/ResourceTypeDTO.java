@@ -12,7 +12,7 @@ import com.everhomes.util.StringHelper;
  * <li>iconUrl: 图标url</li>
  * <li>status: 状态 0 关闭 2 开启</li>
  * <li>namespaceId: 域空间</li>
- * <li>payMode: 支付模式 (工作流模式) 0-线上支付  1-线下支付</li>
+ * <li>payMode: 支付模式 (工作流模式) {@link com.everhomes.rest.rentalv2.admin.PayMode}</li>
  * </ul>
  */
 public class ResourceTypeDTO {

@@ -4,17 +4,15 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>TEXT_REMARK:0 文本备注</li>
- * <li>LICENSE_NUMBER:1 车牌</li>
- * <li>SHOW_CONTENT:2 显示内容</li>
- * <li>ATTACHMENT:3 附件</li>
+ * <li>ONLINE_PAY: 0-线上支付</li>
+ * <li>OFFLINE_PAY: 1-线下支付</li> 
  * </ul>
  */
-public enum AttachmentType {
-	TEXT_REMARK((byte) 0), LICENSE_NUMBER((byte) 1), SHOW_CONTENT((byte) 2), ATTACHMENT((byte) 3);
+public enum PayMode {
+	ONLINE_PAY((byte) 0), OFFLINE_PAY((byte) 1) ;
 	private Byte code;
 
-	private AttachmentType(Byte code) {
+	private PayMode(Byte code) {
 		this.code = code;
 	}
 
@@ -26,9 +24,9 @@ public enum AttachmentType {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
-	public static AttachmentType fromCode(Byte code) {
+	public static PayMode fromCode(Byte code) {
 		if (code != null) {
-			for (AttachmentType a : AttachmentType.values()) {
+			for (PayMode a : PayMode.values()) {
 				if (code.byteValue() == a.code.byteValue()) {
 					return a;
 				}
