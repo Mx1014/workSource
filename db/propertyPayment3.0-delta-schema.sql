@@ -79,3 +79,19 @@ CREATE TABLE `eh_asset_bill_template_fields` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- 物业公司催缴记录
+DROP TABLE IF EXISTS `eh_asset_bill_notify_record`;
+CREATE TABLE `eh_asset_bill_notify_record` (
+  `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
+  `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
+  
+  `owner_type` VARCHAR(32) COMMENT 'notify record owner type',
+  `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'notify record owner id',
+  `target_type` VARCHAR(32) COMMENT 'notify record target type: community',
+  `target_id` BIGINT NOT NULL COMMENT 'notify record target id: community id',
+  
+  `creator_uid` BIGINT,
+  `create_time` DATETIME(3),
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

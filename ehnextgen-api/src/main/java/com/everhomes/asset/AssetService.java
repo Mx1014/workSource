@@ -25,5 +25,6 @@ public interface AssetService {
     List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd);
 
     Boolean checkTokenRegister(CheckTokenRegisterCommand cmd);
+    NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd);
 
 }

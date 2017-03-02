@@ -22,7 +22,6 @@ import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.asset.*;
 import com.everhomes.rest.community.CommunityType;
-import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
@@ -46,7 +45,7 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
-import org.apache.commons.lang.StringUtils;
+
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
@@ -452,7 +451,7 @@ public class AssetServiceImpl implements AssetService {
     private List<String> importAssetBills(ImportOwnerCommand cmd, List<String> list, List<Field> fields, Long userId, Long templateVersion){
         List<String> errorDataLogs = new ArrayList<String>();
 
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+//        Integer namespaceId = UserContext.getCurrentNamespaceId();
         for (String str : list) {
             String[] s = str.split("\\|\\|");
             dbProvider.execute((TransactionStatus status) -> {
@@ -462,6 +461,7 @@ public class AssetServiceImpl implements AssetService {
                 bill.setTargetId(cmd.getTargetId());
                 bill.setTargetType(cmd.getTargetType());
                 bill.setTemplateVersion(templateVersion);
+                bill.setSource(AssetBillSource.THIRD_PARTY.getCode());
                 int i = 0;
                 for(Field field : fields) {
                     try {
@@ -539,6 +539,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd) {
         AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
+        bill.setSource(AssetBillSource.MANUAL.getCode());
         bill.setCreatorUid(UserContext.current().getUser().getId());
         getTotalAmount(bill);
 
@@ -836,6 +837,13 @@ public class AssetServiceImpl implements AssetService {
         }
 
         return true;
+    }
+
+    @Override
+    public NotifyTimesResponse notifyTimes(ImportOwnerCommand cmd) {
+        NotifyTimesResponse response = new NotifyTimesResponse();
+        
+        return null;
     }
 
     private Map<Long, List<Field>> getTemplateFields(ListAssetBillTemplateCommand cmd) {

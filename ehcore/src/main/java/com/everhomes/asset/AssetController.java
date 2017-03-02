@@ -246,5 +246,20 @@ public class AssetController extends ControllerBase {
         response.setErrorDescription("OK");
         return response;
     }
+
+    /**
+     * <b>URL: /asset/notifyTimes</b>
+     * <p>本月已催缴次数</p>
+     * @return
+     */
+    @RequestMapping("notifyTimes")
+    @RestReturn(value=NotifyTimesResponse.class)
+    public RestResponse notifyTimes(@Valid ImportOwnerCommand cmd) {
+
+        RestResponse response = new RestResponse(this.assetService.notifyTimes(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 //    脚本配置设置用户模板
 }
