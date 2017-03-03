@@ -2016,7 +2016,9 @@ public class EquipmentServiceImpl implements EquipmentService {
         }).filter(task->task!=null).collect(Collectors.toList());
 
 		long endTime = System.currentTimeMillis();
+
 		LOGGER.debug("TrackUserRelatedCost: convertEquipmentTasksToDTO  taskSize = "+ tasks.size() +", elapse=" + (endTime - startTime));
+
 		return dtoList;
 	}
 	
@@ -3078,8 +3080,7 @@ public class EquipmentServiceImpl implements EquipmentService {
         	tasks.remove(tasks.size() - 1);
         	response.setNextPageAnchor((long) (offset + 1));
         }
-        
-
+		
     	List<EquipmentTaskDTO> dtos = convertEquipmentTasksToDTO(tasks);
 //				tasks.stream().map(r -> {
 //        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);

@@ -135,7 +135,7 @@ CREATE TABLE `eh_os_object_download_logs` (
 CREATE TABLE `eh_docking_mappings` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',  
   `scope` VARCHAR(64) NOT NULL,
-  `value` VARCHAR(256),
+  `name` VARCHAR(256),
   `mapping_value` VARCHAR(256),
   `mapping_json` VARCHAR(1024),
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
