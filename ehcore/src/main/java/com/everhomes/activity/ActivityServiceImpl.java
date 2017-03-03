@@ -35,7 +35,6 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityPmOwner;
-import com.everhomes.poll.ActivityProcessStatus;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -1048,8 +1047,8 @@ public class ActivityServiceImpl implements ActivityService {
         return dto;
     }
 
-    private ActivityProcessStatus getStatus(Activity activity) {
-        return StatusChecker.getActivityProcessStatus(activity);
+    private ProcessStatus getStatus(Activity activity) {
+        return StatusChecker.getProcessStatus(activity.getStartTimeMs(), activity.getEndTimeMs());
     }
 
     @Override

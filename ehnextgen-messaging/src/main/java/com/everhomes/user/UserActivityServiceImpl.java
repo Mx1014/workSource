@@ -59,7 +59,6 @@ import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.namespace.NamespacesService;
-import com.everhomes.poll.ActivityProcessStatus;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.promotion.BizHttpRestCallProvider;
 import com.everhomes.region.Region;
@@ -990,8 +989,8 @@ public class UserActivityServiceImpl implements UserActivityService {
         return response;
 	}
 
-	private ActivityProcessStatus getStatus(Activity activity) {
-        return StatusChecker.getActivityProcessStatus(activity);
+	private ProcessStatus getStatus(Activity activity) {
+        return StatusChecker.getProcessStatus(activity.getStartTimeMs(), activity.getEndTimeMs());
     }
 	
 	@Override
