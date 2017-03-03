@@ -1,25 +1,11 @@
-package com.everhomes.pmtask;
-import java.io.BufferedReader;
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileInputStream;
-import java.io.FileNotFoundException;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStreamReader;
-import java.io.OutputStreamWriter;
-import java.io.RandomAccessFile;
-import java.io.UnsupportedEncodingException;
-import java.sql.Connection;
-import java.sql.DriverManager;
-import java.sql.PreparedStatement;
-import java.sql.ResultSet;
-import java.sql.SQLException;
-import java.sql.Statement;
-import java.util.HashMap;
-import java.util.Map;
+package com.everhomes.pm;
 
-import org.apache.commons.lang.StringUtils;
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DbProvider;
+import com.everhomes.region.Region;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhRegionsDao;
+import com.everhomes.util.ConvertHelper;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -29,19 +15,13 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.DSLContext;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.db.AccessSpec;
-import com.everhomes.db.DbProvider;
-import com.everhomes.region.Region;
-import com.everhomes.region.RegionProvider;
-import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhRegionsDao;
-import com.everhomes.util.ConvertHelper;
+import java.io.*;
+import java.util.HashMap;
+import java.util.Map;
 
 
 @Controller

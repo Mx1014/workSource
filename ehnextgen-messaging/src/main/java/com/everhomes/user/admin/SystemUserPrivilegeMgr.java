@@ -98,7 +98,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         List<Long> moduleIds = new ArrayList<>();
         for (ServiceModulePrivilege serviceModule: serviceModules) {
-            if(!moduleIds.contains(serviceModule.getPrivilegeId()))
+            if(!moduleIds.contains(serviceModule.getModuleId()))
                 moduleIds.add(serviceModule.getModuleId());
         }
         if(0 < moduleIds.size()){

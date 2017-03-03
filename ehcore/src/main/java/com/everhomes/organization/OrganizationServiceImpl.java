@@ -8384,16 +8384,19 @@ System.out.println();
 		contractDTO.setSignupCount(getSignupCount(contract.getOrganizationId()));
 		
 		OrganizationDetail organizationDetail = organizationProvider.findOrganizationDetailByOrganizationId(contract.getOrganizationId());
-		contractDTO.setContract(organizationDetail.getContact());
-		contractDTO.setContactor(organizationDetail.getContactor());
-		contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
-		
-		OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
-		if (user != null) {
+		if (organizationDetail != null) {
+			contractDTO.setContract(organizationDetail.getContact());
+			contractDTO.setContactor(organizationDetail.getContactor());
 			contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
-			contractDTO.setServiceUserName(user.getServiceUserName());
-			contractDTO.setServiceUserPhone(user.getServiceUserPhone());
+			
+			OrganizationServiceUser user = getServiceUser(contract.getOrganizationId(), organizationDetail.getServiceUserId());
+			if (user != null) {
+				contractDTO.setServiceUserId(organizationDetail.getServiceUserId());
+				contractDTO.setServiceUserName(user.getServiceUserName());
+				contractDTO.setServiceUserPhone(user.getServiceUserPhone());
+			}
 		}
+		
 		List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
 		contractDTO.setBuildings(buildings);
 		return contractDTO;
@@ -8757,6 +8760,37 @@ System.out.println();
 			}
 		}
 		return organizationDTOs;
+	}
+
+	@Override
+	public List<OrganizationContactDTO> listOrganizationsContactByModuleId(ListOrganizationByModuleIdCommand cmd) {
+		List<OrganizationDTO> organizations = listOrganizationsByModuleId(ConvertHelper.convert(cmd, ListOrganizationByModuleIdCommand.class));
+		List<Long> organizationIds = new ArrayList<>();
+		for (OrganizationDTO organization: organizations) {
+			organizationIds.add(organization.getId());
+		}
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
+
+		if(organizationIds.size() > 0) {
+			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(organizationIds, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+					return query;
+				}
+			});
+
+			if(null == members || members.size() == 0){
+				return new ArrayList<>();
+			}
+
+			for (OrganizationMember member: members) {
+				dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
+			}
+		}
+
+		return dtos;
 	}
 
 	@Override

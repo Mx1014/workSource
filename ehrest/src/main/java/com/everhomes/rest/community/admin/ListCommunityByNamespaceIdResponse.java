@@ -10,7 +10,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 返回值
  * <li>communities: 小区列表，{@link com.everhomes.rest.address.CommunityDTO}</li>
  * <li>nextPageAnchor: 下一个锚点</li>
  * </ul>
