@@ -154,7 +154,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 			dto.setCardType(cardType.getCardTypeName());
 			dto.setMonthCount(new BigDecimal(monthCount));
 			dto.setPrice(new BigDecimal(r.getFee()));
-			dto.setVendorName(ParkingLotVendor.KETUO.getCode());
+			dto.setVendorName(ParkingLotVendor.INNOSPRING.getCode());
 			return dto;
 		}).collect(Collectors.toList());
 
