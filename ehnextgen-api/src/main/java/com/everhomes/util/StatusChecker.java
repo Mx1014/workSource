@@ -3,6 +3,8 @@ package com.everhomes.util;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import com.everhomes.activity.Activity;
+import com.everhomes.poll.ActivityProcessStatus;
 import com.everhomes.poll.ProcessStatus;
 
 public class StatusChecker {
@@ -27,4 +29,28 @@ public class StatusChecker {
         
         return ProcessStatus.END;
     }
+    
+    public static ActivityProcessStatus getActivityProcessStatus(Activity activity) {
+    	long current = DateHelper.currentGMTTime().getTime();
+    	Long startTime = activity.getStartTimeMs();
+    	Long endTime = activity.getEndTimeMs();
+    	Long signupEndtime = activity.getSignupEndTime()==null?startTime:activity.getSignupEndTime().getTime();
+		if (signupEndtime != null && current < signupEndtime.longValue()) {
+			return ActivityProcessStatus.SINGING_UP;
+		}
+		
+		if (startTime == null) {
+            if (current <= endTime.longValue())
+                return ActivityProcessStatus.UNKNOWN;
+            return ActivityProcessStatus.END;
+        }
+        
+        if (current <= endTime && current >= startTime)
+            return ActivityProcessStatus.UNDERWAY;
+        
+        else if(current < startTime)
+        	return ActivityProcessStatus.NOTSTART;
+        
+        return ActivityProcessStatus.END;
+	}
 }
