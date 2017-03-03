@@ -207,6 +207,8 @@ import com.everhomes.rest.rentalv2.admin.ResourceTypeStatus;
 import com.everhomes.rest.rentalv2.admin.SiteNumberDTO;
 import com.everhomes.rest.rentalv2.admin.SiteOwnerDTO;
 import com.everhomes.rest.rentalv2.admin.TimeIntervalDTO;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRecourseAttachementCommand;
@@ -5355,4 +5357,16 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 	@Override
 	public void updateRecourseAttachement(UpdateRecourseAttachementCommand cmd){}
+
+	@Override
+	public void updateDefaultDateRule(UpdateDefaultDateRuleAdminCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void updateDefaultAttachmentRule(UpdateDefaultAttachmentRuleAdminCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 }

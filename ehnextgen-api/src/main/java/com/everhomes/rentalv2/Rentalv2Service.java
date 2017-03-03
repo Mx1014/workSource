@@ -81,6 +81,8 @@ import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRecourseAttachementCommand;
@@ -247,5 +249,11 @@ public interface Rentalv2Service {
 
 
 	void updateRecourseAttachement(UpdateRecourseAttachementCommand cmd);
+
+
+	void updateDefaultDateRule(UpdateDefaultDateRuleAdminCommand cmd);
+
+
+	void updateDefaultAttachmentRule(UpdateDefaultAttachmentRuleAdminCommand cmd);
 
 }

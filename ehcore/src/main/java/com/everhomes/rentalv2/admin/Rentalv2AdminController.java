@@ -45,6 +45,7 @@ import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRecourseAttachementCommand;
@@ -257,7 +258,38 @@ public class Rentalv2AdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateDefaultDateRule<b>
+	 * <p>
+	 * 修改默认规则时间
+	 * </p>
+	 */
+	@RequestMapping("updateDefaultDateRule")
+	@RestReturn(String.class)
+	public RestResponse updateDefaultDateRule(@Valid UpdateDefaultDateRuleAdminCommand cmd) {
+		this.rentalService.updateDefaultDateRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * 
+	 * <b>URL: /rental/admin/updateDefaultAttachmentRule<b>
+	 * <p>
+	 * 修改默认规则提示文字
+	 * </p>
+	 */
+	@RequestMapping("updateDefaultAttachmentRule")
+	@RestReturn(String.class)
+	public RestResponse updateDefaultAttachmentRule(@Valid UpdateDefaultAttachmentRuleAdminCommand cmd) {
+		this.rentalService.updateDefaultRule(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	/**
 	 * 
 	 * <b>URL: /rental/admin/getResourceList<b>
@@ -415,7 +447,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 * <b>URL: /rental/admin/updateRecourseAttachement</b>
 	 * <p>
-	 * 添加具体资源的规则
+	 * 添加修改资源的提交信息
 	 * </p>
 	 */
 
@@ -432,7 +464,7 @@ public class Rentalv2AdminController extends ControllerBase {
 	/**
 	 * <b>URL: /rental/admin/updateRentalDate</b>
 	 * <p>
-	 * 添加具体资源的规则
+	 * 添加修改资源的开放时间
 	 * </p>
 	 */
 
