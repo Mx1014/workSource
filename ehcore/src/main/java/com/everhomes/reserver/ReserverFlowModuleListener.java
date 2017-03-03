@@ -196,12 +196,6 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
 
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
-		}
-
 		JSONObject paramJson = JSONObject.parseObject(params);
 		String nodeType = paramJson.getString("nodeType");
 
@@ -209,9 +203,7 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 
 		Map<String,String> param = new HashMap<>();
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if ("ASSIGNING".equals(nodeType)) {
-				param.put("status", "1");
-			}
+			param.put("status", "1");
 		}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 			param.put("status", "2");
 		}
