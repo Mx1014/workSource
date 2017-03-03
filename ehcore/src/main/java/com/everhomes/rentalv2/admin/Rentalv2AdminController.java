@@ -49,7 +49,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRecourseAttachementCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
@@ -446,16 +446,16 @@ public class Rentalv2AdminController extends ControllerBase {
 
 
 	/**
-	 * <b>URL: /rental/admin/updateRecourseAttachement</b>
+	 * <b>URL: /rental/admin/updateResourceAttachment</b>
 	 * <p>
 	 * 添加修改资源的提交信息
 	 * </p>
 	 */
 
-	@RequestMapping("updateRecourseAttachement")
+	@RequestMapping("updateResourceAttachment")
 	@RestReturn(value = String.class)
-	public RestResponse updateRecourseAttachement(@Valid UpdateRecourseAttachementCommand cmd) {
-		rentalService.updateRecourseAttachement(cmd);
+	public RestResponse updateResourceAttachment(@Valid UpdateResourceAttachmentCommand cmd) {
+		rentalService.updateResourceAttachment(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");

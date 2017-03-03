@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>attachments: 预约需要提交的信息</li> 
  * </ul>
  */
-public class UpdateRecourseAttachementCommand {
+public class UpdateResourceAttachmentCommand {
 	@NotNull
 	private Long rentalSiteId; 
 	@ItemType(AttachmentConfigDTO.class)

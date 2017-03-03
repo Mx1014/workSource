@@ -211,7 +211,7 @@ import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
-import com.everhomes.rest.rentalv2.admin.UpdateRecourseAttachementCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
@@ -5362,7 +5362,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 
 	@Override
-	public void updateRecourseAttachement(UpdateRecourseAttachementCommand cmd){}
+	public void updateResourceAttachment(UpdateResourceAttachmentCommand cmd){}
 
 	@Override
 	public void updateDefaultDateRule(UpdateDefaultDateRuleAdminCommand cmd) {
