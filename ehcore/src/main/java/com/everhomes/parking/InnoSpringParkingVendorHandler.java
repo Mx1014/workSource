@@ -14,6 +14,7 @@ import com.everhomes.parking.innospring.InnoSpringCardRate;
 import com.everhomes.parking.innospring.InnoSpringCardType;
 import com.everhomes.parking.innospring.InnoSpringTempFee;
 import com.everhomes.rest.parking.*;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
@@ -57,6 +58,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	private String version;
 	private String licensekey;
 	private String parkName;
+	private String serverUrl;
 
 	@Autowired
 	private ParkingProvider parkingProvider;
@@ -72,9 +74,11 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
 	@PostConstruct
 	public void init() {
 		httpclient = HttpClients.createDefault();
-		version = "1.4";
-		licensekey = "44030520000420161231235959102643";
-		parkName = "测试停车场";
+		Integer namespaceId = 999986;
+		version = configProvider.getValue(namespaceId, "parking.innospring.version", "");
+		licensekey = configProvider.getValue(namespaceId, "parking.innospring.licensekey", "");
+		parkName = configProvider.getValue(namespaceId, "parking.innospring.parkName", "");
+		serverUrl = configProvider.getValue(namespaceId, "parking.innospring.serverUrl", "");
 	}
 
 	@Override
@@ -450,7 +454,7 @@ public class InnoSpringParkingVendorHandler implements ParkingVendorHandler {
     }
 
 	public String post(JSONObject param) {
-		HttpPost httpPost = new HttpPost("http://120.55.114.140:8085/kesb_req");
+		HttpPost httpPost = new HttpPost(serverUrl);
 
 		CloseableHttpResponse response = null;
 		String json = null;
