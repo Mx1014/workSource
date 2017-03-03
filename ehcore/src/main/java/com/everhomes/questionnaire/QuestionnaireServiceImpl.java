@@ -4,6 +4,7 @@ package com.everhomes.questionnaire;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -140,6 +141,8 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				}
 				questionDTOs.add(convertToQuestionDTO(question, optionDTOs, nextPageAnchor));
 			});
+			// 经过map处理后顺序会乱，所以要重新排序下
+			sortQuestions(questionDTOs);
 			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
 		});
 		return questionnaireDTOs.get(0);
@@ -512,9 +515,20 @@ public class QuestionnaireServiceImpl implements QuestionnaireService {
 				List<QuestionnaireOptionDTO> optionDTOs =  v2.stream().map(o->convertToOptionDTO(o, questionnaireAnswers)).collect(Collectors.toList());
 				questionDTOs.add(convertToQuestionDTO(question, optionDTOs));
 			});
+			// 经过map处理后顺序会乱，所以要重新排序下
+			sortQuestions(questionDTOs);
 			questionnaireDTOs.add(convertToQuestionnaireDTO(questionnaire, questionDTOs));
 		});
 		return questionnaireDTOs.get(0);
+	}
+
+	private void sortQuestions(List<QuestionnaireQuestionDTO> questionDTOs) {
+		questionDTOs.sort(new Comparator<QuestionnaireQuestionDTO>() {
+			@Override
+			public int compare(QuestionnaireQuestionDTO o1, QuestionnaireQuestionDTO o2) {
+				return (int) (o1.getId() - o2.getId());
+			}
+		});
 	}
 
 	@Override
