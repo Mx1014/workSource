@@ -349,6 +349,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	 
 
+	private String processFlowURL(Long flowCaseId, String string, Long moduleId) { 
+		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
+		  
+		
+	}
+	
 	private void checkEnterpriseCommunityIdIsNull(Long enterpriseCommunityId) {
 		if (null == enterpriseCommunityId || enterpriseCommunityId.equals(0L)) {
 			LOGGER.error("Invalid enterpriseCommunityId   parameter in the command");
