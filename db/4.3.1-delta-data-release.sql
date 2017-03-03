@@ -182,4 +182,11 @@ WHERE `namespace_id`=999985 AND `name`='ServiceMarketLayout';
 INSERT INTO `eh_parking_lots` (`id`, `owner_type`, `owner_id`, `name`, `vendor_name`, `vendor_lot_token`, `card_reserve_days`, `status`, `creator_uid`, `create_time`, `max_request_num`, `tempfee_flag`, `rate_flag`, `recharge_month_count`, `recharge_type`, `namespace_id`, `is_support_recharge`) 
 	VALUES ('10023', 'community', '240111044331054735', '创源停车场', 'INNOSPRING', '', '1', '2', '1025', '2017-03-02 17:07:20', '1', '1', '1', '1', '1', '999986', '0');
 UPDATE eh_launch_pad_items set action_data = '', action_type = 30 where namespace_id = 999986 and item_label = '智能停车场';
-
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('parking.innospring.version', '1.4', '', '999986', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('parking.innospring.licensekey', '44030520000420161231235959102643', '', '999986', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('parking.innospring.parkName', '未来科技城123', '', '999986', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('parking.innospring.serverUrl', 'http://120.55.114.140:8085/kesb_req', '', '999986', NULL);

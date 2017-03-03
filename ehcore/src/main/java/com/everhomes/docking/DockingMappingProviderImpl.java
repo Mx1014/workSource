@@ -24,12 +24,12 @@ public class DockingMappingProviderImpl implements DockingMappingProvider {
     private DbProvider dbProvider;
     
     @Override
-    public DockingMapping findDockingMappingByScopeAndValue(Integer namespaceId, String scope, String value) {
+    public DockingMapping findDockingMappingByScopeAndName(Integer namespaceId, String scope, String name) {
         DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhDockingMappings.class));
 
         SelectQuery<EhDockingMappingsRecord> query = context.selectQuery(Tables.EH_DOCKING_MAPPINGS);
         query.addConditions(Tables.EH_DOCKING_MAPPINGS.SCOPE.eq(scope));
-        query.addConditions(Tables.EH_DOCKING_MAPPINGS.VALUE.eq(value));
+        query.addConditions(Tables.EH_DOCKING_MAPPINGS.NAME.eq(name));
 
         return ConvertHelper.convert(query.fetchAny(), DockingMapping.class);
     }

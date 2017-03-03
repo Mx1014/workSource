@@ -6,9 +6,9 @@ package com.everhomes.docking;
 public interface DockingMappingProvider {
     void createDockingMapping(DockingMapping dockingMapping);
 
-    DockingMapping findDockingMappingByScopeAndValue(Integer namespaceId, String scope, String value);
+    DockingMapping findDockingMappingByScopeAndName(Integer namespaceId, String scope, String name);
 
-    DockingMapping findDockingMappingByScopeAndMappingValue(Integer namespaceId, String scope, String value);
+    DockingMapping findDockingMappingByScopeAndMappingValue(Integer namespaceId, String scope, String mappingValue);
 
     DockingMapping findDockingMappingById(Long id);
 
