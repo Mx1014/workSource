@@ -62,7 +62,7 @@ public class ReserverController extends ControllerBase {
         createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
         createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
         createFlowCaseCommand.setReferId(Long.valueOf(cmd.getOrderId()));
-        createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
+        createFlowCaseCommand.setReferType(FlowOwnerType.RESERVER_PLACE.getCode());
         SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
         StringBuilder sb = new StringBuilder("");
         sb.append("就餐时间：").append(sdf.format(new Date(cmd.getReserverTime()))).append("\n");

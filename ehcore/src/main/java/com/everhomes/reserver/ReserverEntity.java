@@ -5,7 +5,7 @@ package com.everhomes.reserver;
  */
 public class ReserverEntity<T> {
     private Boolean result;
-    private Object body;
+    private T body;
 
     public Boolean getResult() {
         return result;
@@ -15,11 +15,12 @@ public class ReserverEntity<T> {
         this.result = result;
     }
 
-    public Object getBody() {
+    public T getBody() {
         return body;
     }
 
-    public void setBody(Object body) {
+    public void setBody(T body) {
         this.body = body;
     }
+
 }
