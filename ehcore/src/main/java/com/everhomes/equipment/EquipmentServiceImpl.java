@@ -2886,7 +2886,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setManufacturer(s[5]);
 				equipment.setLocation(s[7]);
 				equipment.setQuantity(Long.valueOf(s[8]));
-				equipment.setRemarks(s[9]);
+				if(!StringUtils.isEmpty(s[9]) && !"null".equals(s[9])) {
+					equipment.setRemarks(s[9]);
+				}
 
 				equipment.setOwnerType(cmd.getOwnerType());
 				equipment.setOwnerId(cmd.getOwnerId());
