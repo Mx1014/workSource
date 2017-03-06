@@ -102,6 +102,7 @@ import com.everhomes.util.*;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
 
+import org.apache.commons.logging.Log;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFRow;
@@ -4755,6 +4756,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public ListOrganizationMemberCommandResponse listOrganizationPersonnels(ListOrganizationContactCommand cmd, boolean pinyinFlag) {
+		Long startTime1 = System.currentTimeMillis();
 		ListOrganizationMemberCommandResponse response = new ListOrganizationMemberCommandResponse();
 		Organization org = this.checkOrganization(cmd.getOrganizationId());
 		if(null == org)
@@ -4768,9 +4770,9 @@ public class OrganizationServiceImpl implements OrganizationService {
 		Organization orgCommoand = new Organization();
 		orgCommoand.setId(org.getId());
 		orgCommoand.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-
+		Long startTime2 = System.currentTimeMillis();
 		List<OrganizationMember> organizationMembers = this.organizationProvider.listOrganizationPersonnels(cmd.getKeywords(),orgCommoand, cmd.getIsSignedup(),null, locator, pageSize);
-		
+		Long endTime2 = System.currentTimeMillis();
 		if(pinyinFlag){
 			organizationMembers = convertPinyin(organizationMembers);
 		}
@@ -4780,9 +4782,14 @@ public class OrganizationServiceImpl implements OrganizationService {
 		}
 		
 		response.setNextPageAnchor(locator.getAnchor());
-		
+
+		Long startTime3 = System.currentTimeMillis();
 		response.setMembers(this.convertDTO(organizationMembers, org));
-		
+		Long endTime = System.currentTimeMillis();
+
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.debug("Track: listOrganizationPersonnels: get organization member elapse:{}, convert elapse:{}, total elapse:{}", endTime2 - startTime2, endTime - startTime3, endTime - startTime1);
+		}
 		return response;
 	}
 	
@@ -5790,7 +5797,6 @@ System.out.println();
 	 * @return
      */
 	public List<OrganizationMemberDTO> convertDTO(List<OrganizationMember> organizationMembers, Organization org){
-		
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		
 		Long orgId = null;
@@ -5800,7 +5806,7 @@ System.out.println();
 		}else{
 			orgId = org.getId();
 		}
-		
+		Long startTime = System.currentTimeMillis();
 		List<Role> roles= aclProvider.getRolesByOwner(Namespace.DEFAULT_NAMESPACE, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), null);
 
 		List<Role> orgRoles = aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), null);
@@ -5811,12 +5817,16 @@ System.out.println();
 
 		roles.addAll(aclProvider.getRolesByOwner(namespaceId, AppConstants.APPID_PARK_ADMIN, EntityType.ORGANIZATIONS.getCode(), orgId));
 
+		Long endTime = System.currentTimeMillis();
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.debug("Track: listOrganizationPersonnels:convertDTO: get role elapse:{}", endTime - startTime);
+		}
 	    Map<Long, Role> roleMap =  this.convertOrganizationRoleMap(roles);
 	    
 		Long ownerId = orgId;
 
 		OrganizationDTO orgDTO = ConvertHelper.convert(org, OrganizationDTO.class);
-	    
+
 		return organizationMembers.stream().map((c) ->{
 			Long organizationId = ownerId;
 			if(!StringUtils.isEmpty(c.getInitial())){
@@ -5825,7 +5835,7 @@ System.out.println();
 			
 			OrganizationMemberDTO dto =  ConvertHelper.convert(c, OrganizationMemberDTO.class);
 
-
+			Long startTime1_1 = System.currentTimeMillis();
 			if(OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.DEPARTMENT || OrganizationGroupType.fromCode(org.getGroupType()) == OrganizationGroupType.ENTERPRISE){
 				dto.setGroups(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
 				List<OrganizationDTO> departments = new ArrayList<OrganizationDTO>();
@@ -5861,6 +5871,7 @@ System.out.println();
 				groups.addAll(this.getOrganizationMemberGroups(OrganizationGroupType.GROUP, dto.getContactToken(), org.getPath()));
 				dto.setGroups(groups);
 			}
+			Long endTime1_1 = System.currentTimeMillis();
 
 			//岗位
 			dto.setJobPositions(this.getOrganizationMemberGroups(OrganizationGroupType.JOB_POSITION, dto.getContactToken(),org.getPath()));
@@ -5876,7 +5887,7 @@ System.out.println();
 					dto.setNickName(dto.getNickName());
 				}
 			}
-			
+
 			if(c.getIntegralTag4() != null && c.getIntegralTag4() == 1){
 				dto.setContactToken(null);
 			}
@@ -5885,6 +5896,7 @@ System.out.println();
 				dto.setVisibleFlag(VisibleFlag.SHOW.getCode());
 			}
 
+			Long startTime2_2 = System.currentTimeMillis();
 			/**
 			 * 补充用户角色
 			 */
@@ -5900,8 +5912,15 @@ System.out.println();
 					dto.setRoles(roleDTOs);
 				}
 			}
+
+			Long endTime2_2 = System.currentTimeMillis();
+
+			if(LOGGER.isDebugEnabled()){
+				LOGGER.debug("Track: listOrganizationPersonnels:convertDTO:map: get organizatin elapse:{}, get organization elapse:{}, total elapse:{}", endTime1_1 - startTime1_1, endTime2_2 - startTime2_2);
+			}
 			return dto;
 		}).collect(Collectors.toList());
+
 	}
 
 	@Override
@@ -5979,7 +5998,7 @@ System.out.println();
     @Override
 	public OrganizationMenuResponse listAllChildrenOrganizationMenus(Long id,
 			List<String> groupTypes,Byte naviFlag) {
-		
+		Long startTime = System.currentTimeMillis();
 		if(null == naviFlag){
 			naviFlag = OrganizationNaviFlag.SHOW_NAVI.getCode();
 		}
@@ -6012,9 +6031,16 @@ System.out.println();
 				rganizationDTOs.add(orgDto);
 			}
 		}
-		
+
+		Long startTime1 = System.currentTimeMillis();
 		dto = this.getOrganizationMenu(rganizationDTOs, dto);
 		res.setOrganizationMenu(dto);
+		Long endTime = System.currentTimeMillis();
+
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.debug("Track: listAllChildrenOrganizationMenus: get tree elapse:{},  total elapse:{}", endTime - startTime1, endTime - startTime);
+		}
+
 		return res;
 	}
 
