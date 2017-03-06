@@ -2008,22 +2008,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
-		long startTime = System.currentTimeMillis();
+
 		List<EquipmentTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
 			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);  
         	return dto;
         }).filter(task->task!=null).collect(Collectors.toList());
 
-		long endTime = System.currentTimeMillis();
-
-		LOGGER.debug("TrackUserRelatedCost: convertEquipmentTasksToDTO  taskSize = "+ tasks.size() +", elapse=" + (endTime - startTime));
-
 		return dtoList;
 	}
 	
 	private EquipmentTaskDTO convertEquipmentTaskToDTO(EquipmentInspectionTasks task) {
-		
+		long startTime = System.currentTimeMillis();
 		EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);  
 
 
@@ -2084,8 +2080,12 @@ public class EquipmentServiceImpl implements EquipmentService {
         		dto.setReviewerName(reviewers.getContactName());
         	}
     	}
-    	
-    	return dto;
+
+		long endTime = System.currentTimeMillis();
+
+		LOGGER.debug("TrackUserRelatedCost: convertEquipmentTaskToDTO elapse: " + (endTime - startTime));
+
+		return dto;
 	}
 	
 	private void processLogAttachments(long userId, List<AttachmentDescriptor> attachmentList, EquipmentInspectionTasksLogs log) {
@@ -3088,7 +3088,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
 //        	return dto;
 //        }).filter(r->r!=null).collect(Collectors.toList());
-
+		long startTime2 = System.currentTimeMillis();
 		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
 			EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
 			EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
@@ -3097,10 +3097,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 			return dto;
 		}).filter(r->r!=null).collect(Collectors.toList());
-				response.setTasks(dtos);
+
+		response.setTasks(dtos);
 
 		long endTime = System.currentTimeMillis();
-		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse=" + (endTime - startTime));
+		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse:{}, convertEquipmentTaskDTO resultSize:{}, convert time:{}" ,
+				(endTime - startTime), tasks.size(), (endTime - startTime2));
 		return response;
 	}
 	

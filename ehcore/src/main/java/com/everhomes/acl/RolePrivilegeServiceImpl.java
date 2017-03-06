@@ -1831,17 +1831,19 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 	@Override
 	public List<CommunityDTO> listUserRelatedProjectByModuleId(ListUserRelatedProjectByModuleIdCommand cmd) {
 
-		LOGGER.debug("TrackUserRelatedCost:listUserRelatedProjectByModuleId:startTime:{}", System.currentTimeMillis());
+		Long startTime1 = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 
 		List<CommunityDTO> communitydtos = new ArrayList<>();
 
+		Long startTime2 = System.currentTimeMillis();
 		// 用户的角色以及用户所在部门角色的所有权限
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 
 		// 用户在当前机构自身权限
 		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), user.getId()));
 
+		Long endTime2 = System.currentTimeMillis();
 		List<ServiceModulePrivilege> serviceModulePrivileges = serviceModuleProvider.listServiceModulePrivileges(cmd.getModuleId(), ServiceModulePrivilegeType.SUPER);
 		
 		if(privilegeIds.contains(serviceModulePrivileges.get(0).getPrivilegeId())) {
@@ -1859,6 +1861,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		List<OrganizationDTO> orgDTOs = new ArrayList<>();
 
 		// 没有，则获取个人所在公司节点的业务模块下的项目
+
+		Long startTime3 = System.currentTimeMillis();
 		if(serviceModuleAssignments.size() == 0){
 			List<String> groupTypes = new ArrayList<>();
 			groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
@@ -1873,7 +1877,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
 			}
 		}
-
+		Long endTime3 = System.currentTimeMillis();
 		for (ServiceModuleAssignment serviceModuleAssignment: serviceModuleAssignments) {
 			if(EntityType.fromCode(serviceModuleAssignment.getOwnerType()) == EntityType.COMMUNITY){
 				Community community = communityProvider.findCommunityById(serviceModuleAssignment.getOwnerId());
@@ -1882,7 +1886,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 			}
 		}
-		LOGGER.debug("TrackUserRelatedCost:listUserRelatedProjectByModuleId:endTime:{}", System.currentTimeMillis());
+		Long endTime1 = System.currentTimeMillis();
+		if(LOGGER.isInfoEnabled()){
+			LOGGER.debug("TrackUserRelatedCost:listUserRelatedProjectByModuleId: get privileges elapse:{}, get organization elapse:{}, total elapse:{}", endTime2 - startTime2, endTime3 - startTime3, endTime1 - startTime1);
+		}
 		return communitydtos;
 	}
 

@@ -794,7 +794,7 @@ public class ParkingServiceImpl implements ParkingService {
     			FlowCaseDetailDTO flowCaseDetailDTO = flowService.getFlowCaseDetail(r.getFlowCaseId()
                 		, userId
                 		, FlowUserType.PROCESSOR
-                		, true);
+                		, false);
     			
     			dto.setButtons(flowCaseDetailDTO.getButtons());
     			return dto;

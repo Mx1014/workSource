@@ -242,4 +242,26 @@ SET @locale_string_id = (SELECT max(id) FROM `eh_locale_strings`);
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values((@locale_string_id := @locale_string_id + 1),'forum','108','zh_CN','园区圈');
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values((@locale_string_id := @locale_string_id + 1),'forum','109','zh_CN','社区圈');
 
-	
+-- 位置预订工作流设置菜单
+INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
+	VALUES ('40050', '位置预订', '40000', '/40000/40050', '0', '2', '2', '0', UTC_TIMESTAMP());
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES ('100', '40050', '1', '10145', NULL, '0', UTC_TIMESTAMP());
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
+	VALUES (10145, '0', '位置预订 管理员', '位置预订 业务模块权限', NULL);
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+	SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1001,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id =10145;
+INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`order_seq`,`creator_uid`,`create_time`, `role_type`)
+	SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id =10145;
+
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+	VALUES ('40050', '位置预订', '40000', null, 'react:/working-flow/flow-list/reserver-place/40050?ownerType=RESERVER_PLACE&ownerId=0', '0', '2', '/40000/40050', 'park', '479', 40050);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+	VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), 10145, 40050, '位置预订', 1, 1, '位置预订  全部权限', 202);
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40050, '', 'EhNamespaces', 999983, 2);
+
