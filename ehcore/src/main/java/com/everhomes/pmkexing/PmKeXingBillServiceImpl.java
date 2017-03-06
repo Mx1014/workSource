@@ -196,7 +196,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         return billStat != null ? billStat.toBillStatDTO() : new PmKeXingBillStatDTO();
     }
 
-    private OrganizationDTO currentOrganization() {
+    private OrganizationDTO currentOrganization(Long organizationId) {
         OrganizationDTO organization = organizationService.getUserCurrentOrganization();
         if (organization == null) {
             LOGGER.error("Current organization are not exist.");
@@ -205,12 +205,21 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         }
         if (organization.getCommunityId() == null || organization.getCommunityName() == null) {
             OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+
+            Long communityId;
             if (communityRequest != null) {
-                Community community = communityProvider.findCommunityById(communityRequest.getCommunityId());
-                if (community != null) {
-                    organization.setCommunityId(community.getId());
-                    organization.setCommunityName(community.getName());
-                }
+                communityId = communityRequest.getCommunityId();
+            } else {
+                OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(organizationId);
+                communityId = orgComm.getCommunityId();
+            }
+
+            Community community = communityProvider.findCommunityById(communityId);
+            if (community != null) {
+                organization.setCommunityId(community.getId());
+                organization.setCommunityName(community.getName());
+            } else {
+                LOGGER.error("not found organization name for current organization or organization {}", organizationId);
             }
         }
         if (LOGGER.isDebugEnabled())
