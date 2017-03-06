@@ -2187,7 +2187,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
-		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:startTime:{}", System.currentTimeMillis());
+		Long startTime = System.currentTimeMillis();
 		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
         
         OrganizationGroupType tempGroupType = null;
@@ -2223,7 +2223,10 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
-		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:endTime:{}", System.currentTimeMillis());
+		Long endTime = System.currentTimeMillis();
+		if(LOGGER.isDebugEnabled()){
+			LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:elapse:{}", endTime - startTime);
+		}
 		return dtos;
 	}
 	
