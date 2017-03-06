@@ -301,6 +301,8 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setConfirmFamilyId(user.getAddressId());
         roster.setAdultCount(0);
         roster.setChildCount(0);
+        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+        roster.setCheckinFlag(CheckInStatus.CHECKIN.getCode());
         
         // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
         addAdditionalInfo(roster, user, activity);
@@ -415,9 +417,11 @@ public class ActivityServiceImpl implements ActivityService {
     
     @Override
 	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
+    	Activity outActivity = checkActivityExist(cmd.getActivityId());
     	ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
 	        return (ActivityRoster)dbProvider.execute((status) -> {
 		    	User user = UserContext.current().getUser();
+		    	// 锁里面要重新查询活动
 		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
 		        if (activity == null) {
 		            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
@@ -458,14 +462,19 @@ public class ActivityServiceImpl implements ActivityService {
 	        });
         }).first();
     	
-		return convertActivityRoster(activityRoster);
+		return convertActivityRoster(activityRoster, outActivity);
 	}
 
-	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster) {
+	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = ConvertHelper.convert(activityRoster, SignupInfoDTO.class);
 		User user = getUserFromPhone(activityRoster.getPhone());
 		signupInfoDTO.setNickName(user.getNickName());
 		signupInfoDTO.setType(getAuthFlag(user));
+		if (activity != null && activityRoster.getUid().longValue() == activity.getCreatorUid().longValue()) {
+			signupInfoDTO.setCreateFlag((byte)1);
+		}else {
+			signupInfoDTO.setCreateFlag((byte)0);
+		}
 		
 		return signupInfoDTO;
 	}
@@ -537,7 +546,7 @@ public class ActivityServiceImpl implements ActivityService {
 	        	return roster;
 	        });
 		}).first();
-		return convertActivityRoster(activityRoster);
+		return convertActivityRoster(activityRoster, null);
 	}
 
 	private ActivityRoster convertToRoster(UpdateSignupInfoCommand cmd) {
@@ -685,6 +694,7 @@ public class ActivityServiceImpl implements ActivityService {
 
 	@Override
 	public ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd) {
+		Activity activity = checkActivityExist(cmd.getActivityId());
 		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
 		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getPageAnchor(), pageSize+1);
 		Long nextPageAnchor = null;
@@ -692,24 +702,33 @@ public class ActivityServiceImpl implements ActivityService {
 			rosters.remove(rosters.size()-1);
 			nextPageAnchor = rosters.get(rosters.size()-1).getId();
 		}
-		return new ListSignupInfoResponse(nextPageAnchor, rosters.stream().map(this::convertActivityRoster).collect(Collectors.toList()));
+		return new ListSignupInfoResponse(nextPageAnchor, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
 	}
 
 	@Override
 	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
-		checkActivityExist(cmd.getActivityId());
+		Activity activity = checkActivityExist(cmd.getActivityId());
 		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), null, 100000);
 		if (rosters.size() > 0) {
-			List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(this::convertActivityRosterForExcel).collect(Collectors.toList());
-			for(int i=0; i<signupInfoDTOs.size(); i++) {
-				signupInfoDTOs.get(i).setId(i+1L);
-			}
+			List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
 			String fileName = String.format("报名信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
 			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
-			String[] propertyNames = {"id", "phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
-					"typeText", "sourceFlagText", "confirmFlagText", "checkinFlagText"};
-			String[] titleNames = {"序号", "手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "类型", "报名来源", "报名确认", "是否签到"};
-			int[] titleSizes = {10, 20, 20, 20, 10, 20, 20, 10, 20, 20, 20, 10};
+			List<String> propertyNames = new ArrayList<String>(Arrays.asList("phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
+					"typeText", "sourceFlagText"));
+			List<String> titleNames = new ArrayList<String>(Arrays.asList("手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "类型", "报名来源"));
+			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 10, 20, 20, 10, 20, 20));
+			
+			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
+				propertyNames.add("confirmFlagText");
+				titleNames.add("报名确认");
+				titleSizes.add(20);
+			}
+			if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
+				propertyNames.add("checkinFlagText");
+				titleNames.add("是否签到");
+				titleSizes.add(10);
+			}
+			
 			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, signupInfoDTOs);
 		}else {
 			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
@@ -717,8 +736,8 @@ public class ActivityServiceImpl implements ActivityService {
 		}
 	}
 	
-	private SignupInfoDTO convertActivityRosterForExcel(ActivityRoster roster) {
-		SignupInfoDTO signupInfoDTO = convertActivityRoster(roster);
+	private SignupInfoDTO convertActivityRosterForExcel(ActivityRoster roster, Activity activity) {
+		SignupInfoDTO signupInfoDTO = convertActivityRoster(roster, activity);
 		signupInfoDTO.setGenderText(UserGender.fromCode(signupInfoDTO.getGender()).getText());
 		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
 		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());

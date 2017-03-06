@@ -42,7 +42,14 @@ public class SignupInfoDTO {
 	private String confirmFlagText;
 	private Byte checkinFlag;
 	private String checkinFlagText;
+	private Byte createFlag;
 	
+	public Byte getCreateFlag() {
+		return createFlag;
+	}
+	public void setCreateFlag(Byte createFlag) {
+		this.createFlag = createFlag;
+	}
 	public String getGenderText() {
 		return genderText;
 	}
