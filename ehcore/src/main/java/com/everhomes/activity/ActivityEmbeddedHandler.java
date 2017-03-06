@@ -208,19 +208,24 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         // add by tt, 20170116
         OfficialFlag officialFlag = OfficialFlag.fromCode(cmd.getOfficialFlag());
         Long categoryId = cmd.getCategoryId();
-        if (categoryId == null) {
-			if(officialFlag == null) officialFlag = OfficialFlag.NO;
-			categoryId = officialFlag == OfficialFlag.YES?1L:0L;
+        if (officialFlag != null && officialFlag == OfficialFlag.YES) {
+			categoryId = 1L;
 		}else {
-			if (categoryId.longValue() == 1L) {
-				officialFlag = OfficialFlag.YES;
-			}else if (categoryId.longValue() == 0L) {
-				officialFlag = OfficialFlag.NO;
+			if (categoryId == null) {
+				if(officialFlag == null) officialFlag = OfficialFlag.NO;
+				categoryId = officialFlag == OfficialFlag.YES?1L:0L;
 			}else {
-				// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
-				officialFlag = OfficialFlag.UNKOWN;
+				if (categoryId.longValue() == 1L) {
+					officialFlag = OfficialFlag.YES;
+				}else if (categoryId.longValue() == 0L) {
+					officialFlag = OfficialFlag.NO;
+				}else {
+					// 如果categoryId不是0和1，则表示是新增的入口，不与之前的官方非官方活动对应
+					officialFlag = OfficialFlag.UNKOWN;
+				}
 			}
 		}
+        
         cmd.setOfficialFlag(officialFlag.getCode());
         post.setOfficialFlag(officialFlag.getCode());
         cmd.setCategoryId(categoryId);
