@@ -35,6 +35,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,10 +136,11 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
 
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("就餐时间");
-		e.setValue(dto.getDinnerTime().toString());
+		e.setValue(sdf.format(dto.getDinnerTime()));
 		entities.add(e);
 		
 		e = new FlowCaseEntity();
