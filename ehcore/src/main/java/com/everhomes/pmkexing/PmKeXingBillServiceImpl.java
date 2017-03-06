@@ -189,7 +189,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
         String api = getAPI(ConfigConstants.KEXING_PMBILL_API_BILLCOUNT);
         Map<String, String> params = new HashMap<>();
-        params.put("projectName", currentOrganization().getCommunityName());
+        params.put("projectName", currentOrganization(cmd.getOrganizationId()).getCommunityName());
         params.put("companyName", organization.getName());
 
         BillStat billStat = post(api, params, BillStat.class);
