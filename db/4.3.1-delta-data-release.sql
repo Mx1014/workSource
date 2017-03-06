@@ -256,7 +256,7 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 	SELECT (@acl_id := @acl_id + 1), 'EhOrganizations', 1, `id`, 1005,0,1,now(),'EhAclRoles' FROM `eh_acl_privileges` WHERE id =10145;
 
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
-	VALUES ('40050', '位置预订', '41000', null, 'react:/working-flow/flow-list/reserver-place/40050?ownerType=RESERVER_PLACE&ownerId=0', '0', '2', '/40000/40050', 'park', '479', 40050);
+	VALUES ('40050', '位置预订', '40000', null, 'react:/working-flow/flow-list/reserver-place/40050?ownerType=RESERVER_PLACE&ownerId=0', '0', '2', '/40000/40050', 'park', '479', 40050);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
 INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
