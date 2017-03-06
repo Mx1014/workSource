@@ -1,6 +1,7 @@
 package com.everhomes.reserver;
 
 import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
@@ -11,6 +12,8 @@ import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -28,9 +31,12 @@ import org.springframework.stereotype.Component;
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
@@ -40,8 +46,8 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
     private static final Logger LOGGER = LoggerFactory.getLogger(ReserverFlowModuleListener.class);
 	
 	private Long moduleId = FlowConstants.RESERVER_PLACE;
-	private static final String GET_RESERVER_DETAIL = "/zl-ec/rest/service/front/shop/queryShopsPositionById";
-	private static final String UPDATE_RESERVER = "/zl-ec/rest/service/front/shop/updatePositionReservationResult";
+	private static final String GET_RESERVER_DETAIL = "/zl-ec/rest/openapi/shop/queryShopsPositionById";
+	private static final String UPDATE_RESERVER = "/zl-ec/rest/openapi/shop/updatePositionReservationResult";
 
 	@Autowired
 	private FlowService flowService;
@@ -49,10 +55,15 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 	private ConfigurationProvider configProvider;
 
 	private CloseableHttpClient httpclient = null;
+//	private String serverUrl;
+//	private String appKey;
+//	private String secretKey;
 
 	@PostConstruct
 	public void init() {
 		httpclient = HttpClients.createDefault();
+
+
 	}
 
 	@PreDestroy
@@ -111,11 +122,13 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 	@Override
 	public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
 
-		JSONObject param = new JSONObject();
-		param.put("id", flowCase.getReferId());
-		String json = post(param, GET_RESERVER_DETAIL);
+		Map<String,String> params = new HashMap<>();
+		params.put("id", String.valueOf(flowCase.getReferId()));
+		String json = post(createRequestParam(params), GET_RESERVER_DETAIL);
 
-		ReserverDTO dto = JSONObject.parseObject(json, ReserverDTO.class);
+		ReserverEntity<ReserverDTO> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<ReserverDTO>>(){});
+
+		ReserverDTO dto = entity.getBody();
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
@@ -183,27 +196,26 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		String stepType = ctx.getStepType().getCode();
 		String params = flowNode.getParams();
 
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
-		}
-
 		JSONObject paramJson = JSONObject.parseObject(params);
 		String nodeType = paramJson.getString("nodeType");
 
 		LOGGER.debug("update reserver request, stepType={}, nodeType={}", stepType, nodeType);
+
+		Map<String,String> param = new HashMap<>();
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-			if ("ASSIGNING".equals(nodeType)) {
-				JSONObject param = new JSONObject();
-				param.put("id", flowCase.getReferId());
-				param.put("status", flowCase.getReferId());
-				String json = post(param, UPDATE_RESERVER);
-
-
-			}
+			param.put("status", "1");
+		}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
+			param.put("status", "2");
 		}
+		param.put("id", String.valueOf(flowCase.getReferId()));
+		String json = post(createRequestParam(param), UPDATE_RESERVER);
+		ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
 
+		if (!entity.getResult()) {
+			LOGGER.error("sychronized position reserver to biz fail.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"sychronized position reserver to biz fail.");
+		}
 	}
 	
 	@Override
@@ -222,16 +234,18 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 
 	}
 
-	private String post(JSONObject param, String method) {
+	private String post(Map<String,String> param, String method) {
+		String serverUrl = configProvider.getValue("position.reserver.serverUrl", "");
 
-		String url = configProvider.getValue("pmtask.ebei.url", "");
-		HttpPost httpPost = new HttpPost(url + method);
+		HttpPost httpPost = new HttpPost(serverUrl + method);
 		CloseableHttpResponse response = null;
 
 		String json = null;
 		try {
-			StringEntity stringEntity = new StringEntity(param.toString(), StandardCharsets.UTF_8);
+			String p = StringHelper.toJsonString(param);
+			StringEntity stringEntity = new StringEntity(p, StandardCharsets.UTF_8);
 			httpPost.setEntity(stringEntity);
+			httpPost.addHeader("content-type", "application/json");
 
 			response = httpclient.execute(httpPost);
 
@@ -243,7 +257,6 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 					json = EntityUtils.toString(entity, "utf8");
 				}
 			}
-
 		} catch (IOException e) {
 			LOGGER.error("Reserver request error, param={}", param, e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -257,11 +270,34 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 				}
 			}
 		}
-
 		if(LOGGER.isDebugEnabled())
 			LOGGER.debug("Data from business, param={}, json={}", param, json);
 
 		return json;
 	}
 
+	private Map createRequestParam(Map<String,String> params) {
+		Integer nonce = (int)(Math.random()*1000);
+		Long timestamp = System.currentTimeMillis();
+
+		String appKey = configProvider.getValue("position.reserver.appKey", "");
+		String secretKey = configProvider.getValue("position.reserver.secretKey", "");
+		params.put("nonce", String.valueOf(nonce));
+		params.put("timestamp", String.valueOf(timestamp));
+		params.put("appKey", appKey);
+
+		Map<String, String> mapForSignature = new HashMap<>();
+		for(Map.Entry<String, String> entry : params.entrySet()) {
+			mapForSignature.put(entry.getKey(), entry.getValue());
+		}
+
+		String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+		try {
+			params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		return params;
+	}
 }
