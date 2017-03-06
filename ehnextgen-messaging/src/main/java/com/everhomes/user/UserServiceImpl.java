@@ -3178,6 +3178,12 @@ public class UserServiceImpl implements UserService {
 		ListSearchTypesBySceneReponse response = new ListSearchTypesBySceneReponse();
 		response.setSearchTypes(new ArrayList<SearchTypeDTO>());
 		List<SearchTypes> searchTypes = userActivityProvider.listByNamespaceId(namespaceId);
+
+		//域空间下没配的话则返回左邻域下的作为默认 add by xiongying20170306
+		if(searchTypes == null || searchTypes.size() == 0) {
+			searchTypes = userActivityProvider.listByNamespaceId(0);
+		}
+
 		if(searchTypes != null && searchTypes.size() > 0) {
 			response.getSearchTypes().addAll(searchTypes.stream().map(r -> {
 				SearchTypeDTO dto = ConvertHelper.convert(r, SearchTypeDTO.class);
