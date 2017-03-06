@@ -661,13 +661,7 @@ public class ForumServiceImpl implements ForumService {
             }else{
                 resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_NOTIC_TOPIC);
             }
-        }else if(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY == post.getContentCategory() && post.getActivityCategoryId() == 0L){
-            if(post.getParentPostId() != null && post.getParentPostId() != 0){
-                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_COMMENT0);
-            }else{
-                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_TOPIC0);
-            }
-        }else if(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY == post.getContentCategory() && post.getActivityCategoryId() == 1L){
+        }else if(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY == post.getContentCategory()){
             if(post.getParentPostId() != null && post.getParentPostId() != 0){
                 resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_COMMENT1);
             }else{
