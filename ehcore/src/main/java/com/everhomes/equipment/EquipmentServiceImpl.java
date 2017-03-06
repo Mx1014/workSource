@@ -3083,13 +3083,21 @@ public class EquipmentServiceImpl implements EquipmentService {
         	response.setNextPageAnchor((long) (offset + 1));
         }
 
-    	List<EquipmentTaskDTO> dtos = convertEquipmentTasksToDTO(tasks);
+//    	List<EquipmentTaskDTO> dtos = convertEquipmentTasksToDTO(tasks);
 //				tasks.stream().map(r -> {
 //        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
 //        	return dto;
 //        }).filter(r->r!=null).collect(Collectors.toList());
-        
-		response.setTasks(dtos);
+
+		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+			EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
+			EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
+        	if(equipment != null) {
+				dto.setEquipmentLocation(equipment.getLocation());
+			}
+			return dto;
+		}).filter(r->r!=null).collect(Collectors.toList());
+				response.setTasks(dtos);
 
 		long endTime = System.currentTimeMillis();
 		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse=" + (endTime - startTime));
