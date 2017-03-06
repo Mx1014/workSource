@@ -81,7 +81,7 @@ INSERT INTO `eh_launch_pad_layouts`(id, namespace_id, name, layout_json, version
     
     
     
-SET @item_id = (SELECT max(id) FROM `eh_launch_pad_layouts`);    
+SET @item_id = (SELECT max(id) FROM `eh_launch_pad_items`);    
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
     VALUES ((@item_id := @item_id + 1), 999985, '0', '0', '0', '/secondhome', 'GovAgencies', '业主查询', '业主查询', 'cs://1/image/aW1hZ2UvTVRwbE5ESmpNamRqTURobU5qWXlZMlkyT0dNME1HRTRNV1kwWldWbE1qZGhPUQ', '1', '1', 14,'{"url":"http://zuolin.com/mobile/static/coming_soon/index.html"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`) 
