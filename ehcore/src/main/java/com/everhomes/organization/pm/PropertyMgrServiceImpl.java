@@ -2000,15 +2000,21 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setName(apartmentDTO.getApartmentName());
 				dto.setAddressId(family.getAddressId());
 				dto.setId(family.getId());
-				dto.setMemberCount(family.getMemberCount());
-			}
+				// dto.setMemberCount(family.getMemberCount());
+                List<OrganizationOwnerDTO> organizationOwners = propertyMgrProvider.listOrganizationOwnersByAddressId(
+                        UserContext.getCurrentNamespaceId(), apartmentDTO.getAddressId(), record -> new OrganizationOwnerDTO());
+                dto.setMemberCount((long) organizationOwners.size());
+            }
 			else
 			{
 				dto.setAddress(cmd.getBuildingName()+"-"+apartmentDTO.getApartmentName());
 				dto.setName(apartmentDTO.getApartmentName());
 				dto.setAddressId(apartmentDTO.getAddressId());
 				dto.setId(0L);
-				dto.setMemberCount(0L);
+				// dto.setMemberCount(0L);
+                List<OrganizationOwnerDTO> organizationOwners = propertyMgrProvider.listOrganizationOwnersByAddressId(
+                        UserContext.getCurrentNamespaceId(), apartmentDTO.getAddressId(), record -> new OrganizationOwnerDTO());
+                dto.setMemberCount((long) organizationOwners.size());
 			}
 			CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(apartmentDTO.getAddressId());
 			if(mapping != null){

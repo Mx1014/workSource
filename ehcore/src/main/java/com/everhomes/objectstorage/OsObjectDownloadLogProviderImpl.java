@@ -28,7 +28,7 @@ import java.util.stream.Collectors;
  * Created by xq.tian on 2017/2/16.
  */
 @Repository
-public class OsObjectDownloadLogProviderImpl implements OsObjectDownloadLogProvider {
+class OsObjectDownloadLogProviderImpl implements OsObjectDownloadLogProvider {
 
     @Autowired
     private DbProvider dbProvider;

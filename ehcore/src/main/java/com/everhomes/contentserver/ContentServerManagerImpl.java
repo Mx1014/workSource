@@ -1,13 +1,5 @@
 package com.everhomes.contentserver;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
@@ -18,6 +10,12 @@ import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.util.WebTokenGenerator;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.Map;
 
 @Component
 public class ContentServerManagerImpl implements ContentServerMananger {
@@ -144,6 +142,7 @@ public class ContentServerManagerImpl implements ContentServerMananger {
         switch (request.getAccessType()) {
         case LOOKUP:
             md5 = lookupInvoke(login, request.getObjectId());
+            buildMetaData(request);
             break;
         case DELETE:
             md5 = deleteInvoke(login, request.getObjectId());
@@ -156,7 +155,17 @@ public class ContentServerManagerImpl implements ContentServerMananger {
             throw RuntimeErrorException.errorWith(ContentServerErrorCode.SCOPE,
                     ContentServerErrorCode.ERROR_INVALID_ACTION, "Unsupported access type");
         }
+
         request.setMd5(md5);
+    }
+
+    private void buildMetaData(MessageHandleRequest request) {
+        String resourceId = Generator.decodeUrl(request.getObjectId());
+        ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
+        request.setFilename(resource.getResourceName());
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("build object meta data {}", resource.getResourceName());
+        }
     }
 
     private String lookupInvoke(LoginToken login, String resourceId) {
