@@ -1136,7 +1136,36 @@ public class YellowPageServiceImpl implements YellowPageService {
 			modules = yellowPageProvider.jumpModules(0);
 		}
 
-		return modules;
+		//TODO:从电商拿当前域空间店铺、
+		JumpModuleDTO bisModule = null;
+		for (JumpModuleDTO m: modules) {
+			if ("BIZS".equals(m.getModuleUrl())) {
+				bisModule = m;
+				break;
+			}
+		}
+
+		return createTree(modules);
+	}
+
+	private List<JumpModuleDTO> createTree(List<JumpModuleDTO> modules) {
+		List<JumpModuleDTO> nodeList = new ArrayList<>();
+		for(JumpModuleDTO node1 : modules){
+			boolean mark = false;
+			for(JumpModuleDTO node2 : modules){
+				if(node1.getParentId()!= null && node1.getParentId()!= 0L && node1.getParentId().equals(node2.getId())){
+					mark = true;
+					if(node2.getChildren() == null)
+						node2.setChildren(new ArrayList<JumpModuleDTO>());
+					node2.getChildren().add(node1);
+					break;
+				}
+			}
+			if(!mark){
+				nodeList.add(node1);
+			}
+		}
+		return nodeList;
 	}
 
 	@Override
