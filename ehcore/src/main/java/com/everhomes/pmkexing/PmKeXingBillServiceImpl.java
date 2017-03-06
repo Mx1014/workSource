@@ -146,7 +146,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
         Map<String, String> params = new HashMap<>();
-        params.put("projectName", currentOrganization().getCommunityName());
+        params.put("projectName", currentOrganization(cmd.getOrganizationId()).getCommunityName());
         params.put("companyName", organization.getName());
         if (cmd.getBillStatus() != null) {
             params.put("isPay", String.valueOf(cmd.getBillStatus()));
@@ -169,7 +169,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         Organization organization = this.findOrganizationById(cmd.getOrganizationId());
         String api = getAPI(ConfigConstants.KEXING_PMBILL_API_BILLLIST);
         Map<String, String> params = new HashMap<>();
-        params.put("projectName", currentOrganization().getCommunityName());
+        params.put("projectName", currentOrganization(cmd.getOrganizationId()).getCommunityName());
         params.put("companyName", organization.getName());
         params.put("pageCount", "1");
         params.put("pageSize", "1");
