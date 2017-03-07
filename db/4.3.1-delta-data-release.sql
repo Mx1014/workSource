@@ -280,3 +280,5 @@ INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`,
 	VALUES ('position.reserver.appKey', 'd80e06ca-3766-11e5-b18f-b083fe4e159f', '', '0', NULL);
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
 	VALUES ('position.reserver.secretKey', 'g1JOZUM3BYzWpZD5Q7p3z+i/z0nj2TcokTFx2ic53FCMRIKbMhSUCi7fSu9ZklFCZ9tlj68unxur9qmOji4tNg==', '', '0', NULL);
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+	VALUES ('position.reserver.serverUrl', 'http://biz-beta.zuolin.com', '', '0', NULL);
