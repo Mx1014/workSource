@@ -49,8 +49,13 @@ public class ReserverController extends ControllerBase {
     public RestResponse createReserverOrder(CreateReserverOrderCommand cmd) {
 
         //新建flowcase
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
+
         User user = UserContext.current().getUser();
+        if (null == user) {
+
+        }
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
         Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RESERVER_PLACE,
                 FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.RESERVER_PLACE.getCode());
         if(null == flow) {
