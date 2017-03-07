@@ -46,7 +46,7 @@ public class ReserverController extends ControllerBase {
      */
     @RequestMapping("createReserverOrder")
     @RestReturn(value=String.class)
-    public RestResponse createReserverOrder(@RequestBody CreateReserverOrderCommand cmd) {
+    public RestResponse createReserverOrder(CreateReserverOrderCommand cmd) {
 
         //新建flowcase
         Integer namespaceId = UserContext.getCurrentNamespaceId();
