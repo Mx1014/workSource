@@ -1193,6 +1193,13 @@ public class ForumServiceImpl implements ForumService {
 //        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
 //         	command.setCommunityId(organization.getId());;
 //         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+        	// 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
+        	if (organization.getGroupId() != null) {
+				Group group = groupProvider.findGroupById(organization.getGroupId());
+				if (group != null) {
+					forumIds.add(group.getOwningForumId());
+				}
+			}
          	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
          	if(null != communities){
          		for (CommunityDTO communityDTO : communities) {
@@ -1295,7 +1302,8 @@ public class ForumServiceImpl implements ForumService {
      * 独立出一个方法来专门查询官方活动，以简化帖子条件的查询条件；而原来使用listOrgTopics(QueryOrganizationTopicCommand cmd)
      * 存在着BUG：当一个机构没有管理小区或者以普通机构的身份访问时会查不到帖子；
      */
-    public ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd){
+    // 这个方法没有地方引用，删除接口中此方法并改为私有方法, add by tt, 20160307
+    private ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd){
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();

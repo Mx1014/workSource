@@ -22,6 +22,8 @@ import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -166,6 +168,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private GroupService groupService;
+    
+    @Autowired
+    private GroupProvider groupProvider;
     
     @Autowired
     private CategoryProvider categoryProvider;
@@ -2852,6 +2857,16 @@ public class ActivityServiceImpl implements ActivityService {
 //        }
 
         if(null == communityId){
+        	// 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
+        	Organization organization = organizationProvider.findOrganizationById(organizationId);
+        	if (organization != null) {
+        		if (organization.getGroupId() != null) {
+        			Group group = groupProvider.findGroupById(organization.getGroupId());
+        			if (group != null) {
+        				forumIds.add(group.getOwningForumId());
+        			}
+        		}
+			}
             List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
             if(null != communities){
                 for (CommunityDTO communityDTO : communities) {
