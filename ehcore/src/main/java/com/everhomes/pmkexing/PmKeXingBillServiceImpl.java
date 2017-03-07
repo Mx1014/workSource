@@ -204,7 +204,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
                     "Organization are not exist");
         }
         if (organization.getCommunityId() == null || organization.getCommunityName() == null) {
-            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
 
             Long communityId;
             if (communityRequest != null) {
@@ -256,7 +256,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Http post params is :{}", params.toString());
             }
-            return HttpUtils.post(api, params, 10, "utf-8");
+            return HttpUtils.post(api, params, 20, "utf-8");
         } catch (Throwable e) {
             LOGGER.error("Http post error for api: {}", api, e);
             throw RuntimeErrorException.errorWith(PmKeXingBillServiceErrorCode.SCOPE, PmKeXingBillServiceErrorCode.ERROR_HTTP_REQUEST,
