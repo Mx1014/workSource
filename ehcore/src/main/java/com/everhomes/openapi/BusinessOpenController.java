@@ -737,7 +737,7 @@ public class BusinessOpenController extends ControllerBase {
     }
 
 	/**
-	 * <b>URL: /reserver/createReserverOrder</b>
+	 * <b>URL: /openapi/createReserverOrder</b>
 	 * <p>新建位置预订</p>
 	 */
 	@RequestMapping("createReserverOrder")
