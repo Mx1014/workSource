@@ -2448,8 +2448,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info("sendTaskMsg, zero = " + zero);
 			}
-			
+
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(zero);
+//			CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
 
 			if (tasks != null && tasks.size() > 0) {
 				for (EquipmentInspectionTasks task : tasks) {
