@@ -32,7 +32,9 @@ import org.springframework.web.servlet.ModelAndView;
 import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
 import java.net.InetAddress;
+import java.net.URLDecoder;
 import java.net.URLEncoder;
 import java.util.*;
 
@@ -374,7 +376,16 @@ public class WebRequestInterceptor implements HandlerInterceptor {
                 mapForSignature.put(entry.getKey(), StringUtils.join(entry.getValue(), ','));
             }
         }
-        return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), getParamValue(paramMap, "signature"));
+
+        String sign = null;
+        try {
+            String signature = getParamValue(paramMap, "signature");
+            sign = null != signature ? URLDecoder.decode(signature, "UTF8"): signature;
+        } catch (UnsupportedEncodingException e) {
+            e.printStackTrace();
+        }
+
+        return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), sign);
     }
 
     private static String getParamValue(Map<String, String[]> paramMap, String paramName) {
