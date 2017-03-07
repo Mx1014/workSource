@@ -1175,37 +1175,38 @@ public class ActivityServiceImpl implements ActivityService {
     }
     
     private String populateUserName(User user, long postId) {
-    	
-    	Post post = this.forumProvider.findPostById(postId);
-        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
-        Long regionId = post.getVisibleRegionId();
-        
-        if(regionType != null && regionId != null) {
-            String creatorNickName = user.getNickName();
-            if(creatorNickName == null) {
-                creatorNickName = "";
-            }
-            switch(regionType) {
-            case COMMUNITY:
-                Community community = communityProvider.findCommunityById(regionId);
-                if(community != null)
-                	creatorNickName = creatorNickName + "@" + community.getName();
-                break;
-            case REGION:
-                Organization organization = organizationProvider.findOrganizationById(regionId);
-                if(organization !=null)
-                	creatorNickName = creatorNickName + "@" + organization.getName();
-                break;
-            default:
-                LOGGER.error("Unsupported visible region type, userId=" + user.getId() 
-                    + ", regionType=" + regionType + ", postId=" + post.getId());
-            }
-            return creatorNickName;
-        } else {
-            LOGGER.error("Region type or id is null, userId=" + user.getId() + ", postId=" + post.getId());
-        }
-        
-        return "";
+    	// 根据产品姚绮云要求，不要显示@xxxx, add by tt, 20170307
+    	return user.getNickName();
+//    	Post post = this.forumProvider.findPostById(postId);
+//        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+//        Long regionId = post.getVisibleRegionId();
+//        
+//        if(regionType != null && regionId != null) {
+//            String creatorNickName = user.getNickName();
+//            if(creatorNickName == null) {
+//                creatorNickName = "";
+//            }
+//            switch(regionType) {
+//            case COMMUNITY:
+//                Community community = communityProvider.findCommunityById(regionId);
+//                if(community != null)
+//                	creatorNickName = creatorNickName + "@" + community.getName();
+//                break;
+//            case REGION:
+//                Organization organization = organizationProvider.findOrganizationById(regionId);
+//                if(organization !=null)
+//                	creatorNickName = creatorNickName + "@" + organization.getName();
+//                break;
+//            default:
+//                LOGGER.error("Unsupported visible region type, userId=" + user.getId() 
+//                    + ", regionType=" + regionType + ", postId=" + post.getId());
+//            }
+//            return creatorNickName;
+//        } else {
+//            LOGGER.error("Region type or id is null, userId=" + user.getId() + ", postId=" + post.getId());
+//        }
+//        
+//        return "";
         
     }
 

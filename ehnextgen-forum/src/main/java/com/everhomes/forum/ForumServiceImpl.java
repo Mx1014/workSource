@@ -3523,50 +3523,51 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private void populatePostRegionInfo(long userId, Post post) {
-        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
-        Long regionId = post.getVisibleRegionId();
-        
-        if(regionType != null && regionId != null) {
-            String creatorNickName = post.getCreatorNickName();
-            if(creatorNickName == null) {
-                creatorNickName = "";
-            }
-            switch(regionType) {
-            case COMMUNITY:
-                Community community = communityProvider.findCommunityById(regionId);
-                if(community != null)
-                	creatorNickName = creatorNickName + "@" + community.getName();
-                break;
-            case REGION:
-                Organization organization = organizationProvider.findOrganizationById(regionId);
-                // 根据产品姚绮云要求，当以公司名义发送时，使用公司所入驻的小区，而不是使用公司名称 by lqs 20161217
-//                if(organization !=null)
-//                	creatorNickName = creatorNickName + "@" + organization.getName();
-                if(organization !=null) {
-                	String regionName = organization.getName();
-                	Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
-                    if(communityId != null) {
-                        community = communityProvider.findCommunityById(communityId);
-                        if(community != null) {
-                            regionName = community.getName();
-                        } else {
-                            LOGGER.error("Community not found, userId={}, communityId={}, , regionType={}, postId={}", userId, communityId, regionType, post.getId());
-                        }
-                    } else {
-                        LOGGER.error("No community id found in organization, organizationId={}", organization.getId());
-                    }
-                    creatorNickName = creatorNickName + "@" + regionName;
-                }
-                break;
-            default:
-                LOGGER.error("Unsupported visible region type, userId=" + userId 
-                    + ", regionType=" + regionType + ", postId=" + post.getId());
-            }
-            post.setCreatorNickName(creatorNickName);
-        } else {
-            LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
-        }
-        
+    	// 根据产品姚绮云要求，不要显示@xxxx, add by tt, 20170307
+//        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+//        Long regionId = post.getVisibleRegionId();
+//        
+//        if(regionType != null && regionId != null) {
+//            String creatorNickName = post.getCreatorNickName();
+//            if(creatorNickName == null) {
+//                creatorNickName = "";
+//            }
+//            switch(regionType) {
+//            case COMMUNITY:
+//                Community community = communityProvider.findCommunityById(regionId);
+//                if(community != null)
+//                	creatorNickName = creatorNickName + "@" + community.getName();
+//                break;
+//            case REGION:
+//                Organization organization = organizationProvider.findOrganizationById(regionId);
+//                // 根据产品姚绮云要求，当以公司名义发送时，使用公司所入驻的小区，而不是使用公司名称 by lqs 20161217
+////                if(organization !=null)
+////                	creatorNickName = creatorNickName + "@" + organization.getName();
+//                if(organization !=null) {
+//                	String regionName = organization.getName();
+//                	Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+//                    if(communityId != null) {
+//                        community = communityProvider.findCommunityById(communityId);
+//                        if(community != null) {
+//                            regionName = community.getName();
+//                        } else {
+//                            LOGGER.error("Community not found, userId={}, communityId={}, , regionType={}, postId={}", userId, communityId, regionType, post.getId());
+//                        }
+//                    } else {
+//                        LOGGER.error("No community id found in organization, organizationId={}", organization.getId());
+//                    }
+//                    creatorNickName = creatorNickName + "@" + regionName;
+//                }
+//                break;
+//            default:
+//                LOGGER.error("Unsupported visible region type, userId=" + userId 
+//                    + ", regionType=" + regionType + ", postId=" + post.getId());
+//            }
+//            post.setCreatorNickName(creatorNickName);
+//        } else {
+//            LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
+//        }
+//        
     }
     
     private void populatePostForumNameInfo(long userId, Post post) {
