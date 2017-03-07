@@ -2144,15 +2144,16 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
         if ("biz".equals(source)) {// 从电商服务器获取数据
             Integer namespaceId = UserContext.getCurrentNamespaceId();
-            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, cmd.getPageSize());
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
         }
         // 从数据库获取数据
         else {
             ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
-
-            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
             List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
                     UserContext.getCurrentNamespaceId(), pageSize, cmd.getPageAnchor());

@@ -1895,20 +1895,23 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd) {
+		Long startTime1 = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		List<WebMenuPrivilege> webMenuPrivileges = webMenuPrivilegeProvider.listWebMenuPrivilegeByMenuId(cmd.getMenuId());
-
+		Long startTime2 = System.currentTimeMillis();
 		// 用户的角色以及用户所在部门角色的所有权限
 		List<Long> privilegeIds = this.getUserPrivileges(null, cmd.getOrganizationId(), user.getId());
 
 		// 用户在当前机构自身权限
 		privilegeIds.addAll(this.getResourceAclPrivilegeIds(EntityType.ORGANIZATIONS.getCode(), cmd.getOrganizationId(), EntityType.USER.getCode(), user.getId()));
-
+		Long endTime2 = System.currentTimeMillis();
 		List<CommunityDTO> communitydtos = organizationService.listAllChildrenOrganizationCoummunities(cmd.getOrganizationId());
 
 		List<ProjectDTO> projectDTOs = new ArrayList<>();
 		List<Long> projectIds = new ArrayList<>();
+
+		Long startTime3 = System.currentTimeMillis();
 		for (WebMenuPrivilege webMenuPrivilege:webMenuPrivileges) {
 			// 用户有此菜单的权限，则获取全部的园区项目
 			if(privilegeIds.contains(webMenuPrivilege.getPrivilegeId())){
@@ -1923,7 +1926,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				break;
 			}
 		}
-
+		Long endTime3 = System.currentTimeMillis();
 		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
 			List<Long> moduleIds = new ArrayList<>();
 			moduleIds.add(0L);
@@ -1938,6 +1941,8 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			List<ServiceModuleAssignment> serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.USER.getCode(), user.getId(), cmd.getOrganizationId(), moduleIds);
 
 			List<OrganizationDTO> orgDTOs = new ArrayList<>();
+
+
 
 			// 没有，则获取个人所在公司节点的业务模块下的项目
 			if(serviceModuleAssignments.size() == 0){
@@ -1969,7 +1974,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 			}
 		}
-
+		Long startTime5 = System.currentTimeMillis();
 		List<ProjectDTO> entityts = new ArrayList<>();
 		List<Long> categoryIds = new ArrayList<>();
 		if(0 != projectDTOs.size()){
@@ -1990,7 +1995,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				}
 			}
 		}
-
+		Long endTime5 = System.currentTimeMillis();
 		List<ProjectDTO> projects = new ArrayList<>();
 		if(0 != categoryIds.size()){
 			List<ProjectDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), categoryIds, ResourceCategoryType.CATEGORY.getCode())
@@ -2011,6 +2016,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			setResourceDTOs(projects, projectIds, namespaceId);
 		}
 		projects.addAll(entityts);
+		Long endTime1 = System.currentTimeMillis();
+		if(LOGGER.isInfoEnabled()){
+			LOGGER.debug("Track: listUserRelatedProjectByMenuId: get privileges elapse:{}, webMenuPrivilege elapse:{}, get organization elapse:{}, get all project elapse:{}, get project tree elapse:{}, total elapse:{}", endTime2 - startTime2, endTime3 - startTime3, startTime5 - startTime3, endTime5 - startTime5, endTime1 - endTime5, endTime1 - startTime1);
+		}
 		return projects;
 	}
 

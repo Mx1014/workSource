@@ -22,6 +22,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.configuration.ConfigConstants;
@@ -160,6 +163,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 	}
 
+	@Cacheable(value="findEquipmentByIdAndOwner", key="{#id, #ownerType, #ownerId}", unless="#result == null")
 	@Override
 	public EquipmentInspectionEquipments findEquipmentById(Long id, String ownerType, Long ownerId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -211,6 +215,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 	}
 
+	@Caching(evict={@CacheEvict(value="findEquipmentByIdAndOwner", key="{#equipment.id, #equipment.ownerType, #equipment.ownerId}"),
+            @CacheEvict(value="findEquipmentById", key="#id"),
+	        @CacheEvict(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'"),
+	        @CacheEvict(value="findEquipmentByQrCodeToken", key="#qrCodeToken")})
 	@Override
 	public void creatEquipmentInspectionEquipment(
 			EquipmentInspectionEquipments equipment) {
@@ -267,6 +275,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result.get(0);
 	}
 
+    @Caching(evict={@CacheEvict(value="findEquipmentByIdAndOwner", key="{#equipment.id, #equipment.ownerType, #equipment.ownerId}"),
+            @CacheEvict(value="findEquipmentById", key="#id"),
+            @CacheEvict(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'"),
+            @CacheEvict(value="findEquipmentByQrCodeToken", key="#qrCodeToken")})
 	@Override
 	public void updateEquipmentInspectionEquipment(
 			EquipmentInspectionEquipments equipment) {
@@ -720,6 +732,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         return ConvertHelper.convert(dao.findById(id), EquipmentInspectionStandards.class);
 	}
 
+    @Cacheable(value="findEquipmentById", key="#id", unless="#result == null")
 	@Override
 	public EquipmentInspectionEquipments findEquipmentById(Long id) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
@@ -879,6 +892,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result;
 	}
 
+    @Cacheable(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'", unless="#result.size() == 0")
 	@Override
 	public List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments() {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1556,6 +1570,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
         DaoHelper.publishDaoAction(DaoAction.MODIFY, EhEquipmentInspectionTasks.class, t.getId());
 	}
 
+    @Cacheable(value="findEquipmentByQrCodeToken", key="#qrCodeToken", unless="#result == null")
 	@Override
 	public EquipmentInspectionEquipments findEquipmentByQrCodeToken(
 			String qrCodeToken) {
