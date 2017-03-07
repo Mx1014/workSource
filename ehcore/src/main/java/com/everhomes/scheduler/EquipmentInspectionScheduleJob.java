@@ -3,6 +3,8 @@ package com.everhomes.scheduler;
 import java.sql.Timestamp;
 import java.util.*;
 
+import com.everhomes.configuration.ConfigConstants;
+import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
 import org.quartz.JobExecutionContext;
@@ -45,6 +47,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 	@Autowired
 	private CoordinationProvider coordinationProvider;
 
+	@Autowired
+	private ConfigurationProvider configurationProvider;
+
 	@Override
 	protected void executeInternal(JobExecutionContext context)
 			throws JobExecutionException {
@@ -53,6 +58,7 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		}
 		closeDelayTasks();
 		createTask();
+//		sendTaskMsg();
 		
 	}
 	
@@ -179,6 +185,21 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		
 		LOGGER.info("EquipmentInspectionScheduleJob: close expired review tasks.");
 		equipmentProvider.closeExpiredReviewTasks();
+	}
+
+	private void sendTaskMsg() {
+		long current = System.currentTimeMillis();//当前时间毫秒数
+		long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(zero);
+		Timestamp taskStartTime = task.getExecutiveStartTime();
+		//默认未来一分钟内
+		long nextNotifyTime = taskStartTime.getTime() - configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 60000);
+		if(current >= nextNotifyTime) {
+			long endTime = current + configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 60000);
+			equipmentService.sendTaskMsg(taskStartTime.getTime(), endTime);
+			task = equipmentProvider.findLastestEquipmentInspectionTask(endTime);
+		}
+
 	}
 
 }

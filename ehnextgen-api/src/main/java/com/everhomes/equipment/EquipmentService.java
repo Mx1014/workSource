@@ -1,5 +1,6 @@
 package com.everhomes.equipment;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import javax.servlet.http.HttpServletResponse;
@@ -118,5 +119,5 @@ public interface EquipmentService {
 	ListEquipmentTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
 	
 	StatEquipmentTasksResponse statEquipmentTasks(StatEquipmentTasksCommand cmd);
-	void sendTaskMsg();
+	void sendTaskMsg(Long startTime, Long endTime);
 }

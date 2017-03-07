@@ -210,7 +210,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletResponse;
 
 
-
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.util.*;
 
 import org.apache.commons.lang.StringUtils;
@@ -2440,17 +2440,19 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 //	@Scheduled(cron = "0 0 7 * * ? ")
 	@Override
-	public void sendTaskMsg() {
+	public void sendTaskMsg(Long startTime, Long endTime) {
 		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-			long current = System.currentTimeMillis();//当前时间毫秒数
-			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
+//			long current = System.currentTimeMillis();//当前时间毫秒数
+//			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
 
-			if (LOGGER.isInfoEnabled()) {
-				LOGGER.info("sendTaskMsg, zero = " + zero);
-			}
+//			if (LOGGER.isInfoEnabled()) {
+//				LOGGER.info("sendTaskMsg, zero = " + current);
+//			}
 
-			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(zero);
-//			CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
+			//默认未来一分钟内
+//			long endTime = current + configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 60000);
+			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(startTime, endTime);
+			CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
 
 			if (tasks != null && tasks.size() > 0) {
 				for (EquipmentInspectionTasks task : tasks) {
