@@ -874,7 +874,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 //        query.addLimit(pageSize);
-        query.addLimit(offset, pageSize);
+		query.addLimit(offset * (pageSize-1), pageSize);
         
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("Query tasks by count, sql=" + query.getSQL());

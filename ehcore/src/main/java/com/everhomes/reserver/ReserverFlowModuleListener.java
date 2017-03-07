@@ -178,8 +178,22 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		e.setKey("联系商家");
 		e.setValue(dto.getShopPhone());
 		entities.add(e);
+
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("申请结果");
+		e.setValue(convert(dto.getStatus()));
+		entities.add(e);
 		
 		return entities;
+	}
+
+	private  String convert(Integer status) {
+		switch (status) {
+			case 1: return "成功";
+			case 2: return "失败";
+			default: return "处理中";
+		}
 	}
 
 	@Override
