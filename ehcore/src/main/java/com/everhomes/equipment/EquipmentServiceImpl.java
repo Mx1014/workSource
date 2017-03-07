@@ -3095,6 +3095,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
         	if(equipment != null) {
 				dto.setEquipmentLocation(equipment.getLocation());
+				dto.setQrCodeFlag(equipment.getQrCodeFlag());
 			}
 			return dto;
 		}).filter(r->r!=null).collect(Collectors.toList());
