@@ -5916,7 +5916,7 @@ System.out.println();
 			Long endTime2_2 = System.currentTimeMillis();
 
 			if(LOGGER.isDebugEnabled()){
-				LOGGER.debug("Track: listOrganizationPersonnels:convertDTO:{}:map: get organizatin elapse:{}, get organization elapse:{}, total elapse:{}", c.getContactToken(), endTime1_1 - startTime1_1, endTime2_2 - startTime2_2);
+				LOGGER.debug("Track: listOrganizationPersonnels:convertDTO:map:{}: get organizatin elapse:{}, get organization elapse:{}, total elapse:{}", c.getContactToken(), endTime1_1 - startTime1_1, endTime2_2 - startTime2_2);
 			}
 			return dto;
 		}).collect(Collectors.toList());
