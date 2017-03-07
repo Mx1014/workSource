@@ -11,10 +11,7 @@ import com.everhomes.messaging.MessagingKickoffService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.oauth2.CommonRestResponse;
-import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserServiceErrorCode;
+import com.everhomes.rest.user.*;
 import com.everhomes.rest.version.VersionRealmType;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
@@ -506,41 +503,49 @@ public class WebRequestInterceptor implements HandlerInterceptor {
         //2016-07-29:modify by liujinwne,parameter name don't be signed.
 
         try {
-            String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
-            String getUserInfoUri = homeUrl + "/evh/openapi/getUserInfoById";
-            String appKey = configurationProvider.getValue(ZUOLIN_APP_KEY, "f9392ce2-341b-40c1-9c2c-99c702215535");
-            App app = appProvider.findAppByKey(appKey);
-            if (app == null) {
-                LOGGER.error("app nou found.appKey=" + appKey);
-                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "app not found");
-            }
-
-            Map<String, String> params = new HashMap<String, String>();
-            params.put("appKey", appKey);
-            params.put("zlAppKey", zlAppKey);
-            params.put("zlSignature", zlSignature);
-            params.put("id", id);
-            params.put("randomNum", randomNum);
-            params.put("timeStamp", timeStamp);
-            String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
-
-            String param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
-                    getUserInfoUri,
-                    URLEncoder.encode(zlSignature, "UTF-8"), zlAppKey,
-                    id,
-                    randomNum, timeStamp,
-                    appKey, URLEncoder.encode(signature, "UTF-8"));
-            Clients ci = new Clients();
-            String responseString = ci.restCall("GET", param, null, null, null);
-
-            LOGGER.error("getBizUserInfo the response of getUserInfoById , responseString={}", responseString);
-
-            Gson gson = new Gson();
-            CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>() {
-            }.getType());
-            UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
+            //20170307 modify by sw, through local service method invoked
+            GetUserInfoByIdCommand cmd = new GetUserInfoByIdCommand();
+            cmd.setId(Long.valueOf(id));
+            cmd.setZlSignature(zlSignature);
+            cmd.setZlAppKey(zlAppKey);
+            cmd.setRandomNum(Integer.valueOf(randomNum));
+            cmd.setTimeStamp(Long.valueOf(timeStamp));
+            UserInfo userInfo = userService.getUserInfoById(cmd);
+//            String homeUrl = configurationProvider.getValue("home.url", "https://core.zuolin.com");
+//            String getUserInfoUri = homeUrl + "/evh/openapi/getUserInfoById";
+//            String appKey = configurationProvider.getValue(ZUOLIN_APP_KEY, "f9392ce2-341b-40c1-9c2c-99c702215535");
+//            App app = appProvider.findAppByKey(appKey);
+//            if (app == null) {
+//                LOGGER.error("app nou found.appKey=" + appKey);
+//                throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, "app not found");
+//            }
+//
+//            Map<String, String> params = new HashMap<String, String>();
+//            params.put("appKey", appKey);
+//            params.put("zlAppKey", zlAppKey);
+//            params.put("zlSignature", zlSignature);
+//            params.put("id", id);
+//            params.put("randomNum", randomNum);
+//            params.put("timeStamp", timeStamp);
+//            String signature = SignatureHelper.computeSignature(params, app.getSecretKey());
+//
+//            String param = String.format("%s?zlSignature=%s&zlAppKey=%s&id=%s&randomNum=%s&timeStamp=%s&appKey=%s&signature=%s",
+//                    getUserInfoUri,
+//                    URLEncoder.encode(zlSignature, "UTF-8"), zlAppKey,
+//                    id,
+//                    randomNum, timeStamp,
+//                    appKey, URLEncoder.encode(signature, "UTF-8"));
+//            Clients ci = new Clients();
+//            String responseString = ci.restCall("GET", param, null, null, null);
+//
+//            LOGGER.error("getBizUserInfo the response of getUserInfoById , responseString={}", responseString);
+//
+//            Gson gson = new Gson();
+//            CommonRestResponse<UserInfo> userInfoRestResponse = gson.fromJson(responseString, new TypeToken<CommonRestResponse<UserInfo>>() {
+//            }.getType());
+//            UserInfo userInfo = (UserInfo) userInfoRestResponse.getResponse();
             if (userInfo == null) {
-                LOGGER.error("userInfo don't get.appKey=" + appKey + ",signature=" + signature + ",zlAppKey=" + zlAppKey + ",zlSignature=" + zlSignature + ",id=" + id + ",randomNum=" + randomNum + ",timeStamp=" + timeStamp);
+                LOGGER.error("userInfo don't get.appKey=" + zlAppKey + ",signature=" + zlSignature + ",zlAppKey=" + zlAppKey + ",zlSignature=" + zlSignature + ",id=" + id + ",randomNum=" + randomNum + ",timeStamp=" + timeStamp);
                 throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                         "userInfo don't get.");
             }
