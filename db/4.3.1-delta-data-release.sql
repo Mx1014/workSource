@@ -250,6 +250,9 @@ SET @locale_string_id = (SELECT max(id) FROM `eh_locale_strings`);
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values((@locale_string_id := @locale_string_id + 1),'forum','108','zh_CN','园区圈');
 insert into `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) values((@locale_string_id := @locale_string_id + 1),'forum','109','zh_CN','社区圈');
 
+DELETE FROM `eh_service_module_privileges` where `module_id` = 10100 AND `privilege_id` = 200;
+DELETE FROM `eh_service_module_privileges` where `module_id` = 10600 AND `privilege_id` = 310;
+
 -- 位置预订工作流设置菜单
 INSERT INTO `eh_service_modules` (`id`, `name`, `parent_id`, `path`, `type`, `level`, `status`, `default_order`, `create_time`) 
 	VALUES ('40050', '位置预订', '40000', '/40000/40050', '0', '2', '2', '0', UTC_TIMESTAMP());
