@@ -374,15 +374,9 @@ public class WebRequestInterceptor implements HandlerInterceptor {
             }
         }
 
-        String sign = null;
-        try {
-            String signature = getParamValue(paramMap, "signature");
-            sign = null != signature ? URLDecoder.decode(signature, "UTF8"): signature;
-        } catch (UnsupportedEncodingException e) {
-            e.printStackTrace();
-        }
+        String signature = getParamValue(paramMap, "signature");
 
-        return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), sign);
+        return SignatureHelper.verifySignature(mapForSignature, app.getSecretKey(), signature);
     }
 
     private static String getParamValue(Map<String, String[]> paramMap, String paramName) {
