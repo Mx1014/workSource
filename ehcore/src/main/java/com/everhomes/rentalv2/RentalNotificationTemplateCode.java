@@ -8,6 +8,7 @@ public class RentalNotificationTemplateCode {
 	 
 	 public static final String FLOW_SCOPE = "rental.flow";
 	 public static final int RENTAL_FLOW_CONTENT = 1; //工作流content
+	 public static final int RENTAL_FLOW_OFFLINE_INFO = 2; //工作流 线下支付的info
 	 
  
 	 

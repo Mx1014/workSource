@@ -17,6 +17,7 @@ import java.nio.charset.Charset;
 import java.sql.Date;
 import java.sql.Time;
 import java.sql.Timestamp;
+import java.text.Normalizer.Form;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -30,16 +31,43 @@ import java.util.Random;
 import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
+
+
+
+import java.util.concurrent.Executor;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+
 import javax.annotation.PostConstruct;
 import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 
+
+
+
+
+
+
+
+
+
 import net.greghaines.jesque.Job;
+
+
+
+
+
+
+
+
+
 
 import org.apache.poi.ss.usermodel.Row;
 import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.ss.usermodel.Workbook;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.elasticsearch.threadpool.ThreadPool;
 import org.json.simple.JSONArray;
 import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
@@ -55,6 +83,7 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 import org.springframework.util.LinkedMultiValueMap;
@@ -63,7 +92,25 @@ import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+
+
+
+
+
+
+
+
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
+
+
+
+
+
+
+
+
+
 
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
@@ -89,6 +136,7 @@ import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
@@ -233,6 +281,7 @@ import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.techpark.onlinePay.OnlinePayService;
 import com.everhomes.techpark.rental.IncompleteUnsuccessRentalBillAction;
+import com.everhomes.techpark.rental.RentalProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
@@ -246,6 +295,15 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+
+
+
+
+
+
+
+
 
 import freemarker.core.ReturnInstruction.Return;
 
@@ -269,7 +327,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
     private static ThreadLocal<Long> currentId = new ThreadLocal<Long>() {  
         
     };  
-      
+    private ExecutorService executorPool =  Executors.newFixedThreadPool(5);
 	private Time convertTime(Long TimeLong) {
 		if (null != TimeLong) {
 			//从8点开始计算
@@ -310,7 +368,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
 
 	private String queueName = "rentalService";
-
+ 
 	@Autowired
 	private SmsProvider smsProvider;
 	@Autowired
@@ -1123,6 +1181,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			if(null != charger)
 				rSiteDTO.setChargeName(charger.getNickName());
 		}
+		if(null != rentalSite.getOfflinePayeeUid()){
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(rSiteDTO.getOfflinePayeeUid(), rentalSite.getOrganizationId());
+			if(null!=member){
+				rSiteDTO.setOfflinePayeeName(member.getContactName());
+			}
+		}
 		Community community = this.communityProvider.findCommunityById(rSiteDTO.getCommunityId());
 		if(null != community)
 			rSiteDTO.setCommunityName(community.getName());
@@ -1745,6 +1809,65 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		return billDTO;
 	}
 
+	@Override
+	public void changeOfflinePayOrderSuccess(RentalOrder order){
+		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
+		List<RentalBillRuleDTO> rules = new ArrayList<RentalBillRuleDTO>();
+		List<RentalResourceOrder> rsbs = rentalv2Provider
+				.findRentalResourceOrderByOrderId(order.getId());
+		List<Long> resourceRuleIds = new ArrayList<>();
+		for(RentalResourceOrder rsb : rsbs){
+			RentalBillRuleDTO dto = new RentalBillRuleDTO();
+			dto.setRentalCount(rsb.getRentalCount());
+			dto.setRuleId(rsb.getRentalResourceRuleId());
+			resourceRuleIds.add(rsb.getRentalResourceRuleId());
+			rules.add(dto);					
+		}
+		
+		this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+order.getRentalResourceId())
+		.enter(() -> {
+
+			//验证订单下的资源是否足够
+			this.valiRentalBill(rules);
+			
+			//本订单状态置为成功,
+			order.setStatus(SiteBillStatus.SUCCESS.getCode());			
+			rentalv2Provider.updateRentalBill(order);
+			return null;
+		}); 
+		//发短信
+		
+		
+		//找到所有有这些ruleids的订单
+		List<RentalOrder> otherOrders = this.rentalv2Provider.findRentalSiteBillBySiteRuleIds(resourceRuleIds); 
+		for (RentalOrder otherOrder : otherOrders){
+			//把自己排除
+			if(otherOrder.getId().equals(order.getId()))
+				continue;
+			//剩下的用线程池处理flowcase状态和发短信
+			executorPool.execute(new Runnable() {
+				@Override
+				public void run() { 
+					//其他订单置为失败工作流设置为终止
+					FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(otherOrder.getId(),REFER_TYPE,Rentalv2Controller.moduleId); 
+					otherOrder.setStatus(SiteBillStatus.FAIL.getCode());			
+					rentalv2Provider.updateRentalBill(otherOrder);
+
+					FlowAutoStepDTO dto = new FlowAutoStepDTO();
+					dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+					dto.setFlowCaseId(flowcase.getId());
+					dto.setFlowMainId(flowcase.getFlowMainId());
+					dto.setFlowNodeId(flowcase.getCurrentNodeId());
+					dto.setFlowVersion(flowcase.getFlowVersion());
+					dto.setStepCount(flowcase.getStepCount());
+					flowService.processAutoStep(dto);
+					//并发短信
+					
+				}
+			});
+		}
+	}
+	
 	private List<RentalCell> findGroupRentalSiteRules(RentalCell rsr) {
 		List<RentalCell> result = new ArrayList<>();
 		for( RentalCell cell : cellList.get()){
@@ -3233,13 +3356,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
 		if(bill.getStatus().equals(SiteBillStatus.OFFLINE_PAY.getCode())){
-			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
+			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode()+bill.getRentalResourceId())
 					.enter(() -> {
 						List<RentalBillRuleDTO> rules = new ArrayList<RentalBillRuleDTO>();
-						// this.groupProvider.updateGroup(group); 
+						//验证订单下的资源是否足够
+						List<RentalResourceOrder> rsbs = rentalv2Provider
+								.findRentalResourceOrderByOrderId(bill.getId());
+						for(RentalResourceOrder rsb : rsbs){
+							RentalBillRuleDTO dto = new RentalBillRuleDTO();
+							dto.setRentalCount(rsb.getRentalCount());
+							dto.setRuleId(rsb.getId());
+							rules.add(dto);					
+						}
 						this.valiRentalBill(rules);
 						
-							//线下支付要建立工作流
+						//线下支付要建立工作流
 						FlowCase flowCase = this.createflowCase(bill);
 			        	String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
 			        	response.setFlowCaseUrl(url);

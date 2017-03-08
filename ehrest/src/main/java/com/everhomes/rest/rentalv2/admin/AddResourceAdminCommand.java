@@ -62,7 +62,7 @@ public class AddResourceAdminCommand {
 	private Byte status;
 	private String confirmationPrompt;
     private String offlineCashierAddress;
-    private Long offlinePayeeUid;
+    private String offlinePayeeName;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -212,12 +212,13 @@ public class AddResourceAdminCommand {
 		this.offlineCashierAddress = offlineCashierAddress;
 	}
 
-	public Long getOfflinePayeeUid() {
-		return offlinePayeeUid;
+	public String getOfflinePayeeName() {
+		return offlinePayeeName;
 	}
 
-	public void setOfflinePayeeUid(Long offlinePayeeUid) {
-		this.offlinePayeeUid = offlinePayeeUid;
+	public void setOfflinePayeeName(String offlinePayeeName) {
+		this.offlinePayeeName = offlinePayeeName;
 	}
+ 
 
 }

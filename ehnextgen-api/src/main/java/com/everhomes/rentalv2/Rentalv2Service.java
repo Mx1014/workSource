@@ -256,4 +256,7 @@ public interface Rentalv2Service {
 
 	void updateDefaultAttachmentRule(UpdateDefaultAttachmentRuleAdminCommand cmd);
 
+
+	void changeOfflinePayOrderSuccess(RentalOrder order);
+
 }

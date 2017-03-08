@@ -419,9 +419,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDED.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.REFUNDING.getCode()));
-		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
-				.ne(SiteBillStatus.OFFLINE_PAY.getCode()));
+				.ne(SiteBillStatus.REFUNDING.getCode())); 
 		step.where(condition);
 		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
@@ -433,7 +431,35 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 
 		return result;
 	}
+	@Override
+	public List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		SelectJoinStep<Record> step = context
+				.selectDistinct(Tables.EH_RENTALV2_ORDERS.fields())
+				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
+				.join(Tables.EH_RENTALV2_ORDERS)
+				.on(Tables.EH_RENTALV2_ORDERS.ID
+						.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID));
 
+		Condition condition = Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_RESOURCE_RULE_ID
+				.in(siteRuleIds);
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.FAIL.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.REFUNDED.getCode()));
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.REFUNDING.getCode())); 
+		step.where(condition);
+		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
+				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
+				.map(new RentalResourceOrderRecordMapper());
+
+		List<RentalOrder> result = resultRecord.stream().map((r) -> {
+			return ConvertHelper.convert(r, RentalOrder.class);
+		}).collect(Collectors.toList());
+
+		return result;
+	}
 	@Override
 	public List<RentalItemsOrder> findRentalItemsBillByItemsId(Long siteItemId) {
 

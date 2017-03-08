@@ -112,7 +112,7 @@ public class RentalSiteDTO {
 	private String confirmationPrompt;
     private String offlineCashierAddress;
     private Long offlinePayeeUid;
-    private Long offlinePayeeName;
+    private String offlinePayeeName;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -566,13 +566,14 @@ public class RentalSiteDTO {
 	}
 
 
-	public Long getOfflinePayeeName() {
+	public String getOfflinePayeeName() {
 		return offlinePayeeName;
 	}
 
 
-	public void setOfflinePayeeName(Long offlinePayeeName) {
+	public void setOfflinePayeeName(String offlinePayeeName) {
 		this.offlinePayeeName = offlinePayeeName;
 	}
+
  
 }

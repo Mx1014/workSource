@@ -1,7 +1,9 @@
 package com.everhomes.rentalv2;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
@@ -9,8 +11,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.contentserver.ContentServerResource;
+import com.alibaba.fastjson.JSON;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -23,7 +24,7 @@ import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
-import com.everhomes.organization.Organization;
+import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -32,20 +33,15 @@ import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
-import com.everhomes.rest.organization.OrganizationMemberStatus;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
-import com.everhomes.rest.rentalv2.AmorpmFlag;
-import com.everhomes.rest.rentalv2.BillAttachmentDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
 import com.everhomes.rest.rentalv2.RentalFlowNodeParams;
-import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
-import com.everhomes.util.ConvertHelper;
 
 @Component
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
@@ -69,7 +65,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	private OrganizationService organizationService;
 	@Autowired
 	LocaleStringService localeStringService;
-
+    @Autowired
+    private LocaleTemplateService localeTemplateService;
+    
 	@Override
 	public FlowModuleInfo initModule() {
 		FlowModuleInfo module = new FlowModuleInfo();
@@ -105,7 +103,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		}
 		else if(flowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
 			//更改订单状态 
-			
+			rentalv2Service.changeOfflinePayOrderSuccess(order);
 			//发短信
 		}
 	}
@@ -268,8 +266,22 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			}
 
 		}
+		Map<String,String> customObject = new HashMap<String,String>();
 
-//		flowCase.setCustomObject(JSONObject.toJSONString(dto));
+    	Map<String, String> map = new HashMap<String, String>(); 
+
+		if(null != order.getOfflinePayeeUid()){
+			OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+			if(null!=member){
+				map.put("offlinePayeeName", member.getContactName());
+				map.put("offlinePayeeContact", member.getContactToken());
+			}
+		}
+        map.put("offlineCashierAddress", order.getOfflineCashierAddress()); 
+		String contentString = localeTemplateService.getLocaleTemplateString(RentalNotificationTemplateCode.FLOW_SCOPE, 
+				RentalNotificationTemplateCode.RENTAL_FLOW_OFFLINE_INFO, RentalNotificationTemplateCode.locale, map, "");
+		customObject.put("offlinePayInfo",contentString);
+		flowCase.setCustomObject(JSON.toJSONString(customObject));
 		return entities;
 	}
 
