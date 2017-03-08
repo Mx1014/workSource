@@ -1,6 +1,28 @@
 // @formatter:off
 package com.everhomes.address;
 
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.jooq.Record2;
+import org.jooq.Result;
+import org.jooq.SelectConditionStep;
+import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
@@ -24,25 +46,6 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectQuery;
-import org.jooq.impl.DSL;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.UUID;
 
 @Component
 public class AddressProviderImpl implements AddressProvider {
@@ -369,6 +372,35 @@ public class AddressProviderImpl implements AddressProvider {
 	        .and(Tables.EH_ADDRESSES.NAMESPACE_ADDRESS_TYPE.eq(namespaceType))
 	        .fetch()
 	        .map(r->ConvertHelper.convert(r, Address.class));
+	}
+
+	@Override
+	public Map<Byte, Integer> countApartmentByLivingStatus(Long communityId) {
+		Map<Byte, Integer> map = new HashMap<>();
+		dbProvider.getDslContext(AccessSpec.readOnly())
+			.select(Tables.EH_ADDRESSES.LIVING_STATUS, DSL.count())
+			.from(Tables.EH_ADDRESSES)
+			.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+			.and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.groupBy(Tables.EH_ADDRESSES.LIVING_STATUS)
+			.fetch()
+			.map(r->{
+				map.put(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS), r.getValue(DSL.count()));
+				return null;
+			});
+		return map;
+	}
+
+	@Override
+	public Integer countApartment(Long communityId) {
+		return dbProvider.getDslContext(AccessSpec.readOnly())
+			.select(DSL.count())
+			.from(Tables.EH_ADDRESSES)
+			.where(Tables.EH_ADDRESSES.COMMUNITY_ID.eq(communityId))
+			.and(Tables.EH_ADDRESSES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.fetch()
+			.get(0)
+			.getValue(DSL.count());
 	}
     
 }

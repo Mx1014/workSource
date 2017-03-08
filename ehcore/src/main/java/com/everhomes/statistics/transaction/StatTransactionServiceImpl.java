@@ -1234,7 +1234,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					order.setNamespaceId(user.getNamespaceId());
 				}
 			}else{
-				order.setNamespaceId(1000000);
+				order.setNamespaceId(0);
 			}
 			order.setShopType(bizPaidOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
@@ -1275,7 +1275,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 					order.setNamespaceId(user.getNamespaceId());
 				}
 			}else{
-				order.setNamespaceId(1000000);
+				order.setNamespaceId(0);
 			}
 			order.setShopType(bizRefundOrder.getShopCreateType());
 			order.setResourceType(SettlementResourceType.SHOP.getCode());
@@ -1332,7 +1332,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statOrder.setNamespaceId(user.getNamespaceId());
 				statOrder.setOrderAmount(parkingRechargeOrder.getPrice());
 				statOrder.setOrderDate(date);
-				statOrder.setOrderNo(parkingRechargeOrder.getOrderNo().toString());
+				statOrder.setOrderNo(parkingRechargeOrder.getId().toString());
 				statOrder.setOrderTime(parkingRechargeOrder.getRechargeTime());
 				statOrder.setOrderType(SettlementOrderType.TRANSACTION.getCode());
 				statOrder.setPayerUid(parkingRechargeOrder.getPayerUid());
@@ -1535,7 +1535,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statTransaction.setWareJson(statOrder.getWareJson());
 			}else{
 				statTransaction.setCommunityId(0L);
-				statTransaction.setNamespaceId(1000000);
+				statTransaction.setNamespaceId(0);
 				statTransaction.setResourceId("-1");
 				statTransaction.setPayerUid(0L);
 			}
@@ -1762,7 +1762,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				statRefund.setWareJson(statOrder.getWareJson());
 			}else{
 				statRefund.setCommunityId(0L);
-				statRefund.setNamespaceId(1000000);
+				statRefund.setNamespaceId(0);
 				statRefund.setResourceId("-1");
 				statRefund.setPayerUid(0L);
 			}

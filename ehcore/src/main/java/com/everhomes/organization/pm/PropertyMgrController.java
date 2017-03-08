@@ -281,6 +281,21 @@ public class PropertyMgrController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
+	/**
+	 * <b>URL: /pm/getNewApartmentStatistics</b>
+	 * <p>小区公寓统计信息：公寓统计（总数、入住公寓数量、入住用户数量、自住/出租/空闲/装修/待售/其它等数量）</p>
+	 */
+	//checked
+	@RequestMapping("getNewApartmentStatistics")
+	@RestReturn(value=PropAptStatisticDTO.class)
+	public RestResponse getNewApartmentStatistics(@Valid PropCommunityIdCommand cmd) {
+		PropAptStatisticDTO result = propertyMgrService.getNewApartmentStatistics(cmd);
+		RestResponse response = new RestResponse(result);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 
 	/**
 	 * <b>URL: /pm/assignPMTopics</b>
