@@ -16,8 +16,10 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
+import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleStringService;
@@ -35,6 +37,7 @@ import com.everhomes.rest.organization.OrganizationSimpleDTO;
 import com.everhomes.rest.rentalv2.AmorpmFlag;
 import com.everhomes.rest.rentalv2.BillAttachmentDTO;
 import com.everhomes.rest.rentalv2.NormalFlag;
+import com.everhomes.rest.rentalv2.RentalFlowNodeParams;
 import com.everhomes.rest.rentalv2.SiteItemDTO;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.user.IdentifierType;
@@ -89,9 +92,22 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	}
 
 	@Override
-	public void onFlowCaseStateChanged(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
-
+	public void onFlowCaseStateChanged(FlowCaseState ctx) { 
+		FlowGraphNode graphNode = ctx.getPrefixNode();
+		FlowNode flowNode = graphNode.getFlowNode();
+		FlowCase flowCase = ctx.getFlowCase();
+		RentalOrder order = null;
+		if(null != flowCase.getReferId()){
+			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
+		}
+		if(flowNode.getParams().equals(RentalFlowNodeParams.AGREE.getCode())){
+			//发短信
+		}
+		else if(flowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
+			//更改订单状态 
+			
+			//发短信
+		}
 	}
 
 	@Override

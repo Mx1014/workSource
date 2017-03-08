@@ -31,6 +31,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 import javax.annotation.PostConstruct;
+import javax.persistence.criteria.Order;
 import javax.servlet.http.HttpServletResponse;
 
 import net.greghaines.jesque.Job;
@@ -61,6 +62,8 @@ import org.springframework.util.MultiValueMap;
 import org.springframework.util.concurrent.ListenableFuture;
 import org.springframework.web.client.AsyncRestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
+import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
@@ -97,6 +100,7 @@ import com.everhomes.rest.flow.FlowModuleType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowReferType;
 import com.everhomes.rest.flow.FlowStepType;
+import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
@@ -199,6 +203,7 @@ import com.everhomes.rest.rentalv2.admin.GetResourceRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceTypeListCommand;
 import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
+import com.everhomes.rest.rentalv2.admin.PayMode;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
 import com.everhomes.rest.rentalv2.admin.RefundOrderDTO;
@@ -241,6 +246,8 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+import freemarker.core.ReturnInstruction.Return;
 
 
 @Component
@@ -349,8 +356,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	
 	 
 
-	private String processFlowURL(Long flowCaseId, String string, Long moduleId) { 
-		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
+	private String processFlowURL(Long flowCaseId, String flowUserType, Long moduleId) { 
+		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+flowUserType+"&moduleId="+moduleId  ;
 		  
 		
 	}
@@ -1386,6 +1393,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		RentalBillDTO billDTO = new RentalBillDTO();
 		RentalResource rs =this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
 		proccessCells(rs);
+		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
 		this.dbProvider.execute((TransactionStatus status) -> {
 			java.util.Date reserveTime = new java.util.Date();
 			List<RentalCell> rentalSiteRules = new ArrayList<RentalCell>();
@@ -1403,6 +1411,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalBill.setInvoiceFlag(InvoiceFlag.NONEED.getCode());
 			rentalBill.setRentalDate(new Date(cmd.getRentalDate()));
 			this.valiRentalBill(cmd.getRules());
+			if(rsType.getPayMode() == null )
+				rentalBill.setPayMode(PayMode.ONLINE_PAY.getCode());
+			else
+				rentalBill.setPayMode(rsType.getPayMode());
 //			rentalBill.setRentalCount(cmd.getRentalCount());
 			java.math.BigDecimal siteTotalMoney = new java.math.BigDecimal(0);
 			Map<java.sql.Date  , Map<String,Set<Byte>>> dayMap= new HashMap<Date, Map<String,Set<Byte>>>();
@@ -1424,8 +1436,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				//TODO:不允许一个用户预约多时段的情况
 				
 				//不允许一个用户预约一个时段多个资源的情况
-				
-				
 				
 				//给半天预定的日期map加入am和pm的byte
 				if(rs.getRentalType().equals(RentalType.HALFDAY.getCode())||rs.getRentalType().equals(RentalType.THREETIMEADAY.getCode())){
@@ -1583,9 +1593,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	//
 	//		} else {
 				// 在支付时间之后 为待支付全款
-			rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
 	//		}
-
+			if(rentalBill.getPayMode().equals(PayMode.OFFLINE_PAY.getCode()))
+				rentalBill.setStatus(SiteBillStatus.OFFLINE_PAY.getCode());
+			else
+				rentalBill.setStatus(SiteBillStatus.PAYINGFINAL.getCode());
+				
 			SimpleDateFormat bigentimeSF = new SimpleDateFormat("MM-dd HH:mm");
 			SimpleDateFormat bigenDateSF = new SimpleDateFormat("MM-dd");
 			SimpleDateFormat endtimeSF = new SimpleDateFormat("HH:mm");
@@ -1653,33 +1666,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						this.valiRentalBill(cmd.getRules());
 						return this.rentalv2Provider.createRentalOrder(rentalBill);
 					});
-			Long rentalBillId = tuple.first();
-//			if (rentalBill.getStatus().equals(SiteBillStatus.LOCKED.getCode())) {
-//	//			// 20分钟后，取消状态为锁定的订单
-//	//			final Job job1 = new Job(
-//	//					CancelLockedRentalBillAction.class.getName(),
-//	//					new Object[] { String.valueOf(rentalBillId) });
-//	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-//	//					System.currentTimeMillis() + cancelTime);
-//	//			// 在支付时间开始时，把订单状态更新为待支付全款
-//	//			final Job job2 = new Job(
-//	//					UpdateRentalBillStatusToPayingFinalAction.class.getName(),
-//	//					new Object[] { String.valueOf(rentalBill.getId()) });
-//	//			// 20min cancel order if status still is locked or paying
-//	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job2,
-//	//					cmd.getStartTime() - rentalRule.getPayStartTime());
-//	//			
-//	//
-//	//			// 在支付时间截止时，取消未成功的订单
-//	//			final Job job3 = new Job(
-//	//					CancelUnsuccessRentalBillAction.class.getName(),
-//	//					new Object[] { String.valueOf(rentalBill.getId()) });
-//	//			// 20min cancel order if status still is locked or paying
-//	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job3,
-//	//					cmd.getStartTime() - rentalRule.getPayEndTime());
-//				
-//				
-//			} else
+			Long rentalBillId = tuple.first(); 
 			if (rentalBill.getStatus().equals(
 					SiteBillStatus.PAYINGFINAL.getCode())) {
 				// 20分钟后，取消未成功的订单
@@ -1691,18 +1678,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						reserveTime.getTime() + cancelTime);
 	
 			}
-			
-			
-	//		if(null!=rentalBill.getEndTime()&&null!=rs.getOvertimeTime()){
-	//			//超期未确认的置为超时
-	//			final Job job1 = new Job(
-	//					IncompleteUnsuccessRentalBillAction.class.getName(),
-	//					new Object[] { String.valueOf(rentalBill.getId()) });
-	//
-	//			jesqueClientFactory.getClientPool().delayedEnqueue(queueName, job1,
-	//					rentalBill.getEndTime().getTime() + rs.getOvertimeTime());
-	//		}
-
+			 
 			for (RentalBillRuleDTO siteRule : cmd.getRules())  {
 				BigDecimal money = new BigDecimal(0);
 				RentalCell  rsr =  findRentalSiteRuleById(siteRule.getRuleId() );
@@ -3193,10 +3169,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			}
 			int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
 			
-			if (compare == 0) {
+			if (bill.getPayMode().equals(PayMode.ONLINE_PAY.getCode())&&compare == 0) {
 				// 总金额为0，直接预订成功状态
 				bill.setStatus(SiteBillStatus.SUCCESS.getCode());
-			}
+				response.setAmount(new java.math.BigDecimal(0));
+			} 
 //			else if ( bill.getStatus().equals(
 //							SiteBillStatus.LOCKED.getCode())) {
 //				// 预付金额为0，且状态为locked，直接进入支付定金成功状态
@@ -3218,7 +3195,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 				response.setAmount(bill.getPayTotalMoney().subtract(bill.getPaidMoney()));
 				response.setOrderNo(String.valueOf(orderNo));
 			} else {
-				response.setAmount(new java.math.BigDecimal(0));
+				response.setAmount(bill.getPayTotalMoney());
 			}
 			bill.setOrderNo(String.valueOf(orderNo));
 			rentalv2Provider.updateRentalBill(bill);
@@ -3254,6 +3231,22 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			
 			onOrderSuccess(bill);
 		}
+		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
+		if(bill.getStatus().equals(SiteBillStatus.OFFLINE_PAY.getCode())){
+			this.coordinationProvider.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
+					.enter(() -> {
+						List<RentalBillRuleDTO> rules = new ArrayList<RentalBillRuleDTO>();
+						// this.groupProvider.updateGroup(group); 
+						this.valiRentalBill(rules);
+						
+							//线下支付要建立工作流
+						FlowCase flowCase = this.createflowCase(bill);
+			        	String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
+			        	response.setFlowCaseUrl(url);
+						
+						return null;
+					}); 
+			}
 		// 客户端生成订单
 		return response;
 	}
@@ -3278,6 +3271,11 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	@Override
 	public void onOrderSuccess(RentalOrder order) {
 		//加工作流
+		createflowCase(order);
+		//发消息给管理员
+		addOrderSendMessage(order );
+	}
+	private FlowCase createflowCase(RentalOrder order){
 		String moduleType = FlowModuleType.NO_MODULE.getCode();
 		Long ownerId = order.getResourceTypeId();
 		String ownerType = FlowOwnerType.RENTALRESOURCETYPE.getCode();
@@ -3307,13 +3305,12 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					RentalNotificationTemplateCode.RENTAL_FLOW_CONTENT, RentalNotificationTemplateCode.locale, map, "");
 			
 	    	cmd.setContent(contentString);
-	    	LOGGER.debug("cmd = \n"+cmd);
+//	    	LOGGER.debug("cmd = \n"+cmd);
 	    	FlowCase flowCase = flowService.createFlowCase(cmd);
+	    	return flowCase;
     	}
-		//发消息给管理员
-		addOrderSendMessage(order );
+    	return null;
 	}
-
 	private boolean valiItem(RentalItemsOrder rib) {
 
 		RentalItem rSiteItem = this.rentalv2Provider.getRentalSiteItemById(rib.getRentalResourceItemId()); 
