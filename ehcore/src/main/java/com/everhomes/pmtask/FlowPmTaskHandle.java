@@ -76,8 +76,10 @@ class FlowPmTaskHandle implements PmTaskHandle {
 				if(building != null){
 					ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
 							EntityType.BUILDING.getCode(), namespaceId);
-					createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
-					createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+					if (null != resourceCategory) {
+						createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
+						createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+					}
 				}
 			}else {
 				createFlowCaseCommand.setProjectId(task.getOwnerId());
