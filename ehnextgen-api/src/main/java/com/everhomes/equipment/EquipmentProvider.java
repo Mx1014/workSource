@@ -2,6 +2,7 @@ package com.everhomes.equipment;
 
 import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 
 
@@ -125,4 +126,9 @@ public interface EquipmentProvider {
 
 	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime);
 	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
+
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(String ownerType, Long ownerId, Long inspectionCategoryId,
+		List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset, Integer pageSize, String cacheKey);
+
+	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
 }
