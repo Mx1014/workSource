@@ -70,6 +70,8 @@ class FlowPmTaskHandle implements PmTaskHandle {
 			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
 			createFlowCaseCommand.setContent(task.getContent());
 
+			createFlowCaseCommand.setProjectId(task.getOwnerId());
+			createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 			if (StringUtils.isNotBlank(task.getBuildingName())) {
 				Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
 						task.getBuildingName());
@@ -81,9 +83,6 @@ class FlowPmTaskHandle implements PmTaskHandle {
 						createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
 					}
 				}
-			}else {
-				createFlowCaseCommand.setProjectId(task.getOwnerId());
-				createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
 			}
 
 			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
