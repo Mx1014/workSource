@@ -450,4 +450,6 @@ public interface PropertyMgrService {
      * 按小区，公司，用户
      */
     void sendNoticeToPmAdmin(SendNoticeToPmAdminCommand cmd, Timestamp operateTime);
+
+	PropAptStatisticDTO getNewApartmentStatistics(PropCommunityIdCommand cmd);
 }
