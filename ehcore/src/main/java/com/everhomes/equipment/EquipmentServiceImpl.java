@@ -2141,7 +2141,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			 if(contentUri != null && contentUri.length() > 0) {
 				 try{
 					 String url = contentServerService.parserUri(contentUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-					 attachment.setContentUrl(url);
+					 attachment.setContentUrl(convertAttachmentURL(url));
 				 }catch(Exception e){
 					 LOGGER.error("Failed to parse attachment uri, logId=" + log.getId() + ", attachmentId=" + attachment.getId(), e);
 				 }
@@ -3398,6 +3398,26 @@ public class EquipmentServiceImpl implements EquipmentService {
 	
 	}
 
+	private String convertAttachmentURL(String url) {
+		String[] urls = url.split("&");
+		StringBuilder sb = new StringBuilder();
+		for(int i = 0; i < urls.length; i++) {
+			if(i == 0) {
+				sb.append(urls[i]);
+			} else if(i < urls.length-2) {
+				sb.append("&");
+				sb.append(urls[i]);
+			} else if(i == urls.length-2) {
+				sb.append("&w=600");
+			} else if(i == urls.length-1) {
+				sb.append("&h=800");
+			}
+
+		}
+
+		return sb.toString();
+	}
+
 	@Override
 	public List<EquipmentAttachmentDTO> listAttachmentsByEquipmentId(
 			ListAttachmentsByEquipmentIdCommand cmd) {
@@ -3413,7 +3433,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			 if(contentUri != null && contentUri.length() > 0) {
 				 try{
 					 String url = contentServerService.parserUri(contentUri, EntityType.USER.getCode(), UserContext.current().getUser().getId());
-					 dto.setContentUrl(url);
+					 dto.setContentUrl(convertAttachmentURL(url));
 				 }catch(Exception e){
 					 LOGGER.error("Failed to parse attachment uri, equipmentId=" + r.getEquipmentId() + ", attachmentId=" + r.getId(), e);
 				 }
