@@ -3066,6 +3066,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 				tasks = equipmentProvider.listEquipmentInspectionReviewTasks(cmd.getOwnerType(), cmd.getOwnerId(),
 						cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
+
+				if(tasks.size() > pageSize) {
+					tasks.remove(tasks.size() - 1);
+					response.setNextPageAnchor((long) (offset + 1));
+				}
 			} else {
 				if(LOGGER.isDebugEnabled()) {
 					LOGGER.debug("equipment inspection standard group map is empty, cmd={}", cmd);
@@ -3087,10 +3092,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 			List<EquipmentInspectionTasks> allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), cmd.getOwnerId(),
 					cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1, cacheKey);
 
-			Timestamp current = new Timestamp(System.currentTimeMillis());
+			if(allTasks.size() > pageSize) {
+				allTasks.remove(allTasks.size() - 1);
+				response.setNextPageAnchor((long) (offset + 1));
+			}
 
-//		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//		con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+			Timestamp current = new Timestamp(System.currentTimeMillis());
 			tasks = allTasks.stream().map(r -> {
 				if(current.before(r.getExecutiveExpireTime()) || current.before(r.getProcessExpireTime())) {
 					return r;
@@ -3099,12 +3106,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}).filter(r->r!=null).collect(Collectors.toList());
 
 		}
-
-		if(tasks.size() > pageSize) {
-			tasks.remove(tasks.size() - 1);
-			response.setNextPageAnchor((long) (offset + 1));
-		}
-
 
 		long startTime2 = System.currentTimeMillis();
 		Set<Long> taskEquipmentIds = tasks.stream().map(r -> {
