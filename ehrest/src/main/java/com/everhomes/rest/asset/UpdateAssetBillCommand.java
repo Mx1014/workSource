@@ -64,7 +64,7 @@ public class UpdateAssetBillCommand {
     private String apartmentName;
 
     private Byte source;
-    private Timestamp accountPeriod;
+    private Long accountPeriod;
     private Long addressId;
     private String contactNo;
     private BigDecimal rental;
@@ -153,11 +153,11 @@ public class UpdateAssetBillCommand {
         this.source = source;
     }
 
-    public Timestamp getAccountPeriod() {
+    public Long getAccountPeriod() {
         return accountPeriod;
     }
 
-    public void setAccountPeriod(Timestamp accountPeriod) {
+    public void setAccountPeriod(Long accountPeriod) {
         this.accountPeriod = accountPeriod;
     }
 

@@ -539,6 +539,7 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public AssetBillTemplateValueDTO creatAssetBill(CreatAssetBillCommand cmd) {
         AssetBill bill = ConvertHelper.convert(cmd, AssetBill.class);
+        bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
         bill.setSource(AssetBillSource.MANUAL.getCode());
         bill.setCreatorUid(UserContext.current().getUser().getId());
         getTotalAmount(bill);
@@ -694,6 +695,7 @@ public class AssetServiceImpl implements AssetService {
 
         bill = ConvertHelper.convert(cmd, AssetBill.class);
 
+        bill.setAccountPeriod(new Timestamp(cmd.getAccountPeriod()));
         bill.setUpdateUid(UserContext.current().getUser().getId());
         getTotalAmount(bill);
         assetProvider.updateAssetBill(bill);
