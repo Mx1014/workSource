@@ -469,7 +469,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		return result.get(0);
 	}
 
-	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", key="{#}")})
+	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", allEntries = true)})
 	@Override
 	public void creatEquipmentTask(EquipmentInspectionTasks task) {
 
@@ -488,7 +488,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 	}
 
-	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", key="{#}")})
+	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", allEntries = true)})
 	@Override
 	public void updateEquipmentTask(EquipmentInspectionTasks task) {
 
@@ -1543,7 +1543,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 	}
 
-	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", key="{#}")})
+	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", allEntries = true)})
 	@Override
 	public void closeTask(EquipmentInspectionTasks task) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
@@ -1563,7 +1563,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 	}
 
-	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", key="{#}")})
+	@Caching(evict={@CacheEvict(value="listEquipmentInspectionTasksUseCache", allEntries = true)})
 	@Override
 	public void closeReviewTasks(EquipmentInspectionTasks task) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
