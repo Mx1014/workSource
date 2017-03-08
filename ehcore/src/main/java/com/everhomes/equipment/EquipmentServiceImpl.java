@@ -3099,9 +3099,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			Timestamp current = new Timestamp(System.currentTimeMillis());
 			tasks = allTasks.stream().map(r -> {
-				if(current.before(r.getExecutiveExpireTime()) || current.before(r.getProcessExpireTime())) {
+				if(r.getExecutiveExpireTime() != null && current.before(r.getExecutiveExpireTime())) {
 					return r;
 				}
+				else if(r.getProcessExpireTime() != null && current.before(r.getProcessExpireTime())) {
+					return r;
+				}
+
 				return null;
 			}).filter(r->r!=null).collect(Collectors.toList());
 
