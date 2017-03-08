@@ -1551,7 +1551,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		task.setStatus(EquipmentTaskStatus.DELAY.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
-		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
+//		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
@@ -1563,7 +1563,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public void closeReviewTasks(EquipmentInspectionTasks task) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		task.setReviewResult(ReviewResult.REVIEW_DELAY.getCode());
-		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
+//		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
