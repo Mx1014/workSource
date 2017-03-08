@@ -218,11 +218,18 @@ public class WebRequestInterceptor implements HandlerInterceptor {
 
     private void setupScheme(Map<String, String> userAgents) {
         UserContext context = UserContext.current();
-        VersionRange versionRange = new VersionRange("[" + context.getVersion() + "," + context.getVersion() + ")");
-        if (versionRange.getUpperBound() < VERSION_UPPERBOUND) {
-            context.setScheme(HTTP);
-        } else {
+        if(org.springframework.util.StringUtils.isEmpty(context.getVersion())){
             context.setScheme(userAgents.get("scheme"));
+        }else{
+            VersionRange versionRange = new VersionRange("[" + context.getVersion() + "," + context.getVersion() + ")");
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("setup scheme, version={}, versionUpperBound={}", context.getVersion(), versionRange.getUpperBound());
+            }
+            if (versionRange.getUpperBound() < VERSION_UPPERBOUND) {
+                context.setScheme(HTTP);
+            } else {
+                context.setScheme(userAgents.get("scheme"));
+            }
         }
 
     }
