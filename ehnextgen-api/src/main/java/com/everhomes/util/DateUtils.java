@@ -33,7 +33,7 @@ public class DateUtils {
 
 			if (time1.after(time2)){
 				return time1;
-			};
+			}
 		}
 
 		return time2;

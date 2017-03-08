@@ -178,8 +178,22 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		e.setKey("联系商家");
 		e.setValue(dto.getShopPhone());
 		entities.add(e);
+
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("申请结果");
+		e.setValue(convert(dto.getStatus()));
+		entities.add(e);
 		
 		return entities;
+	}
+
+	private  String convert(Integer status) {
+		switch (status) {
+			case 1: return "成功";
+			case 2: return "失败";
+			default: return "处理中";
+		}
 	}
 
 	@Override
@@ -206,18 +220,28 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		Map<String,String> param = new HashMap<>();
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			param.put("status", "1");
+			param.put("id", String.valueOf(flowCase.getReferId()));
+			String json = post(createRequestParam(param), UPDATE_RESERVER);
+			ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
+
+			if (!entity.getResult()) {
+				LOGGER.error("sychronized position reserver to biz fail.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sychronized position reserver to biz fail.");
+			}
 		}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 			param.put("status", "2");
-		}
-		param.put("id", String.valueOf(flowCase.getReferId()));
-		String json = post(createRequestParam(param), UPDATE_RESERVER);
-		ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
+			param.put("id", String.valueOf(flowCase.getReferId()));
+			String json = post(createRequestParam(param), UPDATE_RESERVER);
+			ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
 
-		if (!entity.getResult()) {
-			LOGGER.error("sychronized position reserver to biz fail.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"sychronized position reserver to biz fail.");
+			if (!entity.getResult()) {
+				LOGGER.error("sychronized position reserver to biz fail.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sychronized position reserver to biz fail.");
+			}
 		}
+
 	}
 	
 	@Override

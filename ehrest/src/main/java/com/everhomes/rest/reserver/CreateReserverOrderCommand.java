@@ -7,12 +7,21 @@ import com.everhomes.util.StringHelper;
  */
 public class CreateReserverOrderCommand {
 
+    private Long id;
     private String orderId;
     private Long reserverTime;
     private Integer reserverNum;
     private String remark;
     private String requestorName;
     private String shopName;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getOrderId() {
         return orderId;
