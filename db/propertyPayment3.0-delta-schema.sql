@@ -8,7 +8,7 @@ CREATE TABLE `eh_asset_bills` (
   `target_type` VARCHAR(32) COMMENT 'bill target type: community',
   `target_id` BIGINT NOT NULL COMMENT 'bill target id: community id',
   `tenant_type` VARCHAR(32) COMMENT 'bill tenant type: family、enterprise',
-  `tenant_id` BIGINT NOT NULL COMMENT 'bill tenant id: family、enterprise id',
+  `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'bill tenant id: family、enterprise id',
   `source` TINYINT NOT NULL DEFAULT 0 COMMENT '0: auto, 1: third party, 2: manual',
   
   `account_period` DATETIME NOT NULL,
