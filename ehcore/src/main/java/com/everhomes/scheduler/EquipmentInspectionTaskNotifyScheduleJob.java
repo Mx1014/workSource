@@ -4,27 +4,19 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.equipment.EquipmentInspectionStandardGroupMap;
 import com.everhomes.equipment.EquipmentInspectionTasks;
 import com.everhomes.equipment.EquipmentProvider;
 import com.everhomes.equipment.EquipmentService;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.rest.equipment.EquipmentNotificationTemplateCode;
-import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
-import com.everhomes.rest.organization.OrganizationContactDTO;
-import com.everhomes.rest.quality.QualityGroupType;
 import com.everhomes.util.CronDateUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.TimeZone;
 
 /**
  * Created by Administrator on 2017/3/8.
@@ -32,6 +24,7 @@ import java.util.TimeZone;
 @Component
 public class EquipmentInspectionTaskNotifyScheduleJob extends QuartzJobBean {
 
+    private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspectionTaskNotifyScheduleJob.class);
     @Autowired
     private CoordinationProvider coordinationProvider;
 
@@ -50,6 +43,7 @@ public class EquipmentInspectionTaskNotifyScheduleJob extends QuartzJobBean {
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
         this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+            LOGGER.info("in EquipmentInspectionTaskNotifyScheduleJob " + System.currentTimeMillis());
             //默认提前十分钟通知
             long executiveStartTime = System.currentTimeMillis()+(configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 

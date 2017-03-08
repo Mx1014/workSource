@@ -2448,7 +2448,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 //			}
 
 		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(startTime, endTime);
-		CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
+//		CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
 
 		if (tasks != null && tasks.size() > 0) {
 			for (EquipmentInspectionTasks task : tasks) {

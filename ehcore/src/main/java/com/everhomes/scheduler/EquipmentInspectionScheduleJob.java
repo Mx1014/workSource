@@ -191,18 +191,21 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
 
 		long endTime = current + (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+		//通知当天零点到11分的所有任务
 		equipmentService.sendTaskMsg(zero, endTime+60000);
 		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime+60000);
 
-		Timestamp taskStartTime = task.getExecutiveStartTime();
-		//默认提前十分钟
-		long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+		if(task != null) {
+			Timestamp taskStartTime = task.getExecutiveStartTime();
+			//默认提前十分钟
+			long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 
-		String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
+			String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
 
-		String equipmentInspectionTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
-				cronExpression, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+			String equipmentInspectionTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+			scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
+					cronExpression, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+		}
 
 	}
 
