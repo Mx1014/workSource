@@ -27,6 +27,8 @@ import com.everhomes.util.StringHelper;
  * <li>owners: 可见社区</li>
  * <li>status: 是否开启，1是0否</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
+ * <li>offlineCashierAddress: 线下支付收银地址</li>
+ * <li>offlinePayeeUid: 线下支付收款人id</li>
  * </ul>
  */
 public class AddResourceAdminCommand { 
@@ -59,6 +61,8 @@ public class AddResourceAdminCommand {
 	private List<SiteOwnerDTO> owners;
 	private Byte status;
 	private String confirmationPrompt;
+    private String offlineCashierAddress;
+    private Long offlinePayeeUid;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -198,6 +202,22 @@ public class AddResourceAdminCommand {
 
 	public void setConfirmationPrompt(String confirmationPrompt) {
 		this.confirmationPrompt = confirmationPrompt;
+	}
+
+	public String getOfflineCashierAddress() {
+		return offlineCashierAddress;
+	}
+
+	public void setOfflineCashierAddress(String offlineCashierAddress) {
+		this.offlineCashierAddress = offlineCashierAddress;
+	}
+
+	public Long getOfflinePayeeUid() {
+		return offlinePayeeUid;
+	}
+
+	public void setOfflinePayeeUid(Long offlinePayeeUid) {
+		this.offlinePayeeUid = offlinePayeeUid;
 	}
 
 }

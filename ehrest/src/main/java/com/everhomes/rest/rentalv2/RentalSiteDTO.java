@@ -54,6 +54,8 @@ import com.everhomes.util.StringHelper;
  * <li>	owners： List资源可显示的园区范围列表 {@link com.everhomes.rest.techpark.rental.SiteOwnerDTO}</li> 
  * <li>attachments: 可添加的附件{@link com.everhomes.rest.rentalv2.admin.AttachmentConfigDTO}</li>
  * <li>confirmationPrompt: 确认提示(非必填)</li>
+ * <li>offlineCashierAddress: 线下支付收银地址</li>
+ * <li>offlinePayeeUid: 线下支付收款人id</li>
  * </ul>
  */
 public class RentalSiteDTO {
@@ -107,6 +109,8 @@ public class RentalSiteDTO {
 	@ItemType(AttachmentConfigDTO.class)
 	private List<AttachmentConfigDTO> attachments;
 	private String confirmationPrompt;
+    private String offlineCashierAddress;
+    private Long offlinePayeeUid;
 	@Override
     public String toString() {
         return StringHelper.toJsonString(this);
@@ -537,6 +541,26 @@ public class RentalSiteDTO {
 
 	public void setConfirmationPrompt(String confirmationPrompt) {
 		this.confirmationPrompt = confirmationPrompt;
+	}
+
+
+	public String getOfflineCashierAddress() {
+		return offlineCashierAddress;
+	}
+
+
+	public void setOfflineCashierAddress(String offlineCashierAddress) {
+		this.offlineCashierAddress = offlineCashierAddress;
+	}
+
+
+	public Long getOfflinePayeeUid() {
+		return offlinePayeeUid;
+	}
+
+
+	public void setOfflinePayeeUid(Long offlinePayeeUid) {
+		this.offlinePayeeUid = offlinePayeeUid;
 	}
  
 }
