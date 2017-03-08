@@ -3039,6 +3039,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		if(cmd.getTargetId() != null)
 			targetIds.add(cmd.getTargetId());
 
+		Long userId = user.getId();
 		//是否是管理员
 		boolean isAdmin = false;
 		List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), cmd.getOwnerId(), EntityType.USER.getCode(), user.getId());
@@ -3049,6 +3050,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						|| resource.getRoleId() == RoleConstants.PM_SUPER_ADMIN
 						|| resource.getRoleId() == RoleConstants.PM_ORDINARY_ADMIN) {
 					isAdmin = true;
+					userId =0L;
 					break;
 				}
 			}
@@ -3078,6 +3080,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		} else {
 			if(!isAdmin) {
+				standardIds = new ArrayList<>();
 				List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
 				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
 				if(maps != null && maps.size() > 0) {
@@ -3088,7 +3091,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 
 			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), cmd.getOwnerId(),
-					cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset);
+					cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, userId);
 			List<EquipmentInspectionTasks> allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), cmd.getOwnerId(),
 					cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1, cacheKey);
 
@@ -3099,10 +3102,17 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 			Timestamp current = new Timestamp(System.currentTimeMillis());
 			tasks = allTasks.stream().map(r -> {
-				if(r.getExecutiveExpireTime() != null && current.before(r.getExecutiveExpireTime())) {
+				if((EquipmentTaskStatus.WAITING_FOR_EXECUTING.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
+						|| EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus())))
+					&& r.getExecutiveExpireTime() != null && current.before(r.getExecutiveExpireTime())) {
 					return r;
 				}
-				else if(r.getProcessExpireTime() != null && current.before(r.getProcessExpireTime())) {
+				else if(EquipmentTaskStatus.IN_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus())) &&
+						r.getProcessExpireTime() != null && current.before(r.getProcessExpireTime())) {
+					return r;
+				}
+				else if(EquipmentTaskStatus.NEED_MAINTENANCE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))
+						|| EquipmentTaskStatus.CLOSE.equals(EquipmentTaskStatus.fromStatus(r.getStatus()))) {
 					return r;
 				}
 
@@ -3139,7 +3149,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 	private String convertListEquipmentInspectionTasksCache(String ownerType, Long ownerId, Long inspectionCategoryId,
-		List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset) {
+		List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
 
@@ -3147,6 +3157,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 			inspectionCategoryId = -1L;
 		}
 
+		sb.append(userId);
+		sb.append("-");
 		sb.append(ownerType);
 		sb.append("-");
 		sb.append("-community-");
@@ -3158,7 +3170,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		sb.append("-");
 		sb.append(offset);
 		sb.append("-");
-		if(standardIds == null || standardIds.size() == 0) {
+		if(standardIds == null) {
 			sb.append("all");
 		} else {
 			Collections.sort(standardIds);

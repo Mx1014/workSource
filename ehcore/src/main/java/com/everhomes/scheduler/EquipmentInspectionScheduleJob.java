@@ -7,6 +7,7 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
+import com.everhomes.util.CronDateUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
 import org.slf4j.Logger;
@@ -21,10 +22,8 @@ import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
-import com.everhomes.rest.equipment.InspectionStandardMapTargetType;
 import com.everhomes.util.DateHelper;
 import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.support.TransactionCallback;
 
 @Component
 @Scope("prototype")
@@ -49,6 +48,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+
+	@Autowired
+	private ScheduleProvider scheduleProvider;
 
 	@Override
 	protected void executeInternal(JobExecutionContext context)
@@ -190,15 +192,21 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 	private void sendTaskMsg() {
 		long current = System.currentTimeMillis();//当前时间毫秒数
 		long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
-		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(zero);
+
+		long endTime = current + (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+		equipmentService.sendTaskMsg(zero, endTime);
+		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime);
+
 		Timestamp taskStartTime = task.getExecutiveStartTime();
-		//默认未来一分钟内
-		long nextNotifyTime = taskStartTime.getTime() - configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 60000);
-		if(current >= nextNotifyTime) {
-			long endTime = current + configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 60000);
-			equipmentService.sendTaskMsg(taskStartTime.getTime(), endTime);
-			task = equipmentProvider.findLastestEquipmentInspectionTask(endTime);
-		}
+		//默认提前十分钟
+		long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
+
+		String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
+		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
+			String equipmentInspectionTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+			scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
+					cronExpression, EquipmentInspectionScheduleJob.class, null);
+		});
 
 	}
 

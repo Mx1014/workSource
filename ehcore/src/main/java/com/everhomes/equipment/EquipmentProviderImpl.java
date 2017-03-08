@@ -1555,7 +1555,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		
 		task.setStatus(EquipmentTaskStatus.DELAY.getCode());
 		task.setReviewResult(ReviewResult.NONE.getCode());
-		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
+//		task.setExecutiveTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
@@ -1568,7 +1568,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	public void closeReviewTasks(EquipmentInspectionTasks task) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		task.setReviewResult(ReviewResult.REVIEW_DELAY.getCode());
-		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
+//		task.setReviewTime(new Timestamp(System.currentTimeMillis()));
 		EhEquipmentInspectionTasks t = ConvertHelper.convert(task, EhEquipmentInspectionTasks.class);
 		EhEquipmentInspectionTasksDao dao = new EhEquipmentInspectionTasksDao(context.configuration());
         dao.update(t);
@@ -2000,18 +2000,20 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 
 
-		Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
-		con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
+		if(standardIds == null) {
+			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
+			con1 = con1.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.ne(ReviewResult.QUALIFIED.getCode()));
 
-		Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
+			Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
 //		Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
 //		con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 //		con2 = con2.and(con3);
 //
-		Condition con = con1.or(con2);
+			Condition con = con1.or(con2);
 //		Condition con = con1;
 
-		query.addConditions(con);
+			query.addConditions(con);
+		}
 
 		if(standardIds != null) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(standardIds);
