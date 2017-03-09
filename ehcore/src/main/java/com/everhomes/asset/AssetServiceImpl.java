@@ -36,6 +36,7 @@ import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserServiceErrorCode;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.search.OrganizationSearcher;
+import com.everhomes.server.schema.tables.pojos.EhAssetBills;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.rental.RentalServiceImpl;
 import com.everhomes.user.*;
@@ -44,6 +45,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 
 
 import org.apache.poi.ss.usermodel.Row;
@@ -599,7 +601,7 @@ public class AssetServiceImpl implements AssetService {
         List<AssetBillTemplateFieldDTO> templateFields = assetProvider.findTemplateFieldByTemplateVersion(cmd.getOwnerId(), cmd.getOwnerType(), cmd.getTargetId(), cmd.getTargetType(), cmd.getTemplateVersion());
         if(templateFields != null && templateFields.size() > 0) {
             List<FieldValueDTO> valueDTOs = new ArrayList<>();
-            Field[] fields = bill.getClass().getDeclaredFields();
+            Field[] fields = EhAssetBills.class.getDeclaredFields();
             for(AssetBillTemplateFieldDTO fieldDTO : templateFields) {
                 if(AssetBillTemplateSelectedFlag.SELECTED.equals(AssetBillTemplateSelectedFlag.fromCode(fieldDTO.getSelectedFlag()))) {
                     FieldValueDTO valueDTO = new FieldValueDTO();
