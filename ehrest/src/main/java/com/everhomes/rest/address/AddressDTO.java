@@ -38,6 +38,7 @@ public class AddressDTO {
     private java.sql.Timestamp createTime;
     private java.sql.Timestamp deleteTime;
     private Byte memberStatus;
+    private Double areaSize;
 
     public AddressDTO() {
     }
@@ -195,7 +196,15 @@ public class AddressDTO {
 		this.memberStatus = memberStatus;
 	}
 
-	@Override
+    public Double getAreaSize() {
+        return areaSize;
+    }
+
+    public void setAreaSize(Double areaSize) {
+        this.areaSize = areaSize;
+    }
+
+    @Override
     public String toString(){
         return StringHelper.toJsonString(this);
         
