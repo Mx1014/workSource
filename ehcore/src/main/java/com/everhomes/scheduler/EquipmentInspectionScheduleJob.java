@@ -42,9 +42,6 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 	@Autowired
 	private DbProvider dbProvider;
-	
-	@Autowired
-	private CoordinationProvider coordinationProvider;
 
 	@Autowired
 	private ConfigurationProvider configurationProvider;
@@ -60,8 +57,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		}
 		closeDelayTasks();
 		createTask();
-//		sendTaskMsg();
-		
+		sendTaskMsg();
+
 	}
 	
 	private void createTask() {
@@ -194,19 +191,18 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
 
 		long endTime = current + (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
-		equipmentService.sendTaskMsg(zero, endTime);
-		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime);
+		equipmentService.sendTaskMsg(zero, endTime+60000);
+		EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(endTime+60000);
 
 		Timestamp taskStartTime = task.getExecutiveStartTime();
 		//默认提前十分钟
 		long nextNotifyTime = taskStartTime.getTime() - (configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 
 		String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
-		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-			String equipmentInspectionTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
-					cronExpression, EquipmentInspectionScheduleJob.class, null);
-		});
+
+		String equipmentInspectionTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
+				cronExpression, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 	}
 

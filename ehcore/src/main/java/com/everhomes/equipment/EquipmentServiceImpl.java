@@ -2440,7 +2440,6 @@ public class EquipmentServiceImpl implements EquipmentService {
 //	@Scheduled(cron = "0 0 7 * * ? ")
 	@Override
 	public void sendTaskMsg(Long startTime, Long endTime) {
-		this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
 //			long current = System.currentTimeMillis();//当前时间毫秒数
 //			long zero = current / (1000 * 3600 * 24) * (1000 * 3600 * 24) - TimeZone.getDefault().getRawOffset();//今天零点零分零秒的毫秒数
 
@@ -2448,54 +2447,51 @@ public class EquipmentServiceImpl implements EquipmentService {
 //				LOGGER.info("sendTaskMsg, zero = " + current);
 //			}
 
-			//默认未来一分钟内
-//			long endTime = current + configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 60000);
-			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(startTime, endTime);
-			CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
+		List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(startTime, endTime);
+		CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
 
-			if (tasks != null && tasks.size() > 0) {
-				for (EquipmentInspectionTasks task : tasks) {
-					Map<String, Object> map = new HashMap<String, Object>();
-					map.put("deadline", timeToStr(task.getExecutiveExpireTime()));
-					String scope = EquipmentNotificationTemplateCode.SCOPE;
-					int code = EquipmentNotificationTemplateCode.GENERATE_EQUIPMENT_TASK_NOTIFY;
-					String locale = "zh_CN";
-					String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+		if (tasks != null && tasks.size() > 0) {
+			for (EquipmentInspectionTasks task : tasks) {
+				Map<String, Object> map = new HashMap<String, Object>();
+				map.put("deadline", timeToStr(task.getExecutiveExpireTime()));
+				String scope = EquipmentNotificationTemplateCode.SCOPE;
+				int code = EquipmentNotificationTemplateCode.GENERATE_EQUIPMENT_TASK_NOTIFY;
+				String locale = "zh_CN";
+				String notifyTextForApplicant = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
 
-					List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), QualityGroupType.EXECUTIVE_GROUP.getCode());
+				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(task.getStandardId(), QualityGroupType.EXECUTIVE_GROUP.getCode());
 
-					for (EquipmentInspectionStandardGroupMap executiveGroup : maps) {
-						if (executiveGroup.getPositionId() != null) {
-							ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
-							command.setOrganizationId(executiveGroup.getGroupId());
-							command.setJobPositionId(executiveGroup.getPositionId());
-							List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
-							if (LOGGER.isInfoEnabled()) {
-								LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "contacts = {}" + contacts);
+				for (EquipmentInspectionStandardGroupMap executiveGroup : maps) {
+					if (executiveGroup.getPositionId() != null) {
+						ListOrganizationContactByJobPositionIdCommand command = new ListOrganizationContactByJobPositionIdCommand();
+						command.setOrganizationId(executiveGroup.getGroupId());
+						command.setJobPositionId(executiveGroup.getPositionId());
+						List<OrganizationContactDTO> contacts = organizationService.listOrganizationContactByJobPositionId(command);
+						if (LOGGER.isInfoEnabled()) {
+							LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "contacts = {}" + contacts);
+						}
+
+						if (contacts != null && contacts.size() > 0) {
+							for (OrganizationContactDTO contact : contacts) {
+								sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
 							}
+						}
+					} else {
+						List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
+						if (LOGGER.isInfoEnabled()) {
+							LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "members = {}" + members);
+						}
 
-							if (contacts != null && contacts.size() > 0) {
-								for (OrganizationContactDTO contact : contacts) {
-									sendMessageToUser(contact.getTargetId(), notifyTextForApplicant);
-								}
-							}
-						} else {
-							List<OrganizationMember> members = organizationProvider.listOrganizationMembers(executiveGroup.getGroupId(), null);
-							if (LOGGER.isInfoEnabled()) {
-								LOGGER.info("sendTaskMsg, executiveGroup = {}" + executiveGroup + "members = {}" + members);
-							}
-
-							if (members != null) {
-								for (OrganizationMember member : members) {
-									sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
-								}
+						if (members != null) {
+							for (OrganizationMember member : members) {
+								sendMessageToUser(member.getTargetId(), notifyTextForApplicant);
 							}
 						}
 					}
 				}
-
 			}
-		});
+
+		}
 	}
 
 	@Override

@@ -9,7 +9,9 @@ import java.util.*;
 
 import javax.annotation.PostConstruct;
 
+import com.everhomes.scheduler.EquipmentInspectionTaskNotifyScheduleJob;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.CronDateUtils;
 import com.everhomes.util.DateUtils;
 
 import org.jooq.Condition;
@@ -160,6 +162,13 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 //			});
 		}
+
+		//五分钟后启动通知
+		Long notifyTime = System.currentTimeMillis() + 300000;
+		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyTriggerName,
+				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 
 	}
