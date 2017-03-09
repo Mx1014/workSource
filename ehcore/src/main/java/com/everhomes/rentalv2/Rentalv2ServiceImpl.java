@@ -1835,8 +1835,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalv2Provider.updateRentalBill(order);
 			return null;
 		}); 
-		//发短信
-		
+		//发短信给预订人
+		String templateScope = SmsTemplateCode.SCOPE;
+		List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+		smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
+		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+		int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE; 
+
+		String templateLocale = RentalNotificationTemplateCode.locale; 
+
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+		if(null == userIdentifier){
+			LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+		}else{
+			smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+		}
 		
 		//找到所有有这些ruleids的订单
 		List<RentalOrder> otherOrders = this.rentalv2Provider.findRentalSiteBillBySiteRuleIds(resourceRuleIds); 
@@ -1862,6 +1875,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dto.setStepCount(flowcase.getStepCount());
 					flowService.processAutoStep(dto);
 					//并发短信
+					String templateScope = SmsTemplateCode.SCOPE;
+					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
+					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName()); 
+					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId()); 
+					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE; 
+
+					String templateLocale = RentalNotificationTemplateCode.locale; 
+
+					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+					if(null == userIdentifier){
+						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
+					}else{
+						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+					}
 					
 				}
 			});
