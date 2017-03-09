@@ -16,6 +16,10 @@ import com.everhomes.util.Tuple;
 
 import java.util.List;
 
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.multipart.MultipartFile;
+
 public interface ActivityService {
 
     void createPost(ActivityPostCommand cmd, Long postId);
@@ -130,5 +134,18 @@ public interface ActivityService {
 
     ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
 
+	SignupInfoDTO manualSignup(ManualSignupCommand cmd);
+
+	SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd);
+
+	void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
+
+	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
+
+	void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response);
+
+	void deleteSignupInfo(DeleteSignupInfoCommand cmd);
+
 	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);
-}
+
+	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);}

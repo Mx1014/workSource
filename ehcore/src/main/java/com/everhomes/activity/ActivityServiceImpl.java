@@ -22,6 +22,8 @@ import com.everhomes.forum.Attachment;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
+import com.everhomes.group.Group;
+import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
@@ -29,18 +31,23 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
+import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.pm.CommunityPmOwner;
 import com.everhomes.poll.ProcessStatus;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
+import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
 import com.everhomes.rest.group.LeaveGroupCommand;
@@ -54,6 +61,10 @@ import com.everhomes.rest.namespace.admin.NamespaceInfoDTO;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.pm.PropertyServiceErrorCode;
 import com.everhomes.rest.promotion.ModulePromotionEntityDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoDTO;
 import com.everhomes.rest.promotion.ModulePromotionInfoType;
@@ -70,8 +81,13 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.server.schema.tables.pojos.EhActivityCategories;
 import com.everhomes.settings.PaginationConfigHelper;
+import com.everhomes.sms.DateUtil;
 import com.everhomes.user.*;
 import com.everhomes.util.*;
+import com.everhomes.util.excel.ExcelUtils;
+import com.everhomes.util.excel.RowResult;
+import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import net.greghaines.jesque.Job;
 import org.elasticsearch.common.geo.GeoHashUtils;
 import org.jooq.Condition;
@@ -81,8 +97,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Component;
 import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
@@ -94,6 +114,7 @@ import java.util.stream.Stream;
 
 import static com.everhomes.poll.ProcessStatus.NOTSTART;
 import static com.everhomes.poll.ProcessStatus.UNDERWAY;
+import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 
 @Component
@@ -147,6 +168,9 @@ public class ActivityServiceImpl implements ActivityService {
 
     @Autowired
     private GroupService groupService;
+    
+    @Autowired
+    private GroupProvider groupProvider;
     
     @Autowired
     private CategoryProvider categoryProvider;
@@ -233,6 +257,12 @@ public class ActivityServiceImpl implements ActivityService {
         //if date time format is not ok,return now
         Date convertStartTime = convert(cmd.getStartTime(), "yyyy-MM-dd HH:mm:ss");
         Date convertEndTime = convert(cmd.getEndTime(), "yyyy-MM-dd HH:mm:ss");
+        Date signupEndTime = null;
+        if (org.apache.commons.lang.StringUtils.isBlank(cmd.getSignupEndTime())) {
+			signupEndTime = convertStartTime;
+		}else {
+			signupEndTime = convert(cmd.getSignupEndTime(), "yyyy-MM-dd HH:mm:ss");
+		}
         long endTimeMs=  DateHelper.currentGMTTime().getTime();
         long startTimeMs = DateHelper.currentGMTTime().getTime();
         if(convertStartTime!=null){
@@ -244,6 +274,7 @@ public class ActivityServiceImpl implements ActivityService {
         activity.setPosterUri(cmd.getPosterUri());
         activity.setStartTime(new Timestamp(startTimeMs));
         activity.setEndTime(new Timestamp(endTimeMs));
+        activity.setSignupEndTime(new Timestamp(signupEndTime.getTime()));
         activity.setStartTimeMs(startTimeMs);
         activity.setEndTimeMs(endTimeMs);
         activity.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -275,6 +306,12 @@ public class ActivityServiceImpl implements ActivityService {
         roster.setConfirmFamilyId(user.getAddressId());
         roster.setAdultCount(0);
         roster.setChildCount(0);
+        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+        roster.setCheckinFlag(CheckInStatus.CHECKIN.getCode());
+        
+        // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
+        addAdditionalInfo(roster, user, activity);
+        
         activityProvider.createActivityRoster(roster);
         
     }
@@ -283,8 +320,9 @@ public class ActivityServiceImpl implements ActivityService {
     @Override
     public ActivityDTO signup(ActivitySignupCommand cmd) {
     	// 把锁放在查询语句的外面，update by tt, 20170210
-        return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()).enter(()-> {
+        return (ActivityDTO)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
 	        return (ActivityDTO)dbProvider.execute((status) -> {
+
 		        User user = UserContext.current().getUser();
 		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
 		        if (activity == null) {
@@ -299,6 +337,14 @@ public class ActivityServiceImpl implements ActivityService {
 							"beyond contraint quantity!");
 				}
 		        
+		        // 添加报名截止时间检查，add by tt, 20170228
+		        Timestamp signupEndTime = getSignupEndTime(activity);
+		        if (System.currentTimeMillis() > signupEndTime.getTime()) {
+		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME,
+							"beyond activity signup end time!");
+				}
+        
 		        Post post = forumProvider.findPostById(activity.getPostId());
 		        if (post == null) {
 		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
@@ -350,11 +396,14 @@ public class ActivityServiceImpl implements ActivityService {
 	            dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 	            dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 	            dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+	            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 	            dto.setUserActivityStatus(getActivityStatus(roster).getCode());
 	            dto.setFamilyId(activity.getCreatorFamilyId());
 	            dto.setGroupId(activity.getGroupId());
 	            dto.setStartTime(activity.getStartTime().toString());
 	            dto.setStopTime(activity.getEndTime().toString());
+	            dto.setSignupEndTime(getSignupEndTime(activity).toString());
 	            dto.setProcessStatus(getStatus(activity).getCode());
 	            dto.setForumId(post.getForumId());
 	            dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -368,11 +417,378 @@ public class ActivityServiceImpl implements ActivityService {
 	            
 	            return dto;
 	        });
-//	        return null;
         }).first();
-    }
+	 }
     
-    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+    @Override
+	public SignupInfoDTO manualSignup(ManualSignupCommand cmd) {
+    	Activity outActivity = checkActivityExist(cmd.getActivityId());
+    	ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode() + cmd.getActivityId()).enter(()-> {
+	        return (ActivityRoster)dbProvider.execute((status) -> {
+		    	User user = UserContext.current().getUser();
+		    	// 锁里面要重新查询活动
+		        Activity activity = activityProvider.findActivityById(cmd.getActivityId());
+		        if (activity == null) {
+		            LOGGER.error("handle activity error ,the activity does not exsit.id={}", cmd.getActivityId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + cmd.getActivityId());
+		        }
+		        //检查是否超过报名人数限制, add by tt, 20161012
+		        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount() >= activity.getMaxQuantity().intValue()) {
+		        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+							"beyond contraint quantity!");
+				}
+		        
+		        Post post = forumProvider.findPostById(activity.getPostId());
+		        if (post == null) {
+		            LOGGER.error("handle post failed,maybe post be deleted.postId={}", activity.getPostId());
+		            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+		                    ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id " + activity.getPostId());
+		        }
+		        ActivityRoster roster = newRoster(cmd, user, activity);
+		        
+	            if (activity.getGroupId() != null && activity.getGroupId() != 0) {
+	                RequestToJoinGroupCommand joinCmd = new RequestToJoinGroupCommand();
+	                joinCmd.setGroupId(activity.getGroupId());
+	                joinCmd.setRequestText("request to join activity group");
+	                try{
+	                    groupService.requestToJoinGroup(joinCmd);
+	                }catch(Exception e){
+	                    LOGGER.error("join to group failed",e);
+	                }
+	               
+	            }
+	            activity.setSignupAttendeeCount(activity.getSignupAttendeeCount()+1);
+	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + 1);
+	            activityProvider.createActivityRoster(roster);
+	            activityProvider.updateActivity(activity);
+	            return roster;
+	        });
+        }).first();
+    	
+		return convertActivityRoster(activityRoster, outActivity);
+	}
+
+	private SignupInfoDTO convertActivityRoster(ActivityRoster activityRoster, Activity activity) {
+		SignupInfoDTO signupInfoDTO = ConvertHelper.convert(activityRoster, SignupInfoDTO.class);
+		User user = getUserFromPhone(activityRoster.getPhone());
+		signupInfoDTO.setNickName(user.getNickName());
+		signupInfoDTO.setType(getAuthFlag(user));
+		if (activity != null && activityRoster.getUid().longValue() == activity.getCreatorUid().longValue()) {
+			signupInfoDTO.setCreateFlag((byte)1);
+		}else {
+			signupInfoDTO.setCreateFlag((byte)0);
+		}
+		
+		return signupInfoDTO;
+	}
+
+	private Byte getAuthFlag(User user) {
+		if (user.getId().longValue() == 0L) {
+			return UserAuthFlag.NOT_REGISTER.getCode();
+		}
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(user.getId());
+		for (OrganizationMember organizationMember : members) {
+			if (OrganizationMemberStatus.fromCode(organizationMember.getStatus()) == OrganizationMemberStatus.ACTIVE) {
+				return UserAuthFlag.AUTH.getCode();
+			}
+		}
+		return UserAuthFlag.NOT_AUTH.getCode();
+	}
+
+	private ActivityRoster newRoster(ManualSignupCommand cmd, User createUser, Activity activity) {
+		User user = getUserFromPhone(cmd.getPhone());
+		ActivityRoster roster = new ActivityRoster();
+		roster.setUuid(UUID.randomUUID().toString());
+		roster.setActivityId(activity.getId());
+		roster.setUid(user.getId());
+        roster.setAdultCount(1);
+        roster.setChildCount(0);
+        roster.setCheckinFlag(CheckInStatus.UN_CHECKIN.getCode());
+        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+        roster.setConfirmUid(createUser.getId());
+        roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        roster.setLotteryFlag((byte) 0);
+        roster.setPhone(cmd.getPhone());
+        roster.setRealName(cmd.getRealName());
+        roster.setGender(cmd.getGender());
+        roster.setCommunityName(cmd.getCommunityName());
+        roster.setOrganizationName(cmd.getOrganizationName());
+        roster.setPosition(cmd.getPosition());
+        roster.setLeaderFlag(cmd.getLeaderFlag());
+        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
+        
+        return roster;
+	}
+
+	private User getUserFromPhone(String phone) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, phone);
+		if (userIdentifier != null) {
+			User user = userProvider.findUserById(userIdentifier.getOwnerUid());
+			if (user != null) {
+				return user;
+			}
+		}
+		User user = new User();
+		user.setId(0L);
+		user.setExecutiveTag((byte) 0);
+		return user;
+	}
+
+	@Override
+	public SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd) {
+		ActivityRoster activityRoster = (ActivityRoster)this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
+	        return (ActivityRoster)dbProvider.execute((status) -> {
+	        	ActivityRoster roster = convertToRoster(cmd);
+	        	if (cmd.getCheckinFlag().byteValue() != roster.getCheckinFlag().byteValue()) {
+	        		updateActivityCheckin(roster, cmd.getCheckinFlag());
+	        		roster.setCheckinFlag(cmd.getCheckinFlag());
+	        		roster.setCheckinUid(UserContext.current().getUser().getId());
+	    		}
+	        	activityProvider.updateRoster(roster);
+	        	return roster;
+	        });
+		}).first();
+		return convertActivityRoster(activityRoster, null);
+	}
+
+	private ActivityRoster convertToRoster(UpdateSignupInfoCommand cmd) {
+		ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
+		roster.setRealName(cmd.getRealName());
+		roster.setGender(cmd.getGender());
+		roster.setCommunityName(cmd.getCommunityName());
+		roster.setOrganizationName(cmd.getOrganizationName());
+		roster.setPosition(cmd.getPosition());
+		roster.setLeaderFlag(cmd.getLeaderFlag());
+		return roster;
+	}
+
+	private void updateActivityCheckin(ActivityRoster roster, Byte toCheckinFlag) {
+		// 签到的话活动表对应字段+1
+		if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.UN_CHECKIN && CheckInStatus.fromCode(toCheckinFlag) == CheckInStatus.CHECKIN) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+				Activity activity = activityProvider.findActivityById(roster.getActivityId());
+				activity.setCheckinAttendeeCount(activity.getCheckinAttendeeCount()
+		                + (roster.getAdultCount() + roster.getChildCount()));
+		        if (roster.getFamilyId() != null) {
+		        	activity.setCheckinFamilyCount(activity.getCheckinFamilyCount() + 1);
+		        }
+		        activityProvider.updateActivity(activity);
+				return null;
+			});
+			//取消签到的话活动表对应字段-1
+		}else if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.CHECKIN && CheckInStatus.fromCode(toCheckinFlag) == CheckInStatus.UN_CHECKIN) {
+			this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+				int result = 0;
+				Activity activity = activityProvider.findActivityById(roster.getActivityId());
+				activity.setCheckinAttendeeCount((result = activity.getCheckinAttendeeCount() - (roster.getAdultCount() + roster.getChildCount())) < 0 ? 0 : result);
+		        if (roster.getFamilyId() != null){
+		        	activity.setCheckinFamilyCount((result = activity.getCheckinFamilyCount() - 1) < 0 ? 0 : result);
+		        }
+		        activityProvider.updateActivity(activity);
+				return null;
+			});
+		}
+	}
+
+	@Override
+	public void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files) {
+		this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+cmd.getActivityId()).enter(()-> {
+			User user = UserContext.current().getUser();
+			Activity activity = checkActivityExist(cmd.getActivityId());
+			List<ActivityRoster> rosters = getRostersFromExcel(files[0]);
+			//检查是否超过报名人数限制, add by tt, 20161012
+	        if (activity.getMaxQuantity() != null && activity.getSignupAttendeeCount().intValue() + rosters.size() > activity.getMaxQuantity().intValue()) {
+	        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_BEYOND_CONTRAINT_QUANTITY,
+						"beyond contraint quantity!");
+			}
+			
+			dbProvider.execute(s->{
+				rosters.forEach(r -> {
+					r.setConfirmUid(user.getId());
+					r.setActivityId(cmd.getActivityId());
+					activityProvider.createActivityRoster(r);
+				});
+				activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() + rosters.size());
+	            activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + rosters.size());
+	            activityProvider.updateActivity(activity);
+	            
+				return null;
+			});
+			return null;
+		});
+		
+	}
+
+	private List<ActivityRoster> getRostersFromExcel(MultipartFile file) {
+		@SuppressWarnings("rawtypes")
+		ArrayList rows = processorExcel(file);
+		List<ActivityRoster> rosters = new ArrayList<>();
+		for(int i=1, len=rows.size(); i<len; i++) {
+			RowResult row = (RowResult) rows.get(i);
+			if (org.apache.commons.lang.StringUtils.isBlank(row.getA())) {
+				continue;
+			}
+			if (row.getA().trim().length() != 11 || !row.getA().trim().startsWith("1")) {
+				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+	                    ActivityServiceErrorCode.ERROR_PHONE, "invalid phone " + row.getA());
+			}
+			User user = getUserFromPhone(row.getA().trim());
+			ActivityRoster roster = new ActivityRoster();
+			roster.setUuid(UUID.randomUUID().toString());
+			roster.setUid(user.getId());
+	        roster.setAdultCount(1);
+	        roster.setChildCount(0);
+	        roster.setCheckinFlag(CheckInStatus.UN_CHECKIN.getCode());
+	        roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
+	        roster.setConfirmTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+	        roster.setLotteryFlag((byte) 0);
+	        roster.setPhone(row.getA().trim());
+	        roster.setRealName(row.getB().trim());
+	        roster.setGender(getGender(row.getC().trim()));
+	        roster.setCommunityName(row.getD().trim());
+	        roster.setOrganizationName(row.getE().trim());
+	        roster.setPosition(row.getF().trim());
+	        roster.setLeaderFlag(getLeaderFlag(row.getG().trim()));
+	        roster.setSourceFlag(ActivityRosterSourceFlag.BACKEND_ADD.getCode());
+	        
+	        rosters.add(roster);
+		}
+		return rosters;
+	}
+
+	private Byte getLeaderFlag(String leaderFlag) {
+		if ("是".equals(leaderFlag)) {
+			return TrueOrFalseFlag.TRUE.getCode();
+		}
+		return TrueOrFalseFlag.FALSE.getCode();
+	}
+
+	private Byte getGender(String gender) {
+		if ("男".equals(gender)) {
+			return UserGender.MALE.getCode();
+		}else if ("女".equals(gender)) {
+			return UserGender.FEMALE.getCode();
+		}
+		return UserGender.UNDISCLOSURED.getCode();
+	}
+
+	@SuppressWarnings("rawtypes")
+	private ArrayList processorExcel(MultipartFile file) {
+		try {
+            return PropMrgOwnerHandler.processorExcel(file.getInputStream());
+        } catch (IOException e) {
+			LOGGER.error("Process excel error.", e);
+			throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Process excel error.");
+        }
+	}
+	
+	private Activity checkActivityExist(Long activityId) {
+		Activity activity = activityProvider.findActivityById(activityId);
+        if (activity == null) {
+            LOGGER.error("handle activity error ,the activity does not exsit.id={}", activityId);
+            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_ID, "invalid activity id " + activityId);
+        }
+        return activity;
+	}
+
+	@Override
+	public ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd) {
+		Activity activity = checkActivityExist(cmd.getActivityId());
+		int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), cmd.getPageAnchor(), pageSize+1);
+		Long nextPageAnchor = null;
+		if (rosters.size() > pageSize) {
+			rosters.remove(rosters.size()-1);
+			nextPageAnchor = rosters.get(rosters.size()-1).getId();
+		}
+		return new ListSignupInfoResponse(nextPageAnchor, rosters.stream().map(r->convertActivityRoster(r,activity)).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response) {
+		Activity activity = checkActivityExist(cmd.getActivityId());
+		List<ActivityRoster> rosters = activityProvider.listActivityRoster(cmd.getActivityId(), null, 100000);
+		if (rosters.size() > 0) {
+			List<SignupInfoDTO> signupInfoDTOs = rosters.stream().map(r->convertActivityRosterForExcel(r, activity)).collect(Collectors.toList());
+			String fileName = String.format("报名信息_%s", DateUtil.dateToStr(new Date(), DateUtil.NO_SLASH));
+			ExcelUtils excelUtils = new ExcelUtils(response, fileName, "报名信息");
+			List<String> propertyNames = new ArrayList<String>(Arrays.asList("phone", "nickName", "realName", "genderText", "organizationName", "position", "leaderFlagText",
+					"typeText", "sourceFlagText"));
+			List<String> titleNames = new ArrayList<String>(Arrays.asList("手机号", "用户昵称", "真实姓名", "性别", "公司", "职位", "是否高管", "类型", "报名来源"));
+			List<Integer> titleSizes = new ArrayList<Integer>(Arrays.asList(20, 20, 20, 10, 20, 20, 10, 20, 20));
+			
+			if (ConfirmStatus.fromCode(activity.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
+				propertyNames.add("confirmFlagText");
+				titleNames.add("报名确认");
+				titleSizes.add(20);
+			}
+			if (CheckInStatus.fromCode(activity.getSignupFlag()) == CheckInStatus.CHECKIN) {
+				propertyNames.add("checkinFlagText");
+				titleNames.add("是否签到");
+				titleSizes.add(10);
+			}
+			
+			excelUtils.writeExcel(propertyNames, titleNames, titleSizes, signupInfoDTOs);
+		}else {
+			throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+                    ActivityServiceErrorCode.ERROR_NO_ROSTER, "no roster in this activity");
+		}
+	}
+	
+	private SignupInfoDTO convertActivityRosterForExcel(ActivityRoster roster, Activity activity) {
+		SignupInfoDTO signupInfoDTO = convertActivityRoster(roster, activity);
+		signupInfoDTO.setGenderText(UserGender.fromCode(signupInfoDTO.getGender()).getText());
+		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
+		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
+		signupInfoDTO.setSourceFlagText(ActivityRosterSourceFlag.fromCode(signupInfoDTO.getSourceFlag()).getText());
+		signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
+		signupInfoDTO.setCheckinFlagText(CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag()).getText());
+		return signupInfoDTO;
+	}
+
+	@Override
+	public void deleteSignupInfo(DeleteSignupInfoCommand cmd) {
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY_ROSTER.getCode()+cmd.getId()).enter(()-> {
+	        dbProvider.execute((status) -> {
+	        	ActivityRoster roster = activityProvider.findRosterById(cmd.getId());
+	        	activityProvider.deleteRoster(roster);
+	        	updateActivityWhenDeleteRoster(roster);
+	        	return null;
+	        });
+	        return null;
+		});
+	}
+
+	private void updateActivityWhenDeleteRoster(ActivityRoster roster) {
+		coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ACTIVITY.getCode()+roster.getActivityId()).enter(()-> {
+			int total = roster.getAdultCount() + roster.getChildCount();
+			int result = 0;
+			Activity activity = activityProvider.findActivityById(roster.getActivityId());
+			activity.setSignupAttendeeCount(activity.getSignupAttendeeCount() - total);
+			if (ConfirmStatus.fromCode(roster.getConfirmFlag()) == ConfirmStatus.CONFIRMED) {
+				activity.setConfirmAttendeeCount((result = activity.getConfirmAttendeeCount() - total) < 0 ? 0 : result);
+				if (roster.getFamilyId() != null) {
+					activity.setConfirmFamilyCount((result = activity.getConfirmFamilyCount() -1) < 0 ? 0 : result);
+				}
+			}
+			if (CheckInStatus.fromCode(roster.getCheckinFlag()) == CheckInStatus.CHECKIN) {
+				activity.setCheckinAttendeeCount((result = activity.getCheckinAttendeeCount() - total) < 0 ? 0 : result);
+				if (roster.getFamilyId() != null) {
+					activity.setCheckinFamilyCount((result = activity.getCheckinFamilyCount() - 1) < 0 ? 0 : result);
+				}
+			}
+			activityProvider.updateActivity(activity);
+			return null;
+		});
+	}
+
+	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
     	
         String scope = ActivityNotificationTemplateCode.SCOPE;
         
@@ -407,10 +823,86 @@ public class ActivityServiceImpl implements ActivityService {
         if(ConfirmStatus.UN_CONFIRMED == ConfirmStatus.fromCode(activity.getConfirmFlag())){
         	roster.setConfirmFlag(ConfirmStatus.CONFIRMED.getCode());
         }
+        
+        // 添加活动报名时新增的姓名、职位等信息, add by tt, 20170228
+        addAdditionalInfo(roster, user, activity);
+        
         return roster;
     }
 
-    @Override
+    private void addAdditionalInfo(ActivityRoster roster, User user, Activity activity) {
+    	SignupInfoDTO signupInfoDTO = verifyPerson(activity.getNamespaceId(), user);
+    	roster.setPhone(signupInfoDTO.getPhone());
+    	roster.setRealName(signupInfoDTO.getRealName());
+    	roster.setGender(signupInfoDTO.getGender());
+    	roster.setCommunityName(signupInfoDTO.getCommunityName());
+    	roster.setOrganizationName(signupInfoDTO.getOrganizationName());
+    	roster.setPosition(signupInfoDTO.getPosition());
+    	roster.setLeaderFlag(signupInfoDTO.getLeaderFlag());
+    	roster.setSourceFlag(ActivityRosterSourceFlag.SELF.getCode());
+	}
+    
+    private SignupInfoDTO verifyPerson(Integer namespaceId, User user) {
+    	SignupInfoDTO signupInfoDTO = new SignupInfoDTO();
+    	List<UserIdentifier> userIdentifiers = userProvider.listUserIdentifiersOfUser(user.getId());
+    	if (userIdentifiers != null && userIdentifiers.size() > 0) {
+    		signupInfoDTO.setPhone(userIdentifiers.get(0).getIdentifierToken());
+		}
+    	signupInfoDTO.setGender(user.getGender());
+    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag());
+    	signupInfoDTO.setNickName(user.getNickName());
+    	
+    	OrganizationMember organizationMember = findAnyOrganizationMember(namespaceId, user.getId());
+    	if (organizationMember != null) {
+    		signupInfoDTO.setRealName(organizationMember.getContactName());
+    		Organization organization = organizationProvider.findOrganizationById(organizationMember.getOrganizationId());
+    		//如果是职位，取之
+			if (OrganizationGroupType.fromCode(organizationMember.getGroupType()) == OrganizationGroupType.JOB_POSITION) {
+				if (organization != null) {
+					signupInfoDTO.setPosition(organization.getName());
+				}
+			}
+			//找出公司
+			Long organizationId = Long.parseLong(organization.getPath().split("/")[1]);
+			Organization rootOrganization = organizationProvider.findOrganizationById(organizationId);
+			if (rootOrganization != null) {
+				signupInfoDTO.setOrganizationName(rootOrganization.getName());
+				//找出园区
+				OrganizationCommunityRequest organizationCommunityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(rootOrganization.getId());
+				if (organizationCommunityRequest != null) {
+					Community community = communityProvider.findCommunityById(organizationCommunityRequest.getCommunityId());
+					if (community != null) {
+						signupInfoDTO.setCommunityName(community.getName());
+					}
+				}
+			}
+		}
+    	
+    	return signupInfoDTO;
+    }
+
+	@Override
+	public SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getPhone());
+		if (identifier != null) {
+			User user = userProvider.findUserById(identifier.getOwnerUid());
+			if (user != null) {
+				return verifyPerson(namespaceId, user);
+			}
+		}
+		return null;
+	}
+
+	private OrganizationMember findAnyOrganizationMember(Integer namespaceId, Long userId) {
+		OrganizationMember organizationMember = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(namespaceId, userId, OrganizationGroupType.JOB_POSITION.getCode());
+		if (organizationMember == null) {
+			organizationMember = organizationProvider.findAnyOrganizationMemberByNamespaceIdAndUserId(namespaceId, userId, OrganizationGroupType.ENTERPRISE.getCode());
+		}
+		return organizationMember;
+	}
+
+	@Override
     public ActivityDTO cancelSignup(ActivityCancelSignupCommand cmd) {
         User user = UserContext.current().getUser();
         Activity activity = activityProvider.findActivityById(cmd.getActivityId());
@@ -443,11 +935,14 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setForumId(post.getForumId());
         dto.setUserActivityStatus(ActivityStatus.UN_SIGNUP.getCode());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -568,6 +1063,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         dto.setForumId(post.getForumId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -617,6 +1113,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -657,7 +1154,10 @@ public class ActivityServiceImpl implements ActivityService {
                         .map((a) -> { return a.getIdentifierToken(); })
                         .collect(Collectors.toList());
                 d.setPhone(phones);
-            }
+            }else {
+				d.setUserName(r.getRealName());
+				d.setPhone(Arrays.asList(r.getPhone()));
+			}
 
             
             return d;
@@ -680,37 +1180,38 @@ public class ActivityServiceImpl implements ActivityService {
     }
     
     private String populateUserName(User user, long postId) {
-    	
-    	Post post = this.forumProvider.findPostById(postId);
-        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
-        Long regionId = post.getVisibleRegionId();
-        
-        if(regionType != null && regionId != null) {
-            String creatorNickName = user.getNickName();
-            if(creatorNickName == null) {
-                creatorNickName = "";
-            }
-            switch(regionType) {
-            case COMMUNITY:
-                Community community = communityProvider.findCommunityById(regionId);
-                if(community != null)
-                	creatorNickName = creatorNickName + "@" + community.getName();
-                break;
-            case REGION:
-                Organization organization = organizationProvider.findOrganizationById(regionId);
-                if(organization !=null)
-                	creatorNickName = creatorNickName + "@" + organization.getName();
-                break;
-            default:
-                LOGGER.error("Unsupported visible region type, userId=" + user.getId() 
-                    + ", regionType=" + regionType + ", postId=" + post.getId());
-            }
-            return creatorNickName;
-        } else {
-            LOGGER.error("Region type or id is null, userId=" + user.getId() + ", postId=" + post.getId());
-        }
-        
-        return "";
+    	// 根据产品姚绮云要求，不要显示@xxxx, add by tt, 20170307
+    	return user.getNickName();
+//    	Post post = this.forumProvider.findPostById(postId);
+//        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+//        Long regionId = post.getVisibleRegionId();
+//        
+//        if(regionType != null && regionId != null) {
+//            String creatorNickName = user.getNickName();
+//            if(creatorNickName == null) {
+//                creatorNickName = "";
+//            }
+//            switch(regionType) {
+//            case COMMUNITY:
+//                Community community = communityProvider.findCommunityById(regionId);
+//                if(community != null)
+//                	creatorNickName = creatorNickName + "@" + community.getName();
+//                break;
+//            case REGION:
+//                Organization organization = organizationProvider.findOrganizationById(regionId);
+//                if(organization !=null)
+//                	creatorNickName = creatorNickName + "@" + organization.getName();
+//                break;
+//            default:
+//                LOGGER.error("Unsupported visible region type, userId=" + user.getId() 
+//                    + ", regionType=" + regionType + ", postId=" + post.getId());
+//            }
+//            return creatorNickName;
+//        } else {
+//            LOGGER.error("Region type or id is null, userId=" + user.getId() + ", postId=" + post.getId());
+//        }
+//        
+//        return "";
         
     }
 
@@ -809,6 +1310,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setUserActivityStatus(getActivityStatus(item).getCode());
@@ -816,6 +1319,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         fixupVideoInfo(dto);//added by janson
         
@@ -875,6 +1379,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setUserActivityStatus(getActivityStatus(roster).getCode());
@@ -884,6 +1390,7 @@ public class ActivityServiceImpl implements ActivityService {
 //        String convertEndTime = format.format(activity.getEndTime().getTime());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         fixupVideoInfo(dto);//added by janson
         return dto;
@@ -1011,6 +1518,8 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setCheckinFlag(activity.getSignupFlag()==null?null:activity.getSignupFlag().intValue());
         dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
         dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setFamilyId(activity.getCreatorFamilyId());
 //        SimpleDateFormat format = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
@@ -1018,6 +1527,7 @@ public class ActivityServiceImpl implements ActivityService {
 //        String convertEndTime = format.format(activity.getEndTime().getTime());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setGroupId(activity.getGroupId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
         dto.setForumId(post.getForumId());
@@ -1052,7 +1562,10 @@ public class ActivityServiceImpl implements ActivityService {
                             .map((a) -> { return a.getIdentifierToken(); })
                             .collect(Collectors.toList());
                     d.setPhone(phones);
-                }
+                }else {
+					d.setUserName(r.getRealName());
+					d.setPhone(Arrays.asList(r.getPhone()));
+				}
 
             }
             return d;
@@ -1161,12 +1674,15 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
             dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
             dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
             dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
             dto.setProcessStatus(getStatus(activity).getCode());
             dto.setFamilyId(activity.getCreatorFamilyId());
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
+            dto.setSignupEndTime(getSignupEndTime(activity).toString());
             dto.setGroupId(activity.getGroupId());
             dto.setPosterUrl(getActivityPosterUrl(activity));
             dto.setForumId(post.getForumId());
@@ -1220,6 +1736,8 @@ public class ActivityServiceImpl implements ActivityService {
           }
           dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
           dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+          dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+          dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
           dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
           dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
           dto.setProcessStatus(getStatus(activity).getCode());
@@ -1227,6 +1745,7 @@ public class ActivityServiceImpl implements ActivityService {
           dto.setPosterUrl(getActivityPosterUrl(activity));
           dto.setStartTime(activity.getStartTime().toString());
           dto.setStopTime(activity.getEndTime().toString());
+          dto.setSignupEndTime(getSignupEndTime(activity).toString());
           dto.setGroupId(activity.getGroupId());
           dto.setForumId(post.getForumId());
           User user = UserContext.current().getUser();
@@ -1255,6 +1774,13 @@ public class ActivityServiceImpl implements ActivityService {
         return new Tuple<Long, List<ActivityDTO>>(locator.getAnchor(), result);
     }
 
+    private Timestamp getSignupEndTime(Activity activity) {
+    	if (activity.getSignupEndTime() == null) {
+			return activity.getStartTime();
+		}
+    	return activity.getSignupEndTime();
+    }
+    
 	@Override
 	public boolean isPostIdExist(Long postId) {
 		Activity activity = activityProvider.findSnapshotByPostId(postId);
@@ -1324,6 +1850,8 @@ public class ActivityServiceImpl implements ActivityService {
             }
 			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+	        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 			dto.setProcessStatus(getStatus(activity).getCode());
@@ -1331,6 +1859,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setPosterUrl(getActivityPosterUrl(activity));
 			dto.setStartTime(activity.getStartTime().toString());
 			dto.setStopTime(activity.getEndTime().toString());
+	        dto.setSignupEndTime(getSignupEndTime(activity).toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
 			User user = UserContext.current().getUser();
@@ -1410,6 +1939,8 @@ public class ActivityServiceImpl implements ActivityService {
             }
 			dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 			dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+	        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+	        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 			dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 			dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 			dto.setProcessStatus(getStatus(activity).getCode());
@@ -1417,6 +1948,7 @@ public class ActivityServiceImpl implements ActivityService {
 			dto.setPosterUrl(getActivityPosterUrl(activity));
 			dto.setStartTime(activity.getStartTime().toString());
 			dto.setStopTime(activity.getEndTime().toString());
+	        dto.setSignupEndTime(getSignupEndTime(activity).toString());
 			dto.setGroupId(activity.getGroupId());
 			dto.setForumId(post.getForumId());
 			fixupVideoInfo(dto);//added by janson
@@ -1704,12 +2236,15 @@ public class ActivityServiceImpl implements ActivityService {
             dto.setActivityId(activity.getId());
             dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
             dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+            dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+            dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
             dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
             dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
             dto.setProcessStatus(getStatus(activity).getCode());
             dto.setFamilyId(activity.getCreatorFamilyId());
             dto.setStartTime(activity.getStartTime().toString());
             dto.setStopTime(activity.getEndTime().toString());
+            dto.setSignupEndTime(getSignupEndTime(activity).toString());
             dto.setGroupId(activity.getGroupId());
 //            dto.setPosterUrl(getActivityPosterUrl(activity));
             String posterUrl = getActivityPosterUrl(activity);
@@ -1940,12 +2475,15 @@ public class ActivityServiceImpl implements ActivityService {
 		    			dto.setActivityId(activity.getId());
 		    	        dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
 		    	        dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+		    	        dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+		    	        dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
 		    	        dto.setConfirmFlag(activity.getConfirmFlag()==null?0:activity.getConfirmFlag().intValue());
 		    	        dto.setCheckinFlag(activity.getSignupFlag()==null?0:activity.getSignupFlag().intValue());
 		    	        dto.setProcessStatus(getStatus(activity).getCode());
 		    	        dto.setFamilyId(activity.getCreatorFamilyId());
 		    	        dto.setStartTime(activity.getStartTime().toString());
 		    	        dto.setStopTime(activity.getEndTime().toString());
+		    	        dto.setSignupEndTime(getSignupEndTime(activity).toString());
 		    	        dto.setGroupId(activity.getGroupId());
 		    	        dto.setPosterUrl(getActivityPosterUrl(activity));
 		    	        dto.setForumId(r.getForumId());
@@ -2216,6 +2754,7 @@ public class ActivityServiceImpl implements ActivityService {
         dto.setProcessStatus(getStatus(activity).getCode());
         dto.setStartTime(activity.getStartTime().toString());
         dto.setStopTime(activity.getEndTime().toString());
+        dto.setSignupEndTime(getSignupEndTime(activity).toString());
         dto.setFamilyId(activity.getCreatorFamilyId());
         dto.setGroupId(activity.getGroupId());
         dto.setPosterUrl(getActivityPosterUrl(activity));
@@ -2318,6 +2857,16 @@ public class ActivityServiceImpl implements ActivityService {
 //        }
 
         if(null == communityId){
+        	// 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
+        	Organization organization = organizationProvider.findOrganizationById(organizationId);
+        	if (organization != null) {
+        		if (organization.getGroupId() != null) {
+        			Group group = groupProvider.findGroupById(organization.getGroupId());
+        			if (group != null) {
+        				forumIds.add(group.getOwningForumId());
+        			}
+        		}
+			}
             List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organizationId);
             if(null != communities){
                 for (CommunityDTO communityDTO : communities) {
@@ -2460,12 +3009,15 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setActivityId(activity.getId());
                 dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
                 dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+                dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+                dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
                 dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
                 dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
                 dto.setProcessStatus(getStatus(activity).getCode());
                 dto.setFamilyId(activity.getCreatorFamilyId());
                 dto.setStartTime(activity.getStartTime().toString());
                 dto.setStopTime(activity.getEndTime().toString());
+                dto.setSignupEndTime(getSignupEndTime(activity).toString());
                 dto.setGroupId(activity.getGroupId());
                 dto.setPosterUrl(getActivityPosterUrl(activity));
                 if (user != null) {
@@ -2507,12 +3059,15 @@ public class ActivityServiceImpl implements ActivityService {
                 dto.setActivityId(activity.getId());
                 dto.setEnrollFamilyCount(activity.getSignupFamilyCount());
                 dto.setEnrollUserCount(activity.getSignupAttendeeCount());
+                dto.setCheckinUserCount(activity.getCheckinAttendeeCount());
+                dto.setCheckinFamilyCount(activity.getCheckinFamilyCount());
                 dto.setConfirmFlag(activity.getConfirmFlag() == null ? 0 : activity.getConfirmFlag().intValue());
                 dto.setCheckinFlag(activity.getSignupFlag() == null ? 0 : activity.getSignupFlag().intValue());
                 dto.setProcessStatus(getStatus(activity).getCode());
                 dto.setFamilyId(activity.getCreatorFamilyId());
                 dto.setStartTime(activity.getStartTime().toString());
                 dto.setStopTime(activity.getEndTime().toString());
+                dto.setSignupEndTime(getSignupEndTime(activity).toString());
                 dto.setGroupId(activity.getGroupId());
                 dto.setPosterUrl(getActivityPosterUrl(activity));
                 if (user != null) {

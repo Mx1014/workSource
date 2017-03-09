@@ -24,6 +24,7 @@ public enum CoordinationLocks {
 	WANKE_LOGIN("wanke.login"),
     
     UPDATE_ACTIVITY("activity.update"),
+    UPDATE_ACTIVITY_ROSTER("activity.update.roster"),
     CREATE_NEW_ORG("org.create"),
 	UPDATE_APPROVAL_CATEGORY("update_approval_category"),
 	UPDATE_APPROVAL_RULE("update_approval_rule"),

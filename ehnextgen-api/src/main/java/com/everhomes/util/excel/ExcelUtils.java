@@ -1,5 +1,6 @@
 package com.everhomes.util.excel;
 
+import org.apache.commons.lang.ArrayUtils;
 import org.apache.commons.lang.StringEscapeUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.Cell;
@@ -9,6 +10,8 @@ import org.apache.poi.ss.usermodel.Sheet;
 import org.apache.poi.xssf.usermodel.XSSFCellStyle;
 import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+
+import com.everhomes.rest.activity.SignupInfoDTO;
 
 import javax.servlet.http.HttpServletResponse;
 import java.io.*;
@@ -118,6 +121,11 @@ public class ExcelUtils {
             ex.printStackTrace();
         }
     }
+
+	public void writeExcel(List<String> titleColumn, List<String> titleName, List<Integer> titleSize,
+			List<?> dataList) {
+		writeExcel(titleColumn.toArray(new String[titleColumn.size()]), titleName.toArray(new String[titleName.size()]), ArrayUtils.toPrimitive(titleSize.toArray(new Integer[titleSize.size()])), dataList);
+	}
 
     private OutputStream getOutputStream() throws IOException {
         if (fileDir != null) {
