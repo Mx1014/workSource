@@ -3053,31 +3053,46 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		if(isAdmin) {
-			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, null, offset, pageSize + 1);
+			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, pageSize + 1);
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
-				
-				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
-				if(maps != null && maps.size() > 0) {
-					List<Long> standardIds = maps.stream().map(r->{
-						return r.getStandardId();
-					}).collect(Collectors.toList());
-					tasks = equipmentProvider.listEquipmentInspectionReviewTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
-				}
-				
-			} else {
-				//产品修改需求，生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以根据用户关联的部门岗位先去eh_equipment_inspection_standard_group_map查出standardIds再根据standardIds来查 by xiongying20170213
-//				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, groupDtos, offset, pageSize + 1);
-				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.EXECUTIVE_GROUP.getCode());
-				if(maps != null && maps.size() > 0) {
-					List<Long> standardIds = maps.stream().map(r->{
-						return r.getStandardId();
-					}).collect(Collectors.toList());
-					tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
-				}
-
+			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			if(maps != null && maps.size() > 0) {
+				List<Long> executeStandardIds = new ArrayList<>();
+				List<Long> reviewStandardIds = new ArrayList<>();
+				maps.stream().map(r->{
+					if(QualityGroupType.REVIEW_GROUP.equals(r.getGroupType())) {
+						reviewStandardIds.add(r.getStandardId());
+					}
+					if(QualityGroupType.EXECUTIVE_GROUP.equals(r.getGroupType())) {
+						executeStandardIds.add(r.getStandardId());
+					}
+					return null;
+				});
+				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1);
 			}
+//			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
+//
+//				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
+//				if(maps != null && maps.size() > 0) {
+//					List<Long> standardIds = maps.stream().map(r->{
+//						return r.getStandardId();
+//					}).collect(Collectors.toList());
+//					tasks = equipmentProvider.listEquipmentInspectionReviewTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
+//				}
+//
+//			} else {
+//				//产品修改需求，生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以根据用户关联的部门岗位先去eh_equipment_inspection_standard_group_map查出standardIds再根据standardIds来查 by xiongying20170213
+////				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, groupDtos, offset, pageSize + 1);
+//				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.EXECUTIVE_GROUP.getCode());
+//				if(maps != null && maps.size() > 0) {
+//					List<Long> standardIds = maps.stream().map(r->{
+//						return r.getStandardId();
+//					}).collect(Collectors.toList());
+//					tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
+//				}
+//
+//			}
 		}
         if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
