@@ -743,12 +743,12 @@ public class ActivityServiceImpl implements ActivityService {
 	
 	private SignupInfoDTO convertActivityRosterForExcel(ActivityRoster roster, Activity activity) {
 		SignupInfoDTO signupInfoDTO = convertActivityRoster(roster, activity);
-		signupInfoDTO.setGenderText(UserGender.fromCode(signupInfoDTO.getGender()).getText());
-		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
-		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
+		signupInfoDTO.setGenderText(UserGender.fromCode(signupInfoDTO.getGender())==null?UserGender.UNDISCLOSURED.getText():UserGender.fromCode(signupInfoDTO.getGender()).getText());
+		signupInfoDTO.setLeaderFlagText(TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag())==null?TrueOrFalseFlag.FALSE.getText():TrueOrFalseFlag.fromCode(signupInfoDTO.getLeaderFlag()).getText());
+		signupInfoDTO.setTypeText(UserAuthFlag.fromCode(signupInfoDTO.getType())==null?UserAuthFlag.NOT_REGISTER.getText():UserAuthFlag.fromCode(signupInfoDTO.getType()).getText());
 		signupInfoDTO.setSourceFlagText(ActivityRosterSourceFlag.fromCode(signupInfoDTO.getSourceFlag()).getText());
-		signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
-		signupInfoDTO.setCheckinFlagText(CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag()).getText());
+		signupInfoDTO.setConfirmFlagText(ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag())==null?ConfirmStatus.UN_CONFIRMED.getText():ConfirmStatus.fromCode(signupInfoDTO.getConfirmFlag()).getText());
+		signupInfoDTO.setCheckinFlagText(CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag())==null?CheckInStatus.UN_CHECKIN.getText():CheckInStatus.fromCode(signupInfoDTO.getCheckinFlag()).getText());
 		return signupInfoDTO;
 	}
 
@@ -849,7 +849,7 @@ public class ActivityServiceImpl implements ActivityService {
     		signupInfoDTO.setPhone(userIdentifiers.get(0).getIdentifierToken());
 		}
     	signupInfoDTO.setGender(user.getGender());
-    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag());
+    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag()==null?TrueOrFalseFlag.FALSE.getCode():user.getExecutiveTag());
     	signupInfoDTO.setNickName(user.getNickName());
     	
     	OrganizationMember organizationMember = findAnyOrganizationMember(namespaceId, user.getId());

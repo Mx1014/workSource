@@ -34,6 +34,6 @@ public enum ActivityRosterSourceFlag {
 				}
 			}
 		}
-		return null;
+		return SELF;
 	}
 }
