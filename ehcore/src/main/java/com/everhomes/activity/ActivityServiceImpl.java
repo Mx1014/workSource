@@ -849,7 +849,7 @@ public class ActivityServiceImpl implements ActivityService {
     		signupInfoDTO.setPhone(userIdentifiers.get(0).getIdentifierToken());
 		}
     	signupInfoDTO.setGender(user.getGender());
-    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag());
+    	signupInfoDTO.setLeaderFlag(user.getExecutiveTag()==null?TrueOrFalseFlag.FALSE.getCode():user.getExecutiveTag());
     	signupInfoDTO.setNickName(user.getNickName());
     	
     	OrganizationMember organizationMember = findAnyOrganizationMember(namespaceId, user.getId());
