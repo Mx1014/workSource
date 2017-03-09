@@ -760,8 +760,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //				}
 //			}
 			newDefaultRule.setOpenWeekday(defaultRule.getOpenWeekday());
-			newDefaultRule.setBeginDate(new Date(cmd.getBeginDate()));
-			newDefaultRule.setEndDate(new Date(cmd.getEndDate()));
+			newDefaultRule.setBeginDate(defaultRule.getBeginDate());
+			newDefaultRule.setEndDate(defaultRule.getEndDate());
 			newDefaultRule.setId(defaultRule.getId());
 			newDefaultRule.setResourceCounts(cmd.getSiteCounts());
 			this.rentalv2Provider.updateRentalDefaultRule(newDefaultRule);
