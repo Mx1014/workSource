@@ -1,4 +1,4 @@
-/*package com.everhomes.test.junit.rental;
+package com.everhomes.test.junit.rental;
 
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -20,7 +20,7 @@ import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.pojos.EhRentalDefaultRules;
+import com.everhomes.server.schema.tables.pojos.EhRentalv2DefaultRules;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
@@ -71,20 +71,20 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 				httpClientService.isReponseSuccess(response));
 		assertNotNull("The default rule not null ", response.getResponse());
 		System.out.print(response.getResponse().toString());
-		List<EhRentalDefaultRules> result = new ArrayList<>();
+		List<EhRentalv2DefaultRules> result = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext();
 		context.select()
-				.from(Tables.EH_RENTAL_DEFAULT_RULES)
-				.where(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_TYPE.eq(cmd
+				.from(Tables.EH_RENTALV2_DEFAULT_RULES)
+				.where(Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_TYPE.eq(cmd
 						.getOwnerType()))
-				.and(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_ID.eq(cmd
+				.and(Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_ID.eq(cmd
 						.getOwnerId()))
-				.and(Tables.EH_RENTAL_DEFAULT_RULES.RESOURCE_TYPE_ID.eq(cmd
+				.and(Tables.EH_RENTALV2_DEFAULT_RULES.RESOURCE_TYPE_ID.eq(cmd
 						.getResourceTypeId()))
 				.fetch()
 				.map((r) -> {
 					result.add(ConvertHelper.convert(r,
-							EhRentalDefaultRules.class));
+							EhRentalv2DefaultRules.class));
 					return null;
 				});
 		assertEquals(1, result.size());
@@ -142,20 +142,20 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 				+ StringHelper.toJsonString(response),
 				httpClientService.isReponseSuccess(response));
 
-		List<EhRentalDefaultRules> result = new ArrayList<>();
+		List<EhRentalv2DefaultRules> result = new ArrayList<>();
 		DSLContext context = dbProvider.getDslContext();
 		context.select()
-				.from(Tables.EH_RENTAL_DEFAULT_RULES)
-				.where(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_TYPE.eq(cmd
+				.from(Tables.EH_RENTALV2_DEFAULT_RULES)
+				.where(Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_TYPE.eq(cmd
 						.getOwnerType()))
-				.and(Tables.EH_RENTAL_DEFAULT_RULES.OWNER_ID.eq(cmd
+				.and(Tables.EH_RENTALV2_DEFAULT_RULES.OWNER_ID.eq(cmd
 						.getOwnerId()))
-				.and(Tables.EH_RENTAL_DEFAULT_RULES.RESOURCE_TYPE_ID.eq(cmd
+				.and(Tables.EH_RENTALV2_DEFAULT_RULES.RESOURCE_TYPE_ID.eq(cmd
 						.getResourceTypeId()))
 				.fetch()
 				.map((r) -> {
 					result.add(ConvertHelper.convert(r,
-							EhRentalDefaultRules.class));
+							EhRentalv2DefaultRules.class));
 					return null;
 				});
 		assertEquals(1, result.size()); 
@@ -163,5 +163,4 @@ public class RentalDefaultRuleTest extends BaseLoginAuthTestCase {
 	}
 	
 	
-}
-*/
+} 

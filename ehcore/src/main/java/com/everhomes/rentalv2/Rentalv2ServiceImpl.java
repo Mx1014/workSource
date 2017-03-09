@@ -4977,6 +4977,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalsite.setStatus(cmd.getStatus());
 			rentalsite.setOfflineCashierAddress(cmd.getOfflineCashierAddress());
 			rentalsite.setOfflinePayeeUid(cmd.getOfflinePayeeUid());
+			rentalsite.setConfirmationPrompt(cmd.getConfirmationPrompt());
 			rentalv2Provider.updateRentalSite(rentalsite);
 			this.rentalv2Provider.deleteRentalSitePicsBySiteId(cmd.getId());
 			this.rentalv2Provider.deleteRentalSiteOwnersBySiteId(cmd.getId());
