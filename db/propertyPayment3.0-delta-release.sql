@@ -28,3 +28,31 @@ INSERT INTO `eh_asset_bill_template_fields` (`id`, `namespace_id`, `required_fla
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('asset', '10001', 'zh_CN', '账单不存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('asset', '10002', 'zh_CN', '生成excel信息有问题');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('asset', 'asset.notify.fee', 'zh_CN', '您有待缴的物业账单，请尽快完成缴费（点击查看账单详情）。');
+
+
+--添加菜单
+SET @menu_id = (SELECT MAX(id) FROM `eh_web_menus`);
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+VALUES ((@menu_id := @menu_id + 1), '缴费管理', '20000', NULL, 'react:/property-service/payment-management', '1', '2', '/20000/', 'park', '458', NULL);
+
+SET @acl_privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
+VALUES ((@acl_privilege_id := @acl_privilege_id + 1), 0, '缴费管理', '缴费管理 全部权限', NULL);
+
+SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @acl_privilege_id, @menu_id, '缴费管理', 1, 1, '缴费管理  全部权限', 458); 
+
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+VALUES ((@menu_scope_id := @menu_scope_id + 1), @menu_id, '', 'EhNamespaces', 999985, 2);
+
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @acl_privilege_id, 1005, 'EhAclRoles', 0, 1, NOW()); 
+SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
+INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @acl_privilege_id, 1001, 'EhAclRoles', 0, 1, NOW()); 
+
+
+
