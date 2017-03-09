@@ -31,6 +31,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
+import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.organization.ListUserRelatedOrganizationsCommand;
 import com.everhomes.rest.organization.OrganizationSimpleDTO;
@@ -145,9 +146,27 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			}
 		}
 		else if(preFlowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
-			//更改订单状态 + 发短信 
-			rentalv2Service.changeOfflinePayOrderSuccess(order);
-			
+			if(currNode.getAutoStepType().equals(FlowStepType.END_STEP.getCode())){
+				//已完成
+				//更改订单状态 + 发短信 
+				rentalv2Service.changeOfflinePayOrderSuccess(order);
+			}else{
+				//从已支付到其他状态-一般是终止
+				String templateScope = SmsTemplateCode.SCOPE;
+				List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+				smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
+				RentalResource rs = rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+				int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE; 
+	
+				String templateLocale = RentalNotificationTemplateCode.locale; 
+	
+				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+				if(null == userIdentifier){
+					LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+				}else{
+					smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+				}
+			}
 		}
 	}
 

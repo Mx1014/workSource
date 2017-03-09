@@ -1874,21 +1874,21 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					dto.setFlowVersion(flowcase.getFlowVersion());
 					dto.setStepCount(flowcase.getStepCount());
 					flowService.processAutoStep(dto);
-					//并发短信
-					String templateScope = SmsTemplateCode.SCOPE;
-					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
-					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName()); 
-					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId()); 
-					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE; 
-
-					String templateLocale = RentalNotificationTemplateCode.locale; 
-
-					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-					if(null == userIdentifier){
-						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
-					}else{
-						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-					}
+//					//并发短信
+//					String templateScope = SmsTemplateCode.SCOPE;
+//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
+//					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName()); 
+//					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId()); 
+//					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE; 
+//
+//					String templateLocale = RentalNotificationTemplateCode.locale; 
+//
+//					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+//					if(null == userIdentifier){
+//						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
+//					}else{
+//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+//					}
 					
 				}
 			});
