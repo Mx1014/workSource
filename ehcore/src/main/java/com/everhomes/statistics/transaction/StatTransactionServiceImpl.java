@@ -20,6 +20,7 @@ import javax.annotation.PostConstruct;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.namespace.Namespace;
 import org.apache.http.protocol.HTTP;
 import org.apache.poi.ss.usermodel.Font;
 import org.apache.poi.ss.util.CellRangeAddress;
@@ -261,12 +262,16 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 				results.addAll(shopSettlementResults);
 				
 				//乱数据全部统计在临时店铺下面
-				Condition eqCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq("-1"));
-				StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(eqCond, sStartDate, sEndDate);
-				result.setServiceType(serviceType);
-				result.setResourceType(SettlementResourceType.SHOP.getCode());
-				result.setResourceId("-1");
-				results.add(result);
+				//只有0域或者查询全部的时候 才把没有来源的数据查出 add by sfyan 20170309
+				if(StringUtils.isEmpty(cmd.getNamespaceId()) || cmd.getNamespaceId() == Namespace.DEFAULT_NAMESPACE){
+					Condition eqCond = serviceCond.and(Tables.EH_STAT_SERVICE_SETTLEMENT_RESULTS.RESOURCE_ID.eq("-1"));
+					StatServiceSettlementResult result = statTransactionProvider.getStatServiceSettlementResultTotal(eqCond, sStartDate, sEndDate);
+					result.setServiceType(serviceType);
+					result.setResourceType(SettlementResourceType.SHOP.getCode());
+					result.setResourceId("-1");
+					results.add(result);
+				}
+
 			}else if(SettlementServiceType.fromCode(serviceType) == SettlementServiceType.OTHER_SHOP){
 				List<StatServiceSettlementResult> shopSettlementResults = statTransactionProvider.listStatServiceSettlementResult(serviceCond, sStartDate, sEndDate);
 				results.addAll(shopSettlementResults);
@@ -804,7 +809,7 @@ public class StatTransactionServiceImpl implements StatTransactionService{
 			List<StatWareDTO> statWareDTOs =  new ArrayList<StatWareDTO>();
 			
 			if(!StringUtils.isEmpty(wareJson)){
-				List<Ware> wares = (List<Ware>)StringHelper.fromJsonString(wareJson, List.class);
+				Ware[] wares = (Ware[])StringHelper.fromJsonString(wareJson, Ware[].class);
 				if(null != wares){
 					for (Ware ware : wares) {
 						StatWareDTO wareDTO = this.getWareInfo(ware.getWareId());
