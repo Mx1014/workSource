@@ -1195,3 +1195,12 @@ INSERT INTO `eh_service_alliances` (`id`, `parent_id`, `owner_type`, `owner_id`,
 update eh_launch_pad_items set action_data = '{"categoryId":0,"timeWidgetStyle":"date"}'  where namespace_id = 999980 and item_label = '园区快讯';
 update eh_launch_pad_items set action_data = CONCAT('{"type":',@service_alliance_categorie_id,',"parentId":',@service_alliance_categorie_id,',"displayType":"list"}')  where namespace_id = 999980 and item_label = '办事指南';
 
+
+-- 修改"产品服务"和"招商租赁"的宽度 add by xujuan 20170308
+update eh_launch_pad_layouts set layout_json='{"displayName": "服务市场","groups": [{"defaultOrder": 1,"groupName": "","instanceConfig": {"itemGroup": "Default"},"separatorFlag": 0,"separatorHeight": 0,"style": "Default","widget": "Banners"}, {"groupName": "","widget": "Navigator","instanceConfig": {"itemGroup": "Gallery"},"style": "Gallery","defaultOrder": 2,"separatorFlag": 1,"separatorHeight": 21,"columnCount": 2}, {"defaultOrder": 3,"groupName": "商家服务","instanceConfig": {"itemGroup": "Bizs"},"separatorFlag": 0,"separatorHeight": 0,"style": "Default","widget": "Navigator"}, {"defaultOrder": 4,"groupName": "","instanceConfig": {"itemGroup": "滚动广告"},"separatorFlag": 1,"separatorHeight": 21,"style": "Default","widget": "Bulletins"}, {"columnCount": 1,"defaultOrder": 5,"groupName": "","instanceConfig": {"itemGroup": "Coupons"},"separatorFlag": 0,"separatorHeight": 0,"style": "Gallery","widget": "Navigator"}],"layoutName": "ServiceMarketLayout","versionCode": "2017030801","versionName": "4.3.0"}',version_code='2017030801'
+where namespace_id=999980 and name='ServiceMarketLayout';
+
+
+
+update eh_launch_pad_items set item_width='1' where id=114027;
+update eh_launch_pad_items set item_width='1' where id=114028;
