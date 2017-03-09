@@ -75,6 +75,10 @@ public class FlowTimeoutServiceImpl implements FlowTimeoutService, ApplicationLi
     		break;
     	case MESSAGE_TIMEOUT:
     		flowService.processMessageTimeout(ft);
+    		break;
+    	case SMS_TIMEOUT:
+    		flowService.processSMSTimeout(ft);
+    		break;
     	default:
     		break;
     	}

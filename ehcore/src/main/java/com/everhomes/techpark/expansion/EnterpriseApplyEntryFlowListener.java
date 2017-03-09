@@ -19,6 +19,7 @@ import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
 import com.everhomes.yellowPage.YellowPageProvider;
 
@@ -208,6 +209,13 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
 		// TODO Auto-generated method stub
 		
 	}

@@ -30,6 +30,43 @@ public interface ContentServerService {
 
     String parserUri(String uri, String ownerType, Long ownerId);
 
+    /**
+     * 可以指定一个quality, 定义图片输出的质量
+     * @param uri
+     * @param ownerType
+     * @param ownerId
+     * @param quality   1~100之间的一个数字，值越小，输出的图片体积越小，清晰度更低
+     * @return
+     */
+    String parserUri(String uri, String ownerType, Long ownerId, Integer quality);
+
+    /**
+     * 可以指定输出图片的高度与宽度，如果只指定一个尺寸，则按比例缩放
+     * 指定高和宽，则先裁剪，再缩放
+     * @param uri
+     * @param ownerType
+     * @param ownerId
+     * @param width     输出图片的宽度
+     * @param height    输出图片的高度
+     * @return
+     */
+    String parserUri(String uri, String ownerType, Long ownerId, Integer width, Integer height);
+
+    /**
+     * 可以指定输出图片的高度与宽度，和输出质量
+     *
+     * 如果只指定一个尺寸，则按比例缩放
+     * 指定高和宽，则先裁剪，再缩放
+     * @param uri
+     * @param ownerType
+     * @param ownerId
+     * @param width     输出图片的宽度
+     * @param height    输出图片的高度
+     * @param quality   1~100之间的一个数字，值越小，输出的图片体积越小，清晰度更低
+     * @return
+     */
+    String parserUri(String uri, String ownerType, Long ownerId, Integer width, Integer height, Integer quality);
+
     ContentServerResource findResourceByUri(String uri);
     
     ImageBody parserImageBody(String uri, String ownerType, Long ownerId);

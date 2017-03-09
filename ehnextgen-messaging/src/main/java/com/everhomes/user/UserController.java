@@ -288,7 +288,7 @@ public class UserController extends ControllerBase {
 	@RequestMapping("resendVerificationCode")
 	@RequireAuthentication(false)
 	@RestReturn(String.class)
-	public RestResponse resendVerificationCode(@Valid ResendVerificationCodeCommand cmd) {
+	public RestResponse resendVerificationCode(@Valid ResendVerificationCodeCommand cmd, HttpServletRequest request) {
 		SignupToken token = WebTokenGenerator.getInstance().fromWebToken(cmd.getSignupToken(), SignupToken.class);
 		if(token == null) {
 			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
@@ -296,7 +296,7 @@ public class UserController extends ControllerBase {
 		}
 
         int namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode());
+		this.userService.resendVerficationCode(namespaceId, token, cmd.getRegionCode(), request);
 		return new RestResponse("OK");
 	}
 
@@ -696,17 +696,10 @@ public class UserController extends ControllerBase {
 	@RequestMapping("resendVerificationCodeByIdentifier")
 	@RequireAuthentication(false)
 	@RestReturn(String.class)
-	public RestResponse resendByVerifyCodeByIdentifier(@Valid ResendVerificationCodeByIdentifierCommand cmd){
+	public RestResponse resendByVerifyCodeByIdentifier(@Valid ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request){
 		assert StringUtils.isNotEmpty(cmd.getIdentifier());
-		Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
-		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
-		if(userIdentifier==null){
-			LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
-			throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
-					UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
-		}
-		userIdentifier.setRegionCode(cmd.getRegionCode());
-		userService.resendVerficationCode(userIdentifier);
+
+		userService.resendVerficationCode(cmd, request);
 		return new RestResponse("OK");
 	}
 
@@ -757,18 +750,22 @@ public class UserController extends ControllerBase {
 		    return response;
 		}
 
-		for(Long appId : cmd.getAppIds()) {
-			FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
-			messageCmd.setAppId(appId);
-			messageCmd.setAnchor(0l);
-			messageCmd.setCount(1);
-			messageCmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-			messageCmd.setRemoveOld((byte)0);
-			FetchMessageCommandResponse resp = this.messagingService.fetchPastToRecentMessages(messageCmd);
+		try {
+			for(Long appId : cmd.getAppIds()) {
+				FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
+				messageCmd.setAppId(appId);
+				messageCmd.setAnchor(0l);
+				messageCmd.setCount(1);
+				messageCmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+				messageCmd.setRemoveOld((byte)0);
+				FetchMessageCommandResponse resp = this.messagingService.fetchPastToRecentMessages(messageCmd);
 
-			if(resp.getMessages().size() > 0) {
-				cmdResponse.getAppIds().add(appId);
-			}
+				if(resp.getMessages().size() > 0) {
+					cmdResponse.getAppIds().add(appId);
+				}
+			}			
+		} catch(Exception ex) {
+			LOGGER.error("getAppIds error", ex);
 		}
 
 		return response;

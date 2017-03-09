@@ -112,7 +112,7 @@ public interface ForumService {
     List<TopicScopeDTO> getTopicSentScopes(GetTopicSentScopeCommand cmd);
     ListPostCommandResponse listTopicsByForums(ListTopicByForumCommand cmd);
     ListPostCommandResponse listOrgTopics(QueryOrganizationTopicCommand cmd);
-    ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd);
+//    ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd);
     ListPostCommandResponse listNoticeTopic(VisibleRegionType visibleRegionType, List<Long> visibleRegionIds, String publishStatus, Integer pageSize, Long pageAnchor);
     ListPostCommandResponse listNoticeByScene(ListNoticeBySceneCommand cmd);
     

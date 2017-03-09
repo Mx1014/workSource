@@ -4,7 +4,12 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.rest.pmtask.*;
+
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.sms.SmsProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -35,6 +40,7 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
@@ -52,7 +58,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
     private FlowUserSelectionProvider flowUserSelectionProvider;
-	
+	@Autowired
+	private SmsProvider smsProvider;
+	@Autowired
+	private CategoryProvider categoryProvider;
+
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 	
 	@Override
@@ -296,5 +306,30 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
 
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+
+		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_CODE == templateId) {
+
+			FlowGraphEvent event = ctx.getCurrentEvent();
+
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_TO_CREATOR_CODE == templateId) {
+
+		}
+
+		
 	}
 }

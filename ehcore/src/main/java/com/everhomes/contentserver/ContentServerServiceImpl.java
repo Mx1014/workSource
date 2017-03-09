@@ -174,17 +174,32 @@ public class ContentServerServiceImpl implements ContentServerService {
         final String token[] = new String[1];
         if(UserContext.current().getLogin() != null) 
             token[0] = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token[0]))
+        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token[0], null, null, null))
                 .collect(Collectors.toList());
     }
 
     @Override
     public String parserUri(String uri, String ownerType, Long ownerId) {
+        return parserUri(uri, ownerType, ownerId, null, null, null);
+    }
+
+    @Override
+    public String parserUri(String uri, String ownerType, Long ownerId, Integer quality) {
+        return parserUri(uri, ownerType, ownerId, null, null, quality);
+    }
+
+    @Override
+    public String parserUri(String uri, String ownerType, Long ownerId, Integer width, Integer height) {
+        return parserUri(uri, ownerType, ownerId, width, height, null);
+    }
+
+    @Override
+    public String parserUri(String uri, String ownerType, Long ownerId, Integer width, Integer height, Integer quality) {
         Map<Long, ContentServer> cache = getServersHash();
         String token =null;
         if(UserContext.current().getLogin() != null)
             token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        return parserSingleUri(uri, cache, ownerType, ownerId, token);
+        return parserSingleUri(uri, cache, ownerType, ownerId, token, width, height, quality);
     }
 
     private Map<Long, ContentServer> getServersHash() {
@@ -196,8 +211,14 @@ public class ContentServerServiceImpl implements ContentServerService {
         return cache;
     }
 
-    private String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId,
-            String token) {
+    private String parserSingleUri(String uri,
+                                   Map<Long, ContentServer> cache,
+                                   String ownerType,
+                                   Long ownerId,
+                                   String token,
+                                   Integer width,
+                                   Integer height,
+                                   Integer quality) {
         if(StringUtils.isEmpty(uri)){
             return null;
         }
@@ -235,36 +256,38 @@ public class ContentServerServiceImpl implements ContentServerService {
 //                    .getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId, token);
 //        }
         
-        int width = 0;
-        int height = 0;
-        String metaData = null;
-        try {
-            String resourceId = uri;
-            position = resourceId.indexOf("/");
-            if(position != -1) {
-                resourceId = resourceId.substring(position + 1);
-            }
-            resourceId = Generator.decodeUrl(resourceId);
-            if(resourceId != null) {
-                ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
-                if(resource != null) {
-                    metaData = resource.getMetadata();
-                    if(metaData != null && metaData.trim().length() > 0) {
-                        HashMap map = (HashMap)StringHelper.fromJsonString(metaData, HashMap.class);
-                        Object widthObj = map.get("width");
-                        if(widthObj != null) {
-                            width = Integer.parseInt(widthObj.toString());
-                        }
-                        Object heightObj = map.get("height");
-                        if(heightObj != null) {
-                            height = Integer.parseInt(heightObj.toString());
+        // int width = 0;
+        // int height = 0;
+        if (width == null && height == null) {
+            String metaData = null;
+            try {
+                String resourceId = uri;
+                position = resourceId.indexOf("/");
+                if(position != -1) {
+                    resourceId = resourceId.substring(position + 1);
+                }
+                resourceId = Generator.decodeUrl(resourceId);
+                if(resourceId != null) {
+                    ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
+                    if(resource != null) {
+                        metaData = resource.getMetadata();
+                        if(metaData != null && metaData.trim().length() > 0) {
+                            HashMap map = (HashMap)StringHelper.fromJsonString(metaData, HashMap.class);
+                            Object widthObj = map.get("width");
+                            if(widthObj != null) {
+                                width = Integer.parseInt(widthObj.toString());
+                            }
+                            Object heightObj = map.get("height");
+                            if(heightObj != null) {
+                                height = Integer.parseInt(heightObj.toString());
+                            }
                         }
                     }
                 }
+            } catch (Exception e) {
+                LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType
+                        + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType 
-                + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
         }
 
         // https 默认端口443 by sfyan 20161226
@@ -273,9 +296,14 @@ public class ContentServerServiceImpl implements ContentServerService {
             port = 443;
         }
 
-        return String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
+        String url = String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
                 getScheme(port), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
                 token, width, height);
+
+        if (quality != null) {
+            url += ("&q=" + quality);
+        }
+        return url;
     }
 
     @Override

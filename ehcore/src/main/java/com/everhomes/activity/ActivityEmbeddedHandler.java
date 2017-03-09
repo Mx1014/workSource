@@ -21,6 +21,7 @@ import com.everhomes.rest.activity.ActivityDTO;
 import com.everhomes.rest.activity.ActivityListResponse;
 import com.everhomes.rest.activity.ActivityLocalStringCode;
 import com.everhomes.rest.activity.ActivityPostCommand;
+import com.everhomes.rest.activity.ActivityServiceErrorCode;
 import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.approval.ApprovalTypeTemplateCode;
@@ -32,6 +33,7 @@ import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
 
@@ -137,10 +139,18 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     }
     
     private String getOldPostContent(ActivityDTO activityDTO){
-    	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + activityDTO.getStartTime()+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + activityDTO.getStopTime()+"\n"
+    	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + formatDate(activityDTO.getStartTime())+"\n"
+    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime())+"\n"
     				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
     				(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+    }
+    
+    // timestamp格式化后会有一个.0在后面，把它去掉，add by tt, 20170310
+    private String formatDate(String time) {
+    	if (time.contains(".")) {
+			return time.substring(0,time.lastIndexOf("."));
+		}
+    	return time;
     }
     
     private boolean isOld(String versionString){
@@ -176,6 +186,11 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         
         ActivityPostCommand cmd = (ActivityPostCommand) StringHelper.fromJsonString(post.getEmbeddedJson(),
                 ActivityPostCommand.class);
+        
+        if (StringUtils.isNotBlank(cmd.getSignupEndTime()) && cmd.getSignupEndTime().compareTo(cmd.getEndTime()) > 0) {
+        	throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_INVALID_ACTIVITY_SIGNUP_END_TIME,
+					"signup end time must less or equal to end time");
+		}
         
         if(null == cmd.getNamespaceId()){
         	Forum forum = forumProvider.findForumById(post.getForumId());

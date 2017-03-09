@@ -1,38 +1,6 @@
 // @formatter:off
 package com.everhomes.user;
 
-import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
-
-import java.io.UnsupportedEncodingException;
-import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.regex.Matcher;
-import java.util.regex.Pattern;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.Cookie;
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
-import org.apache.commons.lang.StringUtils;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.BeanUtils;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.CollectionUtils;
-
 import com.everhomes.acl.AclProvider;
 import com.everhomes.acl.PortalRoleResolver;
 import com.everhomes.acl.Role;
@@ -105,12 +73,7 @@ import com.everhomes.rest.family.FamilyMemberFullDTO;
 import com.everhomes.rest.family.ListAllFamilyMembersCommandResponse;
 import com.everhomes.rest.family.admin.ListAllFamilyMembersAdminCommand;
 import com.everhomes.rest.link.RichLinkDTO;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagePopupFlag;
-import com.everhomes.rest.messaging.MessagingConstants;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.namespace.NamespaceResourceType;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -124,81 +87,44 @@ import com.everhomes.rest.point.PointType;
 import com.everhomes.rest.search.SearchContentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.ContentBriefDTO;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.ui.user.SearchTypeDTO;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.DeviceIdentifierType;
-import com.everhomes.rest.user.GetBizSignatureCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.IdentifierClaimStatus;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.InitBizInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.InvitationRoster;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.SynThridUserCommand;
-import com.everhomes.rest.user.UserCurrentEntity;
-import com.everhomes.rest.user.UserCurrentEntityType;
-import com.everhomes.rest.user.UserGender;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserImperInfo;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserLoginDTO;
-import com.everhomes.rest.user.UserLoginResponse;
-import com.everhomes.rest.user.UserLoginStatus;
-import com.everhomes.rest.user.UserNotificationTemplateCode;
-import com.everhomes.rest.user.UserServiceErrorCode;
-import com.everhomes.rest.user.UserStatus;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.admin.InvitatedUsers;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.admin.*;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RandomGenerator;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SignatureHelper;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.util.*;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.DSLContext;
+import org.jooq.Record;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.BeanUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
+import org.springframework.data.redis.serializer.StringRedisSerializer;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.CollectionUtils;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.Cookie;
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.io.UnsupportedEncodingException;
+import java.net.URLEncoder;
+import java.sql.*;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.LocalDate;
+import java.util.*;
+import java.util.Date;
+import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
+import static com.everhomes.server.schema.Tables.EH_USER_IDENTIFIERS;
 
 /**
  * 
@@ -216,6 +142,8 @@ public class UserServiceImpl implements UserService {
 	private static final String MW_VCODE_TEMPLATE_CONTENT = "mw.vcode.template.content";
 	private static final String VCODE_SEND_TYPE = "sms.handler.type";
 
+	private static final String X_EVERHOMES_DEVICE = "x-everhomes-device";
+
 	@Autowired
 	private DbProvider dbProvider;
 
@@ -230,9 +158,6 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private CategoryProvider categoryProvider;
-
-	@Autowired
-	private SmsProvider smmProvider;
 
 	@Autowired
 	private CommunityProvider communityProvider;
@@ -329,7 +254,7 @@ public class UserServiceImpl implements UserService {
 
 	@Autowired
 	private ConfigurationProvider configProvider;
-	
+
 
 	private static final String DEVICE_KEY = "device_login";
 
@@ -372,7 +297,10 @@ public class UserServiceImpl implements UserService {
 					"User identifier token has already been claimed");
 		}
 
-		String ip = request.getHeader("x-forwarded-for");
+		// 在创建用户信息前就检查此次短信发送的合法性
+        this.verifySmsTimes("signup", identifierToken, request.getHeader(X_EVERHOMES_DEVICE));
+
+        String ip = request.getHeader("x-forwarded-for");
 
 		if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) { 
 			ip = request.getHeader("Proxy-Client-IP"); 
@@ -413,14 +341,15 @@ public class UserServiceImpl implements UserService {
 			newIdentifier.setRegionCode(cmd.getRegionCode());
 			userProvider.createIdentifier(newIdentifier);
 
-			LOGGER.info("Send verfication code: " + verificationCode + " for new user: " + identifierToken);
 			//            String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
-			//            smsProvider.sendSms(identifierToken, verificationCode,templateId);
-			sendVerificationCodeSms(newIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(identifierToken, cmd.getRegionCode()), verificationCode);
-			return newIdentifier;
-		});
+            //            smsProvider.sendSms(identifierToken, verificationCode,templateId);
+            return newIdentifier;
+        });
 
-		SignupToken signupToken = new SignupToken(identifier.getOwnerUid(), identifierType, identifierToken);
+        LOGGER.info("Send verfication code: " + identifier.getVerificationCode() + " for new user: " + identifierToken);
+        sendVerificationCodeSms(identifier.getNamespaceId(), this.getYzxRegionPhoneNumber(identifierToken, cmd.getRegionCode()), identifier.getVerificationCode());
+
+        SignupToken signupToken = new SignupToken(identifier.getOwnerUid(), identifierType, identifierToken);
 		if(StringUtils.isEmpty(signupToken.getIdentifierToken())) {
 			LOGGER.error("Signup token should not be empty, signupToken" + signupToken + ", cmd=" + cmd);
 		} else {
@@ -431,7 +360,114 @@ public class UserServiceImpl implements UserService {
 
 		return signupToken;
 	}
-	private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
+
+    /**
+     * 校验短信发送频率
+     */
+    private void verifySmsTimes(String smsAction, String identifierToken, String deviceId) {
+        RedisTemplate template = bigCollectionProvider.getMapAccessor("sendSmsTimes", "1").getTemplate();
+        // 设置value的序列化，要不然下面的increment方法会报错
+        template.setValueSerializer(new StringRedisSerializer());
+        ValueOperations op = template.opsForValue();
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        Integer smsMinDuration = Integer.parseInt(configProvider.getValue(namespaceId,"sms.verify.minDuration.seconds", "60"));
+        Integer smsTimesDeviceForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.device.timesForAnHour", "10"));
+        Integer smsTimesDeviceForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.device.timesForADay", "20"));
+        Integer smsTimesPhoneForAnHour = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForAnHour", "3"));
+        Integer smsTimesPhoneForADay = Integer.parseInt(configProvider.getValue(namespaceId, "sms.verify.phone.timesForADay", "5"));
+
+        // 每个手机号每天发送次数≤5
+        String phoneDayKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.PHONE.name(), SmsVerify.Duration.DAY.name(), identifierToken);
+        Object times = op.get(phoneDayKey);
+
+        if(times == null) {
+            // 设置今天晚上23:59:59过期
+            LocalDate yesterdayStart = LocalDate.now().plusDays(1);
+            long seconds = (java.sql.Date.valueOf(yesterdayStart).getTime() - System.currentTimeMillis()) / 1000;
+            op.set(phoneDayKey, String.valueOf(0), seconds, TimeUnit.SECONDS);
+        } else {
+            Integer t = Integer.valueOf((String) times);
+            if (t >= smsTimesPhoneForADay) {
+                LOGGER.error("Verification code request is too frequent, please try again after 24 hours");
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
+                        "Verification code request is too frequent, please try again after 24 hours");
+            }
+        }
+
+        // 每个手机设备每天发送次数≤20
+        String deviceDayKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.DEVICE.name(), SmsVerify.Duration.DAY.name(), deviceId);
+        times = op.get(deviceDayKey);
+
+        if(times == null) {
+            // 设置今天晚上23:59:59过期
+            LocalDate yesterdayStart = LocalDate.now().plusDays(1);
+            long seconds = (java.sql.Date.valueOf(yesterdayStart).getTime() - System.currentTimeMillis()) / 1000;
+            op.set(deviceDayKey, String.valueOf(0), seconds, TimeUnit.SECONDS);
+        } else {
+            Integer t = Integer.valueOf((String) times);
+            if (t >= smsTimesDeviceForADay) {
+                LOGGER.error("Verification code request is too frequent, please try again after 24 hours");
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_DAY,
+                        "Verification code request is too frequent, please try again after 24 hours");
+            }
+        }
+
+        // 每个手机号每小时发送次数≤3
+        String phoneHourKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.PHONE.name(), SmsVerify.Duration.HOUR.name(), identifierToken);
+        times = op.get(phoneHourKey);
+
+        if(times == null) {
+            op.set(phoneHourKey, String.valueOf(0), 1, TimeUnit.HOURS);
+        } else {
+            Integer t = Integer.valueOf((String) times);
+            if (t >= smsTimesPhoneForAnHour) {
+                LOGGER.error("Verification code request is too frequent, please 1 hour to try again");
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
+                        "Verification code request is too frequent, please 1 hour to try again");
+            }
+        }
+
+        // 每个手机设备每小时发送次数≤10
+        String deviceHourKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.DEVICE.name(), SmsVerify.Duration.HOUR.name(), deviceId);
+        times = op.get(deviceHourKey);
+
+        if(times == null) {
+            op.set(deviceHourKey, String.valueOf(0), 1, TimeUnit.HOURS);
+        } else {
+            Integer t = Integer.valueOf((String) times);
+            if (t >= smsTimesDeviceForAnHour) {
+                LOGGER.error("Verification code request is too frequent, please 1 hour to try again");
+                throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_TOO_FREQUENT_HOUR,
+                        "Verification code request is too frequent, please 1 hour to try again");
+            }
+        }
+
+        // 发送验证码时间不得小于60s
+        String minDurationKey = getCacheKey("sendSmsTimes", smsAction, SmsVerify.Type.PHONE.name(), SmsVerify.Duration.SECOND.name(), identifierToken);
+        times = op.get(minDurationKey);
+
+        if(times == null) {
+            op.set(minDurationKey, String.valueOf(0), smsMinDuration, TimeUnit.SECONDS);
+        } else {
+            LOGGER.error("The time for sending the verification code shall not be less than {}s", smsMinDuration);
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_SMS_MIN_DURATION,
+                    "The time for sending the verification code shall not be less than %s s", smsMinDuration);
+        }
+
+        LOGGER.info("sms verify success smsAction={}, identifierToken={}, deviceId={}", smsAction, identifierToken, deviceId);
+        // 发送次数增加 1
+        op.increment(phoneHourKey, 1L);
+        op.increment(phoneDayKey, 1L);
+        op.increment(deviceHourKey, 1L);
+        op.increment(deviceDayKey, 1L);
+    }
+
+    private String getCacheKey(String... keys) {
+        return StringUtils.join(Arrays.asList(keys), ":");
+    }
+
+    private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
 		String templateScope = SmsTemplateCode.SCOPE;
 		int templateId = SmsTemplateCode.VERIFICATION_CODE;
@@ -493,7 +529,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode) {
+	public void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request) {
 		UserIdentifier identifier = this.findIdentifierByToken(namespaceId, signupToken);
 		if(identifier == null) {
 			LOGGER.error("User identifier not found in db, signupToken=" + signupToken);
@@ -502,6 +538,9 @@ public class UserServiceImpl implements UserService {
 
 		if(identifier.getClaimStatus() == IdentifierClaimStatus.CLAIMING.getCode() ||
 				identifier.getClaimStatus() == IdentifierClaimStatus.VERIFYING.getCode()) {
+
+            this.verifySmsTimes("signup", identifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+
 			Timestamp ts = identifier.getNotifyTime();
 			if(ts == null || isVerificationExpired(ts)) {
 				String verificationCode = RandomGenerator.getRandomDigitalString(6);
@@ -1572,7 +1611,17 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	public void resendVerficationCode(UserIdentifier userIdentifier) {
+	public void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request) {
+
+        Integer namespaceId = UserContext.getCurrentNamespaceId(cmd.getNamespaceId());
+        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByToken(namespaceId, cmd.getIdentifier());
+        if(userIdentifier==null){
+            LOGGER.error("cannot find user identifierToken.identifierToken={}",cmd.getIdentifier());
+            throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE,
+                    UserServiceErrorCode.ERROR_USER_NOT_EXIST, "can not find user identifierToken or status is error");
+        }
+        userIdentifier.setRegionCode(cmd.getRegionCode());
+
 		String verificationCode = RandomGenerator.getRandomDigitalString(6);
 		userIdentifier.setVerificationCode(verificationCode);
 		this.userProvider.updateIdentifier(userIdentifier);
@@ -1581,6 +1630,9 @@ public class UserServiceImpl implements UserService {
 			LOGGER.debug("Send notification code " + verificationCode + " to " + userIdentifier.getIdentifierToken());
 		//        String templateId = configurationProvider.getValue(YZX_VCODE_TEMPLATE_ID, "");
 		//        smmProvider.sendSms(userIdentifier.getIdentifierToken(), verificationCode,templateId);
+
+        this.verifySmsTimes("fogotPasswd", userIdentifier.getIdentifierToken(), request.getHeader(X_EVERHOMES_DEVICE));
+
 		sendVerificationCodeSms(userIdentifier.getNamespaceId(), this.getYzxRegionPhoneNumber(userIdentifier.getIdentifierToken(), userIdentifier.getRegionCode()),verificationCode);
 		userIdentifier.setNotifyTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		this.userProvider.updateIdentifier(userIdentifier);
