@@ -759,7 +759,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //					openWorkday ="0"+openWorkday;
 //				}
 //			}
-//			newDefaultRule.setOpenWeekday(openWorkday);
+			newDefaultRule.setOpenWeekday(defaultRule.getOpenWeekday());
 			newDefaultRule.setBeginDate(new Date(cmd.getBeginDate()));
 			newDefaultRule.setEndDate(new Date(cmd.getEndDate()));
 			newDefaultRule.setId(defaultRule.getId());
@@ -4948,6 +4948,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rentalsite.setChargeUid(cmd.getChargeUid());
 			rentalsite.setCoverUri(cmd.getCoverUri());
 			rentalsite.setStatus(cmd.getStatus());
+			rentalsite.setOfflineCashierAddress(cmd.getOfflineCashierAddress());
+			rentalsite.setOfflinePayeeUid(cmd.getOfflinePayeeUid());
 			rentalv2Provider.updateRentalSite(rentalsite);
 			this.rentalv2Provider.deleteRentalSitePicsBySiteId(cmd.getId());
 			this.rentalv2Provider.deleteRentalSiteOwnersBySiteId(cmd.getId());
