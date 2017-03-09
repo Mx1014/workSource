@@ -10,6 +10,7 @@ import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.util.Tuple;
 
 @Component
 public class FlowModuleListenerDummy2 implements FlowModuleListener {
@@ -119,6 +120,13 @@ public class FlowModuleListenerDummy2 implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
 		// TODO Auto-generated method stub
 		
 	}

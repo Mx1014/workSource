@@ -10,6 +10,7 @@ import org.springframework.stereotype.Component;
 import com.alibaba.fastjson.JSON;
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.general_approval.GeneralApproval;
 import com.everhomes.general_approval.GeneralApprovalFlowModuleListener;
@@ -34,6 +35,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
+import com.everhomes.util.Tuple;
 @Component
 public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModuleListener {
 	@Autowired
@@ -215,6 +217,13 @@ public class ServiceAllianceFlowModuleListener extends GeneralApprovalFlowModule
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
+		
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
+		// TODO Auto-generated method stub
 		
 	}
 }
