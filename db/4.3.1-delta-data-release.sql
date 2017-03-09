@@ -304,3 +304,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999991', '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRvd09HUTNNRGs1TURZeVpUTmhNbU5pWkdWbVpXUmhNMlU1T1RSaE4yTTFNZw', '1', '1', '56', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);	
 update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=提交服务"}' where item_label = '物业报修' and namespace_id = 999991;
 
+
+
+-- 活动截止报名时间错误提示，add by tt, 20170228
+select max(id) into @id from `eh_locale_strings`;
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10018', 'zh_CN', '报名截止时间应早于或等于活动结束时间!');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10019', 'zh_CN', '活动报名已截止!');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10020', 'zh_CN', '手机号码错误!');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10021', 'zh_CN', '该活动还没有报名信息哦!');

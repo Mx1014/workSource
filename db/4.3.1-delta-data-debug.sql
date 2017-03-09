@@ -185,3 +185,11 @@ INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_ur
     VALUES ('31', '999981', '星商汇园区', '2', 'http://a.app.qq.com/o/simple.jsp?pkgname=com.everhomes.android.vanke.xsh', 'cs://1/image/aW1hZ2UvTVRvNU5UaGlaV0U0WlRWaU1UZzNOVEU0Tm1Zd1lqTTRNVFZqWVRjek1EUXlPUQ', '移动平台聚合服务，助力园区效能提升');
 INSERT INTO `eh_app_urls` (`id`, `namespace_id`, `name`, `os_type`, `download_url`, `logo_url`, `description`) 
     VALUES ('32', '999981', '星商汇园区', '1', 'https://itunes.apple.com/cn/app/%E6%98%9F%E5%95%86%E6%B1%87%E5%9B%AD%E5%8C%BA/id1194430405?mt=8', 'cs://1/image/aW1hZ2UvTVRvNU5UaGlaV0U0WlRWaU1UZzNOVEU0Tm1Zd1lqTTRNVFZqWVRjek1EUXlPUQ', '移动平台聚合服务，助力园区效能提升');
+
+    
+-- 活动截止报名时间错误提示，add by tt, 20170228
+select max(id) into @id from `eh_locale_strings`;
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10018', 'zh_CN', '报名截止时间应早于或等于活动结束时间!');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10019', 'zh_CN', '活动报名已截止!');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10020', 'zh_CN', '手机号码错误!');
+INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`) VALUES (@id:=@id+1, 'activity', '10021', 'zh_CN', '该活动还没有报名信息哦!');
