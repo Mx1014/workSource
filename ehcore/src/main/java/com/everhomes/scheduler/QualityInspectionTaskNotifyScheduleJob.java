@@ -4,9 +4,9 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
-import com.everhomes.equipment.EquipmentInspectionTasks;
-import com.everhomes.equipment.EquipmentProvider;
-import com.everhomes.equipment.EquipmentService;
+import com.everhomes.quality.QualityInspectionTasks;
+import com.everhomes.quality.QualityProvider;
+import com.everhomes.quality.QualityService;
 import com.everhomes.util.CronDateUtils;
 import org.quartz.JobExecutionContext;
 import org.quartz.JobExecutionException;
@@ -14,25 +14,23 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.quartz.QuartzJobBean;
-import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 
 /**
  * Created by Administrator on 2017/3/8.
  */
-@Component
-public class EquipmentInspectionTaskNotifyScheduleJob extends QuartzJobBean {
+public class QualityInspectionTaskNotifyScheduleJob extends QuartzJobBean {
 
     private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspectionTaskNotifyScheduleJob.class);
     @Autowired
     private CoordinationProvider coordinationProvider;
 
     @Autowired
-    private EquipmentProvider equipmentProvider;
+    private QualityProvider qualityProvider;
 
     @Autowired
-    private EquipmentService equipmentService;
+    private QualityService qualityService;
 
     @Autowired
     private ConfigurationProvider configurationProvider;
@@ -42,14 +40,14 @@ public class EquipmentInspectionTaskNotifyScheduleJob extends QuartzJobBean {
 
     @Override
     protected void executeInternal(JobExecutionContext context) throws JobExecutionException {
-        this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_EQUIPMENT_TASK.getCode()).tryEnter(()-> {
-            LOGGER.info("in EquipmentInspectionTaskNotifyScheduleJob " + System.currentTimeMillis());
+        this.coordinationProvider.getNamedLock(CoordinationLocks.WARNING_QUALITY_TASK.getCode()).tryEnter(()-> {
+            LOGGER.info("in QualityInspectionTaskNotifyScheduleJob " + System.currentTimeMillis());
             //默认提前十分钟通知
             long executiveStartTime = System.currentTimeMillis()+(configurationProvider.getLongValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_TIME, 10) * 60000);
 
-            equipmentService.sendTaskMsg(executiveStartTime, executiveStartTime+60000);
+            qualityService.sendTaskMsg(executiveStartTime, executiveStartTime+60000);
 
-            EquipmentInspectionTasks task = equipmentProvider.findLastestEquipmentInspectionTask(executiveStartTime+60000);
+            QualityInspectionTasks task = qualityProvider.findLastestQualityInspectionTask(executiveStartTime+60000);
             //没有新任务时，等到零点生成任务之后再发通知
             if(task != null) {
                 Timestamp taskStartTime = task.getExecutiveStartTime();
@@ -58,13 +56,12 @@ public class EquipmentInspectionTaskNotifyScheduleJob extends QuartzJobBean {
 
                 String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
 
-                String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-                String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-                scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-                        cronExpression, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+                String qualityInspectionNotifyTriggerName = "QualityInspectionNotify ";
+                String qualityInspectionNotifyJobName = "QualityInspectionNotify " + System.currentTimeMillis();
+                scheduleProvider.scheduleCronJob(qualityInspectionNotifyTriggerName, qualityInspectionNotifyJobName,
+                        cronExpression, QualityInspectionTaskNotifyScheduleJob.class, null);
             }
 
         });
     }
-
 }

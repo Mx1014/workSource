@@ -166,8 +166,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		//五分钟后启动通知
 		Long notifyTime = System.currentTimeMillis() + 300000;
 		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyTriggerName,
+		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
 				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 
 

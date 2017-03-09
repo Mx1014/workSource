@@ -8,8 +8,8 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.equipment.*;
 import com.everhomes.util.CronDateUtils;
-import org.quartz.JobExecutionContext;
-import org.quartz.JobExecutionException;
+import org.quartz.*;
+import org.quartz.impl.StdSchedulerFactory;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,8 +17,6 @@ import org.springframework.context.annotation.Scope;
 import org.springframework.scheduling.quartz.QuartzJobBean;
 import org.springframework.stereotype.Component;
 
-import com.everhomes.coordinator.CoordinationLocks;
-import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.repeat.RepeatService;
 import com.everhomes.rest.equipment.EquipmentStandardStatus;
 import com.everhomes.rest.equipment.EquipmentStatus;
@@ -30,7 +28,9 @@ import org.springframework.transaction.TransactionStatus;
 public class EquipmentInspectionScheduleJob extends QuartzJobBean {
 	
 private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspectionScheduleJob.class);
-	
+
+	private static SchedulerFactory gSchedulerFactory = new StdSchedulerFactory();
+
 	@Autowired
 	private EquipmentProvider equipmentProvider;
 	
@@ -55,10 +55,13 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 		if(LOGGER.isInfoEnabled()) {
 			LOGGER.info("EquipmentInspectionScheduleJob" + new Timestamp(DateHelper.currentGMTTime().getTime()));
 		}
+
+		//为防止时间长了的话可能会有内存溢出的可能，把每天过期的定时任务清理一下
+		scheduleProvider.unscheduleJob("EquipmentInspectionNotify ");
+
 		closeDelayTasks();
 		createTask();
 		sendTaskMsg();
-
 	}
 	
 	private void createTask() {
@@ -202,8 +205,9 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 			String cronExpression = CronDateUtils.getCron(new Timestamp(nextNotifyTime));
 
-			String equipmentInspectionTriggerName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-			scheduleProvider.scheduleCronJob(equipmentInspectionTriggerName, equipmentInspectionTriggerName,
+			String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+			String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+			scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
 					cronExpression, EquipmentInspectionTaskNotifyScheduleJob.class, null);
 		}
 
