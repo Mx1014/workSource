@@ -2168,12 +2168,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setId(0L);
 				dto.setMemberCount(0L);
 			}
-			CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(apartmentDTO.getAddressId());
-			if(mapping != null){
-				dto.setLivingStatus(mapping.getLivingStatus());
-			}
-			else{
-				dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+			
+			if (apartmentDTO.getLivingStatus() != null) {
+				dto.setLivingStatus(apartmentDTO.getLivingStatus());
+			}else {
+				CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(apartmentDTO.getAddressId());
+				if(mapping != null){
+					dto.setLivingStatus(mapping.getLivingStatus());
+				}
+				else{
+					dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+				}
 			}
 
 			//判断公寓是否欠费
