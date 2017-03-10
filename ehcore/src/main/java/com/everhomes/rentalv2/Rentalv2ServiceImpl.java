@@ -5625,6 +5625,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
  
 			return null;
 		});
+		this.rentalv2Provider.updateRentalDefaultRule(defaultRule);
 	}
 
 	@Override
