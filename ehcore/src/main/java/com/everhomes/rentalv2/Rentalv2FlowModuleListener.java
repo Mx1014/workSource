@@ -98,78 +98,79 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowCaseStateChanged(FlowCaseState ctx) { 
 		FlowGraphNode graphNode = ctx.getPrefixNode();
-		FlowNode preFlowNode = graphNode.getFlowNode();
-		FlowNode currNode = ctx.getCurrentNode().getFlowNode();
-		FlowCase flowCase = ctx.getFlowCase();
-		RentalOrder order = null;
-		if(null != flowCase.getReferId()){
-			order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
-		}
-		if(preFlowNode.getParams().equals(RentalFlowNodeParams.AGREE.getCode())){
-			//发短信
-			//发短信给预订人
-			String templateScope = SmsTemplateCode.SCOPE;
-			String templateLocale = RentalNotificationTemplateCode.locale; 
-			UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-			List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
-			smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
-			if(currNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
-				//从同意到已支付界面
-				String contactName="";
-				String contactToken="";
-				if(null != order.getOfflinePayeeUid()){
-					OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
-					if(null!=member){
-						contactName = member.getContactName();
-						contactToken = member.getContactToken();
-					}
-				}  
-				smsProvider.addToTupleList(variables, "offlinePayeeName", contactName); 
-				smsProvider.addToTupleList(variables, "offlinePayeeContact", contactToken); 
-				smsProvider.addToTupleList(variables, "offlineCashierAddress", order.getOfflineCashierAddress()); 
-				RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
-				int templateId = SmsTemplateCode.RENTAL_APPLY_SUCCESS_CODE; 
-				if(null == userIdentifier){
-					LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-				}else{
-					smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-				}
-			}else{
-				//从同意到其他节点-就是说被驳回 
-				RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
-				int templateId = SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE; 
-				if(null == userIdentifier){
-					LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-				}else{
-					smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-				}
+		if(null!=graphNode){
+			FlowNode preFlowNode = graphNode.getFlowNode();
+			FlowNode currNode = ctx.getCurrentNode().getFlowNode();
+			FlowCase flowCase = ctx.getFlowCase();
+			RentalOrder order = null;
+			if(null != flowCase.getReferId()){
+				order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
 			}
-		}
-		else if(preFlowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
-			if(currNode.getAutoStepType().equals(FlowStepType.END_STEP.getCode())){
-				//已完成
-				//更改订单状态 + 发短信 
-				rentalv2Service.changeOfflinePayOrderSuccess(order);
-			}else{
-				//从已支付到其他状态-一般是终止
+			if(preFlowNode.getParams().equals(RentalFlowNodeParams.AGREE.getCode())){
+				//发短信
+				//发短信给预订人
 				String templateScope = SmsTemplateCode.SCOPE;
+				String templateLocale = RentalNotificationTemplateCode.locale; 
+				UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
 				List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
 				smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
-				RentalResource rs = rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
-				int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE; 
-	
-				String templateLocale = RentalNotificationTemplateCode.locale; 
-	
-				UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-				if(null == userIdentifier){
-					LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+				if(currNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
+					//从同意到已支付界面
+					String contactName="";
+					String contactToken="";
+					if(null != order.getOfflinePayeeUid()){
+						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+						if(null!=member){
+							contactName = member.getContactName();
+							contactToken = member.getContactToken();
+						}
+					}  
+					smsProvider.addToTupleList(variables, "offlinePayeeName", contactName); 
+					smsProvider.addToTupleList(variables, "offlinePayeeContact", contactToken); 
+					smsProvider.addToTupleList(variables, "offlineCashierAddress", order.getOfflineCashierAddress()); 
+					RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+					int templateId = SmsTemplateCode.RENTAL_APPLY_SUCCESS_CODE; 
+					if(null == userIdentifier){
+						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+					}else{
+						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+					}
 				}else{
-					smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+					//从同意到其他节点-就是说被驳回 
+					RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+					int templateId = SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE; 
+					if(null == userIdentifier){
+						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+					}else{
+						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+					}
+				}
+			}
+			else if(preFlowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
+				if(currNode.getAutoStepType().equals(FlowStepType.END_STEP.getCode())){
+					//已完成
+					//更改订单状态 + 发短信 
+					rentalv2Service.changeOfflinePayOrderSuccess(order);
+				}else{
+					//从已支付到其他状态-一般是终止
+					String templateScope = SmsTemplateCode.SCOPE;
+					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
+					smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
+					RentalResource rs = rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+					int templateId = SmsTemplateCode.RENTAL_CANCEL_CODE; 
+		
+					String templateLocale = RentalNotificationTemplateCode.locale; 
+		
+					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+					if(null == userIdentifier){
+						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+					}else{
+						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+					}
 				}
 			}
 		}
 	}
-
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
 		// TODO Auto-generated method stub
