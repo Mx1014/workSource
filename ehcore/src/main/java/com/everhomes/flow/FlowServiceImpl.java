@@ -1730,15 +1730,17 @@ public class FlowServiceImpl implements FlowService {
 		//TODO better here
 	    String locale = Locale.SIMPLIFIED_CHINESE.toString();
 	    int templateId = flowAction.getTemplateId().intValue();
-		LocaleTemplate template = localeTemplateService.getLocalizedTemplate(namespaceId, locale, templateId, locale);
+		String scope = "flow:" + ctx.getModule().getModuleId();
+		LocaleTemplate template = localeTemplateService.getLocalizedTemplate(namespaceId, scope, templateId, locale);
 		List<Tuple<String, Object>> variables = new ArrayList<Tuple<String,Object>>();
+		flowListenerManager.onFlowSMSVariableRender(ctx, templateId, variables);
 		if(LOGGER.isDebugEnabled())
 			LOGGER.debug("flowsmstimeout tick message, size={}", users.size());
 		
 		for(Long userId : users) {
 			UserInfo user = userService.getUserSnapshotInfoWithPhone(userId);
 			if(user != null && user.getPhones().size() > 0) {
-				sendCodeSms(namespaceId, locale, template.getScope(), templateId, user, variables);
+				sendCodeSms(namespaceId, locale, SmsTemplateCode.SCOPE, templateId, user, variables);
 			}
 			LOGGER.debug("flowsmstimeout tick message, userId={}", userId);
 		}
