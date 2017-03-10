@@ -7,7 +7,7 @@ import com.everhomes.util.StringHelper;
 /**
  * <ul>
  * <li>groupId: 俱乐部id</li>
- * <li>keyword: 请求人所在的家庭ID</li>
+ * <li>keyword: 关键字</li>
  * <li>status: 成员在group里的状态，参考{@link com.everhomes.rest.group.GroupMemberStatus}</li>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>

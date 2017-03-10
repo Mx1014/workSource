@@ -4886,12 +4886,27 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public ListMemberCommandResponse searchClubMembers(SearchClubMemberCommand cmd) {
         ListMemberCommandResponse response = new ListMemberCommandResponse();
-        Long from = cmd.getPageAnchor() * cmd.getPageSize();
-        List<GroupMember> members = groupProvider.searchPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(), from, cmd.getPageSize()+1);
-        if(members.size() > cmd.getPageSize()) {
+
+        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
+        Long pageAnchor = cmd.getPageAnchor() == null?0L:cmd.getPageAnchor();
+
+        Long from = pageAnchor * pageSize;
+        List<GroupMember> members = groupProvider.searchPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(), from, pageSize+1);
+        if(members.size() > pageSize) {
             members.remove(members.size() - 1);
-            response.setNextPageAnchor(cmd.getPageAnchor() + 1);
+            response.setNextPageAnchor(pageAnchor + 1);
         }
+        List<GroupMemberDTO> memberDtos = members.stream()
+                .map((r) -> ConvertHelper.convert(r, GroupMemberDTO.class))
+                .collect(Collectors.toList());
+
+        Long groupId = cmd.getGroupId();
+        Long operatorUid = UserContext.current().getUser().getId();
+        Group group = checkGroupParameter(groupId, operatorUid, "searchClubMembers, cmd="+cmd.toString());
+
+        populateGroupMemberDTOs(operatorUid, group, memberDtos);
+
+        response.setMembers(memberDtos);
         return response;
     }
 

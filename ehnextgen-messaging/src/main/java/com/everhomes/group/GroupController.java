@@ -639,8 +639,8 @@ public class GroupController extends ControllerBase {
     }
 
     /**
-     * <b>URL: /group/searchClubMembers</b>
      * <p>搜索俱乐部成员</p>
+     * <b>URL: /group/searchClubMembers</b>
      */
     @RequestMapping("searchClubMembers")
     @RestReturn(value=ListMemberCommandResponse.class)
