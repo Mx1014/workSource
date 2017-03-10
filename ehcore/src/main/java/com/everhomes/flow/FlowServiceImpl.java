@@ -1752,6 +1752,9 @@ public class FlowServiceImpl implements FlowService {
 		flowCase.setOwnerType(snapshotFlow.getOwnerType());
 		flowCase.setCaseType(FlowCaseType.INNER.getCode());
 		flowCase.setStatus(FlowCaseStatus.INITIAL.getCode());
+		if(flowCase.getModuleType() == null) {
+			flowCase.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		}
 		
 		if(flowCaseCmd.getProjectId() == null) {
 			//use default projectId

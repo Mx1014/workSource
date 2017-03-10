@@ -2144,15 +2144,16 @@ public class BusinessServiceImpl implements BusinessService {
 
     @Override
     public ListBusinessPromotionEntitiesReponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd) {
+
+        int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+
         if ("biz".equals(source)) {// 从电商服务器获取数据
             Integer namespaceId = UserContext.getCurrentNamespaceId();
-            return fetchBusinessPromotionEntitiesFromBiz(namespaceId);
+            return fetchBusinessPromotionEntitiesFromBiz(namespaceId, pageSize);
         }
         // 从数据库获取数据
         else {
             ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
-
-            int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
             List<BusinessPromotion> promotions = businessPromotionProvider.listBusinessPromotion(
                     UserContext.getCurrentNamespaceId(), pageSize, cmd.getPageAnchor());
@@ -2194,8 +2195,10 @@ public class BusinessServiceImpl implements BusinessService {
         }
     }
 
-    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId) {
+
+    private ListBusinessPromotionEntitiesReponse fetchBusinessPromotionEntitiesFromBiz(Integer namespaceId, Integer pageSize) {
         String bizApi = configurationProvider.getValue(ConfigConstants.BIZ_BUSINESS_PROMOTION_API, "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml");
+
         String bizServer = configurationProvider.getValue("stat.biz.server.url", "");
 
         // bizApi = "/Zl-MallMgt/shopCommo/admin/queryRecommendList.ihtml";
@@ -2209,6 +2212,7 @@ public class BusinessServiceImpl implements BusinessService {
 
         Map<String, String> param = new HashMap<>();
         param.put("namespaceId", String.valueOf(namespaceId));
+        param.put("pageSize", String.valueOf(pageSize));
 
         ListBusinessPromotionEntitiesReponse reponse = new ListBusinessPromotionEntitiesReponse();
         try {

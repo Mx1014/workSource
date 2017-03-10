@@ -37,6 +37,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -146,7 +148,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 
         Map<String, String> params = new HashMap<>();
-        params.put("projectName", currentOrganization().getCommunityName());
+        params.put("projectName", currentOrganization(cmd.getOrganizationId()).getCommunityName());
         params.put("companyName", organization.getName());
         if (cmd.getBillStatus() != null) {
             params.put("isPay", String.valueOf(cmd.getBillStatus()));
@@ -154,6 +156,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         int pageOffset = cmd.getPageOffset() != null ? cmd.getPageOffset() : 1;
         params.put("pageCount", String.valueOf(pageOffset));
         params.put("pageSize", String.valueOf(pageSize));
+
+        String sdateTo = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        params.put("sdateTo", sdateTo);
 
         BillBeans itemList = post(api, params, BillBeans.class);
         return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset()) : new ListPmKeXingBillsResponse();
@@ -169,7 +174,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         Organization organization = this.findOrganizationById(cmd.getOrganizationId());
         String api = getAPI(ConfigConstants.KEXING_PMBILL_API_BILLLIST);
         Map<String, String> params = new HashMap<>();
-        params.put("projectName", currentOrganization().getCommunityName());
+        params.put("projectName", currentOrganization(cmd.getOrganizationId()).getCommunityName());
         params.put("companyName", organization.getName());
         params.put("pageCount", "1");
         params.put("pageSize", "1");
@@ -189,14 +194,17 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
 
         String api = getAPI(ConfigConstants.KEXING_PMBILL_API_BILLCOUNT);
         Map<String, String> params = new HashMap<>();
-        params.put("projectName", currentOrganization().getCommunityName());
+        params.put("projectName", currentOrganization(cmd.getOrganizationId()).getCommunityName());
         params.put("companyName", organization.getName());
+
+        String sdateTo = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        params.put("sdateTo", sdateTo);
 
         BillStat billStat = post(api, params, BillStat.class);
         return billStat != null ? billStat.toBillStatDTO() : new PmKeXingBillStatDTO();
     }
 
-    private OrganizationDTO currentOrganization() {
+    private OrganizationDTO currentOrganization(Long organizationId) {
         OrganizationDTO organization = organizationService.getUserCurrentOrganization();
         if (organization == null) {
             LOGGER.error("Current organization are not exist.");
@@ -204,13 +212,22 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
                     "Organization are not exist");
         }
         if (organization.getCommunityId() == null || organization.getCommunityName() == null) {
-            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organization.getId());
+            OrganizationCommunityRequest communityRequest = organizationProvider.getOrganizationCommunityRequestByOrganizationId(organizationId);
+
+            Long communityId;
             if (communityRequest != null) {
-                Community community = communityProvider.findCommunityById(communityRequest.getCommunityId());
-                if (community != null) {
-                    organization.setCommunityId(community.getId());
-                    organization.setCommunityName(community.getName());
-                }
+                communityId = communityRequest.getCommunityId();
+            } else {
+                OrganizationCommunity orgComm = this.organizationProvider.findOrganizationCommunityByOrgId(organizationId);
+                communityId = orgComm.getCommunityId();
+            }
+
+            Community community = communityProvider.findCommunityById(communityId);
+            if (community != null) {
+                organization.setCommunityId(community.getId());
+                organization.setCommunityName(community.getName());
+            } else {
+                LOGGER.error("not found organization name for current organization or organization {}", organizationId);
             }
         }
         if (LOGGER.isDebugEnabled())
@@ -247,7 +264,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
             if (LOGGER.isDebugEnabled()) {
                 LOGGER.debug("Http post params is :{}", params.toString());
             }
-            return HttpUtils.post(api, params, 10, "utf-8");
+            return HttpUtils.post(api, params, 20, "utf-8");
         } catch (Throwable e) {
             LOGGER.error("Http post error for api: {}", api, e);
             throw RuntimeErrorException.errorWith(PmKeXingBillServiceErrorCode.SCOPE, PmKeXingBillServiceErrorCode.ERROR_HTTP_REQUEST,
@@ -454,5 +471,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         PmKeXingBillServiceImpl service = new PmKeXingBillServiceImpl();
         BillBeans billItemList = service.xmlToBean(xml, BillBeans.class);
         System.out.println(billItemList);
+
+        System.out.println(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")));
     }*/
 }

@@ -83,7 +83,12 @@ public class WankeParkingVendorHandler implements ParkingVendorHandler {
 	private static final String GET_TYPES = "/Parking/GetMonthCardList";
 	private static final String GET_TEMP_FEE = "/Parking/GetCost";
 	private static final String PAY_TEMP_FEE = "/Parking/PayCost";
-	
+
+	@Override
+	protected Object clone() throws CloneNotSupportedException {
+		return super.clone();
+	}
+
 	private CloseableHttpClient httpclient = null;
 	
 	@Autowired

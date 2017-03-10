@@ -1,67 +1,18 @@
 // @formatter:off
 package com.everhomes.user;
 
-import java.util.List;
-
-import javax.servlet.http.HttpServletRequest;
-import javax.servlet.http.HttpServletResponse;
-
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.link.RichLinkDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
-import com.everhomes.rest.scene.SceneTypeInfoDTO;
 import com.everhomes.rest.ui.organization.SetCurrentCommunityForSceneCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneCommand;
-import com.everhomes.rest.ui.user.ListSearchTypesBySceneReponse;
-import com.everhomes.rest.ui.user.ListScentTypeByOwnerCommand;
-import com.everhomes.rest.ui.user.SceneDTO;
-import com.everhomes.rest.ui.user.SceneTokenDTO;
-import com.everhomes.rest.ui.user.SceneType;
-import com.everhomes.rest.ui.user.SearchContentsBySceneCommand;
-import com.everhomes.rest.ui.user.SearchContentsBySceneReponse;
-import com.everhomes.rest.user.AssumePortalRoleCommand;
-import com.everhomes.rest.user.BorderListResponse;
-import com.everhomes.rest.user.CreateInvitationCommand;
-import com.everhomes.rest.user.CreateUserImpersonationCommand;
-import com.everhomes.rest.user.DeleteUserImpersonationCommand;
-import com.everhomes.rest.user.GetBizSignatureCommand;
-import com.everhomes.rest.user.GetSignatureCommandResponse;
-import com.everhomes.rest.user.GetUserInfoByIdCommand;
-import com.everhomes.rest.user.InitBizInfoCommand;
-import com.everhomes.rest.user.InitBizInfoDTO;
-import com.everhomes.rest.user.ListLoginByPhoneCommand;
-import com.everhomes.rest.user.ListRegisterUsersResponse;
-import com.everhomes.rest.user.LoginToken;
-import com.everhomes.rest.user.SearchUserByNamespaceCommand;
-import com.everhomes.rest.user.SearchUserImpersonationCommand;
-import com.everhomes.rest.user.SearchUserImpersonationResponse;
-import com.everhomes.rest.user.SendMessageTestCommand;
-import com.everhomes.rest.user.SetUserAccountInfoCommand;
-import com.everhomes.rest.user.SetUserInfoCommand;
-import com.everhomes.rest.user.SignupCommand;
-import com.everhomes.rest.user.SynThridUserCommand;
-import com.everhomes.rest.user.UserCurrentEntity;
-import com.everhomes.rest.user.UserIdentifierDTO;
-import com.everhomes.rest.user.UserImpersonationDTO;
-import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.user.UserInvitationsDTO;
-import com.everhomes.rest.user.UserLoginResponse;
-import com.everhomes.rest.user.ValidatePassCommand;
-import com.everhomes.rest.user.VerifyAndLogonByIdentifierCommand;
-import com.everhomes.rest.user.VerifyAndLogonCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserCommand;
-import com.everhomes.rest.user.admin.ListInvitatedUserResponse;
-import com.everhomes.rest.user.admin.ListUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.ListUsersWithAddrResponse;
-import com.everhomes.rest.user.admin.SearchInvitatedUserCommand;
-import com.everhomes.rest.user.admin.SearchUsersWithAddrCommand;
-import com.everhomes.rest.user.admin.SendUserTestMailCommand;
-import com.everhomes.rest.user.admin.SendUserTestRichLinkMessageCommand;
-import com.everhomes.rest.user.admin.SendUserTestSmsCommand;
-import com.everhomes.rest.user.admin.UsersWithAddrResponse;
+import com.everhomes.rest.ui.user.*;
+import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.admin.*;
+
+import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
+import java.util.List;
 
 /**
  * 
@@ -73,7 +24,7 @@ import com.everhomes.rest.user.admin.UsersWithAddrResponse;
 public interface UserService {
     SignupToken signup(SignupCommand cmd, HttpServletRequest request);
     UserIdentifier findIdentifierByToken(Integer namespaceId, SignupToken signupToken);
-    void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode);
+    void resendVerficationCode(Integer namespaceId, SignupToken signupToken, Integer regionCode, HttpServletRequest request);
     UserLogin verifyAndLogon(VerifyAndLogonCommand cmd);
     UserLogin verifyAndLogonByIdentifier(VerifyAndLogonByIdentifierCommand cmd);
     
@@ -103,7 +54,7 @@ public interface UserService {
     List<UserIdentifierDTO> listUserIdentifiers();
     void deleteUserIdentifier(long identifierId);
     
-    void resendVerficationCode(UserIdentifier userIdentifier);
+    void resendVerficationCode(ResendVerificationCodeByIdentifierCommand cmd, HttpServletRequest request);
     
     UserInvitationsDTO createInvatation(CreateInvitationCommand cmd);
     

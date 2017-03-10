@@ -1,6 +1,7 @@
 // @formatter:off
 package com.everhomes.rest.address;
 
+import org.apache.commons.lang.StringUtils;
 import org.apache.commons.lang.builder.EqualsBuilder;
 import org.apache.commons.lang.builder.HashCodeBuilder;
 
@@ -15,7 +16,7 @@ import com.everhomes.util.StringHelper;
   * <li>livingStatus: 地址入住状态 ，参考{@link com.everhomes.rest.address.AddressLivingStatus}</li>
  * </ul>
  */
-public class ApartmentDTO {
+public class ApartmentDTO implements Comparable<ApartmentDTO> {
     private Long addressId;
     private Long familyId;
     private String apartmentName;
@@ -24,6 +25,7 @@ public class ApartmentDTO {
     private Byte livingStatus;
     private Double areaSize;
     private String enterpriseName;
+    private String apartmentFloor;
     
     public String getBusinessApartmentName() {
 		return businessApartmentName;
@@ -96,6 +98,14 @@ public class ApartmentDTO {
 		this.enterpriseName = enterpriseName;
 	}
 
+	public String getApartmentFloor() {
+		return apartmentFloor;
+	}
+
+	public void setApartmentFloor(String apartmentFloor) {
+		this.apartmentFloor = apartmentFloor;
+	}
+
 	@Override
     public boolean equals(Object obj){
         if (! (obj instanceof ApartmentDTO)) {
@@ -112,4 +122,22 @@ public class ApartmentDTO {
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+
+	@Override
+	public int compareTo(ApartmentDTO o) {
+		int f1 = parseInt(getApartmentFloor());
+		int f2 = parseInt(o.getApartmentFloor());
+		if (f1 == f2) {
+			return getApartmentName().compareTo(o.getApartmentName());
+		}
+		return f1 - f2;
+	}
+	
+	private int parseInt(String string) {
+		try {
+			return Integer.parseInt(string);
+		} catch (Exception e) {
+			return 0;
+		}
+	}
 }

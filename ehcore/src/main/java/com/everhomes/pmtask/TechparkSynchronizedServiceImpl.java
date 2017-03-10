@@ -14,7 +14,7 @@ import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 
 @Component("techparkSynchronizedServiceImpl")
-public class TechparkSynchronizedServiceImpl implements ApplicationListener<ContextRefreshedEvent>{
+class TechparkSynchronizedServiceImpl implements ApplicationListener<ContextRefreshedEvent>{
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(TechparkSynchronizedServiceImpl.class);
 
@@ -26,7 +26,7 @@ public class TechparkSynchronizedServiceImpl implements ApplicationListener<Cont
 	
     private String pmtask = "synchronizedpmtask";
     
-	public void pushToQueque(String json) {
+	void pushToQueque(String json) {
 		
 		final Job job = new Job(TechparkSynchronizedAction.class.getName(), new Object[]{ json });
 		

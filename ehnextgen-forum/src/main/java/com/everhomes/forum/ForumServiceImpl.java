@@ -642,20 +642,74 @@ public class ForumServiceImpl implements ForumService {
             return null;
         }
     }
-    
+
     @Override
     public void deletePost(Long forumId, Long postId) {
-        deletePost(forumId, postId, true);
+        deletePost(forumId, postId, true, null, null, null);
     }
-    
+
     @Override
-    public void deletePost(Long forumId, Long postId, boolean deleteUserPost) {
+    public void deletePost(Long forumId, Long postId, Long currentOrgId, String ownerType, Long ownerId) {
+        deletePost(forumId, postId, true, currentOrgId, ownerType, ownerId);
+    }
+
+    private void checkDeletePostPrivilege(Long currentOrgId, String ownerType, Long ownerId, Post post){
+        SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+        if(CategoryConstants.CATEGORY_ID_NOTICE == post.getContentCategory()){
+            if(post.getParentPostId() != null && post.getParentPostId() != 0){
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_NOTIC_COMMENT);
+            }else{
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_NOTIC_TOPIC);
+            }
+        }else if(CategoryConstants.CATEGORY_ID_TOPIC_ACTIVITY == post.getContentCategory()){
+            if(post.getParentPostId() != null && post.getParentPostId() != 0){
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_COMMENT1);
+            }else{
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_ACTIVITY_TOPIC1);
+            }
+        }else{
+            if(post.getParentPostId() != null && post.getParentPostId() != 0){
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_OHTER_COMMENT);
+            }else{
+                resolver.checkUserAuthority(UserContext.current().getUser().getId(), ownerType, ownerId, currentOrgId, PrivilegeConstants.DELETE_OHTER_TOPIC);
+            }
+        }
+    }
+
+    @Override
+    public void deletePost(Long forumId, Long postId, boolean deleteUserPost){
+        deletePost(forumId, postId, true, null, null, null);
+    }
+
+    @Override
+    public void deletePost(Long forumId, Long postId, boolean deleteUserPost, Long currentOrgId, String ownerType, Long ownerId) {
         User user = UserContext.current().getUser();
         Long userId = user.getId();
         
         checkForumParameter(userId, forumId, "getTopic");
         
         Post post = checkPostParameter(userId, forumId, postId, "deletePost");
+
+
+        Post pPost = null;
+        if(post.getParentPostId() != null && post.getParentPostId() != 0) {
+            pPost = this.forumProvider.findPostById(post.getParentPostId());
+            if(null != pPost){
+                post.setContentCategory(pPost.getContentCategory());
+                post.setActivityCategoryId(pPost.getActivityCategoryId());
+            }
+        }
+        Post parentPost = pPost;
+        //check权限 add sfyan 20170228
+        // 后台园区删除帖子或者评论的时候 currentOrgId 或者 ownerId 一定非空， 其他地方调用删除接口，暂时不做处理,代表不需要权限校验
+        if((null != ownerType && null != ownerId) || null != currentOrgId){
+            //不是自己发的贴或者评论 就要进行权限校验
+            if(post.getCreatorUid().longValue() != userId.longValue()){
+                checkDeletePostPrivilege(currentOrgId, ownerType, ownerId, post);
+            }
+        }
+
+
         Long embededAppId = post.getEmbeddedAppId();
         ForumEmbeddedHandler handler = getForumEmbeddedHandler(embededAppId);
         
@@ -684,12 +738,9 @@ public class ForumServiceImpl implements ForumService {
                 this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_POST.getCode()).enter(()-> {
                     this.forumProvider.updatePost(post);
                  // 删除评论时帖子的child count减1 mod by xiongying 20160428
-                    if(post.getParentPostId() != null && post.getParentPostId() != 0) {
-                    	Post parentPost = this.forumProvider.findPostById(post.getParentPostId());
-                    	if(parentPost != null) {
-                    		parentPost.setChildCount(parentPost.getChildCount() - 1);
-                            this.forumProvider.updatePost(parentPost);
-                    	}
+                    if(parentPost != null) {
+                        parentPost.setChildCount(parentPost.getChildCount() - 1);
+                        this.forumProvider.updatePost(parentPost);
                     }
                     if(deleteUserPost) {
                         if(userId.equals(post.getCreatorUid())){
@@ -1193,6 +1244,13 @@ public class ForumServiceImpl implements ForumService {
 //        	 ListCommunitiesByOrganizationIdCommand command = new ListCommunitiesByOrganizationIdCommand();
 //         	command.setCommunityId(organization.getId());;
 //         	List<CommunityDTO> communities = organizationService.listCommunityByOrganizationId(command).getCommunities();
+        	// 如果发送范围选择的公司圈，需要加上公司的论坛，add by tt, 20170307
+        	if (organization.getGroupId() != null) {
+				Group group = groupProvider.findGroupById(organization.getGroupId());
+				if (group != null) {
+					forumIds.add(group.getOwningForumId());
+				}
+			}
          	List<CommunityDTO> communities = organizationService.listAllChildrenOrganizationCoummunities(organization.getId());
          	if(null != communities){
          		for (CommunityDTO communityDTO : communities) {
@@ -1295,7 +1353,8 @@ public class ForumServiceImpl implements ForumService {
      * 独立出一个方法来专门查询官方活动，以简化帖子条件的查询条件；而原来使用listOrgTopics(QueryOrganizationTopicCommand cmd)
      * 存在着BUG：当一个机构没有管理小区或者以普通机构的身份访问时会查不到帖子；
      */
-    public ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd){
+    // 这个方法没有地方引用，删除接口中此方法并改为私有方法, add by tt, 20160307
+    private ListPostCommandResponse listOfficialActivityTopics(QueryOrganizationTopicCommand cmd){
         long startTime = System.currentTimeMillis();
         User operator = UserContext.current().getUser();
         Long operatorId = operator.getId();
@@ -3523,50 +3582,51 @@ public class ForumServiceImpl implements ForumService {
     }
     
     private void populatePostRegionInfo(long userId, Post post) {
-        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
-        Long regionId = post.getVisibleRegionId();
-        
-        if(regionType != null && regionId != null) {
-            String creatorNickName = post.getCreatorNickName();
-            if(creatorNickName == null) {
-                creatorNickName = "";
-            }
-            switch(regionType) {
-            case COMMUNITY:
-                Community community = communityProvider.findCommunityById(regionId);
-                if(community != null)
-                	creatorNickName = creatorNickName + "@" + community.getName();
-                break;
-            case REGION:
-                Organization organization = organizationProvider.findOrganizationById(regionId);
-                // 根据产品姚绮云要求，当以公司名义发送时，使用公司所入驻的小区，而不是使用公司名称 by lqs 20161217
-//                if(organization !=null)
-//                	creatorNickName = creatorNickName + "@" + organization.getName();
-                if(organization !=null) {
-                	String regionName = organization.getName();
-                	Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
-                    if(communityId != null) {
-                        community = communityProvider.findCommunityById(communityId);
-                        if(community != null) {
-                            regionName = community.getName();
-                        } else {
-                            LOGGER.error("Community not found, userId={}, communityId={}, , regionType={}, postId={}", userId, communityId, regionType, post.getId());
-                        }
-                    } else {
-                        LOGGER.error("No community id found in organization, organizationId={}", organization.getId());
-                    }
-                    creatorNickName = creatorNickName + "@" + regionName;
-                }
-                break;
-            default:
-                LOGGER.error("Unsupported visible region type, userId=" + userId 
-                    + ", regionType=" + regionType + ", postId=" + post.getId());
-            }
-            post.setCreatorNickName(creatorNickName);
-        } else {
-            LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
-        }
-        
+    	// 根据产品姚绮云要求，不要显示@xxxx, add by tt, 20170307
+//        VisibleRegionType regionType = VisibleRegionType.fromCode(post.getVisibleRegionType());
+//        Long regionId = post.getVisibleRegionId();
+//        
+//        if(regionType != null && regionId != null) {
+//            String creatorNickName = post.getCreatorNickName();
+//            if(creatorNickName == null) {
+//                creatorNickName = "";
+//            }
+//            switch(regionType) {
+//            case COMMUNITY:
+//                Community community = communityProvider.findCommunityById(regionId);
+//                if(community != null)
+//                	creatorNickName = creatorNickName + "@" + community.getName();
+//                break;
+//            case REGION:
+//                Organization organization = organizationProvider.findOrganizationById(regionId);
+//                // 根据产品姚绮云要求，当以公司名义发送时，使用公司所入驻的小区，而不是使用公司名称 by lqs 20161217
+////                if(organization !=null)
+////                	creatorNickName = creatorNickName + "@" + organization.getName();
+//                if(organization !=null) {
+//                	String regionName = organization.getName();
+//                	Long communityId = organizationService.getOrganizationActiveCommunityId(organization.getId());
+//                    if(communityId != null) {
+//                        community = communityProvider.findCommunityById(communityId);
+//                        if(community != null) {
+//                            regionName = community.getName();
+//                        } else {
+//                            LOGGER.error("Community not found, userId={}, communityId={}, , regionType={}, postId={}", userId, communityId, regionType, post.getId());
+//                        }
+//                    } else {
+//                        LOGGER.error("No community id found in organization, organizationId={}", organization.getId());
+//                    }
+//                    creatorNickName = creatorNickName + "@" + regionName;
+//                }
+//                break;
+//            default:
+//                LOGGER.error("Unsupported visible region type, userId=" + userId 
+//                    + ", regionType=" + regionType + ", postId=" + post.getId());
+//            }
+//            post.setCreatorNickName(creatorNickName);
+//        } else {
+//            LOGGER.error("Region type or id is null, userId=" + userId + ", postId=" + post.getId());
+//        }
+//        
     }
     
     private void populatePostForumNameInfo(long userId, Post post) {

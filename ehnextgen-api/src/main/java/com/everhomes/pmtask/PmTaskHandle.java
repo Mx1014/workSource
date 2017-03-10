@@ -13,7 +13,7 @@ public interface PmTaskHandle {
 	 String FLOW = "flow";
 	 String TECHPARK_REDIS_KEY_PREFIX = "techparkSynchronizedData-pmtask";
 	 
-	 PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone);
+	 PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone);
 	 
 	 void cancelTask(CancelTaskCommand cmd);
 	 

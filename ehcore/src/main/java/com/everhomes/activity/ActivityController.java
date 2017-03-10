@@ -4,13 +4,16 @@ package com.everhomes.activity;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
 import org.apache.commons.collections.CollectionUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.util.StringUtils;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.acl.AclProvider;
 import com.everhomes.category.Category;
@@ -18,7 +21,6 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.activity.ActivityCancelSignupCommand;
 import com.everhomes.rest.activity.ActivityCategoryDTO;
 import com.everhomes.rest.activity.ActivityCheckinCommand;
@@ -37,7 +39,9 @@ import com.everhomes.rest.activity.CreateActivityAttachmentCommand;
 import com.everhomes.rest.activity.CreateActivityGoodsCommand;
 import com.everhomes.rest.activity.DeleteActivityAttachmentCommand;
 import com.everhomes.rest.activity.DeleteActivityGoodsCommand;
+import com.everhomes.rest.activity.DeleteSignupInfoCommand;
 import com.everhomes.rest.activity.DownloadActivityAttachmentCommand;
+import com.everhomes.rest.activity.ExportSignupInfoCommand;
 import com.everhomes.rest.activity.GetActivityAchievementCommand;
 import com.everhomes.rest.activity.GetActivityAchievementResponse;
 import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
@@ -47,6 +51,7 @@ import com.everhomes.rest.activity.GetActivityShareDetailCommand;
 import com.everhomes.rest.activity.GetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.GetActivityWarningCommand;
 import com.everhomes.rest.activity.GetVideoCapabilityCommand;
+import com.everhomes.rest.activity.ImportSignupInfoCommand;
 import com.everhomes.rest.activity.ListActivitiesByNamespaceIdAndTagCommand;
 import com.everhomes.rest.activity.ListActivitiesByTagCommand;
 import com.everhomes.rest.activity.ListActivitiesCommand;
@@ -63,12 +68,19 @@ import com.everhomes.rest.activity.ListNearByActivitiesCommandV2;
 import com.everhomes.rest.activity.ListNearbyActivitiesResponse;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
 import com.everhomes.rest.activity.ListOfficialActivityByNamespaceResponse;
+import com.everhomes.rest.activity.ListSignupInfoCommand;
+import com.everhomes.rest.activity.ListSignupInfoResponse;
+import com.everhomes.rest.activity.ManualSignupCommand;
 import com.everhomes.rest.activity.SetActivityAchievementCommand;
 import com.everhomes.rest.activity.SetActivityVideoInfoCommand;
 import com.everhomes.rest.activity.SetActivityWarningCommand;
+import com.everhomes.rest.activity.SignupInfoDTO;
 import com.everhomes.rest.activity.UpdateActivityGoodsCommand;
+import com.everhomes.rest.activity.UpdateSignupInfoCommand;
+import com.everhomes.rest.activity.VertifyPersonByPhoneCommand;
 import com.everhomes.rest.activity.VideoCapabilityResponse;
 import com.everhomes.rest.activity.YzbVideoDeviceChangeCommand;
+import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
 import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.util.ConvertHelper;
@@ -109,6 +121,115 @@ public class ActivityController extends ControllerBase {
         response.setErrorDescription("OK");
         response.setResponseObject(result);
         return response;
+    }
+    
+    /**
+     * 
+     * <p>后台手动添加活动报名</p>
+     * <b>URL: /activity/manualSignup</b>
+     */
+    @RequestMapping("manualSignup")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse manualSignup(@Valid ManualSignupCommand cmd) {
+    	SignupInfoDTO result = activityService.manualSignup(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        response.setResponseObject(result);
+        return response;
+    }
+    
+    /**
+     * 
+     * <p>修改活动报名</p>
+     * <b>URL: /activity/updateSignupInfo</b>
+     */
+    @RequestMapping("updateSignupInfo")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse updateSignupInfo(@Valid UpdateSignupInfoCommand cmd) {
+    	SignupInfoDTO result = activityService.updateSignupInfo(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	response.setResponseObject(result);
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>导入活动报名</p>
+     * <b>URL: /activity/importSignupInfo</b>
+     */
+    @RequestMapping("importSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse importSignupInfo(@Valid ImportSignupInfoCommand cmd, @RequestParam("attachment") MultipartFile[] files) {
+    	activityService.importSignupInfo(cmd, files);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>列出活动报名信息</p>
+     * <b>URL: /activity/listSignupInfo</b>
+     */
+    @RequestMapping("listSignupInfo")
+    @RestReturn(value=ListSignupInfoResponse.class)
+    public RestResponse listSignupInfo(@Valid ListSignupInfoCommand cmd) {
+    	ListSignupInfoResponse result = activityService.listSignupInfo(cmd);
+    	RestResponse response = new RestResponse();
+    	response.setErrorCode(ErrorCodes.SUCCESS);
+    	response.setErrorDescription("OK");
+    	response.setResponseObject(result);
+    	return response;
+    }
+    
+    /**
+     * 
+     * <p>导出活动报名信息</p>
+     * <b>URL: /activity/exportSignupInfo</b>
+     */
+    @RequestMapping("exportSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse exportSignupInfo(@Valid ExportSignupInfoCommand cmd, HttpServletResponse response) {
+    	activityService.exportSignupInfo(cmd, response);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	return restResponse;
+    }
+    
+    /**
+     * 
+     * <p>删除活动报名信息</p>
+     * <b>URL: /activity/deleteSignupInfo</b>
+     */
+    @RequestMapping("deleteSignupInfo")
+    @RestReturn(value=String.class)
+    public RestResponse deleteSignupInfo(@Valid DeleteSignupInfoCommand cmd) {
+    	activityService.deleteSignupInfo(cmd);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	return restResponse;
+    }
+    
+    /**
+     * 
+     * <p>检查手机号</p>
+     * <b>URL: /activity/vertifyPersonByPhone</b>
+     */
+    @RequestMapping("vertifyPersonByPhone")
+    @RestReturn(value=SignupInfoDTO.class)
+    public RestResponse vertifyPersonByPhone(@Valid VertifyPersonByPhoneCommand cmd) {
+    	SignupInfoDTO signupInfoDTO = activityService.vertifyPersonByPhone(cmd);
+    	RestResponse restResponse = new RestResponse();
+    	restResponse.setErrorCode(ErrorCodes.SUCCESS);
+    	restResponse.setErrorDescription("OK");
+    	restResponse.setResponseObject(signupInfoDTO);
+    	return restResponse;
     }
     
     /**

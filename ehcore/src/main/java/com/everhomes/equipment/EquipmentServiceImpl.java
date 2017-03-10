@@ -2008,18 +2008,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
-		
+
 		List<EquipmentTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
 			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);  
         	return dto;
         }).filter(task->task!=null).collect(Collectors.toList());
-		
+
 		return dtoList;
 	}
 	
 	private EquipmentTaskDTO convertEquipmentTaskToDTO(EquipmentInspectionTasks task) {
-		
+		long startTime = System.currentTimeMillis();
 		EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);  
 
 
@@ -2080,8 +2080,12 @@ public class EquipmentServiceImpl implements EquipmentService {
         		dto.setReviewerName(reviewers.getContactName());
         	}
     	}
-    	
-    	return dto;
+
+		long endTime = System.currentTimeMillis();
+
+		LOGGER.debug("TrackUserRelatedCost: convertEquipmentTaskToDTO elapse: " + (endTime - startTime));
+
+		return dto;
 	}
 	
 	private void processLogAttachments(long userId, List<AttachmentDescriptor> attachmentList, EquipmentInspectionTasksLogs log) {
@@ -2444,8 +2448,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info("sendTaskMsg, zero = " + zero);
 			}
-			
+
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(zero);
+//			CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
 
 			if (tasks != null && tasks.size() > 0) {
 				for (EquipmentInspectionTasks task : tasks) {
@@ -2884,7 +2889,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setManufacturer(s[5]);
 				equipment.setLocation(s[7]);
 				equipment.setQuantity(Long.valueOf(s[8]));
-				equipment.setRemarks(s[9]);
+				if(!StringUtils.isEmpty(s[9]) && !"null".equals(s[9])) {
+					equipment.setRemarks(s[9]);
+				}
 
 				equipment.setOwnerType(cmd.getOwnerType());
 				equipment.setOwnerId(cmd.getOwnerId());
@@ -3076,17 +3083,28 @@ public class EquipmentServiceImpl implements EquipmentService {
         	tasks.remove(tasks.size() - 1);
         	response.setNextPageAnchor((long) (offset + 1));
         }
-        
-        
-    	List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
-        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
-        	return dto;
-        }).filter(r->r!=null).collect(Collectors.toList());
-        
+
+//    	List<EquipmentTaskDTO> dtos = convertEquipmentTasksToDTO(tasks);
+//				tasks.stream().map(r -> {
+//        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
+//        	return dto;
+//        }).filter(r->r!=null).collect(Collectors.toList());
+		long startTime2 = System.currentTimeMillis();
+		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
+			EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
+			EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
+        	if(equipment != null) {
+				dto.setEquipmentLocation(equipment.getLocation());
+				dto.setQrCodeFlag(equipment.getQrCodeFlag());
+			}
+			return dto;
+		}).filter(r->r!=null).collect(Collectors.toList());
+
 		response.setTasks(dtos);
 
 		long endTime = System.currentTimeMillis();
-		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse=" + (endTime - startTime));
+		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse:{}, convertEquipmentTaskDTO resultSize:{}, convert time:{}" ,
+				(endTime - startTime), tasks.size(), (endTime - startTime2));
 		return response;
 	}
 	

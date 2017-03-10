@@ -12,6 +12,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -841,4 +842,17 @@ public class ActivityProviderImpl implements ActivityProivider {
 		}
 		return new ArrayList<ActivityRoster>();
 	}
+
+	@Override
+	public List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select().from(Tables.EH_ACTIVITY_ROSTER)
+		.where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId))
+		.and(pageAnchor==null?DSL.trueCondition():Tables.EH_ACTIVITY_ROSTER.ID.gt(pageAnchor))
+		.orderBy(Tables.EH_ACTIVITY_ROSTER.ID.asc())
+		.limit(pageSize)
+		.fetch()
+		.map(r->ConvertHelper.convert(r, ActivityRoster.class));
+	}
+	
 }

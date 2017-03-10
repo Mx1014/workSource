@@ -20,6 +20,7 @@ import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.ListActiveStatCommand;
+import com.everhomes.rest.user.ListBusinessTreasureResponse;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -98,5 +99,7 @@ public interface UserActivityService {
 	void addAnyDayActive(Date statDate, Integer namespaceId);
 
 	String getBizUrl();
+
+	ListBusinessTreasureResponse getUserBusinessTreasure();
  
 }

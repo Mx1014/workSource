@@ -1237,7 +1237,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	private String parserUri(String uri,String ownerType, long ownerId){
 		try {
 			if(!org.apache.commons.lang.StringUtils.isEmpty(uri))
-				return contentServerService.parserUri(uri,ownerType,ownerId);
+				return contentServerService.parserUri(uri,ownerType,ownerId, 100);
 
 		} catch (Exception e) {
 			LOGGER.error("Parser uri is error." + e.getMessage());

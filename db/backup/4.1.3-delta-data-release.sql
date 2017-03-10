@@ -321,6 +321,13 @@ INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `defa
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@categories_id := @categories_id + 1), '7', '0', '周末值班', '设备类型/周末值班', '0', '2', NOW(), NULL, NULL, NULL, '0');
 INSERT INTO `eh_categories` (`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `delete_time`, `logo_uri`, `description`, `namespace_id`) VALUES ((@categories_id := @categories_id + 1), '7', '0', '安全检查', '设备类型/安全检查', '0', '2', NOW(), NULL, NULL, NULL, '0');
 
+-- 添加健身房 add by sw 20170217
+SET @eh_launch_pad_items = (SELECT max(id) FROM `eh_launch_pad_items`);
+
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) 
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999986', '0', '0', '0', '/home', 'Bizs', '健身房', '健身房', 'cs://1/image/aW1hZ2UvTVRvek5UUTBObU0wT0dReU1tWmhNbVZpTTJNMU1UVTVNRGN4WVRobE5qbGtPUQ', '1', '1', '14', '{"url":"http://core.zuolin.com/mobile/static/banner/jsf.html"}', '40', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'park_tourist', '0', NULL, NULL);
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) 
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999986', '0', '0', '0', '/home', 'Bizs', '健身房', '健身房', 'cs://1/image/aW1hZ2UvTVRvek5UUTBObU0wT0dReU1tWmhNbVZpTTJNMU1UVTVNRGN4WVRobE5qbGtPUQ', '1', '1', '14', '{"url":"http://core.zuolin.com/mobile/static/banner/jsf.html"}', '40', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '0', NULL, NULL);
 
 -- 更新现网时间周期timeRange为负bug by xiongying20170217
 update eh_repeat_settings set time_ranges = '{"ranges":[{"startTime":"06:00:00","endTime":"05:45:00","duration":"1425m"}]}' where id = 11;

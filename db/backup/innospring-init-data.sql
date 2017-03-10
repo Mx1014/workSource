@@ -2512,6 +2512,10 @@ UPDATE `eh_launch_pad_items` SET default_order=999 WHERE `id`=112314 or `id`=112
 UPDATE `eh_launch_pad_items` SET `display_flag`=1 WHERE `id`=112316 or `id`=112335; -- 7 众创空间
 UPDATE `eh_launch_pad_items` SET `display_flag`=0 WHERE `id`=112313 or `id`=112332; -- 10 视频会议
 
+
+-- 添加健身房 add by sw 20170217
+SET @eh_launch_pad_items = (SELECT max(id) FROM `eh_launch_pad_items`);
+
 -- 添加服务广场健身房 add by sw 20170217
 SET @eh_launch_pad_items = (SELECT max(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`, `selected_icon_uri`) 
@@ -2522,8 +2526,6 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 
 -- 创源屏蔽"智慧楼控" add by  xujuan 20170221
 delete from eh_launch_pad_items where id in (112320,112339) and namespace_id = 999986;
-
-
 
 
 
