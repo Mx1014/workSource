@@ -3254,6 +3254,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 
 		RentalOrder bill = rentalv2Provider.findRentalBillById(cmd
 				.getRentalBillId());
+
+		RentalResource rs =this.rentalv2Provider.getRentalSiteById(bill.getRentalResourceId());
+		proccessCells(rs);
 		// 循环存物品订单
 		AddRentalBillItemCommandResponse response = new AddRentalBillItemCommandResponse();
 		this.dbProvider.execute((TransactionStatus status) -> {
