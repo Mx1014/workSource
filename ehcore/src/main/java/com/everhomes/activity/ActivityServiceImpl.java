@@ -1282,13 +1282,14 @@ public class ActivityServiceImpl implements ActivityService {
                     "cannnot find post record in database id=" + cmd.getRosterId());
         }
         
+        // 后台管理系统确认不用判断是不是创建者
         User user = UserContext.current().getUser();
-        if (post.getCreatorUid().longValue() != user.getId().longValue()) {
-            LOGGER.error("the user is invalid.cannot confirm");
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_USER,
-                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
-        }
+//        if (post.getCreatorUid().longValue() != user.getId().longValue()) {
+//            LOGGER.error("the user is invalid.cannot confirm");
+//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+//                    ActivityServiceErrorCode.ERROR_INVALID_USER,
+//                    "the user is invalid.cannot confirm id=" + cmd.getRosterId());
+//        }
         dbProvider.execute(status -> {
  //           forumProvider.createPost(createPost(user.getId(), post, cmd.getConfirmFamilyId(), cmd.getTargetName()));
             activity.setConfirmAttendeeCount(activity.getConfirmAttendeeCount() + item.getChildCount()
@@ -1324,10 +1325,12 @@ public class ActivityServiceImpl implements ActivityService {
         fixupVideoInfo(dto);//added by janson
         
         //管理员同意活动的报名
-        Map<String, String> map = new HashMap<String, String>();
-        map.put("userName", user.getNickName());
-        map.put("postName", activity.getSubject());
-        sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER);
+        if (item.getUid().longValue() != 0L) {
+        	Map<String, String> map = new HashMap<String, String>();
+        	map.put("userName", user.getNickName());
+        	map.put("postName", activity.getSubject());
+        	sendMessageCode(item.getUid(), user.getLocale(), map, ActivityNotificationTemplateCode.ACTIVITY_CREATOR_CONFIRM_TO_USER);
+		}
         return dto;
     }
 
@@ -1422,11 +1425,12 @@ public class ActivityServiceImpl implements ActivityService {
             throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
                     ActivityServiceErrorCode.ERROR_INVALID_POST_ID, "invalid post id=" + postId);
         }
-        if (user.getId().longValue() != post.getCreatorUid().longValue()) {
-            LOGGER.error("No permission to reject the roster.rosterId={}", cmd.getRosterId());
-            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
-                    ActivityServiceErrorCode.ERROR_INVALID_USER, "invalid post id=" + postId);
-        }
+        // 后台管理系统不用判断是不是创建者
+//        if (user.getId().longValue() != post.getCreatorUid().longValue()) {
+//            LOGGER.error("No permission to reject the roster.rosterId={}", cmd.getRosterId());
+//            throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE,
+//                    ActivityServiceErrorCode.ERROR_INVALID_USER, "invalid post id=" + postId);
+//        }
 
         int total = roster.getAdultCount() + roster.getChildCount();
         dbProvider.execute(status->{
@@ -1450,50 +1454,52 @@ public class ActivityServiceImpl implements ActivityService {
             activityProvider.updateActivity(activity);
             return status;
         });
-        User queryUser = userProvider.findUserById(roster.getUid());
-        if (activity.getGroupId() != null) {
-            RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
-            rejectCmd.setGroupId(activity.getGroupId());
-            rejectCmd.setUserId(roster.getUid());
-            rejectCmd.setRejectText(cmd.getReason());
-            //reject to join group
-            //groupService.rejectJoinGroupRequest(rejectCmd);
-        }
-        Post comment = createPost(user.getId(), post, null, "");
-//        String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
-        String template = localeStringService.getLocalizedString(
-        		ActivityLocalStringCode.SCOPE,
-                String.valueOf(ActivityLocalStringCode.ACTIVITY_REJECT),
-                UserContext.current().getUser().getLocale(),
-                "");
-        comment.setContent(TemplatesConvert.convert(template, new HashMap<String, String>(){/**
-             * 
-             */
-            private static final long serialVersionUID = 8928858603520552572L;
+        
+        if (roster.getUid().longValue() != 0L) {
+        	User queryUser = userProvider.findUserById(roster.getUid());
+            if (activity.getGroupId() != null) {
+                RejectJoinGroupRequestCommand rejectCmd=new RejectJoinGroupRequestCommand();
+                rejectCmd.setGroupId(activity.getGroupId());
+                rejectCmd.setUserId(roster.getUid());
+                rejectCmd.setRejectText(cmd.getReason());
+                //reject to join group
+                //groupService.rejectJoinGroupRequest(rejectCmd);
+            }
+            Post comment = createPost(user.getId(), post, null, "");
+//            String template=configurationProvider.getValue(REJECT_AUTO_COMMENT, "");
+            String template = localeStringService.getLocalizedString(
+            		ActivityLocalStringCode.SCOPE,
+                    String.valueOf(ActivityLocalStringCode.ACTIVITY_REJECT),
+                    UserContext.current().getUser().getLocale(),
+                    "");
+            comment.setContent(TemplatesConvert.convert(template, new HashMap<String, String>(){/**
+                 * 
+                 */
+                private static final long serialVersionUID = 8928858603520552572L;
 
-        {
-            put("subject", activity.getSubject());
-            put("reason",cmd.getReason());
-            put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+            {
+                put("subject", activity.getSubject());
+                put("reason",cmd.getReason()==null?"":cmd.getReason());
+                put("username",queryUser.getNickName()==null?queryUser.getAccountName():queryUser.getNickName());
+                
+            }}, ""));
+//            forumProvider.createPost(comment);
             
-        }}, ""));
-//        forumProvider.createPost(comment);
-        
-        
-        
-        MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(user.getId());
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), queryUser.getId().toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(comment.getContent());
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        
-        UserLogin u = userService.listUserLogins(user.getId()).get(0);
-        messagingService.routeMessage(u, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-        		queryUser.getId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-        
+            
+            
+            MessageDTO messageDto = new MessageDTO();
+            messageDto.setAppId(AppConstants.APPID_MESSAGING);
+            messageDto.setSenderUid(user.getId());
+            messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), queryUser.getId().toString()));
+            messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(user.getId())));
+            messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+            messageDto.setBody(comment.getContent());
+            messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
+            
+            UserLogin u = userService.listUserLogins(user.getId()).get(0);
+            messagingService.routeMessage(u, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
+            		queryUser.getId().toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+		}
     }
 
     @Override
