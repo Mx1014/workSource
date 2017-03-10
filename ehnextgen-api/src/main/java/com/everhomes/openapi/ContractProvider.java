@@ -30,4 +30,6 @@ public interface ContractProvider {
 
 	List<Contract> listContractByOrganizationId(Integer namespaceId, Long organizationId);
 
+	List<Contract> listContractByOrganizationId(Long organizationId);
+
 }

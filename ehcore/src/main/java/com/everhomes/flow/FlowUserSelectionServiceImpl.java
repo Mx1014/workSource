@@ -9,6 +9,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.organization.Organization;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.organization.ListOrganizationByModuleIdCommand;
 import com.everhomes.rest.organization.ListOrganizationContactByJobPositionIdCommand;
 import com.everhomes.rest.organization.ListOrganizationManagersCommand;
 import com.everhomes.rest.organization.OrganizationContactDTO;
@@ -75,6 +76,27 @@ public class FlowUserSelectionServiceImpl implements FlowUserSelectionService {
 			}
 		}
 
+		return users;
+	}
+	
+	@Override
+	public List<Long> findUsersByDudy(Long parentOrgId, Long moduleId, String departmentType, Long departmentId) {		
+		ListOrganizationByModuleIdCommand cmd = new ListOrganizationByModuleIdCommand();
+		cmd.setModuleId(moduleId);
+		cmd.setOrganizationId(parentOrgId);
+		cmd.setOwnerType(departmentType);
+		cmd.setOwnerId(departmentId);
+		
+		List<OrganizationContactDTO> dtos = organizationService.listOrganizationsContactByModuleId(cmd);
+		List<Long> users = new ArrayList<>();
+		if(dtos != null) {
+			for(OrganizationContactDTO dto : dtos) {
+				if(dto.getTargetType().equals(OrganizationMemberTargetType.USER.getCode())) {
+					users.add(dto.getTargetId());	
+				}
+			}
+		}
+		
 		return users;
 	}
 }

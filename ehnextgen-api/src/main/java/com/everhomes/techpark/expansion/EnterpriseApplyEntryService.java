@@ -1,5 +1,6 @@
 package com.everhomes.techpark.expansion;
 
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
 import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
 import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
 import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
@@ -27,7 +28,7 @@ public interface EnterpriseApplyEntryService {
 	
 	ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd);
 	
-	boolean applyEntry(EnterpriseApplyEntryCommand cmd);
+	ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd);
 	
 	boolean applyRenew(EnterpriseApplyRenewCommand cmd);
 	

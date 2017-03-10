@@ -8,6 +8,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.AddressProvider;
+import com.everhomes.community.Community;
+import com.everhomes.community.CommunityProvider;
+import com.everhomes.flow.*;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.parking.ParkingErrorCode;
+import com.everhomes.rest.pmtask.*;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
@@ -30,44 +38,15 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.flow.Flow;
-import com.everhomes.flow.FlowCase;
-import com.everhomes.flow.FlowCaseProvider;
-import com.everhomes.flow.FlowProvider;
-import com.everhomes.flow.FlowService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.organization.Organization;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowConstants;
-import com.everhomes.rest.flow.FlowModuleType;
-import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
 import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.pmtask.AttachmentDescriptor;
-import com.everhomes.rest.pmtask.CancelTaskCommand;
-import com.everhomes.rest.pmtask.EvaluateTaskCommand;
-import com.everhomes.rest.pmtask.GetTaskDetailCommand;
-import com.everhomes.rest.pmtask.ListAllTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesCommand;
-import com.everhomes.rest.pmtask.ListTaskCategoriesResponse;
-import com.everhomes.rest.pmtask.ListUserTasksCommand;
-import com.everhomes.rest.pmtask.ListUserTasksResponse;
-import com.everhomes.rest.pmtask.PmTaskAddressType;
-import com.everhomes.rest.pmtask.PmTaskAttachmentType;
-import com.everhomes.rest.pmtask.PmTaskDTO;
-import com.everhomes.rest.pmtask.CreateTaskCommand;
-import com.everhomes.rest.pmtask.PmTaskErrorCode;
-import com.everhomes.rest.pmtask.PmTaskNotificationTemplateCode;
-import com.everhomes.rest.pmtask.PmTaskOperateType;
-import com.everhomes.rest.pmtask.PmTaskSourceType;
-import com.everhomes.rest.pmtask.PmTaskStatus;
-import com.everhomes.rest.pmtask.SearchTasksCommand;
-import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
@@ -116,6 +95,14 @@ public class FlowPmTaskHandle implements PmTaskHandle {
     private FlowCaseProvider flowCaseProvider;
     @Autowired
     private BigCollectionProvider bigCollectionProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
+	@Autowired
+	private AddressProvider addressProvider;
+	@Autowired
+	private OrganizationProvider organizationProvider;
+	@Autowired
+	private FlowNodeProvider flowNodeProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
@@ -171,7 +158,7 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 			task.setNamespaceId(user.getNamespaceId());
 			task.setOwnerId(ownerId);
 			task.setOwnerType(ownerType);
-			task.setStatus(PmTaskStatus.UNPROCESSED.getCode());
+
 			task.setUnprocessedTime(now);
 
 			if(null != cmd.getReserveTime())
@@ -180,18 +167,6 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 			task.setSourceType(cmd.getSourceType()==null?PmTaskSourceType.APP.getCode():cmd.getSourceType());
 
 			pmTaskProvider.createTask(task);
-			//图片
-			addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
-
-			PmTaskLog pmTaskLog = new PmTaskLog();
-			pmTaskLog.setNamespaceId(task.getNamespaceId());
-			pmTaskLog.setOperatorTime(now);
-			pmTaskLog.setOperatorUid(userId);
-			pmTaskLog.setOwnerId(task.getOwnerId());
-			pmTaskLog.setOwnerType(task.getOwnerType());
-			pmTaskLog.setStatus(task.getStatus());
-			pmTaskLog.setTaskId(task.getId());
-			pmTaskProvider.createTaskLog(pmTaskLog);
 
 			//新建flowcase
 	    	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), FlowConstants.PM_TASK_MODULE, 
@@ -213,10 +188,25 @@ public class FlowPmTaskHandle implements PmTaskHandle {
     		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
     		
         	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
+			task.setStatus(convertFlowStatus(flowNode.getParams()));
         	task.setFlowCaseId(flowCase.getId());
         	pmTaskProvider.updateTask(task);
-			
-	    	List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
+
+			PmTaskLog pmTaskLog = new PmTaskLog();
+			pmTaskLog.setNamespaceId(task.getNamespaceId());
+			pmTaskLog.setOperatorTime(now);
+			pmTaskLog.setOperatorUid(userId);
+			pmTaskLog.setOwnerId(task.getOwnerId());
+			pmTaskLog.setOwnerType(task.getOwnerType());
+			pmTaskLog.setStatus(task.getStatus());
+			pmTaskLog.setTaskId(task.getId());
+			pmTaskProvider.createTaskLog(pmTaskLog);
+
+			//图片
+			addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
+
+			List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
 	    			PmTaskOperateType.EXECUTOR.getCode(), null, null);
 	    	int size = targets.size();
 	    	if(LOGGER.isDebugEnabled())
@@ -230,6 +220,26 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		pmTaskSearch.feedDoc(task);
 		
 		return ConvertHelper.convert(task, PmTaskDTO.class);
+	}
+
+	private Byte convertFlowStatus(String params) {
+
+		if(StringUtils.isBlank(params)) {
+			LOGGER.error("Invalid flowNode param.");
+			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
+					"Invalid flowNode param.");
+		}
+
+		JSONObject paramJson = JSONObject.parseObject(params);
+		String nodeType = paramJson.getString("nodeType");
+
+		switch (nodeType) {
+			case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
+			case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
+			case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
+			case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
+			default: return null;
+		}
 	}
 
     final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -412,8 +422,83 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 			}
 		}
 		
-		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		return handler.getTaskDetail(cmd);
+		return getFlowTaskDetail(cmd);
+	}
+
+	private PmTaskDTO getFlowTaskDetail(GetTaskDetailCommand cmd) {
+
+		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
+		checkId(cmd.getId());
+		PmTask task = checkPmTask(cmd.getId());
+
+		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
+
+		setPmTaskDTOAddress(task, dto);
+		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
+			User user = userProvider.findUserById(task.getCreatorUid());
+			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+			dto.setRequestorName(user.getNickName());
+			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
+		}
+
+		//查询服务类型
+		Category category = categoryProvider.findCategoryById(task.getCategoryId());
+		Category taskCategory = checkCategory(task.getTaskCategoryId());
+		if(null != category)
+			dto.setCategoryName(category.getName());
+		dto.setTaskCategoryName(taskCategory.getName());
+
+		//查询图片
+		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
+		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
+			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
+
+			String contentUrl = getResourceUrlByUir(r.getContentUri(),
+					EntityType.USER.getCode(), r.getCreatorUid());
+			attachmentDto.setContentUrl(contentUrl);
+			return attachmentDto;
+		}).collect(Collectors.toList());
+		dto.setAttachments(attachmentDtos);
+
+		return dto;
+	}
+
+	private void checkId(Long id){
+		if(null == id) {
+			LOGGER.error("Invalid id parameter.");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid id parameter.");
+		}
+	}
+
+	private PmTask checkPmTask(Long id){
+		PmTask pmTask = pmTaskProvider.findTaskById(id);
+		if(null == pmTask) {
+			LOGGER.error("PmTask not found, id={}", id);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"PmTask not found.");
+		}
+		return pmTask;
+	}
+	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {
+		if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
+			Address address = addressProvider.findAddressById(task.getAddressId());
+			if(null != address) {
+				Community community = communityProvider.findCommunityById(address.getCommunityId());
+				dto.setAddress(address.getCityName() + address.getAreaName() + community.getName() + address.getAddress());
+			}
+		}else {
+			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
+			Address address = addressProvider.findAddressById(task.getAddressId());
+
+			String addr = "";
+			if(null != organization)
+				addr = organization.getName();
+			if(null != address)
+				addr = addr + address.getAddress();
+
+			dto.setAddress(addr);
+		}
 	}
 
 	@Override
@@ -444,5 +529,23 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		return handler.listUserTasks(cmd);
 	}
 
+	@Override
+	public void updateTaskByOrg(UpdateTaskCommand cmd) {
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		handler.updateTaskByOrg(cmd);
+
+		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+
+		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+		stepDTO.setFlowCaseId(flowCase.getId());
+		stepDTO.setFlowMainId(flowCase.getFlowMainId());
+		stepDTO.setFlowVersion(flowCase.getFlowVersion());
+		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+		stepDTO.setStepCount(flowCase.getStepCount());
+		flowService.processAutoStep(stepDTO);
+
+	}
 
 }

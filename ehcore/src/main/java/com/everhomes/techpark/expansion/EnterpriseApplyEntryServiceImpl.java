@@ -1,7 +1,34 @@
 package com.everhomes.techpark.expansion;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
+import java.util.ArrayList;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.LinkedMultiValueMap;
+import org.springframework.util.MultiValueMap;
+import org.springframework.util.StringUtils;
+import org.springframework.web.util.UriComponentsBuilder;
+
+import ch.qos.logback.core.joran.conditional.ElseAction;
+
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
@@ -12,6 +39,7 @@ import com.everhomes.enterprise.EnterpriseCommunityMap;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowService;
 import com.everhomes.group.Group;
 import com.everhomes.group.GroupProvider;
@@ -20,15 +48,52 @@ import com.everhomes.listing.ListingLocator;
 import com.everhomes.listing.ListingQueryBuilderCallback;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
+import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
+import com.everhomes.openapi.ContractProvider;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.rest.community.BuildingDTO;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
+import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
+import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
+import com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO;
+import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
+import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryDTO;
+import com.everhomes.rest.techpark.expansion.EnterpriseApplyRenewCommand;
+import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
+import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
+import com.everhomes.rest.techpark.expansion.ExpansionConst;
+import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
+import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
+import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
+import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
+import com.everhomes.rest.techpark.expansion.LeasePromotionType;
+import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
+import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
+import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
+import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
+import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -36,21 +101,10 @@ import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.Tuple;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.*;
-import java.util.stream.Collectors;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
+import com.everhomes.yellowPage.YellowPage;
+import com.everhomes.yellowPage.YellowPageProvider;
 
 @Component
 public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryService {
@@ -59,6 +113,17 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Autowired
 	private SmsProvider smsProvider;
 
+	@Autowired
+	private ContractProvider contractProvider;
+
+	@Autowired
+	private BuildingProvider buildingProvider;
+	
+	@Autowired
+	private ContractBuildingMappingProvider contractBuildingMappingProvider;
+	@Autowired
+	private EnterpriseOpRequestBuildingProvider enterpriseOpRequestBuildingProvider;
+	
 	@Autowired
 	private OrganizationProvider organizationProvider;
 
@@ -83,12 +148,18 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Autowired
 	private UserProvider userProvider;
 
+	@Autowired
+	private YellowPageProvider yellowPageProvider;
+	
     @Autowired
     private FlowService flowService;
 
     @Autowired
     private DbProvider dbProvider;
 
+	@Autowired
+	private OrganizationService organizationService;
+	
     @Autowired
     private LocaleTemplateService localeTemplateService;
 
@@ -226,34 +297,110 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		ListEnterpriseApplyEntryResponse res = new ListEnterpriseApplyEntryResponse();
 		
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
-		
+//		if(request.getApplyType() != null &&ApplyEntryApplyType.MAKER_ZONE.getCode() == request.getApplyType().byteValue()){
+//			request.setApplyType(null);
+//			request.setSourceType(ApplyEntrySourceType.MARKET_ZONE.getCode());
+//		}
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
-		List<EnterpriseOpRequest> enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize);
-		
+		List<EnterpriseOpRequest> enterpriseOpRequests = null;
+		//增加了判断buildingId
+		if(null == cmd.getBuildingId())
+			enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize);
+		else{
+			List<EnterpriseOpRequestBuilding> opRequestBuildings = this.enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(null,
+					Integer.MAX_VALUE - 1, new ListingQueryBuilderCallback() {
+						@Override
+						public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+								SelectQuery<? extends Record> query) {
+							query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.BUILDING_ID.eq(cmd.getBuildingId()));  
+							return query;
+						}
+					});
+			List<Long> idList = new ArrayList<>();
+			for(EnterpriseOpRequestBuilding opBuilding : opRequestBuildings){
+				idList.add(opBuilding.getEnterpriseOpRequestsId());
+			}
+			if(idList.size() >0 )
+				enterpriseOpRequests = enterpriseApplyEntryProvider.listApplyEntrys(request, locator, pageSize,idList);
+			
+		}
+		if(null == enterpriseOpRequests)
+			return res;
 		res.setNextPageAnchor(locator.getAnchor());
-		for (EnterpriseOpRequest enterpriseOpRequest : enterpriseOpRequests) {
-			if(ApplyEntrySourceType.BUILDING.getCode().equals(enterpriseOpRequest.getSourceType())){
-				Building building = communityProvider.findBuildingById(enterpriseOpRequest.getSourceId());
-				if(null != building)enterpriseOpRequest.setSourceName(building.getName());
-			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(enterpriseOpRequest.getSourceType())||
-					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(enterpriseOpRequest.getSourceType())){
-				LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(enterpriseOpRequest.getSourceId());
-				if(null != leasePromotion)enterpriseOpRequest.setSourceName(leasePromotion.getSubject());
+
+		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map((c) ->{
+			EnterpriseApplyEntryDTO dto = ConvertHelper.convert(c, EnterpriseApplyEntryDTO.class);
+			//对于有合同的(一定是续租)
+			if(null != c.getContractId()){
+				Contract contract = contractProvider.findContractById(c.getContractId());
+				if(null != contract)
+					dto.setContract(organizationService.processContract(contract));
+			}
+			return dto;
+		}).collect(Collectors.toList());
+		for (EnterpriseApplyEntryDTO dto : dtos) {
+			dto.setBuildings(new ArrayList<BuildingDTO>() );
+			//对于不同的类型有不同的sourceName 和 楼栋
+			if(ApplyEntryApplyType.fromType(dto.getApplyType()).equals(ApplyEntryApplyType.RENEW)){
+				//续租的搜
+				dto.setSourceName("续租");
+				List<EnterpriseOpRequestBuilding> opBuildings = enterpriseOpRequestBuildingProvider.queryEnterpriseOpRequestBuildings(null, Integer.MAX_VALUE,  new ListingQueryBuilderCallback() {
+					//续租申请，申请来源=续租 续租申请，楼栋=合同里关联的楼栋（可能多个）
+		            @Override
+		            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
+		                    SelectQuery<? extends Record> query) {
+		                query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.ENTERPRISE_OP_REQUESTS_ID.eq(dto.getId())); 
+		                query.addConditions(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.STATUS.eq(EnterpriseOpRequestBuildingStatus.NORMAL.getCode())); 
+		                return query;
+		            }
+				});   
+				for(EnterpriseOpRequestBuilding opBuilding : opBuildings){
+					Building building = communityProvider.findBuildingById(opBuilding.getBuildingId());
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
+			}else if(ApplyEntrySourceType.BUILDING.getCode().equals(dto.getSourceType())){
+				//园区介绍处的申请，申请来源=楼栋名称 园区介绍处的申请，楼栋=楼栋名称
+				Building building = communityProvider.findBuildingById(dto.getSourceId());
+				if(null != building){
+					dto.setSourceName(building.getName());
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
+			}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(dto.getSourceType())||
+					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(dto.getSourceType())){
+				//虚位以待处的申请，申请来源=招租标题 虚位以待处的申请，楼栋=招租办公室所在楼栋
+				LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(dto.getSourceId());
+				if(null != leasePromotion){
+					dto.setSourceName(leasePromotion.getSubject());
+					Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
+					dto.getBuildings().add(proessBuildingDTO(building));
+				}
+			}else if (ApplyEntrySourceType.MARKET_ZONE.getCode().equals(dto.getSourceType())){
+				//创客入驻处的申请，申请来源=“创客申请” 创客入驻处的申请，楼栋=创客空间所在的楼栋
+				YellowPage yellowPage = yellowPageProvider.getYellowPageById(dto.getSourceId());
+				if(null != yellowPage){
+					dto.setSourceName("创客申请");
+					if(yellowPage.getBuildingId()!=null){
+						Building building = communityProvider.findBuildingById(yellowPage.getBuildingId());
+						dto.getBuildings().add(proessBuildingDTO(building));
+					}
+				}
 			}
 		}
-		
-		List<EnterpriseApplyEntryDTO> dtos = enterpriseOpRequests.stream().map((c) ->{
-			return ConvertHelper.convert(c, EnterpriseApplyEntryDTO.class);
-		}).collect(Collectors.toList());
-		
 		res.setEntrys(dtos);
 		return res;
 	}
+	private BuildingDTO proessBuildingDTO(Building building){
+		BuildingDTO buildingDTO = ConvertHelper.convert(building, BuildingDTO.class); 
+		buildingDTO.setBuildingName(buildingDTO.getName());
+		buildingDTO.setName(org.springframework.util.StringUtils.isEmpty(buildingDTO.getAliasName()) ? buildingDTO.getName() : buildingDTO.getAliasName());
+		return buildingDTO;
+	}
 
 	@Override
-	public boolean applyEntry(EnterpriseApplyEntryCommand cmd) {
+	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
+		ApplyEntryResponse resp = new ApplyEntryResponse();
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
 		if(null != cmd.getContactPhone())
@@ -261,10 +408,67 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		request.setOperatorUid(request.getApplyUserId());
 		request.setStatus(ApplyEntryStatus.PROCESSING.getCode());
-
-        boolean createFlowCaseSuccess = dbProvider.execute(status -> {
+		
+        FlowCase flowCase = dbProvider.execute(status -> {
+        	//added by Janson
+        	String projectType = EntityType.COMMUNITY.getCode();
+        	
             enterpriseApplyEntryProvider.createApplyEntry(request);
-            return this.createFlowCase(request);
+            Long projectId = cmd.getCommunityId();
+            EnterpriseOpRequestBuilding opRequestBuilding = new EnterpriseOpRequestBuilding();
+            opRequestBuilding.setEnterpriseOpRequestsId(request.getId()); 
+            opRequestBuilding.setCreatorUid(UserContext.current().getUser().getId());
+            opRequestBuilding.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+            opRequestBuilding.setStatus(EnterpriseOpRequestBuildingStatus.NORMAL.getCode());
+            ResourceCategoryAssignment resourceCategory = null;
+            //TODO : 根据情况保存地址
+    		if(null != request.getContractId()){
+    			//1.保存合同带的地址
+    			Contract contract = contractProvider.findContractById(request.getContractId());
+    			if(null == contract )
+    				throw errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,"can not find contract!!");
+    			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(UserContext.getCurrentNamespaceId(),
+    					contract.getContractNumber());
+    			for(BuildingApartmentDTO buildingApartmentDTO: buildings){
+    				com.everhomes.building.Building building = buildingProvider.findBuildingByName(UserContext.getCurrentNamespaceId(), cmd.getCommunityId(), buildingApartmentDTO.getBuildingName());
+    				if(building !=null){
+    					opRequestBuilding.setBuildingId(building.getId());
+    					resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(), 
+    							EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+    					enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    				}
+    			}
+    			
+    		}else if (cmd.getApplyType().equals(ApplyEntryApplyType.RENEW.getCode())){
+    			
+    		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.MARKET_ZONE.getCode())){
+    			//2. 创客空间带的地址
+    			YellowPage yellowPage = yellowPageProvider.getYellowPageById(cmd.getSourceId());
+    			opRequestBuilding.setBuildingId(yellowPage.getBuildingId());
+    			resourceCategory = communityProvider.findResourceCategoryAssignment(yellowPage.getBuildingId(), 
+						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    		}else if (cmd.getSourceType().equals(ApplyEntrySourceType.BUILDING.getCode())){
+    			//3. 园区介绍直接就是楼栋的地址
+    			opRequestBuilding.setBuildingId(cmd.getSourceId());
+    			resourceCategory = communityProvider.findResourceCategoryAssignment(cmd.getSourceId(), 
+						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    		}else if(ApplyEntrySourceType.FOR_RENT.getCode().equals(cmd.getSourceType())||
+					ApplyEntrySourceType.OFFICE_CUBICLE.getCode().equals(cmd.getSourceType())){
+    			//4. 虚位以待的楼栋地址
+    			LeasePromotion leasePromotion = enterpriseApplyEntryProvider.getLeasePromotionById(cmd.getSourceId());
+    			opRequestBuilding.setBuildingId(leasePromotion.getBuildingId());
+    			resourceCategory = communityProvider.findResourceCategoryAssignment(leasePromotion.getBuildingId(), 
+						EntityType.BUILDING.getCode(),UserContext.getCurrentNamespaceId());
+				enterpriseOpRequestBuildingProvider.createEnterpriseOpRequestBuilding(opRequestBuilding);
+    		}
+    		if(null != resourceCategory && null!=resourceCategory.getResourceCategryId()) {
+    			projectId = resourceCategory.getResourceCategryId();
+    			projectType = EntityType.RESOURCE_CATEGORY.getCode();
+    		}
+
+            return this.createFlowCase(request,projectId, projectType);
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813
@@ -293,9 +497,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         // 1.如果创建flowCase成功, 则不在这里发送短信, 移到工作流中配置
         // 2.如果创建flowCase不成功, 说明没有配置使用工作流, 则保持原来的发短信功能不变   add by xq.tian  2016/12/22
-        if (createFlowCaseSuccess) {
-            return true;
-        }
+
 
         // 根据apply type来区分
         String phoneNumber = null;
@@ -339,28 +541,47 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     break;
             }
         }
-		return true;
+        
+        if (flowCase != null ) {
+        	//TODO: 组装resp
+        	String url = processFlowURL(flowCase.getId(), FlowUserType.APPLIER.getCode(), flowCase.getModuleId());
+        	resp.setUrl(url);
+        }
+		return resp;
 	}
 
-    private boolean createFlowCase(EnterpriseOpRequest request) {
+	private String processFlowURL(Long flowCaseId, String string, Long moduleId) { 
+		return "zl://workflow/detail?flowCaseId="+flowCaseId+"&flowUserType="+string+"&moduleId="+moduleId  ;
+		  
+		
+	}
+    private FlowCase createFlowCase(EnterpriseOpRequest request, Long projectId, String projectType) {
         Flow flow = flowService.getEnabledFlow(UserContext.getCurrentNamespaceId(), ExpansionConst.MODULE_ID, null, request.getCommunityId(), FlowOwnerType.COMMUNITY.getCode());
+
+        CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
+        flowCaseCmd.setApplyUserId(request.getApplyUserId());
+        flowCaseCmd.setReferId(request.getId());
+        // flowCase摘要内容
+        flowCaseCmd.setContent(this.getBriefContent(request));
+        flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
+        flowCaseCmd.setProjectId(projectId);
         if (flow != null) {
-            CreateFlowCaseCommand flowCaseCmd = new CreateFlowCaseCommand();
-            flowCaseCmd.setApplyUserId(request.getApplyUserId());
             flowCaseCmd.setFlowMainId(flow.getFlowMainId());
             flowCaseCmd.setFlowVersion(flow.getFlowVersion());
-            flowCaseCmd.setReferId(request.getId());
-            flowCaseCmd.setReferType(EntityType.ENTERPRISE_OP_REQUEST.getCode());
-            // flowCase摘要内容
-            flowCaseCmd.setContent(this.getBriefContent(request));
+            flowCaseCmd.setProjectType(projectType);
+            flowCaseCmd.setProjectId(projectId);
 
-            flowService.createFlowCase(flowCaseCmd);
-            return true;
+            return flowService.createFlowCase(flowCaseCmd);
         } else {
-            if(LOGGER.isWarnEnabled()) {
-                LOGGER.warn("There is no expansion workflow enabled for ownerId: {}", request.getCommunityId());
-            }
-            return false;
+        	GeneralModuleInfo gm = new GeneralModuleInfo();
+        	gm.setOrganizationId(request.getEnterpriseId());
+        	gm.setProjectType(projectType);
+        	gm.setProjectId(projectId);
+        	gm.setNamespaceId(UserContext.getCurrentNamespaceId());
+        	gm.setModuleId(ExpansionConst.MODULE_ID);
+			gm.setOwnerId(request.getCommunityId());
+			gm.setOwnerType(FlowOwnerType.COMMUNITY.getCode());
+			return flowService.createDumpFlowCase(gm, flowCaseCmd);
         }
     }
 
@@ -368,11 +589,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         String locale = UserContext.current().getUser().getLocale();
         Map<String, Object> map = new HashMap<>();
         String applyType = localeStringService.getLocalizedString(ExpansionLocalStringCode.SCOPE_APPLY_TYPE, request.getApplyType() + "", locale, "");
-        map.put("applyType", applyType);
-        map.put("areaSize", request.getAreaSize());
+        map.put("applyType", defaultIfNull(applyType,""));
+        map.put("areaSize", defaultIfNull(request.getAreaSize(),""));
 
         return localeTemplateService.getLocaleTemplateString(ExpansionLocalStringCode.SCOPE,
                 ExpansionLocalStringCode.FLOW_BRIEF_CONTENT_CODE, locale, map, "");
+    }
+
+    private Object defaultIfNull(Object obj, Object defaultValue) {
+        return obj != null ? obj : defaultValue;
     }
 
     /**

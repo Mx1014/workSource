@@ -1,10 +1,10 @@
 // @formatter:off
 package com.everhomes.rest.forum;
 
-import java.util.List;
-
 import com.everhomes.discover.ItemType;
 import com.everhomes.util.StringHelper;
+
+import java.util.List;
 
 /**
  * <ul>
@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * <li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>categoryId: 活动类型id</li>
+ * <li>contentCategoryId: 活动主题分类id</li>
  * </ul>
  */
 public class QueryOrganizationTopicCommand {
@@ -40,10 +41,23 @@ public class QueryOrganizationTopicCommand {
     @ItemType(Long.class)
     private List<Long> excludeCategories;
     
+    private Long contentCategoryId;
+
+    @ItemType(Integer.class)
+    private List<Integer> activityStatusList;
+    
     public QueryOrganizationTopicCommand() {
     }
 
-    public Long getCategoryId() {
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public Long getCategoryId() {
 		return categoryId;
 	}
 
@@ -67,8 +81,15 @@ public class QueryOrganizationTopicCommand {
 	}
 
 
+    public List<Integer> getActivityStatusList() {
+        return activityStatusList;
+    }
 
-	public void setCommunityId(Long communityId) {
+    public void setActivityStatusList(List<Integer> activityStatusList) {
+        this.activityStatusList = activityStatusList;
+    }
+
+    public void setCommunityId(Long communityId) {
 		this.communityId = communityId;
 	}
 

@@ -11,6 +11,8 @@ import java.util.List;
  *     <li>communityId: 小区id</li>
  *     <li>livingStatus: 是否在户</li>
  *     <li>orgOwnerTypeIds: 业主类型id列表</li>
+ *      <li>ownerType: ownerType EhCommunities 权限校验时用的</li>
+ *      <li>ownerId: ownerId, communityId</li>
  * </ul>
  */
 public class ListOrganizationOwnerStatisticCommand {
@@ -20,6 +22,25 @@ public class ListOrganizationOwnerStatisticCommand {
     private Byte livingStatus;
     @ItemType(Long.class)
     private List<Long> orgOwnerTypeIds;
+
+    private String ownerType;
+    private Long ownerId;
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public Long getCommunityId() {
         return communityId;

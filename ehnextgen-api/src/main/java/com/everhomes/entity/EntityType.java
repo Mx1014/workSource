@@ -51,7 +51,8 @@ public enum EntityType {
     PARKING_LOT(EhParkingLots.class.getSimpleName()),
     PARKING_CLEARANCE_LOG(EhParkingClearanceLogs.class.getSimpleName()),
     ENTERPRISE_OP_REQUEST(EhEnterpriseOpRequests.class.getSimpleName()),
-    PM_TASK(EhPmTasks.class.getSimpleName());
+    PM_TASK(EhPmTasks.class.getSimpleName()),
+    ORGANIZATION_FILE("EhOrganizationFiles");
 
     private String code;
     

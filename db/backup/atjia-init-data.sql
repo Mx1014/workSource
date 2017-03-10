@@ -101,7 +101,11 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES (110156, 999988, '0', '0', '0', '/home', 'Bizs', '视频点播', '视频点播', 'cs://1/image/aW1hZ2UvTVRvM1lqVTBNekptWW1ZeU4ySTNaVEl5WVRnNE0ySmxNemcwWldNM05EUmtOUQ', '1', '1', '14', '{\"url\":\"http://172.17.1.1:8080"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default', '1');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
     VALUES (110157, 999988, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRwaE9UVTRORE0wTjJOaFlXUmpZamhoWkRFeU9XSXdNMlkyWkRrNE1UZzNZdw', '1', '1', '1', '{\"itemLocation\":\"/home\",\"itemGroup\":\"Bizs\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default', '1');
+-- 为验收而添加俱乐部 by lqs 20170120
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+    VALUES (111501, 999988, '0', '0', '0', '/home', 'Bizs', 'CLUB', '俱乐部', 'cs://1/image/aW1hZ2UvTVRveE4yVmxOak0wWkdReU9UY3dPVGMzTlRrM05UWmxOV1U1TVRneFltTTVaZw', '1', '1', '36', '{"privateFlag": 0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'default', '1');
 
+	
 -- pm_admin 小区物业管理公司场景
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
     VALUES (110158, 999988, '0', '0', '0', '/home', 'Bizs', 'PUNCH', '打卡考勤', 'cs://1/image/aW1hZ2UvTVRveVltSmhNMlkzTjJJMU5URmtOMkl5WXpZNE9UaG1ZV0l6WlRBd01EVXhOUQ', '1', '1', '23', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1');
@@ -117,6 +121,9 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
     VALUES (110163, 999988, '0', '0', '0', '/home', 'Bizs', '视频点播', '视频点播', 'cs://1/image/aW1hZ2UvTVRvM1lqVTBNekptWW1ZeU4ySTNaVEl5WVRnNE0ySmxNemcwWldNM05EUmtOUQ', '1', '1', '14', '{\"url\":\"http://172.17.1.1:8080"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
     VALUES (110164, 999988, '0', '0', '0', '/home', 'Bizs', '更多', '更多', 'cs://1/image/aW1hZ2UvTVRwaE9UVTRORE0wTjJOaFlXUmpZamhoWkRFeU9XSXdNMlkyWkRrNE1UZzNZdw', '1', '1', '1', '{\"itemLocation\":\"/home\",\"itemGroup\":\"Bizs\"}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
+-- 为验收而添加俱乐部 by lqs 20170120
+INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
+    VALUES (111502, 999988, '0', '0', '0', '/home', 'Bizs', 'CLUB', '俱乐部', 'cs://1/image/aW1hZ2UvTVRveE4yVmxOak0wWkdReU9UY3dPVGMzTlRrM05UWmxOV1U1TVRneFltTTVaZw', '1', '1', '36', '{"privateFlag": 0}', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '0', 'pm_admin', '1');
 
     
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
@@ -174,5 +181,31 @@ INSERT INTO `eh_banners` (`id`, `namespace_id`, `appId`, `banner_location`, `ban
     VALUES ('10797', '999988', '0', '/home', 'Default', '0', '0', '活动4', 'atjia', 'cs://1/image/aW1hZ2UvTVRwak5HSTRZVFl4TUdZMU1qRTJPRGxtTVRsaE1HSTJNREZqTlRBeU56RTVaUQ', 14, '{"url":"https://core.zuolin.com/park-introduction/index.html?hideNavigationBar=1#sign_suffix"}', NULL, NULL, '2', '1', '0', UTC_TIMESTAMP(), NULL, 'pm_admin', '0');
 
 
-
+-- 
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203001, 2, 0, '运动与音乐', '兴趣/运动与音乐', 10, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203002, 2, 0, '旅游摄影', '兴趣/旅游摄影', 20, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203003, 2, 0, '亲子与教育', '兴趣/亲子与教育', 30, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203004, 2, 0, '美食与厨艺', '兴趣/美食与厨艺', 40, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203005, 2, 0, '家庭装饰', '兴趣/家庭装饰', 50, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203006, 2, 0, '美容化妆', '兴趣/美容化妆', 60, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203007, 2, 0, '宠物会', '兴趣/宠物会', 70, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203008, 2, 0, '名牌汇', '兴趣/名牌汇', 80, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203009, 2, 0, '同事群', '兴趣/同事群', 90, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203010, 2, 0, '老乡群', '兴趣/老乡群', 100, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203011, 2, 0, '同学群', '兴趣/同学群', 110, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203012, 2, 0, '拼车', '兴趣/拼车', 120, 2, UTC_TIMESTAMP(), 999988);
+INSERT INTO `eh_categories`(`id`, `parent_id`, `link_id`, `name`, `path`, `default_order`, `status`, `create_time`, `namespace_id`)
+    VALUES(203013, 2, 0, '其他', '兴趣/其他', 200, 2, UTC_TIMESTAMP(), 999988);
     

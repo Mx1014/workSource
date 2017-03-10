@@ -44,7 +44,7 @@ public class UpdateOrganizationOwnerAddressStatusTest extends BaseLoginAuthTestC
         cmd.setOrganizationId(1000001L);
         cmd.setAddressId(address.getId());
         cmd.setBehaviorType(OrganizationOwnerBehaviorType.IMMIGRATION.getCode());
-        cmd.setOwnerId(1L);
+        cmd.setOrgOwnerId(1L);
 
         RestResponseBase response = httpClientService.restPost(api, cmd, RestResponseBase.class);
 
@@ -64,7 +64,7 @@ public class UpdateOrganizationOwnerAddressStatusTest extends BaseLoginAuthTestC
                 .where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.ADDRESS_ID.eq(address.getId()))
                 .and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.BEHAVIOR_TYPE.eq(OrganizationOwnerBehaviorType.IMMIGRATION.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.OWNER_ID.eq(updatedOwnerAddress.getOrganizationOwnerId()))
-                .fetchOne();
+                .fetchAny();
 
         assertNotNull("The ownerBehaviorsRecord should not null.", ownerBehaviorsRecord);
     }
@@ -91,7 +91,7 @@ public class UpdateOrganizationOwnerAddressStatusTest extends BaseLoginAuthTestC
         cmd.setOrganizationId(1000001L);
         cmd.setAddressId(address.getId());
         cmd.setBehaviorType(OrganizationOwnerBehaviorType.EMIGRATION.getCode());
-        cmd.setOwnerId(1L);
+        cmd.setOrgOwnerId(1L);
 
         RestResponseBase response = httpClientService.restPost(api, cmd, RestResponseBase.class);
 
@@ -111,7 +111,7 @@ public class UpdateOrganizationOwnerAddressStatusTest extends BaseLoginAuthTestC
                 .where(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.ADDRESS_ID.eq(address.getId()))
                 .and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.BEHAVIOR_TYPE.eq(OrganizationOwnerBehaviorType.EMIGRATION.getCode()))
                 .and(Tables.EH_ORGANIZATION_OWNER_BEHAVIORS.OWNER_ID.eq(updatedOwnerAddress.getOrganizationOwnerId()))
-                .fetchOne();
+                .fetchAny();
 
         assertNotNull("The ownerBehaviorsRecord should not null.", ownerBehaviorsRecord);
     }
@@ -128,7 +128,8 @@ public class UpdateOrganizationOwnerAddressStatusTest extends BaseLoginAuthTestC
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-list-owner-addresses-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-list-owner-addresses-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

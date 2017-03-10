@@ -7,6 +7,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.server.schema.tables.daos.*;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.Condition;
 import org.jooq.DSLContext;
@@ -32,16 +33,6 @@ import com.everhomes.rest.parking.ParkingRechargeOrderRechargeStatus;
 import com.everhomes.rest.parking.ParkingRechargeOrderStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
-import com.everhomes.server.schema.tables.daos.EhParkingActivitiesDao;
-import com.everhomes.server.schema.tables.daos.EhParkingAttachmentsDao;
-import com.everhomes.server.schema.tables.daos.EhParkingCardRequestsDao;
-import com.everhomes.server.schema.tables.daos.EhParkingFlowDao;
-import com.everhomes.server.schema.tables.daos.EhParkingLotsDao;
-import com.everhomes.server.schema.tables.daos.EhParkingRechargeOrdersDao;
-import com.everhomes.server.schema.tables.daos.EhParkingRechargeRatesDao;
-import com.everhomes.server.schema.tables.daos.EhParkingStatisticsDao;
-import com.everhomes.server.schema.tables.daos.EhParkingVendorsDao;
-import com.everhomes.server.schema.tables.daos.EhPmTaskAttachmentsDao;
 import com.everhomes.server.schema.tables.pojos.EhParkingActivities;
 import com.everhomes.server.schema.tables.pojos.EhParkingAttachments;
 import com.everhomes.server.schema.tables.pojos.EhParkingCarSeries;
@@ -783,7 +774,7 @@ public class ParkingProviderImpl implements ParkingProvider {
 		
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhParkingCarSeries.class));
 		 
-		EhParkingStatisticsDao dao = new EhParkingStatisticsDao(context.configuration());
+		EhParkingCarSeriesDao dao = new EhParkingCarSeriesDao(context.configuration());
 		
 		return ConvertHelper.convert(dao.findById(id), ParkingCarSerie.class);
     }

@@ -509,7 +509,8 @@ public class Ketuo2ParkingVendorHandler implements ParkingVendorHandler {
 			String validEnd = sdf1.format(addMonth(time, order.getMonthCount().intValue()));
 			
 			param.put("cardId", card.getCardId());
-			param.put("ruleType", CUSTOM.equals(order.getRateToken())?"2":order.getRateToken());
+//			param.put("ruleType", CUSTOM.equals(order.getRateToken())?"2":order.getRateToken());
+			param.put("ruleType", RULE_TYPE);
 		    param.put("ruleAmount", String.valueOf(order.getMonthCount().intValue()));
 		    param.put("payMoney", order.getPrice().intValue()*100);
 		    param.put("startTime", validStart);

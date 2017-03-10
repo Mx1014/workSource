@@ -163,4 +163,9 @@ public interface GroupService {
      * 删除俱乐部的广播
      */
     void deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd);
+
+    /**
+     * 搜索俱乐部成员
+     */
+    ListMemberCommandResponse searchClubMembers(SearchClubMemberCommand cmd);
 }

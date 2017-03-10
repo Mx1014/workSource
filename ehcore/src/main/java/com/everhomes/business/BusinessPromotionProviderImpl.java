@@ -41,7 +41,7 @@ public class BusinessPromotionProviderImpl implements BusinessPromotionProvider 
             // TODO
             query.addConditions(Tables.EH_BUSINESS_PROMOTIONS.ID.le(pageAnchor));
         }
-        query.addOrderBy(Tables.EH_BUSINESS_PROMOTIONS.DEFAULT_ORDER, Tables.EH_BUSINESS_PROMOTIONS.CREATE_TIME);
+        query.addOrderBy(Tables.EH_BUSINESS_PROMOTIONS.DEFAULT_ORDER.desc());
         query.addLimit(pageSize);
         return query.fetchInto(BusinessPromotion.class);
     }

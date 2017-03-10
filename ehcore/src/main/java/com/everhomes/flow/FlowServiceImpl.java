@@ -1795,6 +1795,9 @@ public class FlowServiceImpl implements FlowService {
 		flowCase.setNamespaceId(ga.getNamespaceId());
 		flowCase.setModuleId(ga.getModuleId());
 		flowCase.setModuleName(moduleDTO.getDisplayName());
+		if(ga.getModuleType() == null) {
+			ga.setModuleType(FlowModuleType.NO_MODULE.getCode());
+		}
 		flowCase.setModuleType(ga.getModuleType());
 		flowCase.setOwnerId(ga.getOwnerId());
 		flowCase.setOwnerType(ga.getOwnerType());
@@ -2231,6 +2234,16 @@ public class FlowServiceImpl implements FlowService {
 			}
 			
 			nodeDTOS.add(logDTO);
+		} else {
+			//BUG 6052
+			for(int i = nodeDTOS.size() - 2; i >= 0; i--) {
+				logDTO = nodeDTOS.get(i);
+				if(logDTO.getLogs().size() > 0) {
+					nodeDTOS.get(nodeDTOS.size()-1).getLogs().add(logDTO.getLogs().get(logDTO.getLogs().size()-1));
+					logDTO.getLogs().remove(logDTO.getLogs().size()-1);
+					break;
+				}
+			}
 		}
 		
 		//fix multiple current node
@@ -2597,18 +2610,26 @@ public class FlowServiceImpl implements FlowService {
 					parentOrgId = sel.getOrganizationId();
 				}
 				Long departmentId = parentOrgId;
-				if(sel.getSourceIdB() != null 
-						&& !sel.getSourceIdB().equals(0l) 
-						&& FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
-					departmentId = sel.getSourceIdB();
+				if(sel.getSourceIdB() != null) {
+					if(FlowUserSourceType.SOURCE_DUTY_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
+						FlowCase flowCase = ctx.getFlowCase(); 
+						List<Long> tmp = flowUserSelectionService.findUsersByDudy(parentOrgId, flowCase.getModuleId(), flowCase.getProjectType(), flowCase.getProjectId());
+						users.addAll(tmp);
+						continue;
+					}
+					
+					if(sel.getSourceIdB().equals(0l) 
+							&& FlowUserSourceType.SOURCE_DEPARTMENT.getCode().equals(sel.getSourceTypeB())) {
+						departmentId = sel.getSourceIdB();
+					}
 				}
+				
 //				LOGGER.error("position selId= " + sel.getId() + " positionId= " + sel.getSourceIdA() + " departmentId= " + departmentId);
 				if(FlowUserSourceType.SOURCE_POSITION.getCode().equals(sel.getSourceTypeA())) {
 					List<Long> tmp = flowUserSelectionService.findUsersByJobPositionId(parentOrgId, sel.getSourceIdA(), departmentId);
 					if(tmp != null) {
 						users.addAll(tmp);	
 					}
-					
 				} else {
 					LOGGER.error("resolvUser selId= " + sel.getId() + " position parse error!");
 				}

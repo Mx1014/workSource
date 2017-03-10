@@ -42,6 +42,7 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceProvider;
 import com.everhomes.openapi.Contract;
+import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.organization.pm.CommunityPmContact;
 import com.everhomes.organization.pm.PropertyMgrProvider;
 import com.everhomes.organization.pm.PropertyMgrService;
@@ -59,6 +60,7 @@ import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
 import com.everhomes.rest.enterprise.*;
 import com.everhomes.rest.family.LeaveFamilyCommand;
@@ -87,7 +89,6 @@ import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.user.*;
 import com.everhomes.rest.user.admin.ImportDataResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
-import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.search.PostAdminQueryFilter;
 import com.everhomes.search.PostSearcher;
@@ -109,9 +110,6 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.jooq.Condition;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
-import org.simplejavamail.email.Email;
-import org.simplejavamail.email.EmailBuilder;
-import org.simplejavamail.mailer.Mailer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -144,6 +142,10 @@ public class OrganizationServiceImpl implements OrganizationService {
 	@Autowired
 	private DbProvider dbProvider;
 
+
+	@Autowired
+	private ContractBuildingMappingProvider contractBuildingMappingProvider;
+	
 	@Autowired
 	private NamespaceProvider namespaceProvider;
 	
@@ -2185,7 +2187,8 @@ public class OrganizationServiceImpl implements OrganizationService {
 	
 	@Override
 	public List<OrganizationDTO> listUserRelateOrganizations(Integer namespaceId, Long userId, OrganizationGroupType groupType) {
-	    List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
+		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:startTime:{}", System.currentTimeMillis());
+		List<OrganizationMember> orgMembers = this.organizationProvider.listOrganizationMembers(userId);
         
         OrganizationGroupType tempGroupType = null;
         List<OrganizationDTO> dtos = new ArrayList<OrganizationDTO>();
@@ -2220,8 +2223,8 @@ public class OrganizationServiceImpl implements OrganizationService {
             OrganizationDTO dto = toOrganizationDTO(userId, org);
             dtos.add(dto);
         }
-        
-        return dtos;
+		LOGGER.debug("TrackUserRelatedCost:listUserRelateOrganizations:endTime:{}", System.currentTimeMillis());
+		return dtos;
 	}
 	
 	private OrganizationDTO toOrganizationDTO(Long userId, Organization organization) {
@@ -2337,14 +2340,7 @@ public class OrganizationServiceImpl implements OrganizationService {
 					}
 				}
 				else{
-					//Filter out the inactive organization add by sfyan 20130430
-					if(orgStatus != OrganizationStatus.ACTIVE){
-						LOGGER.error("The member is ignored for organization not active, userId=" + user.getId()  
-			                    + ", organizationId=" + member.getOrganizationId() + ", orgMemberId=" + member.getId() 
-			                    + ", namespaceId=" + namespaceId + ", orgStatus" + orgStatus);
-						continue;
-					}
-					
+
 					if(OrganizationGroupType.ENTERPRISE == OrganizationGroupType.fromCode(org.getGroupType())){
 						OrganizationSimpleDTO tempSimpleOrgDTO = ConvertHelper.convert(org, OrganizationSimpleDTO.class);
 						//物业或业委增加小区Id和小区name信息
@@ -4619,29 +4615,31 @@ public class OrganizationServiceImpl implements OrganizationService {
         
         if(member != null) {
 			if(OrganizationMemberStatus.fromCode(member.getStatus()) != OrganizationMemberStatus.WAITING_FOR_APPROVAL){
-				LOGGER.error("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
-				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
-						"organization member status error.");
+				//不抛异常会导致客户端小黑条消不掉 by sfyan 20170120
+				LOGGER.debug("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
+//				throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
+//						"organization member status error.");
+			}else{
+				member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
+				updateEnterpriseContactStatus(operator.getId(), member);
+				DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
+				sendMessageForContactApproved(member);
+				//记录添加log
+				OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
+				orgLog.setOrganizationId(member.getOrganizationId());
+				orgLog.setContactName(member.getContactName());
+				orgLog.setContactToken(member.getContactToken());
+				orgLog.setUserId(member.getTargetId());
+				orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+				orgLog.setOperationType(OperationType.JOIN.getCode());
+				orgLog.setRequestType(RequestType.USER.getCode());
+				orgLog.setOperatorUid(UserContext.current().getUser().getId());
+				this.organizationProvider.createOrganizationMemberLog(orgLog);
 			}
-            member.setStatus(OrganizationMemberStatus.ACTIVE.getCode());
-            updateEnterpriseContactStatus(operator.getId(), member);
-            DaoHelper.publishDaoAction(DaoAction.CREATE, OrganizationMember.class, member.getId());
-            sendMessageForContactApproved(member);
+
         } else {
             LOGGER.warn("Enterprise contact not found, maybe it has been rejected, operatorUid=" + operatorUid + ", cmd=" + cmd);
         }
-
-    	//记录添加log 
-    	OrganizationMemberLog orgLog = ConvertHelper.convert(cmd, OrganizationMemberLog.class);
-    	orgLog.setOrganizationId(member.getOrganizationId());
-    	orgLog.setContactName(member.getContactName());
-    	orgLog.setContactToken(member.getContactToken());
-    	orgLog.setUserId(member.getTargetId());
-    	orgLog.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-    	orgLog.setOperationType(OperationType.JOIN.getCode());
-    	orgLog.setRequestType(RequestType.USER.getCode());
-    	orgLog.setOperatorUid(UserContext.current().getUser().getId());
-    	this.organizationProvider.createOrganizationMemberLog(orgLog);
 	}
 
 	/**
@@ -4653,13 +4651,15 @@ public class OrganizationServiceImpl implements OrganizationService {
         Long operatorUid = operator.getId();
         OrganizationMember member = checkEnterpriseContactParameter(cmd.getEnterpriseId(), cmd.getUserId(), operatorUid, "rejectForEnterpriseContact");
 		if(OrganizationMemberStatus.fromCode(member.getStatus()) != OrganizationMemberStatus.WAITING_FOR_APPROVAL){
-			LOGGER.error("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
-			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
-					"organization member status error.");
+			//不抛异常会导致客户端小黑条消不掉 by sfyan 20170120
+			LOGGER.debug("organization member status error, status={}, cmd={}", member.getStatus(), cmd);
+//			throw RuntimeErrorException.errorWith(OrganizationServiceErrorCode.SCOPE, OrganizationServiceErrorCode.ERROR_MEMBER_STSUTS_MODIFIED,
+//					"organization member status error.");
+		}else{
+			deleteEnterpriseContactStatus(operatorUid, member);
+			sendMessageForContactReject(member);
 		}
-        deleteEnterpriseContactStatus(operatorUid, member);
-		
-        sendMessageForContactReject(member);
+
 	}
 	
 
@@ -5902,29 +5902,38 @@ System.out.println();
 	}
 
 	@Override
-	public List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath){
-		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>(); 
-		
-		List<String> groupTypeList = new ArrayList<String>();
-		groupTypeList.add(organizationGroupType.getCode());
-		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypeList);
+	public List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, Long userId, Long organizationId){
+		UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
+		Organization organization = organizationProvider.findOrganizationById(organizationId);
+		if(null != userIdentifier && null != organization){
+			return getOrganizationMemberGroups(groupTypes, userIdentifier.getIdentifierToken(), organization.getPath());
+		}
+		return new ArrayList<>();
+	}
+
+	@Override
+	public List<OrganizationDTO> getOrganizationMemberGroups(List<String> groupTypes, String token, String orgPath){
+		List<OrganizationDTO> groups = new ArrayList<OrganizationDTO>();
+		List<Organization> depts = organizationProvider.listOrganizationByGroupTypes(orgPath+"/%", groupTypes);
 		List<Long> deptIds = new ArrayList<Long>();
 		for (Organization organization : depts) {
 			deptIds.add(organization.getId());
 		}
-		
 		List<OrganizationMember> members = organizationProvider.listOrganizationMemberByTokens(token, deptIds);
-		
 		for (OrganizationMember member : members) {
 			Organization group = organizationProvider.findOrganizationById(member.getOrganizationId());
-			if(null != group){
-				if(OrganizationGroupType.fromCode(group.getGroupType()) == organizationGroupType){
-					groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
-				}
+			if(null != group && OrganizationStatus.fromCode(group.getStatus()) == OrganizationStatus.ACTIVE){
+				groups.add(ConvertHelper.convert(group, OrganizationDTO.class));
 			}
 		}
-		
 		return groups;
+	}
+
+	@Override
+	public List<OrganizationDTO> getOrganizationMemberGroups(OrganizationGroupType organizationGroupType, String token, String orgPath){
+		List<String> groupTypes = new ArrayList<>();
+		groupTypes.add(organizationGroupType.getCode());
+		return getOrganizationMemberGroups(groupTypes, token, orgPath);
 	}
 
 	@Override
@@ -6118,7 +6127,7 @@ System.out.println();
 				if(null != enterprise){
 					dto.setAddress(enterprise.getAddress());
 				}
-				return dto;
+				// return dto;
 			}
 			Organization depart = deptMaps.get(dto.getParentId());
 //			List<RoleAssignment> resources = aclProvider.getRoleAssignmentByResourceAndTarget(EntityType.ORGANIZATIONS.getCode(), ownerId, EntityType.ORGANIZATIONS.getCode(), dto.getId());
@@ -6325,10 +6334,9 @@ System.out.println();
 
 		// send notification to all the other members in the group
 		notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_USER_SUCCESS_OTHER);
-		//传入groupId，排除自己 by sfyan 20160706
-		List<Long> excludeList = new ArrayList<Long>();
-		excludeList.add(member.getTargetId());
-		sendEnterpriseNotification(groupId, null, excludeList, notifyTextForApplicant, null, null);
+		// 消息只发给公司的管理人员  by sfyan 20170213
+		includeList = this.includeOrgList(org, member.getTargetId());
+		sendEnterpriseNotification(groupId, includeList, null, notifyTextForApplicant, null, null);
 		
 	}
 	
@@ -6384,25 +6392,44 @@ System.out.println();
 
        // send notification to all the other members in the enterprise
        notifyTextForApplicant = this.getNotifyText(org, member, user, EnterpriseNotifyTemplateCode.ENTERPRISE_CONTACT_LEAVE_FOR_OTHER);
-       
+
+	   //消息只发给公司的管理人员  by sfyan 20170213
        includeList = this.includeOrgList(org, member.getTargetId());
-       sendEnterpriseNotification(org.getId(), includeList, null, notifyTextForApplicant, null, null);
+       sendEnterpriseNotification(org.getGroupId(), includeList, null, notifyTextForApplicant, null, null);
    }
    
    /**
-    * 获取初自己以外所有公司人员
+    * 获取初自己以外所有管理人员
     * @param org
     * @param excludeUserId
     * @return
     */
    private List<Long> includeOrgList(Organization org, Long excludeUserId){
-	   List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(org.getId());
-	   List<Long> includeList = new ArrayList<Long>();
-	   for (OrganizationMember member : members) {
-		   if(OrganizationMemberTargetType.USER.getCode().equals(member.getTargetType()) && excludeUserId != member.getTargetId()){
-			   includeList.add(member.getTargetId());
+
+	   List<OrganizationContactDTO> contacts = new ArrayList<>();
+	   ListServiceModuleAdministratorsCommand cmd = new ListServiceModuleAdministratorsCommand();
+	   cmd.setOrganizationId(org.getId());
+	   //获取企业管理员 by sfyan 20170213
+	   List<OrganizationContactDTO> orgAdmin = rolePrivilegeService.listOrganizationAdministrators(cmd);
+	   if(null != orgAdmin){
+		   contacts.addAll(orgAdmin);
+	   }
+
+	   //是管理公司的情况下，需要再获取超级管理员 by sfyan 20170213
+	   if(OrganizationType.fromCode(org.getOrganizationType()) == OrganizationType.PM){
+		   List<OrganizationContactDTO> superAdmin =  rolePrivilegeService.listOrganizationSuperAdministrators(cmd);
+		   if(null != superAdmin){
+			   contacts.addAll(superAdmin);
 		   }
-		   
+	   }
+
+//	   List<OrganizationMember> members = organizationProvider.listOrganizationMembersByOrgId(org.getId());
+	   List<Long> includeList = new ArrayList<Long>();
+	   for (OrganizationContactDTO contact : contacts) {
+		   if(OrganizationMemberTargetType.USER.getCode().equals(contact.getTargetType()) && excludeUserId != contact.getTargetId()){
+			   includeList.add(contact.getTargetId());
+		   }
+
 	   }
 	   return includeList;
    }
@@ -8342,8 +8369,14 @@ System.out.println();
 	}
 
 	@Override
-	public ContractDTO processContract(Contract contract) {
-		ContractDTO contractDTO = new ContractDTO();
+	public ContractDTO processContract(Contract contract ) {
+		return processContract(contract, null);
+	}
+	@Override
+	public ContractDTO processContract(Contract contract,Integer namespaceId) {
+		namespaceId = namespaceId==null?UserContext.getCurrentNamespaceId():namespaceId;
+		
+		ContractDTO contractDTO = ConvertHelper.convert(contract, ContractDTO.class);
 		contractDTO.setContractNumber(contract.getContractNumber());
 		contractDTO.setContractEndDate(contract.getContractEndDate());
 		contractDTO.setOrganizationName(contract.getOrganizationName());
@@ -8361,7 +8394,8 @@ System.out.println();
 			contractDTO.setServiceUserName(user.getServiceUserName());
 			contractDTO.setServiceUserPhone(user.getServiceUserPhone());
 		}
-		
+		List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
+		contractDTO.setBuildings(buildings);
 		return contractDTO;
 	}
 	
@@ -8726,6 +8760,37 @@ System.out.println();
 	}
 
 	@Override
+	public List<OrganizationContactDTO> listOrganizationsContactByModuleId(ListOrganizationByModuleIdCommand cmd) {
+		List<OrganizationDTO> organizations = listOrganizationsByModuleId(ConvertHelper.convert(cmd, ListOrganizationByModuleIdCommand.class));
+		List<Long> organizationIds = new ArrayList<>();
+		for (OrganizationDTO organization: organizations) {
+			organizationIds.add(organization.getId());
+		}
+		List<OrganizationContactDTO> dtos = new ArrayList<>();
+
+		if(organizationIds.size() > 0) {
+			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(organizationIds, new ListingQueryBuilderCallback() {
+				@Override
+				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
+					query.addConditions(Tables.EH_ORGANIZATION_MEMBERS.STATUS.eq(OrganizationMemberStatus.ACTIVE.getCode()));
+					query.addGroupBy(Tables.EH_ORGANIZATION_MEMBERS.CONTACT_TOKEN);
+					return query;
+				}
+			});
+
+			if(null == members || members.size() == 0){
+				return new ArrayList<>();
+			}
+
+			for (OrganizationMember member: members) {
+				dtos.add(ConvertHelper.convert(member, OrganizationContactDTO.class));
+			}
+		}
+
+		return dtos;
+	}
+
+	@Override
 	public List<OrganizationContactDTO> listOrganizationContactByJobPositionId(ListOrganizationContactByJobPositionIdCommand cmd) {
 		Organization organization = checkOrganization(cmd.getOrganizationId());
 		List<OrganizationMember> members = null;
@@ -8794,7 +8859,8 @@ System.out.println();
 			}
 		}
 
-		if(organizationIds.size() > 0) {
+		//organizationIds改为jobPositionIds by xiongying20170124
+		if(jobPositionIds.size() > 0) {
 			List<OrganizationMember> members = organizationProvider.getOrganizationMemberByOrgIds(jobPositionIds, new ListingQueryBuilderCallback() {
 				@Override
 				public SelectQuery<? extends Record> buildCondition(ListingLocator locator, SelectQuery<? extends Record> query) {
@@ -8807,5 +8873,41 @@ System.out.println();
 		}
 		return new ArrayList<>();
 	}
+
+	@Override
+	public List<OrgAddressDTO> listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd) {
+		if(null == cmd.getUserId()){
+			cmd.setUserId(UserContext.current().getUser().getId());
+		}
+		List<OrgAddressDTO> dtos = new ArrayList<>();
+		List<OrganizationMember> members = organizationProvider.listOrganizationMembers(cmd.getUserId());
+		for (OrganizationMember member: members) {
+			if(OrganizationMemberStatus.fromCode(member.getStatus()) == OrganizationMemberStatus.ACTIVE){
+				Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+				if(null != organization){
+					List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(organization.getId());
+					if(null != addresses && addresses.size() > 0){
+						for (OrganizationAddress organizationAddress: addresses) {
+							Address address = addressProvider.findAddressById(organizationAddress.getAddressId());
+							if(null != address){
+								OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
+								dto.setAddressId(address.getId());
+								dto.setOrganizationId(organization.getId());
+								dto.setDisplayName(organization.getName());
+								Community community = communityProvider.findCommunityById(address.getCommunityId());
+								if(null != community){
+									dto.setCommunityName(community.getName());
+								}
+								dtos.add(dto);
+							}
+						}
+					}
+
+				}
+			}
+		}
+		return dtos;
+	}
 }
+
 
