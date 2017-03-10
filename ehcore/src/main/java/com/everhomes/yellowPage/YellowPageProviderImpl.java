@@ -936,25 +936,6 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
-	public void createJumpModules(List<JumpModule> jumpModules) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-//		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
-//		request.setId(id);
-
-		EhServiceAllianceJumpModuleDao dao = new EhServiceAllianceJumpModuleDao(context.configuration());
-		dao.insert(jumpModules.stream().map(r -> ConvertHelper.convert(r, EhServiceAllianceJumpModule.class)).collect(Collectors.toList()));
-	}
-
-	@Override
-	public void deleteJumpModules(Long parentId) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
-		DeleteQuery<EhServiceAllianceJumpModuleRecord> query = context.deleteQuery(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE);
-		if (null != parentId)
-			query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.PARENT_ID.eq(parentId));
-		query.execute();
-	}
-
-	@Override
 	public List<ServiceAllianceAttachment> listAttachments(
 			CrossShardListingLocator locator, int count, Long ownerId) {
 		List<ServiceAllianceAttachment> attachments = new ArrayList<ServiceAllianceAttachment>();

@@ -97,7 +97,4 @@ public interface YellowPageProvider {
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
 
-	void createJumpModules(List<JumpModule> jumpModules);
-
-	void deleteJumpModules(Long parentId);
 }

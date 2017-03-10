@@ -1180,8 +1180,8 @@ public class YellowPageServiceImpl implements YellowPageService {
 			List<BizEntity> bizs = JSONObject.parseObject(obj.toString(), new TypeReference<List<BizEntity>>(){});;
 			for (BizEntity b: bizs) {
 				JumpModuleDTO d = new JumpModuleDTO();
-				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
-				d.setId(id);
+//				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
+//				d.setId(id);
 				d.setModuleName(b.getShopName());
 				d.setModuleUrl(b.getShopURL());
 				d.setNamespaceId(namespaceId);
@@ -1190,11 +1190,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 
 			}
 		}
-		yellowPageProvider.deleteJumpModules(bisModule.getId());
-		yellowPageProvider.createJumpModules(bizModules.stream().map(r -> {
 
-			return  ConvertHelper.convert(r, JumpModule.class);
-		}).collect(Collectors.toList()));
 		modules.addAll(bizModules);
 		return createTree(modules);
 	}
