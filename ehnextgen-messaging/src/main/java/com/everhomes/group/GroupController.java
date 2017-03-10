@@ -638,22 +638,6 @@ public class GroupController extends ControllerBase {
         return response;
     }
 
-    /**
-     * <p>搜索俱乐部成员</p>
-     * <b>URL: /group/searchClubMembers</b>
-     */
-    @RequestMapping("searchClubMembers")
-    @RestReturn(value=ListMemberCommandResponse.class)
-    public RestResponse searchClubMembers(@Valid SearchClubMemberCommand cmd) {
-
-        ListMemberCommandResponse cmdResponse = this.groupService.searchClubMembers(cmd);
-
-        RestResponse response = new RestResponse(cmdResponse);
-        response.setErrorCode(ErrorCodes.SUCCESS);
-        response.setErrorDescription("OK");
-        return response;
-    }
-
     //Add by Janson
     @RequestMapping("deleteById")
     @RestReturn(value=String.class)

@@ -1605,7 +1605,7 @@ public class GroupServiceImpl implements GroupService {
 //			}
 //			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
 			Long from = pageAnchor * pageSize;
-			members = groupProvider.listPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getStatus(), from, pageSize+1, TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE, group.getCreatorUid());
+			members = groupProvider.listPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(), from, pageSize+1, TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE, group.getCreatorUid());
 			if(members.size() > pageSize) {
 	            members.remove(members.size() - 1);
 	            nextPageAnchor = pageAnchor + 1;
@@ -2519,10 +2519,13 @@ public class GroupServiceImpl implements GroupService {
                 }
 
             }
-            
-            AclAccessor groupPrivileges = this.aclProvider.getAccessor(
-                    EntityType.GROUP.getCode(), group.getId(), userInRoles);
-            groupDto.setMemberGroupPrivileges(groupPrivileges.getGrantPrivileges());
+
+            // 此代码有问题，会把很多不相干的数据查出来，导致数据非常多，
+            // 我也不是很清楚业务逻辑，没法改，而且客户端那边说也没用上，所以就注释掉了
+            // 如果还要用的话，这里需要改一下          add by xq.tian   2017/03/13
+            // AclAccessor groupPrivileges = this.aclProvider.getAccessor(
+            //         EntityType.GROUP.getCode(), group.getId(), userInRoles);
+            // groupDto.setMemberGroupPrivileges(groupPrivileges.getGrantPrivileges());
             
 //            AclAccessor forumPrivileges = this.aclProvider.getAccessor(
 //                    EntityType.FORUM.getCode(), group.getOwningForumId(), userInRoles);
@@ -4882,32 +4885,4 @@ public class GroupServiceImpl implements GroupService {
             broadcastProvider.deleteBroadcast(broadcast);
         }
     }
-
-    @Override
-    public ListMemberCommandResponse searchClubMembers(SearchClubMemberCommand cmd) {
-        ListMemberCommandResponse response = new ListMemberCommandResponse();
-
-        int pageSize = PaginationConfigHelper.getPageSize(configProvider, cmd.getPageSize());
-        Long pageAnchor = cmd.getPageAnchor() == null?0L:cmd.getPageAnchor();
-
-        Long from = pageAnchor * pageSize;
-        List<GroupMember> members = groupProvider.searchPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(), from, pageSize+1);
-        if(members.size() > pageSize) {
-            members.remove(members.size() - 1);
-            response.setNextPageAnchor(pageAnchor + 1);
-        }
-        List<GroupMemberDTO> memberDtos = members.stream()
-                .map((r) -> ConvertHelper.convert(r, GroupMemberDTO.class))
-                .collect(Collectors.toList());
-
-        Long groupId = cmd.getGroupId();
-        Long operatorUid = UserContext.current().getUser().getId();
-        Group group = checkGroupParameter(groupId, operatorUid, "searchClubMembers, cmd="+cmd.toString());
-
-        populateGroupMemberDTOs(operatorUid, group, memberDtos);
-
-        response.setMembers(memberDtos);
-        return response;
-    }
-
 }
