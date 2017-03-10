@@ -19,6 +19,7 @@ import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.activity.ActivityAttachmentDTO;
 import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
@@ -30,6 +31,8 @@ import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.ServiceType;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceJumpModule;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.*;
@@ -112,6 +115,8 @@ public class YellowPageServiceImpl implements YellowPageService {
     private StringTemplateLoader templateLoader;
     
     private Configuration templateConfig;
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -1169,18 +1174,28 @@ public class YellowPageServiceImpl implements YellowPageService {
 		String json = post(createRequestParam(param), "/zl-ec/rest/openapi/shop/queryShopInfoByNamespace");
 		ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
 
+		List<JumpModuleDTO> bizModules = new ArrayList<>();
 		Object obj = entity.getBody();
 		if (null != obj) {
-			List<BizEntity> bizs = (List<BizEntity>) obj;
+			List<BizEntity> bizs = JSONObject.parseObject(obj.toString(), new TypeReference<List<BizEntity>>(){});;
 			for (BizEntity b: bizs) {
 				JumpModuleDTO d = new JumpModuleDTO();
+				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
+				d.setId(id);
 				d.setModuleName(b.getShopName());
 				d.setModuleUrl(b.getShopURL());
 				d.setNamespaceId(namespaceId);
 				d.setParentId(bisModule.getId());
+				bizModules.add(d);
+
 			}
 		}
+		yellowPageProvider.deleteJumpModules(bisModule.getId());
+		yellowPageProvider.createJumpModules(bizModules.stream().map(r -> {
 
+			return  ConvertHelper.convert(r, JumpModule.class);
+		}).collect(Collectors.toList()));
+		modules.addAll(bizModules);
 		return createTree(modules);
 	}
 

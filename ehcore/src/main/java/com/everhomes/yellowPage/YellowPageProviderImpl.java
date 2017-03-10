@@ -26,10 +26,7 @@ import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
 
 import org.elasticsearch.common.lang3.StringUtils;
-import org.jooq.Condition;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
+import org.jooq.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,7 +34,9 @@ import org.springframework.stereotype.Component;
 
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Component
 public class YellowPageProviderImpl implements YellowPageProvider {
@@ -936,6 +935,24 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 		return modules;
 	}
 
+	@Override
+	public void createJumpModules(List<JumpModule> jumpModules) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+//		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
+//		request.setId(id);
+
+		EhServiceAllianceJumpModuleDao dao = new EhServiceAllianceJumpModuleDao(context.configuration());
+		dao.insert(jumpModules.stream().map(r -> ConvertHelper.convert(r, EhServiceAllianceJumpModule.class)).collect(Collectors.toList()));
+	}
+
+	@Override
+	public void deleteJumpModules(Long parentId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		DeleteQuery<EhServiceAllianceJumpModuleRecord> query = context.deleteQuery(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE);
+		if (null != parentId)
+			query.addConditions(Tables.EH_SERVICE_ALLIANCE_JUMP_MODULE.PARENT_ID.eq(parentId));
+		query.execute();
+	}
 
 	@Override
 	public List<ServiceAllianceAttachment> listAttachments(
