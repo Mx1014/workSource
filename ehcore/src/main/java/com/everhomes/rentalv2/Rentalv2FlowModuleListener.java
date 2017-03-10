@@ -106,7 +106,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			if(null != flowCase.getReferId()){
 				order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
 			}
-			if(preFlowNode.getParams().equals(RentalFlowNodeParams.AGREE.getCode())){
+			if(preFlowNode.getParams()!=null && preFlowNode.getParams().equals(RentalFlowNodeParams.AGREE.getCode())){
 				//发短信
 				//发短信给预订人
 				String templateScope = SmsTemplateCode.SCOPE;
@@ -114,7 +114,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
 				List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
 				smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
-				if(currNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
+				if(currNode.getParams()!= null && currNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
 					//从同意到已支付界面
 					String contactName="";
 					String contactToken="";
@@ -146,8 +146,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					}
 				}
 			}
-			else if(preFlowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
-				if(currNode.getAutoStepType().equals(FlowStepType.END_STEP.getCode())){
+			else if(preFlowNode.getParams()!=null && preFlowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
+				if(currNode.getParams()!= null && currNode.getAutoStepType().equals(FlowStepType.END_STEP.getCode())){
 					//已完成
 					//更改订单状态 + 发短信 
 					rentalv2Service.changeOfflinePayOrderSuccess(order);
