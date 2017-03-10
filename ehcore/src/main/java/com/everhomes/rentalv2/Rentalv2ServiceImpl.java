@@ -3395,7 +3395,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 						for(RentalResourceOrder rsb : rsbs){
 							RentalBillRuleDTO dto = new RentalBillRuleDTO();
 							dto.setRentalCount(rsb.getRentalCount());
-							dto.setRuleId(rsb.getId());
+							dto.setRuleId(rsb.getRentalResourceRuleId());
 							rules.add(dto);					
 						}
 						this.valiRentalBill(rules);
