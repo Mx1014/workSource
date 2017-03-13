@@ -52,7 +52,9 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
 import net.greghaines.jesque.Job;
+
 
 
 
@@ -101,6 +103,7 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 
 
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
 
 
@@ -112,6 +115,8 @@ import ch.qos.logback.core.joran.conditional.ElseAction;
 
 
 
+
+import com.alibaba.fastjson.JSON;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.app.App;
 import com.everhomes.app.AppProvider;
@@ -295,6 +300,7 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
 
 
 
@@ -1856,6 +1862,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		//找到所有有这些ruleids的订单
 		List<RentalOrder> otherOrders = this.rentalv2Provider.findRentalSiteBillBySiteRuleIds(resourceRuleIds); 
 		for (RentalOrder otherOrder : otherOrders){
+			LOGGER.debug("otherOrder is "+JSON.toJSONString(otherOrder));
 			//把自己排除
 			if(otherOrder.getId().equals(order.getId()))
 				continue;
