@@ -11,8 +11,6 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import antlr.debug.Event;
-
 import com.alibaba.fastjson.JSON;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
@@ -21,13 +19,13 @@ import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
 import com.everhomes.flow.FlowEventLog;
 import com.everhomes.flow.FlowEventLogProvider;
-import com.everhomes.flow.FlowGraphEvent;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
 import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
+import com.everhomes.flow.FlowUserSelection;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
@@ -35,6 +33,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
@@ -426,6 +425,10 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					//从同意到已支付界面
 					String contactName="";
 					String payeeContactToken="";
+//					List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ctx.getBelongTo()
+//							, ft.getBelongEntity(), FlowUserType.PROCESSOR.getCode());
+//					List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_ACTION, flowAction.getId(), selections);
+
 					if(null != order.getOfflinePayeeUid()){
 						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
 						if(null!=member){

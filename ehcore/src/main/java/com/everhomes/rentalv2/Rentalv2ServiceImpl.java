@@ -1813,6 +1813,9 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 	public void changeOfflinePayOrderSuccess(RentalOrder order){
 		//用基于服务器平台的锁 验证线下支付 的剩余资源是否足够
 		List<RentalBillRuleDTO> rules = new ArrayList<RentalBillRuleDTO>();
+
+		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+		proccessCells(rs);
 		List<RentalResourceOrder> rsbs = rentalv2Provider
 				.findRentalResourceOrderByOrderId(order.getId());
 		List<Long> resourceRuleIds = new ArrayList<>();
@@ -1839,8 +1842,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		String templateScope = SmsTemplateCode.SCOPE;
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
 		smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
-		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
-		proccessCells(rs);
 		int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE; 
 
 		String templateLocale = RentalNotificationTemplateCode.locale; 
