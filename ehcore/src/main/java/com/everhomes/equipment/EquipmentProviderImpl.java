@@ -869,8 +869,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //			}
 //
 //		}
-		
-		if(executeStandardIds != null) {
+
+		Condition con = null;
+		if(executeStandardIds != null && executeStandardIds.size() > 0) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
 			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
@@ -882,7 +883,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 			con4 = con4.or(con5);
 			con4 = con4.and(con3);
-			query.addConditions(con4);
+			con = con4;
 		}
 
 		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
@@ -898,11 +899,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 			con2 = con2.and(con3);
 
-			Condition con = con1.or(con2);
+//			Condition con = con1.or(con2);
 
+			if(con == null) {
+				con = con1.or(con2);
+			} else {
+				con = con.or(con1.or(con2));
+			}
+
+		}
+
+		if(con != null) {
 			query.addConditions(con);
 		}
-		
+
+
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 //        query.addLimit(pageSize);
 		query.addLimit(offset * (pageSize-1), pageSize);
@@ -2012,7 +2023,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionTasksRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_TASKS);
-
+//		if(locator.getAnchor() != null) {
+//            query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.ID.lt(locator.getAnchor()));
+//        }
+//
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
@@ -2028,58 +2042,34 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		}
 
 
-
 		if(executeStandardIds == null && reviewStandardIds == null) {
 			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
 			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
 
 			Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.CLOSE.getCode());
-			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
-			con2 = con2.and(con3);
+//			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+//			con2 = con2.and(con3);
 
 			Condition con = con1.or(con2);
 			query.addConditions(con);
 		}
 
-//		con = con.or(con3);
-		//产品修改需求，生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以根据用户关联的部门岗位先去eh_equipment_inspection_standard_group_map查出standardIds再根据standardIds来查 by xiongying20170213
-//		if(executiveGroups != null) {
-//			if(LOGGER.isDebugEnabled()) {
-//	            LOGGER.debug("Query tasks by count, executiveGroups = {}" + executiveGroups);
-//	        }
-//			Condition con5 = null;
-//			for(ExecuteGroupAndPosition executiveGroup : executiveGroups) {
-//				Condition con4 = null;
-//				con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(executiveGroup.getGroupId());
-//				con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.POSITION_ID.eq(executiveGroup.getPositionId()));
-//				if(con5 == null) {
-//					con5 = con4;
-//				} else {
-//					con5 = con5.or(con4);
-//				}
-//
-//			}
-//
-//			if(con5 != null) {
-//				con = con.and(con5);
-//			}
-//
-//		}
 
-		if(executeStandardIds != null) {
+		Condition con = null;
+		if(executeStandardIds != null && executeStandardIds.size() > 0) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
 			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
 			Condition con5 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.OPERATOR_ID.eq(UserContext.current().getUser().getId());
 			con5 = con5.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
 
-			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+//			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 
 			con4 = con4.or(con5);
-			con4 = con4.and(con3);
-			query.addConditions(con4);
+//			con4 = con4.and(con3);
+			con = con4;
 		}
 
 		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
@@ -2088,24 +2078,35 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			//巡检完成关闭的任务
 			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
 			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
-			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_EXPIRED_DATE.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+//			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_EXPIRED_DATE.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 			//需维修待审核的任务
 			Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
-			con2 = con2.and(con3);
+//			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
+//			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
+//			con2 = con2.and(con3);
 
-			Condition con = con1.or(con2);
+//			Condition con = con1.or(con2);
 
+			if(con == null) {
+				con = con1.or(con2);
+			} else {
+				con = con.or(con1.or(con2));
+			}
+
+		}
+
+		if(con != null) {
 			query.addConditions(con);
 		}
 
+
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
+//        query.addLimit(pageSize);
 		query.addLimit(offset * (pageSize-1), pageSize);
 
 		if(LOGGER.isDebugEnabled()) {
-			LOGGER.debug("listEquipmentInspectionTasksUseCache by count, sql=" + query.getSQL());
-			LOGGER.debug("listEquipmentInspectionTasksUseCache by count, bindValues=" + query.getBindValues());
+			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());
+			LOGGER.debug("Query tasks by count, bindValues=" + query.getBindValues());
 		}
 
 		query.fetch().map((EhEquipmentInspectionTasksRecord record) -> {

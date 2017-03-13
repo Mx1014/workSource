@@ -2296,30 +2296,7 @@ public class FlowServiceImpl implements FlowService {
 			}
 			
 			nodeDTOS.add(logDTO);
-		} else {
-			//BUG 6052
-			for(int i = nodeDTOS.size() - 2; i >= 0; i--) {
-				logDTO = nodeDTOS.get(i);
-				if(logDTO.getLogs().size() > 0) {
-					nodeDTOS.get(nodeDTOS.size()-1).getLogs().add(logDTO.getLogs().get(logDTO.getLogs().size()-1));
-					logDTO.getLogs().remove(logDTO.getLogs().size()-1);
-					break;
-				}
-			}
 		}
-		
-		//fix multiple current node
-//		for(int i = nodeDTOS.size()-1; i >= 0; i--) {
-//			logDTO = nodeDTOS.get(i);
-//			if(logDTO.getIsCurrentNode() != null && logDTO.getIsCurrentNode().equals((byte)1)) {
-//				int j = i-1;
-//				for(; j >= 0; j--) {
-//					logDTO.setIsCurrentNode((byte)0);
-//				}
-//				
-//				break;
-//			}
-//		}
 		
 		return dto;
 	}
