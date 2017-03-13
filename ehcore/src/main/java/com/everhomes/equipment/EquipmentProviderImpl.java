@@ -856,8 +856,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //			}
 //
 //		}
-		
-		if(executeStandardIds != null) {
+
+		Condition con = null;
+		if(executeStandardIds != null && executeStandardIds.size() > 0) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
 			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
@@ -869,7 +870,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 			con4 = con4.or(con5);
 			con4 = con4.and(con3);
-			query.addConditions(con4);
+			con = con4;
 		}
 
 		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
@@ -885,11 +886,21 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 			con2 = con2.and(con3);
 
-			Condition con = con1.or(con2);
+//			Condition con = con1.or(con2);
 
+			if(con == null) {
+				con = con1.or(con2);
+			} else {
+				con = con.or(con1.or(con2));
+			}
+
+		}
+
+		if(con != null) {
 			query.addConditions(con);
 		}
-		
+
+
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 //        query.addLimit(pageSize);
 		query.addLimit(offset * (pageSize-1), pageSize);
