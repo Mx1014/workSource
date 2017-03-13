@@ -3069,6 +3069,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 					}
 					return null;
 				});
+				LOGGER.info("reviewStandardIds={}, executeStandardIds={}",reviewStandardIds,executeStandardIds);
 				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1);
 			}
 //			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
