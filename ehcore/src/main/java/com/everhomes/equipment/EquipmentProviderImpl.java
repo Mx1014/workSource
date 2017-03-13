@@ -896,7 +896,10 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		}
 
-		query.addConditions(con);
+		if(con != null) {
+			query.addConditions(con);
+		}
+
 
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 //        query.addLimit(pageSize);
