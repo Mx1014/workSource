@@ -1860,48 +1860,49 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 		
 		//找到所有有这些ruleids的订单
-		List<RentalOrder> otherOrders = this.rentalv2Provider.findRentalSiteBillBySiteRuleIds(resourceRuleIds); 
-		for (RentalOrder otherOrder : otherOrders){
-			LOGGER.debug("otherOrder is "+JSON.toJSONString(otherOrder));
-			//把自己排除
-			if(otherOrder.getId().equals(order.getId()))
-				continue;
-			//剩下的用线程池处理flowcase状态和发短信
-			executorPool.execute(new Runnable() {
-				@Override
-				public void run() { 
-					//其他订单置为失败工作流设置为终止
-					FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(otherOrder.getId(),REFER_TYPE,Rentalv2Controller.moduleId); 
-					otherOrder.setStatus(SiteBillStatus.FAIL.getCode());			
-					rentalv2Provider.updateRentalBill(otherOrder);
-
-					FlowAutoStepDTO dto = new FlowAutoStepDTO();
-					dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
-					dto.setFlowCaseId(flowcase.getId());
-					dto.setFlowMainId(flowcase.getFlowMainId());
-					dto.setFlowNodeId(flowcase.getCurrentNodeId());
-					dto.setFlowVersion(flowcase.getFlowVersion());
-					dto.setStepCount(flowcase.getStepCount());
-					flowService.processAutoStep(dto);
-//					//并发短信
-//					String templateScope = SmsTemplateCode.SCOPE;
-//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
-//					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName()); 
-//					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId()); 
-//					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE; 
-//
-//					String templateLocale = RentalNotificationTemplateCode.locale; 
-//
-//					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
-//					if(null == userIdentifier){
-//						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
-//					}else{
-//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
-//					}
-					
-				}
-			});
-		}
+		List<RentalOrder> otherOrders = this.rentalv2Provider.findRentalSiteBillBySiteRuleIds(resourceRuleIds);
+		if(null != otherOrders && otherOrders.size()>0)
+			for (RentalOrder otherOrder : otherOrders){
+				LOGGER.debug("otherOrder is "+JSON.toJSONString(otherOrder));
+				//把自己排除
+				if(otherOrder.getId().equals(order.getId()))
+					continue;
+				//剩下的用线程池处理flowcase状态和发短信
+				executorPool.execute(new Runnable() {
+					@Override
+					public void run() { 
+						//其他订单置为失败工作流设置为终止
+						FlowCase flowcase = flowCaseProvider.findFlowCaseByReferId(otherOrder.getId(),REFER_TYPE,Rentalv2Controller.moduleId); 
+						otherOrder.setStatus(SiteBillStatus.FAIL.getCode());			
+						rentalv2Provider.updateRentalBill(otherOrder);
+	
+						FlowAutoStepDTO dto = new FlowAutoStepDTO();
+						dto.setAutoStepType(FlowStepType.ABSORT_STEP.getCode());
+						dto.setFlowCaseId(flowcase.getId());
+						dto.setFlowMainId(flowcase.getFlowMainId());
+						dto.setFlowNodeId(flowcase.getCurrentNodeId());
+						dto.setFlowVersion(flowcase.getFlowVersion());
+						dto.setStepCount(flowcase.getStepCount());
+						flowService.processAutoStep(dto);
+	//					//并发短信
+	//					String templateScope = SmsTemplateCode.SCOPE;
+	//					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", otherOrder.getUseDetail());
+	//					smsProvider.addToTupleList(variables, "resourceName", otherOrder.getResourceName()); 
+	//					RentalResource rs = rentalv2Provider.getRentalSiteById(otherOrder.getRentalResourceId()); 
+	//					int templateId = SmsTemplateCode.RENTAL_SUBSCRIBE_FAILURE_CODE; 
+	//
+	//					String templateLocale = RentalNotificationTemplateCode.locale; 
+	//
+	//					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(otherOrder.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+	//					if(null == userIdentifier){
+	//						LOGGER.debug("userIdentifier is null...userId = " + otherOrder.getRentalUid());
+	//					}else{
+	//						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+	//					}
+						
+					}
+				});
+			}
 	}
 	
 	private List<RentalCell> findGroupRentalSiteRules(RentalCell rsr) {

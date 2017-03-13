@@ -438,8 +438,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context
 				.selectDistinct(Tables.EH_RENTALV2_ORDERS.fields())
-				.from(Tables.EH_RENTALV2_RESOURCE_ORDERS)
-				.join(Tables.EH_RENTALV2_ORDERS)
+				.from(Tables.EH_RENTALV2_ORDERS )
+				.join(Tables.EH_RENTALV2_RESOURCE_ORDERS)
 				.on(Tables.EH_RENTALV2_ORDERS.ID
 						.eq(Tables.EH_RENTALV2_RESOURCE_ORDERS.RENTAL_ORDER_ID));
 
