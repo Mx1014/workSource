@@ -3060,7 +3060,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(maps != null && maps.size() > 0) {
 				List<Long> executeStandardIds = new ArrayList<>();
 				List<Long> reviewStandardIds = new ArrayList<>();
-				maps.stream().map(r->{
+				for(EquipmentInspectionStandardGroupMap r : maps){
 					if(QualityGroupType.REVIEW_GROUP.equals(r.getGroupType())) {
 						reviewStandardIds.add(r.getStandardId());
 					}
@@ -3068,7 +3068,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 						executeStandardIds.add(r.getStandardId());
 					}
 					return null;
-				});
+				}
 				LOGGER.info("reviewStandardIds={}, executeStandardIds={}",reviewStandardIds,executeStandardIds);
 				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1);
 			}
