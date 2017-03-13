@@ -1840,6 +1840,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
 		smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
 		RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+		proccessCells(rs);
 		int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE; 
 
 		String templateLocale = RentalNotificationTemplateCode.locale; 
