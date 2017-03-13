@@ -182,8 +182,9 @@ public class GroupServiceImpl implements GroupService {
                 
         		return new RestResponse(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, errorDescription);
     		}
-        	//判断简介
-        	if (cmd.getDescription() == null || cmd.getDescription().length() < 10) {
+        	// 判断简介
+            // 产品定义为至少一个字  add by xq.tian      2017/03/10
+        	if (cmd.getDescription() == null || cmd.getDescription().length() < 1) {
         		throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_DESCRIPTION_LENGTH,
     					"description length cannot be less than 10!");
 			}
@@ -394,8 +395,13 @@ public class GroupServiceImpl implements GroupService {
                 regionType = VisibleRegionType.COMMUNITY;
                 regionId = user.getCommunityId();
             }
-        	recommandGroup(groupDto, regionType, regionId);
-            try {
+
+            // 如果创建俱乐部需要审核的话，审核后再发帖子
+            if (groupSetting.getVerifyFlag() == TrueOrFalseFlag.FALSE.getCode()) {
+                recommandGroup(groupDto, regionType, regionId);
+            }
+
+        	try {
                 Group dbGroup = groupProvider.findGroupById(groupDto.getId());
                 groupSearcher.feedDoc(dbGroup);
             } catch(Exception e) {
@@ -428,11 +434,11 @@ public class GroupServiceImpl implements GroupService {
     		LOGGER.info("regionType is null ");
     		return ;
     	}
-    	
-    	User user = UserContext.current().getUser();
+
+        User user = userProvider.findUserById(groupDto.getCreatorUid());
     	long userId = user.getId();
-    	
-    	NewTopicCommand newTopic = new NewTopicCommand();
+
+        NewTopicCommand newTopic = new NewTopicCommand();
 
     	Map<String, Object> map = new HashMap<String, Object>();
         map.put("groupName", groupDto.getName());
@@ -491,7 +497,7 @@ public class GroupServiceImpl implements GroupService {
     	
     	newTopic.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
     	newTopic.setContentType(PostContentType.TEXT.getCode());
-    	forumService.createTopic(newTopic);
+    	forumService.createTopic(newTopic, user.getId());
     }
     
     @Override
@@ -1688,7 +1694,7 @@ public class GroupServiceImpl implements GroupService {
 
         checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupInviteAdminRole);
         
-        GroupOpRequest request = this.groupProvider.findGroupOpRequestByRequestor(groupId, cmd.getUserId());
+        GroupOpRequest request = this.groupProvider.findGroupOpRequestByRequestor(groupId, targetUid);
         if(request == null) {
             request = new GroupOpRequest();
             request.setGroupId(groupId);
@@ -4690,6 +4696,9 @@ public class GroupServiceImpl implements GroupService {
 			sendNotificationToCreatorWhenApproval(group, user.getLocale(), GroupNotificationTemplateCode.GROUP_MEMBER_TO_CREATOR_WHEN_APPROVAL);  //你申请创建的“${groupName}”已通过
 			return null;
 		});
+
+		// 发送推荐帖
+        recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
 	}
 	
 	private void sendNotificationToCreatorWhenApproval(Group group, String locale, int code) {
