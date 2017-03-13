@@ -11,12 +11,17 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import antlr.debug.Event;
+
 import com.alibaba.fastjson.JSON;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
+import com.everhomes.flow.FlowEventLog;
+import com.everhomes.flow.FlowEventLogProvider;
+import com.everhomes.flow.FlowGraphEvent;
 import com.everhomes.flow.FlowGraphNode;
 import com.everhomes.flow.FlowModuleInfo;
 import com.everhomes.flow.FlowModuleListener;
@@ -30,6 +35,7 @@ import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
+import com.everhomes.rest.flow.FlowLogType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -40,6 +46,7 @@ import com.everhomes.rest.rentalv2.RentalFlowNodeParams;
 import com.everhomes.rest.rentalv2.admin.AttachmentType;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.server.schema.tables.pojos.EhFlowCases;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
@@ -53,6 +60,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2FlowModuleListener.class);
 	@Autowired
 	private FlowService flowService;
+	@Autowired
+	private FlowEventLogProvider flowEventLogProvider;
 	@Autowired
 	private FlowProvider flowProvider;
 	@Autowired
@@ -102,6 +111,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			FlowNode preFlowNode = graphNode.getFlowNode();
 			FlowNode currNode = ctx.getCurrentNode().getFlowNode();
 			FlowCase flowCase = ctx.getFlowCase();
+			ctx.getCurrentEvent().getFiredButtonId();
 			RentalOrder order = null;
 			if(null != flowCase.getReferId()){
 				order = this.rentalv2Provider.findRentalBillById(flowCase.getReferId());
@@ -137,6 +147,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					}
 				}else{
 					//从同意到其他节点-就是说被驳回 
+					//如果是申请者干的不发短信
+					if(FlowUserType.APPLIER.equals(ctx.getCurrentEvent().getUserType()))
+						return ;
 					RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
 					int templateId = SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE; 
 					if(null == userIdentifier){
@@ -153,6 +166,9 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					rentalv2Service.changeOfflinePayOrderSuccess(order);
 				}else{
 					//从已支付到其他状态-一般是终止
+					//如果是申请者干的不发短信
+					if(FlowUserType.APPLIER.equals(ctx.getCurrentEvent().getUserType()))
+						return;
 					String templateScope = SmsTemplateCode.SCOPE;
 					List<Tuple<String, Object>> variables = smsProvider.toTupleList("useTime", order.getUseDetail());
 					smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
@@ -370,83 +386,59 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowButtonFired(FlowCaseState ctx) {
-		//
-		// FlowGraphNode currentNode = ctx.getCurrentNode();
-		// FlowNode flowNode = currentNode.getFlowNode();
-		// FlowCase flowCase = ctx.getFlowCase();
-		//
-		// String stepType = ctx.getStepType().getCode();
-		// String param = flowNode.getParams();
-		//
-		// Long flowId = flowNode.getFlowMainId();
-		// ParkingCardRequest parkingCardRequest =
-		// parkingProvider.findParkingCardRequestById(flowCase.getReferId());
-		// Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(),
-		// flowCase.getFlowVersion());
-		// String tag1 = flow.getStringTag1();
-		//
-		// long now = System.currentTimeMillis();
-		// LOGGER.debug("update parking request, stepType={}, tag1={}, param={}",
-		// stepType, tag1, param);
-		// if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
-		// if("AUDITING".equals(param)) {
-		// parkingCardRequest.setStatus(ParkingCardRequestStatus.QUEUEING.getCode());
-		// parkingCardRequest.setAuditSucceedTime(new Timestamp(now));
-		// parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		// }
-		// else if("QUEUEING".equals(param)) {
-		//
-		// ParkingFlow parkingFlow =
-		// parkingProvider.getParkingRequestCardConfig(parkingCardRequest.getOwnerType(),
-		// parkingCardRequest.getOwnerId(),
-		// parkingCardRequest.getParkingLotId(), flowId);
-		// Integer requestedCount =
-		// parkingProvider.countParkingCardRequest(parkingCardRequest.getOwnerType(),
-		// parkingCardRequest.getOwnerId(),
-		// parkingCardRequest.getParkingLotId(), flowId,
-		// ParkingCardRequestStatus.SUCCEED.getCode(), null);
-		//
-		// Integer totalCount = parkingFlow.getMaxIssueNum();
-		// Integer surplusCount = totalCount - requestedCount;
-		// if(surplusCount <= 0) {
-		// LOGGER.error("surplusCount is 0.");
-		// throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE,
-		// ParkingErrorCode.ERROR_ISSUE_CARD,
-		// "surplusCount is 0.");
-		// }
-		// if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1))
-		// {
-		// parkingCardRequest.setStatus(ParkingCardRequestStatus.PROCESSING.getCode());
-		// parkingCardRequest.setIssueTime(new Timestamp(now));
-		// parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		// }else {
-		// LOGGER.debug("update parking request, stepType={}, tag1={}",
-		// stepType, tag1);
-		// parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
-		// parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
-		// parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		// }
-		// }else if("PROCESSING".equals(param)) {
-		// if(ParkingRequestFlowType.QUEQUE.getCode() == Integer.valueOf(tag1))
-		// {
-		// parkingCardRequest.setStatus(ParkingCardRequestStatus.SUCCEED.getCode());
-		// parkingCardRequest.setProcessSucceedTime(new Timestamp(now));
-		// parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		// }
-		// }
-		// }else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
-		// if("SUCCEED".equals(param)) {
-		// parkingCardRequest.setStatus(ParkingCardRequestStatus.OPENED.getCode());
-		// parkingCardRequest.setOpenCardTime(new Timestamp(now));
-		// parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		// }else {
-		// parkingCardRequest.setStatus(ParkingCardRequestStatus.INACTIVE.getCode());
-		// parkingCardRequest.setCancelTime(new Timestamp(now));
-		// parkingProvider.updateParkingCardRequest(parkingCardRequest);
-		// }
-		//
-		// }
-		//
+		// 
+		
+		FlowGraphNode currentNode = ctx.getCurrentNode();
+		//当前节点是同意待支付节点并且事件是催办的时候
+		if( currentNode.getFlowNode().getParams()!=null && currentNode.getFlowNode().getParams().equals(RentalFlowNodeParams.PAID.getCode())
+				&& FlowStepType.REMINDER_STEP.getCode().equals(ctx.getStepType())){
+			
+			FlowLogType logType = FlowLogType.NODE_REMIND;
+			FlowEventLog log = new FlowEventLog();
+			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			log.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+			log.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			log.setFlowCaseId(ctx.getFlowCase().getId());
+			log.setFlowUserId(ctx.getOperator().getId());
+			log.setLogType(logType.getCode());
+			log.setFlowNodeId(currentNode.getFlowNode().getId());
+			List<FlowEventLog> remindLogs = flowEventLogProvider.findFiredEventsByLog(log);
+			if(remindLogs == null || remindLogs.size()==0){
+				//第一次催办发短信给管理员
+				EhFlowCases flowCase =ctx.getFlowCase();
+				RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
+				String templateScope = SmsTemplateCode.SCOPE;
+				String templateLocale = RentalNotificationTemplateCode.locale; 
+				RentalResource rs = rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
+				if(null != rs){ 
+					int templateId = SmsTemplateCode.RENTAL_APPLY_SUCCESS_CODE; 
+					User user = userProvider.findUserById(ctx.getOperator().getId());
+					List<Tuple<String, Object>> variables = smsProvider.toTupleList("userName", user.getNickName());
+					
+					UserIdentifier rentalIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode()) ;
+					smsProvider.addToTupleList(variables, "userPhone", rentalIdentifier.getIdentifierToken()); 
+					smsProvider.addToTupleList(variables, "resourceName", rs.getResourceName()); 
+					smsProvider.addToTupleList(variables, "usetime", order.getUseDetail()); 
+					smsProvider.addToTupleList(variables, "pricce", order.getPayTotalMoney()); 
+					
+					//从同意到已支付界面
+					String contactName="";
+					String payeeContactToken="";
+					if(null != order.getOfflinePayeeUid()){
+						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
+						if(null!=member){
+							contactName = member.getContactName();
+							payeeContactToken = member.getContactToken();
+						}
+					}    
+					if(null == payeeContactToken){
+						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+					}else{
+						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), payeeContactToken, templateScope, templateId, templateLocale, variables);
+					}
+				}
+			}
+		}
 	}
 
 	@Override
