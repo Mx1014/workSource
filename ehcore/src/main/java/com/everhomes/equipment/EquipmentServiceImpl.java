@@ -3022,7 +3022,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		User user = UserContext.current().getUser();
 		
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
 //        CrossShardListingLocator locator = new CrossShardListingLocator();
 //        locator.setAnchor(cmd.getPageAnchor());
 		if(null == cmd.getPageAnchor()) {
