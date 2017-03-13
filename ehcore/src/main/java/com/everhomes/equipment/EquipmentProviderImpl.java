@@ -857,7 +857,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //
 //		}
 		
-		if(executeStandardIds != null) {
+		if(executeStandardIds != null && executeStandardIds.size() > 0) {
 			Condition con4 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(executeStandardIds);
 			con4 = con4.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 
