@@ -9,7 +9,11 @@ import com.everhomes.category.CategoryProvider;
 import com.everhomes.rest.pmtask.*;
 
 import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -62,6 +66,8 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	private SmsProvider smsProvider;
 	@Autowired
 	private CategoryProvider categoryProvider;
+	@Autowired
+	private UserProvider userProvider;
 
 	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 	
@@ -319,17 +325,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
 			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
-		}else if (SmsTemplateCode.PM_TASK_ASSIGN_CODE == templateId) {
+		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
 
 			FlowGraphEvent event = ctx.getCurrentEvent();
+			Long targetId = event.getEntityId();
 
-			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
-			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
-			smsProvider.addToTupleList(variables, "categoryName", category.getName());
-		}else if (SmsTemplateCode.PM_TASK_ASSIGN_TO_CREATOR_CODE == templateId) {
+			User targetUser = userProvider.findUserById(targetId);
+			UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(targetId, IdentifierType.MOBILE.getCode());
 
+			smsProvider.addToTupleList(variables, "creatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "creatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "operatorName", targetUser.getNickName());
+			smsProvider.addToTupleList(variables, "operatorPhone", targetIdentifier.getIdentifierToken());
 		}
 
-		
 	}
 }
