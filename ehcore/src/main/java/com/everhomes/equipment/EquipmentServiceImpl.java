@@ -3061,10 +3061,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 				List<Long> executeStandardIds = new ArrayList<>();
 				List<Long> reviewStandardIds = new ArrayList<>();
 				for(EquipmentInspectionStandardGroupMap r : maps){
-					if(QualityGroupType.REVIEW_GROUP.equals(r.getGroupType())) {
+					if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						reviewStandardIds.add(r.getStandardId());
 					}
-					if(QualityGroupType.EXECUTIVE_GROUP.equals(r.getGroupType())) {
+					if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						executeStandardIds.add(r.getStandardId());
 					}
 					return null;
