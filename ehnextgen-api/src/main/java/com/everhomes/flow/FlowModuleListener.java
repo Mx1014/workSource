@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.util.Tuple;
 
 /**
  * 业务模块必须实现的接口
@@ -80,4 +81,12 @@ public interface FlowModuleListener {
 	void onFlowCaseCreating(FlowCase flowCase);
 
 	void onFlowCaseCreated(FlowCase flowCase);
+	
+	/**
+	 * 发短信
+	 * @param ctx
+	 * @param templateId
+	 * @param variables
+	 */
+	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables);
 }

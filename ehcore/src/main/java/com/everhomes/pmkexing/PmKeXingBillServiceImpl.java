@@ -37,6 +37,8 @@ import javax.xml.bind.annotation.XmlElement;
 import javax.xml.bind.annotation.XmlRootElement;
 import java.io.StringReader;
 import java.math.BigDecimal;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 import java.util.stream.Collectors;
 
@@ -155,6 +157,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         params.put("pageCount", String.valueOf(pageOffset));
         params.put("pageSize", String.valueOf(pageSize));
 
+        String sdateTo = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        params.put("sdateTo", sdateTo);
+
         BillBeans itemList = post(api, params, BillBeans.class);
         return itemList != null ? itemList.toPmKeXingBillResponse(cmd.getPageOffset()) : new ListPmKeXingBillsResponse();
     }
@@ -191,6 +196,9 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         Map<String, String> params = new HashMap<>();
         params.put("projectName", currentOrganization(cmd.getOrganizationId()).getCommunityName());
         params.put("companyName", organization.getName());
+
+        String sdateTo = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
+        params.put("sdateTo", sdateTo);
 
         BillStat billStat = post(api, params, BillStat.class);
         return billStat != null ? billStat.toBillStatDTO() : new PmKeXingBillStatDTO();
@@ -463,5 +471,7 @@ public class PmKeXingBillServiceImpl implements PmKeXingBillService {
         PmKeXingBillServiceImpl service = new PmKeXingBillServiceImpl();
         BillBeans billItemList = service.xmlToBean(xml, BillBeans.class);
         System.out.println(billItemList);
+
+        System.out.println(LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM")));
     }*/
 }

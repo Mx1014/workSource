@@ -305,6 +305,7 @@ CREATE TABLE `eh_activities` (
   `achievement_richtext_url` VARCHAR(512) COMMENT 'richtext page',
   `update_time` DATETIME,
   `content_category_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'content category id',
+  `signup_end_time` DATETIME,
   
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_uuid` (`uuid`),
@@ -399,10 +400,17 @@ CREATE TABLE `eh_activity_roster` (
   `lottery_flag` TINYINT NOT NULL DEFAULT 0,
   `lottery_time` DATETIME,
   `create_time` DATETIME COMMENT 'remove-deletion policy, user directly managed data',
+  `phone` VARCHAR(32),
+  `real_name` VARCHAR(128),
+  `gender` TINYINT,
+  `community_name` VARCHAR(64),
+  `organization_name` VARCHAR(128),
+  `position` VARCHAR(64),
+  `leader_flag` TINYINT,
+  `source_flag` TINYINT,
 
   PRIMARY KEY (`id`),
   UNIQUE KEY `u_eh_act_roster_uuid` (`uuid`),
-  UNIQUE KEY `u_eh_act_roster_user` (`activity_id`,`uid`),
   KEY `i_eh_act_roster_create_time` (`create_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -1787,6 +1795,18 @@ CREATE TABLE `eh_devices` (
   KEY `u_eh_dev_create_time` (`create_time`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+-- 对接映射表 
+DROP TABLE IF EXISTS `eh_docking_mappings`;
+CREATE TABLE `eh_docking_mappings` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',  
+  `scope` VARCHAR(64) NOT NULL,
+  `name` VARCHAR(256),
+  `mapping_value` VARCHAR(256),
+  `mapping_json` VARCHAR(1024),
+  `namespace_id` INTEGER NOT NULL DEFAULT 0,
+
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- key table partition of eh_door_access
@@ -5892,7 +5912,8 @@ CREATE TABLE `eh_pm_task_targets` (
   `target_id` BIGINT COMMENT 'target object(user/group) id',
   `role_id` TINYINT NOT NULL,
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 2: active',
-
+  `create_time` DATETIME,
+  `creator_uid` BIGINT,
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
@@ -5931,6 +5952,8 @@ CREATE TABLE `eh_pm_tasks` (
   `address_org_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'organization of address',
   `flow_case_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'flow case id',
   `string_tag1` VARCHAR(128),
+  `building_name` VARCHAR(128),
+  `organization_uid` BIGINT,
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
@@ -9431,7 +9454,7 @@ CREATE TABLE `eh_web_menus`(
   `name` VARCHAR(64),
   `parent_id` BIGINT NOT NULL DEFAULT 0,
   `icon_url` VARCHAR(64),
-  `data_type` VARCHAR(64),
+  `data_type` VARCHAR(256),
   `leaf_flag` TINYINT NOT NULL DEFAULT 0 COMMENT 'Whether leaf nodes, non leaf nodes can be folded 0: false, 1: true',
   `status` TINYINT NOT NULL DEFAULT 2 COMMENT '0: inactive, 2: active',
   `path` VARCHAR(64),

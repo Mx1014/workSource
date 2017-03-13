@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.formula.functions.Count;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -401,6 +402,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					updateAddress(address, customerApartment);
 				}
 			}
+		}
+		
+		// 同步完地址后更新community表中的门牌总数，add by tt, 20170308
+		Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+		Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+		if (community.getAptCount().intValue() != count.intValue()) {
+			community.setAptCount(count);
+			communityProvider.updateCommunity(community);
 		}
 	}
 	

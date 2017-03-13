@@ -677,6 +677,7 @@ public class DoorAccessServiceImpl implements DoorAccessService {
             rlt.setDoorName(doorAcc.getName());
             rlt.setHardwareId(doorAcc.getHardwareId());
         }
+        
 
         // 记录操作日志
         this.createDoorAuthLog(doorAuth);

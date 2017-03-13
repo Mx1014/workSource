@@ -86,7 +86,7 @@ CREATE TABLE `eh_energy_meter_categories` (
 );
 
 --
--- 表记属性
+-- 表记属性 费率表
 --
 CREATE TABLE `eh_energy_meter_setting_logs` (
   `id`            BIGINT  NOT NULL,

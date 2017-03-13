@@ -280,7 +280,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }	
     
-    
+	@Override
+	public OrganizationMember findAnyOrganizationMemberByNamespaceIdAndUserId(Integer namespaceId, Long userId,
+			String groupType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select()
+			.from(Tables.EH_ORGANIZATION_MEMBERS)
+			.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType))
+			.fetchAny();
+		
+		if (record != null) {
+			return record.map(r->ConvertHelper.convert(r, OrganizationMember.class));
+		}
+		return null;
+	}
 
 	@Override
 	public List<Organization> listOrganizations(String organizationType,String name,Integer pageOffset,Integer pageSize) {
