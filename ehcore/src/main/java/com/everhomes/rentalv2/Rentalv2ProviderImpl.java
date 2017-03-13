@@ -420,6 +420,8 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 				.ne(SiteBillStatus.REFUNDED.getCode()));
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDING.getCode())); 
+		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
+				.ne(SiteBillStatus.OFFLINE_PAY.getCode())); 
 		step.where(condition);
 		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
 				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
