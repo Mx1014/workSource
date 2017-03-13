@@ -1,8 +1,8 @@
 package com.everhomes.rest.rentalv2;
 
 /***
- * AGREE("agree") 同意节点
- * PAID("paid") 已支付节点 
+ * AGREE("agree") 待审批
+ * PAID("paid") 待支付节点 
  * COMPLETE("complete") 已完成节点 
  * */
 public enum RentalFlowNodeParams {

@@ -452,14 +452,17 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 		condition = condition.and(Tables.EH_RENTALV2_ORDERS.STATUS
 				.ne(SiteBillStatus.REFUNDING.getCode())); 
 		step.where(condition);
-		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
-				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
-				.map(new RentalResourceOrderRecordMapper());
-
-		List<RentalOrder> result = resultRecord.stream().map((r) -> {
-			return ConvertHelper.convert(r, RentalOrder.class);
-		}).collect(Collectors.toList());
-
+//		List<EhRentalv2ResourceOrdersRecord> resultRecord = step
+//				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch()
+//				.map(new RentalResourceOrderRecordMapper());
+//
+//		List<RentalOrder> result = resultRecord.stream().map((r) -> {
+//			return ConvertHelper.convert(r, RentalOrder.class);
+//		}).collect(Collectors.toList());
+		List<RentalOrder> result = step
+				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch().map((r) -> {
+					return ConvertHelper.convert(r, RentalOrder.class);
+					});
 		return result;
 	}
 	@Override
