@@ -147,7 +147,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				}
 			}
 			else if(preFlowNode.getParams()!=null && preFlowNode.getParams().equals(RentalFlowNodeParams.PAID.getCode())){
-				if(currNode.getParams()!= null && currNode.getAutoStepType().equals(FlowStepType.END_STEP.getCode())){
+				if(currNode.getParams()!= null &&  currNode.getParams().equals(RentalFlowNodeParams.COMPLETE.getCode())){
 					//已完成
 					//更改订单状态 + 发短信 
 					rentalv2Service.changeOfflinePayOrderSuccess(order);
