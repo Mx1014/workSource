@@ -148,6 +148,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				}else{
 					//从同意到其他节点-就是说被驳回 
 					//如果是申请者干的不发短信
+					LOGGER.debug("agree to a node which is not paid ");
 					if(FlowUserType.APPLIER.equals(ctx.getCurrentEvent().getUserType()))
 						return ;
 					RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
@@ -155,6 +156,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					if(null == userIdentifier){
 						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
 					}else{
+						LOGGER.debug("this is a remind sms to " +userIdentifier.getIdentifierToken() );
 						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
 					}
 				}
