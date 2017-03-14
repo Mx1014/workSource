@@ -273,8 +273,9 @@ public class AssetServiceImpl implements AssetService {
         Sheet sheet = wb.createSheet("assetBills");
 
         this.createAssetBillsBookSheetHead(sheet);
+        int i = 0;
         for (SimpleAssetBillDTO dto : dtos ) {
-            this.setNewAssetBillsBookRow(sheet, dto);
+            this.setNewAssetBillsBookRow(sheet, dto, i++);
         }
 
         try {
@@ -305,10 +306,11 @@ public class AssetServiceImpl implements AssetService {
         row.createCell(++i).setCellValue("状态");
     }
 
-    private void setNewAssetBillsBookRow(Sheet sheet ,SimpleAssetBillDTO dto){
+    private void setNewAssetBillsBookRow(Sheet sheet ,SimpleAssetBillDTO dto, int id){
         Row row = sheet.createRow(sheet.getLastRowNum()+1);
         int i = -1;
-        row.createCell(++i).setCellValue(dto.getId());
+//        row.createCell(++i).setCellValue(dto.getId());
+        row.createCell(++i).setCellValue(id);
         if(null != dto.getAccountPeriod()) {
             row.createCell(++i).setCellValue(dto.getAccountPeriod().toString());
         } else {
