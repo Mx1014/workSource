@@ -50,7 +50,8 @@ public enum CoordinationLocks {
 
     ENERGY_METER("energyMeter"),
     ENERGY_METER_CATEGORY("energyMeter.category"),
-    ENERGY_METER_FORMULA("energyMeter.formula");
+    ENERGY_METER_FORMULA("energyMeter.formula"),
+    UPDATE_ASSET_BILL_TEMPLATE("assetBillTemplate.update");
 
     private String code;
     private CoordinationLocks(String code) {

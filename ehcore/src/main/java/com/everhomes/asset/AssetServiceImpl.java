@@ -6,6 +6,8 @@ import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.coordinator.CoordinationLocks;
+import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.Family;
@@ -123,6 +125,9 @@ public class AssetServiceImpl implements AssetService {
 	
 	@Autowired
 	private ConfigurationProvider configurationProvider;
+
+    @Autowired
+    private CoordinationProvider coordinationProvider;
 
     @Override
     public List<AssetBillTemplateFieldDTO> listAssetBillTemplate(ListAssetBillTemplateCommand cmd) {
@@ -816,13 +821,15 @@ public class AssetServiceImpl implements AssetService {
     @Override
     public List<AssetBillTemplateFieldDTO> updateAssetBillTemplate(UpdateAssetBillTemplateCommand cmd) {
 
-        if(cmd.getDtos() != null && cmd.getDtos().size() > 0) {
-            for(AssetBillTemplateFieldDTO dto : cmd.getDtos()) {
-                AssetBillTemplateFields field = ConvertHelper.convert(dto, AssetBillTemplateFields.class);
-                field.setTemplateVersion(field.getTemplateVersion() + 1);
-                assetProvider.creatTemplateField(field);
+        this.coordinationProvider.getNamedLock(CoordinationLocks.UPDATE_ASSET_BILL_TEMPLATE.getCode()).tryEnter(()-> {
+            if(cmd.getDtos() != null && cmd.getDtos().size() > 0) {
+                for(AssetBillTemplateFieldDTO dto : cmd.getDtos()) {
+                    AssetBillTemplateFields field = ConvertHelper.convert(dto, AssetBillTemplateFields.class);
+                    field.setTemplateVersion(field.getTemplateVersion() + 1);
+                    assetProvider.creatTemplateField(field);
+                }
             }
-        }
+        });
 
         ListAssetBillTemplateCommand command = new ListAssetBillTemplateCommand();
         command.setOwnerType(cmd.getDtos().get(0).getOwnerType());
