@@ -344,3 +344,9 @@ INSERT INTO `eh_locale_strings` (`id`, `scope`, `code`, `locale`, `text`)
 VALUES (@max_id := @max_id + 1, 'user', '300003', 'zh_CN', '验证码请求过于频繁，请明天重试');
 
 UPDATE `eh_locale_strings` SET `text` = '签名过期，请重新获取' WHERE `scope` = 'user' AND `code` = '10000' AND `locale` = 'zh_CN';
+
+-- 物业报修对接工作流短信 add by sw 20170314
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES (999983, 'flow:20100', 11, 'zh_CN', '物业报修短信', '30092');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`) 
+	VALUES (999983, 'flow:20100', 34, 'zh_CN', '物业报修短信', '38833');
