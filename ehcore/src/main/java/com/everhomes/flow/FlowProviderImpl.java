@@ -119,7 +119,7 @@ public class FlowProviderImpl implements FlowProvider {
         obj.setCreateTime(new Timestamp(l2));
         obj.setStopTime(obj.getCreateTime());
         obj.setStopTime(obj.getCreateTime());
-        obj.setRunTime(obj.getCreateTime());
+        obj.setRunTime(new Timestamp(DateHelper.parseDataString("1997-01-01", "yyyy-MM-dd").getTime()));
         obj.setUpdateTime(obj.getCreateTime());
     }
 

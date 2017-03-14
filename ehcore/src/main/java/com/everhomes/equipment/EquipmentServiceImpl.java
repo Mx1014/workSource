@@ -3022,7 +3022,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		User user = UserContext.current().getUser();
 		
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
 //        CrossShardListingLocator locator = new CrossShardListingLocator();
 //        locator.setAnchor(cmd.getPageAnchor());
 		if(null == cmd.getPageAnchor()) {
@@ -3060,15 +3060,16 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if(maps != null && maps.size() > 0) {
 				List<Long> executeStandardIds = new ArrayList<>();
 				List<Long> reviewStandardIds = new ArrayList<>();
-				maps.stream().map(r->{
-					if(QualityGroupType.REVIEW_GROUP.equals(r.getGroupType())) {
+				for(EquipmentInspectionStandardGroupMap r : maps){
+					if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						reviewStandardIds.add(r.getStandardId());
 					}
-					if(QualityGroupType.EXECUTIVE_GROUP.equals(r.getGroupType())) {
+					if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
 						executeStandardIds.add(r.getStandardId());
 					}
-					return null;
-				});
+
+				}
+				LOGGER.info("reviewStandardIds={}, executeStandardIds={}",reviewStandardIds,executeStandardIds);
 				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1);
 			}
 //			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
