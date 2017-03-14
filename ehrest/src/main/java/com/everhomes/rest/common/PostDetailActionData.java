@@ -39,4 +39,8 @@ public class PostDetailActionData implements Serializable{
     public String toString() {
         return StringHelper.toJsonString(this);
     }
+    
+	public String toUrlString(String url) {
+		return url.replace("${forumId}", String.valueOf(forumId)).replace("${topicId}", String.valueOf(topicId));
+	}
 }
