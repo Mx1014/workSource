@@ -43,7 +43,8 @@ package com.everhomes.rest.launchpad;
  * <li>ROUTER(60): 路由协议跳转</li>
  * <li>ACTIVITY(61): 活动通用配置</li>
  * <li>POST_LIST(62): 帖子列表（无参数）</li>
- * <li>ACLINK_REMOTE_OPEN(63) 门禁远程开门</li>
+ * <li>ACLINK_REMOTE_OPEN(63): 门禁远程开门</li>
+ * <li>ACTIVITY_DETAIL(64): 活动详情</li>
  * </ul>
  */
 public enum ActionType {
@@ -58,17 +59,28 @@ public enum ActionType {
       NOTICE_MANAGERMENT((byte)43),OFFLINE_WEBAPP((byte)44),SERVICE_HOT_LINE((byte)45),CONTACTS((byte)46),
       WIFI((byte)47),NEWS((byte)48),RENTAL((byte)49),OFFICIAL_ACTIVITY((byte)50),PM_TASK((byte)51),AUTH((byte)52),
       ALL_BUTTON((byte)53),MY_APPROVAL((byte) 54),NEWS_FLASH((byte) 55), FLOW_TASKS( (byte)56 ), PARKING_CLEARANCE((byte) 57), PARKING_CLEARANCE_TASK((byte) 58),
-      CREATE_PMTASK((byte) 59),ROUTER((byte) 60), ACTIVITY((byte)61), POST_LIST((byte)62), ACLINK_REMOTE_OPEN((byte)63);
+      CREATE_PMTASK((byte) 59),ROUTER((byte) 60), ACTIVITY((byte)61), POST_LIST((byte)62), ACLINK_REMOTE_OPEN((byte)63), 
+      ACTIVITY_DETAIL((byte)64, "zl://activity/d?forumId=${forumId}&topicId=${topicId}");
       
     private byte code;
+    private String url;
     
     private ActionType(byte code) {
         this.code = code;
     }
     
+    private ActionType(byte code, String url) {
+    	this.code = code;
+    	this.url = url;
+    }
+    
     public byte getCode() {
         return this.code;
     }
+    
+    public String getUrl() {
+		return this.url;
+	}
     
     public static ActionType fromCode(Byte code) {
         if(code == null)
