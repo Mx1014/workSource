@@ -1776,21 +1776,56 @@ public class ForumServiceImpl implements ForumService {
             userPointService.getItemPoint(PointType.CREATE_COMMENT), userId);  
         userPointService.addPoint(pointCmd);
         
-        Post topic = this.forumProvider.findPostById(post.getParentPostId());
-        if(topic != null && !topic.getCreatorUid().equals(userId) && !topic.getStatus().equals(PostStatus.INACTIVE.getCode())) {
-            //Send message to creator
-            Map<String, String> map = new HashMap<String, String>();
-            String userName = (user.getNickName() == null) ? "" : user.getNickName();
-            String subject = (topic.getSubject() == null) ? "" : topic.getSubject();
-            map.put("userName", userName);
-            map.put("postName", subject);
-            sendMessageCode(topic.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
-        }
+//        Post topic = this.forumProvider.findPostById(post.getParentPostId());
+//        if(topic != null && !topic.getCreatorUid().equals(userId) && !topic.getStatus().equals(PostStatus.INACTIVE.getCode())) {
+//            //Send message to creator
+//            Map<String, String> map = new HashMap<String, String>();
+//            String userName = (user.getNickName() == null) ? "" : user.getNickName();
+//            String subject = (topic.getSubject() == null) ? "" : topic.getSubject();
+//            map.put("userName", userName);
+//            map.put("postName", subject);
+//            sendMessageCode(topic.getCreatorUid(), user.getLocale(), map, ForumNotificationTemplateCode.FORUM_REPLAY_ONE_TO_CREATOR);
+//        }
+        
+        //发表评论发消息给创建者或父评论者，add by tt, 20170314
+        sendMessageToCreatorOrParent(user, post);
         
         return ConvertHelper.convert(post, PostDTO.class);
     }
     
-    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+    private void sendMessageToCreatorOrParent(User user, Post comment) {
+    	// 评论所在的帖子
+    	Post post = forumProvider.findPostById(comment.getParentPostId());
+    	// 评论的父评论
+    	Post parentComment = null;
+    	if (comment.getParentCommentId() != null) {
+			parentComment = forumProvider.findPostById(comment.getParentCommentId());
+		}
+    	
+    	// 如果是帖子创建者评论自己的帖子不用给创建者发消息
+    	// 如果评论的是帖子创建者发表的评论不用给创建者发消息
+    	if (post != null && !post.getStatus().equals(PostStatus.INACTIVE.getCode())
+    			&& post.getCreatorUid().longValue() != comment.getCreatorUid().longValue()
+    			&& (parentComment == null || post.getCreatorUid().longValue() != parentComment.getCreatorUid().longValue())) {
+			sendMessageToCreator(user, post);
+		}
+    	
+    	// 如果评论的是自己发表的评论不用发消息
+    	if (post != null && !post.getStatus().equals(PostStatus.INACTIVE.getCode())
+    			&& parentComment != null && parentComment.getCreatorUid().longValue() != comment.getCreatorUid().longValue()) {
+			sendMessageToParent(user, parentComment);
+		}
+    	
+    	
+	}
+
+	private void sendMessageToParent(User user, Post parentComment) {
+	}
+
+	private void sendMessageToCreator(User user, Post post) {
+	}
+
+	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
         String scope = ForumNotificationTemplateCode.SCOPE;
         
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
@@ -2673,6 +2708,8 @@ public class ForumServiceImpl implements ForumService {
         commentPost.setStatus(PostStatus.ACTIVE.getCode());
         commentPost.setContentCategory(topic.getContentCategory());
         
+        // 添加父评论id字段, add by tt, 20170314
+        commentPost.setParentCommentId(cmd.getParentCommentId());
         return commentPost;
     }
     

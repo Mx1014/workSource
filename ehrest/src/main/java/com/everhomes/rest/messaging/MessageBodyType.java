@@ -9,10 +9,11 @@ package com.everhomes.rest.messaging;
  *     <li>LINK</li>
  *     <li>NOTIFY</li>
  *     <li>RICH_LINK</li>
+ *     <li>INNER_LINK: 消息内容内部有链接</li>
  * </ul>
  */
 public enum MessageBodyType {
-    TEXT("TEXT"), IMAGE("IMAGE"), AUDIO("AUDIO"), VIDEO("VIDEO"), LINK("LINK"), NOTIFY("NOTIFY"), RICH_LINK("RICH_LINK");
+    TEXT("TEXT"), IMAGE("IMAGE"), AUDIO("AUDIO"), VIDEO("VIDEO"), LINK("LINK"), NOTIFY("NOTIFY"), RICH_LINK("RICH_LINK"), INNER_LINK("INNER_LINK");
     
     private String code;
     private MessageBodyType(String code) {
