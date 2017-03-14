@@ -1863,7 +1863,7 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		Map<String, String> map = new HashMap<String, String>(); 
 		map.put("useTime", order.getUseDetail());
 	    map.put("resourceName", order.getResourceName()); 
-	    sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
+	    sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
 		String templateLocale = RentalNotificationTemplateCode.locale; 
 
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;

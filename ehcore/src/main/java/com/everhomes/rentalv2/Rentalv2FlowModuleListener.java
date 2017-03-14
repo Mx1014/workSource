@@ -156,7 +156,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				    map.put("offlinePayeeName", contactName); 
 				    map.put("offlinePayeeContact", contactToken); 
 				    map.put("offlineCashierAddress", order.getOfflineCashierAddress());
-				    rentalService.sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
+				    rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_APPLY_SUCCESS_CODE);
 				}else{
 					//从同意到其他节点-就是说被驳回 
 					//如果是申请者干的不发短信
@@ -167,7 +167,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					RentalResource rs = this.rentalv2Provider.getRentalSiteById(order.getRentalResourceId()); 
 					int templateId = SmsTemplateCode.RENTAL_APPLY_FAILURE_CODE; 
 
-				    rentalService.sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
+				    rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_APPLY_FAILURE_CODE);
 					if(null == userIdentifier){
 						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
 					}else{
@@ -195,7 +195,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					Map<String, String> map = new HashMap<String, String>(); 
 					map.put("useTime", order.getUseDetail());
 				    map.put("resourceName", order.getResourceName()); 
-				    rentalService.sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
+				    rentalService.sendMessageCode(order.getRentalUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_CANCEL_CODE);
 					String templateLocale = RentalNotificationTemplateCode.locale; 
 		
 					UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
@@ -451,7 +451,6 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					map.put("resourceName", rs.getResourceName()); 
 					map.put("usetime", order.getUseDetail()); 
 					map.put("price", ""+order.getPayTotalMoney() );  
-				    rentalService.sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
 					//从同意到已支付界面 
 					List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ctx.getCurrentNode().getFlowNode().getId()
 							, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
@@ -460,6 +459,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					if(null != users){
 						for(Long userId : users){
 							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode()) ;
+							rentalService.sendMessageCode(userId,  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_REMIND_CODE);
 							if(null == userIdentifier){
 								LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
 							}else{
