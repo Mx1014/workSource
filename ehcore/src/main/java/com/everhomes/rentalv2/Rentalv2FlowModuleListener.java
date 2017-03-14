@@ -187,6 +187,8 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					if(null == userIdentifier){
 						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
 					}else{
+
+						LOGGER.debug("send message to  : "+userIdentifier.getIdentifierToken());
 						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
 					}
 				}
@@ -395,6 +397,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		// 
 		
 		FlowGraphNode currentNode = ctx.getCurrentNode();
+		LOGGER.debug("buttun fire   params : " + currentNode.getFlowNode().getParams()+"step type "+ctx.getStepType());
 		//当前节点是同意待支付节点并且事件是催办的时候
 		if( currentNode.getFlowNode().getParams()!=null && currentNode.getFlowNode().getParams().equals(RentalFlowNodeParams.PAID.getCode())
 				&& FlowStepType.REMINDER_STEP.getCode().equals(ctx.getStepType())){ 
