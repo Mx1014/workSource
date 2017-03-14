@@ -150,6 +150,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				}else{
 					//从同意到其他节点-就是说被驳回 
 					//如果是申请者干的不发短信
+					LOGGER.debug("paid to not comple user type : "+ctx.getCurrentEvent().getUserType().getCode());
 					LOGGER.debug("agree to a node which is not paid ");
 					if(FlowUserType.APPLIER.equals(ctx.getCurrentEvent().getUserType()))
 						return ;
@@ -171,6 +172,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 				}else{
 					//从已支付到其他状态-一般是终止
 					//如果是申请者干的不发短信
+					LOGGER.debug("paid to not comple user type : "+ctx.getCurrentEvent().getUserType().getCode());
 					if(FlowUserType.APPLIER.equals(ctx.getCurrentEvent().getUserType()))
 						return;
 					String templateScope = SmsTemplateCode.SCOPE;
@@ -395,8 +397,7 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 		FlowGraphNode currentNode = ctx.getCurrentNode();
 		//当前节点是同意待支付节点并且事件是催办的时候
 		if( currentNode.getFlowNode().getParams()!=null && currentNode.getFlowNode().getParams().equals(RentalFlowNodeParams.PAID.getCode())
-				&& FlowStepType.REMINDER_STEP.getCode().equals(ctx.getStepType())){
-			
+				&& FlowStepType.REMINDER_STEP.getCode().equals(ctx.getStepType())){ 
 			FlowLogType logType = FlowLogType.NODE_REMIND;
 			FlowEventLog log = new FlowEventLog();
 			log.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
@@ -407,8 +408,10 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			log.setLogType(logType.getCode());
 			log.setFlowNodeId(currentNode.getFlowNode().getId());
 			List<FlowEventLog> remindLogs = flowEventLogProvider.findFiredEventsByLog(log);
+			LOGGER.debug("offline pay : cuiban remind : log size : " + remindLogs==null?"0":String.valueOf(remindLogs.size()));
 			if(remindLogs == null || remindLogs.size()==0){
 				//第一次催办发短信给管理员
+				
 				EhFlowCases flowCase =ctx.getFlowCase();
 				RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
 				String templateScope = SmsTemplateCode.SCOPE;
