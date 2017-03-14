@@ -2573,8 +2573,8 @@ public class FlowServiceImpl implements FlowService {
 		return resp;
 	}
 	
-	
-	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
+	@Override
+	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
 		// Remove dup users
 		List<Long> tmps = resolvUserSelections(ctx, entityType, entityId, selections, 1);
 		List<Long> rlts = new ArrayList<>();

@@ -26,6 +26,7 @@ import com.everhomes.flow.FlowNode;
 import com.everhomes.flow.FlowProvider;
 import com.everhomes.flow.FlowService;
 import com.everhomes.flow.FlowUserSelection;
+import com.everhomes.flow.FlowUserSelectionProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.organization.OrganizationMember;
@@ -57,6 +58,8 @@ import com.everhomes.util.Tuple;
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	private static final Logger LOGGER = LoggerFactory.getLogger(Rentalv2FlowModuleListener.class);
+	@Autowired
+	private FlowUserSelectionProvider flowUserSelectionProvider;
 	@Autowired
 	private FlowService flowService;
 	@Autowired
@@ -422,25 +425,22 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 					smsProvider.addToTupleList(variables, "usetime", order.getUseDetail()); 
 					smsProvider.addToTupleList(variables, "pricce", order.getPayTotalMoney()); 
 					
-					//从同意到已支付界面
-					String contactName="";
-					String payeeContactToken="";
-//					List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ctx.getBelongTo()
-//							, ft.getBelongEntity(), FlowUserType.PROCESSOR.getCode());
-//					List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_ACTION, flowAction.getId(), selections);
+					//从同意到已支付界面 
+					List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ctx.getCurrentNode().getFlowNode().getId()
+							, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
+					List<Long> users = flowService.resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, ctx.getCurrentNode().getFlowNode().getId(), selections);
 
-					if(null != order.getOfflinePayeeUid()){
-						OrganizationMember member = organizationProvider.findOrganizationMemberByOrgIdAndUId(order.getOfflinePayeeUid(), order.getOrganizationId());
-						if(null!=member){
-							contactName = member.getContactName();
-							payeeContactToken = member.getContactToken();
-						}
-					}    
-					if(null == payeeContactToken){
-						LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
-					}else{
-						smsProvider.sendSms(UserContext.getCurrentNamespaceId(), payeeContactToken, templateScope, templateId, templateLocale, variables);
+					if(null != users){
+						for(Long userId : users){
+							UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode()) ;
+							if(null == userIdentifier){
+								LOGGER.debug("userIdentifier is null...userId = " + order.getRentalUid());
+							}else{
+								smsProvider.sendSms(UserContext.getCurrentNamespaceId(), userIdentifier.getIdentifierToken(), templateScope, templateId, templateLocale, variables);
+							}
+						}    
 					}
+					
 				}
 			}
 		}

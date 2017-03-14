@@ -444,6 +444,9 @@ public interface FlowService {
 
 	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
 			CreateFlowCaseCommand flowCaseCmd);
+
+	List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId,
+			List<FlowUserSelection> selections);
 	
 	//TODO 日志信息分类：
 	
