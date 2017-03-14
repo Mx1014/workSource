@@ -463,7 +463,7 @@ public class Rentalv2ProviderImpl implements Rentalv2Provider {
 //			return ConvertHelper.convert(r, RentalOrder.class);
 //		}).collect(Collectors.toList());
 		List<RentalOrder> result = step
-				.orderBy(Tables.EH_RENTALV2_RESOURCE_ORDERS.ID.desc()).fetch().map((r) -> {
+				.orderBy(Tables.EH_RENTALV2_ORDERS.ID.desc()).fetch().map((r) -> {
 					return ConvertHelper.convert(r, RentalOrder.class);
 					});
 		return result;
