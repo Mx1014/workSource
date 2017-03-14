@@ -53,7 +53,11 @@ import javax.servlet.http.HttpServletResponse;
 
 
 
+
+
 import net.greghaines.jesque.Job;
+
+
 
 
 
@@ -104,7 +108,11 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 
 
+
+
 import ch.qos.logback.core.joran.conditional.ElseAction;
+
+
 
 
 
@@ -300,6 +308,8 @@ import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+
+
 
 
 
@@ -1850,6 +1860,10 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		smsProvider.addToTupleList(variables, "resourceName", order.getResourceName()); 
 		int templateId = SmsTemplateCode.RENTAL_PAY_SUCCESS_CODE; 
 
+		Map<String, String> map = new HashMap<String, String>(); 
+		map.put("useTime", order.getUseDetail());
+	    map.put("resourceName", order.getResourceName()); 
+	    sendMessageCode(rs.getChargeUid(),  RentalNotificationTemplateCode.locale, map, RentalNotificationTemplateCode.RENTAL_PAY_SUCCESS_CODE);
 		String templateLocale = RentalNotificationTemplateCode.locale; 
 
 		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
@@ -2027,8 +2041,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		}
 	}
 	
-
-    private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
+	@Override
+    public void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
         String scope = RentalNotificationTemplateCode.SCOPE;
         
         String notifyTextForOther = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");

@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -258,5 +259,8 @@ public interface Rentalv2Service {
 
 
 	void changeOfflinePayOrderSuccess(RentalOrder order);
+
+
+	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);
 
 }
