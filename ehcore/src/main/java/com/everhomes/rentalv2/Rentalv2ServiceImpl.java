@@ -1460,8 +1460,8 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of null rules");
 		Long userId = UserContext.current().getUser().getId(); 
-		RentalBillDTO billDTO = new RentalBillDTO();
 		RentalResource rs =this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
+		RentalBillDTO billDTO = ConvertHelper.convert(rs , RentalBillDTO.class);
 		proccessCells(rs);
 		RentalResourceType rsType = this.rentalv2Provider.getRentalResourceTypeById(rs.getResourceTypeId());
 		this.dbProvider.execute((TransactionStatus status) -> {
