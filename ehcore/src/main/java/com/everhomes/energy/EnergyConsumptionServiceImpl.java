@@ -1555,7 +1555,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
         List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
-        return logs.stream().map(this::toEnergyMeterSettingLogDTO).collect(Collectors.toList());
+
+        if(EnergyMeterSettingType.PRICE.equals(EnergyMeterSettingType.fromCode(cmd.getSettingType()))) {
+            List<EnergyMeterSettingLogDTO> dtos = logs.stream().map(log -> {
+                EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+                //开始时间-创建时间-价钱    结束时间-创建时间-价钱
+                return dto;
+            }).collect(Collectors.toList());
+            return dtos;
+        } else {
+            return logs.stream().map(this::toEnergyMeterSettingLogDTO).collect(Collectors.toList());
+        }
+
     }
 
     private EnergyMeterSettingLogDTO toEnergyMeterSettingLogDTO(EnergyMeterSettingLog log) {
