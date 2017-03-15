@@ -30,3 +30,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 ( 'flow', 10008, 'zh_CN', '发起人已取消任务', '发起人已取消任务');
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
 ( 'flow', 10009, 'zh_CN', '任务已完成', '任务已完成');
+
+-- 更新科技园物业报修oa 地址 add by sw 20170315
+UPDATE `eh_configurations` SET `value`='http://oa.ssipc.com.cn:7890/oa/service/WorkflowAppDraftWebService?wsdl' WHERE `name`='techpark.oa.url';
+
