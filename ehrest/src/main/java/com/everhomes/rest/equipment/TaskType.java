@@ -22,11 +22,14 @@ public enum TaskType {
 		return code;
 	}
 	
-	public static TaskType fromStatus(byte code) {
-		for(TaskType v : TaskType.values()) {
-			if(v.getCode() == code)
-				return v;
+	public static TaskType fromStatus(Byte code) {
+		if(code != null) {
+			for(TaskType v : TaskType.values()) {
+				if(v.getCode() == code)
+					return v;
+			}
 		}
+
 		return null;
 	}
 	

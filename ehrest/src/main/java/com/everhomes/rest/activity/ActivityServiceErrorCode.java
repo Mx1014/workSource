@@ -21,5 +21,9 @@ public interface ActivityServiceErrorCode {
     static final int ERROR_QUANTITY_MUST_NOT_GREATER_THAN_10000=10015;  //报名为数上限不能大于1万！
     static final int ERROR_INVALID_ACTIVITY_ATTACHMENT_ID=10016;
     static final int ERROR_INVALID_ACTIVITY_GOODS_ID=10017;
+    static final int ERROR_INVALID_ACTIVITY_SIGNUP_END_TIME=10018;
+    static final int ERROR_BEYOND_ACTIVITY_SIGNUP_END_TIME=10019;
+    static final int ERROR_PHONE=10020;
+	static final int ERROR_NO_ROSTER = 10021;
 
 }

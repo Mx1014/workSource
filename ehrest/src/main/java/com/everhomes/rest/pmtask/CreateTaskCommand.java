@@ -41,7 +41,8 @@ public class CreateTaskCommand {
 	
 	private Byte addressType;
 	private Long addressOrgId;
-	
+	private String buildingName;
+
 	@ItemType(AttachmentDescriptor.class)
 	private List<AttachmentDescriptor> attachments;
 	
@@ -141,7 +142,13 @@ public class CreateTaskCommand {
 	public void setAddressOrgId(Long addressOrgId) {
 		this.addressOrgId = addressOrgId;
 	}
-	
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);

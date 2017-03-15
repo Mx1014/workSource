@@ -1,6 +1,61 @@
 // @formatter:off
 package com.everhomes.organization.pm;
 
+import static com.everhomes.util.RuntimeErrorException.errorWith;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.OutputStream;
+import java.math.BigDecimal;
+import java.net.URLEncoder;
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.time.Instant;
+import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.Calendar;
+import java.util.Collections;
+import java.util.Comparator;
+import java.util.Date;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+import java.util.Set;
+import java.util.UUID;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletResponse;
+import javax.validation.ConstraintViolation;
+import javax.validation.Valid;
+import javax.validation.Validation;
+import javax.validation.Validator;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.ss.usermodel.WorkbookFactory;
+import org.jooq.Record;
+import org.jooq.Record2;
+import org.jooq.RecordMapper;
+import org.jooq.Result;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
+import org.springframework.transaction.TransactionStatus;
+import org.springframework.util.StringUtils;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.everhomes.acl.Role;
 import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.address.Address;
@@ -18,9 +73,18 @@ import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.*;
+import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.enterprise.EnterpriseCommunityMap;
+import com.everhomes.enterprise.EnterpriseContact;
+import com.everhomes.enterprise.EnterpriseContactEntry;
+import com.everhomes.enterprise.EnterpriseContactProvider;
+import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.family.*;
+import com.everhomes.family.Family;
+import com.everhomes.family.FamilyBillingAccount;
+import com.everhomes.family.FamilyBillingTransactions;
+import com.everhomes.family.FamilyProvider;
+import com.everhomes.family.FamilyService;
 import com.everhomes.forum.ForumProvider;
 import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
@@ -35,34 +99,106 @@ import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.messaging.MessagingService;
 import com.everhomes.namespace.Namespace;
 import com.everhomes.order.OrderUtil;
-import com.everhomes.organization.*;
+import com.everhomes.organization.BillingAccountHelper;
+import com.everhomes.organization.BillingAccountType;
+import com.everhomes.organization.Organization;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.OrganizationBillingAccount;
+import com.everhomes.organization.OrganizationBillingTransactions;
+import com.everhomes.organization.OrganizationCommunity;
+import com.everhomes.organization.OrganizationCommunityRequest;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationOrder;
+import com.everhomes.organization.OrganizationOwner;
+import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
+import com.everhomes.organization.OrganizationTask;
 import com.everhomes.organization.pm.pay.ResultHolder;
 import com.everhomes.promotion.PromotionService;
-import com.everhomes.pushmessage.*;
+import com.everhomes.pushmessage.PushMessage;
+import com.everhomes.pushmessage.PushMessageProvider;
+import com.everhomes.pushmessage.PushMessageResult;
+import com.everhomes.pushmessage.PushMessageResultProvider;
+import com.everhomes.pushmessage.PushMessageStatus;
+import com.everhomes.pushmessage.PushMessageTargetType;
+import com.everhomes.pushmessage.PushMessageType;
 import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.queue.taskqueue.WorkerPoolFactory;
 import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
-import com.everhomes.rest.address.*;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.AddressServiceErrorCode;
+import com.everhomes.rest.address.ApartmentDTO;
+import com.everhomes.rest.address.BuildingDTO;
+import com.everhomes.rest.address.ListAddressByKeywordCommand;
+import com.everhomes.rest.address.ListBuildingByKeywordCommand;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
 import com.everhomes.rest.community.CommunityServiceErrorCode;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
-import com.everhomes.rest.family.*;
-import com.everhomes.rest.forum.*;
+import com.everhomes.rest.family.ApproveMemberCommand;
+import com.everhomes.rest.family.FamilyBillingTransactionDTO;
+import com.everhomes.rest.family.FamilyDTO;
+import com.everhomes.rest.family.LeaveFamilyCommand;
+import com.everhomes.rest.family.RejectMemberCommand;
+import com.everhomes.rest.family.RevokeMemberCommand;
+import com.everhomes.rest.forum.CancelLikeTopicCommand;
+import com.everhomes.rest.forum.GetTopicCommand;
+import com.everhomes.rest.forum.LikeTopicCommand;
+import com.everhomes.rest.forum.ListPostCommandResponse;
+import com.everhomes.rest.forum.ListTopicCommand;
+import com.everhomes.rest.forum.ListTopicCommentCommand;
+import com.everhomes.rest.forum.NewCommentCommand;
+import com.everhomes.rest.forum.NewTopicCommand;
+import com.everhomes.rest.forum.PostContentType;
+import com.everhomes.rest.forum.PostDTO;
+import com.everhomes.rest.forum.PostEntityTag;
+import com.everhomes.rest.forum.PostPrivacy;
+import com.everhomes.rest.forum.PropertyPostDTO;
 import com.everhomes.rest.group.GroupDiscriminator;
 import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.messaging.*;
+import com.everhomes.rest.messaging.ImageBody;
+import com.everhomes.rest.messaging.MessageBodyType;
+import com.everhomes.rest.messaging.MessageChannel;
+import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.order.CommonOrderCommand;
 import com.everhomes.rest.order.CommonOrderDTO;
 import com.everhomes.rest.order.OrderType;
-import com.everhomes.rest.organization.*;
+import com.everhomes.rest.organization.AccountType;
+import com.everhomes.rest.organization.BillTransactionResult;
+import com.everhomes.rest.organization.GetOrgDetailCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommand;
+import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
+import com.everhomes.rest.organization.OrganizationBillingTransactionDTO;
+import com.everhomes.rest.organization.OrganizationContactDTO;
+import com.everhomes.rest.organization.OrganizationDTO;
+import com.everhomes.rest.organization.OrganizationDetailDTO;
+import com.everhomes.rest.organization.OrganizationMemberGroupType;
+import com.everhomes.rest.organization.OrganizationMemberStatus;
+import com.everhomes.rest.organization.OrganizationMemberTargetType;
+import com.everhomes.rest.organization.OrganizationOrderStatus;
+import com.everhomes.rest.organization.OrganizationOrderType;
+import com.everhomes.rest.organization.OrganizationOwnerDTO;
+import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.organization.OrganizationTaskStatus;
+import com.everhomes.rest.organization.OrganizationTaskType;
+import com.everhomes.rest.organization.OrganizationType;
+import com.everhomes.rest.organization.PaidType;
+import com.everhomes.rest.organization.TxType;
+import com.everhomes.rest.organization.VendorType;
 import com.everhomes.rest.organization.pm.*;
-import com.everhomes.rest.organization.pm.CreateOrganizationOwnerCommand;
-import com.everhomes.rest.organization.pm.DeleteOrganizationOwnerCommand;
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.techpark.company.ContactType;
-import com.everhomes.rest.user.*;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.user.MessageChannelType;
+import com.everhomes.rest.user.SetCurrentCommunityCommand;
+import com.everhomes.rest.user.UserGender;
+import com.everhomes.rest.user.UserInfo;
+import com.everhomes.rest.user.UserLocalStringCode;
+import com.everhomes.rest.user.UserTokenCommand;
+import com.everhomes.rest.user.UserTokenCommandResponse;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.OrganizationOwnerCarSearcher;
 import com.everhomes.search.PMOwnerSearcher;
@@ -73,46 +209,26 @@ import com.everhomes.server.schema.tables.pojos.EhParkingCardCategories;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.DateUtil;
 import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.*;
-import com.everhomes.util.*;
+import com.everhomes.user.User;
+import com.everhomes.user.UserContext;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
+import com.everhomes.user.UserService;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.DateHelper;
+import com.everhomes.util.DateStatisticHelper;
+import com.everhomes.util.PaginationHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 import com.everhomes.util.excel.ExcelUtils;
 import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.handler.ProcessBillModel1;
 import com.everhomes.util.excel.handler.PropMgrBillHandler;
 import com.everhomes.util.excel.handler.PropMrgOwnerHandler;
+
 import net.greghaines.jesque.Job;
-import org.apache.poi.ss.usermodel.*;
-import org.jooq.Record;
-import org.jooq.RecordMapper;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.util.StringUtils;
-import org.springframework.web.multipart.MultipartFile;
-
-import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletResponse;
-import javax.validation.ConstraintViolation;
-import javax.validation.Valid;
-import javax.validation.Validation;
-import javax.validation.Validator;
-import java.io.*;
-import java.math.BigDecimal;
-import java.net.URLEncoder;
-import java.sql.Timestamp;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.time.Instant;
-import java.time.LocalDateTime;
-import java.util.*;
-import java.util.stream.Collectors;
-import java.util.stream.Stream;
-
-import static com.everhomes.util.RuntimeErrorException.errorWith;
 
 /**
  * 物业和组织共用同一张表。所有的逻辑都由以前的communityId 转移到 organizationId。
@@ -1885,6 +2001,48 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 	}
 
 	@Override
+	public PropAptStatisticDTO getNewApartmentStatistics(PropCommunityIdCommand cmd) {
+		PropAptStatisticDTO dto = new PropAptStatisticDTO();
+		Long communityId = cmd.getCommunityId();
+		this.checkCommunityIdIsNull(communityId);
+		Community community = this.checkCommunity(communityId);
+
+		int familyCount = familyProvider.countFamiliesByCommunityId(communityId);
+		int userCount = familyProvider.countUserByCommunityId(communityId);
+//		Organization org = this.checkOrganizationByCommIdAndOrgType(communityId, OrganizationType.PM.getCode());
+//		long organizationId = org.getId();
+//
+//		int defaultCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.DEFAULT.getCode());
+//		int liveCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.LIVING.getCode());
+//		int rentCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.RENT.getCode());
+//		int freeCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.FREE.getCode());
+//		int decorateCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.DECORATE.getCode());
+//		int unsaleCount = propertyMgrProvider.countCommunityAddressMappings(organizationId, communityId, PmAddressMappingStatus.UNSALE.getCode());
+		
+		Map<Byte, Integer> result = addressProvider.countApartmentByLivingStatus(communityId);
+		
+//		dto.setAptCount(community.getAptCount()==null ?0 : community.getAptCount());
+		dto.setFamilyCount(familyCount);
+		dto.setUserCount(userCount);
+		Integer temp = null;
+		int sum = 0;
+		dto.setDefaultCount(temp = (temp = result.get(PmAddressMappingStatus.DEFAULT.getCode())) == null ? 0 : temp);
+		sum += temp;
+		dto.setLiveCount(temp = (temp = result.get(PmAddressMappingStatus.LIVING.getCode())) == null ? 0 : temp);
+		sum += temp;
+		dto.setRentCount(temp = (temp = result.get(PmAddressMappingStatus.RENT.getCode())) == null ? 0 : temp);
+		sum += temp;
+		dto.setFreeCount(temp = (temp = result.get(PmAddressMappingStatus.FREE.getCode())) == null ? 0 : temp);
+		sum += temp;
+		dto.setDecorateCount(temp = (temp = result.get(PmAddressMappingStatus.DECORATE.getCode())) == null ? 0 : temp);
+		sum += temp;
+		dto.setUnsaleCount(temp = (temp = result.get(PmAddressMappingStatus.UNSALE.getCode())) == null ? 0 : temp);
+		sum += temp;
+		dto.setAptCount(sum);
+		return dto;
+	}
+
+	@Override
 	public OrganizationDTO findPropertyOrganization(PropCommunityIdCommand cmd) {
 		this.checkCommunityIdIsNull(cmd.getCommunityId());
 		Community community = this.checkCommunity(cmd.getCommunityId());
@@ -2010,12 +2168,17 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 				dto.setId(0L);
 				dto.setMemberCount(0L);
 			}
-			CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(apartmentDTO.getAddressId());
-			if(mapping != null){
-				dto.setLivingStatus(mapping.getLivingStatus());
-			}
-			else{
-				dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+			
+			if (apartmentDTO.getLivingStatus() != null) {
+				dto.setLivingStatus(apartmentDTO.getLivingStatus());
+			}else {
+				CommunityAddressMapping mapping = propertyMgrProvider.findAddressMappingByAddressId(apartmentDTO.getAddressId());
+				if(mapping != null){
+					dto.setLivingStatus(mapping.getLivingStatus());
+				}
+				else{
+					dto.setLivingStatus(PmAddressMappingStatus.LIVING.getCode());
+				}
 			}
 
 			//判断公寓是否欠费

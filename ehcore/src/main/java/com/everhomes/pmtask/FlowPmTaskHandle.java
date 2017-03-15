@@ -1,363 +1,101 @@
 package com.everhomes.pmtask;
 
-import java.sql.Timestamp;
-import java.text.SimpleDateFormat;
-import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
 
-import com.everhomes.address.AddressProvider;
-import com.everhomes.community.Community;
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.CommunityProvider;
+import com.everhomes.community.ResourceCategoryAssignment;
 import com.everhomes.flow.*;
-import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.flow.*;
-import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.rest.pmtask.*;
-import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 import org.springframework.transaction.TransactionStatus;
 
-import com.alibaba.fastjson.JSONObject;
-import com.everhomes.address.Address;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.category.Category;
-import com.everhomes.category.CategoryProvider;
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
 import com.everhomes.entity.EntityType;
-import com.everhomes.locale.LocaleTemplateService;
-import com.everhomes.messaging.MessagingService;
-import com.everhomes.organization.Organization;
-import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryDTO;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.user.IdentifierType;
-import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.sms.SmsProvider;
-import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.Tuple;
 
 @Component(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.FLOW)
-public class FlowPmTaskHandle implements PmTaskHandle {
-	
-	public static final String CATEGORY_SEPARATOR = "/";
+class FlowPmTaskHandle implements PmTaskHandle {
 
-    SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
-	
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowPmTaskHandle.class);
 	@Autowired
-	private CategoryProvider categoryProvider;
-	@Autowired
-    private DbProvider dbProvider;
+	private DbProvider dbProvider;
 	@Autowired
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
-	private UserProvider userProvider;
-	@Autowired
-	private LocaleTemplateService localeTemplateService;
-	@Autowired
-	private SmsProvider smsProvider;
-	@Autowired
-	private MessagingService messagingService;
-	@Autowired
-    private ContentServerService contentServerService;
-	@Autowired
 	private FlowService flowService;
-    @Autowired
-	private FlowProvider flowProvider;
-    @Autowired
-    private FlowCaseProvider flowCaseProvider;
-    @Autowired
-    private BigCollectionProvider bigCollectionProvider;
 	@Autowired
-	private CommunityProvider communityProvider;
+	private PmTaskCommonServiceImpl pmTaskCommonService;
 	@Autowired
-	private AddressProvider addressProvider;
-	@Autowired
-	private OrganizationProvider organizationProvider;
+	private FlowCaseProvider flowCaseProvider;
 	@Autowired
 	private FlowNodeProvider flowNodeProvider;
+	@Autowired
+	private BuildingProvider buildingProvider;
+	@Autowired
+	private CommunityProvider communityProvider;
 
 	@Override
-	public PmTaskDTO createTask(CreateTaskCommand cmd, Long userId, String requestorName, String requestorPhone){
+	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
 
-		if(null == cmd.getAddressType()){
-			LOGGER.error("Invalid addressType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid addressType parameter.");
-		}
-
-		String ownerType = cmd.getOwnerType();
-		Long ownerId = cmd.getOwnerId();
-		Long taskCategoryId = cmd.getTaskCategoryId();
-		String content = cmd.getContent();
-		checkCreateTaskParam(ownerType, ownerId, taskCategoryId, content);
-		Category taskCategory = checkCategory(taskCategoryId);
-
-		User user = UserContext.current().getUser();
-		PmTask task = new PmTask();
-		dbProvider.execute((TransactionStatus status) -> {
-			Timestamp now = new Timestamp(System.currentTimeMillis());
-
-			task.setAddressType(cmd.getAddressType());
-
-			if(cmd.getAddressType().equals(PmTaskAddressType.ORGANIZATION.getCode())) {
-				if(null == cmd.getAddressOrgId()){
-					LOGGER.error("Invalid addressOrgId parameter.");
-		    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-		    				"Invalid addressOrgId parameter.");
-				}
-				task.setAddressOrgId(cmd.getAddressOrgId());
-				task.setAddressId(cmd.getAddressId());
-//				List<OrganizationAddress> addresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getAddressOrgId());
-//				int size = addresses.size();
-//				if(size != 0) {
-//					task.setAddressId(addresses.get(0).getAddressId());
-//				}
-			}else {
-				task.setAddressId(cmd.getAddressId());
-			}
-			task.setAddress(cmd.getAddress());
-			task.setTaskCategoryId(taskCategoryId);
-			task.setCategoryId(cmd.getCategoryId());
-			task.setContent(content);
-			task.setCreateTime(now);
-
-			if(null != cmd.getOrganizationId()) {
-				task.setOrganizationId(cmd.getOrganizationId());
-				task.setRequestorName(requestorName);
-				task.setRequestorPhone(requestorPhone);
-			}
-			task.setCreatorUid(user.getId());
-			task.setNamespaceId(user.getNamespaceId());
-			task.setOwnerId(ownerId);
-			task.setOwnerType(ownerType);
-
-			task.setUnprocessedTime(now);
-
-			if(null != cmd.getReserveTime())
-				task.setReserveTime(new Timestamp(cmd.getReserveTime()));
-			task.setPriority(cmd.getPriority());
-			task.setSourceType(cmd.getSourceType()==null?PmTaskSourceType.APP.getCode():cmd.getSourceType());
-
-			pmTaskProvider.createTask(task);
-
+		PmTask task1 = dbProvider.execute((TransactionStatus status) -> {
+			PmTask task = pmTaskCommonService.createTask(cmd, requestorUid, requestorName, requestorPhone);
 			//新建flowcase
-	    	Flow flow = flowService.getEnabledFlow(user.getNamespaceId(), FlowConstants.PM_TASK_MODULE, 
-	    			FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
-	    	if(null == flow) {
-	    		LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
-	    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
-	    				"Enable pmtask flow not found.");
-	    	}
-    		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-    		createFlowCaseCommand.setApplyUserId(user.getId());
-    		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
-    		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-    		createFlowCaseCommand.setReferId(task.getId());
-    		createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
-//    		createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
-    		createFlowCaseCommand.setContent(task.getContent());
-    		createFlowCaseCommand.setProjectId(task.getOwnerId());
-    		createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
-    		
-        	FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
-			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-			task.setStatus(convertFlowStatus(flowNode.getParams()));
-        	task.setFlowCaseId(flowCase.getId());
-        	pmTaskProvider.updateTask(task);
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+					FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
+			if(null == flow) {
+				LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+						"Enable pmtask flow not found.");
+			}
+			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
+			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+			createFlowCaseCommand.setReferId(task.getId());
+			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
+			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
+			createFlowCaseCommand.setContent(task.getContent());
 
-			PmTaskLog pmTaskLog = new PmTaskLog();
-			pmTaskLog.setNamespaceId(task.getNamespaceId());
-			pmTaskLog.setOperatorTime(now);
-			pmTaskLog.setOperatorUid(userId);
-			pmTaskLog.setOwnerId(task.getOwnerId());
-			pmTaskLog.setOwnerType(task.getOwnerType());
-			pmTaskLog.setStatus(task.getStatus());
-			pmTaskLog.setTaskId(task.getId());
-			pmTaskProvider.createTaskLog(pmTaskLog);
-
-			//图片
-			addAttachments(cmd.getAttachments(), userId, task.getId(), PmTaskAttachmentType.TASK.getCode());
-
-			List<PmTaskTarget> targets = pmTaskProvider.listTaskTargets(cmd.getOwnerType(), cmd.getOwnerId(),
-	    			PmTaskOperateType.EXECUTOR.getCode(), null, null);
-	    	int size = targets.size();
-	    	if(LOGGER.isDebugEnabled())
-	    		LOGGER.debug("Create pmtask and send message, size={}, cmd={}", size, cmd);
-	    	if(size > 0){
-	    		sendMessage4CreateTask(targets, requestorName, requestorPhone, taskCategory.getName(), user);
-	    	}
-			return null;
-		});
-		
-		pmTaskSearch.feedDoc(task);
-		
-		return ConvertHelper.convert(task, PmTaskDTO.class);
-	}
-
-	private Byte convertFlowStatus(String params) {
-
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
-		}
-
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
-
-		switch (nodeType) {
-			case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
-			case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
-			case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
-			case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
-			default: return null;
-		}
-	}
-
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
-
-    private String getResourceUrlByUir(String uri, String ownerType, Long ownerId) {
-        String url = null;
-        if(uri != null && uri.length() > 0) {
-            try{
-                url = contentServerService.parserUri(uri, ownerType, ownerId);
-            }catch(Exception e){
-                LOGGER.error("Failed to parse uri, uri=, ownerType=, ownerId=", uri, ownerType, ownerId, e);
-            }
-        }
-        
-        return url;
-    }
-	
-	private void sendMessage4CreateTask(List<PmTaskTarget> targets, String requestorName, String requestorPhone,
-			String taskCategoryName, User user) {
-		List<String> phones = new ArrayList<String>();
-    	
-    	//消息推送
-    	String scope = PmTaskNotificationTemplateCode.SCOPE;
-	    String locale = PmTaskNotificationTemplateCode.LOCALE;
-    	for(PmTaskTarget p: targets) {
-        	UserIdentifier sender = userProvider.findClaimedIdentifierByOwnerAndType(p.getTargetId(), IdentifierType.MOBILE.getCode());
-        	phones.add(sender.getIdentifierToken());
-        	//消息推送
-        	Map<String, Object> map = new HashMap<String, Object>();
-    	    map.put("creatorName", requestorName);
-    	    map.put("creatorPhone", requestorPhone);
-    	    map.put("categoryName", taskCategoryName);
-    		int code = PmTaskNotificationTemplateCode.CREATE_PM_TASK;
-    		String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
-    		sendMessageToUser(p.getTargetId(), text);
-    	}
-    	int num = phones.size();
-    	if(num > 0) {
-    		String[] s = new String[num];
-        	phones.toArray(s);
-    		List<Tuple<String, Object>> variables = smsProvider.toTupleList("operatorName", requestorName);
-    		smsProvider.addToTupleList(variables, "operatorPhone", requestorPhone);
-    		smsProvider.addToTupleList(variables, "categoryName", taskCategoryName);
-    		smsProvider.sendSms(user.getNamespaceId(), s, SmsTemplateCode.SCOPE, 
-    				SmsTemplateCode.PM_TASK_CREATOR_CODE, user.getLocale(), variables);
-    	}
-	}
-
-	private void sendMessageToUser(Long userId, String content) {
-//		User user = UserContext.current().getUser();
-		MessageDTO messageDto = new MessageDTO();
-        messageDto.setAppId(AppConstants.APPID_MESSAGING);
-        messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), userId.toString()));
-        messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
-        messageDto.setBody(content);
-        messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
-        
-        messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
-                userId.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
-	}
-	
-	private void addAttachments(List<AttachmentDescriptor> list, Long userId, Long ownerId, String targetType){
-		if(!CollectionUtils.isEmpty(list)){
-			for(AttachmentDescriptor ad: list){
-				if(null != ad){
-					PmTaskAttachment attachment = new PmTaskAttachment();
-					attachment.setContentType(ad.getContentType());
-					attachment.setContentUri(ad.getContentUri());
-					attachment.setCreateTime(new Timestamp(System.currentTimeMillis()));
-					attachment.setCreatorUid(userId);
-					attachment.setOwnerId(ownerId);
-					attachment.setOwnerType(targetType);
-					pmTaskProvider.createTaskAttachment(attachment);
+			createFlowCaseCommand.setProjectId(task.getOwnerId());
+			createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+			if (StringUtils.isNotBlank(task.getBuildingName())) {
+				Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
+						task.getBuildingName());
+				if(building != null){
+					ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
+							EntityType.BUILDING.getCode(), namespaceId);
+					if (null != resourceCategory) {
+						createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
+						createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+					}
 				}
 			}
-		}
-	}
-	
-	private Category checkCategory(Long id){
-		Category category = categoryProvider.findCategoryById(id);
-		if(null == category) {
-        	LOGGER.error("Category not found, categoryId={}", id);
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Category not found.");
-        }
-		return category;
-	}
-	
-	private void checkCreateTaskParam(String ownerType, Long ownerId, Long taskCategoryId, String content){
-		checkOwnerIdAndOwnerType(ownerType, ownerId);
-    	if(null == taskCategoryId) {
-        	LOGGER.error("Invalid taskCategoryId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid taskCategoryId parameter.");
-        }
-    	
-    	if(StringUtils.isBlank(content)) {
-        	LOGGER.error("Invalid content parameter.");
-    		throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CONTENT_NULL,
-    				"Invalid content parameter.");
-        }
-    	
-    }
-	
-	private void checkOwnerIdAndOwnerType(String ownerType, Long ownerId){
-		if(null == ownerId) {
-        	LOGGER.error("Invalid ownerId parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid ownerId parameter.");
-        }
-    	
-    	if(StringUtils.isBlank(ownerType)) {
-        	LOGGER.error("Invalid ownerType parameter.");
-    		throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-    				"Invalid ownerType parameter.");
-        }
+
+			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
+			task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+			task.setFlowCaseId(flowCase.getId());
+			pmTaskProvider.updateTask(task);
+			return task;
+		});
+
+		pmTaskSearch.feedDoc(task1);
+
+		return ConvertHelper.convert(task1, PmTaskDTO.class);
 	}
 
 	@Override
@@ -366,20 +104,17 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983) {
-			
+
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-			
+
 			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
-				String handle = PmTaskHandle.EBEI;
-				
-				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-				
+
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+
 				handler.cancelTask(cmd);
 			}
 		}
-//			PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-//			handler.cancelTask(cmd);	
-		
+
 	}
 
 	@Override
@@ -388,20 +123,16 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983) {
-			
+
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-			
+
 			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
-				String handle = PmTaskHandle.EBEI;
-				
-				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-				
+
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+
 				handler.evaluateTask(cmd);
 			}
 		}
-		
-//		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-//		handler.evaluateTask(cmd);
 	}
 
 	@Override
@@ -410,122 +141,46 @@ public class FlowPmTaskHandle implements PmTaskHandle {
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		//TODO:为科兴与一碑对接
 		if(namespaceId == 999983) {
-			
+
 			PmTask task = pmTaskProvider.findTaskById(cmd.getId());
-			
+
 			if(StringUtils.isNotBlank(task.getStringTag1()) && task.getFlowCaseId() == 0L) {
-				String handle = PmTaskHandle.EBEI;
-				
-				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + handle);
-				
+
+				PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.EBEI);
+
 				return handler.getTaskDetail(cmd);
 			}
 		}
-		
-		return getFlowTaskDetail(cmd);
-	}
 
-	private PmTaskDTO getFlowTaskDetail(GetTaskDetailCommand cmd) {
-
-		checkOwnerIdAndOwnerType(cmd.getOwnerType(), cmd.getOwnerId());
-		checkId(cmd.getId());
-		PmTask task = checkPmTask(cmd.getId());
-
-		PmTaskDTO dto  = ConvertHelper.convert(task, PmTaskDTO.class);
-
-		setPmTaskDTOAddress(task, dto);
-		if(null == task.getOrganizationId() || task.getOrganizationId() ==0 ){
-			User user = userProvider.findUserById(task.getCreatorUid());
-			UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
-			dto.setRequestorName(user.getNickName());
-			dto.setRequestorPhone(userIdentifier.getIdentifierToken());
-		}
-
-		//查询服务类型
-		Category category = categoryProvider.findCategoryById(task.getCategoryId());
-		Category taskCategory = checkCategory(task.getTaskCategoryId());
-		if(null != category)
-			dto.setCategoryName(category.getName());
-		dto.setTaskCategoryName(taskCategory.getName());
-
-		//查询图片
-		List<PmTaskAttachment> attachments = pmTaskProvider.listPmTaskAttachments(task.getId(), PmTaskAttachmentType.TASK.getCode());
-		List<PmTaskAttachmentDTO> attachmentDtos =  attachments.stream().map(r -> {
-			PmTaskAttachmentDTO attachmentDto = ConvertHelper.convert(r, PmTaskAttachmentDTO.class);
-
-			String contentUrl = getResourceUrlByUir(r.getContentUri(),
-					EntityType.USER.getCode(), r.getCreatorUid());
-			attachmentDto.setContentUrl(contentUrl);
-			return attachmentDto;
-		}).collect(Collectors.toList());
-		dto.setAttachments(attachmentDtos);
-
-		return dto;
-	}
-
-	private void checkId(Long id){
-		if(null == id) {
-			LOGGER.error("Invalid id parameter.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-					"Invalid id parameter.");
-		}
-	}
-
-	private PmTask checkPmTask(Long id){
-		PmTask pmTask = pmTaskProvider.findTaskById(id);
-		if(null == pmTask) {
-			LOGGER.error("PmTask not found, id={}", id);
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"PmTask not found.");
-		}
-		return pmTask;
-	}
-	private void setPmTaskDTOAddress(PmTask task, PmTaskDTO dto) {
-		if(task.getAddressType().equals(PmTaskAddressType.FAMILY.getCode())) {
-			Address address = addressProvider.findAddressById(task.getAddressId());
-			if(null != address) {
-				Community community = communityProvider.findCommunityById(address.getCommunityId());
-				dto.setAddress(address.getCityName() + address.getAreaName() + community.getName() + address.getAddress());
-			}
-		}else {
-			Organization organization = organizationProvider.findOrganizationById(task.getAddressOrgId());
-			Address address = addressProvider.findAddressById(task.getAddressId());
-
-			String addr = "";
-			if(null != organization)
-				addr = organization.getName();
-			if(null != address)
-				addr = addr + address.getAddress();
-
-			dto.setAddress(addr);
-		}
+		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
+		return handler.getTaskDetail(cmd);
 	}
 
 	@Override
 	public ListTaskCategoriesResponse listTaskCategories(ListTaskCategoriesCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.listTaskCategories(cmd);
 	}
 
 	@Override
 	public List<CategoryDTO> listAllTaskCategories(ListAllTaskCategoriesCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.listAllTaskCategories(cmd);
 	}
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.searchTasks(cmd);
 	}
 
 	@Override
 	public ListUserTasksResponse listUserTasks(ListUserTasksCommand cmd) {
 		PmTaskHandle handler = PlatformContext.getComponent(PmTaskHandle.PMTASK_PREFIX + PmTaskHandle.SHEN_YE);
-		
+
 		return handler.listUserTasks(cmd);
 	}
 

@@ -4,7 +4,16 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.category.Category;
+import com.everhomes.category.CategoryProvider;
 import com.everhomes.rest.pmtask.*;
+
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.sms.SmsProvider;
+import com.everhomes.user.User;
+import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.UserProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -13,7 +22,6 @@ import org.springframework.stereotype.Component;
 
 import com.alibaba.fastjson.JSONObject;
 import com.everhomes.bootstrap.PlatformContext;
-import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.flow.Flow;
 import com.everhomes.flow.FlowCase;
 import com.everhomes.flow.FlowCaseState;
@@ -36,6 +44,7 @@ import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.parking.ParkingErrorCode;
 import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class PmtaskFlowModuleListener implements FlowModuleListener {
@@ -48,15 +57,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 	@Autowired
 	private PmTaskProvider pmTaskProvider;
 	@Autowired
-	private PmTaskService pmTaskService;
+	private PmTaskCommonServiceImpl pmTaskCommonService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 	@Autowired
     private FlowUserSelectionProvider flowUserSelectionProvider;
-	
-	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 	@Autowired
-    private ContentServerService contentServerService;
+	private SmsProvider smsProvider;
+	@Autowired
+	private CategoryProvider categoryProvider;
+	@Autowired
+	private UserProvider userProvider;
+
+	private Long moduleId = FlowConstants.PM_TASK_MODULE;
 	
 	@Override
 	public FlowModuleInfo initModule() {
@@ -104,18 +117,15 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		JSONObject paramJson = JSONObject.parseObject(params);
 		String nodeType = paramJson.getString("nodeType");
 
-		Long flowId = flowNode.getFlowMainId();
 		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
 		Flow flow = flowProvider.findSnapshotFlow(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		String tag1 = flow.getStringTag1();
 
-		long now = System.currentTimeMillis();
 		LOGGER.debug("update pmtask request, stepType={}, tag1={}, nodeType={}", stepType, tag1, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 
 			if ("ACCEPTING".equals(nodeType)) {
-//				task.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 
 				//TODO: 同步数据到科技园
@@ -134,11 +144,11 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				}
 			}else if ("ASSIGNING".equals(nodeType)) {
 
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 
 			}else if ("PROCESSING".equals(nodeType)) {
-				task.setStatus(convertFlowStatus(nextNode.getParams()));
+				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 			}
 		}else if(FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
@@ -154,19 +164,16 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseEnd(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onFlowCaseActionFired(FlowCaseState ctx) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public String onFlowCaseBriefRender(FlowCase flowCase) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -177,12 +184,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		cmd.setId(flowCase.getReferId());
 		cmd.setOwnerId(flowCase.getProjectId());
 		cmd.setOwnerType(PmTaskOwnerType.COMMUNITY.getCode());
-		PmTaskDTO dto = pmTaskService.getTaskDetail(cmd);
+		PmTaskDTO dto = pmTaskCommonService.getTaskDetail(cmd, false);
 
 		flowCase.setCustomObject(JSONObject.toJSONString(dto));
 		
 		List<FlowCaseEntity> entities = new ArrayList<>();
-		FlowCaseEntity e = new FlowCaseEntity();
+		FlowCaseEntity e;
 		
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.MULTI_LINE.getCode());
@@ -227,7 +234,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public String onFlowVariableRender(FlowCaseState ctx, String variable) {
-		// TODO Auto-generated method stub
 		return null;
 	}
 
@@ -282,27 +288,6 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	}
 
-	private Byte convertFlowStatus(String params) {
-
-		if(StringUtils.isBlank(params)) {
-			LOGGER.error("Invalid flowNode param.");
-			throw RuntimeErrorException.errorWith(ParkingErrorCode.SCOPE, ParkingErrorCode.ERROR_FLOW_NODE_PARAM,
-					"Invalid flowNode param.");
-		}
-
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
-
-		LOGGER.debug("pmtask flow nodeTppe: {}", nodeType);
-		switch (nodeType) {
-			case "ACCEPTING": return PmTaskFlowStatus.ACCEPTING.getCode();
-			case "ASSIGNING": return PmTaskFlowStatus.ASSIGNING.getCode();
-			case "PROCESSING": return PmTaskFlowStatus.PROCESSING.getCode();
-			case "COMPLETED": return PmTaskFlowStatus.COMPLETED.getCode();
-			default: return null;
-		}
-	}
-
 	//同步数据到科技园
 	private void synchronizedTaskToTechpark(PmTask task, Long targetId, Long organizationId) {
 		UserContext context = UserContext.current();
@@ -321,13 +306,38 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreating(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
+
 	}
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
-		// TODO Auto-generated method stub
-		
+
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
+		FlowCase flowCase = ctx.getFlowCase();
+		PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
+
+		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
+
+			FlowGraphEvent event = ctx.getCurrentEvent();
+			Long targetId = event.getEntityId();
+
+			User targetUser = userProvider.findUserById(targetId);
+			UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(targetId, IdentifierType.MOBILE.getCode());
+
+			smsProvider.addToTupleList(variables, "creatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "creatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "operatorName", targetUser.getNickName());
+			smsProvider.addToTupleList(variables, "operatorPhone", targetIdentifier.getIdentifierToken());
+		}
+
 	}
 }

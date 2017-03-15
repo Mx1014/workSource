@@ -8,7 +8,7 @@ import com.everhomes.util.StringHelper;
  * <ul>
  * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
  * <li>pageSize: 每页的数量</li>
- * <li>status: 小区状态,参考{@link com.everhomes.rest.address.CommunityAdminStatus}}</li>
+ * <li>status: 小区状态,参考{@link com.everhomes.rest.address.CommunityAdminStatus}</li>
  * </ul>
  */
 public class ListCommunitesByStatusCommand {

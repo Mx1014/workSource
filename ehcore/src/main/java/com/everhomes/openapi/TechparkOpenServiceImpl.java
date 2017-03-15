@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.formula.functions.Count;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.NamespaceAddressType;
@@ -51,6 +53,7 @@ import com.everhomes.rest.openapi.techpark.CustomerContractBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerLivingStatus;
 import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -62,6 +65,7 @@ import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.user.User;
@@ -90,6 +94,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
+	private OrganizationService organizationService;
+	
+	@Autowired
 	private ContractProvider contractProvider;
 	
 	@Autowired
@@ -109,6 +116,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+	
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
 	
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
@@ -393,6 +403,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				}
 			}
 		}
+		
+		// 同步完地址后更新community表中的门牌总数，add by tt, 20170308
+		Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+		Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+		if (community.getAptCount().intValue() != count.intValue()) {
+			community.setAptCount(count);
+			communityProvider.updateCommunity(community);
+		}
 	}
 	
 	private void insertAddress(Integer namespaceId, Long communityId, CustomerApartment customerApartment) {
@@ -658,9 +676,17 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		 * eh_users
 		 * eh_user_identifiers
 		 */
-		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("begin sync all rentings, size="+backupList.size());
+		}
 		List<Organization> myOrganizationList = organizationProvider.listOrganizationByNamespaceType(appNamespaceMapping.getNamespaceId(), NamespaceOrganizationType.JINDIE.getCode());
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 1");
+		}
 		List<CustomerRental> theirRentalList = mergeBackupList(backupList, CustomerRental.class);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 2");
+		}
 		//有的组织名称过长，格式化一下
 		for (CustomerRental customerRental : theirRentalList) {
 			String name = customerRental.getName();
@@ -668,29 +694,62 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				customerRental.setName(name.substring(0,64).trim());
 			}
 		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 3");
+		}
 		formatBuildingName(theirRentalList);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 4");
+		}
 		for (Organization myOrganization : myOrganizationList) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("sync all rentings, flag 5");
+			}
 			CustomerRental customerRental = findFromTheirRentalList(myOrganization, theirRentalList);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("sync all rentings, flag 6");
+			}
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
 			rentalThreadPool.execute(()->{
-				dbProvider.execute(s->{
-					if (customerRental != null) {
-						if (LOGGER.isDebugEnabled()) {
-							LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
-						}
-						updateOrganization(myOrganization, customerRental);
-						insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-						insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
-						insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
-					}else {
-						deleteOrganization(myOrganization);
-						deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-						deleteContracts(myOrganization);
+				try {
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("sync all rentings, flag 7");
 					}
-					return true;
-				});
+					dbProvider.execute(s->{
+						try {
+							if (LOGGER.isDebugEnabled()) {
+								LOGGER.debug("sync all rentings, flag 8");
+							}
+							if (customerRental != null) {
+								if (LOGGER.isDebugEnabled()) {
+									LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
+								}
+								updateOrganization(myOrganization, customerRental);
+								insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+								insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+								insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+								insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
+								insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
+							}else {
+//								deleteOrganization(myOrganization);
+//								deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+								//改成以下方式，否则es中的数据无法删除
+								DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
+								deleteOrganizationIdCommand.setId(myOrganization.getId());
+								organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+								deleteContracts(myOrganization);
+							}
+							return true;
+						} catch (Exception e) {
+							LOGGER.error("transaction error", e);
+							throw e;
+						}
+					});
+				} catch (Exception e) {
+					LOGGER.error("thread error", e);
+					throw e;
+				}
+				
 			});
 			
 		}
@@ -1586,5 +1645,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			organizationDetail.setContactor(contact);
 			organizationProvider.updateOrganizationDetail(organizationDetail);
 		}
+		organizationSearcher.feedDoc(organization);
 	}
 }

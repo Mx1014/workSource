@@ -68,7 +68,7 @@ public interface QualityProvider {
 	List<QualityInspectionCategories> listQualityInspectionCategoriesByPath(String superiorPath);
 	
 	List<QualityInspectionTasks> listClosedTask(Timestamp startDate, Timestamp endDate);
-	List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long createTime);
+	List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long startTime, Long endTime);
 	
 	void populateTaskRecords(QualityInspectionTasks task);
 	void populateTasksRecords(final List<QualityInspectionTasks> tasks);
@@ -119,4 +119,6 @@ public interface QualityProvider {
 	List<QualityInspectionTaskTemplates> listUserQualityInspectionTaskTemplates(ListingLocator locator, int count, Long uid);
 	List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupIds);
 	List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
+
+	QualityInspectionTasks findLastestQualityInspectionTask(Long startTime);
 }

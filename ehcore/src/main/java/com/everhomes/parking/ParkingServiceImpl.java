@@ -1,10 +1,8 @@
 // @formatter:off
 package com.everhomes.parking;
 
-import java.io.BufferedOutputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -19,6 +17,7 @@ import java.util.stream.Collectors;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import com.everhomes.util.DownloadUtils;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.lang.StringUtils;
 import org.apache.poi.ss.usermodel.CellStyle;
@@ -150,7 +149,7 @@ import com.everhomes.util.RuntimeErrorException;
 public class ParkingServiceImpl implements ParkingService {
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingServiceImpl.class);
 
-    SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+    private SimpleDateFormat datetimeSF = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
     
     @Autowired
     private ParkingProvider parkingProvider;
@@ -795,7 +794,7 @@ public class ParkingServiceImpl implements ParkingService {
     			FlowCaseDetailDTO flowCaseDetailDTO = flowService.getFlowCaseDetail(r.getFlowCaseId()
                 		, userId
                 		, FlowUserType.PROCESSOR
-                		, true);
+                		, false);
     			
     			dto.setButtons(flowCaseDetailDTO.getButtons());
     			return dto;
@@ -1207,7 +1206,7 @@ public class ParkingServiceImpl implements ParkingService {
 		try {
 			out = new ByteArrayOutputStream();
 			wb.write(out);
-			download(out, response);
+			DownloadUtils.download(out, response);
 		} catch (IOException e) {
 			LOGGER.error("exportParkingRechageOrders is fail. {}",e);
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
@@ -1217,30 +1216,6 @@ public class ParkingServiceImpl implements ParkingService {
 		return response;
 	}
 	
-	public HttpServletResponse download(ByteArrayOutputStream out, HttpServletResponse response) {
-        try {
-
-            // 清空response
-            //response.reset();
-            // 设置response的Header
-            response.addHeader("Content-Disposition", "attachment;filename=" + System.currentTimeMillis()+".xlsx");
-            //response.addHeader("Content-Length", "" + out.);
-            OutputStream toClient = new BufferedOutputStream(response.getOutputStream());
-            response.setContentType("application/octet-stream");
-            toClient.write(out.toByteArray());
-            toClient.flush();
-            toClient.close();
-            
-        } catch (IOException ex) { 
- 			LOGGER.error(ex.getMessage());
- 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
- 					ErrorCodes.ERROR_GENERAL_EXCEPTION,
- 					ex.getLocalizedMessage());
-     		 
-        }
-        return response;
-    }
-
 	@Override
 	public void deleteParkingRechargeOrder(DeleteParkingRechargeOrderCommand cmd) {
 		ParkingRechargeOrder order = parkingProvider.findParkingRechargeOrderById(cmd.getId());
@@ -1486,10 +1461,8 @@ public class ParkingServiceImpl implements ParkingService {
     			
     			try {
 //    				lock.wait(5000);
-					System.out.println("wait ~~~~~~~~~~~~~~~~~~~~~~~~~~");
 					Thread.sleep(500);
 				} catch (InterruptedException e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
     			sTime = System.currentTimeMillis();
@@ -1533,7 +1506,7 @@ public class ParkingServiceImpl implements ParkingService {
     			cmd.getOwnerId(), cmd.getParkingLotId(), null, (byte)1, null, null, null, null);
 		
 		for(ParkingCardRequest request: list) {
-			//TODO: 新建flowcase
+
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
 			createFlowCaseCommand.setApplyUserId(user.getId());
 			createFlowCaseCommand.setFlowMainId(flowId);

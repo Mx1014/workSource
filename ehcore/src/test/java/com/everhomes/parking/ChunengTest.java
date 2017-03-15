@@ -41,7 +41,7 @@ public class ChunengTest {
 	public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("plateNo", "DWX622");
+		param.put("plateNo", "B22222");
 //		param.put("money", "30000");
 ////		param.put("carType", "2");
 //		param.put("plateNo", "B12347");
@@ -70,14 +70,17 @@ public class ChunengTest {
 	
 	
 	public static String post(JSONObject param, String type) {
-
-		HttpPost httpPost = new HttpPost("http://220.160.111.114:9099/" + type);
+//		http://183.238.146.34:8099
+//		user:  ktapi
+//		pwd:  0106E5
+//		key:  BD8F1F46E589D97E3DEEECF4
+		HttpPost httpPost = new HttpPost("http://218.17.157.47:8099/" + type);
 		StringBuilder result = new StringBuilder();
 		
-        String key = "F7A0B971B199FD2A1017CEC5";
-        String iv = "20170110";
+        String key = "BD8F1F46E589D97E3DEEECF4";
+        String iv = "20170227";
         String user = "ktapi";
-        String pwd = "0306A9";
+        String pwd = "0106E5";
         String data = null;
 		try {
 			data = EncryptUtil.getEncString(param, key, iv);
@@ -107,8 +110,7 @@ public class ChunengTest {
 				}
 			}
 		} catch (IOException e) {
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-    				"Parking request error.");
+			e.printStackTrace();
 		}finally {
             try {
             	instream.close();
@@ -123,7 +125,6 @@ public class ChunengTest {
 	
 	/**
 	 * 获取加密后的字符串
-	 * @param input
 	 * @return
 	 */
 	private static String stringMD5(String pw) {

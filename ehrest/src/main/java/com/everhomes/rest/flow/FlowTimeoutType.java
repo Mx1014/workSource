@@ -10,7 +10,7 @@ package com.everhomes.rest.flow;
  *
  */
 public enum FlowTimeoutType {
-	STEP_TIMEOUT("step_timeout"), REMIND_TIMEOUT("remind_timeout"), MESSAGE_TIMEOUT("message_timeout");
+	STEP_TIMEOUT("step_timeout"), REMIND_TIMEOUT("remind_timeout"), MESSAGE_TIMEOUT("message_timeout"), SMS_TIMEOUT("sms_timeout");
 	
 	private String code;
     private FlowTimeoutType(String code) {

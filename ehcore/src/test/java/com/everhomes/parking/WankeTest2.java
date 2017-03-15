@@ -26,9 +26,8 @@ public class WankeTest2 {
     public static void main(String[] args) {
 		JSONObject param = new JSONObject();
 		
-		param.put("plateNo", "浙A625FF");
-//		param.put("plateNo", "浙AS0616");
-		
+		param.put("plateNo", "桂KS6909");
+
 		param.put("flag", "2");
 //	    param.put("amount", 300*100);
 //	    param.put("payMons", 1);
@@ -38,7 +37,8 @@ public class WankeTest2 {
 //		param.put("orderNo", "1701101105590023");
 //		param.put("amount", 36000);
 //	    param.put("payType", 1);
-		
+
+		System.out.println(param.toJSONString());
 		String json = postToWanke(param, GET_CARD);
 		
 		String s = "{\"errorCode\":1,\"errorMsg\":\"未查询到该用户信息\",\"data\":\"null\"}";
@@ -49,7 +49,7 @@ public class WankeTest2 {
 	}
     
 	public static String postToWanke(JSONObject param, String type) {
-		HttpPost httpPost = new HttpPost("http://122.224.250.35:7021" + type);
+		HttpPost httpPost = new HttpPost("http://140.207.16.122:7021" + type);
 		CloseableHttpClient httpclient = HttpClients.createDefault();
 		String json = null;
 		
