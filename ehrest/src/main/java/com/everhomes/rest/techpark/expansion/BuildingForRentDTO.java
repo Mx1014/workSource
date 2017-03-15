@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -50,6 +51,13 @@ public class BuildingForRentDTO {
 	private Timestamp createTime;
 	@ItemType(BuildingForRentAttachmentDTO.class)
 	private List<BuildingForRentAttachmentDTO> attachments;
+
+	private Byte enterTimeFlag;
+	private Long addressId;
+	private String apartmentName;
+	private String orientation;
+	private BigDecimal rentAmount;
+	private String issuerType;
 
 	public Long getId() {
 		return id;

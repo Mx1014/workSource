@@ -39,25 +39,6 @@ public class EnterpriseApplyEntryProviderImpl implements
 
 	@Autowired
 	private SequenceProvider sequenceProvider;
-	
-	public List<EnterpriseAddress> listBuildingEnterprisesByBuildingName(String buildingName, ListingLocator locator, int pageSize){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		SelectQuery<EhEnterpriseAddressesRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_ADDRESSES);
-		query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.BUILDING_NAME.eq(buildingName));
-		query.addGroupBy(Tables.EH_ENTERPRISE_ADDRESSES.ENTERPRISE_ID);
-		if(locator.getAnchor() != null) {
-            query.addConditions(Tables.EH_ENTERPRISE_ADDRESSES.ID.gt(locator.getAnchor()));
-        }
-		query.addLimit(pageSize);
-		List<EnterpriseAddress> enterpriseAddresses = query.fetch().map((r) -> {
-			return ConvertHelper.convert(r, EnterpriseAddress.class);
-		});
-		
-		if(enterpriseAddresses.size() >= pageSize) {
-	            locator.setAnchor(enterpriseAddresses.get(enterpriseAddresses.size() - 1).getId());
-	    }
-		return enterpriseAddresses;
-	}
 
 	@Override
 	public EnterpriseDetail getEnterpriseDetailById(Long id) {

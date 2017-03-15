@@ -19,9 +19,7 @@ public interface EnterpriseApplyEntryProvider {
 	
 	List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
 			ListingLocator locator, int pageSize);
-	
-	List<EnterpriseAddress> listBuildingEnterprisesByBuildingName(String buildingName, ListingLocator locator, int pageSize);
-	
+
 	LeasePromotion createLeasePromotion(LeasePromotion leasePromotion);
 	
 	LeasePromotion getLeasePromotionById(Long id);

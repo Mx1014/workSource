@@ -64,6 +64,9 @@ public class EnterpriseApplyEntryDTO {
 	private List<BuildingDTO> buildings;
 
 	private ContractDTO contract;
+
+	private Long flowCaseId;
+
 	public Long getId() {
 		return id;
 	}

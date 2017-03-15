@@ -1,6 +1,7 @@
 package com.everhomes.rest.techpark.expansion;
 
 
+import java.math.BigDecimal;
 
 /**
  * <ul>
@@ -27,7 +28,14 @@ public class ListBuildingForRentCommand {
     private Long buildingId;
     
     private String rentType;
-    
+
+	private BigDecimal startRentArea;
+	private BigDecimal endRentArea;
+	private BigDecimal startRentAmount;
+	private BigDecimal endRentAmount;
+	private Long userId;
+	private String issuerType;
+
     public Byte getStatus() {
 		return status;
 	}

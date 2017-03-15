@@ -49,7 +49,9 @@ public class EnterpriseApplyEntryCommand {
 
 	private String description;
 
-	private Long contractId; 
+	private Long contractId;
+
+	private Byte issuerType;
 
 	public String getSourceType() {
 		return sourceType;

@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
+import java.math.BigDecimal;
 import java.util.List;
 
 import javax.validation.constraints.NotNull;
@@ -41,7 +42,12 @@ public class CreateLeasePromotionCommand {
 	private String   description;
 	private Long enterTime;
 	private Byte     status;
-	
+
+	private Byte enterTimeFlag;
+	private Long addressId;
+	private String orientation;
+	private BigDecimal rentAmount;
+
 	@ItemType(BuildingForRentAttachmentDTO.class)
 	private List<BuildingForRentAttachmentDTO> attachments;
 	

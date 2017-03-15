@@ -166,61 +166,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     @Autowired
     private LocaleStringService localeStringService;
 
-    @Override
-	public ListEnterpriseDetailResponse listEnterpriseDetails(
-			ListEnterpriseDetailCommand cmd) {
-		
-		ListEnterpriseDetailResponse res = new ListEnterpriseDetailResponse();
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
-		
-		List<Long> enterpriseIds = new ArrayList<Long>();
-		ListingLocator locator = new ListingLocator();
-        locator.setAnchor(cmd.getPageAnchor());
-		//根据楼栋名称查询
-		if(!StringUtils.isEmpty(cmd.getBuildingName())){
-			List<EnterpriseAddress> enterpriseAddresses = enterpriseApplyEntryProvider.listBuildingEnterprisesByBuildingName(cmd.getBuildingName(), locator, pageSize+1);
-			for (EnterpriseAddress enterpriseAddress : enterpriseAddresses) {
-				enterpriseIds.add(enterpriseAddress.getEnterpriseId());
-			}
-		}else{
-			List<EnterpriseCommunityMap> enterpriseMaps = this.enterpriseProvider.queryEnterpriseMapByCommunityId(locator
-		                , cmd.getCommunityId(), pageSize+1, new ListingQueryBuilderCallback() {
-
-		            @Override
-		            public SelectQuery<? extends Record> buildCondition(ListingLocator locator,
-		                    SelectQuery<? extends Record> query) {
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.COMMUNITY_ID.eq(cmd.getCommunityId()));
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_TYPE.eq(EnterpriseCommunityMapType.Enterprise.getCode()));
-		                query.addConditions(Tables.EH_ENTERPRISE_COMMUNITY_MAP.MEMBER_STATUS.ne(EnterpriseCommunityMapStatus.INACTIVE.getCode()));
-		                return query;
-		            }
-		      });    
-			
-			for (EnterpriseCommunityMap enterpriseCommunityMap : enterpriseMaps) {
-				enterpriseIds.add(enterpriseCommunityMap.getMemberId());
-			}
-		}
-		
-		List<EnterpriseDetailDTO> dtos = new ArrayList<EnterpriseDetailDTO>();
-		
-		if(null != locator.getAnchor())
-			enterpriseIds.remove(enterpriseIds.size()-1);
-		
-		for (Long enterpriseId : enterpriseIds) {
-			EnterpriseDetail enterpriseDetail = this.getEnterpriseDetailByEnterpriseId(enterpriseId);
-			if(null != enterpriseDetail){
-				EnterpriseDetailDTO dto = toEnterpriseDetailDTO(enterpriseDetail);
-				dto.setContactPhone(enterpriseDetail.getContact());
-				dtos.add(dto);
-			}
-				
-		}
-		
-		res.setNextPageAnchor(locator.getAnchor());
-		res.setDetails(dtos);
-		return res;
-	}
-
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
 			GetEnterpriseDetailByIdCommand cmd) {
@@ -291,8 +236,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 
 	@Override
-	public ListEnterpriseApplyEntryResponse listApplyEntrys(
-			ListEnterpriseApplyEntryCommand cmd) {
+	public ListEnterpriseApplyEntryResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd) {
 		
 		ListEnterpriseApplyEntryResponse res = new ListEnterpriseApplyEntryResponse();
 		

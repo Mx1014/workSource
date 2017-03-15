@@ -1,5 +1,6 @@
 package com.everhomes.rest.techpark.expansion;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.List;
 
@@ -37,7 +38,12 @@ public class UpdateLeasePromotionCommand {
 	private String   contactPhone;
 	private String   description;
 	private Long enterTime;
-	
+
+	private Byte enterTimeFlag;
+	private Long addressId;
+	private String orientation;
+	private BigDecimal rentAmount;
+
 	@ItemType(BuildingForRentAttachmentDTO.class)
 	private List<BuildingForRentAttachmentDTO> attachments;
 	

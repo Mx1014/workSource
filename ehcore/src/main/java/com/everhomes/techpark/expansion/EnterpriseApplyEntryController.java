@@ -3,6 +3,7 @@ package com.everhomes.techpark.expansion;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.techpark.expansion.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -16,26 +17,6 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
-import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
-import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
-import com.everhomes.rest.techpark.expansion.FindLeasePromotionByIdCommand;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
-import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
 import com.everhomes.util.ConvertHelper;
 
 @RestDoc(value = "entry controller", site = "ehcore")
@@ -87,34 +68,6 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	public RestResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd){
 		GetEnterpriseDetailByIdResponse res = enterpriseApplyEntryService.getEnterpriseDetailById(cmd);
 		RestResponse response = new RestResponse(res);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /techpark/entry/listApplyEntrys
-	 * <p>入住信息列表
-	 */
-	@RequestMapping("listApplyEntrys")
-	@RestReturn(value=EnterpriseApplyEntryResponse.class)
-	public RestResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd){
-		ListEnterpriseApplyEntryResponse res = enterpriseApplyEntryService.listApplyEntrys(cmd);
-		RestResponse response = new RestResponse(res);
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
-	
-	/**
-	 * <b>URL: /techpark/entry/applyEntry
-	 * <p>申请入住
-	 */
-	@RequestMapping("applyEntry")
-	@RestReturn(value=ApplyEntryResponse.class)
-	public RestResponse applyEntry(EnterpriseApplyEntryCommand cmd){
-		ApplyEntryResponse b = enterpriseApplyEntryService.applyEntry(cmd);
-		RestResponse response = new RestResponse(b);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -189,7 +142,61 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /techpark/entry/updateLeasePromotionStatus
+	 * <p>修改招租状态
+	 */
+	@RequestMapping("updateLeasePromotionStatus")
+	@RestReturn(value=String.class)
+	public RestResponse updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.updateLeasePromotionStatus(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/deleteLeasePromotion
+	 * <p>删除招租
+	 */
+	@RequestMapping("deleteLeasePromotion")
+	@RestReturn(value=String.class)
+	public RestResponse deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
+		RestResponse response = new RestResponse(enterpriseApplyEntryService.deleteLeasePromotion(cmd));
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/listApplyEntrys
+	 * <p>入住信息列表
+	 */
+	@RequestMapping("listApplyEntrys")
+	@RestReturn(value=EnterpriseApplyEntryResponse.class)
+	public RestResponse listApplyEntrys(ListEnterpriseApplyEntryCommand cmd){
+		ListEnterpriseApplyEntryResponse res = enterpriseApplyEntryService.listApplyEntrys(cmd);
+		RestResponse response = new RestResponse(res);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/applyEntry
+	 * <p>申请入住
+	 */
+	@RequestMapping("applyEntry")
+	@RestReturn(value=ApplyEntryResponse.class)
+	public RestResponse applyEntry(EnterpriseApplyEntryCommand cmd){
+		ApplyEntryResponse b = enterpriseApplyEntryService.applyEntry(cmd);
+		RestResponse response = new RestResponse(b);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
 	/**
 	 * <b>URL: /techpark/entry/updateApplyEntryStatus
 	 * <p>修改入住状态
@@ -203,18 +210,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 	
-	/**
-	 * <b>URL: /techpark/entry/updateLeasePromotionStatus
-	 * <p>修改招租状态
-	 */
-	@RequestMapping("updateLeasePromotionStatus")
-	@RestReturn(value=String.class)
-	public RestResponse updateLeasePromotionStatus(UpdateLeasePromotionStatusCommand cmd){
-		RestResponse response = new RestResponse(enterpriseApplyEntryService.updateLeasePromotionStatus(cmd));
-		response.setErrorCode(ErrorCodes.SUCCESS);
-		response.setErrorDescription("OK");
-		return response;
-	}
+
 	
 	/**
 	 * <b>URL: /techpark/entry/deleteApplyEntry
@@ -228,18 +224,77 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
 	/**
-	 * <b>URL: /techpark/entry/deleteLeasePromotion
-	 * <p>删除招租
+	 * <b>URL: /techpark/entry/getLeasePromotionConfig
+	 * <p>获取园区入驻设置
 	 */
-	@RequestMapping("deleteLeasePromotion")
+	@RequestMapping("getLeasePromotionConfig")
 	@RestReturn(value=String.class)
-	public RestResponse deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
-		RestResponse response = new RestResponse(enterpriseApplyEntryService.deleteLeasePromotion(cmd));
+	public RestResponse getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd){
+		//TODO:
+		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
+	/**
+	 * <b>URL: /techpark/entry/addLeaseIssuer
+	 * <p>添加出租发布者
+	 */
+	@RequestMapping("addLeaseIssuer")
+	@RestReturn(value=String.class)
+	public RestResponse addLeaseIssuer(AddLeaseIssuerCommand cmd){
+		//TODO:
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/deleteLeaseIssuer
+	 * <p>删除出租发布者
+	 */
+	@RequestMapping("deleteLeaseIssuer")
+	@RestReturn(value=String.class)
+	public RestResponse deleteLeaseIssuer(DeleteLeaseIssuerCommand cmd){
+		//TODO:
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/listLeaseIssuers
+	 * <p>获取出租发布者列表
+	 */
+	@RequestMapping("listLeaseIssuers")
+	@RestReturn(value=LeaseIssuerDTO.class)
+	public RestResponse listLeaseIssuers(ListLeaseIssuersCommand cmd){
+		//TODO:
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+	/**
+	 * <b>URL: /techpark/entry/checkIsLeaseIssuer
+	 * <p>检查是否可以发布
+	 */
+	@RequestMapping("checkIsLeaseIssuer")
+	@RestReturn(value=CheckIsLeaseIssuerDTO.class)
+	public RestResponse checkIsLeaseIssuer(){
+		//TODO:
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+
+
 	
 }

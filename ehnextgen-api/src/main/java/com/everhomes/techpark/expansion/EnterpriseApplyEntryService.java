@@ -21,8 +21,6 @@ import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
 
 
 public interface EnterpriseApplyEntryService {
-
-	ListEnterpriseDetailResponse listEnterpriseDetails(ListEnterpriseDetailCommand cmd);
 	
 	GetEnterpriseDetailByIdResponse getEnterpriseDetailById(GetEnterpriseDetailByIdCommand cmd);
 	
