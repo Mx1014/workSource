@@ -278,7 +278,7 @@ public class AssetServiceImpl implements AssetService {
         Sheet sheet = wb.createSheet("assetBills");
 
         this.createAssetBillsBookSheetHead(sheet);
-        int i = 0;
+        int i = 1;
         for (SimpleAssetBillDTO dto : dtos ) {
             this.setNewAssetBillsBookRow(sheet, dto, i++);
         }

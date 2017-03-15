@@ -114,7 +114,7 @@ public class AssetProviderImpl implements AssetProvider {
         query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.TARGET_TYPE.eq(targetType));
         query.addConditions(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.TEMPLATE_VERSION.eq(templateVersion));
 
-        query.addOrderBy(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.SELECTED_FLAG.desc(), Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.DEFAULT_ORDER.desc());
+        query.addOrderBy(Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.SELECTED_FLAG.desc(), Tables.EH_ASSET_BILL_TEMPLATE_FIELDS.ID.asc());
         if(LOGGER.isDebugEnabled()) {
             LOGGER.debug("findTemplateFieldByTemplateVersion, sql=" + query.getSQL());
             LOGGER.debug("findTemplateFieldByTemplateVersion, bindValues=" + query.getBindValues());
