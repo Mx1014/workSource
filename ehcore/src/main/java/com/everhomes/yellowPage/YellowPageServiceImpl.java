@@ -1,5 +1,7 @@
 package com.everhomes.yellowPage;
 
+import com.alibaba.fastjson.JSONObject;
+import com.alibaba.fastjson.TypeReference;
 import com.everhomes.activity.ActivityAttachment;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
@@ -10,12 +12,15 @@ import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
+import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerResource;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplate;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.reserver.ReserverEntity;
 import com.everhomes.rest.activity.ActivityAttachmentDTO;
 import com.everhomes.rest.activity.ListActivityAttachmentsResponse;
 import com.everhomes.rest.app.AppConstants;
@@ -26,18 +31,30 @@ import com.everhomes.rest.servicehotline.GetHotlineListResponse;
 import com.everhomes.rest.servicehotline.ServiceType;
 import com.everhomes.rest.techpark.company.ContactType;
 import com.everhomes.rest.yellowPage.*;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceJumpModule;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.techpark.servicehotline.HotlineService;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 
+import com.everhomes.util.SignatureHelper;
+import com.everhomes.util.StringHelper;
 import freemarker.cache.StringTemplateLoader;
 import freemarker.template.Configuration;
 import freemarker.template.Template;
 import freemarker.template.TemplateException;
 
 import org.apache.commons.lang.math.RandomUtils;
+import org.apache.http.HttpEntity;
+import org.apache.http.HttpStatus;
+import org.apache.http.client.methods.CloseableHttpResponse;
+import org.apache.http.client.methods.HttpPost;
+import org.apache.http.entity.StringEntity;
+import org.apache.http.impl.client.CloseableHttpClient;
+import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,7 +64,9 @@ import org.springframework.ui.freemarker.FreeMarkerTemplateUtils;
 import org.springframework.util.StringUtils;
 
 import java.io.IOException;
+import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
+import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.HashMap;
@@ -96,6 +115,8 @@ public class YellowPageServiceImpl implements YellowPageService {
     private StringTemplateLoader templateLoader;
     
     private Configuration templateConfig;
+	@Autowired
+	private SequenceProvider sequenceProvider;
 
 	private void populateYellowPage(YellowPage yellowPage) { 
 		this.yellowPageProvider.populateYellowPagesAttachment(yellowPage);
@@ -1136,7 +1157,65 @@ public class YellowPageServiceImpl implements YellowPageService {
 			modules = yellowPageProvider.jumpModules(0);
 		}
 
-		return modules;
+		//TODO:从电商拿当前域空间店铺、
+
+		JumpModuleDTO bisModule = null;
+		for (JumpModuleDTO m: modules) {
+			if ("BIZS".equals(m.getModuleUrl())) {
+				bisModule = m;
+				break;
+			}
+		}
+
+		Map<String,String> param = new HashMap<>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		param.put("namespaceId", String.valueOf(namespaceId));
+		List<JumpModuleDTO> bizModules = new ArrayList<>();
+
+		String json = post(createRequestParam(param), "/zl-ec/rest/openapi/shop/queryShopInfoByNamespace");
+		if (null != json) {
+			ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
+			if (null != entity) {
+				Object obj = entity.getBody();
+				if (null != obj) {
+					List<BizEntity> bizs = JSONObject.parseObject(obj.toString(), new TypeReference<List<BizEntity>>(){});;
+					for (BizEntity b: bizs) {
+						JumpModuleDTO d = new JumpModuleDTO();
+//				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
+//				d.setId(id);
+						d.setModuleName(b.getShopName());
+						d.setModuleUrl(b.getShopURL());
+						d.setNamespaceId(namespaceId);
+						d.setParentId(bisModule.getId());
+						bizModules.add(d);
+
+					}
+				}
+			}
+		}
+
+		modules.addAll(bizModules);
+		return createTree(modules);
+	}
+
+	private List<JumpModuleDTO> createTree(List<JumpModuleDTO> modules) {
+		List<JumpModuleDTO> nodeList = new ArrayList<>();
+		for(JumpModuleDTO node1 : modules){
+			boolean mark = false;
+			for(JumpModuleDTO node2 : modules){
+				if(node1.getParentId()!= null && node1.getParentId()!= 0L && node1.getParentId().equals(node2.getId())){
+					mark = true;
+					if(node2.getChildren() == null)
+						node2.setChildren(new ArrayList<JumpModuleDTO>());
+					node2.getChildren().add(node1);
+					break;
+				}
+			}
+			if(!mark){
+				nodeList.add(node1);
+			}
+		}
+		return nodeList;
 	}
 
 	@Override
@@ -1172,4 +1251,72 @@ public class YellowPageServiceImpl implements YellowPageService {
         return response;
 	}
 
+	private String post(Map<String,String> param, String method) {
+		CloseableHttpClient httpclient = HttpClients.createDefault();
+
+		String serverUrl = configurationProvider.getValue("position.reserver.serverUrl", "");
+
+		HttpPost httpPost = new HttpPost(serverUrl + method);
+		CloseableHttpResponse response = null;
+
+		String json = null;
+		try {
+			String p = StringHelper.toJsonString(param);
+			StringEntity stringEntity = new StringEntity(p, StandardCharsets.UTF_8);
+			httpPost.setEntity(stringEntity);
+			httpPost.addHeader("content-type", "application/json");
+
+			response = httpclient.execute(httpPost);
+
+			int status = response.getStatusLine().getStatusCode();
+			if(status == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
+
+				if (entity != null) {
+					json = EntityUtils.toString(entity, "utf8");
+				}
+			}
+		} catch (IOException e) {
+			LOGGER.error("Reserver request error, param={}", param, e);
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+					"Reserver request error.");
+		}finally {
+			if (null != response) {
+				try {
+					response.close();
+				} catch (IOException e) {
+					LOGGER.error("Reserver close instream, response error, param={}", param, e);
+				}
+			}
+		}
+		if(LOGGER.isDebugEnabled())
+			LOGGER.debug("Data from business, param={}, json={}", param, json);
+
+		return json;
+	}
+
+	private Map createRequestParam(Map<String,String> params) {
+		Integer nonce = (int)(Math.random()*1000);
+		Long timestamp = System.currentTimeMillis();
+
+		String appKey = configurationProvider.getValue("position.reserver.appKey", "");
+		String secretKey = configurationProvider.getValue("position.reserver.secretKey", "");
+		params.put("nonce", String.valueOf(nonce));
+		params.put("timestamp", String.valueOf(timestamp));
+		params.put("appKey", appKey);
+
+		Map<String, String> mapForSignature = new HashMap<>();
+		for(Map.Entry<String, String> entry : params.entrySet()) {
+			mapForSignature.put(entry.getKey(), entry.getValue());
+		}
+
+		String signature = SignatureHelper.computeSignature(mapForSignature, secretKey);
+		try {
+			params.put("signature", URLEncoder.encode(signature,"UTF-8"));
+		} catch (UnsupportedEncodingException e) {
+			e.printStackTrace();
+		}
+
+		return params;
+	}
 }
