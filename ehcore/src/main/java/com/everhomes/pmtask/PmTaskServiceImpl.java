@@ -29,6 +29,15 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 
+import com.everhomes.building.Building;
+import com.everhomes.building.BuildingProvider;
+import com.everhomes.community.ResourceCategoryAssignment;
+import com.everhomes.flow.*;
+import com.everhomes.parking.ParkingCardRequest;
+import com.everhomes.rest.flow.*;
+import com.everhomes.rest.parking.ListParkingCardRequestsCommand;
+import com.everhomes.rest.parking.ParkingCardRequestStatus;
+import com.everhomes.rest.parking.ParkingFlowConstant;
 import com.everhomes.rest.pmtask.*;
 import com.everhomes.util.DownloadUtils;
 import org.apache.commons.lang.StringUtils;
@@ -85,7 +94,6 @@ import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.category.CategoryDTO;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.flow.FlowConstants;
 import com.everhomes.rest.namespace.NamespaceCommunityType;
 import com.everhomes.rest.organization.OrgAddressDTO;
 import com.everhomes.rest.organization.OrganizationDTO;
@@ -150,6 +158,12 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private NamespaceResourceProvider namespaceResourceProvider;
 	@Autowired
 	private PmTaskCommonServiceImpl pmTaskCommonService;
+	@Autowired
+	private FlowService flowService;
+	@Autowired
+	private FlowNodeProvider flowNodeProvider;
+	@Autowired
+	private BuildingProvider buildingProvider;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -1778,6 +1792,13 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
 
 		if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+
+			if(0 == dtos.size()) {
+				LOGGER.error("Not privilege", cmd);
+				throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+						"Not privilege");
+			}
+
 			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
 			User user = UserContext.current().getUser();
 			List<CommunityDTO> result = new ArrayList<>();
@@ -2039,6 +2060,73 @@ public class PmTaskServiceImpl implements PmTaskService {
 		dto.setHandler(handler);
 		
 		return dto;
+	}
+
+	@Override
+	public void synchronizedData(SearchTasksCommand cmd) {
+
+		User user = UserContext.current().getUser();
+
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.PM_TASK_MODULE,
+				FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.PMTASK.getCode());
+		if(null == flow) {
+			LOGGER.error("Enable pmtask flow not found, moduleId={}", FlowConstants.PM_TASK_MODULE);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"Enable pmtask flow not found.");
+		}
+
+		Long flowId = flow.getFlowMainId();
+
+		List<PmTaskDTO> list = pmTaskSearch.searchDocsByType(cmd.getStatus(), cmd.getKeyword(), cmd.getOwnerId(), cmd.getOwnerType(),
+				cmd.getTaskCategoryId(), cmd.getStartDate(), cmd.getEndDate(), cmd.getAddressId(), cmd.getBuildingName(),
+				null, null);
+
+		for(PmTaskDTO t: list) {
+			PmTask task = pmTaskProvider.findTaskById(t.getId());
+
+			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+			createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
+			createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+			createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+			createFlowCaseCommand.setReferId(task.getId());
+			createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
+			//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
+			createFlowCaseCommand.setContent(task.getContent());
+
+			createFlowCaseCommand.setProjectId(task.getOwnerId());
+			createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+			if (StringUtils.isNotBlank(task.getBuildingName())) {
+				Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
+						task.getBuildingName());
+				if(building != null){
+					ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
+							EntityType.BUILDING.getCode(), namespaceId);
+					if (null != resourceCategory) {
+						createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
+						createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
+					}
+				}
+			}
+
+			FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+
+			FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+			stepDTO.setFlowCaseId(flowCase.getId());
+			stepDTO.setFlowMainId(flowCase.getFlowMainId());
+			stepDTO.setFlowVersion(flowCase.getFlowVersion());
+			stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+			stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+			stepDTO.setStepCount(flowCase.getStepCount());
+			flowService.processAutoStep(stepDTO);
+
+			FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
+			task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+			task.setFlowCaseId(flowCase.getId());
+			pmTaskProvider.updateTask(task);
+		}
+
+
 	}
 	
 }
