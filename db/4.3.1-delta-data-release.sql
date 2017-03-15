@@ -347,9 +347,9 @@ UPDATE `eh_locale_strings` SET `text` = '签名过期，请重新获取' WHERE `
 
 -- 物业报修对接工作流短信 add by sw 20170314
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (999981, 'flow:20100', 11, 'zh_CN', '物业报修短信', '30092');
+	VALUES (999991, 'flow:20100', 11, 'zh_CN', '物业报修短信', '30092');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (999981, 'flow:20100', 34, 'zh_CN', '物业报修短信', '38833');
+	VALUES (999991, 'flow:20100', 34, 'zh_CN', '物业报修短信', '38833');
 
 -- added by janson 20170315
 UPDATE `eh_configurations` SET `value`='259200' WHERE `name`='aclink.user_key_timeout' and `namespace_id`=0 limit 1;
