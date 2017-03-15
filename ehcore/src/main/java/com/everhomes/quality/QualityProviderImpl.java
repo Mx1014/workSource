@@ -366,7 +366,11 @@ public class QualityProviderImpl implements QualityProvider {
 				Condition con4 = null;
 				con4 = Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
 				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
-				con5 = con5.or(con4);
+				if(con5 == null) {
+					con5 = con4;
+				} else {
+					con5 = con5.or(con4);
+				}
 			}
 			con = con5;
 		}
