@@ -3,6 +3,7 @@ package com.everhomes.flow;
 import java.util.ArrayList;
 import java.util.List;
 
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowStepType;
 
 public abstract class FlowGraphNode {
@@ -33,6 +34,17 @@ public abstract class FlowGraphNode {
 	
 	public abstract void stepEnter(FlowCaseState ctx, FlowGraphNode from) throws FlowStepErrorException;
 	public abstract void stepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException;
+	public FlowCaseStatus getExpectStatus() {
+		//TODO better for this
+		FlowNode fn = this.flowNode;
+		if(fn.getNodeName().equals("START")) {
+			return FlowCaseStatus.INITIAL;
+		} else if(fn.getNodeName().equals("END")) {
+			return FlowCaseStatus.FINISHED;
+		} else {
+			return FlowCaseStatus.PROCESS;	
+		}
+	}
 	
 	public FlowNode getFlowNode() {
 		return flowNode;

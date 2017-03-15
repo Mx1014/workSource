@@ -8,6 +8,7 @@ package com.everhomes.rest.flow;
  * <li>ABSORTED: 已完成（已完成，但是处于异常的结束）</li>
  * <li>FINISHED: 已完成</li>
  * <li>EVALUATE: 待评价</li>
+ * <li> 注意： 不能随便改 FlowCaseStatus 的参数值 </li>
  * </ul>
  * @author janson
  *
@@ -18,6 +19,10 @@ public enum FlowCaseStatus {
     
     public byte getCode() {
         return this.code;
+    }
+    
+    public int getCodeInt() {
+        return (int)this.code;
     }
     
     private FlowCaseStatus(byte code) {

@@ -449,7 +449,8 @@ public interface FlowService {
 			List<FlowUserSelection> selections);
  
 	void processSMSTimeout(FlowTimeout ft);
- 
-	//TODO 日志信息分类：
+
+	String getStepMessageTemplate(FlowStepType fromStep,
+			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
 	
 }
