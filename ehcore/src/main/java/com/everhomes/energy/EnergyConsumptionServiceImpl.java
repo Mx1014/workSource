@@ -2097,6 +2097,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     }
 
     @Override
+    public EnergyMeterPriceConfigDTO updateEnergyMeterPriceConfig(UpdateEnergyMeterPriceConfigCommand cmd) {
+        return null;
+    }
+
+    @Override
     public EnergyMeterPriceConfigDTO getEnergyMeterPriceConfig(GetEnergyMeterPriceConfigCommand cmd) {
         return null;
     }
