@@ -2085,7 +2085,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		for(PmTaskDTO t: list) {
 			PmTask task = pmTaskProvider.findTaskById(t.getId());
 
-			if (null != task.getFlowCaseId())
+			if (0 != task.getFlowCaseId())
 				continue;
 
 			CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
