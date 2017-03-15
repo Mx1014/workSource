@@ -1,5 +1,6 @@
 package com.everhomes.energy;
 
+import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.Community;
 import com.everhomes.community.CommunityProvider;
@@ -8,20 +9,29 @@ import com.everhomes.constants.ErrorCodes;
 import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.DbProvider;
+import com.everhomes.entity.EntityType;
 import com.everhomes.locale.LocaleString;
 import com.everhomes.locale.LocaleStringProvider;
 import com.everhomes.locale.LocaleStringService;
 import com.everhomes.mail.MailHandler;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.rest.acl.ListUserRelatedProjectByModuleIdCommand;
+import com.everhomes.rest.acl.PrivilegeConstants;
+import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.approval.MeterFormulaVariable;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
+import com.everhomes.rest.pmtask.PmTaskCheckPrivilegeFlag;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
 import com.everhomes.search.EnergyMeterReadingLogSearcher;
 import com.everhomes.search.EnergyMeterSearcher;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
 import com.everhomes.user.UserProvider;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
@@ -149,6 +159,45 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Autowired
     private CoordinationProvider coordinationProvider;
+
+    @Autowired
+    private RolePrivilegeService rolePrivilegeService;
+
+    @Override
+    public ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+
+        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+            if(null == cmd.getOrganizationId()) {
+                LOGGER.error("Not privilege", cmd);
+                throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_CREATE_TASK_PRIVILEGE,
+                        "Not privilege");
+            }
+        }
+
+        ListAuthorizationCommunityByUserResponse response = new ListAuthorizationCommunityByUserResponse();
+
+        ListUserRelatedProjectByModuleIdCommand listUserRelatedProjectByModuleIdCommand = new ListUserRelatedProjectByModuleIdCommand();
+        listUserRelatedProjectByModuleIdCommand.setOrganizationId(cmd.getOrganizationId());
+        listUserRelatedProjectByModuleIdCommand.setModuleId(49100L);
+
+        List<CommunityDTO> dtos = rolePrivilegeService.listUserRelatedProjectByModuleId(listUserRelatedProjectByModuleIdCommand);
+
+        if (null != cmd.getCheckPrivilegeFlag() && cmd.getCheckPrivilegeFlag() == PmTaskCheckPrivilegeFlag.CHECKED.getCode()) {
+            SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+            User user = UserContext.current().getUser();
+            List<CommunityDTO> result = new ArrayList<>();
+            dtos.forEach(r -> {
+                if (resolver.checkUserPrivilege(user.getId(), EntityType.COMMUNITY.getCode(), r.getId(), cmd.getOrganizationId(), PrivilegeConstants.REPLACE_CREATE_TASK)) {
+                    result.add(r);
+                }
+            });
+            response.setCommunities(result);
+
+        }else{
+            response.setCommunities(dtos);
+        }
+        return response;
+    }
 
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
