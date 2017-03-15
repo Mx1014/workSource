@@ -6,6 +6,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.energy.*;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -25,6 +27,20 @@ public class EnergyConsumptionController extends ControllerBase {
 
     @Autowired
     private EnergyConsumptionService energyConsumptionService;
+
+    /**
+     * <b>URL: /energy/listAuthorizationCommunityByUser</b>
+     * <p>授权人员 管理小区列表</p>
+     */
+    @RequestMapping("listAuthorizationCommunityByUser")
+    @RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
+    public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
+        ListAuthorizationCommunityByUserResponse resp = energyConsumptionService.listAuthorizationCommunityByUser(cmd);
+        RestResponse response = new RestResponse(resp);
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
 
     /**
      * <p>新建表记(水表, 电表等)</p>
