@@ -2,6 +2,8 @@ package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
 
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
@@ -13,6 +15,8 @@ import java.util.List;
  * Created by xq.tian on 2016/10/25.
  */
 public interface EnergyConsumptionService {
+
+    ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
 
     /**
      * 创建能耗表记(水表, 电表)

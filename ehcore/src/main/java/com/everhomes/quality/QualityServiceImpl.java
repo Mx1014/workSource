@@ -879,7 +879,7 @@ public class QualityServiceImpl implements QualityService {
 		if(isAdmin) {
 			//管理员查询所有任务
 			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType, 
-            		cmd.getTaskType(), null, startDate, endDate, null, null,
+            		cmd.getTaskType(), null, startDate, endDate,
             		cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
@@ -892,9 +892,24 @@ public class QualityServiceImpl implements QualityService {
 //
 //			} else {
 			List<QualityInspectionStandardGroupMap> maps = qualityProvider.listQualityInspectionStandardGroupMapByGroupAndPosition(groupDtos);
-			tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
-						cmd.getTaskType(), user.getId(), startDate, endDate, groupDtos, maps,
-						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, null, cmd.getManualFlag());
+			if(maps != null && maps.size() > 0) {
+				List<Long> executeStandardIds = new ArrayList<>();
+				List<Long> reviewStandardIds = new ArrayList<>();
+				for(QualityInspectionStandardGroupMap r : maps){
+//					if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+//						reviewStandardIds.add(r.getStandardId());
+//					}
+					if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						executeStandardIds.add(r.getStandardId());
+					}
+
+				}
+				tasks = qualityProvider.listVerificationTasks(locator, pageSize + 1, ownerId, ownerType, targetId, targetType,
+						cmd.getTaskType(), user.getId(), startDate, endDate,
+						cmd.getExecuteStatus(), cmd.getReviewStatus(), timeCompared, executeStandardIds, cmd.getManualFlag());
+			}
+
+
 //			}
 		}
         
@@ -931,43 +946,60 @@ public class QualityServiceImpl implements QualityService {
 	}
 	
 	private List<ExecuteGroupAndPosition> listUserRelateGroups() {
+		Long startTime = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 
 		List<OrganizationMember> members = organizationProvider.listOrganizationMembersByUId(user.getId());
 		if(members == null || members.size() == 0) {
 			return new ArrayList<ExecuteGroupAndPosition>();
 		}
-		
+
 		List<ExecuteGroupAndPosition> groupDtos = new ArrayList<ExecuteGroupAndPosition>();
-		members.stream().map(r -> {
-			Organization organization = organizationProvider.findOrganizationById(r.getOrganizationId());
-			if(organization == null) {
-				return null;
-			}
-			
-			if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-				List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
-				if(maps != null && maps.size() > 0) {
-					for(OrganizationJobPositionMap map : maps) {
-						ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-						group.setGroupId(map.getOrganizationId());
-						group.setPositionId(map.getJobPositionId());
-						groupDtos.add(group);
-						
-						group.setGroupId(0L);
-						group.setPositionId(map.getJobPositionId());
-						groupDtos.add(group);
-					}
-						
+		for(OrganizationMember member : members) {
+			Organization organization = organizationProvider.findOrganizationById(member.getOrganizationId());
+
+			if(organization != null) {
+				if(LOGGER.isInfoEnabled()) {
+					LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 				}
-			} else {
-				ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
-				group.setGroupId(organization.getId());
-				group.setPositionId(0L);
-				groupDtos.add(group);
+				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					if(LOGGER.isInfoEnabled()) {
+						LOGGER.info("listUserRelateGroups, OrganizationJobPositionMaps = {}" + maps);
+					}
+
+					if(maps != null && maps.size() > 0) {
+						for(OrganizationJobPositionMap map : maps) {
+							ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
+							group.setGroupId(map.getOrganizationId());
+							group.setPositionId(map.getJobPositionId());
+							groupDtos.add(group);
+
+							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
+							if(groupOrg != null) {
+								group.setGroupId(groupOrg.getDirectlyEnterpriseId());
+								group.setPositionId(map.getJobPositionId());
+								groupDtos.add(group);
+							}
+
+						}
+
+					}
+				} else {
+					ExecuteGroupAndPosition group = new ExecuteGroupAndPosition();
+					group.setGroupId(organization.getId());
+					group.setPositionId(0L);
+					groupDtos.add(group);
+				}
 			}
-			return null;
-		});
+		}
+
+		if(LOGGER.isInfoEnabled()) {
+			LOGGER.info("listUserRelateGroups, groupDtos = {}" , groupDtos);
+		}
+
+		Long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost: listUserRelateGroups userId = " + user.getId() + ", elapse=" + (endTime - startTime));
 		return groupDtos;
 	}
 	
