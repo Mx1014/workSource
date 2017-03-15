@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.validation.Valid;
 import java.util.Date;
 
 /**
@@ -359,5 +360,46 @@ public class EnergyConsumptionController extends ControllerBase {
     public RestResponse caculateEnergyMonthStatByDate(EnergyStatCommand cmd) {
     	energyConsumptionService.calculateEnergyMonthStatByDate(new Date(cmd.getStatDate()));
     	return success();
+    }
+
+    /**
+     * <p>新建梯度单价方案</p>
+     * <b>URL: /energy/createEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = EnergyMeterPriceConfigDTO.class)
+    @RequestMapping("createEnergyMeterPriceConfig")
+    public RestResponse createEnergyMeterPriceConfig(@Valid CreateEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.createEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
+     * <p>梯度单价方案列表</p>
+     * <b>URL: /energy/listEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value =EnergyMeterPriceConfigDTO.class, collection = true)
+    @RequestMapping("listEnergyMeterPriceConfig")
+    public RestResponse listEnergyMeterPriceConfig(@Valid ListEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.listEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
+     * <p>获取梯度单价方案</p>
+     * <b>URL: /energy/getEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = EnergyMeterPriceConfigDTO.class)
+    @RequestMapping("getEnergyMeterPriceConfig")
+    public RestResponse getEnergyMeterPriceConfig(@Valid GetEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.getEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
+     * <p>删除梯度单价方案</p>
+     * <b>URL: /energy/deleteEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = String.class)
+    @RequestMapping("deleteEnergyMeterPriceConfig")
+    public RestResponse deleteEnergyMeterPriceConfig(@Valid DelelteEnergyMeterPriceConfigCommand cmd) {
+        energyConsumptionService.deleteEnergyMeterPriceConfig(cmd);
+        return success();
     }
 }

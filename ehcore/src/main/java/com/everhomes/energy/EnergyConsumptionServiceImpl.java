@@ -2091,4 +2091,24 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         meterSearcher.syncFromDb();
     }
 
+    @Override
+    public EnergyMeterPriceConfigDTO createEnergyMeterPriceConfig(CreateEnergyMeterPriceConfigCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public EnergyMeterPriceConfigDTO getEnergyMeterPriceConfig(GetEnergyMeterPriceConfigCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public List<EnergyMeterPriceConfigDTO> listEnergyMeterPriceConfig(ListEnergyMeterPriceConfigCommand cmd) {
+        return null;
+    }
+
+    @Override
+    public void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd) {
+
+    }
+
 }

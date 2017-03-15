@@ -1,5 +1,7 @@
 package com.everhomes.rest.energy;
 
+import com.everhomes.util.StringHelper;
+
 import java.math.BigDecimal;
 
 /**
@@ -8,10 +10,10 @@ import java.math.BigDecimal;
  *     <li>maxValue: 上界值</li>
  *     <li>upperBoundary: 上边界</li>
  *     <li>lowerBoundary: 下边界 参考</li>
- *     <li>price: 价格</li>
+ *     <li>price: 区间价格</li>
  * </ul>
  */
-public class EnergyMeterPriceFormulaExpressionDTO {
+public class EnergyMeterRangePriceDTO {
 
     private Long minValue;
 
@@ -61,5 +63,10 @@ public class EnergyMeterPriceFormulaExpressionDTO {
 
     public void setPrice(BigDecimal price) {
         this.price = price;
+    }
+
+    @Override
+    public String toString() {
+        return StringHelper.toJsonString(this);
     }
 }

@@ -204,4 +204,9 @@ public interface EnergyConsumptionService {
     void syncEnergyMeterReadingLogIndex();
 
     void syncEnergyMeterIndex();
+
+    EnergyMeterPriceConfigDTO createEnergyMeterPriceConfig(CreateEnergyMeterPriceConfigCommand cmd);
+    EnergyMeterPriceConfigDTO getEnergyMeterPriceConfig(GetEnergyMeterPriceConfigCommand cmd);
+    List<EnergyMeterPriceConfigDTO> listEnergyMeterPriceConfig(ListEnergyMeterPriceConfigCommand cmd);
+    void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd);
 }
