@@ -2113,7 +2113,21 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     @Override
     public void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd) {
-
+        validate(cmd);
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
+        coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_PRICE_CONFIG.getCode() + cmd.getId()).tryEnter(() -> {
+            EnergyMeterPriceConfig priceConfig = meterFormulaProvider.findById(currNamespaceId(), cmd.getFormulaId());
+//            if (formula != null) {
+//                // 查看当前公式是否被引用, 被引用则无法删除
+//                EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(currNamespaceId(), formula.getId());
+//                if (settingLog != null) {
+//                    LOGGER.info("The formula has been reference, formula id = {}", formula.getId());
+//                    throw errorWith(SCOPE, ERR_FORMULA_HAS_BEEN_REFERENCE, "The formula has been reference");
+//                } else {
+//                    meterFormulaProvider.deleteFormula(formula);
+//                }
+//            }
+        });
     }
 
 }
