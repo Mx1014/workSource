@@ -549,8 +549,8 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
         this.dbProvider.mapReduce(AccessSpec.readOnlyWith(EhAddresses.class), null, 
                 (DSLContext context, Object reducingContext)-> {
 
-                	SelectConditionStep<Record4<Long, String, Double, String>> selectSql =
-                			context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.APARTMENT_FLOOR)
+                	SelectConditionStep<Record5<Long, String, Double, String, Byte>> selectSql =
+                			context.selectDistinct(Tables.EH_ADDRESSES.ID,Tables.EH_ADDRESSES.APARTMENT_NAME,Tables.EH_ADDRESSES.AREA_SIZE,Tables.EH_ADDRESSES.APARTMENT_FLOOR,Tables.EH_ADDRESSES.LIVING_STATUS)
                         .from(Tables.EH_ADDRESSES)
                         .where(Tables.EH_ADDRESSES.COMMUNITY_ID.equal(cmd.getCommunityId())
                         .and(Tables.EH_ADDRESSES.NAMESPACE_ID.eq(namespaceId))
@@ -570,6 +570,7 @@ public class AddressServiceImpl implements AddressService, LocalBusSubscriber {
                             apartment.setApartmentName(r.getValue(Tables.EH_ADDRESSES.APARTMENT_NAME));
                             apartment.setAreaSize(r.getValue(Tables.EH_ADDRESSES.AREA_SIZE));
                             apartment.setApartmentFloor(r.getValue(Tables.EH_ADDRESSES.APARTMENT_FLOOR));
+                            apartment.setLivingStatus(r.getValue(Tables.EH_ADDRESSES.LIVING_STATUS));
                             results.add(apartment);
                             return null;
                         });

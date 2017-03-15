@@ -14,6 +14,8 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.SignatureHelper;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
+
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.HttpStatus;
@@ -30,11 +32,13 @@ import org.springframework.stereotype.Component;
 
 import javax.annotation.PostConstruct;
 import javax.annotation.PreDestroy;
+
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
 import java.net.URLEncoder;
 import java.nio.charset.StandardCharsets;
 import java.sql.Timestamp;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -135,10 +139,11 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		List<FlowCaseEntity> entities = new ArrayList<>();
 		FlowCaseEntity e;
 
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
 		e = new FlowCaseEntity();
 		e.setEntityType(FlowCaseEntityType.LIST.getCode());
 		e.setKey("就餐时间");
-		e.setValue(dto.getDinnerTime().toString());
+		e.setValue(sdf.format(dto.getDinnerTime()));
 		entities.add(e);
 		
 		e = new FlowCaseEntity();
@@ -176,8 +181,22 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		e.setKey("联系商家");
 		e.setValue(dto.getShopPhone());
 		entities.add(e);
+
+		e = new FlowCaseEntity();
+		e.setEntityType(FlowCaseEntityType.LIST.getCode());
+		e.setKey("申请结果");
+		e.setValue(convert(dto.getStatus()));
+		entities.add(e);
 		
 		return entities;
+	}
+
+	private  String convert(Integer status) {
+		switch (status) {
+			case 1: return "成功";
+			case 2: return "失败";
+			default: return "处理中";
+		}
 	}
 
 	@Override
@@ -194,28 +213,38 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		FlowCase flowCase = ctx.getFlowCase();
 
 		String stepType = ctx.getStepType().getCode();
-		String params = flowNode.getParams();
+//		String params = flowNode.getParams();
+//
+//		JSONObject paramJson = JSONObject.parseObject(params);
+//		String nodeType = paramJson.getString("nodeType");
 
-		JSONObject paramJson = JSONObject.parseObject(params);
-		String nodeType = paramJson.getString("nodeType");
-
-		LOGGER.debug("update reserver request, stepType={}, nodeType={}", stepType, nodeType);
+		LOGGER.debug("update reserver request, stepType={}", stepType);
 
 		Map<String,String> param = new HashMap<>();
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			param.put("status", "1");
+			param.put("id", String.valueOf(flowCase.getReferId()));
+			String json = post(createRequestParam(param), UPDATE_RESERVER);
+			ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
+
+			if (!entity.getResult()) {
+				LOGGER.error("sychronized position reserver to biz fail.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sychronized position reserver to biz fail.");
+			}
 		}else if (FlowStepType.ABSORT_STEP.getCode().equals(stepType)) {
 			param.put("status", "2");
-		}
-		param.put("id", String.valueOf(flowCase.getReferId()));
-		String json = post(createRequestParam(param), UPDATE_RESERVER);
-		ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
+			param.put("id", String.valueOf(flowCase.getReferId()));
+			String json = post(createRequestParam(param), UPDATE_RESERVER);
+			ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
 
-		if (!entity.getResult()) {
-			LOGGER.error("sychronized position reserver to biz fail.");
-			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
-					"sychronized position reserver to biz fail.");
+			if (!entity.getResult()) {
+				LOGGER.error("sychronized position reserver to biz fail.");
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION,
+						"sychronized position reserver to biz fail.");
+			}
 		}
+
 	}
 	
 	@Override
@@ -299,5 +328,12 @@ public class ReserverFlowModuleListener implements FlowModuleListener {
 		}
 
 		return params;
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
+		// TODO Auto-generated method stub
+		
 	}
 }

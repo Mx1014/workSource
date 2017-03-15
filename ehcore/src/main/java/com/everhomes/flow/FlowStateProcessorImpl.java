@@ -476,6 +476,8 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		ctx.getFlowCase().setCurrentNodeId(curr.getFlowNode().getId());
 		boolean logStep = false;
 		
+		flowListenerManager.onFlowCaseStateChanged(ctx);
+		
 		switch(fromStep) {
 		case NO_STEP:
 			break;

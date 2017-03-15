@@ -280,7 +280,23 @@ public class OrganizationProviderImpl implements OrganizationProvider {
         return result;
     }	
     
-    
+	@Override
+	public OrganizationMember findAnyOrganizationMemberByNamespaceIdAndUserId(Integer namespaceId, Long userId,
+			String groupType) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		Record record = context.select()
+			.from(Tables.EH_ORGANIZATION_MEMBERS)
+			.where(Tables.EH_ORGANIZATION_MEMBERS.TARGET_TYPE.eq(OrganizationMemberTargetType.USER.getCode()))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.TARGET_ID.eq(userId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ORGANIZATION_MEMBERS.GROUP_TYPE.eq(groupType))
+			.fetchAny();
+		
+		if (record != null) {
+			return record.map(r->ConvertHelper.convert(r, OrganizationMember.class));
+		}
+		return null;
+	}
 
 	@Override
 	public List<Organization> listOrganizations(String organizationType,String name,Integer pageOffset,Integer pageSize) {
@@ -2847,8 +2863,7 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 
 	@Override
 	public List<OrganizationJobPositionMap> listOrganizationJobPositionMaps(Long organizationId) {
-		LOGGER.debug("TrackUserRelatedCost:listOrganizationJobPositionMaps:startTime:{}", System.currentTimeMillis());
-
+		Long startTime = System.currentTimeMillis();
 		List<OrganizationJobPositionMap> results = new ArrayList<OrganizationJobPositionMap>();
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhOrganizationJobPositionMapsRecord> query = context.selectQuery(Tables.EH_ORGANIZATION_JOB_POSITION_MAPS);
@@ -2857,7 +2872,9 @@ public class OrganizationProviderImpl implements OrganizationProvider {
 			results.add(ConvertHelper.convert(r, OrganizationJobPositionMap.class));
 			return null;
 		});
-		LOGGER.debug("TrackUserRelatedCost:listOrganizationJobPositionMaps:endTime:{}", System.currentTimeMillis());
+
+		Long endTime = System.currentTimeMillis();
+		LOGGER.debug("TrackUserRelatedCost:listOrganizationJobPositionMaps: elapse:{}", endTime - startTime);
 
 		return results;
 	}

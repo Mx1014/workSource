@@ -38,6 +38,7 @@ import com.everhomes.rest.parking.ParkingRequestFlowType;
 import com.everhomes.rest.parking.ParkingSupportRequestConfigStatus;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.Tuple;
 
 @Component
 public class ParkingFlowModuleListener implements FlowModuleListener {
@@ -301,6 +302,13 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
 		// TODO Auto-generated method stub
 		
 	}

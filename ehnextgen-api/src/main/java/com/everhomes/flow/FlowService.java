@@ -444,6 +444,8 @@ public interface FlowService {
 
 	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
 			CreateFlowCaseCommand flowCaseCmd);
+
+	void processSMSTimeout(FlowTimeout ft);
 	
 	//TODO 日志信息分类：
 	

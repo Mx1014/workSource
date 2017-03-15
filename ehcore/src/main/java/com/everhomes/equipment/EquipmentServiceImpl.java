@@ -2008,22 +2008,18 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 	
 	private List<EquipmentTaskDTO> convertEquipmentTasksToDTO(List<EquipmentInspectionTasks> tasks) {
-		long startTime = System.currentTimeMillis();
+
 		List<EquipmentTaskDTO> dtoList = tasks.stream().map((r) -> {
         	
 			EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);  
         	return dto;
         }).filter(task->task!=null).collect(Collectors.toList());
 
-		long endTime = System.currentTimeMillis();
-
-		LOGGER.debug("TrackUserRelatedCost: convertEquipmentTasksToDTO  taskSize = "+ tasks.size() +", elapse=" + (endTime - startTime));
-
 		return dtoList;
 	}
 	
 	private EquipmentTaskDTO convertEquipmentTaskToDTO(EquipmentInspectionTasks task) {
-		
+		long startTime = System.currentTimeMillis();
 		EquipmentTaskDTO dto = ConvertHelper.convert(task, EquipmentTaskDTO.class);  
 
 
@@ -2084,8 +2080,12 @@ public class EquipmentServiceImpl implements EquipmentService {
         		dto.setReviewerName(reviewers.getContactName());
         	}
     	}
-    	
-    	return dto;
+
+		long endTime = System.currentTimeMillis();
+
+		LOGGER.debug("TrackUserRelatedCost: convertEquipmentTaskToDTO elapse: " + (endTime - startTime));
+
+		return dto;
 	}
 	
 	private void processLogAttachments(long userId, List<AttachmentDescriptor> attachmentList, EquipmentInspectionTasksLogs log) {
@@ -2448,8 +2448,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 			if (LOGGER.isInfoEnabled()) {
 				LOGGER.info("sendTaskMsg, zero = " + zero);
 			}
-			
+
 			List<EquipmentInspectionTasks> tasks = equipmentProvider.listTodayEquipmentInspectionTasks(zero);
+//			CronDateUtils.getCron(tasks.get(0).getExecutiveStartTime());
 
 			if (tasks != null && tasks.size() > 0) {
 				for (EquipmentInspectionTasks task : tasks) {
@@ -3021,7 +3022,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		ListEquipmentTasksResponse response = new ListEquipmentTasksResponse();
 		User user = UserContext.current().getUser();
 		
-		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		int pageSize = cmd.getPageSize() == null ? Integer.MAX_VALUE - 1 : cmd.getPageSize();
 //        CrossShardListingLocator locator = new CrossShardListingLocator();
 //        locator.setAnchor(cmd.getPageAnchor());
 		if(null == cmd.getPageAnchor()) {
@@ -3052,31 +3053,47 @@ public class EquipmentServiceImpl implements EquipmentService {
 			}
 		}
 		if(isAdmin) {
-			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, null, offset, pageSize + 1);
+			tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, pageSize + 1);
 		} else {
 			List<ExecuteGroupAndPosition> groupDtos = listUserRelateGroups();
-			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
-				
-				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
-				if(maps != null && maps.size() > 0) {
-					List<Long> standardIds = maps.stream().map(r->{
-						return r.getStandardId();
-					}).collect(Collectors.toList());
-					tasks = equipmentProvider.listEquipmentInspectionReviewTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
-				}
-				
-			} else {
-				//产品修改需求，生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以根据用户关联的部门岗位先去eh_equipment_inspection_standard_group_map查出standardIds再根据standardIds来查 by xiongying20170213
-//				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, groupDtos, offset, pageSize + 1);
-				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.EXECUTIVE_GROUP.getCode());
-				if(maps != null && maps.size() > 0) {
-					List<Long> standardIds = maps.stream().map(r->{
-						return r.getStandardId();
-					}).collect(Collectors.toList());
-					tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
-				}
+			List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, null);
+			if(maps != null && maps.size() > 0) {
+				List<Long> executeStandardIds = new ArrayList<>();
+				List<Long> reviewStandardIds = new ArrayList<>();
+				for(EquipmentInspectionStandardGroupMap r : maps){
+					if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						reviewStandardIds.add(r.getStandardId());
+					}
+					if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(r.getGroupType()))) {
+						executeStandardIds.add(r.getStandardId());
+					}
 
+				}
+				LOGGER.info("reviewStandardIds={}, executeStandardIds={}",reviewStandardIds,executeStandardIds);
+				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1);
 			}
+//			if(cmd.getIsReview() != null && TaskType.REVIEW_TYPE.equals(TaskType.fromStatus(cmd.getIsReview()))) {
+//
+//				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.REVIEW_GROUP.getCode());
+//				if(maps != null && maps.size() > 0) {
+//					List<Long> standardIds = maps.stream().map(r->{
+//						return r.getStandardId();
+//					}).collect(Collectors.toList());
+//					tasks = equipmentProvider.listEquipmentInspectionReviewTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
+//				}
+//
+//			} else {
+//				//产品修改需求，生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以根据用户关联的部门岗位先去eh_equipment_inspection_standard_group_map查出standardIds再根据standardIds来查 by xiongying20170213
+////				tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, groupDtos, offset, pageSize + 1);
+//				List<EquipmentInspectionStandardGroupMap> maps = equipmentProvider.listEquipmentInspectionStandardGroupMapByGroupAndPosition(groupDtos, QualityGroupType.EXECUTIVE_GROUP.getCode());
+//				if(maps != null && maps.size() > 0) {
+//					List<Long> standardIds = maps.stream().map(r->{
+//						return r.getStandardId();
+//					}).collect(Collectors.toList());
+//					tasks = equipmentProvider.listEquipmentInspectionTasks(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getInspectionCategoryId(), targetTypes, targetIds, standardIds, offset, pageSize + 1);
+//				}
+//
+//			}
 		}
         if(tasks.size() > pageSize) {
         	tasks.remove(tasks.size() - 1);
@@ -3088,19 +3105,22 @@ public class EquipmentServiceImpl implements EquipmentService {
 //        	EquipmentTaskDTO dto = convertEquipmentTaskToDTO(r);
 //        	return dto;
 //        }).filter(r->r!=null).collect(Collectors.toList());
-
+		long startTime2 = System.currentTimeMillis();
 		List<EquipmentTaskDTO> dtos = tasks.stream().map(r -> {
 			EquipmentTaskDTO dto = ConvertHelper.convert(r, EquipmentTaskDTO.class);
 			EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(r.getEquipmentId());
         	if(equipment != null) {
 				dto.setEquipmentLocation(equipment.getLocation());
+				dto.setQrCodeFlag(equipment.getQrCodeFlag());
 			}
 			return dto;
 		}).filter(r->r!=null).collect(Collectors.toList());
-				response.setTasks(dtos);
+
+		response.setTasks(dtos);
 
 		long endTime = System.currentTimeMillis();
-		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse=" + (endTime - startTime));
+		LOGGER.debug("TrackUserRelatedCost: listEquipmentTasks total elapse:{}, convertEquipmentTaskDTO resultSize:{}, convert time:{}" ,
+				(endTime - startTime), tasks.size(), (endTime - startTime2));
 		return response;
 	}
 	

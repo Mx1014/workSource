@@ -1,8 +1,6 @@
 // @formatter:off
 package com.everhomes.rest.yellowPage;
 
-import java.util.Objects;
-
 /**
  * <ul>
  *     <li>LIST(1)：列表</li>
@@ -21,7 +19,7 @@ public enum ServiceAllianceCategoryDisplayMode {
 
     public static ServiceAllianceCategoryDisplayMode fromCode(Byte code) {
         for (ServiceAllianceCategoryDisplayMode category : ServiceAllianceCategoryDisplayMode.values()) {
-            if (Objects.equals(category.code, code)) {
+            if (category.code.equals(code)) {
                 return category;
             }
         }

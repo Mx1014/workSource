@@ -15,6 +15,7 @@ import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.formula.functions.Count;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +38,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.NamespaceAddressType;
@@ -51,6 +53,7 @@ import com.everhomes.rest.openapi.techpark.CustomerContractBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerLivingStatus;
 import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -62,6 +65,7 @@ import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.user.User;
@@ -90,6 +94,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
+	private OrganizationService organizationService;
+	
+	@Autowired
 	private ContractProvider contractProvider;
 	
 	@Autowired
@@ -109,6 +116,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
+	
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
 	
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
@@ -392,6 +402,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 					updateAddress(address, customerApartment);
 				}
 			}
+		}
+		
+		// 同步完地址后更新community表中的门牌总数，add by tt, 20170308
+		Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+		Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+		if (community.getAptCount().intValue() != count.intValue()) {
+			community.setAptCount(count);
+			communityProvider.updateCommunity(community);
 		}
 	}
 	
@@ -713,8 +731,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 								insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
 								insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
 							}else {
-								deleteOrganization(myOrganization);
-								deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+//								deleteOrganization(myOrganization);
+//								deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+								//改成以下方式，否则es中的数据无法删除
+								DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
+								deleteOrganizationIdCommand.setId(myOrganization.getId());
+								organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
 								deleteContracts(myOrganization);
 							}
 							return true;
@@ -1623,5 +1645,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			organizationDetail.setContactor(contact);
 			organizationProvider.updateOrganizationDetail(organizationDetail);
 		}
+		organizationSearcher.feedDoc(organization);
 	}
 }

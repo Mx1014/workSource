@@ -30,4 +30,9 @@ public interface UserServiceErrorCode {
 
     
     static final int ERROR_INVALID_SCENE_TOKEN = 100101;
+
+    int ERROR_SMS_MIN_DURATION = 300001;//发送验证码时间不得小于60s
+    int ERROR_SMS_TOO_FREQUENT_HOUR = 300002;//验证码请求过于频繁，请1小时候重试
+    int ERROR_SMS_TOO_FREQUENT_DAY = 300003;//验证码请求过于频繁，请24小时后重试
+
 }
