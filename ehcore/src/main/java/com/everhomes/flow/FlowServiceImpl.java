@@ -770,6 +770,7 @@ public class FlowServiceImpl implements FlowService {
 			} else {
 				action.setStatus(FlowActionStatus.DISABLED.getCode());
 			}
+			action.setTemplateId(actionInfo.getTemplateId());
 			
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.createFlowAction(action);
@@ -793,6 +794,7 @@ public class FlowServiceImpl implements FlowService {
 			if(actionInfo.getTrackerProcessor() != null) {
 				action.setTrackerProcessor(actionInfo.getTrackerProcessor());	
 			}
+			action.setTemplateId(actionInfo.getTemplateId());
 			
 			action.setRenderText(actionInfo.getRenderText());
 			flowActionProvider.updateFlowAction(action);
@@ -1277,7 +1279,7 @@ public class FlowServiceImpl implements FlowService {
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), null);
 		if(action != null) {
-			graphAction = new FlowGraphSMSAction();
+			graphAction = new FlowGraphSMSAction(action.getReminderAfterMinute(), action.getReminderTickMinute(), 1l);
 			graphAction.setFlowAction(action);
 			graphNode.setSmsAction(graphAction);	
 		}
@@ -1293,7 +1295,7 @@ public class FlowServiceImpl implements FlowService {
 		action = flowActionProvider.findFlowActionByBelong(flowNodeId, FlowEntityType.FLOW_NODE.getCode()
 				, FlowActionType.TICK_SMS.getCode(), FlowActionStepType.STEP_TIMEOUT.getCode(), null);
 		if(action != null) {
-			graphAction = new FlowGraphSMSAction();//TODO action.getReminderAfterMinute(), action.getReminderTickMinute(), 50l
+			graphAction = new FlowGraphSMSAction(action.getReminderAfterMinute(), action.getReminderTickMinute(), 1l);
 			graphAction.setFlowAction(action);
 			graphNode.setTickSMSAction(graphAction);	
 		}
@@ -1691,6 +1693,63 @@ public class FlowServiceImpl implements FlowService {
 			ft.setTimeoutTick(new Timestamp(timeoutTick));
 			flowTimeoutService.pushTimeout(ft);
 		}
+	}
+	
+	@Override
+	public void processSMSTimeout(FlowTimeout ft) {
+		FlowTimeoutMessageDTO dto = (FlowTimeoutMessageDTO)StringHelper.fromJsonString(ft.getJson(), FlowTimeoutMessageDTO.class);
+		if(dto == null) {
+			LOGGER.error("flowsmstimeout error ft=" + ft.getId());
+			return;
+		}
+		FlowAutoStepDTO stepDTO = ConvertHelper.convert(dto, FlowAutoStepDTO.class);
+		FlowCaseState ctx = flowStateProcessor.prepareNoStep(stepDTO);
+		if(ctx == null) {
+			LOGGER.error("flowsmstimeout context error ft=" + ft.getId());
+			return;
+		}
+		
+		FlowCase flowCase = flowCaseProvider.getFlowCaseById(dto.getFlowCaseId());
+		FlowAction flowAction = flowActionProvider.getFlowActionById(ft.getBelongTo());
+		ctx.setFlowCase(flowCase);
+		if(flowAction.getTemplateId() == null 
+				|| FlowActionType.TICK_MESSAGE.getCode().equals(flowAction.getActionType())
+				|| FlowActionType.TICK_SMS.getCode().equals(flowAction.getActionType())) {
+			//check if the step is processed
+			if(!flowCase.getStepCount().equals(dto.getStepCount()) || !flowCase.getCurrentNodeId().equals(dto.getFlowNodeId())) {
+				//NOT OK
+				LOGGER.info("flowsmstimeout template empty or occur but step is processed! ft=" + ft.getId());
+				return;
+			}
+		}
+
+		List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(ft.getBelongTo()
+				, ft.getBelongEntity(), FlowUserType.PROCESSOR.getCode());
+		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_ACTION, flowAction.getId(), selections);
+		Integer namespaceId = ctx.getFlowCase().getNamespaceId();
+		//TODO better here
+	    String locale = Locale.SIMPLIFIED_CHINESE.toString();
+	    int templateId = flowAction.getTemplateId().intValue();
+		String scope = "flow:" + ctx.getModule().getModuleId();
+		LocaleTemplate template = localeTemplateService.getLocalizedTemplate(namespaceId, scope, templateId, locale);
+		List<Tuple<String, Object>> variables = new ArrayList<Tuple<String,Object>>();
+		flowListenerManager.onFlowSMSVariableRender(ctx, templateId, variables);
+		if(LOGGER.isDebugEnabled())
+			LOGGER.debug("flowsmstimeout tick message, size={}", users.size());
+		
+		for(Long userId : users) {
+			UserInfo user = userService.getUserSnapshotInfoWithPhone(userId);
+			if(user != null && user.getPhones().size() > 0) {
+				sendCodeSms(namespaceId, locale, SmsTemplateCode.SCOPE, templateId, user, variables);
+			}
+			LOGGER.debug("flowsmstimeout tick message, userId={}", userId);
+		}
+	}
+	
+	private void sendCodeSms(Integer namespaceId, String locale, String templateScope, int templateId, UserInfo user, List<Tuple<String, Object>> variables){
+		
+	    String phoneNumber = user.getPhones().get(0);
+	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, locale, variables);
 	}
 
 	@Override
@@ -2237,30 +2296,7 @@ public class FlowServiceImpl implements FlowService {
 			}
 			
 			nodeDTOS.add(logDTO);
-		} else {
-			//BUG 6052
-			for(int i = nodeDTOS.size() - 2; i >= 0; i--) {
-				logDTO = nodeDTOS.get(i);
-				if(logDTO.getLogs().size() > 0) {
-					nodeDTOS.get(nodeDTOS.size()-1).getLogs().add(logDTO.getLogs().get(logDTO.getLogs().size()-1));
-					logDTO.getLogs().remove(logDTO.getLogs().size()-1);
-					break;
-				}
-			}
 		}
-		
-		//fix multiple current node
-//		for(int i = nodeDTOS.size()-1; i >= 0; i--) {
-//			logDTO = nodeDTOS.get(i);
-//			if(logDTO.getIsCurrentNode() != null && logDTO.getIsCurrentNode().equals((byte)1)) {
-//				int j = i-1;
-//				for(; j >= 0; j--) {
-//					logDTO.setIsCurrentNode((byte)0);
-//				}
-//				
-//				break;
-//			}
-//		}
 		
 		return dto;
 	}
@@ -3365,14 +3401,6 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		return resp;
-	}
-	
-	private void sendVerificationCodeSms(Integer namespaceId, String phoneNumber, String verificationCode){
-	    List<Tuple<String, Object>> variables = smsProvider.toTupleList(SmsTemplateCode.KEY_VCODE, verificationCode);
-	    String templateScope = SmsTemplateCode.SCOPE;
-	    int templateId = SmsTemplateCode.VERIFICATION_CODE;
-	    String templateLocale = UserContext.current().getUser().getLocale();
-	    smsProvider.sendSms(namespaceId, phoneNumber, templateScope, templateId, templateLocale, variables);
 	}
 
 	@Override

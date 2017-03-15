@@ -17,6 +17,7 @@ import org.springframework.stereotype.Component;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.util.Tuple;
 
 @Component
 public class FlowListenerManagerImpl implements FlowListenerManager, ApplicationListener<ContextRefreshedEvent> {
@@ -158,6 +159,15 @@ public class FlowListenerManagerImpl implements FlowListenerManager, Application
 			  return listener.onFlowVariableRender(ctx, variable);  
 		  }		
 		  return null;
+	}
+	
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId, List<Tuple<String, Object>> variables) {
+		FlowModuleInst inst = moduleMap.get(ctx.getModuleName());
+		  if(inst != null) {
+			  FlowModuleListener listener = inst.getListener();
+			  listener.onFlowSMSVariableRender(ctx, templateId, variables);  
+		  }		
 	}
 
 	@Override
