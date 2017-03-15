@@ -9,7 +9,7 @@ import com.everhomes.util.StringHelper;
  *     <li>ownerType: 拥有者类型</li>
  *     <li>communityId: 园区id</li>
  *     <li>name: 方案名称</li>
- *     <li>explain: 方案说明</li>
+ *     <li>description: 方案说明</li>
  *     <li>expression: 区间价格列表 参考{@link EnergyMeterPriceConfigExpressionDTO}</li>
  * </ul>
  */
@@ -21,7 +21,7 @@ public class EnergyMeterPriceConfigDTO {
     private Long communityId;
 
     private String name;
-    private String explain;
+    private String description;
     private EnergyMeterPriceConfigExpressionDTO expression;
 
     public Long getId() {
@@ -64,12 +64,12 @@ public class EnergyMeterPriceConfigDTO {
         this.name = name;
     }
 
-    public String getExplain() {
-        return explain;
+    public String getDescription() {
+        return description;
     }
 
-    public void setExplain(String explain) {
-        this.explain = explain;
+    public void setDescription(String description) {
+        this.description = description;
     }
 
     public EnergyMeterPriceConfigExpressionDTO getExpression() {

@@ -373,6 +373,16 @@ public class EnergyConsumptionController extends ControllerBase {
     }
 
     /**
+     * <p>修改梯度单价方案</p>
+     * <b>URL: /energy/updateEnergyMeterPriceConfig</b>
+     */
+    @RestReturn(value = EnergyMeterPriceConfigDTO.class)
+    @RequestMapping("updateEnergyMeterPriceConfig")
+    public RestResponse updateEnergyMeterPriceConfig(@Valid UpdateEnergyMeterPriceConfigCommand cmd) {
+        return response(energyConsumptionService.updateEnergyMeterPriceConfig(cmd));
+    }
+
+    /**
      * <p>梯度单价方案列表</p>
      * <b>URL: /energy/listEnergyMeterPriceConfig</b>
      */

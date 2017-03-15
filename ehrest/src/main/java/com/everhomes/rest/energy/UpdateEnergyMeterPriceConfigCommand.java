@@ -7,6 +7,7 @@ import javax.validation.constraints.Size;
 
 /**
  * <ul>
+ *     <li>id: 主键id</li>
  *     <li>ownerType: 组织类型</li>
  *     <li>ownerId: 组织id</li>
  *     <li>communityId: 园区id</li>
@@ -15,8 +16,10 @@ import javax.validation.constraints.Size;
  *     <li>expression: 方案表达式，json格式</li>
  * </ul>
  */
-public class CreateEnergyMeterPriceConfigCommand {
+public class UpdateEnergyMeterPriceConfigCommand {
 
+    @NotNull
+    private Long id;
     @NotNull
     private String ownerType;
     @NotNull
@@ -27,6 +30,14 @@ public class CreateEnergyMeterPriceConfigCommand {
     @NotNull @Size(max = 255) private String name;
     @NotNull @Size(max = 512) private String description;
     @NotNull @Size(max = 1024) private String expression;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
 
     public String getOwnerType() {
         return ownerType;
