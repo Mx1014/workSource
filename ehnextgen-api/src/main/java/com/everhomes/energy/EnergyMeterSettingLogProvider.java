@@ -31,4 +31,5 @@ public interface EnergyMeterSettingLogProvider {
     EnergyMeterSettingLog findSettingByFormulaId(Integer namespaceId, Long formulaId);
 
     List<EnergyMeterSettingLog> listEnergyMeterSettingLogs(Integer namespaceId, Long meterId, Byte settingType);
+    List<EnergyMeterSettingLog> listEnergyMeterSettingLogsOrderByCreateTime(Integer namespaceId, Long meterId, Byte settingType);
 }

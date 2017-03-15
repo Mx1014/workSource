@@ -1554,19 +1554,78 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     public List<EnergyMeterSettingLogDTO> listEnergyMeterSettingLogs(ListEnergyMeterSettingLogsCommand cmd) {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
 
         if(EnergyMeterSettingType.PRICE.equals(EnergyMeterSettingType.fromCode(cmd.getSettingType()))) {
-            List<EnergyMeterSettingLogDTO> dtos = logs.stream().map(log -> {
-                EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
-                //开始时间-创建时间-价钱    结束时间-创建时间-价钱
-                return dto;
-            }).collect(Collectors.toList());
-            return dtos;
+            //log按createTime升序排 放入map时 对同一天的修改 后改的覆盖先前的
+            List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogsOrderByCreateTime(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
+            Map<Long, EnergyMeterPriceDTO> maps = mapEnergyMeterPriceDTO(logs);
+            return dealEnergyMeterPriceDTO(maps);
         } else {
+            List<EnergyMeterSettingLog> logs = meterSettingLogProvider.listEnergyMeterSettingLogs(currNamespaceId(), cmd.getMeterId(), cmd.getSettingType());
             return logs.stream().map(this::toEnergyMeterSettingLogDTO).collect(Collectors.toList());
         }
 
+    }
+
+    private Map<Long, EnergyMeterPriceDTO> mapEnergyMeterPriceDTO(List<EnergyMeterSettingLog> logs) {
+        Map<Long, EnergyMeterPriceDTO> maps = new HashMap<>();
+        logs.stream().map(log -> {
+            EnergyMeterPriceDTO dto = new EnergyMeterPriceDTO();
+            //开始时间-创建时间-价钱    结束时间-创建时间-价钱
+            dto.setMeterId(log.getMeterId());
+            dto.setCreateTime(log.getCreateTime());
+            dto.setTime(log.getStartTime());
+            dto.setSettingValue(log.getSettingValue());
+            if(log.getFormulaId() != null && log.getFormulaId() > 0L) {
+                //价钱梯度表的方案名
+            }
+            if(dto.getTime() != null) {
+                maps.put(dto.getTime().getTime(), dto);
+            } else {
+                maps.put(Long.MAX_VALUE-1, dto);
+            }
+
+            dto.setTime(log.getEndTime());
+            if(dto.getTime() != null) {
+                maps.put(dto.getTime().getTime(), dto);
+            } else {
+                maps.put(Long.MAX_VALUE-1, dto);
+            }
+            return null;
+        });
+        return maps;
+    }
+
+    private List<EnergyMeterSettingLogDTO> dealEnergyMeterPriceDTO(Map<Long, EnergyMeterPriceDTO> maps) {
+        List<EnergyMeterSettingLogDTO> dtos = null;
+        Object[] key_arr = maps.keySet().toArray();
+        Arrays.sort(key_arr);
+        for(int i = 0; i < key_arr.length-2; i++) {
+            EnergyMeterPriceDTO value = maps.get(key_arr[i]);
+            EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+            dto.setMeterId(value.getMeterId());
+            dto.setSettingValue(value.getSettingValue());
+            dto.setFormulaName(value.getPlanName());
+            dto.setStartTime(value.getTime());
+            EnergyMeterPriceDTO nextValue = maps.get(key_arr[i+1]);
+            dto.setEndTime(nextValue.getTime());
+
+            dtos.add(dto);
+        }
+
+        EnergyMeterPriceDTO value = maps.get(key_arr[key_arr.length-2]);
+        EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+        dto.setMeterId(value.getMeterId());
+        dto.setStartTime(value.getTime());
+        EnergyMeterPriceDTO nextValue = maps.get(key_arr[key_arr.length-1]);
+        dto.setEndTime(nextValue.getTime());
+
+        dto.setSettingValue(nextValue.getSettingValue());
+        dto.setFormulaName(nextValue.getPlanName());
+
+        dtos.add(dto);
+
+        return dtos;
     }
 
     private EnergyMeterSettingLogDTO toEnergyMeterSettingLogDTO(EnergyMeterSettingLog log) {
