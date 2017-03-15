@@ -3187,9 +3187,12 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
 		EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
-		Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
-		if(group != null)
-			dto.setTargetName(group.getName());
+		Community community = communityProvider.findCommunityById(dto.getTargetId());
+		if(community != null)
+			dto.setTargetName(community.getName());
+//		Organization group = organizationProvider.findOrganizationById(dto.getTargetId());
+//		if(group != null)
+//			dto.setTargetName(group.getName());
 		
 //		EquipmentInspectionStandards standard = equipmentProvider.findStandardById(equipment.getStandardId(), equipment.getOwnerType(), equipment.getOwnerId());
 //        if(standard != null) {

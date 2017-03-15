@@ -192,7 +192,7 @@ public class EquipmentSearcherImpl extends AbstractElasticSearch implements Equi
 	    		dtos.add(dto);
         	}
         }
-        
+        LOGGER.info("query equipment: {}", dtos);
         response.setEquipment(dtos);
         return response;
 	}
