@@ -23,6 +23,7 @@ import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.StringHelper;
+import com.everhomes.util.Tuple;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -240,6 +241,13 @@ public class ParkingClearanceFlowListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
 		// TODO Auto-generated method stub
 		
 	}

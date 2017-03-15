@@ -750,18 +750,22 @@ public class UserController extends ControllerBase {
 		    return response;
 		}
 
-		for(Long appId : cmd.getAppIds()) {
-			FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
-			messageCmd.setAppId(appId);
-			messageCmd.setAnchor(0l);
-			messageCmd.setCount(1);
-			messageCmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
-			messageCmd.setRemoveOld((byte)0);
-			FetchMessageCommandResponse resp = this.messagingService.fetchPastToRecentMessages(messageCmd);
+		try {
+			for(Long appId : cmd.getAppIds()) {
+				FetchPastToRecentMessageCommand messageCmd = new FetchPastToRecentMessageCommand();
+				messageCmd.setAppId(appId);
+				messageCmd.setAnchor(0l);
+				messageCmd.setCount(1);
+				messageCmd.setNamespaceId(Namespace.DEFAULT_NAMESPACE);
+				messageCmd.setRemoveOld((byte)0);
+				FetchMessageCommandResponse resp = this.messagingService.fetchPastToRecentMessages(messageCmd);
 
-			if(resp.getMessages().size() > 0) {
-				cmdResponse.getAppIds().add(appId);
-			}
+				if(resp.getMessages().size() > 0) {
+					cmdResponse.getAppIds().add(appId);
+				}
+			}			
+		} catch(Exception ex) {
+			LOGGER.error("getAppIds error", ex);
 		}
 
 		return response;

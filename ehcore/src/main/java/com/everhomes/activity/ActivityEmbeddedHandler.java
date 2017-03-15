@@ -139,10 +139,18 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
     }
     
     private String getOldPostContent(ActivityDTO activityDTO){
-    	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + activityDTO.getStartTime()+"\n"
-    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + activityDTO.getStopTime()+"\n"
+    	return getLocalActivityString(ActivityLocalStringCode.ACTIVITY_START_TIME) + formatDate(activityDTO.getStartTime())+"\n"
+    				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_END_TIME) + formatDate(activityDTO.getStopTime())+"\n"
     				+getLocalActivityString(ActivityLocalStringCode.ACTIVITY_LOCATION) + activityDTO.getLocation()+
     				(StringUtils.isNotBlank(activityDTO.getGuest())?"\n" + getLocalActivityString(ActivityLocalStringCode.ACTIVITY_INVITOR) + activityDTO.getGuest():"");
+    }
+    
+    // timestamp格式化后会有一个.0在后面，把它去掉，add by tt, 20170310
+    private String formatDate(String time) {
+    	if (time.contains(".")) {
+			return time.substring(0,time.lastIndexOf("."));
+		}
+    	return time;
     }
     
     private boolean isOld(String versionString){

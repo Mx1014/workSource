@@ -43,6 +43,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
 import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.Tuple;
 
 @Component
 public class Rentalv2FlowModuleListener implements FlowModuleListener {
@@ -372,6 +373,13 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 
 	@Override
 	public void onFlowCaseCreated(FlowCase flowCase) {
+		// TODO Auto-generated method stub
+		
+	}
+
+	@Override
+	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables) {
 		// TODO Auto-generated method stub
 		
 	}
