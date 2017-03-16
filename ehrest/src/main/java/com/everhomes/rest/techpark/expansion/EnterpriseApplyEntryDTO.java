@@ -67,6 +67,14 @@ public class EnterpriseApplyEntryDTO {
 
 	private Long flowCaseId;
 
+	public Long getFlowCaseId() {
+		return flowCaseId;
+	}
+
+	public void setFlowCaseId(Long flowCaseId) {
+		this.flowCaseId = flowCaseId;
+	}
+
 	public Long getId() {
 		return id;
 	}

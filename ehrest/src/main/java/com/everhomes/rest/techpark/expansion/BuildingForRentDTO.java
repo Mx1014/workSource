@@ -59,6 +59,54 @@ public class BuildingForRentDTO {
 	private BigDecimal rentAmount;
 	private String issuerType;
 
+	public Byte getEnterTimeFlag() {
+		return enterTimeFlag;
+	}
+
+	public void setEnterTimeFlag(Byte enterTimeFlag) {
+		this.enterTimeFlag = enterTimeFlag;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
+
+	public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
+	}
+
+	public BigDecimal getRentAmount() {
+		return rentAmount;
+	}
+
+	public void setRentAmount(BigDecimal rentAmount) {
+		this.rentAmount = rentAmount;
+	}
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
 	public Long getId() {
 		return id;
 	}

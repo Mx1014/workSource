@@ -28,8 +28,18 @@ public class ListEnterpriseApplyEntryCommand {
 	private String sourceType; //1:enterprise 2:chuangke space 
     
 	private Long buildingId;
-    
-    public Integer getNamespaceId() {
+
+	private String issuerType;
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public Integer getNamespaceId() {
 		return namespaceId;
 	}
 	public void setNamespaceId(Integer namespaceId) {

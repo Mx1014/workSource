@@ -36,7 +36,55 @@ public class ListBuildingForRentCommand {
 	private Long userId;
 	private String issuerType;
 
-    public Byte getStatus() {
+	public BigDecimal getStartRentArea() {
+		return startRentArea;
+	}
+
+	public void setStartRentArea(BigDecimal startRentArea) {
+		this.startRentArea = startRentArea;
+	}
+
+	public BigDecimal getEndRentArea() {
+		return endRentArea;
+	}
+
+	public void setEndRentArea(BigDecimal endRentArea) {
+		this.endRentArea = endRentArea;
+	}
+
+	public BigDecimal getStartRentAmount() {
+		return startRentAmount;
+	}
+
+	public void setStartRentAmount(BigDecimal startRentAmount) {
+		this.startRentAmount = startRentAmount;
+	}
+
+	public BigDecimal getEndRentAmount() {
+		return endRentAmount;
+	}
+
+	public void setEndRentAmount(BigDecimal endRentAmount) {
+		this.endRentAmount = endRentAmount;
+	}
+
+	public Long getUserId() {
+		return userId;
+	}
+
+	public void setUserId(Long userId) {
+		this.userId = userId;
+	}
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public Byte getStatus() {
 		return status;
 	}
 	public void setStatus(Byte status) {

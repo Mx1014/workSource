@@ -46,7 +46,39 @@ public class UpdateLeasePromotionCommand {
 
 	@ItemType(BuildingForRentAttachmentDTO.class)
 	private List<BuildingForRentAttachmentDTO> attachments;
-	
+
+	public Byte getEnterTimeFlag() {
+		return enterTimeFlag;
+	}
+
+	public void setEnterTimeFlag(Byte enterTimeFlag) {
+		this.enterTimeFlag = enterTimeFlag;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public String getOrientation() {
+		return orientation;
+	}
+
+	public void setOrientation(String orientation) {
+		this.orientation = orientation;
+	}
+
+	public BigDecimal getRentAmount() {
+		return rentAmount;
+	}
+
+	public void setRentAmount(BigDecimal rentAmount) {
+		this.rentAmount = rentAmount;
+	}
+
 	public Long getId() {
 		return id;
 	}

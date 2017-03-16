@@ -51,7 +51,15 @@ public class EnterpriseApplyEntryCommand {
 
 	private Long contractId;
 
-	private Byte issuerType;
+	private String issuerType;
+
+	public String getIssuerType() {
+		return issuerType;
+	}
+
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
 
 	public String getSourceType() {
 		return sourceType;

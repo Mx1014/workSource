@@ -230,7 +230,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 * <p>获取园区入驻设置
 	 */
 	@RequestMapping("getLeasePromotionConfig")
-	@RestReturn(value=String.class)
+	@RestReturn(value=LeasePromotionConfigDTO.class)
 	public RestResponse getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd){
 		//TODO:
 		RestResponse response = new RestResponse();
@@ -272,7 +272,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 * <p>获取出租发布者列表
 	 */
 	@RequestMapping("listLeaseIssuers")
-	@RestReturn(value=LeaseIssuerDTO.class)
+	@RestReturn(value=ListLeaseIssuersResponse.class)
 	public RestResponse listLeaseIssuers(ListLeaseIssuersCommand cmd){
 		//TODO:
 		RestResponse response = new RestResponse();

@@ -5,4 +5,12 @@ package com.everhomes.rest.techpark.expansion;
  */
 public class CheckIsLeaseIssuerDTO {
     private Byte flag;
+
+    public Byte getFlag() {
+        return flag;
+    }
+
+    public void setFlag(Byte flag) {
+        this.flag = flag;
+    }
 }
