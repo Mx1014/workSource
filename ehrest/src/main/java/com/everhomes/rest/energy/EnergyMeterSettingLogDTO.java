@@ -13,6 +13,7 @@ import java.sql.Timestamp;
  *     <li>formulaName: 公式名称</li>
  *     <li>startTime: 开始时间</li>
  *     <li>endTime: 结束时间</li>
+ *     <li>priceConfigName: 价格方案名称</li>
  * </ul>
  */
 public class EnergyMeterSettingLogDTO {
@@ -23,6 +24,8 @@ public class EnergyMeterSettingLogDTO {
     private String formulaName;
     private Timestamp startTime;
     private Timestamp endTime;
+
+    private String priceConfigName;
 
     public Long getId() {
         return id;
@@ -70,6 +73,14 @@ public class EnergyMeterSettingLogDTO {
 
     public void setEndTime(Timestamp endTime) {
         this.endTime = endTime;
+    }
+
+    public String getPriceConfigName() {
+        return priceConfigName;
+    }
+
+    public void setPriceConfigName(String priceConfigName) {
+        this.priceConfigName = priceConfigName;
     }
 
     @Override

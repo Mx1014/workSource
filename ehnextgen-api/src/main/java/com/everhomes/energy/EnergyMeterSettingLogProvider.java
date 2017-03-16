@@ -29,6 +29,7 @@ public interface EnergyMeterSettingLogProvider {
      * @return 返回其中一条数据
      */
     EnergyMeterSettingLog findSettingByFormulaId(Integer namespaceId, Long formulaId);
+    EnergyMeterSettingLog findSettingByPriceConfigId(Integer namespaceId, Long priceConfigId);
 
     List<EnergyMeterSettingLog> listEnergyMeterSettingLogs(Integer namespaceId, Long meterId, Byte settingType);
     List<EnergyMeterSettingLog> listEnergyMeterSettingLogsOrderByCreateTime(Integer namespaceId, Long meterId, Byte settingType);
