@@ -1,28 +1,6 @@
 // @formatter:off
 package com.everhomes.group;
 
-import java.security.InvalidParameterException;
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-
-import org.apache.tools.ant.taskdefs.condition.And;
-import org.hibernate.annotations.Where;
-import org.jooq.DSLContext;
-import org.jooq.Record;
-import org.jooq.Result;
-import org.jooq.SelectConditionStep;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.cache.annotation.CacheEvict;
-import org.springframework.cache.annotation.Cacheable;
-import org.springframework.cache.annotation.Caching;
-import org.springframework.stereotype.Component;
-
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.cache.CacheProvider;
 import com.everhomes.db.AccessSpec;
@@ -56,8 +34,24 @@ import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
 import com.everhomes.util.IterationMapReduceCallback.AfterAction;
+import org.jooq.*;
+import org.jooq.impl.DSL;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.cache.annotation.CacheEvict;
+import org.springframework.cache.annotation.Cacheable;
+import org.springframework.cache.annotation.Caching;
+import org.springframework.stereotype.Component;
 
-import static com.everhomes.server.schema.Tables.*;
+import java.security.InvalidParameterException;
+import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
+
+import static com.everhomes.server.schema.Tables.EH_GROUP_MEMBERS;
 
 @Component
 public class GroupProviderImpl implements GroupProvider {
@@ -872,7 +866,7 @@ public class GroupProviderImpl implements GroupProvider {
     }
 
 	@Override
-	public List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize,
+	public List<GroupMember> listPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize,
 			boolean includeCreator, Long creatorId) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhGroups.class, groupId));
 		SelectConditionStep<Record> step = context
@@ -884,6 +878,10 @@ public class GroupProviderImpl implements GroupProvider {
 		if (status != null) {
 			step = step.and(EH_GROUP_MEMBERS.MEMBER_STATUS.eq(status));
 		}
+
+        if (keyword != null) {
+            step = step.and(EH_GROUP_MEMBERS.MEMBER_NICK_NAME.like(DSL.concat("%", keyword, "%")));
+        }
 		
 		if (!includeCreator) {
 			step = step.and(EH_GROUP_MEMBERS.MEMBER_ID.ne(creatorId));
@@ -899,6 +897,15 @@ public class GroupProviderImpl implements GroupProvider {
 		
 		return new ArrayList<GroupMember>();
 	}
-    
-    
+
+    @Override
+    public List<GroupMember> listPublicGroupMembersByStatus(Long groupId, Byte status, Long from, int pageSize,
+                                                            boolean includeCreator, Long creatorId) {
+        return listPublicGroupMembersByStatus(groupId, null, status, from, pageSize, includeCreator, creatorId);
+    }
+
+	@Override
+	public List<GroupMember> searchPublicGroupMembersByStatus(Long groupId, String keyword, Byte status, Long from, int pageSize) {
+		return listPublicGroupMembersByStatus(groupId, keyword, status, from, pageSize, true, 0L);
+	}
 }

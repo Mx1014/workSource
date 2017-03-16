@@ -39,18 +39,6 @@ import com.everhomes.queue.taskqueue.JesqueClientFactory;
 import com.everhomes.region.Region;
 import com.everhomes.region.RegionProvider;
 import com.everhomes.rest.acl.PrivilegeConstants;
-
-import com.everhomes.rest.activity.ActivityDTO;
-import com.everhomes.rest.activity.ActivityNotificationTemplateCode;
-import com.everhomes.rest.activity.ActivityServiceErrorCode;
-import com.everhomes.rest.activity.ActivityTokenDTO;
-import com.everhomes.rest.activity.ActivityWarningResponse;
-import com.everhomes.rest.activity.GetActivityDetailByIdCommand;
-import com.everhomes.rest.activity.GetActivityDetailByIdResponse;
-import com.everhomes.rest.activity.GetActivityWarningCommand;
-import com.everhomes.rest.activity.ListActivitiesReponse;
-import com.everhomes.rest.activity.ListOfficialActivityByNamespaceCommand;
-
 import com.everhomes.rest.activity.*;
 import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
@@ -218,29 +206,31 @@ public class ForumServiceImpl implements ForumService {
     
     @Override
     public PostDTO createTopic(NewTopicCommand cmd) {
+        return createTopic(cmd, UserContext.current().getUser().getId());
+    }
+
+    @Override
+    public PostDTO createTopic(NewTopicCommand cmd, Long creatorUid) {
         //黑名单权限校验 by sfyan20161213
         checkBlacklist(null, null, cmd.getContentCategory(), cmd.getForumId());
 
-    	//报名人数限制必须在1到10000之间，add by tt, 20161013
-    	if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getMaxQuantity()!= null) {
-			if (cmd.getMaxQuantity() < 1) {
-				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_GREATER_THAN_ZERO,
-						"max quantity should greater than 0!");
-			}else if (cmd.getMaxQuantity() > 10000) {
-				throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_NOT_GREATER_THAN_10000,
-						"max quantity should not greater than 10000");
-			}
-		}
+        //报名人数限制必须在1到10000之间，add by tt, 20161013
+        if (cmd.getEmbeddedAppId() != null && cmd.getEmbeddedAppId().longValue() == AppConstants.APPID_ACTIVITY && cmd.getMaxQuantity()!= null) {
+            if (cmd.getMaxQuantity() < 1) {
+                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_GREATER_THAN_ZERO,
+                        "max quantity should greater than 0!");
+            }else if (cmd.getMaxQuantity() > 10000) {
+                throw RuntimeErrorException.errorWith(ActivityServiceErrorCode.SCOPE, ActivityServiceErrorCode.ERROR_QUANTITY_MUST_NOT_GREATER_THAN_10000,
+                        "max quantity should not greater than 10000");
+            }
+        }
         //checkForumPostPrivilege(cmd.getForumId());
         long startTime = System.currentTimeMillis();
-        
-        User user = UserContext.current().getUser();
-        Long userId = user.getId();
 
         // 阻止黑名单用户发帖(临时解决方案)
-        this.checkUserBlacklist(userId);
-                
-        Post post = processTopicCommand(userId, cmd);
+        this.checkUserBlacklist(creatorUid);
+
+        Post post = processTopicCommand(creatorUid, cmd);
 
         Long embededAppId = cmd.getEmbeddedAppId();
         ForumEmbeddedHandler handler = getForumEmbeddedHandler(embededAppId);
@@ -251,28 +241,28 @@ public class ForumServiceImpl implements ForumService {
         } else {
             forumProvider.createPost(post);
         }
-        
+
 
         // Save the attachments after the post is saved
-        processPostAttachments(userId, cmd.getAttachments(), post);
-        
+        processPostAttachments(creatorUid, cmd.getAttachments(), post);
+
         // Populate the result post the same as query
         Long communityId = null;
         if(VisibleRegionType.COMMUNITY == VisibleRegionType.fromCode(cmd.getVisibleRegionType())) {
             communityId = cmd.getVisibleRegionId();
         }
-        populatePost(userId, post, communityId, false);
-        
+        populatePost(creatorUid, post, communityId, false);
+
         try {
             postSearcher.feedDoc(post);
-            
-            AddUserPointCommand pointCmd = new AddUserPointCommand(userId, PointType.CREATE_TOPIC.name(), 
-                userPointService.getItemPoint(PointType.CREATE_TOPIC), userId);  
+
+            AddUserPointCommand pointCmd = new AddUserPointCommand(creatorUid, PointType.CREATE_TOPIC.name(),
+                userPointService.getItemPoint(PointType.CREATE_TOPIC), creatorUid);
             userPointService.addPoint(pointCmd);
         } catch(Exception e) {
-            LOGGER.error("Failed to add post to search engine, userId=" + userId + ", postId=" + post.getId(), e);
+            LOGGER.error("Failed to add post to search engine, userId=" + creatorUid + ", postId=" + post.getId(), e);
         }
-        
+
         /**
          * 发任务贴的时候 指定发给收消息的人
          */
@@ -282,22 +272,21 @@ public class ForumServiceImpl implements ForumService {
             }else if(VisibleRegionType.REGION == VisibleRegionType.fromCode(cmd.getVisibleRegionType())){
             	this.sendTaskMsgToMembers(this.getOrganizationTaskType(cmd.getContentCategory()).getCode(), EntityType.ORGANIZATIONS.getCode(), cmd.getVisibleRegionId(), post.getSubject());
             }
-        	
+
         }
-        
+
         // 发活动的时候判断要不要设置定时任务
         if (null != cmd.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == cmd.getEmbeddedAppId().longValue()) {
 			setActivitySchedule(post.getEmbeddedId());
 		}
-        
+
         PostDTO postDto = ConvertHelper.convert(post, PostDTO.class);
-        
+
         long endTime = System.currentTimeMillis();
         if(LOGGER.isInfoEnabled()) {
-            LOGGER.info("Create a new post, userId=" + userId + ", postId=" + postDto.getId() 
+            LOGGER.info("Create a new post, userId=" + creatorUid + ", postId=" + postDto.getId()
                 + ", elapse=" + (endTime - startTime));
         }
-        
         return postDto;
     }
 
@@ -4024,7 +4013,7 @@ public class ForumServiceImpl implements ForumService {
         }
         topicCmd.setVisibleRegionId(visibleRegionId);
         
-        return this.createTopic(topicCmd);
+        return this.createTopic((NewTopicCommand) topicCmd);
     }
     
     @Override

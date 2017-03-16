@@ -1,32 +1,7 @@
 // @formatter:off
 package com.everhomes.group;
 
-import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Locale;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import com.everhomes.user.admin.SystemUserPrivilegeMgr;
-import org.hibernate.jpa.criteria.ValueHandlerFactory.LongValueHandler;
-import org.jooq.Condition;
-import org.jooq.Record;
-import org.jooq.SelectQuery;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
-
-import com.everhomes.acl.Acl;
-import com.everhomes.acl.AclAccessor;
-import com.everhomes.acl.AclProvider;
-import com.everhomes.acl.ResourceUserRoleResolver;
-import com.everhomes.acl.Role;
-import com.everhomes.acl.RolePrivilegeService;
+import com.everhomes.acl.*;
 import com.everhomes.appurl.AppUrlService;
 import com.everhomes.auditlog.AuditLog;
 import com.everhomes.auditlog.AuditLogProvider;
@@ -45,7 +20,6 @@ import com.everhomes.coordinator.CoordinationLocks;
 import com.everhomes.coordinator.CoordinationProvider;
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseContactService;
 import com.everhomes.entity.EntityType;
 import com.everhomes.family.FamilyProvider;
 import com.everhomes.forum.Forum;
@@ -54,12 +28,9 @@ import com.everhomes.forum.ForumService;
 import com.everhomes.forum.Post;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
-import com.everhomes.locale.LocaleStringService;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
-import com.everhomes.namespace.Namespace;
 import com.everhomes.organization.Organization;
-import com.everhomes.organization.OrganizationCommunity;
 import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.organization.OrganizationService;
@@ -67,137 +38,25 @@ import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.acl.PrivilegeConstants;
 import com.everhomes.rest.acl.RoleConstants;
 import com.everhomes.rest.app.AppConstants;
-import com.everhomes.rest.approval.ApprovalServiceErrorCode;
-import com.everhomes.rest.approval.CommonStatus;
 import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.family.FamilyDTO;
-import com.everhomes.rest.forum.ForumConstants;
-import com.everhomes.rest.forum.ForumServiceErrorCode;
-import com.everhomes.rest.forum.ListPostCommandResponse;
-import com.everhomes.rest.forum.NewTopicCommand;
-import com.everhomes.rest.forum.PostContentType;
-import com.everhomes.rest.forum.PostDTO;
-import com.everhomes.rest.forum.PostEntityTag;
-import com.everhomes.rest.forum.PostPrivacy;
+import com.everhomes.rest.forum.*;
 import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
-import com.everhomes.rest.group.AcceptJoinGroupInvitation;
-import com.everhomes.rest.group.ApprovalGroupRequestCommand;
-import com.everhomes.rest.group.ApprovalStatus;
-import com.everhomes.rest.group.ApproveAdminRoleCommand;
-import com.everhomes.rest.group.ApproveJoinGroupRequestCommand;
-import com.everhomes.rest.group.BroadcastDTO;
-import com.everhomes.rest.group.BroadcastOwnerType;
-import com.everhomes.rest.group.CancelGroupRequestCommand;
-import com.everhomes.rest.group.CategoryDTO;
-import com.everhomes.rest.group.CommandResult;
-import com.everhomes.rest.group.CreateBroadcastCommand;
-import com.everhomes.rest.group.CreateBroadcastResponse;
-import com.everhomes.rest.group.CreateGroupCategoryCommand;
-import com.everhomes.rest.group.CreateGroupCategoryResponse;
-import com.everhomes.rest.group.CreateGroupCommand;
-import com.everhomes.rest.group.DeleteGroupCategoryCommand;
-import com.everhomes.rest.group.GetAdminRoleStatusCommand;
-import com.everhomes.rest.group.GetBroadcastByTokenCommand;
-import com.everhomes.rest.group.GetBroadcastByTokenResponse;
-import com.everhomes.rest.group.GetClubPlaceholderNameCommand;
-import com.everhomes.rest.group.GetClubPlaceholderNameResponse;
-import com.everhomes.rest.group.GetGroupCommand;
-import com.everhomes.rest.group.GetGroupMemberSnapshotCommand;
-import com.everhomes.rest.group.GetGroupParametersCommand;
-import com.everhomes.rest.group.GetRemainBroadcastCountCommand;
-import com.everhomes.rest.group.GetRemainBroadcastCountResponse;
-import com.everhomes.rest.group.GetShareInfoCommand;
-import com.everhomes.rest.group.GetShareInfoResponse;
-import com.everhomes.rest.group.GroupAdminNotificationTemplateCode;
-import com.everhomes.rest.group.GroupCardDTO;
-import com.everhomes.rest.group.GroupCategoryOwnerType;
-import com.everhomes.rest.group.GroupDTO;
-import com.everhomes.rest.group.GroupDiscriminator;
-import com.everhomes.rest.group.GroupJoinPolicy;
-import com.everhomes.rest.group.GroupMemberDTO;
-import com.everhomes.rest.group.GroupMemberPhonePrivacy;
-import com.everhomes.rest.group.GroupMemberSnapshotDTO;
-import com.everhomes.rest.group.GroupMemberStatus;
-import com.everhomes.rest.group.GroupNotificationTemplateCode;
-import com.everhomes.rest.group.GroupOpRequestDTO;
-import com.everhomes.rest.group.GroupOpRequestStatus;
-import com.everhomes.rest.group.GroupOpType;
-import com.everhomes.rest.group.GroupPostFlag;
-import com.everhomes.rest.group.GroupPrivacy;
-import com.everhomes.rest.group.GroupServiceErrorCode;
-import com.everhomes.rest.group.InviteToBeAdminCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByFamilyCommand;
-import com.everhomes.rest.group.InviteToJoinGroupByPhoneCommand;
-import com.everhomes.rest.group.InviteToJoinGroupCommand;
-import com.everhomes.rest.group.LeaveGroupCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommand;
-import com.everhomes.rest.group.ListAdminOpRequestCommandResponse;
-import com.everhomes.rest.group.ListBroadcastsCommand;
-import com.everhomes.rest.group.ListBroadcastsResponse;
-import com.everhomes.rest.group.ListGroupByTagCommand;
-import com.everhomes.rest.group.ListGroupCategoriesCommand;
-import com.everhomes.rest.group.ListGroupCategoriesResponse;
-import com.everhomes.rest.group.ListGroupCommand;
-import com.everhomes.rest.group.ListGroupCommandResponse;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommand;
-import com.everhomes.rest.group.ListGroupWaitingApprovalsCommandResponse;
-import com.everhomes.rest.group.ListGroupsByApprovalStatusCommand;
-import com.everhomes.rest.group.ListGroupsByApprovalStatusResponse;
-import com.everhomes.rest.group.ListGroupsByNamespaceIdCommand;
-import com.everhomes.rest.group.ListMemberCommandResponse;
-import com.everhomes.rest.group.ListMemberInRoleCommand;
-import com.everhomes.rest.group.ListMemberInStatusCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommand;
-import com.everhomes.rest.group.ListNearbyGroupCommandResponse;
-import com.everhomes.rest.group.ListPublicGroupCommand;
-import com.everhomes.rest.group.ListUserGroupPostCommand;
-import com.everhomes.rest.group.ListUserGroupPostResponse;
-import com.everhomes.rest.group.QuitAndTransferPrivilegeCommand;
-import com.everhomes.rest.group.RejectAdminRoleCommand;
-import com.everhomes.rest.group.RejectGroupRequestCommand;
-import com.everhomes.rest.group.RejectJoinGroupInvitation;
-import com.everhomes.rest.group.RejectJoinGroupRequestCommand;
-import com.everhomes.rest.group.RequestAdminRoleCommand;
-import com.everhomes.rest.group.RequestToJoinGroupCommand;
-import com.everhomes.rest.group.ResignAdminRoleCommand;
-import com.everhomes.rest.group.RevokeAdminRoleCommand;
-import com.everhomes.rest.group.RevokeGroupMemberCommand;
-import com.everhomes.rest.group.SearchGroupCommand;
-import com.everhomes.rest.group.SearchGroupTopicAdminCommand;
-import com.everhomes.rest.group.SetGroupParametersCommand;
-import com.everhomes.rest.group.GroupParametersResponse;
-import com.everhomes.rest.group.TransferCreatorPrivilegeCommand;
-import com.everhomes.rest.group.UpdateGroupCategoryCommand;
-import com.everhomes.rest.group.UpdateGroupCategoryResponse;
-import com.everhomes.rest.group.UpdateGroupCommand;
-import com.everhomes.rest.group.UpdateGroupMemberCommand;
-import com.everhomes.rest.messaging.MessageBodyType;
-import com.everhomes.rest.messaging.MessageChannel;
-import com.everhomes.rest.messaging.MessageDTO;
-import com.everhomes.rest.messaging.MessageMetaConstant;
-import com.everhomes.rest.messaging.MessagingConstants;
-import com.everhomes.rest.messaging.MetaObjectType;
-import com.everhomes.rest.messaging.QuestionMetaObject;
-import com.everhomes.rest.news.NewsServiceErrorCode;
-import com.everhomes.rest.organization.OrganizationCommunityDTO;
-import com.everhomes.rest.organization.OrganizationStatus;
+import com.everhomes.rest.group.*;
+import com.everhomes.rest.messaging.*;
 import com.everhomes.rest.organization.PrivateFlag;
 import com.everhomes.rest.region.RegionDescriptor;
 import com.everhomes.rest.search.GroupQueryResult;
-import com.everhomes.rest.ui.forum.PostSentScopeType;
-import com.everhomes.rest.ui.forum.TopicScopeDTO;
 import com.everhomes.rest.ui.group.ListNearbyGroupBySceneCommand;
 import com.everhomes.rest.ui.user.SceneTokenDTO;
 import com.everhomes.rest.ui.user.SceneType;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.MessageChannelType;
-import com.everhomes.rest.user.UserCurrentEntityType;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.rest.version.VersionInfoDTO;
 import com.everhomes.rest.visibility.VisibilityScope;
 import com.everhomes.rest.visibility.VisibleRegionType;
 import com.everhomes.search.GroupSearcher;
@@ -207,22 +66,23 @@ import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.EhForumPosts;
 import com.everhomes.server.schema.tables.EhUsers;
 import com.everhomes.settings.PaginationConfigHelper;
-import com.everhomes.user.OSType;
-import com.everhomes.user.User;
-import com.everhomes.user.UserContext;
-import com.everhomes.user.UserGroup;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.DateHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
+import com.everhomes.user.*;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
+import com.everhomes.util.*;
 import com.everhomes.version.VersionService;
 import com.google.gson.Gson;
+import org.jooq.Condition;
+import org.jooq.Record;
+import org.jooq.SelectQuery;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+import org.springframework.util.StringUtils;
+
+import java.sql.Timestamp;
+import java.util.*;
+import java.util.stream.Collectors;
 
 @Component
 public class GroupServiceImpl implements GroupService {   
@@ -322,8 +182,9 @@ public class GroupServiceImpl implements GroupService {
                 
         		return new RestResponse(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_GENERAL_EXCEPTION, errorDescription);
     		}
-        	//判断简介
-        	if (cmd.getDescription() == null || cmd.getDescription().length() < 10) {
+        	// 判断简介
+            // 产品定义为至少一个字  add by xq.tian      2017/03/10
+        	if (cmd.getDescription() == null || cmd.getDescription().length() < 1) {
         		throw RuntimeErrorException.errorWith(GroupServiceErrorCode.SCOPE, GroupServiceErrorCode.ERROR_GROUP_DESCRIPTION_LENGTH,
     					"description length cannot be less than 10!");
 			}
@@ -534,8 +395,13 @@ public class GroupServiceImpl implements GroupService {
                 regionType = VisibleRegionType.COMMUNITY;
                 regionId = user.getCommunityId();
             }
-        	recommandGroup(groupDto, regionType, regionId);
-            try {
+
+            // 如果创建俱乐部需要审核的话，审核后再发帖子
+            if (groupSetting.getVerifyFlag() == TrueOrFalseFlag.FALSE.getCode()) {
+                recommandGroup(groupDto, regionType, regionId);
+            }
+
+        	try {
                 Group dbGroup = groupProvider.findGroupById(groupDto.getId());
                 groupSearcher.feedDoc(dbGroup);
             } catch(Exception e) {
@@ -568,11 +434,11 @@ public class GroupServiceImpl implements GroupService {
     		LOGGER.info("regionType is null ");
     		return ;
     	}
-    	
-    	User user = UserContext.current().getUser();
+
+        User user = userProvider.findUserById(groupDto.getCreatorUid());
     	long userId = user.getId();
-    	
-    	NewTopicCommand newTopic = new NewTopicCommand();
+
+        NewTopicCommand newTopic = new NewTopicCommand();
 
     	Map<String, Object> map = new HashMap<String, Object>();
         map.put("groupName", groupDto.getName());
@@ -631,7 +497,7 @@ public class GroupServiceImpl implements GroupService {
     	
     	newTopic.setPrivateFlag(PostPrivacy.PUBLIC.getCode());
     	newTopic.setContentType(PostContentType.TEXT.getCode());
-    	forumService.createTopic(newTopic);
+    	forumService.createTopic(newTopic, user.getId());
     }
     
     @Override
@@ -688,7 +554,7 @@ public class GroupServiceImpl implements GroupService {
     @Override
     public GroupDTO getGroup(GetGroupCommand cmd) {
         User user = UserContext.current().getUser();
-        long userId = user.getId();
+        Long userId = user != null ? user.getId() : 0;
         
         Long groupId = cmd.getGroupId();
         // 改成通过UUID获取，不需要进行权限校验
@@ -747,8 +613,10 @@ public class GroupServiceImpl implements GroupService {
              groups.remove(groups.size() - 1);
              cmdResponse.setNextPageAnchor(groups.get(groups.size() - 1).getId());
          }
-         cmdResponse.setGroups(groups.stream().map((r)-> { 
-             return toGroupDTO(user.getId(), r); 
+
+         cmdResponse.setGroups(groups.stream().map((r)-> {
+             Long userId = user != null ? user.getId() : 0;
+             return toGroupDTO(userId, r);
          }).collect(Collectors.toList()));
          
          return cmdResponse;
@@ -1743,7 +1611,7 @@ public class GroupServiceImpl implements GroupService {
 //			}
 //			query.addOrderBy(Tables.EH_GROUP_MEMBERS.MEMBER_ROLE.asc());
 			Long from = pageAnchor * pageSize;
-			members = groupProvider.listPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getStatus(), from, pageSize+1, TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE, group.getCreatorUid());
+			members = groupProvider.listPublicGroupMembersByStatus(cmd.getGroupId(), cmd.getKeyword(), cmd.getStatus(), from, pageSize+1, TrueOrFalseFlag.fromCode(cmd.getIncludeCreator()) == TrueOrFalseFlag.TRUE, group.getCreatorUid());
 			if(members.size() > pageSize) {
 	            members.remove(members.size() - 1);
 	            nextPageAnchor = pageAnchor + 1;
@@ -1826,7 +1694,7 @@ public class GroupServiceImpl implements GroupService {
 
         checkGroupPrivilege(operator.getId(), groupId, PrivilegeConstants.GroupInviteAdminRole);
         
-        GroupOpRequest request = this.groupProvider.findGroupOpRequestByRequestor(groupId, cmd.getUserId());
+        GroupOpRequest request = this.groupProvider.findGroupOpRequestByRequestor(groupId, targetUid);
         if(request == null) {
             request = new GroupOpRequest();
             request.setGroupId(groupId);
@@ -2430,7 +2298,7 @@ public class GroupServiceImpl implements GroupService {
         }
     }
     
-    private void populateGroupDTO(long userId, GroupDTO group) {
+    private void populateGroupDTO(Long userId, GroupDTO group) {
         if(group == null) {
             return;
         }
@@ -2569,7 +2437,7 @@ public class GroupServiceImpl implements GroupService {
         return forum;
     }
     
-    private GroupDTO toGroupDTO(long operatorId, Group group) {
+    private GroupDTO toGroupDTO(Long operatorId, Group group) {
         // GroupDTO groupDto = new GroupDTO();
         GroupDTO groupDto = ConvertHelper.convert(group, GroupDTO.class);
 //        if(LOGGER.isDebugEnabled()) {
@@ -2601,7 +2469,7 @@ public class GroupServiceImpl implements GroupService {
         //groupDto.setName(group.getName());
         //groupDto.setPrivateFlag(group.getPrivateFlag());
         //groupDto.setTag(group.getTag());
-        
+
         memberInfoToGroupDTO(operatorId, groupDto, group);
 
         populateGroupDTO(operatorId, groupDto);
@@ -2621,7 +2489,7 @@ public class GroupServiceImpl implements GroupService {
 		}
 	}
 
-	private void memberInfoToGroupDTO(long uid, GroupDTO groupDto, Group group) {
+	private void memberInfoToGroupDTO(Long uid, GroupDTO groupDto, Group group) {
         //
         // compute member role ourselves instead of using GroupUserRoleResolver,
         // it is more efficient to do in this way due to the reason that
@@ -2657,10 +2525,13 @@ public class GroupServiceImpl implements GroupService {
                 }
 
             }
-            
-            AclAccessor groupPrivileges = this.aclProvider.getAccessor(
-                    EntityType.GROUP.getCode(), group.getId(), userInRoles);
-            groupDto.setMemberGroupPrivileges(groupPrivileges.getGrantPrivileges());
+
+            // 此代码有问题，会把很多不相干的数据查出来，导致数据非常多，
+            // 我也不是很清楚业务逻辑，没法改，而且客户端那边说也没用上，所以就注释掉了
+            // 如果还要用的话，这里需要改一下          add by xq.tian   2017/03/13
+            // AclAccessor groupPrivileges = this.aclProvider.getAccessor(
+            //         EntityType.GROUP.getCode(), group.getId(), userInRoles);
+            // groupDto.setMemberGroupPrivileges(groupPrivileges.getGrantPrivileges());
             
 //            AclAccessor forumPrivileges = this.aclProvider.getAccessor(
 //                    EntityType.FORUM.getCode(), group.getOwningForumId(), userInRoles);
@@ -4825,6 +4696,9 @@ public class GroupServiceImpl implements GroupService {
 			sendNotificationToCreatorWhenApproval(group, user.getLocale(), GroupNotificationTemplateCode.GROUP_MEMBER_TO_CREATOR_WHEN_APPROVAL);  //你申请创建的“${groupName}”已通过
 			return null;
 		});
+
+		// 发送推荐帖
+        recommandGroup(toGroupDTO(group.getCreatorUid() ,group), VisibleRegionType.fromCode(group.getVisibleRegionType()), group.getVisibleRegionId());
 	}
 	
 	private void sendNotificationToCreatorWhenApproval(Group group, String locale, int code) {
@@ -5006,5 +4880,18 @@ public class GroupServiceImpl implements GroupService {
 		cmd.setGroupId(groupId);
 		createGroupMember(cmd, false);
 	}
-	
+
+    @Override
+    public void deleteBroadcastByToken(DeleteBroadcastByTokenCommand cmd) {
+        if (StringUtils.isEmpty(cmd.getBroadcastToken())) {
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid parameters");
+        }
+        Long id = WebTokenGenerator.getInstance().fromWebToken(cmd.getBroadcastToken(), Long.class);
+
+        Broadcast broadcast = broadcastProvider.findBroadcastById(id);
+        if (broadcast != null) {
+            broadcastProvider.deleteBroadcast(broadcast);
+        }
+    }
 }
