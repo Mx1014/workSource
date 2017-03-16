@@ -14,6 +14,16 @@ public class ActivityDetailActionData {
 	private Long forumId;
 	private Long topicId;
 
+	public ActivityDetailActionData() {
+		super();
+	}
+
+	public ActivityDetailActionData(Long forumId, Long topicId) {
+		super();
+		this.forumId = forumId;
+		this.topicId = topicId;
+	}
+
 	public Long getForumId() {
 		return forumId;
 	}

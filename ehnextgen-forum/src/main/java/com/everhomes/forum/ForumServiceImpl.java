@@ -29,8 +29,10 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.group.GroupService;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.locale.LocaleStringService;
+import com.everhomes.locale.LocaleTemplate;
 import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.messaging.MessagingService;
+import com.everhomes.namespace.Namespace;
 import com.everhomes.namespace.NamespaceResource;
 import com.everhomes.namespace.NamespacesProvider;
 import com.everhomes.organization.*;
@@ -56,6 +58,8 @@ import com.everhomes.rest.address.CommunityAdminStatus;
 import com.everhomes.rest.address.CommunityDTO;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.category.CategoryConstants;
+import com.everhomes.rest.common.ActivityDetailActionData;
+import com.everhomes.rest.common.PostDetailActionData;
 import com.everhomes.rest.community.CommunityType;
 import com.everhomes.rest.family.FamilyDTO;
 import com.everhomes.rest.forum.*;
@@ -63,11 +67,15 @@ import com.everhomes.rest.forum.admin.PostAdminDTO;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommand;
 import com.everhomes.rest.forum.admin.SearchTopicAdminCommandResponse;
 import com.everhomes.rest.group.*;
+import com.everhomes.rest.launchpad.ActionType;
+import com.everhomes.rest.messaging.InnerLinkBody;
 import com.everhomes.rest.messaging.MessageBodyType;
 import com.everhomes.rest.messaging.MessageChannel;
 import com.everhomes.rest.messaging.MessageDTO;
+import com.everhomes.rest.messaging.MessageMetaContent;
 import com.everhomes.rest.messaging.MessagingConstants;
 import com.everhomes.rest.namespace.NamespaceResourceType;
+import com.everhomes.rest.news.NewsServiceErrorCode;
 import com.everhomes.rest.organization.*;
 import com.everhomes.rest.point.AddUserPointCommand;
 import com.everhomes.rest.point.PointType;
@@ -1813,16 +1821,51 @@ public class ForumServiceImpl implements ForumService {
     	// 如果评论的是自己发表的评论不用发消息
     	if (post != null && !post.getStatus().equals(PostStatus.INACTIVE.getCode())
     			&& parentComment != null && parentComment.getCreatorUid().longValue() != comment.getCreatorUid().longValue()) {
-			sendMessageToParent(user, parentComment);
+			sendMessageToParent(user, post, parentComment);
 		}
-    	
     	
 	}
 
-	private void sendMessageToParent(User user, Post parentComment) {
+	private void sendMessageToParent(User user, Post post, Post parentComment) {
+		sendMessageToUserWhenComment(user, post, parentComment.getCreatorUid(), ForumNotificationTemplateCode.FORUM_COMMENT_TO_PARENT);
 	}
 
 	private void sendMessageToCreator(User user, Post post) {
+		sendMessageToUserWhenComment(user, post, post.getCreatorUid(), ForumNotificationTemplateCode.FORUM_COMMENT_TO_CREATOR);
+	}
+	
+	private void sendMessageToUserWhenComment(User user, Post post, Long toUserId, int code) {
+		String templateString = getLocalTemplateString(user.getNamespaceId(), ForumNotificationTemplateCode.SCOPE, code, user.getLocale());
+		String[] templateStringSplit = templateString.split("\t");
+		String title = templateStringSplit[0];
+		String template = templateStringSplit[1];
+		
+		InnerLinkBody innerLinkBody = new InnerLinkBody(title, template);
+		String content = innerLinkBody.toString();
+		
+		Map<String, String> meta = new HashMap<>();
+		String userName = user.getNickName() == null ? "" : user.getNickName();
+		meta.put("userName", new MessageMetaContent(userName).toString());
+		String postName = post.getSubject() == null ? "" : post.getSubject();
+		String postNameUrl = getPostNameUrl(post);
+		meta.put("postName", new MessageMetaContent(postName, postNameUrl).toString());
+		
+		sendMessageToUser(toUserId, content, meta, MessageBodyType.INNER_LINK.getCode());
+	}
+	
+	private String getPostNameUrl(Post post) {
+		if (null != post.getEmbeddedAppId() && AppConstants.APPID_ACTIVITY == post.getEmbeddedAppId().longValue()) {
+			return new ActivityDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.ACTIVITY_DETAIL.getUrl());
+		}
+		return new PostDetailActionData(post.getForumId(), post.getId()).toUrlString(ActionType.POST_DETAILS.getUrl());
+	}
+
+	private String getLocalTemplateString(Integer namespaceId, String scope, int code, String locale)	{
+		LocaleTemplate localeTemplate = localeTemplateService.getLocalizedTemplate(namespaceId, scope, code, locale);
+		if (localeTemplate == null) {
+			localeTemplate = localeTemplateService.getLocalizedTemplate(Namespace.DEFAULT_NAMESPACE, scope, code, locale);
+		}
+		return localeTemplate.getText();
 	}
 
 	private void sendMessageCode(Long uid, String locale, Map<String, String> map, int code) {
@@ -1832,13 +1875,13 @@ public class ForumServiceImpl implements ForumService {
         sendMessageToUser(uid, notifyTextForOther, null);
     }
     
-    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta, String bodyType) {
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_UID);
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), uid.toString()));
         messageDto.setChannels(new MessageChannel(MessageChannelType.USER.getCode(), Long.toString(User.SYSTEM_USER_LOGIN.getUserId())));
-        messageDto.setBodyType(MessageBodyType.TEXT.getCode());
+        messageDto.setBodyType(bodyType);
         messageDto.setBody(content);
         messageDto.setMetaAppId(AppConstants.APPID_MESSAGING);
         if(null != meta && meta.size() > 0) {
@@ -1851,6 +1894,10 @@ public class ForumServiceImpl implements ForumService {
         
         messagingService.routeMessage(User.SYSTEM_USER_LOGIN, AppConstants.APPID_MESSAGING, MessageChannelType.USER.getCode(), 
                 uid.toString(), messageDto, MessagingConstants.MSG_FLAG_STORED_PUSH.getCode());
+    }
+    
+    private void sendMessageToUser(Long uid, String content, Map<String, String> meta) {
+    	sendMessageToUser(uid, content, meta, MessageBodyType.TEXT.getCode());
     }
     
     @Override

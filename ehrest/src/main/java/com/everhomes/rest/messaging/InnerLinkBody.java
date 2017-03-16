@@ -14,6 +14,16 @@ public class InnerLinkBody {
 	private String title;
 	private String template;
 
+	public InnerLinkBody() {
+		super();
+	}
+
+	public InnerLinkBody(String title, String template) {
+		super();
+		this.title = title;
+		this.template = template;
+	}
+
 	public String getTitle() {
 		return title;
 	}
