@@ -232,8 +232,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("getLeasePromotionConfig")
 	@RestReturn(value=LeasePromotionConfigDTO.class)
 	public RestResponse getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd){
-		//TODO:
-		RestResponse response = new RestResponse();
+
+		LeasePromotionConfigDTO dto = enterpriseApplyEntryService.getLeasePromotionConfig(cmd);
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -246,7 +247,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("addLeaseIssuer")
 	@RestReturn(value=String.class)
 	public RestResponse addLeaseIssuer(AddLeaseIssuerCommand cmd){
-		//TODO:
+
+		enterpriseApplyEntryService.addLeaseIssuer(cmd);
+
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -260,7 +263,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("deleteLeaseIssuer")
 	@RestReturn(value=String.class)
 	public RestResponse deleteLeaseIssuer(DeleteLeaseIssuerCommand cmd){
-		//TODO:
+
+		enterpriseApplyEntryService.deleteLeaseIssuer(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -274,8 +278,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("listLeaseIssuers")
 	@RestReturn(value=ListLeaseIssuersResponse.class)
 	public RestResponse listLeaseIssuers(ListLeaseIssuersCommand cmd){
-		//TODO:
-		RestResponse response = new RestResponse();
+
+		ListLeaseIssuersResponse resp = enterpriseApplyEntryService.listLeaseIssuers(cmd);
+		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
@@ -288,8 +293,9 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("checkIsLeaseIssuer")
 	@RestReturn(value=CheckIsLeaseIssuerDTO.class)
 	public RestResponse checkIsLeaseIssuer(){
-		//TODO:
-		RestResponse response = new RestResponse();
+
+		CheckIsLeaseIssuerDTO dto = enterpriseApplyEntryService.checkIsLeaseIssuer();
+		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;

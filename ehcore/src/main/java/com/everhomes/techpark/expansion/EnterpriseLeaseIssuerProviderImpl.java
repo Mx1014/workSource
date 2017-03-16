@@ -1,0 +1,119 @@
+package com.everhomes.techpark.expansion;
+
+import com.everhomes.db.AccessSpec;
+import com.everhomes.db.DaoAction;
+import com.everhomes.db.DaoHelper;
+import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
+import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhLeaseIssuersDao;
+import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
+import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
+import com.everhomes.server.schema.tables.records.EhLeaseConfigsRecord;
+import com.everhomes.server.schema.tables.records.EhLeaseIssuersRecord;
+import com.everhomes.util.ConvertHelper;
+import org.apache.commons.lang.StringUtils;
+import org.jooq.*;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Component;
+
+import java.util.ArrayList;
+import java.util.List;
+
+@Component
+public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerProvider {
+	
+	@Autowired
+	private DbProvider dbProvider;
+
+	@Autowired
+	private SequenceProvider sequenceProvider;
+
+	@Override
+	public LeaseIssuer getLeaseIssuerById(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
+		
+		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
+		query.addConditions(Tables.EH_LEASE_ISSUERS.ID.eq(id));
+		
+		return ConvertHelper.convert(query.fetchOne(), LeaseIssuer.class);
+	}
+
+	@Override
+	public void createLeaseIssuer(LeaseIssuer leaseIssuer) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeaseIssuers.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuers.class));
+		leaseIssuer.setId(id);
+		EhLeaseIssuersDao dao = new EhLeaseIssuersDao(context.configuration());
+		dao.insert(leaseIssuer);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeaseIssuers.class, null);
+
+	}
+
+	@Override
+	public void updateLeaseIssuer(LeaseIssuer leaseIssuer) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuers.class));
+		EhLeaseIssuersDao dao = new EhLeaseIssuersDao(context.configuration());
+		dao.update(leaseIssuer);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeaseIssuers.class, null);
+
+	}
+
+	@Override
+	public void deleteLeaseIssuer(LeaseIssuer leaseIssuer) {
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuers.class));
+		EhLeaseIssuersDao dao = new EhLeaseIssuersDao(context.configuration());
+		dao.delete(leaseIssuer);
+
+		DaoHelper.publishDaoAction(DaoAction.MODIFY, EhLeaseIssuers.class, null);
+
+	}
+
+	@Override
+	public List<LeaseIssuer> listLeaseIssers(Integer namespaceId, String keyword, Long pageAnchor, Integer pageSize) {
+		List<LeaseIssuer> result = new ArrayList<>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
+		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
+		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
+		if (StringUtils.isNotBlank(keyword)) {
+			keyword = "%" + keyword + "%";
+			query.addConditions(Tables.EH_LEASE_ISSUERS.ISSUER_CONTACT.like(keyword).or(
+					Tables.EH_LEASE_ISSUERS.ISSUER_NAME.like(keyword)));
+		}
+
+		if (null != pageAnchor)
+			query.addConditions(Tables.EH_LEASE_ISSUERS.ID.le(pageAnchor));
+
+		query.addOrderBy(Tables.EH_LEASE_ISSUERS.ID.desc());
+
+		if (null != pageSize)
+			query.addLimit(pageSize);
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, LeaseIssuer.class));
+			return null;
+		});
+
+		return result;
+	}
+
+	@Override
+	public LeasePromotionConfig getLeasePromotionConfigByNamespaceId(Integer namespaceId) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseConfigs.class));
+
+		SelectQuery<EhLeaseConfigsRecord> query = context.selectQuery(Tables.EH_LEASE_CONFIGS);
+		query.addConditions(Tables.EH_LEASE_CONFIGS.NAMESPACE_ID.eq(namespaceId));
+
+		return ConvertHelper.convert(query.fetchOne(), LeasePromotionConfig.class);
+	}
+
+	
+}

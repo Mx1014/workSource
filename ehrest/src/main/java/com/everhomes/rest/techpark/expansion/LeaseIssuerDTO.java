@@ -10,12 +10,31 @@ import java.util.List;
  */
 public class LeaseIssuerDTO {
 
+    private Long id;
+    private Integer namespaceId;
     private Long communityId;
     private String issuerContact;
     private String issuerName;
+    private Long enterpriseId;
+
     @ItemType(AddressDTO.class)
     private List<AddressDTO> addresses;
-    private Long enterpriseId;
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
+    }
+
+    public Integer getNamespaceId() {
+        return namespaceId;
+    }
+
+    public void setNamespaceId(Integer namespaceId) {
+        this.namespaceId = namespaceId;
+    }
 
     public Long getCommunityId() {
         return communityId;

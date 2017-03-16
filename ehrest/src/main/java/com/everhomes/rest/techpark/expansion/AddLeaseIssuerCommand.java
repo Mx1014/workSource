@@ -9,11 +9,13 @@ import java.util.List;
  * Created by Administrator on 2017/3/15.
  */
 public class AddLeaseIssuerCommand {
+
+    @ItemType(Long.class)
+    private List<Long> addressIds;
+
     private Long communityId;
     private String issuerContact;
     private String issuerName;
-    @ItemType(Long.class)
-    private List<Long> addresIds;
     private Long enterpriseId;
 
     public Long getCommunityId() {
@@ -40,12 +42,12 @@ public class AddLeaseIssuerCommand {
         this.issuerName = issuerName;
     }
 
-    public List<Long> getAddresIds() {
-        return addresIds;
+    public List<Long> getAddressIds() {
+        return addressIds;
     }
 
-    public void setAddresIds(List<Long> addresIds) {
-        this.addresIds = addresIds;
+    public void setAddressIds(List<Long> addressIds) {
+        this.addressIds = addressIds;
     }
 
     public Long getEnterpriseId() {

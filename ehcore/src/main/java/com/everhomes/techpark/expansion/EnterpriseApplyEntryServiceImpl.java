@@ -12,6 +12,9 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.techpark.expansion.*;
+import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.user.UserIdentifier;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -65,35 +68,6 @@ import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
 import com.everhomes.rest.sms.SmsTemplateCode;
-import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
-import com.everhomes.rest.techpark.expansion.BuildingForRentAttachmentDTO;
-import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
-import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryDTO;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyRenewCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseDetailDTO;
-import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
-import com.everhomes.rest.techpark.expansion.ExpansionConst;
-import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
-import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
-import com.everhomes.rest.techpark.expansion.LeasePromotionType;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
-import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.settings.PaginationConfigHelper;
 import com.everhomes.sms.SmsProvider;
@@ -165,6 +139,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     @Autowired
     private LocaleStringService localeStringService;
+
+	@Autowired
+	private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
 
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
@@ -771,5 +748,92 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public boolean deleteLeasePromotion(DeleteLeasePromotionCommand cmd){
 		return enterpriseApplyEntryProvider.deleteLeasePromotion(cmd.getId());
 	}
-	
+
+	@Override
+	public ListLeaseIssuersResponse listLeaseIssuers(ListLeaseIssuersCommand cmd) {
+		Integer pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+
+		ListLeaseIssuersResponse resp = new ListLeaseIssuersResponse();
+
+		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, cmd.getKeyword(),
+				cmd.getPageAnchor(), pageSize);
+
+		int size = issuers.size();
+
+		if (size > 0) {
+			if (size == pageSize)
+				resp.setNextPageAnchor(issuers.get(size -1).getId());
+		}
+
+		resp.setRequests(issuers.stream().map(r -> {
+			LeaseIssuerDTO dto = ConvertHelper.convert(r, LeaseIssuerDTO.class);
+			//TODO:set address
+			return dto;
+		}).collect(Collectors.toList()));
+
+		return resp;
+	}
+
+    @Override
+    public void deleteLeaseIssuer(DeleteLeaseIssuerCommand cmd) {
+        LeaseIssuer leaseIssuer = enterpriseLeaseIssuerProvider.getLeaseIssuerById(cmd.getId());
+
+        if (null == leaseIssuer) {
+            LOGGER.error("LeaseIssuer not found, cmd={}", cmd);
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "LeaseIssuer not found.");
+        }
+
+        enterpriseLeaseIssuerProvider.deleteLeaseIssuer(leaseIssuer);
+    }
+
+    @Override
+    public void addLeaseIssuer(AddLeaseIssuerCommand cmd) {
+
+        if (null == cmd.getCommunityId()) {
+            LOGGER.error("Invalid communityId param, cmd={}", cmd);
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "Invalid communityId param.");
+        }
+
+        LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+        //TODO:门牌地址
+        enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+    }
+
+    @Override
+    public LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd) {
+        if (null == cmd.getNamespaceId())
+            cmd.setNamespaceId(UserContext.getCurrentNamespaceId());
+
+        LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
+
+        if (null == config) {
+            LOGGER.error("LeaseIssuer not found, namespaceId={}", cmd.getNamespaceId());
+            throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
+                    "LeaseIssuer not found.");
+        }
+
+        return ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
+
+    }
+
+    @Override
+    public CheckIsLeaseIssuerDTO checkIsLeaseIssuer() {
+        CheckIsLeaseIssuerDTO dto = new CheckIsLeaseIssuerDTO();
+
+        User user = UserContext.current().getUser();
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+        List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
+                null, null);
+
+        if (0 != issuers.size()) {
+            dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+        }
+
+        return dto;
+    }
 }

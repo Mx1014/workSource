@@ -1,23 +1,6 @@
 package com.everhomes.techpark.expansion;
 
-import com.everhomes.rest.techpark.expansion.ApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.BuildingForRentDTO;
-import com.everhomes.rest.techpark.expansion.CreateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.DeleteApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.DeleteLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.EnterpriseApplyRenewCommand;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdCommand;
-import com.everhomes.rest.techpark.expansion.GetEnterpriseDetailByIdResponse;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentCommand;
-import com.everhomes.rest.techpark.expansion.ListBuildingForRentResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseApplyEntryResponse;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailCommand;
-import com.everhomes.rest.techpark.expansion.ListEnterpriseDetailResponse;
-import com.everhomes.rest.techpark.expansion.UpdateApplyEntryStatusCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionCommand;
-import com.everhomes.rest.techpark.expansion.UpdateLeasePromotionStatusCommand;
+import com.everhomes.rest.techpark.expansion.*;
 
 
 public interface EnterpriseApplyEntryService {
@@ -45,5 +28,15 @@ public interface EnterpriseApplyEntryService {
 	boolean deleteApplyEntry(DeleteApplyEntryCommand cmd);
 	
 	boolean deleteLeasePromotion(DeleteLeasePromotionCommand cmd);
+
+	ListLeaseIssuersResponse listLeaseIssuers(ListLeaseIssuersCommand cmd);
+
+	void deleteLeaseIssuer(DeleteLeaseIssuerCommand cmd);
+
+	void addLeaseIssuer(AddLeaseIssuerCommand cmd);
+
+	LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd);
+
+	CheckIsLeaseIssuerDTO checkIsLeaseIssuer();
 	
 }
