@@ -23,3 +23,13 @@ INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@id := @id+1),'rental.notification','7','zh_CN','取消短信','您申请预约的${useTime}的${resourceName}由于超时未支付或被其他客户抢先预约，已自动取消，由此给您造成的不便，敬请谅解，感谢您的使用。','0');
 INSERT INTO `eh_locale_templates` (`id`, `scope`, `code`, `locale`, `description`, `text`, `namespace_id`) VALUES((@id := @id+1),'rental.notification','8','zh_CN','催办','客户（${userName}${userPhone}）提交资源预约的线下支付申请，预约${resourceName}，使用时间：${useTime}，订单金额${price}，请尽快联系客户完成支付','0');
 
+-- 2017年3月16日10:21:02 添加 by wh
+
+-- 更新资源类型:特别注意如果这里更改rows = 0 说明id不对,就不能执行下一句
+UPDATE eh_rentalv2_resource_types SET pay_mode = 1 WHERE namespace_id = 999983 AND NAME = '会议室预订' AND id =10505;
+-- 前一条执行好了执行这一条
+UPDATE eh_launch_pad_items  SET action_data ='{"resourceTypeId":10505,"pageType":0,"payMode":1}' WHERE namespace_id = 999983 AND item_label='会议室预订'; 
+
+-- 添加资源预约工作流的菜单
+SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes );
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'40450','','EhNamespaces','999983','2');

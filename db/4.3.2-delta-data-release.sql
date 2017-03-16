@@ -34,3 +34,13 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 -- 更新科技园物业报修oa 地址 add by sw 20170315
 UPDATE `eh_configurations` SET `value`='http://oa.ssipc.com.cn:7890/oa/service/WorkflowAppDraftWebService?wsdl' WHERE `name`='techpark.oa.url';
 
+
+
+-- 更新资源类型:特别注意如果这里更改rows = 0 说明id不对,就不能执行下一句
+UPDATE eh_rentalv2_resource_types SET pay_mode = 1 WHERE namespace_id = 999983 AND NAME = '会议室预订' AND id =10505;
+-- 前一条执行好了执行这一条
+UPDATE eh_launch_pad_items  SET action_data ='{"resourceTypeId":10505,"pageType":0,"payMode":1}' WHERE namespace_id = 999983 AND item_label='会议室预订'; 
+
+-- 添加资源预约工作流的菜单
+SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes );
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'40450','','EhNamespaces','999983','2');
