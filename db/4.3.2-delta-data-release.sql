@@ -44,3 +44,6 @@ UPDATE eh_launch_pad_items  SET action_data ='{"resourceTypeId":10505,"pageType"
 -- 添加资源预约工作流的菜单
 SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes );
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES((@id:=@id+1),'40450','','EhNamespaces','999983','2');
+
+-- 俱乐部3.0  add by xq.tian  2017/03/01
+UPDATE `eh_locale_templates` SET `text`='俱乐部推荐：${groupName}' WHERE `scope`='group.notification' AND `code`=33;
