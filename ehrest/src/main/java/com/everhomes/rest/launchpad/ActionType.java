@@ -49,7 +49,7 @@ package com.everhomes.rest.launchpad;
  */
 public enum ActionType {
       NONE((byte)0),MORE_BUTTON((byte)1),NAVIGATION((byte)2),FAMILY_DETAILS((byte)3),GROUP_DETAILS((byte)4),
-      WIN_COUPON((byte)5),USE_COUPON((byte)6),BIZ_DETAILS((byte)7),DOWNLOAD_APP((byte)8),POST_DETAILS((byte)9),
+      WIN_COUPON((byte)5),USE_COUPON((byte)6),BIZ_DETAILS((byte)7),DOWNLOAD_APP((byte)8),POST_DETAILS((byte)9, " zl://post/d?forumId=${forumId}&topicId=${topicId}"),
       CHECKIN_ACTIVITY((byte)10),OPEN_MSG_SESSION((byte)11),SEND_MSG((byte)12),OFFICIAL_URL((byte)13),
       THIRDPART_URL((byte)14),POST_BY_CATEGORY((byte)15),QRCODE_SCAN((byte)16),PHONE_CALL((byte)17),LAUNCH_APP((byte)18),
       POST_NEW((byte)19),PM_DETAILS((byte)20),OPEN_DOOR((byte)21),PAY((byte)22),PUNCH((byte)23),MEETINGROOM((byte)24),VIPPARKING((byte)25),

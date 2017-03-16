@@ -19,7 +19,17 @@ public class PostDetailActionData implements Serializable{
     private Long forumId;
     private Long topicId;
     
-    public Long getForumId() {
+    public PostDetailActionData() {
+		super();
+	}
+
+	public PostDetailActionData(Long forumId, Long topicId) {
+		super();
+		this.forumId = forumId;
+		this.topicId = topicId;
+	}
+
+	public Long getForumId() {
         return forumId;
     }
 

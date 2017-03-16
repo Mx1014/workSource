@@ -15,6 +15,21 @@ public class MessageMetaContent {
 	private String content;
 	private String url;
 
+	public MessageMetaContent() {
+		super();
+	}
+
+	public MessageMetaContent(String content) {
+		super();
+		this.content = content;
+	}
+
+	public MessageMetaContent(String content, String url) {
+		super();
+		this.content = content;
+		this.url = url;
+	}
+
 	public String getContent() {
 		return content;
 	}
