@@ -150,6 +150,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Autowired
     private CoordinationProvider coordinationProvider;
 
+    @Autowired
+    private EnergyMeterPriceConfigProvider priceConfigProvider;
+
     @Override
     public EnergyMeterDTO createEnergyMeter(CreateEnergyMeterCommand cmd) {
         validate(cmd);
@@ -2116,7 +2119,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         validate(cmd);
         checkCurrentUserNotInOrg(cmd.getOwnerId());
         coordinationProvider.getNamedLock(CoordinationLocks.ENERGY_METER_PRICE_CONFIG.getCode() + cmd.getId()).tryEnter(() -> {
-            EnergyMeterPriceConfig priceConfig = meterFormulaProvider.findById(currNamespaceId(), cmd.getFormulaId());
+            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(cmd.getId(), cmd.getOwnerId(), cmd.getOwnerType(),
+                    cmd.getCommunityId(),currNamespaceId());
+
+            if(priceConfig != null) {
+
+            }
 //            if (formula != null) {
 //                // 查看当前公式是否被引用, 被引用则无法删除
 //                EnergyMeterSettingLog settingLog = meterSettingLogProvider.findSettingByFormulaId(currNamespaceId(), formula.getId());
