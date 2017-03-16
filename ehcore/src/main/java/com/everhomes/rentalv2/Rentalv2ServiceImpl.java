@@ -641,16 +641,20 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		} 
 		response = ConvertHelper.convert(defaultRule, QueryDefaultRuleAdminResponse.class);
 		response.setSiteCounts(defaultRule.getResourceCounts());
-		response.setBeginDate(defaultRule.getBeginDate().getTime());
-		response.setEndDate(defaultRule.getEndDate().getTime());
+		if(null != defaultRule.getBeginDate())
+			response.setBeginDate(defaultRule.getBeginDate().getTime());
+		if(null != defaultRule.getEndDate())
+			response.setEndDate(defaultRule.getEndDate().getTime());
+		
 		response.setOpenWeekday(new ArrayList<Integer>());
-    	int openWeekInt = Integer.valueOf(defaultRule.getOpenWeekday());
-        for(int i=1;i<8;i++){
-        	if(openWeekInt%10 == 1)
-        		response.getOpenWeekday().add(i);
-        	openWeekInt = openWeekInt/10;
-        }
-		 
+		if(null!= defaultRule.getOpenWeekday()){
+	    	int openWeekInt = Integer.valueOf(defaultRule.getOpenWeekday());
+	        for(int i=1;i<8;i++){
+	        	if(openWeekInt%10 == 1)
+	        		response.getOpenWeekday().add(i);
+	        	openWeekInt = openWeekInt/10;
+	        }
+		}
 		List<RentalResourceNumber> resourceNumbers = this.rentalv2Provider.queryRentalResourceNumbersByOwner(EhRentalv2DefaultRules.class.getSimpleName(),defaultRule.getId());
 		if(null!=resourceNumbers){
 			response.setSiteNumbers (new ArrayList<SiteNumberDTO>());
