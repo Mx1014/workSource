@@ -2464,16 +2464,6 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
                     ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter RentalStartTime can not be null");  
 		//给开放日期一个缺省值
 		//默认从启动开始开放3个月，周六周日关闭
-		cmd.setBeginDate(new java.util.Date().getTime());
-		Calendar calendar = Calendar.getInstance();
-		calendar.add(Calendar.MONTH, 3);
-		cmd.setEndDate(calendar.getTimeInMillis());
-		cmd.setOpenWeekday(new ArrayList<Integer>());
-		cmd.getOpenWeekday().add(1);
-		cmd.getOpenWeekday().add(2);
-        cmd.getOpenWeekday().add(3);
-        cmd.getOpenWeekday().add(4);
-        cmd.setCloseDates(null);
 		this.dbProvider.execute((TransactionStatus status) -> {
 			//初始化 
 			//设置新规则的时候就删除之前的旧单元格
@@ -2484,6 +2474,38 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 //			Integer deleteCount = rentalProvider.deleteResourceCells(cmd.getRentalSiteId(), null, null);
 //			LOGGER.debug("delete count = " + String.valueOf(deleteCount)+ "  from rental site rules  ");
 			RentalResource rs = this.rentalv2Provider.getRentalSiteById(cmd.getRentalSiteId());
+			if(null ==rs.getBeginDate())
+				cmd.setBeginDate(new java.util.Date().getTime());
+			else
+				cmd.setBeginDate(rs.getBeginDate().getTime());
+			if(null == rs.getEndDate()){
+				Calendar calendar = Calendar.getInstance();
+				calendar.add(Calendar.MONTH, 3);
+				cmd.setEndDate(calendar.getTimeInMillis());
+			}
+			else
+				cmd.setEndDate(rs.getEndDate().getTime());
+			if(rs.getOpenWeekday() != null ){
+				
+				cmd.setOpenWeekday(new ArrayList<Integer>());
+		    	int openWeekInt = Integer.valueOf(rs.getOpenWeekday());
+		        for(int i=1;i<8;i++){
+		        	if(openWeekInt%10 == 1)
+		        		cmd.getOpenWeekday().add(i);
+		        	openWeekInt = openWeekInt/10;
+		        }
+			}
+			else { 
+				cmd.setOpenWeekday(new ArrayList<Integer>());
+				cmd.getOpenWeekday().add(1);
+				cmd.getOpenWeekday().add(2);
+		        cmd.getOpenWeekday().add(3);
+		        cmd.getOpenWeekday().add(4);
+		        cmd.getOpenWeekday().add(5);
+		        cmd.setCloseDates(null);
+		    }
+	        
+	        
 			rs.setDiscountRatio(cmd.getDiscountRatio());
 			rs.setDiscountType(cmd.getDiscountType());
 			rs.setFullPrice(cmd.getFullPrice());
