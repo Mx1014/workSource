@@ -2039,6 +2039,12 @@ public class PropertyMgrServiceImpl implements PropertyMgrService {
 		dto.setUnsaleCount(temp = (temp = result.get(PmAddressMappingStatus.UNSALE.getCode())) == null ? 0 : temp);
 		sum += temp;
 		dto.setAptCount(sum);
+		
+		// 科技园的从address表里统计，其它域空间还是按以前的方式统计
+		if (sum == 0) {
+			return getApartmentStatistics(cmd);
+		}
+		
 		return dto;
 	}
 
