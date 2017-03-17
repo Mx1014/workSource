@@ -9,4 +9,5 @@ ALTER TABLE eh_rentalv2_orders ADD COLUMN `offline_payee_uid` BIGINT ;
 
 -- 服务联盟 add by sw 20170316
 ALTER TABLE eh_service_alliance_jump_module ADD COLUMN  `parent_id` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE eh_service_alliances ADD COLUMN `button_title` VARCHAR(64);
 
