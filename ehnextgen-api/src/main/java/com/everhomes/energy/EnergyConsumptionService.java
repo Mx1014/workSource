@@ -205,9 +205,28 @@ public interface EnergyConsumptionService {
 
     void syncEnergyMeterIndex();
 
+    /**
+     * 创建梯度价格方案
+     * */
     EnergyMeterPriceConfigDTO createEnergyMeterPriceConfig(CreateEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 修改梯度价格方案
+     * */
     EnergyMeterPriceConfigDTO updateEnergyMeterPriceConfig(UpdateEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 获得梯度价格方案
+     * */
     EnergyMeterPriceConfigDTO getEnergyMeterPriceConfig(GetEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 梯度价格方案列表
+     * */
     List<EnergyMeterPriceConfigDTO> listEnergyMeterPriceConfig(ListEnergyMeterPriceConfigCommand cmd);
+
+    /**
+     * 删除梯度价格方案
+     * */
     void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd);
 }

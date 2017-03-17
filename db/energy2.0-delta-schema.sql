@@ -40,3 +40,9 @@ ALTER TABLE eh_energy_meters ADD COLUMN `owner_type` VARCHAR(32) NOT NULL DEFAUL
 ALTER TABLE eh_energy_meters ADD COLUMN `owner_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_energy_meters ADD COLUMN `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费';
 ALTER TABLE eh_energy_meters ADD COLUMN `config_id` BIGINT COMMENT 'if setting_type is price and  have this value';
+
+ALTER TABLE eh_energy_month_statistics ADD COLUMN `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费';
+ALTER TABLE eh_energy_month_statistics ADD COLUMN `config_id` BIGINT COMMENT 'if setting_type is price and  have this value';
+
+ALTER TABLE eh_energy_date_statistics ADD COLUMN `calculation_type` TINYINT NOT NULL DEFAULT 0 COMMENT '0: standing charge tariff 固定费用, 1: block tariff 阶梯收费';
+ALTER TABLE eh_energy_date_statistics ADD COLUMN `config_id` BIGINT COMMENT 'if setting_type is price and  have this value';
