@@ -164,6 +164,8 @@ public class PmTaskServiceImpl implements PmTaskService {
 	private FlowNodeProvider flowNodeProvider;
 	@Autowired
 	private BuildingProvider buildingProvider;
+	@Autowired
+	private FlowCaseProvider flowCaseProvider;
 
 	@Override
 	public SearchTasksResponse searchTasks(SearchTasksCommand cmd) {
@@ -2094,36 +2096,48 @@ public class PmTaskServiceImpl implements PmTaskService {
 					continue;
 				}
 
-					dbProvider.execute((TransactionStatus transactionStatus) -> {
 
-						CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
-						createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
-						createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
-						createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
-						createFlowCaseCommand.setReferId(task.getId());
-						createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
-						//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
-						createFlowCaseCommand.setContent(task.getContent());
+				CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+				createFlowCaseCommand.setApplyUserId(task.getCreatorUid());
+				createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+				createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+				createFlowCaseCommand.setReferId(task.getId());
+				createFlowCaseCommand.setReferType(EntityType.PM_TASK.getCode());
+				//createFlowCaseCommand.setContent("发起人：" + requestorName + "\n" + "联系方式：" + requestorPhone);
+				createFlowCaseCommand.setContent(task.getContent());
 
-						createFlowCaseCommand.setProjectId(task.getOwnerId());
-						createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
-						if (StringUtils.isNotBlank(task.getBuildingName())) {
-							Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
-									task.getBuildingName());
-							if(building != null){
-								ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
-										EntityType.BUILDING.getCode(), namespaceId);
-								if (null != resourceCategory) {
-									createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
-									createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
-								}
-							}
+				createFlowCaseCommand.setProjectId(task.getOwnerId());
+				createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+				if (StringUtils.isNotBlank(task.getBuildingName())) {
+					Building building = buildingProvider.findBuildingByName(namespaceId, task.getOwnerId(),
+							task.getBuildingName());
+					if(building != null){
+						ResourceCategoryAssignment resourceCategory = communityProvider.findResourceCategoryAssignment(building.getId(),
+								EntityType.BUILDING.getCode(), namespaceId);
+						if (null != resourceCategory) {
+							createFlowCaseCommand.setProjectId(resourceCategory.getResourceCategryId());
+							createFlowCaseCommand.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
 						}
+					}
+				}
 
-						FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+				FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
 
-						if (PmTaskStatus.UNPROCESSED.getCode() == task.getStatus() ||
-								PmTaskStatus.PROCESSING.getCode() == task.getStatus()) {
+				if (PmTaskStatus.UNPROCESSED.getCode() == task.getStatus() ||
+						PmTaskStatus.PROCESSING.getCode() == task.getStatus()) {
+					FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+					stepDTO.setFlowCaseId(flowCase.getId());
+					stepDTO.setFlowMainId(flowCase.getFlowMainId());
+					stepDTO.setFlowVersion(flowCase.getFlowVersion());
+					stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+					stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+					stepDTO.setStepCount(flowCase.getStepCount());
+					flowService.processAutoStep(stepDTO);
+				} else if (PmTaskStatus.PROCESSED.getCode() == task.getStatus() ||
+						PmTaskStatus.CLOSED.getCode() == task.getStatus() ||
+						PmTaskStatus.REVISITED.getCode() == task.getStatus()) {
+					while (flowCase.getCurrentNodeId() != endNode) {
+
 						FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
 						stepDTO.setFlowCaseId(flowCase.getId());
 						stepDTO.setFlowMainId(flowCase.getFlowMainId());
@@ -2132,29 +2146,18 @@ public class PmTaskServiceImpl implements PmTaskService {
 						stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
 						stepDTO.setStepCount(flowCase.getStepCount());
 						flowService.processAutoStep(stepDTO);
-						} else if (PmTaskStatus.PROCESSED.getCode() == task.getStatus() ||
-								PmTaskStatus.CLOSED.getCode() == task.getStatus() ||
-								PmTaskStatus.REVISITED.getCode() == task.getStatus()) {
-							while (flowCase.getCurrentNodeId() != endNode) {
-								FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-								stepDTO.setFlowCaseId(flowCase.getId());
-								stepDTO.setFlowMainId(flowCase.getFlowMainId());
-								stepDTO.setFlowVersion(flowCase.getFlowVersion());
-								stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-								stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-								stepDTO.setStepCount(flowCase.getStepCount());
-								flowService.processAutoStep(stepDTO);
-							}
 
-						}
-						FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
-						task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
-						task.setFlowCaseId(flowCase.getId());
-						pmTaskProvider.updateTask(task);
-						return null;
-					});
-					pmTaskSearch.deleteById(task.getId());
-					pmTaskSearch.feedDoc(task);
+						flowCase = flowCaseProvider.getFlowCaseById(flowCase.getId());
+					}
+
+				}
+				FlowNode flowNode = flowNodeProvider.getFlowNodeById(flowCase.getCurrentNodeId());
+				task.setStatus(pmTaskCommonService.convertFlowStatus(flowNode.getParams()));
+				task.setFlowCaseId(flowCase.getId());
+				pmTaskProvider.updateTask(task);
+
+				pmTaskSearch.deleteById(task.getId());
+				pmTaskSearch.feedDoc(task);
 
 			}
 
