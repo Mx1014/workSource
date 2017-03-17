@@ -13,6 +13,8 @@ import java.math.BigDecimal;
  *     <li>settingValue: 属性值</li>
  *     <li>formulaId: 如果修改的是公式,则为公式id</li>
  *     <li>settingStatus: 状态 {@link com.everhomes.rest.energy.EnergyCommonStatus}</li>
+ *     <li>calculationType: 价格计算方式 参考{@link com.everhomes.rest.energy.PriceCalculationType} </li>
+ *     <li>configId: 价格方案id </li>
  * </ul>
  */
 public class UpdateEnergyMeterDefaultSettingCommand {
@@ -23,6 +25,9 @@ public class UpdateEnergyMeterDefaultSettingCommand {
     @EnumType(value = EnergyCommonStatus.class, nullValue = true)
     private Byte settingStatus;
     private Long formulaId;
+
+    private Byte calculationType;
+    private Long configId;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -62,6 +67,22 @@ public class UpdateEnergyMeterDefaultSettingCommand {
 
     public void setFormulaId(Long formulaId) {
         this.formulaId = formulaId;
+    }
+
+    public Byte getCalculationType() {
+        return calculationType;
+    }
+
+    public void setCalculationType(Byte calculationType) {
+        this.calculationType = calculationType;
+    }
+
+    public Long getConfigId() {
+        return configId;
+    }
+
+    public void setConfigId(Long configId) {
+        this.configId = configId;
     }
 
     @Override

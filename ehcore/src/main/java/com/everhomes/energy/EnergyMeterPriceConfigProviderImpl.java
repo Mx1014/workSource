@@ -50,6 +50,24 @@ public class EnergyMeterPriceConfigProviderImpl implements EnergyMeterPriceConfi
     }
 
     @Override
+    public EnergyMeterPriceConfig findById(Long id) {
+        return context().selectFrom(Tables.EH_ENERGY_METER_PRICE_CONFIG)
+                .where(Tables.EH_ENERGY_METER_PRICE_CONFIG.ID.eq(id))
+                .fetchOneInto(EnergyMeterPriceConfig.class);
+    }
+
+    @Override
+    public EnergyMeterPriceConfig findByName(String name, Long ownerId, String ownerType, Long communityId, Integer namespaceId) {
+        return context().selectFrom(Tables.EH_ENERGY_METER_PRICE_CONFIG)
+                .where(Tables.EH_ENERGY_METER_PRICE_CONFIG.NAME.eq(name))
+                .and(Tables.EH_ENERGY_METER_PRICE_CONFIG.OWNER_ID.eq(ownerId))
+                .and(Tables.EH_ENERGY_METER_PRICE_CONFIG.OWNER_TYPE.eq(ownerType))
+                .and(Tables.EH_ENERGY_METER_PRICE_CONFIG.COMMUNITY_ID.eq(communityId))
+                .and(Tables.EH_ENERGY_METER_PRICE_CONFIG.NAMESPACE_ID.eq(namespaceId))
+                .fetchOneInto(EnergyMeterPriceConfig.class);
+    }
+
+    @Override
     public List<EnergyMeterPriceConfig> listPriceConfig(Long ownerId, String ownerType, Long communityId, Integer namespaceId) {
         return context().selectFrom(Tables.EH_ENERGY_METER_PRICE_CONFIG)
                 .where(Tables.EH_ENERGY_METER_PRICE_CONFIG.NAMESPACE_ID.eq(namespaceId))

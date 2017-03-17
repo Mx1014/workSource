@@ -248,9 +248,13 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         EnergyMeterSettingLog priceLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.PRICE);
         dto.setPrice(priceLog != null ? priceLog.getSettingValue() : null);
 
-//        if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(priceLog.getCalculationType()))) {
-//            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceLog.getConfigId(), )
-//        }
+        if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(priceLog.getCalculationType()))) {
+            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceLog.getConfigId(), meter.getOwnerId(),
+                    meter.getOwnerType(), meter.getCommunityId(), currNamespaceId());
+            if(priceConfig != null) {
+                dto.setPriceConfig(toEnergyMeterPriceConfigDTO(priceConfig));
+            }
+        }
         // 当前倍率
         EnergyMeterSettingLog rateLog = meterSettingLogProvider.findCurrentSettingByMeterId(currNamespaceId(), meter.getId(), EnergyMeterSettingType.RATE);
         dto.setRate(rateLog != null ? rateLog.getSettingValue() : null);
@@ -701,8 +705,17 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
                         break;
                     case PRICE:
+                        setting.setCalculationType(cmd.getCalculationType());
+                        if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+                            setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
+                            setting.setConfigId(0L);
+                        }
+                        if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
+                            setting.setSettingValue(null);
+                            setting.setConfigId(cmd.getConfigId());
+                        }
                     case RATE:
-                        // 价格及倍率类型
+                        // 倍率类型
                         setting.setSettingValue(cmd.getSettingValue() != null ? cmd.getSettingValue() : setting.getSettingValue());
                         break;
                     case AMOUNT_FORMULA:
@@ -723,7 +736,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public EnergyMeterFormulaDTO createEnergyMeterFormula(CreateEnergyMeterFormulaCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
 
         // 预处理公式的表达式
         String processedExpression = this.processFormulaExpression(cmd.getExpression());
@@ -731,6 +744,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         this.checkFormulaExpressionValid(processedExpression);
 
         EnergyMeterFormula formula = new EnergyMeterFormula();
+        formula.setOwnerId(cmd.getOwnerId());
+        formula.setOwnerType(cmd.getOwnerType());
+        formula.setCommunityId(cmd.getCommunityId());
+
         formula.setStatus(EnergyCommonStatus.ACTIVE.getCode());
         formula.setExpression(processedExpression);
         formula.setName(cmd.getName());
@@ -784,8 +801,11 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public EnergyMeterCategoryDTO createEnergyMeterCategory(CreateEnergyMeterCategoryCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
         EnergyMeterCategory category = new EnergyMeterCategory();
+        category.setOwnerId(cmd.getOwnerId());
+        category.setOwnerType(cmd.getOwnerType());
+        category.setCommunityId(cmd.getCommunityId());
         category.setNamespaceId(currNamespaceId());
         category.setName(cmd.getName());
         category.setDeleteFlag(TrueOrFalseFlag.TRUE.getCode());
@@ -830,7 +850,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public void importEnergyMeter(ImportEnergyMeterCommand cmd, MultipartFile file) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
 
         List<EnergyMeter> meterList = new ArrayList<>();
         ArrayList list = processorExcel(file);
@@ -840,6 +860,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 continue;
             }
             EnergyMeter meter = new EnergyMeter();
+            meter.setOwnerId(cmd.getOwnerId());
+            meter.setOwnerType(cmd.getOwnerType());
             meter.setStatus(EnergyMeterStatus.ACTIVE.getCode());
             meter.setCommunityId(cmd.getCommunityId());
             meter.setNamespaceId(currNamespaceId());
@@ -901,6 +923,19 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 LOGGER.error("Import energy meter error, error field meterType");
                 throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field formula");
             }
+            if(NumberUtils.isNumber(result.getL())) {
+                meter.setCalculationType(Byte.valueOf(result.getL()));
+            }
+            if(StringUtils.isEmpty(result.getM())) {
+                EnergyMeterPriceConfig priceConfig = priceConfigProvider.findByName(result.getM(), cmd.getOwnerId(),
+                                                            cmd.getOwnerType(), cmd.getCommunityId(), currNamespaceId());
+                if(priceConfig != null) {
+                    meter.setConfigId(priceConfig.getId());
+                } else {
+                    LOGGER.error("Import energy meter error, error field price config");
+                    throw errorWith(SCOPE, ERR_METER_IMPORT, "Import energy meter error, error field price config");
+                }
+            }
             dbProvider.execute(r -> {
                 meterProvider.createEnergyMeter(meter);
                 // 创建setting log 记录
@@ -911,6 +946,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 updateCmd.setAmountFormulaId(meter.getAmountFormulaId());
                 updateCmd.setStartTime(Date.valueOf(LocalDate.now()).getTime());
                 updateCmd.setMeterId(meter.getId());
+                updateCmd.setCalculationType(meter.getCalculationType());
+                updateCmd.setConfigId(meter.getConfigId());
                 this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.RATE, updateCmd);
                 this.insertMeterSettingLog(EnergyMeterSettingType.AMOUNT_FORMULA, updateCmd);
@@ -921,7 +958,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 readEnergyMeterCmd.setCommunityId(cmd.getCommunityId());
                 readEnergyMeterCmd.setCurrReading(meter.getStartReading());
                 readEnergyMeterCmd.setMeterId(meter.getId());
-                readEnergyMeterCmd.setOrganizationId(cmd.getOrganizationId());
+                readEnergyMeterCmd.setOrganizationId(cmd.getOwnerId());
                 readEnergyMeterCmd.setResetMeterFlag(TrueOrFalseFlag.FALSE.getCode());
                 this.readEnergyMeter(readEnergyMeterCmd);
                 return true;
@@ -1543,8 +1580,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterFormulaDTO> listEnergyMeterFormulas(ListEnergyMeterFormulasCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(currNamespaceId(), cmd.getFormulaType());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
+        List<EnergyMeterFormula> formulas = meterFormulaProvider.listMeterFormulas(cmd.getOwnerId(), cmd.getOwnerType(),
+                                                cmd.getCommunityId(), currNamespaceId(), cmd.getFormulaType());
         return formulas.stream().map(this::toEnergyMeterFormulaDTO).collect(Collectors.toList());
     }
 
@@ -1651,6 +1689,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             EnergyMeterFormula formula = meterFormulaProvider.findById(currNamespaceId(), log.getFormulaId());
             dto.setFormulaName(formula.getName());
         }
+        if(log.getConfigId() != null && log.getConfigId() != 0L) {
+            EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(log.getConfigId());
+            if(priceConfig != null) {
+                dto.setPriceConfigName(priceConfig.getName());
+            }
+        }
         return dto;
     }
 
@@ -1663,13 +1707,16 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterDefaultSettingDTO> listEnergyDefaultSettings(ListEnergyDefaultSettingsCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
         List<EnergyMeterDefaultSetting> settings = new ArrayList<>();
         if (cmd.getMeterType() != null) {
-            settings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), cmd.getMeterType());
+            settings = defaultSettingProvider.listDefaultSetting(cmd.getOwnerId(), cmd.getOwnerType(),
+                            cmd.getCommunityId(),currNamespaceId(), cmd.getMeterType());
         } else {
-            List<EnergyMeterDefaultSetting> waterSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.WATER.getCode());
-            List<EnergyMeterDefaultSetting> elecSettings = defaultSettingProvider.listDefaultSetting(currNamespaceId(), EnergyMeterType.ELECTRIC.getCode());
+            List<EnergyMeterDefaultSetting> waterSettings = defaultSettingProvider.listDefaultSetting(cmd.getOwnerId(), cmd.getOwnerType(),
+                                                                cmd.getCommunityId(),currNamespaceId(), EnergyMeterType.WATER.getCode());
+            List<EnergyMeterDefaultSetting> elecSettings = defaultSettingProvider.listDefaultSetting(cmd.getOwnerId(), cmd.getOwnerType(),
+                                                                cmd.getCommunityId(),currNamespaceId(), EnergyMeterType.ELECTRIC.getCode());
             settings.addAll(waterSettings);
             settings.addAll(elecSettings);
         }
@@ -1686,6 +1733,14 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dto.setFormulaType(formula.getFormulaType());
             }
         }
+        if(EnergyMeterSettingType.PRICE.equals(EnergyMeterSettingType.fromCode(setting.getSettingType()))) {
+            if(PriceCalculationType.BLOCK_TARIFF.equals(PriceCalculationType.fromCode(setting.getCalculationType()))) {
+                EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(setting.getConfigId(), setting.getOwnerId(),
+                        setting.getOwnerType(), setting.getCommunityId(), currNamespaceId());
+                dto.setPriceConfigName(priceConfig.getName());
+            }
+
+        }
         // 表的类型
         String meterType = localeStringService.getLocalizedString(EnergyLocalStringCode.SCOPE_METER_TYPE, String.valueOf(setting.getMeterType()), currLocale(), "");
         dto.setMeterType(meterType);
@@ -1701,8 +1756,9 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     @Override
     public List<EnergyMeterCategoryDTO> listEnergyMeterCategories(ListEnergyMeterCategoriesCommand cmd) {
         validate(cmd);
-        checkCurrentUserNotInOrg(cmd.getOrganizationId());
-        List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(currNamespaceId(), cmd.getCategoryType());
+        checkCurrentUserNotInOrg(cmd.getOwnerId());
+        List<EnergyMeterCategory> categoryList = meterCategoryProvider.listMeterCategories(currNamespaceId(), cmd.getCategoryType(),
+                                                        cmd.getOwnerId(), cmd.getOwnerType(), cmd.getCommunityId());
         return categoryList.stream().map(this::toMeterCategoryDto).collect(Collectors.toList());
     }
 
