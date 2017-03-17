@@ -143,7 +143,7 @@
 		eh_questionnaires | eh_questionnaire_questions | eh_questionnaire_options | eh_questionnaire_answers |
         eh_os_objects | eh_os_object_download_logs |
         eh_docking_mappings |
-        eh_lease_issuers | eh_lease_configs |
+        eh_lease_issuers | eh_lease_configs | eh_lease_issuer_addresses
 
         </includes>
 
