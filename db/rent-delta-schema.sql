@@ -53,6 +53,8 @@ ALTER TABLE eh_lease_promotions ADD COLUMN `issuer_type` VARCHAR(128) COMMENT '1
 ALTER TABLE eh_enterprise_op_requests ADD COLUMN `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user';
 ALTER TABLE eh_enterprise_op_requests ADD COLUMN `building_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_enterprise_op_requests ADD COLUMN `address_id` BIGINT NOT NULL DEFAULT 0;
+ALTER TABLE eh_enterprise_op_requests ADD COLUMN `flowcase_id` BIGINT NOT NULL DEFAULT 0;
+
 
 CREATE TABLE `eh_lease_configs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
