@@ -44,6 +44,17 @@ CREATE TABLE `eh_lease_issuers` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+CREATE TABLE `eh_lease_issuer_addresses` (
+  `id` BIGINT NOT NULL COMMENT 'id of the record',
+  `lease_issuer_id` BIGINT NOT NULL COMMENT 'eh_enterprise_op_requests id',
+  `address_id` BIGINT COMMENT 'building id ',
+  `status` TINYINT,
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  PRIMARY KEY (`id`)
+) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
+
+
 ALTER TABLE eh_lease_promotions ADD COLUMN `enter_time_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: disabled, 1: enabled';
 ALTER TABLE eh_lease_promotions ADD COLUMN `address_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_lease_promotions ADD COLUMN `orientation` VARCHAR(128);
