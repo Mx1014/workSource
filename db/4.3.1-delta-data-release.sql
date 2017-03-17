@@ -66,6 +66,12 @@ INSERT INTO `eh_acls` (`id`,`owner_type`,`grant_type`,`privilege_id`,`role_id`,`
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10012', 'zh_CN', '没有代发权限！');
 INSERT INTO `eh_locale_strings` ( `scope`, `code`, `locale`, `text`) VALUES ('pmtask', '10013', 'zh_CN', '查不到该用户信息！');
 
+SET @eh_service_module_privileges = (SELECT MAX(id) FROM `eh_service_module_privileges`);
+
+INSERT INTO `eh_service_module_privileges` (`id`, `module_id`, `privilege_type`, `privilege_id`, `remark`, `default_order`, `create_time`) 
+	VALUES ((@eh_service_module_privileges := @eh_service_module_privileges + 1), '20100', '0', '10138', '老的物业报修权限', '0', '2017-02-22 10:51:38');
+
+
 INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('techpark.oa.url', 'http://oa.ssipc.com.cn:8890/oa/service/WorkflowAppDraftWebService?wsdl', NULL, '0', NULL);
 
