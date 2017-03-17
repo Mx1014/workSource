@@ -65,14 +65,41 @@ public class EnterpriseApplyEntryDTO {
 
 	private ContractDTO contract;
 
-	private Long flowCaseId;
+	private String issuerType;
+	private Long buildingId;
+	private Long addressId;
+	private Long flowcaseId;
 
-	public Long getFlowCaseId() {
-		return flowCaseId;
+	public String getIssuerType() {
+		return issuerType;
 	}
 
-	public void setFlowCaseId(Long flowCaseId) {
-		this.flowCaseId = flowCaseId;
+	public void setIssuerType(String issuerType) {
+		this.issuerType = issuerType;
+	}
+
+	public Long getBuildingId() {
+		return buildingId;
+	}
+
+	public void setBuildingId(Long buildingId) {
+		this.buildingId = buildingId;
+	}
+
+	public Long getAddressId() {
+		return addressId;
+	}
+
+	public void setAddressId(Long addressId) {
+		this.addressId = addressId;
+	}
+
+	public Long getFlowcaseId() {
+		return flowcaseId;
+	}
+
+	public void setFlowcaseId(Long flowcaseId) {
+		this.flowcaseId = flowcaseId;
 	}
 
 	public Long getId() {

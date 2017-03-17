@@ -18,4 +18,10 @@ public interface EnterpriseLeaseIssuerProvider {
     List<LeaseIssuer> listLeaseIssers(Integer namespaceId, String keyword, Long pageAnchor, Integer pageSize);
 
     LeasePromotionConfig getLeasePromotionConfigByNamespaceId(Integer namespaceId);
+
+    void createLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress);
+
+    void deleteLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress);
+
+    List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId);
 }

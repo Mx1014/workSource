@@ -12,6 +12,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.UserIdentifier;
@@ -142,6 +144,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 	@Autowired
 	private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
+    @Autowired
+    private AddressProvider addressProvider;
 
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
@@ -587,8 +591,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	}
 	
 	@Override
-	public ListBuildingForRentResponse listLeasePromotions(
-			ListBuildingForRentCommand cmd) {
+	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
 		if (null==cmd.getRentType())
 			cmd.setRentType( LeasePromotionType.ORDINARY.getCode());
@@ -601,27 +604,31 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		res.setNextPageAnchor(locator.getAnchor());
 		
-		for (LeasePromotion leasePromotion : leasePromotions) {
-			leasePromotion.setPosterUrl(contentServerService.parserUri(leasePromotion.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-			List<LeasePromotionAttachment> attachments = leasePromotion.getAttachments();
-			if(null != attachments){
-				for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
-					leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-				}
-			}
-			
-			Building building = communityProvider.findBuildingById(leasePromotion.getBuildingId());
-			if(null != building){
-				leasePromotion.setBuildingName(building.getName());
-				leasePromotion.setAddress(building.getAddress());
-				leasePromotion.setLatitude(building.getLatitude());
-				leasePromotion.setLongitude(building.getLongitude());
-			}
-				
-		}
-		
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
-			return ConvertHelper.convert(c, BuildingForRentDTO.class);
+            BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
+
+            Address address = addressProvider.findAddressById(c.getAddressId());
+            if (null != address) {
+                dto.setApartmentName(address.getApartmentName());
+            }
+
+            Building building = communityProvider.findBuildingById(c.getBuildingId());
+            if(null != building){
+                dto.setBuildingName(building.getName());
+                dto.setAddress(building.getAddress());
+                dto.setLatitude(building.getLatitude());
+                dto.setLongitude(building.getLongitude());
+            }
+
+            dto.setPosterUrl(contentServerService.parserUri(c.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+            List<BuildingForRentAttachmentDTO> attachments = dto.getAttachments();
+            if(null != attachments){
+                for (BuildingForRentAttachmentDTO leasePromotionAttachment : attachments) {
+                    leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
+                }
+            }
+
+            return dto;
 		}).collect(Collectors.toList());
 		
 		res.setDtos(dtos);
@@ -800,6 +807,27 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
         //TODO:门牌地址
         enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+
+        if (null != cmd.getEnterpriseId()) {
+
+        }
+
+        if (null != cmd.getAddressIds()) {
+            for (Long id: cmd.getAddressIds()) {
+                LeaseIssuerAddress leaseIssuerAddress = new LeaseIssuerAddress();
+                leaseIssuerAddress.setAddressId(id);
+                leaseIssuerAddress.setLeaseIssuerId(leaseIssuer.getId());
+                createLeaseIssuerAddress(leaseIssuerAddress);
+            }
+        }
+
+
+    }
+
+    private void createLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress) {
+        leaseIssuerAddress.setStatus((byte)2);
+        leaseIssuerAddress.setCreatorUid(UserContext.current().getUser().getId());
+        enterpriseLeaseIssuerProvider.createLeaseIssuerAddress(leaseIssuerAddress);
     }
 
     @Override

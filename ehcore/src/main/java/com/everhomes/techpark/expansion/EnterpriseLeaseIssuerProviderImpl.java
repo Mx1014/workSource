@@ -8,10 +8,13 @@ import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
+import com.everhomes.server.schema.tables.daos.EhLeaseIssuerAddressesDao;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuersDao;
 import com.everhomes.server.schema.tables.pojos.EhLeaseConfigs;
+import com.everhomes.server.schema.tables.pojos.EhLeaseIssuerAddresses;
 import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
 import com.everhomes.server.schema.tables.records.EhLeaseConfigsRecord;
+import com.everhomes.server.schema.tables.records.EhLeaseIssuerAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseIssuersRecord;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
@@ -19,6 +22,7 @@ import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
+import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -115,5 +119,44 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 		return ConvertHelper.convert(query.fetchOne(), LeasePromotionConfig.class);
 	}
 
-	
+	@Override
+	public void createLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeaseIssuers.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuerAddresses.class));
+		leaseIssuerAddress.setId(id);
+		leaseIssuerAddress.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		EhLeaseIssuerAddressesDao dao = new EhLeaseIssuerAddressesDao(context.configuration());
+		dao.insert(leaseIssuerAddress);
+
+		DaoHelper.publishDaoAction(DaoAction.CREATE, EhLeaseIssuerAddresses.class, null);
+
+	}
+
+	@Override
+	public void deleteLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress) {
+		long id = sequenceProvider.getNextSequence(NameMapper
+				.getSequenceDomainFromTablePojo(EhLeaseIssuers.class));
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuerAddresses.class));
+		leaseIssuerAddress.setId(id);
+		EhLeaseIssuerAddressesDao dao = new EhLeaseIssuerAddressesDao(context.configuration());
+		dao.delete(leaseIssuerAddress);
+
+	}
+
+	@Override
+	public List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId) {
+		List<LeaseIssuerAddress> result = new ArrayList<>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
+		SelectQuery<EhLeaseIssuerAddressesRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUER_ADDRESSES);
+		query.addConditions(Tables.EH_LEASE_ISSUER_ADDRESSES.LEASE_ISSUER_ID.eq(leaseIssuerId));
+
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, LeaseIssuerAddress.class));
+			return null;
+		});
+
+		return result;
+	}
 }
