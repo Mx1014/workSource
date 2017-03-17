@@ -4805,6 +4805,13 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
 					ErrorCodes.ERROR_INVALID_PARAMETER,
 					"Invalid launchPadItemId parameter in the command");
+		RentalResourceType type = this.rentalv2Provider.getRentalResourceTypeById(cmd.getResourceTypeId());
+		if(PayMode.OFFLINE_PAY.equals(type.getPayMode())&&(null==cmd.getOfflineCashierAddress()||null==cmd.getOfflinePayeeUid())){
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+					ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Neither offline cashier address nor payee uid can  be null");
+		}
+		
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalResource resource = ConvertHelper.convert(cmd, RentalResource.class);
 			resource.setResourceName(cmd.getSiteName());
@@ -5015,6 +5022,14 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 		
 		this.dbProvider.execute((TransactionStatus status) -> {
 			RentalResource rentalsite = this.rentalv2Provider.getRentalSiteById(cmd.getId()); 
+
+			RentalResourceType type = this.rentalv2Provider.getRentalResourceTypeById(rentalsite.getResourceTypeId());
+			if(PayMode.OFFLINE_PAY.equals(type.getPayMode())&&(null==cmd.getOfflineCashierAddress()||null==cmd.getOfflinePayeeUid())){
+				throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+						ErrorCodes.ERROR_INVALID_PARAMETER,
+						"Neither offline cashier address nor payee uid can  be null");
+			}
+			
 			//TODO: 权限校验
 			rentalsite.setResourceName(cmd.getSiteName());
 			rentalsite.setSpec(cmd.getSpec());
