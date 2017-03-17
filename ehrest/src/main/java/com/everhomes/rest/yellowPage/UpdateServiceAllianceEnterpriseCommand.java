@@ -98,7 +98,17 @@ public class UpdateServiceAllianceEnterpriseCommand {
 	private String moduleUrl;
 	
 	private Byte supportType;
-	
+
+	private String buttonTitle;
+
+	public String getButtonTitle() {
+		return buttonTitle;
+	}
+
+	public void setButtonTitle(String buttonTitle) {
+		this.buttonTitle = buttonTitle;
+	}
+
 	public Long getId() {
 		return id;
 	}

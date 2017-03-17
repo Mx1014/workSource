@@ -584,6 +584,10 @@ public class YellowPageServiceImpl implements YellowPageService {
 			
 		}
 
+		if (!StringUtils.isEmpty(sa.getButtonTitle())) {
+			response.setButtonTitle(sa.getButtonTitle());
+		}
+
 		this.processDetailUrl(response);
 //		response.setDisplayName(serviceAlliance.getNickName());
 		Community community = communityProvider.findCommunityById(response.getOwnerId());
@@ -1167,34 +1171,36 @@ public class YellowPageServiceImpl implements YellowPageService {
 			}
 		}
 
-		Map<String,String> param = new HashMap<>();
-		Integer namespaceId = UserContext.getCurrentNamespaceId();
-		param.put("namespaceId", String.valueOf(namespaceId));
-		List<JumpModuleDTO> bizModules = new ArrayList<>();
+		if (null != bisModule) {
+			Map<String,String> param = new HashMap<>();
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			param.put("namespaceId", String.valueOf(namespaceId));
+			List<JumpModuleDTO> bizModules = new ArrayList<>();
 
-		String json = post(createRequestParam(param), "/zl-ec/rest/openapi/shop/queryShopInfoByNamespace");
-		if (null != json) {
-			ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
-			if (null != entity) {
-				Object obj = entity.getBody();
-				if (null != obj) {
-					List<BizEntity> bizs = JSONObject.parseObject(obj.toString(), new TypeReference<List<BizEntity>>(){});;
-					for (BizEntity b: bizs) {
-						JumpModuleDTO d = new JumpModuleDTO();
+			String json = post(createRequestParam(param), "/zl-ec/rest/openapi/shop/queryShopInfoByNamespace");
+			if (null != json) {
+				ReserverEntity<Object> entity = JSONObject.parseObject(json, new TypeReference<ReserverEntity<Object>>(){});
+				if (null != entity) {
+					Object obj = entity.getBody();
+					if (null != obj) {
+						List<BizEntity> bizs = JSONObject.parseObject(obj.toString(), new TypeReference<List<BizEntity>>(){});;
+						for (BizEntity b: bizs) {
+							JumpModuleDTO d = new JumpModuleDTO();
 //				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
 //				d.setId(id);
-						d.setModuleName(b.getShopName());
-						d.setModuleUrl(b.getShopURL());
-						d.setNamespaceId(namespaceId);
-						d.setParentId(bisModule.getId());
-						bizModules.add(d);
+							d.setModuleName(b.getShopName());
+							d.setModuleUrl(b.getShopURL());
+							d.setNamespaceId(namespaceId);
+							d.setParentId(bisModule.getId());
+							bizModules.add(d);
 
+						}
 					}
 				}
 			}
+			modules.addAll(bizModules);
 		}
 
-		modules.addAll(bizModules);
 		return createTree(modules);
 	}
 
