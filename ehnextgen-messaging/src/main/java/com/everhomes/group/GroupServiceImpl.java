@@ -3759,7 +3759,7 @@ public class GroupServiceImpl implements GroupService {
         User user = UserContext.current().getUser();
         Group group = checkGroupParameter(groupId, user.getId(), "deleteGroup");
         if(!user.getId().equals(group.getCreatorUid()) && !isAdmin(user.getId(), groupId)) {
-            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER, 
+            throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_ACCESS_DENIED,
                     "Forbidden");
         }
         group.setDeleteTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
