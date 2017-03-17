@@ -50,6 +50,9 @@ ALTER TABLE eh_lease_promotions ADD COLUMN `orientation` VARCHAR(128);
 ALTER TABLE eh_lease_promotions ADD COLUMN `rent_amount` DECIMAL(10,2);
 ALTER TABLE eh_lease_promotions ADD COLUMN `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user';
 
+ALTER TABLE eh_enterprise_op_requests ADD COLUMN `issuer_type` VARCHAR(128) COMMENT '1: organization 2: normal_user';
+
+
 CREATE TABLE `eh_lease_configs` (
   `id` BIGINT NOT NULL COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0,
