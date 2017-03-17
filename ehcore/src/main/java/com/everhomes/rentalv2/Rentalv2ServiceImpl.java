@@ -2565,23 +2565,23 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			rs.setRefundFlag(cmd.getRefundFlag());
 			rs.setRefundRatio(cmd.getRefundRatio());
 			rs.setUnit(cmd.getUnit());
-			rs.setBeginDate(new Date(cmd.getBeginDate()));
-			rs.setEndDate(new Date(cmd.getEndDate()));
+//			rs.setBeginDate(new Date(cmd.getBeginDate()));
+//			rs.setEndDate(new Date(cmd.getEndDate()));
 			//modify by wh 2016-11-11 修改时间点和修改操作人的记录
 			rs.setOperatorUid(UserContext.current().getUser().getId());
 			rs.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
-			String openWorkday = "0000000";
-			if(null!=cmd.getOpenWeekday()) {
-				int openWorkdayInt=0;
-				//list的数字:1234567代表从星期天到星期六,经过-1作为10的次方放到7位字符串内
-				for(Integer weekdayInteger : cmd.getOpenWeekday())
-					openWorkdayInt+=Math.pow(10,weekdayInteger-1);
-				openWorkday = String.valueOf(openWorkdayInt);
-				for( ;openWorkday.length()<7; ){
-					openWorkday ="0"+openWorkday;
-				}
-			}
-			rs.setOpenWeekday(openWorkday); 
+//			String openWorkday = "0000000";
+//			if(null!=cmd.getOpenWeekday()) {
+//				int openWorkdayInt=0;
+//				//list的数字:1234567代表从星期天到星期六,经过-1作为10的次方放到7位字符串内
+//				for(Integer weekdayInteger : cmd.getOpenWeekday())
+//					openWorkdayInt+=Math.pow(10,weekdayInteger-1);
+//				openWorkday = String.valueOf(openWorkdayInt);
+//				for( ;openWorkday.length()<7; ){
+//					openWorkday ="0"+openWorkday;
+//				}
+//			}
+//			rs.setOpenWeekday(openWorkday); 
 			rs.setWorkdayPrice(cmd.getWorkdayPrice());
 			rs.setWeekendPrice(cmd.getWeekendPrice()); 
 //			//重新生成附件
