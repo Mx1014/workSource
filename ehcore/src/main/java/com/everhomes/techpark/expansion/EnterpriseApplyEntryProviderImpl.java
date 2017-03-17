@@ -109,6 +109,9 @@ public class EnterpriseApplyEntryProviderImpl implements
 		if(!StringUtils.isEmpty(leasePromotion.getBuildingId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.BUILDING_ID.eq(leasePromotion.getBuildingId()));
 		}
+		if (!StringUtils.isEmpty(leasePromotion.getIssuerType())) {
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(leasePromotion.getIssuerType()));
+		}
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ID.gt(locator.getAnchor()));
 		}
@@ -277,7 +280,11 @@ public class EnterpriseApplyEntryProviderImpl implements
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
 		}
 		
-		if(!StringUtils.isEmpty(request.getApplyType())){
+		if(!StringUtils.isEmpty(request.getIssuerType())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ISSUER_TYPE.eq(request.getIssuerType()));
+		}
+
+		if(null != request.getApplyType()){
 			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
 		}
 		

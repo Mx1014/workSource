@@ -190,7 +190,8 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RequestMapping("applyEntry")
 	@RestReturn(value=ApplyEntryResponse.class)
 	public RestResponse applyEntry(EnterpriseApplyEntryCommand cmd){
-		ApplyEntryResponse b = enterpriseApplyEntryService.applyEntry(cmd);
+        ApplyEntryResponse applyEntryResponse = enterpriseApplyEntryService.applyEntry(cmd);
+        ApplyEntryResponse b = applyEntryResponse;
 		RestResponse response = new RestResponse(b);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
