@@ -3322,53 +3322,58 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 			 
 			//2016-6-2 10:32:44 fix bug :当有物品订单（说明是付款失败再次付款），就不再生成物品订单
 			if (null != cmd.getRentalItems()&&this.rentalv2Provider.findRentalItemsBillBySiteBillId(cmd.getRentalBillId())==null) {
-				java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
-				for (SiteItemDTO siDto : cmd.getRentalItems()) {
-					 
-					if(siDto.getId() == null) {
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
-					}
-					RentalItem rSiteItem = this.rentalv2Provider.getRentalSiteItemById(siDto.getId());
-					if (null == rSiteItem)
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
-					
-					if(!rSiteItem.getRentalResourceId().equals(bill.getRentalResourceId()))
-						throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-			                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter item id is not this site");
+
+				Tuple<Boolean, Boolean> tuple = (Tuple<Boolean, Boolean>)  this.coordinationProvider
+						.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
+						.enter(() -> {
+							java.math.BigDecimal itemMoney = new java.math.BigDecimal(0);
+					for (SiteItemDTO siDto : cmd.getRentalItems()) {
+						 
+						if(siDto.getId() == null) {
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+				                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
+						}
+						RentalItem rSiteItem = this.rentalv2Provider.getRentalSiteItemById(siDto.getId());
+						if (null == rSiteItem)
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+				                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter of siDto id"+ siDto+".");
 						
-					RentalItemsOrder rib = new RentalItemsOrder();
-					rib.setTotalMoney(rSiteItem.getPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
-					rib.setRentalResourceItemId(siDto.getId());
-					rib.setRentalCount(siDto.getCounts());
-					rib.setItemName(rSiteItem.getName());
-					rib.setRentalOrderId(cmd.getRentalBillId());
-					rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
-							.getTime()));
-					rib.setCreatorUid(userId);
-					itemMoney  = itemMoney.add(rib.getTotalMoney());
-					//用基于服务器平台的锁添加订单（包括验证和添加）
-					Tuple<Boolean, Boolean> tuple = (Tuple<Boolean, Boolean>)  this.coordinationProvider
-							.getNamedLock(CoordinationLocks.CREATE_RENTAL_BILL.getCode())
-							.enter(() -> {
-								//先验证后添加，由于锁机制，可以保证同时只有一个线程验证和添加
-								if(this.valiItem(rib))
-									return true;
-								rentalv2Provider.createRentalItemBill(rib);
-								return false;
-							});
-					Boolean valiBoolean = tuple.first();
-					if(valiBoolean)
-						throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
-							RentalServiceErrorCode.ERROR_NO_ENOUGH_ITEMS,"no enough items");
+						if(!rSiteItem.getRentalResourceId().equals(bill.getRentalResourceId()))
+							throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
+				                    ErrorCodes.ERROR_INVALID_PARAMETER, "Invalid paramter item id is not this site");
+							
+						RentalItemsOrder rib = new RentalItemsOrder();
+						rib.setTotalMoney(rSiteItem.getPrice().multiply( new java.math.BigDecimal(siDto.getCounts())));
+						rib.setRentalResourceItemId(siDto.getId());
+						rib.setRentalCount(siDto.getCounts());
+						rib.setItemName(rSiteItem.getName());
+						rib.setRentalOrderId(cmd.getRentalBillId());
+						rib.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+								.getTime()));
+						rib.setCreatorUid(userId);
+						itemMoney  = itemMoney.add(rib.getTotalMoney());
+						//用基于服务器平台的锁添加订单（包括验证和添加）
+									//先验证后添加，由于锁机制，可以保证同时只有一个线程验证和添加
+						if(this.valiItem(rib))
+							return true;
+						rentalv2Provider.createRentalItemBill(rib);
+									
+						
+						
+						
+					}
 					
 					
-				}
-				if (itemMoney.doubleValue() > 0) {
-					bill.setPayTotalMoney(bill.getResourceTotalMoney().add(itemMoney));
-//					bill.setReserveMoney(bill.getReserveMoney().add(itemMoney));
-				}
+					if (itemMoney.doubleValue() > 0) {
+						bill.setPayTotalMoney(bill.getResourceTotalMoney().add(itemMoney));
+//						bill.setReserveMoney(bill.getReserveMoney().add(itemMoney));
+					}
+					return false;
+				});
+				Boolean valiBoolean = tuple.first();
+				if(valiBoolean)
+					throw RuntimeErrorException.errorWith(RentalServiceErrorCode.SCOPE,
+						RentalServiceErrorCode.ERROR_NO_ENOUGH_ITEMS,"no enough items");
 			}
 			int compare = bill.getPayTotalMoney().compareTo(BigDecimal.ZERO);
 			
