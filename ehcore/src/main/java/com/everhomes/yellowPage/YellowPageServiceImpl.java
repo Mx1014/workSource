@@ -1189,7 +1189,7 @@ public class YellowPageServiceImpl implements YellowPageService {
 //				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
 //				d.setId(id);
 							d.setModuleName(b.getShopName());
-							d.setModuleUrl(b.getShopURL());
+							d.setModuleUrl(String.format("zl://browser/i/%s",b.getShopURL()));
 							d.setNamespaceId(namespaceId);
 							d.setParentId(bisModule.getId());
 							bizModules.add(d);
