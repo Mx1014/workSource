@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
+import com.everhomes.pmtask.PmTask;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
 import com.everhomes.rest.techpark.expansion.LeaseIssuerStatus;
 import com.everhomes.sequence.SequenceProvider;
@@ -21,6 +22,7 @@ import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
+import org.jooq.impl.DefaultRecordMapper;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -88,7 +90,6 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 
 	@Override
 	public List<LeaseIssuer> listLeaseIssers(Integer namespaceId, String keyword, Long pageAnchor, Integer pageSize) {
-		List<LeaseIssuer> result = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
 		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
@@ -96,8 +97,11 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
 		if (StringUtils.isNotBlank(keyword)) {
 			keyword = "%" + keyword + "%";
+			query.addJoin(Tables.EH_ORGANIZATIONS, Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_LEASE_ISSUERS.ENTERPRISE_ID));
+
 			query.addConditions(Tables.EH_LEASE_ISSUERS.ISSUER_CONTACT.like(keyword).or(
-					Tables.EH_LEASE_ISSUERS.ISSUER_NAME.like(keyword)));
+					Tables.EH_LEASE_ISSUERS.ISSUER_NAME.like(keyword))
+					.or(Tables.EH_ORGANIZATIONS.NAME.like(keyword)));
 		}
 
 		if (null != pageAnchor)
@@ -108,12 +112,9 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 		if (null != pageSize)
 			query.addLimit(pageSize);
 
-		query.fetch().map((r) -> {
-			result.add(ConvertHelper.convert(r, LeaseIssuer.class));
-			return null;
-		});
 
-		return result;
+		return 	query.fetch().map(new DefaultRecordMapper(Tables.EH_LEASE_ISSUERS.recordType(), LeaseIssuer.class));
+
 	}
 
 	@Override

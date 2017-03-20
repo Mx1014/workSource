@@ -14,7 +14,7 @@ import java.util.stream.Collectors;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.CommunityService;
-import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.organization.*;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
@@ -53,9 +53,6 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.openapi.Contract;
 import com.everhomes.openapi.ContractBuildingMappingProvider;
 import com.everhomes.openapi.ContractProvider;
-import com.everhomes.organization.OrganizationMember;
-import com.everhomes.organization.OrganizationProvider;
-import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
@@ -773,7 +770,15 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			LeaseIssuerDTO dto = ConvertHelper.convert(r, LeaseIssuerDTO.class);
 			//TODO:set address
             if (null != r.getEnterpriseId()) {
-            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(r.getEnterpriseId());
+                Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
+                OrganizationDetail orgDetail = organizationProvider.findOrganizationDetailByOrganizationId(r.getEnterpriseId());
+                if (null != orgDetail) {
+                    dto.setIssuerContact(orgDetail.getContact());
+                }
+
+                dto.setIssuerName(org.getName());
+//                dto.setIssuerContact(org.get);
+                List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(r.getEnterpriseId());
                 dto.setAddresses(organizationAddresses.stream().map(a -> {
                     Address address = addressProvider.findAddressById(a.getAddressId());
                     return ConvertHelper.convert(address, AddressDTO.class);
