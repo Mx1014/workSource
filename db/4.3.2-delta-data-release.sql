@@ -139,3 +139,7 @@ update eh_launch_pad_items set item_name = '物业服务', item_label = '物业�
 SET @id = (SELECT MAX(id) FROM `eh_service_alliance_jump_module`);
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) 
 	VALUES ((@id := @id + 1), '999985', '电商', 'BIZS', '0');
+	
+-- 威新短信模版 add by sw 20170320
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (999991, 'sms.default.yzx', 34, 'zh_CN', '物业报修短信', '38833');
