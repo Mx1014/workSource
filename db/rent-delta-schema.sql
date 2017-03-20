@@ -40,6 +40,9 @@ CREATE TABLE `eh_lease_issuers` (
   `issuer_contact` VARCHAR(128) NOT NULL DEFAULT '' COMMENT 'For rent',
   `issuer_name` VARCHAR(128),
   `enterprise_id` BIGINT COMMENT 'enterprise id',
+  `creator_uid` BIGINT,
+  `create_time` DATETIME,
+  `status` TINYINT COMMENT '0: inactive, 2: active',
   
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
