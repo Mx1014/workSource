@@ -177,8 +177,12 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		
 		FlowGraph flowGraph = flowService.getFlowGraph(flowCase.getFlowMainId(), flowCase.getFlowVersion());
 		ctx.setFlowGraph(flowGraph);
-		
-		FlowGraphNode node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());
+		FlowGraphNode node = null;
+		if(flowCase.getCurrentNodeId() == null) {
+			node = flowGraph.getNodes().get(0);
+		} else {
+			node = flowGraph.getGraphNode(flowCase.getCurrentNodeId());	
+		}
 		if(node == null) {
 			throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_NODE_NOEXISTS, "flownode noexists");
 		}

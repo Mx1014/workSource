@@ -2,6 +2,16 @@ package com.everhomes.rest.flow;
 
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>flowCaseId: 工作流 case Id</li>
+ * <li>entityId: 用户选择项的 ID</li>
+ * <li>flowEntityType: {@link com.everhomes.rest.flow.FlowEntityType}</li>
+ * <li>flowUserType: {@link com.everhomes.rest.flow.FlowUserType}</li>
+ * </ul>
+ * @author janson
+ *
+ */
 public class ListSelectUsersCommand {
 	private Long flowCaseId;
 	private Long entityId;
