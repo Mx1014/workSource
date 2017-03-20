@@ -15,6 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>content: 评论内容</li>
  * <li>entityId: 用户 ID 或者 选择人员的 ID。新版本不能使用这个值了，用 entitySel 代替 </li>
  * <li>flowEntityType: 客户端对象选择下个节点的用户 ID 或者 用户选择类型 ID 。新版本不能使用这个值了，用 entitySel 代替</li>
+ * <li>entitySel: 具体用户的选择列表</li>
  * <li>
  * </ul>
  * @author janson
