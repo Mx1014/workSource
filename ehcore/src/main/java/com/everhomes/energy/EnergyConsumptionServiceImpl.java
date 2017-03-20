@@ -1965,8 +1965,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 ScriptEngineManager manager = new ScriptEngineManager();
                 ScriptEngine engine = manager.getEngineByName("js");
 
+                if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
+                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+                    engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+                }
+
+                if(PriceCalculationType.BLOCK_TARIFF.equals(
+                        PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+
+                }
                 engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+                //分段计费后 settingValue可能为null
+//                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
                 engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
 
                 BigDecimal realAmount = new BigDecimal(0);
