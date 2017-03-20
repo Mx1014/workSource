@@ -45,3 +45,7 @@ INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text
 INSERT INTO `eh_locale_templates`(`scope`, `code`,`locale`, `description`, `text`) VALUES
 ( 'flow', 10009, 'zh_CN', '任务已完成', '任务已完成');
 
+
+
+-- 更新星尚汇服务市场投诉建议为物业服务，关联任务7649，add by tt, 20170320 
+update eh_launch_pad_items set item_name = '物业服务', item_label = '物业服务', action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业服务"}' where namespace_id = 999981 and item_lable = '投诉建议';
