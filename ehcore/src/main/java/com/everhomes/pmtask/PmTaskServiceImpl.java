@@ -1877,7 +1877,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 		List<OrgAddressDTO> addressDTOs = new ArrayList<>();
 
 		organizationList.forEach(o -> {
-			if (null != o.getCommunityId()) {
+			if (null != o && null != o.getCommunityId()) {
 				if(o.getCommunityId().equals(communityId)) {
 					List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(o.getId());
 					List<OrgAddressDTO> addresses = organizationAddresses.stream().map( r -> {
