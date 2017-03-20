@@ -272,9 +272,9 @@ public class QualityProviderImpl implements QualityProvider {
 	}
 
 	@Override
-	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
-    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds,
-			List<QualityInspectionStandardGroupMap> maps, Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag) {
+	public List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType,
+		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
+		List<Long> standardIds, Byte manualFlag) {
 		assert(locator.getEntityId() != 0);
 		DSLContext context = this.dbProvider.getDslContext(AccessSpec.readOnlyWith(EhQualityInspectionTasks.class, locator.getEntityId()));
 		List<QualityInspectionTasks> tasks = new ArrayList<QualityInspectionTasks>();
@@ -312,49 +312,12 @@ public class QualityProviderImpl implements QualityProvider {
 			Condition con = Tables.EH_QUALITY_INSPECTION_TASKS.OPERATOR_ID.eq(executeUid);
 			con = con.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.CORRECT.getCode()));
 
-			if (groupIds != null) {
-				//主动生成的任务按部门岗位查 by xiongying20170214
-				Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(1L);
-				con1 = con1.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskResult.NONE.getCode()));
-				Condition con3 = null;
-				for(ExecuteGroupAndPosition groupId : groupIds) {
-					Condition con2 = null;
-					con2 = Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_GROUP_ID.eq(groupId.getGroupId());
-					con2 = con2.and(Tables.EH_QUALITY_INSPECTION_TASKS.EXECUTIVE_POSITION_ID.eq(groupId.getPositionId()));
-					if(con3 == null) {
-						con3 = con2;
-					} else {
-						con3 = con3.or(con2);
-					}
-				}
-				con1 = con1.and(con3);
-				//产品修改需求，自动生成任务仅根据标准周期生成 与选择了多少部门岗位无关 所以先查出standardIds再根据standardIds来查 by xiongying20170214
-
-				if (maps != null && maps.size() > 0) {
-					Condition con5 = Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(0L);
-					Condition con6 = null;
-					for(QualityInspectionStandardGroupMap map : maps ) {
-						Condition con4 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.eq(map.getStandardId());
-						if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-							con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
-						}
-						if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(map.getGroupType()))) {
-							con4 = con4.and(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.EXECUTED.getCode()));
-						}
-
-						if(con6 == null) {
-							con6 = con4;
-						} else {
-							con6 = con6.or(con4);
-						}
-
-					}
-					con5 = con5.and(con6);
-					con1 = con1.or(con5);
-				}
+			if(standardIds != null) {
+				Condition con1 = Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(standardIds);
+				con1 = con1.and(Tables.EH_QUALITY_INSPECTION_TASKS.RESULT.eq(QualityInspectionTaskStatus.NONE.getCode()));
 				con = con.or(con1);
-				query.addConditions(con);
 			}
+			query.addConditions(con);
 		}
 
 		if(executeStatus != null) {
@@ -373,11 +336,7 @@ public class QualityProviderImpl implements QualityProvider {
 					.or(Tables.EH_QUALITY_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()))));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STATUS.eq(QualityInspectionTaskStatus.WAITING_FOR_EXECUTING.getCode()));
 		}
-		
-		if(standardIds != null) {
-			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.STANDARD_ID.in(standardIds));
-		}
-		
+
 		if(manualFlag != null) {
 			//fix bug :byte to long ...MANUAL_FLAG.eq(manualFlag));
 			query.addConditions(Tables.EH_QUALITY_INSPECTION_TASKS.MANUAL_FLAG.eq(Long.valueOf(manualFlag)));
@@ -416,7 +375,11 @@ public class QualityProviderImpl implements QualityProvider {
 				Condition con4 = null;
 				con4 = Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.GROUP_ID.eq(executiveGroup.getGroupId());
 				con4 = con4.and(Tables.EH_QUALITY_INSPECTION_STANDARD_GROUP_MAP.POSITION_ID.eq(executiveGroup.getPositionId()));
-				con5 = con5.or(con4);
+				if(con5 == null) {
+					con5 = con4;
+				} else {
+					con5 = con5.or(con4);
+				}
 			}
 			con = con5;
 		}
@@ -880,10 +843,10 @@ public class QualityProviderImpl implements QualityProvider {
             	QualityInspectionStandards standard = mapStandards.get(record.getStandardId());
             	
                 assert(standard != null);
-                if(QualityGroupType.EXECUTIVE_GROUP.getCode()==record.getGroupType()) {
+                if(QualityGroupType.EXECUTIVE_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
                 	standard.getExecutiveGroup().add(ConvertHelper.convert(record, QualityInspectionStandardGroupMap.class));
 				 }
-				 if(record.getGroupType()==QualityGroupType.REVIEW_GROUP.getCode()) {
+				 if(QualityGroupType.REVIEW_GROUP.equals(QualityGroupType.fromStatus(record.getGroupType()))) {
 					 standard.getReviewGroup().add(ConvertHelper.convert(record, QualityInspectionStandardGroupMap.class));
 				 }
 				 

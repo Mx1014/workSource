@@ -2527,7 +2527,10 @@ INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`,
 -- 创源屏蔽"智慧楼控" add by  xujuan 20170221
 delete from eh_launch_pad_items where id in (112320,112339) and namespace_id = 999986;
 
-
+-- 增加创源停车工作流菜单 add by sw 20170314
+SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
+	VALUES ((@menu_scope_id := @menu_scope_id + 1), 40850, '', 'EhNamespaces', 999986, 2);
 
 
 

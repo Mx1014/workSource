@@ -4,10 +4,10 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * <li>TEXT_REMARK: 文本备注</li>
- * <li>LICENSE_NUMBER: 车牌</li>
- * <li>SHOW_CONTENT: 显示内容</li>
- * <li>ATTACHMENT: 附件</li>
+ * <li>TEXT_REMARK:0 文本备注</li>
+ * <li>LICENSE_NUMBER:1 车牌</li>
+ * <li>SHOW_CONTENT:2 显示内容</li>
+ * <li>ATTACHMENT:3 附件</li>
  * </ul>
  */
 public enum AttachmentType {

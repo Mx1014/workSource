@@ -17,8 +17,7 @@ public interface QualityProvider {
 	void deleteVerificationTasks(Long taskId);
 	QualityInspectionTasks findVerificationTaskById(Long taskId);
 	List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
-    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds,
-			List<QualityInspectionStandardGroupMap> maps, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
+    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
 			List<Long> standardIds, Byte manualFlag);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
 			Timestamp startDate, Timestamp endDate, Long groupId, Byte executeStatus, Byte reviewStatus);

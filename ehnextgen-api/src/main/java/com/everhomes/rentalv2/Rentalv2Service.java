@@ -1,6 +1,7 @@
 package com.everhomes.rentalv2;
 
 import java.util.List;
+import java.util.Map;
 
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
@@ -81,8 +82,12 @@ import com.everhomes.rest.rentalv2.admin.GetResourceTypeListResponse;
 import com.everhomes.rest.rentalv2.admin.OpenResourceTypeCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.QueryDefaultRuleAdminResponse;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultAttachmentRuleAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateDefaultDateRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateDefaultRuleAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateItemsAdminCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateResourceAttachmentCommand;
+import com.everhomes.rest.rentalv2.admin.UpdateRentalDateCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteDiscountAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateRentalSiteRulesAdminCommand;
 import com.everhomes.rest.rentalv2.admin.UpdateResourceAdminCommand;
@@ -239,5 +244,23 @@ public interface Rentalv2Service {
 
 
 	void onOrderCancel(RentalOrder order);
+
+
+	void updateRentalDate(UpdateRentalDateCommand cmd);
+
+
+	void updateResourceAttachment(UpdateResourceAttachmentCommand cmd);
+
+
+	void updateDefaultDateRule(UpdateDefaultDateRuleAdminCommand cmd);
+
+
+	void updateDefaultAttachmentRule(UpdateDefaultAttachmentRuleAdminCommand cmd);
+
+
+	void changeOfflinePayOrderSuccess(RentalOrder order);
+
+
+	void sendMessageCode(Long uid, String locale, Map<String, String> map, int code);
 
 }

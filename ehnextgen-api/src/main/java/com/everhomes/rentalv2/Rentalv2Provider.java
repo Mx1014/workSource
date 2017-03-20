@@ -273,6 +273,9 @@ public interface Rentalv2Provider {
 
 	List<RentalOrder> listSiteRentalByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 
+
+	List<RentalOrder> findRentalSiteBillBySiteRuleIds(List<Long> siteRuleIds);
+
  
 
  

@@ -9,6 +9,7 @@ import com.everhomes.util.StringHelper;
  * <li>iconUri: 图标uri</li> 
  * <li>status: 状态 0 关闭 2 开启</li>
  * <li>namespaceId: 域空间</li>
+ * <li>payMode: 支付模式 (工作流模式) {@link com.everhomes.rest.rentalv2.admin.PayMode}</li>
  * </ul>
  */
 public class CreateResourceTypeCommand {
@@ -17,6 +18,7 @@ public class CreateResourceTypeCommand {
 	private String iconUri;
 	private Byte status;
 	private Integer namespaceId;
+	private Byte payMode;
 
 	@Override
 	public String toString() {
@@ -62,6 +64,14 @@ public class CreateResourceTypeCommand {
 
 	public void setStatus(Byte status) {
 		this.status = status;
+	}
+
+	public Byte getPayMode() {
+		return payMode;
+	}
+
+	public void setPayMode(Byte payMode) {
+		this.payMode = payMode;
 	}
  
 

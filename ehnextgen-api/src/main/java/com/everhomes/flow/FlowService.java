@@ -444,9 +444,13 @@ public interface FlowService {
 
 	FlowCase createDumpFlowCase(GeneralModuleInfo ga,
 			CreateFlowCaseCommand flowCaseCmd);
-
+ 
+	List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId,
+			List<FlowUserSelection> selections);
+ 
 	void processSMSTimeout(FlowTimeout ft);
-	
-	//TODO 日志信息分类：
+
+	String getStepMessageTemplate(FlowStepType fromStep,
+			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
 	
 }

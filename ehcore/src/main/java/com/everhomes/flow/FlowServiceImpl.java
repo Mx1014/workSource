@@ -2296,7 +2296,30 @@ public class FlowServiceImpl implements FlowService {
 			}
 			
 			nodeDTOS.add(logDTO);
+		} else {
+			//BUG 6052
+			for(int i = nodeDTOS.size() - 2; i >= 0; i--) {
+				logDTO = nodeDTOS.get(i);
+				if(logDTO.getLogs().size() > 0) {
+					nodeDTOS.get(nodeDTOS.size()-1).getLogs().add(logDTO.getLogs().get(logDTO.getLogs().size()-1));
+					logDTO.getLogs().remove(logDTO.getLogs().size()-1);
+					break;
+				}
+			}
 		}
+		
+		//fix multiple current node
+//		for(int i = nodeDTOS.size()-1; i >= 0; i--) {
+//			logDTO = nodeDTOS.get(i);
+//			if(logDTO.getIsCurrentNode() != null && logDTO.getIsCurrentNode().equals((byte)1)) {
+//				int j = i-1;
+//				for(; j >= 0; j--) {
+//					logDTO.setIsCurrentNode((byte)0);
+//				}
+//				
+//				break;
+//			}
+//		}
 		
 		return dto;
 	}
@@ -2612,8 +2635,8 @@ public class FlowServiceImpl implements FlowService {
 		return resp;
 	}
 	
-	
-	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
+	@Override
+	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
 		// Remove dup users
 		List<Long> tmps = resolvUserSelections(ctx, entityType, entityId, selections, 1);
 		List<Long> rlts = new ArrayList<>();
@@ -2980,6 +3003,38 @@ public class FlowServiceImpl implements FlowService {
         
         String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
         return text;
+	}
+	
+	@Override
+	public String getStepMessageTemplate(FlowStepType fromStep, FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map) {
+        String scope = FlowTemplateCode.SCOPE;
+        int code = 0;
+        if(nextStatus == FlowCaseStatus.FINISHED) {
+        	//到终止节点
+        	if (fromStep == FlowStepType.APPROVE_STEP) {
+        		code = FlowTemplateCode.NEXT_STEP_DONE;
+        	} else if(fromStep == FlowStepType.ABSORT_STEP) {
+        		if(flowUserType == FlowUserType.PROCESSOR) {
+        			code = FlowTemplateCode.PROCESSOR_ABSORT;
+        		} else {
+        			code = FlowTemplateCode.APPLIER_ABSORT;
+        		}
+        	}
+        }
+        
+        if(code != 0) {
+        	  User user = UserContext.current().getUser();
+           String locale = Locale.SIMPLIFIED_CHINESE.toString();
+           if(user != null) {
+              	locale = user.getLocale();
+              }              
+              
+           String text = localeTemplateService.getLocaleTemplateString(scope, code, locale, map, "");
+           return text;  	
+        } else {
+        	return getFireButtonTemplate(fromStep, map);
+        }
+      
 	}
 
 	@Override

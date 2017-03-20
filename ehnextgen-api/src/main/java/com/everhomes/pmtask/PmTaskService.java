@@ -120,4 +120,6 @@ public interface PmTaskService {
 	void createTaskTargetStatistics();
 	
 	NamespaceHandlerDTO getNamespaceHandler(GetNamespaceHandlerCommand cmd);
+
+	void synchronizedData(SearchTasksCommand cmd);
 }

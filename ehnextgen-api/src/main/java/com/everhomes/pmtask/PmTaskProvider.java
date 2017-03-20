@@ -8,6 +8,8 @@ import com.everhomes.namespace.Namespace;
 public interface PmTaskProvider {
 	
 	void createTaskTarget(PmTaskTarget pmTaskTarget);
+
+	void deleteTask(PmTask pmTask);
 	
 	void updateTaskTarget(PmTaskTarget pmTaskTarget);
 
