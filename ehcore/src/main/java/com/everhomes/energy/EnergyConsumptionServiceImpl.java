@@ -31,6 +31,7 @@ import com.everhomes.util.excel.RowResult;
 import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
+import com.sun.org.apache.xpath.internal.operations.Bool;
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -1965,6 +1966,27 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 ScriptEngineManager manager = new ScriptEngineManager();
                 ScriptEngine engine = manager.getEngineByName("js");
 
+                engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
+                //分段计费后 settingValue可能为null
+//                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
+                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
+
+                BigDecimal realAmount = new BigDecimal(0);
+//                BigDecimal realCost = new BigDecimal(0);
+
+                try {
+                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
+                    engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), realAmount);
+//                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
+                } catch (ScriptException e) {
+                    String paramsStr = "{AMOUNT:" + amount +
+                            ", TIMES:" + rateSetting.getSettingValue() +
+                            "}";
+                    LOGGER.error("evaluate formula error, amountFormula={}, params={}", amountFormula, paramsStr);
+                    e.printStackTrace();
+                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
+                }
+
                 if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
                     engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
@@ -1973,26 +1995,6 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 if(PriceCalculationType.BLOCK_TARIFF.equals(
                         PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
 
-                }
-                engine.put(MeterFormulaVariable.AMOUNT.getCode(), amount);
-                //分段计费后 settingValue可能为null
-//                engine.put(MeterFormulaVariable.PRICE.getCode(), priceSetting.getSettingValue());
-                engine.put(MeterFormulaVariable.TIMES.getCode(), rateSetting.getSettingValue());
-
-                BigDecimal realAmount = new BigDecimal(0);
-                BigDecimal realCost = new BigDecimal(0);
-
-                try {
-                    realAmount = BigDecimal.valueOf((double) engine.eval(amountFormula));
-                    realCost = BigDecimal.valueOf((double) engine.eval(costFormula));
-                } catch (ScriptException e) {
-                    String paramsStr = "{AMOUNT:" + amount +
-                            ", PRICE:" + priceSetting.getSettingValue() +
-                            ", TIMES:" + rateSetting.getSettingValue() +
-                            "}";
-                    LOGGER.error("evaluate formula error, amountFormula={}, costFormula={}, params={}", amountFormula, costFormula, paramsStr);
-                    e.printStackTrace();
-                    throw errorWith(SCOPE, EnergyConsumptionServiceErrorCode.ERR_METER_FORMULA_ERROR, "evaluate formula error", e);
                 }
 
                 //删除昨天的记录（手工刷的时候）
@@ -2020,6 +2022,49 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 throw new RuntimeException(String.format("meter id = %s, meterName = %s", meter.getId(), meter.getName()), e);
             }
         }
+    }
+
+    private BigDecimal calculateBlockTariff(ScriptEngine engine, EnergyMeterSettingLog priceSetting, BigDecimal realAmount) {
+        EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(priceSetting.getConfigId());
+        EnergyMeterPriceConfigDTO priceConfigDTO = toEnergyMeterPriceConfigDTO(priceConfig);
+        BigDecimal totalCost = new BigDecimal(0);
+        if(priceConfigDTO != null && priceConfigDTO.getExpression() != null) {
+            List<EnergyMeterRangePriceDTO> rangePriceDTOs = priceConfigDTO.getExpression().getRangePrice();
+            if(rangePriceDTOs != null && rangePriceDTOs.size() > 0) {
+                BigDecimal zero = new BigDecimal(0);
+
+                for(EnergyMeterRangePriceDTO rangePriceDTO : rangePriceDTOs) {
+                    BigDecimal minValue = StringUtils.isEmpty(rangePriceDTO.getMinValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMinValue());
+                    BigDecimal maxValue = StringUtils.isEmpty(rangePriceDTO.getMaxValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMaxValue());
+
+                    //在区间内
+                    if((minValue.compareTo(zero) < 0 || minValue.compareTo(realAmount) <= 0)
+                            && (maxValue.compareTo(zero) < 0  || maxValue.compareTo(realAmount) >= 0)) {
+                        totalCost.add(rangePriceDTO.getPrice().multiply(realAmount.subtract(minValue)));
+                    }
+                    //比该区间最大值大
+                    if(maxValue.compareTo(zero) >= 0 && maxValue.compareTo(realAmount) < 0) {
+                        if(minValue.compareTo(zero) < 0) {
+                            totalCost.add(rangePriceDTO.getPrice().multiply(maxValue.subtract(zero)));
+                        } else {
+                            totalCost.add(rangePriceDTO.getPrice().multiply(maxValue.subtract(minValue)));
+                        }
+
+                    }
+                    //比该区间最小值小则不计算
+                }
+            }
+        }
+        return totalCost;
+    }
+
+    private Boolean calculateRange(EnergyMeterRangePriceDTO rangePriceDTO) {
+        String lowerBoundary = rangePriceDTO.getLowerBoundary();
+        String upperBoundary = rangePriceDTO.getUpperBoundary();
+        BigDecimal minValue = StringUtils.isEmpty(rangePriceDTO.getMinValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMinValue());
+        BigDecimal maxValue = StringUtils.isEmpty(rangePriceDTO.getMaxValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMaxValue());
+
+//        if()
     }
 
     /**

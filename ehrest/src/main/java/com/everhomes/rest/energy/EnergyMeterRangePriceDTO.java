@@ -15,9 +15,9 @@ import java.math.BigDecimal;
  */
 public class EnergyMeterRangePriceDTO {
 
-    private Long minValue;
+    private String minValue;
 
-    private Long maxValue;
+    private String maxValue;
 
     private String upperBoundary;
 
@@ -25,20 +25,20 @@ public class EnergyMeterRangePriceDTO {
 
     private BigDecimal price;
 
-    public Long getMinValue() {
-        return minValue;
-    }
-
-    public void setMinValue(Long minValue) {
-        this.minValue = minValue;
-    }
-
-    public Long getMaxValue() {
+    public String getMaxValue() {
         return maxValue;
     }
 
-    public void setMaxValue(Long maxValue) {
+    public void setMaxValue(String maxValue) {
         this.maxValue = maxValue;
+    }
+
+    public String getMinValue() {
+        return minValue;
+    }
+
+    public void setMinValue(String minValue) {
+        this.minValue = minValue;
     }
 
     public String getUpperBoundary() {
