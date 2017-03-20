@@ -13,7 +13,7 @@ ALTER TABLE eh_service_alliances ADD COLUMN `button_title` VARCHAR(64);
 
 -- 物业账单3.0 by xiongying 20170320
 -- 账单表
-DROP TABLE IF EXISTS `eh_asset_bills`;
+-- DROP TABLE IF EXISTS `eh_asset_bills`;
 CREATE TABLE `eh_asset_bills` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
@@ -71,7 +71,7 @@ CREATE TABLE `eh_asset_bills` (
 
 
 -- 用户模板字段表（给一组初始数据）
-DROP TABLE IF EXISTS `eh_asset_bill_template_fields`;
+-- DROP TABLE IF EXISTS `eh_asset_bill_template_fields`;
 CREATE TABLE `eh_asset_bill_template_fields` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
@@ -94,7 +94,7 @@ CREATE TABLE `eh_asset_bill_template_fields` (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- 物业公司催缴记录
-DROP TABLE IF EXISTS `eh_asset_bill_notify_records`;
+-- DROP TABLE IF EXISTS `eh_asset_bill_notify_records`;
 CREATE TABLE `eh_asset_bill_notify_records` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
