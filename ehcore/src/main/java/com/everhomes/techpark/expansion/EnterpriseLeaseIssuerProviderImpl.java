@@ -6,6 +6,7 @@ import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
+import com.everhomes.rest.techpark.expansion.LeaseIssuerStatus;
 import com.everhomes.sequence.SequenceProvider;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.daos.EhLeaseIssuerAddressesDao;
@@ -16,6 +17,7 @@ import com.everhomes.server.schema.tables.pojos.EhLeaseIssuers;
 import com.everhomes.server.schema.tables.records.EhLeaseConfigsRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseIssuerAddressesRecord;
 import com.everhomes.server.schema.tables.records.EhLeaseIssuersRecord;
+import com.everhomes.user.UserContext;
 import com.everhomes.util.ConvertHelper;
 import org.apache.commons.lang.StringUtils;
 import org.jooq.*;
@@ -51,6 +53,10 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 				.getSequenceDomainFromTablePojo(EhLeaseIssuers.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuers.class));
 		leaseIssuer.setId(id);
+		leaseIssuer.setCreatorUid(UserContext.current().getUser().getId());
+		leaseIssuer.setCreateTime(new Timestamp(System.currentTimeMillis()));
+		leaseIssuer.setStatus(LeaseIssuerStatus.ACTIVE.getCode());
+
 		EhLeaseIssuersDao dao = new EhLeaseIssuersDao(context.configuration());
 		dao.insert(leaseIssuer);
 
@@ -86,6 +92,7 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
 		SelectQuery<EhLeaseIssuersRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUERS);
+		query.addConditions(Tables.EH_LEASE_ISSUERS.STATUS.eq(LeaseIssuerStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
 		if (StringUtils.isNotBlank(keyword)) {
 			keyword = "%" + keyword + "%";
@@ -136,7 +143,7 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	@Override
 	public void deleteLeaseIssuerAddress(LeaseIssuerAddress leaseIssuerAddress) {
 		long id = sequenceProvider.getNextSequence(NameMapper
-				.getSequenceDomainFromTablePojo(EhLeaseIssuers.class));
+				.getSequenceDomainFromTablePojo(EhLeaseIssuerAddresses.class));
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWriteWith(EhLeaseIssuerAddresses.class));
 		leaseIssuerAddress.setId(id);
 		EhLeaseIssuerAddressesDao dao = new EhLeaseIssuerAddressesDao(context.configuration());

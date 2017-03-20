@@ -800,8 +800,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
                     "LeaseIssuer not found.");
         }
-
-        enterpriseLeaseIssuerProvider.deleteLeaseIssuer(leaseIssuer);
+        leaseIssuer.setStatus(LeaseIssuerStatus.INACTIVE.getCode());
+        enterpriseLeaseIssuerProvider.updateLeaseIssuer(leaseIssuer);
     }
 
     @Override
@@ -814,6 +814,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         }
 
         LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+        leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
+
         //TODO:门牌地址
         enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
 
