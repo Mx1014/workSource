@@ -28,6 +28,8 @@ public class UpdateEnergyMeterDefaultSettingCommand {
 
     private Byte calculationType;
     private Long configId;
+    private Long ownerId;
+    private String ownerType;
 
     public Long getOrganizationId() {
         return organizationId;
@@ -83,6 +85,22 @@ public class UpdateEnergyMeterDefaultSettingCommand {
 
     public void setConfigId(Long configId) {
         this.configId = configId;
+    }
+
+    public Long getOwnerId() {
+        return ownerId;
+    }
+
+    public void setOwnerId(Long ownerId) {
+        this.ownerId = ownerId;
+    }
+
+    public String getOwnerType() {
+        return ownerType;
+    }
+
+    public void setOwnerType(String ownerType) {
+        this.ownerType = ownerType;
     }
 
     @Override

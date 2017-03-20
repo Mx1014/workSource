@@ -20,8 +20,8 @@ public enum PriceCalculationType {
         return code;
     }
 
-    public static EnergyStatisticType fromCode(Byte code) {
-        for (EnergyStatisticType type : EnergyStatisticType.values()) {
+    public static PriceCalculationType fromCode(Byte code) {
+        for (PriceCalculationType type : PriceCalculationType.values()) {
             if (type.getCode().equals(code)) {
                 return type;
             }

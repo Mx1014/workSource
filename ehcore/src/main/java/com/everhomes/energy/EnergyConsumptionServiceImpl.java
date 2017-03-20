@@ -2011,7 +2011,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dayStat.setLastReading(dayLastReading);
                 dayStat.setCurrentReading(dayCurrReading);
                 dayStat.setCurrentAmount(realAmount);
-                dayStat.setCurrentCost(realCost);
+//                dayStat.setCurrentCost(realCost);
                 dayStat.setResetMeterFlag(resetFlag);
                 dayStat.setChangeMeterFlag(changeFlag);
                 dayStat.setStatus(EnergyCommonStatus.ACTIVE.getCode());
@@ -2036,14 +2036,15 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 for(EnergyMeterRangePriceDTO rangePriceDTO : rangePriceDTOs) {
                     BigDecimal minValue = StringUtils.isEmpty(rangePriceDTO.getMinValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMinValue());
                     BigDecimal maxValue = StringUtils.isEmpty(rangePriceDTO.getMaxValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMaxValue());
-
+                    RangeBoundaryType lowerBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getLowerBoundary());
+                    RangeBoundaryType upperBoundary = RangeBoundaryType.fromCode(rangePriceDTO.getUpperBoundary());
                     //在区间内
-                    if((minValue.compareTo(zero) < 0 || minValue.compareTo(realAmount) <= 0)
-                            && (maxValue.compareTo(zero) < 0  || maxValue.compareTo(realAmount) >= 0)) {
+                    if((minValue.compareTo(zero) < 0 || calculateLowerBoundary(lowerBoundary, minValue, realAmount))
+                            && (maxValue.compareTo(zero) < 0  || calculateUpperBoundary(upperBoundary, maxValue, realAmount))) {
                         totalCost.add(rangePriceDTO.getPrice().multiply(realAmount.subtract(minValue)));
                     }
                     //比该区间最大值大
-                    if(maxValue.compareTo(zero) >= 0 && maxValue.compareTo(realAmount) < 0) {
+                    if(maxValue.compareTo(zero) >= 0 && greaterThanMax(upperBoundary, maxValue, realAmount)) {
                         if(minValue.compareTo(zero) < 0) {
                             totalCost.add(rangePriceDTO.getPrice().multiply(maxValue.subtract(zero)));
                         } else {
@@ -2058,13 +2059,49 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         return totalCost;
     }
 
-    private Boolean calculateRange(EnergyMeterRangePriceDTO rangePriceDTO) {
-        String lowerBoundary = rangePriceDTO.getLowerBoundary();
-        String upperBoundary = rangePriceDTO.getUpperBoundary();
-        BigDecimal minValue = StringUtils.isEmpty(rangePriceDTO.getMinValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMinValue());
-        BigDecimal maxValue = StringUtils.isEmpty(rangePriceDTO.getMaxValue()) ? new BigDecimal(-1) : new BigDecimal(rangePriceDTO.getMaxValue());
+    private Boolean calculateLowerBoundary(RangeBoundaryType lowerBoundary, BigDecimal minValue, BigDecimal realAmount) {
+        Boolean rangeFlag = false;
+        switch (lowerBoundary) {
+            case LESS:
+                rangeFlag = (minValue.compareTo(realAmount) < 0);
+                break;
 
-//        if()
+            case LESS_AND_EQUAL:
+                rangeFlag = (minValue.compareTo(realAmount) <= 0);
+                break;
+        }
+
+        return rangeFlag;
+    }
+
+    private Boolean calculateUpperBoundary(RangeBoundaryType upperBoundary, BigDecimal maxValue, BigDecimal realAmount) {
+        Boolean rangeFlag = false;
+        switch (upperBoundary) {
+            case GREATER:
+                rangeFlag = (maxValue.compareTo(realAmount) > 0);
+                break;
+
+            case GREATER_AND_EQUAL:
+                rangeFlag = (maxValue.compareTo(realAmount) >= 0);
+                break;
+        }
+
+        return rangeFlag;
+    }
+
+    private Boolean greaterThanMax(RangeBoundaryType upperBoundary, BigDecimal maxValue, BigDecimal realAmount) {
+        Boolean flag = false;
+        switch (upperBoundary) {
+            case GREATER:
+                flag = (maxValue.compareTo(realAmount) <= 0);
+                break;
+
+            case GREATER_AND_EQUAL:
+                flag = (maxValue.compareTo(realAmount) < 0);
+                break;
+        }
+
+        return flag;
     }
 
     /**
