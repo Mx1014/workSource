@@ -1350,7 +1350,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
-				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
 		if(action != null) {
 			graphAction = new FlowGraphSMSAction();
 			graphAction.setFlowAction(action);
