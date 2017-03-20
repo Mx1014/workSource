@@ -46,6 +46,8 @@ class FlowPmTaskHandle implements PmTaskHandle {
 	private BuildingProvider buildingProvider;
 	@Autowired
 	private CommunityProvider communityProvider;
+	@Autowired
+	private FlowButtonProvider flowButtonProvider;
 
 	@Override
 	public PmTaskDTO createTask(CreateTaskCommand cmd, Long requestorUid, String requestorName, String requestorPhone){
@@ -191,16 +193,29 @@ class FlowPmTaskHandle implements PmTaskHandle {
 
 		PmTask task = pmTaskProvider.findTaskById(cmd.getTaskId());
 		FlowCase flowCase = flowCaseProvider.getFlowCaseById(task.getFlowCaseId());
+		//TODO:autoStep 没有消息 暂时改成firebutton
+//		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+//		stepDTO.setFlowCaseId(flowCase.getId());
+//		stepDTO.setFlowMainId(flowCase.getFlowMainId());
+//		stepDTO.setFlowVersion(flowCase.getFlowVersion());
+//		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
+//		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
+//		stepDTO.setStepCount(flowCase.getStepCount());
+//		flowService.processAutoStep(stepDTO);
 
-		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
-		stepDTO.setFlowCaseId(flowCase.getId());
-		stepDTO.setFlowMainId(flowCase.getFlowMainId());
-		stepDTO.setFlowVersion(flowCase.getFlowVersion());
-		stepDTO.setFlowNodeId(flowCase.getCurrentNodeId());
-		stepDTO.setAutoStepType(FlowStepType.APPROVE_STEP.getCode());
-		stepDTO.setStepCount(flowCase.getStepCount());
-		flowService.processAutoStep(stepDTO);
+		List<FlowButton> buttons = flowButtonProvider.findFlowButtonsByUserType(flowCase.getCurrentNodeId(),
+				flowCase.getFlowVersion(), FlowUserType.PROCESSOR.getCode());
 
+		FlowButton button = null;
+		for (FlowButton b: buttons) {
+			if (FlowStepType.APPROVE_STEP.getCode().equals(b.getFlowStepType()))
+				button = b;
+		}
+
+		FlowFireButtonCommand fireButtonCommand = new FlowFireButtonCommand();
+		fireButtonCommand.setFlowCaseId(flowCase.getId());
+		fireButtonCommand.setButtonId(button.getId());
+		flowService.fireButton(fireButtonCommand);
 	}
 
 }
