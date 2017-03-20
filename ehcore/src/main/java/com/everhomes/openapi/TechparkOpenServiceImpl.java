@@ -5,14 +5,17 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
 import org.apache.commons.lang.StringUtils;
+import org.apache.poi.ss.formula.functions.Count;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,6 +38,7 @@ import com.everhomes.organization.OrganizationAddress;
 import com.everhomes.organization.OrganizationCommunityRequest;
 import com.everhomes.organization.OrganizationDetail;
 import com.everhomes.organization.OrganizationProvider;
+import com.everhomes.organization.OrganizationService;
 import com.everhomes.organization.pm.CommunityAddressMapping;
 import com.everhomes.rest.acl.admin.CreateOrganizationAdminCommand;
 import com.everhomes.rest.address.NamespaceAddressType;
@@ -49,6 +53,7 @@ import com.everhomes.rest.openapi.techpark.CustomerContractBuilding;
 import com.everhomes.rest.openapi.techpark.CustomerLivingStatus;
 import com.everhomes.rest.openapi.techpark.CustomerRental;
 import com.everhomes.rest.openapi.techpark.SyncDataCommand;
+import com.everhomes.rest.organization.DeleteOrganizationIdCommand;
 import com.everhomes.rest.organization.NamespaceOrganizationType;
 import com.everhomes.rest.organization.OrganizationAddressStatus;
 import com.everhomes.rest.organization.OrganizationCommunityDTO;
@@ -60,6 +65,7 @@ import com.everhomes.rest.organization.OrganizationType;
 import com.everhomes.rest.organization.pm.PmAddressMappingStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionStatus;
 import com.everhomes.rest.techpark.expansion.LeasePromotionType;
+import com.everhomes.search.OrganizationSearcher;
 import com.everhomes.techpark.expansion.EnterpriseApplyEntryProvider;
 import com.everhomes.techpark.expansion.LeasePromotion;
 import com.everhomes.user.User;
@@ -88,6 +94,9 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	private OrganizationProvider organizationProvider;
 	
 	@Autowired
+	private OrganizationService organizationService;
+	
+	@Autowired
 	private ContractProvider contractProvider;
 	
 	@Autowired
@@ -108,10 +117,31 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 	@Autowired
 	private EnterpriseApplyEntryProvider enterpriseApplyEntryProvider;
 	
+	@Autowired
+	private OrganizationSearcher organizationSearcher;
+	
 	//创建一个线程的线程池，这样三种类型的数据如果一起过来就可以排队执行了
 	private ExecutorService queueThreadPool = Executors.newFixedThreadPool(1); 
 	
 	private ExecutorService rentalThreadPool = Executors.newFixedThreadPool(6); 
+	
+	// 从同步过来的数据中取出真正的楼栋和门牌号，以便电商使用，add by tt, 20170213
+	private static List<String> ruleList = new ArrayList<>();
+	private static Map<String, String> ruleMap = new HashMap<>();
+	
+	static {
+		ruleList.add("生产力大楼");
+		ruleList.add("科技工业大厦");
+		ruleList.add("金融基地");
+		ruleList.add("金融科技大厦");
+		
+		//规则为1-2-3-4，前两个数字表示楼栋的分隔线，后两个数字表示门牌的分隔线，最后一个省略表示分隔到底，未指明规则的按最后一个分隔线分隔
+		
+		ruleMap.put("生产力大楼", "1-2+1-2+1");	//生产力大楼-生产力大楼-A101，2+1表示第二个横线+1个字符的位置
+		ruleMap.put("科技工业大厦", "0-1-2");
+		ruleMap.put("金融基地", "1-2-2");
+		ruleMap.put("金融科技大厦", "0-1-2");
+	}
 	
 	@Override
 	public void syncData(SyncDataCommand cmd) {
@@ -373,6 +403,14 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				}
 			}
 		}
+		
+		// 同步完地址后更新community表中的门牌总数，add by tt, 20170308
+		Community community = communityProvider.findCommunityById(appNamespaceMapping.getCommunityId());
+		Integer count = addressProvider.countApartment(appNamespaceMapping.getCommunityId());
+		if (community.getAptCount().intValue() != count.intValue()) {
+			community.setAptCount(count);
+			communityProvider.updateCommunity(community);
+		}
 	}
 	
 	private void insertAddress(Integer namespaceId, Long communityId, CustomerApartment customerApartment) {
@@ -403,7 +441,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		address.setOperatorUid(1L);
 		address.setOperateTime(address.getCreateTime());
-		address.setAreaSize(customerApartment.getAreaSize());
+		address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
 		address.setNamespaceId(namespaceId);
 		address.setRentArea(customerApartment.getRentArea());
 		address.setBuildArea(customerApartment.getBuildArea());
@@ -411,10 +449,117 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setLayout(customerApartment.getLayout());
 		address.setLivingStatus(getLivingStatus(customerApartment.getLivingStatus()));
 		address.setNamespaceAddressType(NamespaceAddressType.JINDIE.getCode());
+		
+		//添加电商用到的楼栋和门牌
+		String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+		address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+		
 		addressProvider.createAddress(address);
 		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
 	
+	private String getRulePrefix(String apartmentName) {
+		if (apartmentName != null) {
+			for (String str : ruleList) {
+				if (apartmentName.startsWith(str)) {
+					return str;
+				}
+			}
+		}
+		return null;
+	}
+	
+	// 查找“-”第几次出现的位置
+	private int indexOf(String source, Integer count, Integer offset) {
+		try {
+			if (count != null) {
+				if (count.intValue() <= 0) {
+					return -1;
+				}else if (count.intValue() == 1) {
+					if (offset == null || offset.intValue() == 0) {
+						return source.indexOf("-");
+					}
+					return source.indexOf("-", offset);
+				}else {
+					count--;
+					return indexOf(source, count, source.indexOf("-")+1);
+				}
+			}
+			return -1;
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+	
+	private int getActualPos(String apartmentName, String rule) {
+		try {
+			Integer offset = 0; //在横线基础上的偏移量
+			Integer lineCount = null; //第几个横线
+			if (rule.contains("+")) {
+				String[] arr = rule.split("\\+");
+				lineCount = Integer.parseInt(arr[0]);
+				offset = Integer.parseInt(arr[1]);
+			}else {
+				lineCount = Integer.parseInt(rule);
+			}
+			return indexOf(apartmentName, lineCount, 0) + offset.intValue();			
+		} catch (Exception e) {
+			return -1;
+		}
+	}
+	
+	// 0存储楼栋名称，1存储门牌名称
+	private String[] getBusinessBuildingApartmentName(String apartmentName) {
+		String[] result = new String[2];
+		try {
+			String rule = ruleMap.get(getRulePrefix(apartmentName));
+			if (rule != null) {
+				String[] ruleArray = rule.split("-");
+				if (ruleArray.length >= 3) {
+					int buildingStart = getActualPos(apartmentName, ruleArray[0]) + 1;
+					int buildingEnd = getActualPos(apartmentName, ruleArray[1]);
+					if (apartmentName.charAt(buildingEnd) >= '0' && apartmentName.charAt(buildingEnd) <= '9') {
+						throw new Exception();
+					}
+					if (apartmentName.charAt(buildingEnd) != '-') {
+						buildingEnd++;
+					}
+					result[0] = apartmentName.substring(buildingStart, buildingEnd);
+					int apartmentStart = getActualPos(apartmentName, ruleArray[2]) + 1;
+					if (ruleArray.length == 4) {
+						int apartmentEnd = getActualPos(apartmentName, ruleArray[3]);
+						result[1] = apartmentName.substring(apartmentStart, apartmentEnd);
+					}else {
+						result[1] = apartmentName.substring(apartmentStart);
+					}
+				}else {
+					result = getDefaultBusinessBuildingApartmentName(apartmentName);
+				}
+			}else {
+				result = getDefaultBusinessBuildingApartmentName(apartmentName);
+			}
+		} catch (Exception e) {
+			result = getDefaultBusinessBuildingApartmentName(apartmentName);
+		}
+		
+		return result;
+	}
+	
+	private String[] getDefaultBusinessBuildingApartmentName(String apartmentName) {
+		String[] result = new String[2];
+		if (apartmentName != null) {
+			if (apartmentName.contains("-")) {
+				int lastIndex = apartmentName.lastIndexOf("-");
+				result[0] = apartmentName.substring(0, lastIndex);
+				result[1] = apartmentName.substring(lastIndex + 1);
+			}else {
+				result[0] = result[1] = apartmentName;
+			}
+		}
+		return result;
+	}
+
 	// 插入或更新招租管理
 	private void insertOrUpdateLeasePromotion(Byte theirLivingStatus, Integer namespaceId, Long communityId, Double rentArea, String buildingName, String apartmentName){
 		CustomerLivingStatus livingStatus = CustomerLivingStatus.fromCode(theirLivingStatus);
@@ -483,7 +628,7 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 
 	private void updateAddress(Address address, CustomerApartment customerApartment) {
 		address.setApartmentFloor(customerApartment.getApartmentFloor());
-		address.setAreaSize(customerApartment.getAreaSize());
+		address.setAreaSize(customerApartment.getAreaSize()==null?customerApartment.getRentArea():customerApartment.getAreaSize());
 		address.setRentArea(customerApartment.getRentArea());
 		address.setBuildArea(customerApartment.getBuildArea());
 		address.setInnerArea(customerApartment.getInnerArea());
@@ -492,6 +637,12 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		address.setOperatorUid(1L);
 		address.setOperateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		address.setStatus(CommonStatus.ACTIVE.getCode());
+
+		//添加电商用到的楼栋和门牌
+		String[] businessBuildingApartmentNames = getBusinessBuildingApartmentName(address.getApartmentName());
+		address.setBusinessBuildingName(businessBuildingApartmentNames[0]);
+		address.setBusinessApartmentName(businessBuildingApartmentNames[1]);
+		
 		addressProvider.updateAddress(address);
 		insertOrUpdateLeasePromotion(customerApartment.getLivingStatus(), address.getNamespaceId(), address.getCommunityId(), address.getRentArea(), address.getBuildingName(), address.getApartmentName());
 	}
@@ -525,9 +676,17 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 		 * eh_users
 		 * eh_user_identifiers
 		 */
-		
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("begin sync all rentings, size="+backupList.size());
+		}
 		List<Organization> myOrganizationList = organizationProvider.listOrganizationByNamespaceType(appNamespaceMapping.getNamespaceId(), NamespaceOrganizationType.JINDIE.getCode());
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 1");
+		}
 		List<CustomerRental> theirRentalList = mergeBackupList(backupList, CustomerRental.class);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 2");
+		}
 		//有的组织名称过长，格式化一下
 		for (CustomerRental customerRental : theirRentalList) {
 			String name = customerRental.getName();
@@ -535,34 +694,70 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 				customerRental.setName(name.substring(0,64).trim());
 			}
 		}
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 3");
+		}
 		formatBuildingName(theirRentalList);
+		if (LOGGER.isDebugEnabled()) {
+			LOGGER.debug("sync all rentings, flag 4");
+		}
 		for (Organization myOrganization : myOrganizationList) {
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("sync all rentings, flag 5");
+			}
 			CustomerRental customerRental = findFromTheirRentalList(myOrganization, theirRentalList);
+			if (LOGGER.isDebugEnabled()) {
+				LOGGER.debug("sync all rentings, flag 6");
+			}
 			//一个组织起一个线程和一个事务来做更新，否则太慢了会导致超时导致事务回滚
 			rentalThreadPool.execute(()->{
-				dbProvider.execute(s->{
-					if (customerRental != null) {
-						if (LOGGER.isDebugEnabled()) {
-							LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
-						}
-						updateOrganization(myOrganization, customerRental);
-						insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-						insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-						insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
-						insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
-						insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
-					}else {
-						deleteOrganization(myOrganization);
-						deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
-						deleteContracts(myOrganization);
+				try {
+					if (LOGGER.isDebugEnabled()) {
+						LOGGER.debug("sync all rentings, flag 7");
 					}
-					return true;
-				});
+					dbProvider.execute(s->{
+						try {
+							if (LOGGER.isDebugEnabled()) {
+								LOGGER.debug("sync all rentings, flag 8");
+							}
+							if (customerRental != null) {
+								if (LOGGER.isDebugEnabled()) {
+									LOGGER.debug("sync organization, name="+customerRental.getName()+", number="+customerRental.getNumber());
+								}
+								updateOrganization(myOrganization, customerRental);
+								insertOrUpdateOrganizationDetail(myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+								insertOrUpdateOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+								insertOrUpdateOrganizationMembers(appNamespaceMapping.getNamespaceId(), myOrganization, customerRental.getContact(), customerRental.getContactPhone());
+								insertOrUpdateAllContracts(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, customerRental.getContracts());
+								insertOrUpdateAllOrganizationAddresses(appNamespaceMapping.getNamespaceId(), appNamespaceMapping.getCommunityId(), myOrganization, extractCustomerContractBuilding(customerRental));
+							}else {
+//								deleteOrganization(myOrganization);
+//								deleteOrganizationCommunityRequest(appNamespaceMapping.getCommunityId(), myOrganization);
+								//改成以下方式，否则es中的数据无法删除
+								DeleteOrganizationIdCommand deleteOrganizationIdCommand = new DeleteOrganizationIdCommand();
+								deleteOrganizationIdCommand.setId(myOrganization.getId());
+								organizationService.deleteEnterpriseById(deleteOrganizationIdCommand);
+								deleteContracts(myOrganization);
+							}
+							return true;
+						} catch (Exception e) {
+							LOGGER.error("transaction error", e);
+							throw e;
+						}
+					});
+				} catch (Exception e) {
+					LOGGER.error("thread error", e);
+					throw e;
+				}
+				
 			});
 			
 		}
 		for (CustomerRental customerRental : theirRentalList) {
 			if (customerRental.getDealed() != null && customerRental.getDealed().booleanValue() == true) {
+				continue;
+			}
+			if (StringUtils.isBlank(customerRental.getName()) || StringUtils.isBlank(customerRental.getNumber())) {
 				continue;
 			}
 			rentalThreadPool.execute(()->{
@@ -1450,5 +1645,6 @@ public class TechparkOpenServiceImpl implements TechparkOpenService{
 			organizationDetail.setContactor(contact);
 			organizationProvider.updateOrganizationDetail(organizationDetail);
 		}
+		organizationSearcher.feedDoc(organization);
 	}
 }

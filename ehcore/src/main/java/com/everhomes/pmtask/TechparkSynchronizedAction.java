@@ -1,39 +1,33 @@
 package com.everhomes.pmtask;
 
-import java.io.ByteArrayOutputStream;
 import java.io.IOException;
-import java.io.InputStream;
-import java.net.HttpURLConnection;
+import java.net.MalformedURLException;
 import java.net.URL;
 import java.text.SimpleDateFormat;
 import java.util.Date;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import org.apache.commons.httpclient.HttpStatus;
+import com.everhomes.configuration.ConfigurationProvider;
 import org.apache.commons.lang.StringUtils;
 import org.apache.http.HttpEntity;
 import org.apache.http.client.methods.CloseableHttpResponse;
 import org.apache.http.client.methods.HttpGet;
 import org.apache.http.impl.client.CloseableHttpClient;
 import org.apache.http.impl.client.HttpClients;
+import org.apache.http.util.EntityUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
 import org.springframework.context.annotation.Scope;
-import org.springframework.data.redis.core.RedisTemplate;
-import org.springframework.data.redis.core.ValueOperations;
-import org.springframework.data.redis.serializer.StringRedisSerializer;
 import org.springframework.stereotype.Component;
 
 import sun.misc.BASE64Encoder;
 
 import com.alibaba.fastjson.JSONArray;
 import com.alibaba.fastjson.JSONObject;
-import com.everhomes.address.Address;
-import com.everhomes.address.AddressProvider;
-import com.everhomes.bigcollection.Accessor;
-import com.everhomes.bigcollection.BigCollectionProvider;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.contentserver.ContentServerResource;
@@ -44,7 +38,6 @@ import com.everhomes.organization.OrganizationMember;
 import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.pmtask.webservice.WorkflowAppDraftWebService;
 import com.everhomes.pmtask.webservice.WorkflowAppDraftWebServicePortType;
-import com.everhomes.rest.forum.AttachmentDescriptor;
 import com.everhomes.rest.pmtask.PmTaskAttachmentDTO;
 import com.everhomes.rest.pmtask.PmTaskAttachmentType;
 import com.everhomes.user.User;
@@ -57,9 +50,7 @@ import com.everhomes.util.ConvertHelper;
 public class TechparkSynchronizedAction implements Runnable{
 	
 	private static final Logger LOGGER = LoggerFactory.getLogger(TechparkSynchronizedAction.class);
-	
-	@Autowired
-	private AddressProvider addressProvider;
+
 	@Autowired
 	private UserProvider userProvider;
 	@Autowired
@@ -71,8 +62,8 @@ public class TechparkSynchronizedAction implements Runnable{
 	@Autowired
 	private CategoryProvider categoryProvider;
 	@Autowired
-    private BigCollectionProvider bigCollectionProvider;
-	
+	private ConfigurationProvider configProvider;
+
 	SimpleDateFormat dateSF = new SimpleDateFormat("yyyy-MM-dd");
 	
 	private Long taskId;
@@ -93,15 +84,11 @@ public class TechparkSynchronizedAction implements Runnable{
 		PmTask task = pmTaskProvider.findTaskById(taskId);
 		
 		UserContext userContext = UserContext.current();
-		User user = userContext.getUser();
-		
-//		if(null == user) {
-			user = userProvider.findUserById(task.getCreatorUid());
-			userContext.setUser(user);
-			userContext.setNamespaceId(task.getNamespaceId());
-			userContext.setScheme("http");
-//		}
-		
+		User user = userProvider.findUserById(task.getCreatorUid());
+		userContext.setUser(user);
+		userContext.setNamespaceId(task.getNamespaceId());
+		userContext.setScheme("http");
+
 		Category taskCategory = categoryProvider.findCategoryById(task.getTaskCategoryId());
 		Category category = null;
 		if(null != task.getCategoryId())
@@ -137,7 +124,7 @@ public class TechparkSynchronizedAction implements Runnable{
 	public void synchronizedData(PmTask task, List<PmTaskAttachmentDTO> attachments, Category taskCategory, Category category) {
 		JSONObject param = new JSONObject();
 		String content = task.getContent();
-		param.put("fileFlag", "1");
+		param.put("fileFlag", String.valueOf(null==task.getPriority()?1:task.getPriority()));
 		param.put("fileTitle", content.length()<=5?content:content.substring(0, 5)+"...");
 		
 		Organization organization = organizationProvider.findOrganizationById(organizationId);
@@ -161,20 +148,11 @@ public class TechparkSynchronizedAction implements Runnable{
 		param.put("backDate", dateSF.format(new Date()));
 		
 		JSONArray enclosure = new JSONArray();
-		
-//		String key = PmTaskHandle.TECHPARK_REDIS_KEY_PREFIX + task.getId();
-//        Accessor acc = this.bigCollectionProvider.getMapAccessor(key, "");
-//        RedisTemplate redisTemplate = acc.getTemplate(stringRedisSerializer);
-//        ValueOperations<String, String> valueOperations = redisTemplate.opsForValue();
-//
-//        String attachmentJson = valueOperations.get(key);
-//        List<AttachmentDescriptor> attachments = JSONObject.parseArray(attachmentJson, AttachmentDescriptor.class);
-//        LOGGER.error("Delete TechparkSynchronizedData key, key={}", key);
-//        redisTemplate.delete(key);
-		
+
 		if(null != attachments) {
 			for(PmTaskAttachmentDTO ad: attachments) {
 				JSONObject attachment = new JSONObject();
+
 				ContentServerResource resource = contentServerService.findResourceByUri(ad.getContentUri());
 				String resourceName = resource.getResourceName();
 				String fileSuffix = "jpg";
@@ -194,12 +172,8 @@ public class TechparkSynchronizedAction implements Runnable{
 				String fileContent = null;
 				try {
 					fileContent = getImageStr(contentUrl);
-//					String fileContent1 = getURLImage(contentUrl);
-//					
-//					System.out.println(fileContent.equals(fileContent1));
-					
+
 				} catch (Exception e) {
-					// TODO Auto-generated catch block
 					e.printStackTrace();
 				}
 				if(null != fileContent)
@@ -211,97 +185,55 @@ public class TechparkSynchronizedAction implements Runnable{
 		}
 		
 		param.put("enclosure", enclosure);
-		
-        LOGGER.debug("Synchronized pmtask data to techpark oa param={}", param.toJSONString());
 
-        WorkflowAppDraftWebService service = new WorkflowAppDraftWebService();
+		if (LOGGER.isDebugEnabled())
+        	LOGGER.debug("Synchronized pmTask data to techpark oa param={}", param.toJSONString());
+
+		URL url = null;
+		try {
+			String value = configProvider.getValue("techpark.oa.url", "");
+			url = new URL(value);
+		} catch (MalformedURLException e) {
+			LOGGER.error("Connect techpark oa failed", e);
+		}
+		WorkflowAppDraftWebService service = new WorkflowAppDraftWebService(url);
     	WorkflowAppDraftWebServicePortType port = service.getWorkflowAppDraftWebServiceHttpPort();
 		String result = port.worflowAppDraft(param.toJSONString());
-		
-        LOGGER.debug("Synchronized pmtask data to techpark oa result={}", result);
+
+		if (LOGGER.isDebugEnabled())
+        	LOGGER.debug("Synchronized pmTask data to techpark oa result={}", result);
 
 	}
-    final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
 
-	
-	public String getURLImage(String imageUrl) throws Exception {
-		if(null == imageUrl)
-			return null;
-        //new一个URL对象  
-        URL url = new URL(imageUrl);  
-        //打开链接  
-        HttpURLConnection conn = (HttpURLConnection)url.openConnection();  
-        //设置请求方式为"GET"  
-        conn.setRequestMethod("GET");  
-        //超时响应时间为5秒  
-//        conn.setConnectTimeout(5 * 1000);  
-        //通过输入流获取图片数据  
-        InputStream inStream = conn.getInputStream();
-        System.out.println(inStream.available());
-        //得到图片的二进制数据，以二进制封装得到数据，具有通用性  
-        byte[] data = readInputStream(inStream);  
-        BASE64Encoder encode = new BASE64Encoder();  
-        String s = encode.encode(data);  
-        return s;  
-    }
-	
-	private byte[] readInputStream(InputStream inStream) throws Exception{  
-        ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
+	public String getImageStr(String url) {
 
-        byte[] buffer = new byte[1024];  
-        int len = 0;  
-        while( (len=inStream.read(buffer)) != -1 ){  
-            outStream.write(buffer, 0, len);  
-        }  
-        inStream.close();  
-        return outStream.toByteArray();  
-    } 
-	
-	public String getImageStr(String url){
         CloseableHttpClient httpclient = HttpClients.createDefault();
         CloseableHttpResponse response = null;
         try {
             HttpGet httpGet = new HttpGet(url);
             
             response = httpclient.execute(httpGet);
-            
-            System.out.println(response.getStatusLine());
-            HttpEntity entity = response.getEntity();
-            
-            if (entity != null) {
-            	InputStream instream = entity.getContent();
-            	System.out.println(instream.available());
-            	
-            	ByteArrayOutputStream outStream = new ByteArrayOutputStream();  
+			int status = response.getStatusLine().getStatusCode();
 
-            	byte[] data = null;
-                byte[] buffer = new byte[1024];  
-                int len = 0;  
-        			while( (len=instream.read(buffer)) != -1 ){  
-        			    outStream.write(buffer, 0, len);  
-        			}
-        		
-                
-                data = outStream.toByteArray();  
-        	    
-        	    // 加密
-        	    BASE64Encoder encoder = new BASE64Encoder();
-        	    return encoder.encode(data);
-            	
+			if (status == HttpStatus.SC_OK) {
+				HttpEntity entity = response.getEntity();
+
+				if (entity != null) {
+					byte[] data = EntityUtils.toByteArray(entity);
+
+					BASE64Encoder encoder = new BASE64Encoder();
+					return encoder.encode(data);
+				}
 			}
-
-        }catch (Exception e) {
-        	
-		} finally {
+        }catch (Exception e) {}
+		finally {
 			try {
 				response.close();
 				httpclient.close();
 			} catch (IOException e) {
 				e.printStackTrace();
 			}
-            
         }
         return null;
     }
-	
 }

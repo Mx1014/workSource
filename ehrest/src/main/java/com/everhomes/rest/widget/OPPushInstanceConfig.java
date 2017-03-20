@@ -14,6 +14,7 @@ public class OPPushInstanceConfig implements Serializable {
     private Integer entityCount;
     private Integer subjectHeight;
     private Integer descriptionHeight;
+    private Integer newsSize;
 
     public String getItemGroup() {
         return itemGroup;
@@ -45,6 +46,14 @@ public class OPPushInstanceConfig implements Serializable {
 
     public void setDescriptionHeight(Integer descriptionHeight) {
         this.descriptionHeight = descriptionHeight;
+    }
+
+    public Integer getNewsSize() {
+        return newsSize;
+    }
+
+    public void setNewsSize(Integer newsSize) {
+        this.newsSize = newsSize;
     }
 
     @Override

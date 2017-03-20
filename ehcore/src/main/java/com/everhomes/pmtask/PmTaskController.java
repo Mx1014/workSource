@@ -11,7 +11,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.everhomes.acl.RolePrivilegeService;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestDoc;
@@ -59,7 +58,6 @@ import com.everhomes.rest.pmtask.SearchTasksResponse;
 import com.everhomes.rest.pmtask.CompleteTaskCommand;
 import com.everhomes.rest.pmtask.TaskCategoryStatisticsDTO;
 import com.everhomes.rest.pmtask.UpdateTaskCommand;
-import com.everhomes.rest.ui.user.GetUserRelatedAddressResponse;
 
 @RestDoc(value="Pmtask controller", site="pmtask")
 @RestController
@@ -68,9 +66,6 @@ public class PmTaskController extends ControllerBase {
 
 	@Autowired
 	private PmTaskService pmTaskService;
-	
-	@Autowired
-	private RolePrivilegeService rolePrivilegeService;
 	@Autowired
 	private PmTaskSearch pmTaskSearch;
 
@@ -209,7 +204,7 @@ public class PmTaskController extends ControllerBase {
       @RequestMapping("updateTaskByOrg")
       @RestReturn(value=String.class)
       public RestResponse updateTaskByOrg(UpdateTaskCommand cmd) {
-    	  //TODO:
+
     	  pmTaskService.updateTaskByOrg(cmd);
           RestResponse response = new RestResponse();
           response.setErrorCode(ErrorCodes.SUCCESS);
@@ -308,7 +303,7 @@ public class PmTaskController extends ControllerBase {
 	@RequestMapping("evaluateTask")
 	@RestReturn(value=String.class)
 	public RestResponse evaluateTask(EvaluateTaskCommand cmd) {
-		//TODO:
+
 		pmTaskService.evaluateTask(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
@@ -323,13 +318,14 @@ public class PmTaskController extends ControllerBase {
 	@RequestMapping("listAuthorizationCommunityByUser")
 	@RestReturn(value=ListAuthorizationCommunityByUserResponse.class)
 	public RestResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd) {
-		//TODO:
+        //TODO:
 		ListAuthorizationCommunityByUserResponse resp = pmTaskService.listAuthorizationCommunityByUser(cmd);
 		RestResponse response = new RestResponse(resp);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
 		return response;
 	}
+
 	
 	/**
 	 * <b>URL: /pmtask/getTaskLog</b>
@@ -366,7 +362,7 @@ public class PmTaskController extends ControllerBase {
     @RequestMapping("listOperatePersonnels")
     @RestReturn(value=ListOperatePersonnelsResponse.class)
     public RestResponse listOperatePersonnels(ListOperatePersonnelsCommand cmd){
-    	//TODO 添加返回数量
+
     	ListOperatePersonnelsResponse resp = pmTaskService.listOperatePersonnels(cmd);
   	  	RestResponse res = new RestResponse(resp);
         res.setErrorCode(ErrorCodes.SUCCESS);
@@ -543,8 +539,8 @@ public class PmTaskController extends ControllerBase {
      */
     @RequestMapping("syncFromDb")
     @RestReturn(value=String.class)
-    public RestResponse syncFromDb() {
-    	pmTaskSearch.syncFromDb();
+    public RestResponse syncPmTask() {
+    	pmTaskSearch.syncPmTask();
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

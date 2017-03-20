@@ -6,6 +6,8 @@ import com.everhomes.rest.activity.*;
 import com.everhomes.rest.forum.QueryOrganizationTopicCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneCommand;
 import com.everhomes.rest.ui.activity.ListActivityPromotionEntitiesBySceneReponse;
+import com.everhomes.rest.ui.activity.ListActivityCategoryCommand;
+import com.everhomes.rest.ui.activity.ListActivityCategoryReponse;
 import com.everhomes.rest.ui.user.GetVideoPermissionInfoCommand;
 import com.everhomes.rest.ui.user.ListNearbyActivitiesBySceneCommand;
 import com.everhomes.rest.ui.user.RequestVideoPermissionCommand;
@@ -13,6 +15,10 @@ import com.everhomes.rest.ui.user.UserVideoPermissionDTO;
 import com.everhomes.util.Tuple;
 
 import java.util.List;
+
+import javax.servlet.http.HttpServletResponse;
+
+import org.springframework.web.multipart.MultipartFile;
 
 public interface ActivityService {
 
@@ -127,4 +133,19 @@ public interface ActivityService {
     ListActivityGoodsResponse listActivityGoods(ListActivityGoodsCommand cmd);
 
     ActivityGoodsDTO getActivityGoods(GetActivityGoodsCommand cmd);
-}
+
+	SignupInfoDTO manualSignup(ManualSignupCommand cmd);
+
+	SignupInfoDTO updateSignupInfo(UpdateSignupInfoCommand cmd);
+
+	void importSignupInfo(ImportSignupInfoCommand cmd, MultipartFile[] files);
+
+	ListSignupInfoResponse listSignupInfo(ListSignupInfoCommand cmd);
+
+	void exportSignupInfo(ExportSignupInfoCommand cmd, HttpServletResponse response);
+
+	void deleteSignupInfo(DeleteSignupInfoCommand cmd);
+
+	ListActivityCategoryReponse listActivityCategory(ListActivityCategoryCommand cmd);
+
+	SignupInfoDTO vertifyPersonByPhone(VertifyPersonByPhoneCommand cmd);}

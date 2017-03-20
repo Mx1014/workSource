@@ -10,6 +10,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageAnchor: 锚点</li>
  * <li>pageSize: 每页的数量</li>
  * <li>categoryId: 活动类型id</li>
+ * <li>contentCategoryId: 主题分类id</li>
  *</ul>
  */
 public class ListNearbyActivitiesBySceneCommand {
@@ -24,8 +25,18 @@ public class ListNearbyActivitiesBySceneCommand {
     private Integer pageSize;
     
     private Long categoryId;
+    
+    private Long contentCategoryId;
 
-    public String getSceneToken() {
+    public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
+
+	public String getSceneToken() {
         return sceneToken;
     }
 

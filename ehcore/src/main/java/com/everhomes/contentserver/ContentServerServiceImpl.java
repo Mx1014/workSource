@@ -1,15 +1,15 @@
 package com.everhomes.contentserver;
 
-import java.io.InputStream;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
-import java.util.stream.Collectors;
-
-import javax.annotation.PostConstruct;
-import javax.annotation.PreDestroy;
-
+import com.everhomes.constants.ErrorCodes;
+import com.everhomes.rest.contentserver.*;
+import com.everhomes.rest.contentserver.WebSocketConstant;
+import com.everhomes.rest.messaging.ImageBody;
+import com.everhomes.rest.rpc.PduFrame;
+import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
+import com.everhomes.util.RuntimeErrorException;
+import com.everhomes.util.StringHelper;
+import com.everhomes.util.WebTokenGenerator;
 import org.apache.commons.collections.CollectionUtils;
 import org.apache.commons.io.FilenameUtils;
 import org.apache.commons.lang.StringUtils;
@@ -28,21 +28,14 @@ import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Component;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.everhomes.constants.ErrorCodes;
-import com.everhomes.rest.contentserver.AddConfigItemCommand;
-import com.everhomes.rest.contentserver.AddContentServerCommand;
-import com.everhomes.rest.contentserver.ContentServerDTO;
-import com.everhomes.rest.contentserver.ContentServerErrorCode;
-import com.everhomes.rest.contentserver.UpdateContentServerCommand;
-import com.everhomes.rest.contentserver.UploadCsFileResponse;
-import com.everhomes.rest.contentserver.WebSocketConstant;
-import com.everhomes.rest.messaging.ImageBody;
-import com.everhomes.rest.rpc.PduFrame;
-import com.everhomes.user.UserContext;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.RuntimeErrorException;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.WebTokenGenerator;
+import javax.annotation.PostConstruct;
+import javax.annotation.PreDestroy;
+import java.io.InputStream;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
 
 @Component
 public class ContentServerServiceImpl implements ContentServerService {
@@ -56,6 +49,9 @@ public class ContentServerServiceImpl implements ContentServerService {
     private ContentServerProvider contentServerProvider;
     
     private CloseableHttpClient httpClient;
+
+    private static final String HTTP = "http";
+    private static final String HTTPS = "https";
     
     @PostConstruct
     protected void init() {
@@ -178,17 +174,32 @@ public class ContentServerServiceImpl implements ContentServerService {
         final String token[] = new String[1];
         if(UserContext.current().getLogin() != null) 
             token[0] = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token[0]))
+        return uris.stream().map(r -> parserSingleUri(r, cache, ownerType, ownerId, token[0], null, null, null))
                 .collect(Collectors.toList());
     }
 
     @Override
     public String parserUri(String uri, String ownerType, Long ownerId) {
+        return parserUri(uri, ownerType, ownerId, null, null, null);
+    }
+
+    @Override
+    public String parserUri(String uri, String ownerType, Long ownerId, Integer quality) {
+        return parserUri(uri, ownerType, ownerId, null, null, quality);
+    }
+
+    @Override
+    public String parserUri(String uri, String ownerType, Long ownerId, Integer width, Integer height) {
+        return parserUri(uri, ownerType, ownerId, width, height, null);
+    }
+
+    @Override
+    public String parserUri(String uri, String ownerType, Long ownerId, Integer width, Integer height, Integer quality) {
         Map<Long, ContentServer> cache = getServersHash();
         String token =null;
         if(UserContext.current().getLogin() != null)
             token = WebTokenGenerator.getInstance().toWebToken(UserContext.current().getLogin().getLoginToken());
-        return parserSingleUri(uri, cache, ownerType, ownerId, token);
+        return parserSingleUri(uri, cache, ownerType, ownerId, token, width, height, quality);
     }
 
     private Map<Long, ContentServer> getServersHash() {
@@ -200,17 +211,22 @@ public class ContentServerServiceImpl implements ContentServerService {
         return cache;
     }
 
-    private String parserSingleUri(String uri, Map<Long, ContentServer> cache, String ownerType, Long ownerId,
-            String token) {
+    private String parserSingleUri(String uri,
+                                   Map<Long, ContentServer> cache,
+                                   String ownerType,
+                                   Long ownerId,
+                                   String token,
+                                   Integer width,
+                                   Integer height,
+                                   Integer quality) {
         if(StringUtils.isEmpty(uri)){
             return null;
         }
-        
+
         //added by Janson if UserContext.current().getScheme() == null 
         // 如果uri本身已经是以http开头的完整链接，则不需要解释，直接返回（方便用一些测试链接）  by lqs 20160715
         uri = uri.trim();
-        if(UserContext.current().getScheme() != null 
-        		&& uri.startsWith(UserContext.current().getScheme())) {
+        if(uri.startsWith(HTTP) || uri.startsWith(HTTPS)) {
             return uri;
         }
         
@@ -240,47 +256,54 @@ public class ContentServerServiceImpl implements ContentServerService {
 //                    .getPublicAddress(), cache.get(serverId).getPublicPort(), uri, ownerType, ownerId, token);
 //        }
         
-        int width = 0;
-        int height = 0;
-        String metaData = null;
-        try {
-            String resourceId = uri;
-            position = resourceId.indexOf("/");
-            if(position != -1) {
-                resourceId = resourceId.substring(position + 1);
-            }
-            resourceId = Generator.decodeUrl(resourceId);
-            if(resourceId != null) {
-                ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
-                if(resource != null) {
-                    metaData = resource.getMetadata();
-                    if(metaData != null && metaData.trim().length() > 0) {
-                        HashMap map = (HashMap)StringHelper.fromJsonString(metaData, HashMap.class);
-                        Object widthObj = map.get("width");
-                        if(widthObj != null) {
-                            width = Integer.parseInt(widthObj.toString());
-                        }
-                        Object heightObj = map.get("height");
-                        if(heightObj != null) {
-                            height = Integer.parseInt(heightObj.toString());
+        // int width = 0;
+        // int height = 0;
+        if (width == null && height == null) {
+            String metaData = null;
+            try {
+                String resourceId = uri;
+                position = resourceId.indexOf("/");
+                if(position != -1) {
+                    resourceId = resourceId.substring(position + 1);
+                }
+                resourceId = Generator.decodeUrl(resourceId);
+                if(resourceId != null) {
+                    ContentServerResource resource = contentServerProvider.findByResourceId(resourceId);
+                    if(resource != null) {
+                        metaData = resource.getMetadata();
+                        if(metaData != null && metaData.trim().length() > 0) {
+                            HashMap map = (HashMap)StringHelper.fromJsonString(metaData, HashMap.class);
+                            Object widthObj = map.get("width");
+                            if(widthObj != null) {
+                                width = Integer.parseInt(widthObj.toString());
+                            }
+                            Object heightObj = map.get("height");
+                            if(heightObj != null) {
+                                height = Integer.parseInt(heightObj.toString());
+                            }
                         }
                     }
                 }
+            } catch (Exception e) {
+                LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType
+                        + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
             }
-        } catch (Exception e) {
-            LOGGER.error("Failed to parse the width and height of resources, owenerType=" + ownerType 
-                + ", ownerId=" + ownerId + ", metaData=" + metaData + ", uri=" + uri, e);
         }
 
         // https 默认端口443 by sfyan 20161226
         Integer port = cache.get(serverId).getPublicPort();
-        if(null != UserContext.current().getScheme() && UserContext.current().getScheme().equals("https")){
+        if(getScheme(port).equals(HTTPS)){
             port = 443;
         }
 
-        return String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
-                UserContext.current().getScheme(), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
+        String url = String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
+                getScheme(port), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
                 token, width, height);
+
+        if (quality != null) {
+            url += ("&q=" + quality);
+        }
+        return url;
     }
 
     @Override
@@ -344,15 +367,47 @@ public class ContentServerServiceImpl implements ContentServerService {
 		
 		return imageBody;
     }
-    
+
+    private String getScheme(){
+        return getScheme(null);
+    }
+
+    private String getScheme(Integer port){
+        //当后台执行任务的时候UserContext.current().getScheme() 为null，则需要根据数据库content server的配置来确定scheme  by sfyan 20170221
+        if(null == UserContext.current().getScheme()){
+            if(null == port){
+                try {
+                    ContentServer server = selectContentServer();
+                    port = server.getPublicPort();
+                } catch (Exception e) {
+                    LOGGER.error("Get scheme. Failed to find content server", e);
+                    return null;
+                }
+            }
+            if(80 == port || 443 == port){
+                return HTTPS;
+            }else{
+                return HTTP;
+            }
+        }else{
+            return UserContext.current().getScheme();
+        }
+    }
+
     @Override
     public String getContentServer(){
         try {
             ContentServer server = selectContentServer();
 
+            if (LOGGER.isDebugEnabled()) {
+                LOGGER.debug("selectContentServer public address is: {}, public port is: {}", server.getPublicPort(), server.getPublicAddress());
+                LOGGER.debug("current scheme is: {}", UserContext.current().getScheme());
+            }
+
             // https 默认端口443 by sfyan 20161226
             Integer port = server.getPublicPort();
-            if(null != UserContext.current().getScheme() && UserContext.current().getScheme().equals("https")){
+
+            if(getScheme(port).equals(HTTPS)){
                 port = 443;
             }
             return String.format("%s:%d",server.getPublicAddress(),port);
@@ -419,7 +474,7 @@ public class ContentServerServiceImpl implements ContentServerService {
         String mediaType = ContentMediaHelper.getContentMediaType(fileSuffix);
 
         // https 默认端口443 by sfyan 20161226
-        String url = String.format("%s://%s/upload/%s?token=%s",UserContext.current().getScheme(), contentServerUri, mediaType, token);
+        String url = String.format("%s://%s/upload/%s?token=%s",getScheme(), contentServerUri, mediaType, token);
         HttpPost httpPost = new HttpPost(url);
         
         CloseableHttpResponse response = null;

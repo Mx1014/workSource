@@ -38,6 +38,7 @@ import com.everhomes.rest.user.GetCustomRequestTemplateCommand;
 import com.everhomes.rest.user.GetRequestInfoCommand;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.ListActiveStatCommand;
+import com.everhomes.rest.user.ListBusinessTreasureResponse;
 import com.everhomes.rest.user.ListContactRespose;
 import com.everhomes.rest.user.ListContactsCommand;
 import com.everhomes.rest.user.ListPostResponse;
@@ -277,6 +278,16 @@ public class UserActivityController extends ControllerBase {
     @RequireAuthentication(false)
     public RestResponse listTreasure(){
         return new RestResponse(userActivityService.getUserTreasure());
+    }
+    
+    /**
+     * 电商用户财富：<b>url:/user/listBusinessTreasure</b>
+     */
+    @RequestMapping("listBusinessTreasure")
+    @RestReturn(ListBusinessTreasureResponse.class)
+    @RequireAuthentication(false)
+    public RestResponse listBusinessTreasure(){
+    	return new RestResponse(userActivityService.getUserBusinessTreasure());
     }
     
     

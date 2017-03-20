@@ -13,6 +13,7 @@ package com.everhomes.rest.launchpad;
  * <li>NEWS：园区快讯</li>
  * <li>NEWS_FLASH：园区快讯新样式</li>
  * <li>OPPUSH：首页运营</li>
+ * <li>TAB：Tab类型样式</li>
  * </ul>
  */
 public enum Widget {
@@ -25,7 +26,8 @@ public enum Widget {
     NEWS("News"),
     NEWS_FLASH("NewsFlash"),
     BULLETINS("Bulletins"),
-    OPPUSH("OPPush");
+    OPPUSH("OPPush"),
+	TAB("Tab");
     
     private String code;
        

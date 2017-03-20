@@ -38,6 +38,7 @@ import com.everhomes.rest.appurl.AppUrlDTO;
 import com.everhomes.rest.appurl.GetAppInfoCommand;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.contract.ContractDTO;
+import com.everhomes.rest.contract.ListContractsByOraganizationIdCommand;
 import com.everhomes.rest.contract.ListContractsCommand;
 import com.everhomes.rest.contract.ListContractsResponse;
 import com.everhomes.rest.organization.OrganizationServiceUser;
@@ -120,9 +121,9 @@ public class ContractServiceImpl implements ContractService {
 		}
 		
 		List<ContractDTO> resultList = contractList.stream().map(c->{
-			ContractDTO contractDTO = organizationService.processContract(c);
-			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
-			contractDTO.setBuildings(buildings);
+			ContractDTO contractDTO = organizationService.processContract(c, namespaceId);
+//			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
+//			contractDTO.setBuildings(buildings);
 			return contractDTO;
 		}).collect(Collectors.toList());
 		
@@ -328,5 +329,23 @@ public class ContractServiceImpl implements ContractService {
 			return "";
 		}
 		return community.getName();
+	}
+
+	/**
+	 * 获取某机构(一般是企业)的所有有效合同
+	 * */
+	@Override
+	public ListContractsResponse listContractsByOraganizationId(
+			ListContractsByOraganizationIdCommand cmd) {
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		List<Contract> contractList = contractProvider.listContractByOrganizationId(cmd.getOrganizationId());
+		List<ContractDTO> resultList = contractList.stream().map(c->{
+			ContractDTO contractDTO = organizationService.processContract(c, namespaceId);
+//			List<BuildingApartmentDTO> buildings = contractBuildingMappingProvider.listBuildingsByContractNumber(namespaceId, contractDTO.getContractNumber());
+//			contractDTO.setBuildings(buildings);
+			return contractDTO;
+		}).collect(Collectors.toList());
+		
+		return new ListContractsResponse(null, resultList);
 	}
 }

@@ -7,6 +7,8 @@ import com.everhomes.discover.RestDoc;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.rest.RestResponse;
 import com.everhomes.rest.business.*;
+import com.everhomes.util.RequireAuthentication;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
@@ -158,6 +160,7 @@ public class BusinessController extends ControllerBase {
      */
     @RequestMapping("listBusinessPromotionEntities")
     @RestReturn(value = ListBusinessPromotionEntitiesReponse.class)
+    @RequireAuthentication(false)
     public RestResponse listBusinessPromotionEntities(ListBusinessPromotionEntitiesCommand cmd){
         RestResponse response = new RestResponse(businessService.listBusinessPromotionEntities(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -173,6 +176,20 @@ public class BusinessController extends ControllerBase {
     @RestReturn(value = String.class)
     public RestResponse createBusinessPromotion(CreateBusinessPromotionCommand cmd){
         businessService.createBusinessPromotion(cmd);
+        RestResponse response = new RestResponse();
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+    /**
+     * <p>切换电商运营数据源</p>
+     * <b>URL: /business/switchBusinessPromotionDataSource</b>
+     */
+    @RequestMapping("switchBusinessPromotionDataSource")
+    @RestReturn(value = String.class)
+    public RestResponse switchBusinessPromotionDataSource(SwitchBusinessPromotionDataSourceCommand cmd){
+        businessService.switchBusinessPromotionDataSource(cmd);
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");

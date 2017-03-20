@@ -5,6 +5,7 @@ import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
 import com.everhomes.enterprise.EnterpriseAddress;
+import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
@@ -19,6 +20,7 @@ import com.everhomes.server.schema.tables.pojos.EhLeasePromotions;
 import com.everhomes.server.schema.tables.records.*;
 import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.DateHelper;
+
 import org.jooq.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
@@ -70,47 +72,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	@Override
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
 			ListingLocator locator, int pageSize) {
-		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
-		pageSize = pageSize + 1;
-		Condition cond = Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId());
-		
-		if(!StringUtils.isEmpty(request.getCommunityId())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
-		}
-		
-		if(!StringUtils.isEmpty(request.getApplyType())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
-		}
-		
-		if(!StringUtils.isEmpty(request.getStatus())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(request.getStatus()));
-		}
-
-		if(!StringUtils.isEmpty(request.getSourceType())){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
-		}
-		
-		if(null != locator.getAnchor()){
-			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.le(locator.getAnchor()));
-		}
-		
-		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
-		query.addConditions(cond);
-        query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
-		query.addLimit(pageSize);
-		query.fetch().map((r) -> {
-			enterpriseOpRequests.add(ConvertHelper.convert(r, EnterpriseOpRequest.class));
-			return null;
-		});
-
-        if (enterpriseOpRequests.size() >= pageSize) {
-            locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
-            enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
-        } else {
-            locator.setAnchor(null);
-        }
-        return enterpriseOpRequests;
+		return listApplyEntrys(request, locator, pageSize, null);
 	}
 
 	@Override
@@ -317,6 +279,59 @@ public class EnterpriseApplyEntryProviderImpl implements
 		}
 		
 		return null;
+	}
+
+	@Override
+	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
+			ListingLocator locator, int pageSize, List<Long> idList) {
+		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		pageSize = pageSize + 1;
+		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
+
+		if(!StringUtils.isEmpty(request.getNamespaceId())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.NAMESPACE_ID.eq(request.getNamespaceId()));
+		}
+		if(!StringUtils.isEmpty(request.getCommunityId())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.COMMUNITY_ID.eq(request.getCommunityId()));
+		}
+		
+		if(!StringUtils.isEmpty(request.getApplyType())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_TYPE.eq(request.getApplyType()));
+		}
+		
+		if(!StringUtils.isEmpty(request.getStatus())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(request.getStatus()));
+		}
+
+		if(!StringUtils.isEmpty(request.getSourceType())){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.SOURCE_TYPE.eq(request.getSourceType()));
+		}
+		
+		if(null != idList && idList.size()>0){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.in(idList));
+		}
+		
+		if(null != locator.getAnchor()){
+			cond = cond.and(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.le(locator.getAnchor()));
+		}
+		
+		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
+		query.addConditions(cond);
+        query.addOrderBy(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.desc());
+		query.addLimit(pageSize);
+		query.fetch().map((r) -> {
+			enterpriseOpRequests.add(ConvertHelper.convert(r, EnterpriseOpRequest.class));
+			return null;
+		});
+
+        if (enterpriseOpRequests.size() >= pageSize) {
+            locator.setAnchor(enterpriseOpRequests.get(enterpriseOpRequests.size() - 1).getId());
+            enterpriseOpRequests.remove(enterpriseOpRequests.size() - 1);
+        } else {
+            locator.setAnchor(null);
+        }
+        return enterpriseOpRequests;
 	}
 	
 }

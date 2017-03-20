@@ -208,7 +208,7 @@ public class ForumController extends ControllerBase {
     @RequestMapping("deleteTopic")
     @RestReturn(value=String.class)
     public RestResponse deleteTopic(DeleteTopicCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId());
+        this.forumService.deletePost(cmd.getForumId(), cmd.getTopicId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);
@@ -303,7 +303,7 @@ public class ForumController extends ControllerBase {
     @RequestMapping("deleteComment")
     @RestReturn(value=String.class)
     public RestResponse deleteComment(DeleteCommentCommand cmd) {
-        this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId());
+        this.forumService.deletePost(cmd.getForumId(), cmd.getCommentId(), cmd.getCurrentOrgId(), cmd.getOwnerType(), cmd.getOwnerId());
         
         RestResponse response = new RestResponse();
         response.setErrorCode(ErrorCodes.SUCCESS);

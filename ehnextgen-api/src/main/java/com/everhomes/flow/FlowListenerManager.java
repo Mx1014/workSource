@@ -4,6 +4,7 @@ import java.util.List;
 
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.util.Tuple;
 
 public interface FlowListenerManager {
 
@@ -77,4 +78,7 @@ public interface FlowListenerManager {
 	void onFlowCaseCreating(FlowCase flowCase);
 
 	void onFlowCaseCreated(FlowCase flowCase);
+
+	void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
+			List<Tuple<String, Object>> variables);
 }

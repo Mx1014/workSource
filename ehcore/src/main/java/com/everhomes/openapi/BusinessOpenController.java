@@ -1,5 +1,7 @@
 package com.everhomes.openapi;
 
+import java.text.SimpleDateFormat;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
@@ -8,6 +10,17 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.Valid;
 
+import com.everhomes.flow.Flow;
+import com.everhomes.flow.FlowCase;
+import com.everhomes.flow.FlowService;
+import com.everhomes.rest.flow.CreateFlowCaseCommand;
+import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowModuleType;
+import com.everhomes.rest.flow.FlowOwnerType;
+import com.everhomes.rest.pmtask.PmTaskErrorCode;
+import com.everhomes.rest.reserver.CreateReserverOrderCommand;
+import com.everhomes.user.*;
+import com.everhomes.util.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -79,18 +92,6 @@ import com.everhomes.rest.user.ListUserCommand;
 import com.everhomes.rest.user.MessageChannelType;
 import com.everhomes.rest.user.UserDtoForBiz;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.SignupToken;
-import com.everhomes.user.User;
-import com.everhomes.user.UserActivityService;
-import com.everhomes.user.UserIdentifier;
-import com.everhomes.user.UserProvider;
-import com.everhomes.user.UserService;
-import com.everhomes.util.ConvertHelper;
-import com.everhomes.util.EtagHelper;
-import com.everhomes.util.SortOrder;
-import com.everhomes.util.StringHelper;
-import com.everhomes.util.Tuple;
-import com.everhomes.util.WebTokenGenerator;
 
 @RestDoc(value="Business open Constroller", site="core")
 @RestController
@@ -115,6 +116,9 @@ public class BusinessOpenController extends ControllerBase {
 
 	@Autowired
 	MessagingService messagingService;
+
+	@Autowired
+	private FlowService flowService;
 
 	/**
 	 * <b>URL: /openapi/listBizCategories</b> 列出所有商家分类
@@ -731,4 +735,51 @@ public class BusinessOpenController extends ControllerBase {
     	businessService.joinBusinessGroup(cmd);
     	return new RestResponse();
     }
+
+	/**
+	 * <b>URL: /openapi/createReserverOrder</b>
+	 * <p>新建位置预订</p>
+	 */
+	@RequestMapping("createReserverOrder")
+	@RestReturn(value=String.class)
+	public RestResponse createReserverOrder(CreateReserverOrderCommand cmd) {
+
+		//新建flowcase
+
+		UserContext context = UserContext.current();
+		User user = userProvider.findUserById(cmd.getId());
+		context.setUser(user);
+
+		Integer namespaceId = user.getNamespaceId();
+		Flow flow = flowService.getEnabledFlow(namespaceId, FlowConstants.RESERVER_PLACE,
+				FlowModuleType.NO_MODULE.getCode(), 0L, FlowOwnerType.RESERVER_PLACE.getCode());
+		if(null == flow) {
+			LOGGER.error("Enable reserver flow not found, moduleId={}", FlowConstants.RESERVER_PLACE);
+			throw RuntimeErrorException.errorWith(PmTaskErrorCode.SCOPE, PmTaskErrorCode.ERROR_ENABLE_FLOW,
+					"Enable reserver flow not found.");
+		}
+		CreateFlowCaseCommand createFlowCaseCommand = new CreateFlowCaseCommand();
+		createFlowCaseCommand.setApplyUserId(user.getId());
+		createFlowCaseCommand.setFlowMainId(flow.getFlowMainId());
+		createFlowCaseCommand.setFlowVersion(flow.getFlowVersion());
+		createFlowCaseCommand.setReferId(Long.valueOf(cmd.getOrderId()));
+		createFlowCaseCommand.setReferType(FlowOwnerType.RESERVER_PLACE.getCode());
+		SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd HH:mm");
+		StringBuilder sb = new StringBuilder("");
+		sb.append("就餐时间：").append(sdf.format(new Date(cmd.getReserverTime()))).append("\n");
+		sb.append("就餐人数：").append(cmd.getReserverNum()).append("人").append("\n");
+		sb.append("备注说明：").append(cmd.getRemark()).append("\n");
+		sb.append("申请人：").append(cmd.getRequestorName()).append("\n");
+		sb.append("店铺名称：").append(cmd.getShopName());
+		createFlowCaseCommand.setContent(sb.toString());
+//        createFlowCaseCommand.setProjectId(task.getOwnerId());
+//        createFlowCaseCommand.setProjectType(EntityType.COMMUNITY.getCode());
+
+		FlowCase flowCase = flowService.createFlowCase(createFlowCaseCommand);
+
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

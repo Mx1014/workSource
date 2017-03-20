@@ -98,7 +98,7 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
         List<ServiceModulePrivilege> serviceModules = serviceModuleProvider.listServiceModulePrivilegesByPrivilegeId(privilegeId, ServiceModulePrivilegeType.ORDINARY);
         List<Long> moduleIds = new ArrayList<>();
         for (ServiceModulePrivilege serviceModule: serviceModules) {
-            if(!moduleIds.contains(serviceModule.getPrivilegeId()))
+            if(!moduleIds.contains(serviceModule.getModuleId()))
                 moduleIds.add(serviceModule.getModuleId());
         }
         if(0 < moduleIds.size()){
@@ -138,38 +138,26 @@ public class SystemUserPrivilegeMgr implements UserPrivilegeMgr {
      * @return
      */
     private boolean checkAccess(Long userId, String ownerType, Long ownerId, Long organizationId, Long privilegeId){
-
-        Organization organization = organizationProvider.findOrganizationById(organizationId);
-
-        if(null == organization){
-            LOGGER.debug("user organization is null..");
-            return false;
-        }
-
-        UserIdentifier userIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(userId, IdentifierType.MOBILE.getCode());
-
-        if(null == userIdentifier){
-            LOGGER.debug("user identifierToken is null..");
-            return false;
-        }
-        List<OrganizationDTO> orgDTOs = organizationService.getOrganizationMemberGroups(OrganizationGroupType.DEPARTMENT, userIdentifier.getIdentifierToken(), organization.getPath());
-
         List<AclRoleDescriptor> descriptors = new ArrayList<>();
-        for (OrganizationDTO orgDTO: orgDTOs) {
-            AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), orgDTO.getId());
-            descriptors.add(descriptor);
+        descriptors.add(new AclRoleDescriptor(EntityType.USER.getCode(), userId));
+        if(null != organizationId){
+            List<String> groupTypes = new ArrayList<>();
+            groupTypes.add(OrganizationGroupType.DEPARTMENT.getCode());
+            groupTypes.add(OrganizationGroupType.GROUP.getCode());
+            groupTypes.add(OrganizationGroupType.ENTERPRISE.getCode());
+            List<OrganizationDTO> orgDTOs = organizationService.getOrganizationMemberGroups(groupTypes, userId, organizationId);
+            LOGGER.debug("user organizations:{}", orgDTOs);
+
+            for (OrganizationDTO orgDTO: orgDTOs) {
+                descriptors.add(new AclRoleDescriptor(EntityType.ORGANIZATIONS.getCode(), orgDTO.getId()));
+            }
+
+            if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
+                return true;
+            }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId){
+                return false;
+            }
         }
-
-        AclRoleDescriptor descriptor = new AclRoleDescriptor(EntityType.USER.getCode(), userId);
-        descriptors.add(descriptor);
-
-
-        if(aclProvider.checkAccessEx(EntityType.ORGANIZATIONS.getCode(), organizationId, privilegeId, descriptors)){
-            return true;
-        }else if(EntityType.fromCode(ownerType) == EntityType.ORGANIZATIONS || null == EntityType.fromCode(ownerType) || null == ownerId){
-            return false;
-        }
-
         return aclProvider.checkAccessEx(ownerType, ownerId, privilegeId, descriptors);
     }
 

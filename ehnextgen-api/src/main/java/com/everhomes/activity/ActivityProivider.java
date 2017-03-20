@@ -81,4 +81,8 @@ public interface ActivityProivider {
 			int pageSize);
 
 	List<ActivityRoster> listActivitySignupByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+
+	List<ActivityCategories> listActivityCategory(Integer namespaceId, Long categoryId);
+
+	List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize);
 }

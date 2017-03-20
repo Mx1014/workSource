@@ -99,4 +99,5 @@ public interface QualityService {
 	ListQualityInspectionTasksResponse listUserHistoryTasks(ListUserHistoryTasksCommand cmd);
 	ListQualityInspectionTasksResponse listUserQualityInspectionTaskTemplates(ListUserQualityInspectionTaskTemplatesCommand cmd);
 	void deleteUserQualityInspectionTaskTemplate(DeleteUserQualityInspectionTaskTemplateCommand cmd);
+	void sendTaskMsg(Long startTime, Long endTime);
 }

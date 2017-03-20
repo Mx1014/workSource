@@ -164,6 +164,7 @@ public class GeneralApprovalServiceImpl implements GeneralApprovalService {
 			for (PostApprovalFormItem val : cmd.getValues()) {
 				GeneralApprovalVal obj = ConvertHelper.convert(ga, GeneralApprovalVal.class);
 				obj.setApprovalId(ga.getId());
+				obj.setFormVersion(form.getFormVersion());
 				obj.setFlowCaseId(flowCase.getId());
 				obj.setFieldName(val.getFieldName());
 				obj.setFieldType(val.getFieldType());

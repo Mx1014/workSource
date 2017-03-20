@@ -31,7 +31,7 @@ public class GetOrganizationOwnerTest extends BaseLoginAuthTestCase {
         assertNotNull("response should not be null", dto);
         assertEquals("Organization owner organization id should be 1000001", Long.valueOf(1000001), dto.getOrganizationId());
         assertEquals("Organization owner orgOwnerType should be equal", "业主", dto.getOrgOwnerType());
-        assertEquals("Organization owner gender should be equal", "男", dto.getGender());
+        assertEquals("Organization owner gender should be equal", "女", dto.getGender());
     }
 
     private void logon() {
@@ -46,7 +46,8 @@ public class GetOrganizationOwnerTest extends BaseLoginAuthTestCase {
         String userInfoFilePath = "data/json/3.4.x-test-data-zuolin_admin_user_160607.txt";
         String filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
-        userInfoFilePath = "data/json/customer-manage-search-owner-data.txt";
+        // userInfoFilePath = "data/json/customer-manage-search-owner-data.txt";
+        userInfoFilePath = "data/json/customer-test-data-170206.json";
         filePath = dbProvider.getAbsolutePathFromClassPath(userInfoFilePath);
         dbProvider.loadJsonFileToDatabase(filePath, false);
     }

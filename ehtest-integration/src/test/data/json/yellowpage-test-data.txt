@@ -51,6 +51,28 @@
 		"description":"公共服务联盟旨在集聚社会优质服务资源，为园区广大企业提供专业、高效、有保障的服务，以帮助广大企业畅通信息渠道，提升企业管理，降低经营成本，增强市场竞争能力。服务类型包括项目融资对接、人才招聘和培训、信息化建设、管理咨询、知识产权管理、质量管理、外贸事务、法律事务、 物流服务、场地装修等。",
 		"poster_uri":"cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ",
 		"status":2
+	},
+	{
+		"id":3,
+		"parent_id":0,
+		"owner_type":"community",
+		"owner_id":240111044331048623,
+		"name":"创客空间",
+		"nick_name":"创客的空间",
+		"type":3,
+		"contact":"0755-86620293",
+		"description":"eeee",
+		"poster_uri":"cs://1/image/aW1hZ2UvTVRvMU56TXpOV0l3T1RKaFlqQTRNVFJpWmpSaVlUazFNall5WldRNVlUZ3dZUQ",
+		"status":2,
+		"buildingId":1
 	}
-  ]
+  ],
+    "eh_buildings": [
+        {
+            "id": 1,
+            "community_id": 2,
+            "name": "楼栋名-A座",
+            "status": 2
+        }
+    ]
 }

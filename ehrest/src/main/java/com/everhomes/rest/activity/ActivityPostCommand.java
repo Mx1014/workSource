@@ -20,6 +20,7 @@ import com.everhomes.util.StringHelper;
  *<li>contactPerson:联系人</li>
  *<li>startTime:开始时间，时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>endTime:结束时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
+ *<li>signupEndTime:活动报名截止时间,时间格式为:YYYY-MM-DD hh:mm:ss</li>
  *<li>checkInFlag:签到标签，0-不需要签到、1-需要签到</li>
  *<li>confirmFlag:确认标签，0-不需要确认、1-需要确认</li>
  *<li>maxAttendeeCount:最大邀请人数</li>
@@ -33,7 +34,8 @@ import com.everhomes.util.StringHelper;
  *<li>mediaUrl:活动url</li>
  *<li>officialFlag: 是否为官方帖；参考{@link com.everhomes.rest.organization.OfficialFlag}</li>
  * <li>maxQuantity: 限制人数</li>
- * <li>categoryId: 活动类型id</li>
+ * <li>categoryId: 活动类型id（入口id)</li>
+ * <li>contentCategoryId: 主题分类id</li>
  * <li>forumId: 论坛ID</li>
  * <li>creatorTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
  * <li>targetTag: 创建者标签，参考{@link com.everhomes.rest.forum.PostEntityTag}</li>
@@ -52,6 +54,7 @@ public class ActivityPostCommand{
     private String contactNumber;
     private String startTime;
     private String endTime;
+    private String signupEndTime;
     private Byte checkinFlag;
     private Byte confirmFlag;
     private Integer maxAttendeeCount;
@@ -78,6 +81,9 @@ public class ActivityPostCommand{
     
     //added by xiongying
     private Long categoryId;
+    
+    //added by tt
+    private Long contentCategoryId;
 
     private Long forumId;
     
@@ -88,6 +94,22 @@ public class ActivityPostCommand{
     private Byte visibleRegionType;
     
     private Long visibleRegionId;
+
+	public String getSignupEndTime() {
+		return signupEndTime;
+	}
+
+	public void setSignupEndTime(String signupEndTime) {
+		this.signupEndTime = signupEndTime;
+	}
+
+	public Long getContentCategoryId() {
+		return contentCategoryId;
+	}
+
+	public void setContentCategoryId(Long contentCategoryId) {
+		this.contentCategoryId = contentCategoryId;
+	}
 
 	public String getContentType() {
 		return contentType;

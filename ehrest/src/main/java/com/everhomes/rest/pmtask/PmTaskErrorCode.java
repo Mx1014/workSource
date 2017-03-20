@@ -26,4 +26,7 @@ public interface PmTaskErrorCode {
     
     int ERROR_CANCEL_TASK = 10011;  //任务已在处理中，不能取消！
 
+    int ERROR_CREATE_TASK_PRIVILEGE = 10012; //没有代发权限！
+
+    int ERROR_USER_INFO = 10013; //查不到该用户信息！
 }

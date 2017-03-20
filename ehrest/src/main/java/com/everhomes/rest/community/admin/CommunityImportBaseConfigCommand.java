@@ -8,8 +8,7 @@ import com.everhomes.discover.ItemType;
 /**
  * <ul>
  * <li>namespaceName：命名空间名称</li>
- * <li>communityType：小区类型，参考
- * {@link com.everhomes.rest.namespace.NamespaceCommunityType}</li>
+ * <li>communityType：小区类型，参考 {@link com.everhomes.rest.namespace.NamespaceCommunityType}</li>
  * <li>androidRealm: androidRealm</li>
  * <li>iosRealm: iosRealm</li>
  * <li>versionDescription: 描述</li>

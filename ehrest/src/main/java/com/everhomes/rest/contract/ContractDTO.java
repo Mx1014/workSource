@@ -12,6 +12,7 @@ import com.everhomes.util.StringHelper;
 /**
  * 
  * <ul>
+ * <li>id: id</li>
  * <li>contractNumber: 合同编号</li>
  * <li>contractEndDate: 合同到期日期</li>
  * <li>organizationName: 客户名称</li>
@@ -22,10 +23,12 @@ import com.everhomes.util.StringHelper;
  * <li>serviceUserId: 客服人员id</li>
  * <li>serviceUserName: 客服人员名称</li>
  * <li>serviceUserPhone: 客服人员电话</li>
- * <li>buildings: 楼栋门牌信息</li>
+ * <li>buildings: 楼栋门牌信息{@link com.everhomes.rest.organization.OrganizationContactDTO}</li>
  * </ul>
  */
 public class ContractDTO {
+	private Long id;
+	
 	private String contractNumber;
 	
 	private Timestamp contractEndDate;
@@ -141,5 +144,13 @@ public class ContractDTO {
 	@Override
 	public String toString() {
 		return StringHelper.toJsonString(this);
+	}
+
+	public Long getId() {
+		return id;
+	}
+
+	public void setId(Long id) {
+		this.id = id;
 	}
 }

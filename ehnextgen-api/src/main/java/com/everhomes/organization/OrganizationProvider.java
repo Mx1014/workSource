@@ -296,6 +296,7 @@ public interface OrganizationProvider {
 	List<Organization> listOrganizationByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
 	List<CommunityAddressMapping> listCsthomerelByUpdateTimeAndAnchor(Integer namespaceId, Long timestamp, Long pageAnchor, int pageSize);
 	List<CommunityAddressMapping> listCsthomerelByUpdateTime(Integer namespaceId, Long timestamp, int pageSize);
+	OrganizationMember findAnyOrganizationMemberByNamespaceIdAndUserId(Integer namespaceId, Long userId, String groupType);
 
 	List<Long> findAddressIdByOrganizationIds(List<Long> organizationIds);
 	OrganizationAddress findActiveOrganizationAddressByAddressId(Long addressId);

@@ -1,9 +1,18 @@
 package com.everhomes.equipment;
 
+import java.sql.Timestamp;
 import java.util.List;
+import java.util.Map;
+import java.util.Set;
+
+
+
 
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
+import com.everhomes.quality.QualityInspectionStandards;
+import com.everhomes.rest.equipment.ExecuteGroupAndPosition;
+import com.everhomes.rest.equipment.TaskCountDTO;
 
 
 public interface EquipmentProvider {
@@ -46,15 +55,17 @@ public interface EquipmentProvider {
 	List<EquipmentInspectionAccessories> listEquipmentInspectionAccessories(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionEquipments> listEquipments(CrossShardListingLocator locator, Integer pageSize);
 	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(CrossShardListingLocator locator, Integer pageSize);
-	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, 
-			List<String> targetType, List<Long> targetId, Integer offset, Integer pageSize);
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
+			List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize);
+	List<EquipmentInspectionTasks> listEquipmentInspectionReviewTasks(String ownerType, Long ownerId, Long inspectionCategoryId,
+			List<String> targetType, List<Long> targetId, List<Long> standardIds, Integer offset, Integer pageSize);
 	
 	List<EquipmentInspectionEquipmentParameters> listParametersByEquipmentId(Long equipmentId);
 	List<EquipmentInspectionEquipmentAttachments> listAttachmentsByEquipmentId(Long equipmentId, Byte attachmentType);
 	
 	List<EquipmentInspectionEquipments> listQualifiedEquipmentStandardEquipments();
 	
-	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus);
+	List<EquipmentInspectionTasks> listTasksByEquipmentId(Long equipmentId, List<Long> standardIds, Timestamp startDate, Timestamp endDate, CrossShardListingLocator locator, Integer pageSize, List<Byte> taskStatus);
 	List<EquipmentInspectionTasks> listTasksByStandardId(Long standardId, CrossShardListingLocator locator, Integer pageSize);
 
 	List<Long> listStandardIdsByType(Byte type);
@@ -82,11 +93,12 @@ public interface EquipmentProvider {
 	void updateEquipmentStandardMap(EquipmentStandardMap map);
 	EquipmentStandardMap findEquipmentStandardMapById(Long id);
 	EquipmentStandardMap findEquipmentStandardMap(Long id, Long standardId, Long targetId, String targetType);
-	
+
 	void createEquipmentInspectionItemResults(EquipmentInspectionItemResults result);
 	List<EquipmentInspectionItemResults> findEquipmentInspectionItemResultsByLogId(Long logId);
 	
-	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(String targetType);
+	List<EquipmentStandardMap> listQualifiedEquipmentStandardMap(Long equipmentId);
+
 	List<EquipmentStandardMap> listEquipmentStandardMap(CrossShardListingLocator locator, Integer pageSize);
 	
 	void closeDelayTasks();
@@ -95,4 +107,28 @@ public interface EquipmentProvider {
 	void closeTask(EquipmentInspectionTasks task);
 	
 	EquipmentInspectionEquipments findEquipmentByQrCodeToken(String qrCodeToken);
+	
+	List<EquipmentInspectionCategories> listEquipmentInspectionCategories(Long ownerId, Integer namespaceId);
+	
+	Set<Long> listRecordsTaskIdByOperatorId(Long uId, Long pageAnchor);
+	
+	List<TaskCountDTO> statEquipmentTasks(Long ownerId, String ownerType, Long targetId, String targetType, 
+			Long inspectionCategoryId, Long startTime, Long endTime, Integer offset, Integer pageSize);
+	
+	void createEquipmentInspectionStandardGroupMap(EquipmentInspectionStandardGroupMap standardGroup);
+	void deleteEquipmentInspectionStandardGroupMap(Long standardGroupId);
+	void deleteEquipmentInspectionStandardGroupMapByStandardId(Long standardId);
+	List<Long> listEquipmentInspectionStandardGroupMapByGroup(List<Long> groupIds, Byte groupType);
+	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> reviewGroups, Byte groupType );
+	List<EquipmentInspectionStandardGroupMap> listEquipmentInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
+	void populateStandardsGroups(final List<EquipmentInspectionStandards> standards);
+	void populateStandardGroups(EquipmentInspectionStandards standard);
+
+	List<EquipmentInspectionTasks> listTodayEquipmentInspectionTasks(Long startTime, Long endTime);
+	EquipmentInspectionTasks findLastestEquipmentInspectionTask(Long startTime);
+
+	List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(String ownerType, Long ownerId, Long inspectionCategoryId,
+		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey);
+
+	Map<Long, EquipmentInspectionEquipments> listEquipmentsById(Set<Long> ids);
 }

@@ -7,7 +7,6 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul>
- * 返回值
  * <li>communityDTO: 小区信息，{@link com.everhomes.rest.address.CommunityDTO}</li>
  * </ul>
  */

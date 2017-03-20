@@ -12,6 +12,7 @@ import org.jooq.DSLContext;
 import org.jooq.Record;
 import org.jooq.Result;
 import org.jooq.SelectQuery;
+import org.jooq.impl.DSL;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -31,6 +32,8 @@ import com.everhomes.group.GroupProvider;
 import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.activity.ActivityServiceErrorCode;
+import com.everhomes.rest.approval.CommonStatus;
+import com.everhomes.rest.approval.TrueOrFalseFlag;
 import com.everhomes.rest.category.CategoryAdminStatus;
 import com.everhomes.rest.organization.OfficialFlag;
 import com.everhomes.sequence.SequenceProvider;
@@ -416,13 +419,15 @@ public class ActivityProviderImpl implements ActivityProivider {
         if(condition != null){
             query.addConditions(condition);
         }
-        Integer offset =  (int) ((pageOffset - 1 ) * count);
+        Integer offset =  (int) ((pageOffset - 1 ) * (count-1));
         query.addConditions(Tables.EH_ACTIVITIES.STATUS.eq((byte) 2));
 
         if(orderByCreateTime) {
             query.addOrderBy(Tables.EH_ACTIVITIES.CREATE_TIME.desc());
         } else {
-            query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
+        	// 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+//          query.addOrderBy(Tables.EH_ACTIVITIES.END_TIME.desc());
+        	query.addOrderBy(Tables.EH_ACTIVITIES.START_TIME.desc());
         }
 
 //            query.addLimit(count - activities.size());
@@ -432,22 +437,27 @@ public class ActivityProviderImpl implements ActivityProivider {
             LOGGER.debug("Query activities by geohash, sql=" + query.getSQL());
             LOGGER.debug("Query activities by geohash, bindValues=" + query.getBindValues());
         }
-
-        query.fetch().map((r) -> {
-        	if(r.getEndTime().after(now)){
-        		activities.add(ConvertHelper.convert(r, Activity.class));
-        	}
-        	else
-        		overdue.add(ConvertHelper.convert(r, Activity.class));
-            return null;
-        });
-
-        activities.addAll(overdue);
+        
+        // 产品妥协了，改成按开始时间倒序排列，add by tt, 20170117
+        activities = query.fetch().map(r->ConvertHelper.convert(r, Activity.class));
+       
+//        query.fetch().map((r) -> {
+//        	if(r.getEndTime().after(now)){
+//        		activities.add(ConvertHelper.convert(r, Activity.class));
+//        	}
+//        	else
+//        		overdue.add(ConvertHelper.convert(r, Activity.class));
+//            return null;
+//        });
+//
+//        activities.addAll(overdue);
         if (activities.size() >= count) {
             locator.setAnchor(pageOffset+1);
-        }
+        }else {
+        	locator.setAnchor(null);
+		}
 
-       if(activities.size()>=count){
+        if(activities.size()>=count){
             return activities.subList(0, count-1);
         }
         return activities;
@@ -731,6 +741,23 @@ public class ActivityProviderImpl implements ActivityProivider {
         return goods;
     }
 
+	@Override
+	public List<ActivityCategories> listActivityCategory(Integer namespaceId, Long categoryId) {
+		if (categoryId == null) {
+			categoryId = 0L;
+		}
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhActivityCategories.class));
+		
+		return context.select()
+			.from(Tables.EH_ACTIVITY_CATEGORIES)
+			.where(Tables.EH_ACTIVITY_CATEGORIES.NAMESPACE_ID.eq(namespaceId))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.PARENT_ID.eq(categoryId))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.STATUS.eq(CommonStatus.ACTIVE.getCode()))
+			.and(Tables.EH_ACTIVITY_CATEGORIES.ENABLED.eq(TrueOrFalseFlag.TRUE.getCode()))
+			.orderBy(Tables.EH_ACTIVITY_CATEGORIES.ALL_FLAG.desc(), Tables.EH_ACTIVITY_CATEGORIES.DEFAULT_ORDER.asc(), Tables.EH_ACTIVITY_CATEGORIES.ID.asc())
+			.fetch()
+			.map(r->ConvertHelper.convert(r, ActivityCategories.class));
+	}
 
 	/**
 	 * 金地取数据使用
@@ -815,4 +842,17 @@ public class ActivityProviderImpl implements ActivityProivider {
 		}
 		return new ArrayList<ActivityRoster>();
 	}
+
+	@Override
+	public List<ActivityRoster> listActivityRoster(Long activityId, Long pageAnchor, int pageSize) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		return context.select().from(Tables.EH_ACTIVITY_ROSTER)
+		.where(Tables.EH_ACTIVITY_ROSTER.ACTIVITY_ID.eq(activityId))
+		.and(pageAnchor==null?DSL.trueCondition():Tables.EH_ACTIVITY_ROSTER.ID.gt(pageAnchor))
+		.orderBy(Tables.EH_ACTIVITY_ROSTER.ID.asc())
+		.limit(pageSize)
+		.fetch()
+		.map(r->ConvertHelper.convert(r, ActivityRoster.class));
+	}
+	
 }

@@ -1,5 +1,21 @@
 package com.everhomes.rest.organization;
 
+/**
+ * <ul>
+ * <li>organizationId：机构id</li>
+ * <li>displayName：机构名称</li>
+ * <li>addressId：机构地址</li>
+ * <li>communityId：小区id</li>
+ * <li>communityName：小区名称</li>
+ * <li>cityName：城市名称</li>
+ * <li>areaName：区域名称</li>
+ * <li>buildingName：楼栋名称</li>
+ * <li>apartmentName: 门牌号</li>
+ * <li>businessBuildingName: 电商楼栋名称</li>
+ * <li>businessApartmentName: 电商门牌号</li>
+ * <li>apartmentFloor: 楼层</li>
+ * </ul>
+ */
 public class OrgAddressDTO {
 	
 	private Long     organizationId;
@@ -8,6 +24,9 @@ public class OrgAddressDTO {
 	private java.lang.Long     addressId;
     private java.lang.Long     communityId;
     private java.lang.Long     cityId;
+	private String cityName;
+	private String areaName;
+	private String communityName;
     private java.lang.String   zipcode;
     private java.lang.String   address;
     private java.lang.Double   longitude;
@@ -16,6 +35,8 @@ public class OrgAddressDTO {
     private java.lang.String   addressAlias;
     private java.lang.String   buildingName;
     private java.lang.String   buildingAliasName;
+	private String businessBuildingName;
+	private String businessApartmentName;
     private java.lang.String   apartmentName;
     private java.lang.String   apartmentFloor;
 	public Long getOrganizationId() {
@@ -108,5 +129,44 @@ public class OrgAddressDTO {
 	public void setApartmentFloor(java.lang.String apartmentFloor) {
 		this.apartmentFloor = apartmentFloor;
 	}
-    
+
+	public String getCityName() {
+		return cityName;
+	}
+
+	public void setCityName(String cityName) {
+		this.cityName = cityName;
+	}
+
+	public String getAreaName() {
+		return areaName;
+	}
+
+	public void setAreaName(String areaName) {
+		this.areaName = areaName;
+	}
+
+	public String getCommunityName() {
+		return communityName;
+	}
+
+	public void setCommunityName(String communityName) {
+		this.communityName = communityName;
+	}
+
+	public String getBusinessApartmentName() {
+		return businessApartmentName;
+	}
+
+	public void setBusinessApartmentName(String businessApartmentName) {
+		this.businessApartmentName = businessApartmentName;
+	}
+
+	public String getBusinessBuildingName() {
+		return businessBuildingName;
+	}
+
+	public void setBusinessBuildingName(String businessBuildingName) {
+		this.businessBuildingName = businessBuildingName;
+	}
 }

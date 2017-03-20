@@ -11,7 +11,7 @@ public enum PmTaskAddressType {
 	FAMILY((byte)1), ORGANIZATION((byte)2);
     
     private byte code;
-    private PmTaskAddressType(byte code) {
+    PmTaskAddressType(byte code) {
         this.code = code;
     }
     
@@ -23,7 +23,7 @@ public enum PmTaskAddressType {
         if(code != null) {
             PmTaskAddressType[] values = PmTaskAddressType.values();
             for(PmTaskAddressType value : values) {
-                if(value.code == code.byteValue()) {
+                if(value.code == code) {
                     return value;
                 }
             }

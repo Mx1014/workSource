@@ -6,10 +6,11 @@ import java.io.Serializable;
 import java.util.List;
 
 /**
- * <p>web菜单</p>
+ * <p>业务模块</p>
  * <ul>
  * <li>id: 模块id</li>
  * <li>name: 模块名称</li>
+ * <li>vType: 值类型 0业务模块，1权限</li>
  * <li>parentId: 父级id </li>
  * <li>path: 层次关系</li>
  * <li>level: 级别</li>
@@ -20,6 +21,8 @@ public class ServiceModuleDTO implements Serializable {
 	private Long id;
 
 	private String name;
+
+	private Byte vType;
 
 	private Long parentId;
 
@@ -68,6 +71,14 @@ public class ServiceModuleDTO implements Serializable {
 
 	public void setLevel(Integer level) {
 		this.level = level;
+	}
+
+	public Byte getvType() {
+		return vType;
+	}
+
+	public void setvType(Byte vType) {
+		this.vType = vType;
 	}
 
 	public List<ServiceModuleDTO> getServiceModules() {

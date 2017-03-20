@@ -17,8 +17,9 @@ public interface QualityProvider {
 	void deleteVerificationTasks(Long taskId);
 	QualityInspectionTasks findVerificationTaskById(Long taskId);
 	List<QualityInspectionTasks> listVerificationTasks(ListingLocator locator, int count, Long ownerId, String ownerType, Long targetId, String targetType, 
-    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds, 
-    		Byte executeStatus, Byte reviewStatus, boolean timeCompared, List<Long> standardIds, Byte manualFlag);
+    		Byte taskType, Long executeUid, Timestamp startDate, Timestamp endDate, List<ExecuteGroupAndPosition> groupIds,
+			List<QualityInspectionStandardGroupMap> maps, Byte executeStatus, Byte reviewStatus, boolean timeCompared,
+			List<Long> standardIds, Byte manualFlag);
 	int countVerificationTasks(Long ownerId, String ownerType, Byte taskType, Long executeUid, 
 			Timestamp startDate, Timestamp endDate, Long groupId, Byte executeStatus, Byte reviewStatus);
 
@@ -67,6 +68,7 @@ public interface QualityProvider {
 	List<QualityInspectionCategories> listQualityInspectionCategoriesByPath(String superiorPath);
 	
 	List<QualityInspectionTasks> listClosedTask(Timestamp startDate, Timestamp endDate);
+	List<QualityInspectionTasks> listTodayQualityInspectionTasks(Long startTime, Long endTime);
 	
 	void populateTaskRecords(QualityInspectionTasks task);
 	void populateTasksRecords(final List<QualityInspectionTasks> tasks);
@@ -115,5 +117,8 @@ public interface QualityProvider {
 	void deleteQualityInspectionTaskTemplates(Long templateId);
 	QualityInspectionTaskTemplates findQualityInspectionTaskTemplateById(Long templateId);
 	List<QualityInspectionTaskTemplates> listUserQualityInspectionTaskTemplates(ListingLocator locator, int count, Long uid);
-	
+	List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByGroupAndPosition(List<ExecuteGroupAndPosition> groupIds);
+	List<QualityInspectionStandardGroupMap> listQualityInspectionStandardGroupMapByStandardIdAndGroupType(Long standardId, Byte groupType);
+
+	QualityInspectionTasks findLastestQualityInspectionTask(Long startTime);
 }

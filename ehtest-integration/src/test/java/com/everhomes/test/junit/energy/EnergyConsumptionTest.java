@@ -21,7 +21,6 @@ import com.everhomes.util.StringHelper;
 import org.jooq.DSLContext;
 import org.jooq.Result;
 import org.jooq.impl.DSL;
-import org.junit.After;
 import org.junit.Before;
 import org.junit.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -519,7 +518,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
                 .where(Tables.EH_ENERGY_METER_CATEGORIES.ID.eq(category.getId()))
                 .fetchOne();
 
-        assertEquals("The deleted energy meter category status should be inactive", deletedCty.getStatus(), EnergyCommonStatus.INACTIVE.getCode());
+        assertNull(deletedCty);
     }
 
     //14. 导入表记(Excel)
@@ -741,7 +740,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
 
         EhEnergyMeterFormulasDao dao = new EhEnergyMeterFormulasDao(dbProvider.getDslContext().configuration());
         EhEnergyMeterFormulas formula = dao.findById(1L);
-        assertEquals("The deleted formula status should be inactive", formula.getStatus(), EnergyCommonStatus.INACTIVE.getCode());
+        assertNull(formula);
     }
 
 
@@ -778,7 +777,7 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
     }
 
     //24. 生成数据
-    @Test
+    // @Test
     public void initStatData() {
         logon();
         List<EhEnergyMeters> meters = initEnergyMeter();
@@ -976,10 +975,5 @@ public class EnergyConsumptionTest extends BaseLoginAuthTestCase{
         jsonFilePath = "data/json/energy-test-data-161031.json";
         fileAbsolutePath = dbProvider.getAbsolutePathFromClassPath(jsonFilePath);
         dbProvider.loadJsonFileToDatabase(fileAbsolutePath, false);
-    }
-
-    @After
-    public void tearDown() {
-        logoff();
     }
 }

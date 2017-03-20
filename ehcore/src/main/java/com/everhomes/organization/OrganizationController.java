@@ -1209,6 +1209,19 @@ public class OrganizationController extends ControllerBase {
 	}
 
 	/**
+	 * <b>URL: /org/listOrganizationsContactByModuleId</b>
+	 * <p>获取获取业务部门的机构人员</p>
+	 */
+	@RequestMapping("listOrganizationsContactByModuleId")
+	@RestReturn(value=OrganizationContactDTO.class, collection = true)
+	public RestResponse listOrganizationsContactByModuleId(ListOrganizationByModuleIdCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listOrganizationsContactByModuleId(cmd));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+	/**
 	 * <b>URL: /org/listOrganizationContactByJobPositionId</b>
 	 * <p>根据通用岗位获取人员</p>
 	 */
@@ -1281,6 +1294,20 @@ public class OrganizationController extends ControllerBase {
 	@RestReturn(value=Long.class)
 	public RestResponse getOrganizationActiveCommunityId(GetOrganizationActiveCommunityId cmd){
 		RestResponse res = new RestResponse(organizationService.getOrganizationActiveCommunityId(cmd.getOrganizationId()));
+		res.setErrorCode(ErrorCodes.SUCCESS);
+		res.setErrorDescription("OK");
+		return res;
+	}
+
+
+	/**
+	 * <b>URL: /org/listUserRelatedOrganizationAddresses</b>
+	 * <p>获取用户机构地址</p>
+	 */
+	@RequestMapping("listUserRelatedOrganizationAddresses")
+	@RestReturn(value=OrgAddressDTO.class, collection = true)
+	public RestResponse listUserRelatedOrganizationAddresses(ListUserRelatedOrganizationAddressesCommand cmd){
+		RestResponse res = new RestResponse(organizationService.listUserRelatedOrganizationAddresses(cmd));
 		res.setErrorCode(ErrorCodes.SUCCESS);
 		res.setErrorDescription("OK");
 		return res;

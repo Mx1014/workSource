@@ -70,6 +70,7 @@ import com.everhomes.rest.activity.UserActiveStatDTO;
 import com.everhomes.rest.activity.VideoState;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.business.BusinessServiceErrorCode;
+import com.everhomes.rest.common.ActivityListStyleFlag;
 import com.everhomes.rest.forum.ForumConstants;
 import com.everhomes.rest.forum.ForumServiceErrorCode;
 import com.everhomes.rest.forum.NewTopicCommand;
@@ -97,6 +98,7 @@ import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.user.InvitationCommandResponse;
 import com.everhomes.rest.user.InvitationDTO;
 import com.everhomes.rest.user.ListActiveStatCommand;
+import com.everhomes.rest.user.ListBusinessTreasureResponse;
 import com.everhomes.rest.user.ListPostResponse;
 import com.everhomes.rest.user.ListPostedActivityByOwnerIdCommand;
 import com.everhomes.rest.user.ListPostedTopicByOwnerIdCommand;
@@ -654,6 +656,8 @@ public class UserActivityServiceImpl implements UserActivityService {
             ListTreasureResponse rsp = new ListTreasureResponse();
             rsp.setBusinessUrl(getTouristBusinessUrl());
             rsp.setBusinessRealm(getBusinessRealm());
+            //设置活动列表的默认列表样式, add by tt, 20170116
+            rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
             return rsp;
         }
         //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
@@ -699,10 +703,64 @@ public class UserActivityServiceImpl implements UserActivityService {
         
         rsp.setBusinessUrl(getBusinessUrl());
         rsp.setBusinessRealm(getBusinessRealm());
+        
+        //设置活动列表的默认列表样式, add by tt, 20170116
+        rsp.setActivityDefaultListStyle(getActivityDefaultListStyle());
         return rsp;
     }
     
-    private String getBusinessRealm() {
+    @Override
+	public ListBusinessTreasureResponse getUserBusinessTreasure() {
+    	// 检查是否登陆，没登陆则只返回游客访问的电商url by sfyan 20161009
+    	if(!userService.isLogon()){
+    		ListBusinessTreasureResponse rsp = new ListBusinessTreasureResponse();
+            rsp.setBusinessUrl(getTouristBusinessUrl());
+            rsp.setBusinessRealm(getBusinessRealm());
+            return rsp;
+        }
+        //2016-07-29:modify by liujinwen.get orderCount's value like couponCount
+        User user = UserContext.current().getUser();
+        ListBusinessTreasureResponse rsp = ConvertHelper.convert(user, ListBusinessTreasureResponse.class);
+        UserProfile applied = userActivityProvider.findUserProfileBySpecialKey(user.getId(),
+                UserProfileContstant.IS_APPLIED_SHOP);
+        UserProfile couponCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+        		UserProfileContstant.RECEIVED_COUPON_COUNT);
+        UserProfile orderCount = userActivityProvider.findUserProfileBySpecialKey(user.getId(), 
+        		UserProfileContstant.RECEIVED_ORDER_COUNT);
+        
+        rsp.setApplyShopUrl(getApplyShopUrl());
+        if (applied != null) {
+        	rsp.setIsAppliedShop(NumberUtils.toInt(applied.getItemValue(), 0));
+        	if (NumberUtils.toInt(applied.getItemValue(), 0) != 0) 
+        		rsp.setApplyShopUrl(getManageShopUrl(user.getId()));
+        }
+        
+        if(couponCount != null) {
+        	rsp.setCouponCount(NumberUtils.toInt(couponCount.getItemValue(), 0));
+        }else {
+        	rsp.setCouponCount(0);
+        }
+        rsp.setMyOrderUrl(getMyOrderUrl());
+        rsp.setMyCoupon(getMyCoupon());
+        
+        if(orderCount != null) {
+        	rsp.setOrderCount(NumberUtils.toInt(orderCount.getItemValue(), 0));
+        } else {
+        	rsp.setOrderCount(0);
+        }
+        
+        rsp.setBusinessUrl(getBusinessUrl());
+        rsp.setBusinessRealm(getBusinessRealm());
+        
+        return rsp;
+	}
+
+	private Byte getActivityDefaultListStyle() {
+    	String activityDefaultListStyle = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.ACTIVITY_DEFAULT_LIST_STYLE, String.valueOf(ActivityListStyleFlag.ZUOLIN_COMMON.getCode()));
+    	return Byte.parseByte(activityDefaultListStyle);
+	}
+
+	private String getBusinessRealm() {
     	String businessRealm = configurationProvider.getValue(UserContext.getCurrentNamespaceId(), ConfigConstants.BUSINESS_REALM, "");
         if(businessRealm.length() == 0) {
             LOGGER.error("Invalid business url path, businessRealm=" + businessRealm);
