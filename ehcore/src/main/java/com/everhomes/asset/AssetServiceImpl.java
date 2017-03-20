@@ -747,12 +747,11 @@ public class AssetServiceImpl implements AssetService {
                     if (TenantType.FAMILY.equals(TenantType.fromCode(bill.getTenantType()))) {
                         List<GroupMember> groupMembers = groupProvider.findGroupMemberByGroupId(bill.getTenantId());
                         if (groupMembers != null && groupMembers.size() > 0) {
-                            groupMembers.stream().map(groupMember -> {
+                            for(GroupMember groupMember : groupMembers) {
                                 if (EntityType.USER.equals(EntityType.fromCode(groupMember.getMemberType()))) {
                                     sendMessageToUser(groupMember.getMemberId(), content);
                                 }
-                                return null;
-                            });
+                            }
                         }
                     }
 
@@ -764,12 +763,11 @@ public class AssetServiceImpl implements AssetService {
                         command.setOrganizationId(bill.getTenantId());
                         List<OrganizationContactDTO> orgContact = rolePrivilegeService.listOrganizationAdministrators(command);
                         if (orgContact != null && orgContact.size() > 0) {
-                            orgContact.stream().map(contact -> {
+                            for(OrganizationContactDTO contact : orgContact) {
                                 if (OrganizationMemberTargetType.USER.equals(OrganizationMemberTargetType.fromCode(contact.getTargetType()))) {
                                     sendMessageToUser(contact.getTargetId(), content);
                                 }
-                                return null;
-                            });
+                            }
 
                         }
                     }
