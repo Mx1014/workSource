@@ -11,7 +11,7 @@ ALTER TABLE eh_rentalv2_orders ADD COLUMN `offline_payee_uid` BIGINT ;
 ALTER TABLE eh_service_alliance_jump_module ADD COLUMN  `parent_id` BIGINT NOT NULL DEFAULT 0;
 ALTER TABLE eh_service_alliances ADD COLUMN `button_title` VARCHAR(64);
 
--- 物业账单3.0 by xiongying
+-- 物业账单3.0 by xiongying 20170320
 -- 账单表
 DROP TABLE IF EXISTS `eh_asset_bills`;
 CREATE TABLE `eh_asset_bills` (

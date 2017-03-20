@@ -71,7 +71,7 @@ update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://pro
 update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=提交服务"}' where item_label = '任务' and namespace_id = 999992 and action_type = 51;
 
 
--- 物业缴费3.0 by xiongying
+-- 物业缴费3.0 by xiongying 20170320
 INSERT INTO `eh_asset_bill_template_fields` (`id`, `namespace_id`, `required_flag`, `selected_flag`, `owner_type`, `owner_id`, `target_type`, `target_id`, `field_name`, `field_display_name`, `field_custom_name`, `default_order`, `template_version`, `field_type`) VALUES ('1', '0', '1', '1', 'PM', '0', 'community', '0', 'accountPeriod', '账期', NULL, NULL, '0', 'Timestamp');
 INSERT INTO `eh_asset_bill_template_fields` (`id`, `namespace_id`, `required_flag`, `selected_flag`, `owner_type`, `owner_id`, `target_type`, `target_id`, `field_name`, `field_display_name`, `field_custom_name`, `default_order`, `template_version`, `field_type`) VALUES ('2', '0', '1', '1', 'PM', '0', 'community', '0', 'buildingName', '楼栋', NULL, NULL, '0', 'String');
 INSERT INTO `eh_asset_bill_template_fields` (`id`, `namespace_id`, `required_flag`, `selected_flag`, `owner_type`, `owner_id`, `target_type`, `target_id`, `field_name`, `field_display_name`, `field_custom_name`, `default_order`, `template_version`, `field_type`) VALUES ('3', '0', '1', '1', 'PM', '0', 'community', '0', 'apartmentName', '门牌号', NULL, NULL, '0', 'String');
