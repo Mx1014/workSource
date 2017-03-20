@@ -2,7 +2,6 @@ package com.everhomes.techpark.expansion;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
-import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,6 +13,11 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.community.CommunityService;
+import com.everhomes.organization.OrganizationAddress;
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.user.UserIdentifier;
@@ -23,12 +27,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-import org.springframework.util.LinkedMultiValueMap;
-import org.springframework.util.MultiValueMap;
 import org.springframework.util.StringUtils;
-import org.springframework.web.util.UriComponentsBuilder;
-
-import ch.qos.logback.core.joran.conditional.ElseAction;
 
 import com.everhomes.building.BuildingProvider;
 import com.everhomes.community.Building;
@@ -38,9 +37,7 @@ import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.contentserver.ContentServerService;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseAddress;
 import com.everhomes.enterprise.EnterpriseAttachment;
-import com.everhomes.enterprise.EnterpriseCommunityMap;
 import com.everhomes.enterprise.EnterpriseProvider;
 import com.everhomes.entity.EntityType;
 import com.everhomes.flow.Flow;
@@ -62,10 +59,7 @@ import com.everhomes.organization.OrganizationService;
 import com.everhomes.rest.community.BuildingDTO;
 import com.everhomes.rest.contract.BuildingApartmentDTO;
 import com.everhomes.rest.enterprise.EnterpriseAttachmentDTO;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapStatus;
-import com.everhomes.rest.enterprise.EnterpriseCommunityMapType;
 import com.everhomes.rest.flow.CreateFlowCaseCommand;
-import com.everhomes.rest.flow.FlowCaseSearchType;
 import com.everhomes.rest.flow.FlowOwnerType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.flow.GeneralModuleInfo;
@@ -146,6 +140,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	private EnterpriseLeaseIssuerProvider enterpriseLeaseIssuerProvider;
     @Autowired
     private AddressProvider addressProvider;
+    @Autowired
+    private CommunityService communityService;
 
 	@Override
 	public GetEnterpriseDetailByIdResponse getEnterpriseDetailById(
@@ -776,6 +772,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		resp.setRequests(issuers.stream().map(r -> {
 			LeaseIssuerDTO dto = ConvertHelper.convert(r, LeaseIssuerDTO.class);
 			//TODO:set address
+            if (null != r.getEnterpriseId()) {
+            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(r.getEnterpriseId());
+                dto.setAddresses(organizationAddresses.stream().map(a -> {
+                    Address address = addressProvider.findAddressById(a.getAddressId());
+                    return ConvertHelper.convert(address, AddressDTO.class);
+                }).collect(Collectors.toList()));
+            }else {
+                List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(r.getId());
+                dto.setAddresses(addresses.stream().map(a -> {
+                    Address address = addressProvider.findAddressById(a.getAddressId());
+                    return ConvertHelper.convert(address, AddressDTO.class);
+                }).collect(Collectors.toList()));
+            }
 			return dto;
 		}).collect(Collectors.toList()));
 
@@ -809,6 +818,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
 
         if (null != cmd.getEnterpriseId()) {
+//            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getEnterpriseId());
 
         }
 
@@ -863,5 +873,11 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         }
 
         return dto;
+    }
+
+    @Override
+    public ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd) {
+        ListBuildingCommandResponse buildings = communityService.listBuildings(cmd);
+        return null;
     }
 }

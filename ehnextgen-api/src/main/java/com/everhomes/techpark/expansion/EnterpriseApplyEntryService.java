@@ -1,5 +1,7 @@
 package com.everhomes.techpark.expansion;
 
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.techpark.expansion.*;
 
 
@@ -38,5 +40,7 @@ public interface EnterpriseApplyEntryService {
 	LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd);
 
 	CheckIsLeaseIssuerDTO checkIsLeaseIssuer();
+
+	ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd);
 	
 }

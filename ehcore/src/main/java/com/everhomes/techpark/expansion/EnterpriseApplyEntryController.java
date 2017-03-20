@@ -3,6 +3,8 @@ package com.everhomes.techpark.expansion;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.community.ListBuildingCommand;
+import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.techpark.expansion.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -302,6 +304,20 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		return response;
 	}
 
+	/**
+	 * <b>URL: /techpark/entry/listBuildings</b>
+	 * <p>根据园区号查询楼栋列表</p>
+	 */
+	@RequestMapping("listBuildings")
+	@RestReturn(value=ListBuildingCommandResponse.class)
+	public RestResponse listBuildings(ListBuildingCommand cmd) {
 
+		ListBuildingCommandResponse buildings = enterpriseApplyEntryService.listBuildings(cmd);
+		RestResponse response =  new RestResponse(buildings);
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 }
