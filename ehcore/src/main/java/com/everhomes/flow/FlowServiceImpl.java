@@ -18,6 +18,8 @@ import com.everhomes.module.ServiceModuleProvider;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.news.Attachment;
 import com.everhomes.news.AttachmentProvider;
+import com.everhomes.organization.OrganizationMember;
+import com.everhomes.organization.OrganizationProvider;
 import com.everhomes.rest.app.AppConstants;
 import com.everhomes.rest.flow.*;
 import com.everhomes.rest.messaging.MessageBodyType;
@@ -156,6 +158,9 @@ public class FlowServiceImpl implements FlowService {
     
     @Autowired
     private SmsProvider smsProvider;
+    
+    @Autowired
+    private OrganizationProvider organizationProvider;
     
     private static final Pattern pParam = Pattern.compile("\\$\\{([^\\}]*)\\}");
     private final StringRedisSerializer stringRedisSerializer = new StringRedisSerializer();
@@ -1350,7 +1355,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
-				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
+				, FlowActionType.SMS.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
 		if(action != null) {
 			graphAction = new FlowGraphSMSAction();
 			graphAction.setFlowAction(action);
@@ -1595,6 +1600,17 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public FlowButtonDTO fireButton(FlowFireButtonCommand cmd) {
+		if(cmd.getEntitySel() == null) {
+			cmd.setEntitySel(new ArrayList<FlowEntitySel>());
+		}
+		if(cmd.getEntityId() != null && cmd.getFlowEntityType() != null) {
+			FlowEntitySel sel = new FlowEntitySel();
+			sel.setEntityId(cmd.getEntityId());
+			sel.setFlowEntityType(cmd.getFlowEntityType());
+			cmd.getEntitySel().add(sel);
+			cmd.setEntityId(null);
+			cmd.setFlowEntityType(null);
+		}
 		UserInfo userInfo = userService.getUserSnapshotInfoWithPhone(UserContext.current().getUser().getId());
 		FlowCaseState ctx = flowStateProcessor.prepareButtonFire(userInfo, cmd);
 		flowStateProcessor.step(ctx, ctx.getCurrentEvent());
@@ -2739,21 +2755,27 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public void createSnapshotNodeProcessors(FlowCaseState ctx, FlowGraphNode nextNode) {
-		List<Long> users;
-		List<FlowUserSelection> selections;
+		List<Long> users = new ArrayList<Long>();
+		List<FlowUserSelection> selections = new ArrayList<>();
 		
 		FlowGraphEvent evt = ctx.getCurrentEvent();
-		if(evt != null && evt.getEntityId() != null 
-				&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType())
-				) {
-			selections = new ArrayList<>();
-			FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
-			selections.add(sel);
-			users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);
+		if(evt.getEntitySel() != null && evt.getEntitySel().size() > 0) {
+			for(FlowEntitySel sel : evt.getEntitySel()) {
+				if(sel.getEntityId() != null && FlowEntityType.FLOW_SELECTION.getCode().equals(sel.getFlowEntityType())) {
+					FlowUserSelection ul = flowUserSelectionProvider.getFlowUserSelectionById(sel.getEntityId());
+					selections.add(ul);
+				}
+			}
 		} else {
-			selections = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
+			List<FlowUserSelection> subs = flowUserSelectionProvider.findSelectionByBelong(nextNode.getFlowNode().getId()
 					, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode());
-			users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);	
+			if(subs != null && subs.size() > 0) {
+				selections.addAll(subs);	
+			}			
+		}
+		
+		if(selections.size() > 0) {
+			users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, null, selections);
 		}
 		
 		if(users.size() > 0) {
@@ -3481,6 +3503,33 @@ public class FlowServiceImpl implements FlowService {
 				UserInfo ui = userService.getUserSnapshotInfoWithPhone(u);
 				infos.add(ConvertHelper.convert(ui, UserInfo.class));
 			});
+		}
+		
+		return resp;
+	}
+
+	@Override
+	public ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd) {
+		FlowAutoStepDTO stepDTO = new FlowAutoStepDTO();
+		stepDTO.setFlowCaseId(cmd.getFlowCaseId());
+		stepDTO.setOperatorId(UserContext.current().getUser().getId());
+		FlowCaseState ctx = flowStateProcessor.prepareNoStep(stepDTO);
+		List<FlowUserSelection> selections = new ArrayList<FlowUserSelection>(); 
+		FlowUserSelection ul = flowUserSelectionProvider.getFlowUserSelectionById(cmd.getEntityId());
+		FlowCase fc = ctx.getFlowCase();
+		ListSelectUsersResponse resp = new ListSelectUsersResponse();
+		resp.setUsers(new ArrayList<UserInfo>());
+		
+		if(ul != null && fc != null) {
+			selections.add(ul);
+			List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE, ctx.getFlowCase().getCurrentNodeId(), selections);
+			for(Long u : users) {
+				//OrganizationMember om = organizationProvider.findOrganizationMembersByOrgIdAndUId(u, ul.getOrganizationId());
+				UserInfo ui = userService.getUserSnapshotInfo(u);
+				if(ui != null) {
+					resp.getUsers().add(ui);	
+				}
+			}
 		}
 		
 		return resp;

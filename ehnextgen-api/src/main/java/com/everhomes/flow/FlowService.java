@@ -48,6 +48,8 @@ import com.everhomes.rest.flow.ListFlowModulesResponse;
 import com.everhomes.rest.flow.ListSMSTemplateCommand;
 import com.everhomes.rest.flow.ListScriptsCommand;
 import com.everhomes.rest.flow.ListScriptsResponse;
+import com.everhomes.rest.flow.ListSelectUsersCommand;
+import com.everhomes.rest.flow.ListSelectUsersResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
@@ -452,5 +454,7 @@ public interface FlowService {
 
 	String getStepMessageTemplate(FlowStepType fromStep,
 			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
+
+	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
 	
 }

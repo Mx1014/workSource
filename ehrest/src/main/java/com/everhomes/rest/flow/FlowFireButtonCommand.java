@@ -13,8 +13,8 @@ import com.everhomes.util.StringHelper;
  * <li>stepCount: 当前节点的 stepCount，用来防止重复提交</li>
  * <li>title: 评论标题 </li>
  * <li>content: 评论内容</li>
- * <li>entityId: 用户 ID 或者 选择人员的 ID </li>
- * <li>flowEntityType: 客户端对象选择下个节点的用户 ID 或者 用户选择类型 ID</li>
+ * <li>entityId: 用户 ID 或者 选择人员的 ID。新版本不能使用这个值了，用 entitySel 代替 </li>
+ * <li>flowEntityType: 客户端对象选择下个节点的用户 ID 或者 用户选择类型 ID 。新版本不能使用这个值了，用 entitySel 代替</li>
  * <li>
  * </ul>
  * @author janson
@@ -33,6 +33,9 @@ public class FlowFireButtonCommand {
 	
 	private Long entityId;
 	private String flowEntityType;
+	
+	@ItemType(FlowEntitySel.class)
+	private List<FlowEntitySel> entitySel;
 	
 	public FlowFireButtonCommand() {
 		images = new ArrayList<String>();
@@ -100,6 +103,14 @@ public class FlowFireButtonCommand {
 
 	public void setStepCount(Long stepCount) {
 		this.stepCount = stepCount;
+	}
+
+	public List<FlowEntitySel> getEntitySel() {
+		return entitySel;
+	}
+
+	public void setEntitySel(List<FlowEntitySel> entitySel) {
+		this.entitySel = entitySel;
 	}
 
 	@Override
