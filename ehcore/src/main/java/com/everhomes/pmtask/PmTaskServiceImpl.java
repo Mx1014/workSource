@@ -1884,7 +1884,7 @@ public class PmTaskServiceImpl implements PmTaskService {
 						Address address = addressProvider.findAddressById(r.getAddressId());
 						OrgAddressDTO dto = ConvertHelper.convert(address, OrgAddressDTO.class);
 						dto.setOrganizationId(o.getId());
-						dto.setDisplayName(o.getDisplayName());
+						dto.setDisplayName(o.getName());
 						dto.setAddressId(address.getId());
 						return dto;
 					}).collect(Collectors.toList());
