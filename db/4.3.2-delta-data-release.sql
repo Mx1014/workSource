@@ -104,7 +104,7 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('ass
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('asset', 'asset.notify.fee', 'zh_CN', '您有待缴的物业账单，请尽快完成缴费（点击查看账单详情）。');
 
 
---添加菜单
+-- 添加菜单
 SET @menu_id = (SELECT MAX(id) FROM `eh_web_menus`);
 INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
 VALUES ((@menu_id := @menu_id + 1), '缴费管理', '20000', NULL, 'react:/property-service/payment-management', '1', '2', '/20000/', 'park', '458', NULL);
