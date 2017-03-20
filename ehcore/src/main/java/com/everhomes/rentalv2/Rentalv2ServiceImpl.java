@@ -1631,25 +1631,25 @@ public class Rentalv2ServiceImpl implements Rentalv2Service {
 					}
 			}
 			//不可以在开始时间-最多提前时间之前 预定 太早了
-			if (reserveTime.before(new java.util.Date(rentalBill.getStartTime().getTime()
-					- rs.getRentalStartTime()))) {
-				LOGGER.error("reserve Time before reserve start time reserveTime = "+ datetimeSF.format(reserveTime));
-				throw RuntimeErrorException 
-						.errorWith(
-								RentalServiceErrorCode.SCOPE,
-								RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY,
-										"reserve Time before reserve start time");
-			}
-			//也不可以在结束时间-最少提前时间之后预定  太迟了
-			if (reserveTime.after(new java.util.Date(rentalBill.getEndTime().getTime()
-					- rs.getRentalEndTime()))) {
-				LOGGER.error("reserve Time after reserve end time  reserveTime = "+ datetimeSF.format(reserveTime));
-				throw RuntimeErrorException
-						.errorWith(
-								RentalServiceErrorCode.SCOPE,
-								RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
-										"reserve Time after reserve end time");
-			}
+//			if (reserveTime.before(new java.util.Date(rentalBill.getStartTime().getTime()
+//					- rs.getRentalStartTime()))) {
+//				LOGGER.error("reserve Time before reserve start time reserveTime = "+ datetimeSF.format(reserveTime));
+//				throw RuntimeErrorException 
+//						.errorWith(
+//								RentalServiceErrorCode.SCOPE,
+//								RentalServiceErrorCode.ERROR_RESERVE_TOO_EARLY,
+//										"reserve Time before reserve start time");
+//			}
+//			//也不可以在结束时间-最少提前时间之后预定  太迟了
+//			if (reserveTime.after(new java.util.Date(rentalBill.getEndTime().getTime()
+//					- rs.getRentalEndTime()))) {
+//				LOGGER.error("reserve Time after reserve end time  reserveTime = "+ datetimeSF.format(reserveTime));
+//				throw RuntimeErrorException
+//						.errorWith(
+//								RentalServiceErrorCode.SCOPE,
+//								RentalServiceErrorCode.ERROR_RESERVE_TOO_LATE,
+//										"reserve Time after reserve end time");
+//			}
 			// for (SiteItemDTO siDto : cmd.getRentalItems()) {
 			// totalMoney += siDto.getItemPrice() * siDto.getCounts();
 			// }
