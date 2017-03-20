@@ -131,3 +131,6 @@ VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @acl_privilege_
 
 
 
+
+-- 更新星尚汇服务市场投诉建议为物业服务，关联任务7649，add by tt, 20170320 
+update eh_launch_pad_items set item_name = '物业服务', item_label = '物业服务', action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=物业服务"}' where namespace_id = 999981 and item_lable = '投诉建议';
