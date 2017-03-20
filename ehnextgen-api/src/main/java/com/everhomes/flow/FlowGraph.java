@@ -51,7 +51,7 @@ public class FlowGraph {
 			if(btn.getMessage() != null) {
 				idToAction.put(btn.getMessage().getFlowAction().getId(), btn.getMessage());
 			}
-			if(btn.getMessage() != null) {
+			if(btn.getSms() != null) {
 				idToAction.put(btn.getSms().getFlowAction().getId(), btn.getSms());
 			}
 			if(btn.getScripts() != null) {
