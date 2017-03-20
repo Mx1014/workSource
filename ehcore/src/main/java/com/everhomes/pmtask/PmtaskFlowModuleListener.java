@@ -147,6 +147,7 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
 
+
 			}else if ("PROCESSING".equals(nodeType)) {
 				task.setStatus(pmTaskCommonService.convertFlowStatus(nextNode.getParams()));
 				pmTaskProvider.updateTask(task);
@@ -260,28 +261,25 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if ("ASSIGNING".equals(nodeType)) {
-				Integer namespaceId = UserContext.getCurrentNamespaceId();
-				if(namespaceId == 1000000) {
-					FlowGraphEvent evt = ctx.getCurrentEvent();
-					if(evt != null && evt.getEntityId() != null
-							&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
+				FlowGraphEvent evt = ctx.getCurrentEvent();
+				if(evt != null && evt.getEntityId() != null
+						&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
 
-						PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-						FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
-						Long targetId = sel.getSourceIdA();
+					PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+					FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
+					Long targetId = sel.getSourceIdA();
 
-						PmTaskLog pmTaskLog = new PmTaskLog();
-						pmTaskLog.setNamespaceId(task.getNamespaceId());
-						pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-						pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
-						pmTaskLog.setOwnerId(task.getOwnerId());
-						pmTaskLog.setOwnerType(task.getOwnerType());
-						pmTaskLog.setStatus(task.getStatus());
-						pmTaskLog.setTargetId(targetId);
-						pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
-						pmTaskLog.setTaskId(task.getId());
-						pmTaskProvider.createTaskLog(pmTaskLog);
-					}
+					PmTaskLog pmTaskLog = new PmTaskLog();
+					pmTaskLog.setNamespaceId(task.getNamespaceId());
+					pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+					pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+					pmTaskLog.setOwnerId(task.getOwnerId());
+					pmTaskLog.setOwnerType(task.getOwnerType());
+					pmTaskLog.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
+					pmTaskLog.setTargetId(targetId);
+					pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+					pmTaskLog.setTaskId(task.getId());
+					pmTaskProvider.createTaskLog(pmTaskLog);
 				}
 			}
 		}
@@ -327,16 +325,19 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
 
-			FlowGraphEvent event = ctx.getCurrentEvent();
-			Long targetId = event.getEntityId();
+			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
 
-			User targetUser = userProvider.findUserById(targetId);
-			UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(targetId, IdentifierType.MOBILE.getCode());
+			if (logs.size() != 0) {
+				Long targetId = logs.get(0).getTargetId();
 
-			smsProvider.addToTupleList(variables, "creatorName", task.getRequestorName());
-			smsProvider.addToTupleList(variables, "creatorPhone", task.getRequestorPhone());
-			smsProvider.addToTupleList(variables, "operatorName", targetUser.getNickName());
-			smsProvider.addToTupleList(variables, "operatorPhone", targetIdentifier.getIdentifierToken());
+				User targetUser = userProvider.findUserById(targetId);
+				UserIdentifier targetIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(targetId, IdentifierType.MOBILE.getCode());
+
+				smsProvider.addToTupleList(variables, "creatorName", task.getRequestorName());
+				smsProvider.addToTupleList(variables, "creatorPhone", task.getRequestorPhone());
+				smsProvider.addToTupleList(variables, "operatorName", targetUser.getNickName());
+				smsProvider.addToTupleList(variables, "operatorPhone", targetIdentifier.getIdentifierToken());
+			}
 		}
 
 	}
