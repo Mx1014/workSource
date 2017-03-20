@@ -5,6 +5,14 @@ import java.util.List;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.StringHelper;
 
+/**
+ * <ul>
+ * <li>users: 用户列表</li>
+ * </ul>
+ *
+ * @author janson
+ *
+ */
 public class ListSelectUsersResponse {
 	List<UserInfo> users;
 
