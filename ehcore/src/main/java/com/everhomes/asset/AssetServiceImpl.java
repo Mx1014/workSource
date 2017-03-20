@@ -776,6 +776,10 @@ public class AssetServiceImpl implements AssetService {
     }
 
     private void sendMessageToUser(Long userId, String content) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("notify asset bills: userId = {}, content = {}", userId, content);
+        }
+
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());
