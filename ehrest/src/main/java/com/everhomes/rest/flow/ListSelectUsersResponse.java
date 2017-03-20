@@ -2,6 +2,7 @@ package com.everhomes.rest.flow;
 
 import java.util.List;
 
+import com.everhomes.discover.ItemType;
 import com.everhomes.rest.user.UserInfo;
 import com.everhomes.util.StringHelper;
 
@@ -14,6 +15,7 @@ import com.everhomes.util.StringHelper;
  *
  */
 public class ListSelectUsersResponse {
+	@ItemType(UserInfo.class)
 	List<UserInfo> users;
 
 	public List<UserInfo> getUsers() {
