@@ -140,5 +140,5 @@ SET @id = (SELECT MAX(id) FROM `eh_service_alliance_jump_module`);
 INSERT INTO `eh_service_alliance_jump_module` (`id`, `namespace_id`, `module_name`, `module_url`, `parent_id`) 
 	VALUES ((@id := @id + 1), '999985', '电商', 'BIZS', '0');
     
--- 去掉华润菜单物业缴费
+-- 去掉华润菜单物业缴费 add by xiongying 20170320
 delete from eh_web_menu_scopes where menu_id = 20400 and owner_id = 999985 and owner_type = 'EhNamespaces';
