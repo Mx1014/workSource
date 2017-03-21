@@ -68,7 +68,7 @@ SET @eh_launch_pad_items = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
 	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999992', '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRvd09HUTNNRGs1TURZeVpUTmhNbU5pWkdWbVpXUmhNMlU1T1RSaE4yTTFNZw', '1', '1', '56', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);	
 update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=提交服务"}' where item_label = '物业报修' and namespace_id = 999992;
-update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=提交服务"}' where item_label = '任务' and namespace_id = 999992 and action_type = 51;
+update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=提交服务"}' where namespace_id = 999992 and action_type = 51;
 
 
 -- 物业缴费3.0 by xiongying 20170320
