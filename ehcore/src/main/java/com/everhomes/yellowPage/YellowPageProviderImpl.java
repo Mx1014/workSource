@@ -886,6 +886,23 @@ public class YellowPageProviderImpl implements YellowPageProvider {
 	}
 
 	@Override
+	public void createGolfRequest(ServiceAllianceGolfRequest request) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceGolfRequests.class));
+		request.setId(id);
+
+		EhServiceAllianceGolfRequestsDao dao = new EhServiceAllianceGolfRequestsDao(context.configuration());
+		dao.insert(request);
+	}
+
+	@Override
+	public ServiceAllianceGolfRequest findGolfRequest(Long id) {
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhServiceAllianceGolfRequestsDao dao = new EhServiceAllianceGolfRequestsDao(context.configuration());
+		return ConvertHelper.convert(dao.findById(id), ServiceAllianceGolfRequest.class);
+	}
+
+	@Override
 	public List<ServiceAllianceInvestRequests> listInvestRequests(CrossShardListingLocator locator, int pageSize) {
 		List<ServiceAllianceInvestRequests> requests = new ArrayList<ServiceAllianceInvestRequests>();
 
