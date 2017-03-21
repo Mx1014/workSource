@@ -64,6 +64,7 @@ import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.user.UserInfo;
 
 public interface FlowService {
 	
@@ -456,5 +457,7 @@ public interface FlowService {
 			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
 
 	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
+
+	List<UserInfo> listUserSelectionsByNode(FlowCaseState ctx, Long nodeId);
 	
 }

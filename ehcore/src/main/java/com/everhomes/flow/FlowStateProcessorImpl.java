@@ -528,6 +528,9 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		return userInfo;
 	}
 	
+	/**
+	 * 当前执行人
+	 */
 	@Override
 	public UserInfo getCurrProcessor(FlowCaseState ctx, String variable) {
 		return ctx.getOperator();

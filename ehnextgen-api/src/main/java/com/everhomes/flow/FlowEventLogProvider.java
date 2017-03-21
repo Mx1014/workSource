@@ -33,7 +33,7 @@ public interface FlowEventLogProvider {
 
 	List<FlowEventLog> findStepEventLogs(Long caseId);
 
-	FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount, FlowStepType fromStep);
+	FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount);
 
 	FlowEventLog isProcessor(Long userId, FlowCase flowCase);
 
@@ -51,5 +51,7 @@ public interface FlowEventLogProvider {
 	FlowEventLog getValidEnterStep(Long userId, FlowCase flowCase);
 
 	void updateFlowEventLogs(List<FlowEventLog> updateLogs);
+
+	List<FlowEventLog> findPrefixStepEventLogs(Long caseId, Long stepCount);
 
 }

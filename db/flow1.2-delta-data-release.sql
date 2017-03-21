@@ -39,7 +39,7 @@ UPDATE `eh_configurations` SET `value`='http://oa.ssipc.com.cn:7890/oa/service/W
 -- 更新资源类型:特别注意如果这里更改rows = 0 说明id不对,就不能执行下一句
 UPDATE eh_rentalv2_resource_types SET pay_mode = 1 WHERE namespace_id = 999983 AND NAME = '会议室预订' AND id =10505;
 -- 前一条执行好了执行这一条
-UPDATE eh_launch_pad_items  SET action_data ='{"resourceTypeId":10505,"pageType":0,"payMode":1}' WHERE namespace_id = 999983 AND item_label='会议室预订'; 
+UPDATE eh_launch_pad_items  SET action_data ='{"resourceTypeId":10505,"pageType":0,"payMode":1}' WHERE namespace_id = 999983 AND item_label='会议室预订';
 
 -- 添加资源预约工作流的菜单
 SET @id = (SELECT MAX(id) FROM eh_web_menu_scopes );
@@ -49,7 +49,7 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 UPDATE `eh_locale_templates` SET `text`='俱乐部推荐：${groupName}' WHERE `scope`='group.notification' AND `code`=33;
 
 -- 更新深业物业报修 工作流 add by sw 20170317
-INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`) 
+INSERT INTO `eh_configurations` (`name`, `value`, `description`, `namespace_id`, `display_name`)
 	VALUES ('pmtask.handler-999992', 'flow', '', '0', NULL);
 DELETE from eh_web_menu_scopes where menu_id = 20160 and owner_id = 999992;
 DELETE from eh_web_menu_scopes where menu_id = 20192 and owner_id = 999992;
@@ -63,10 +63,10 @@ INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `o
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 70100, '', 'EhNamespaces', 999992, 2);
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 	VALUES ((@menu_scope_id := @menu_scope_id + 1), 70200, '', 'EhNamespaces', 999992, 2);
-	
+
 SET @eh_launch_pad_items = (SELECT MAX(id) FROM `eh_launch_pad_items`);
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`, `service_categry_id`)
-	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999992', '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRvd09HUTNNRGs1TURZeVpUTmhNbU5pWkdWbVpXUmhNMlU1T1RSaE4yTTFNZw', '1', '1', '56', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);	
+	VALUES ((@eh_launch_pad_items := @eh_launch_pad_items + 1), '999992', '0', '0', '0', '/home', 'Bizs', 'FLOW_TASKS', '任务管理', 'cs://1/image/aW1hZ2UvTVRvd09HUTNNRGs1TURZeVpUTmhNbU5pWkdWbVpXUmhNMlU1T1RSaE4yTTFNZw', '1', '1', '56', '', '0', '0', '1', '1', '', '0', NULL, NULL, NULL, '1', 'pm_admin', '1', NULL);
 update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=提交服务"}' where item_label = '物业报修' and namespace_id = 999992;
 update eh_launch_pad_items set action_type = 60, action_data = '{"url":"zl://propertyrepair/create?type=user&taskCategoryId=0&displayName=提交服务"}' where item_label = '任务' and namespace_id = 999992 and action_type = 51;
 
@@ -98,7 +98,7 @@ INSERT INTO `eh_asset_bill_template_fields` (`id`, `namespace_id`, `required_fla
 INSERT INTO `eh_asset_bill_template_fields` (`id`, `namespace_id`, `required_flag`, `selected_flag`, `owner_type`, `owner_id`, `target_type`, `target_id`, `field_name`, `field_display_name`, `field_custom_name`, `default_order`, `template_version`, `field_type`) VALUES ('24', '0', '0', '1', 'PM', '0', 'community', '0', 'other', '其他', NULL, NULL, '0', 'BigDecimal');
 
 
- 
+
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('asset', '10001', 'zh_CN', '账单不存在');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('asset', '10002', 'zh_CN', '生成excel信息有问题');
 INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('asset', 'asset.notify.fee', 'zh_CN', '您有待缴的物业账单，请尽快完成缴费（点击查看账单详情）。');
@@ -106,28 +106,53 @@ INSERT INTO `eh_locale_strings` (`scope`, `code`, `locale`, `text`) VALUES ('ass
 
 --添加菜单
 SET @menu_id = (SELECT MAX(id) FROM `eh_web_menus`);
-INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`) 
+INSERT INTO `eh_web_menus` (`id`, `name`, `parent_id`, `icon_url`, `data_type`, `leaf_flag`, `status`, `path`, `type`, `sort_num`, `module_id`)
 VALUES ((@menu_id := @menu_id + 1), '缴费管理', '20000', NULL, 'react:/property-service/payment-management', '1', '2', '/20000/', 'park', '458', NULL);
 
 SET @acl_privilege_id = (SELECT MAX(id) FROM `eh_acl_privileges`);
-INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`) 
+INSERT INTO `eh_acl_privileges` (`id`, `app_id`, `name`, `description`, `tag`)
 VALUES ((@acl_privilege_id := @acl_privilege_id + 1), 0, '缴费管理', '缴费管理 全部权限', NULL);
 
 SET @web_menu_privilege_id = (SELECT MAX(id) FROM `eh_web_menu_privileges`);
-INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`) 
-VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @acl_privilege_id, @menu_id, '缴费管理', 1, 1, '缴费管理  全部权限', 458); 
+INSERT INTO `eh_web_menu_privileges` (`id`, `privilege_id`, `menu_id`, `name`, `show_flag`, `status`, `discription`, `sort_num`)
+VALUES ((@web_menu_privilege_id := @web_menu_privilege_id + 1), @acl_privilege_id, @menu_id, '缴费管理', 1, 1, '缴费管理  全部权限', 458);
 
 SET @menu_scope_id = (SELECT MAX(id) FROM `eh_web_menu_scopes`);
-INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) 
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`)
 VALUES ((@menu_scope_id := @menu_scope_id + 1), @menu_id, '', 'EhNamespaces', 999985, 2);
 
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @acl_privilege_id, 1005, 'EhAclRoles', 0, 1, NOW()); 
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @acl_privilege_id, 1005, 'EhAclRoles', 0, 1, NOW());
 SET @acl_id = (SELECT MAX(id) FROM `eh_acls`);
 INSERT INTO `eh_acls` (`id`, `namespace_id`, `owner_type`, `owner_id`, `grant_type`, `privilege_id`, `role_id`, `role_type`, `order_seq`, `creator_uid`, `create_time`)
-VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @acl_privilege_id, 1001, 'EhAclRoles', 0, 1, NOW()); 
+VALUES ((@acl_id := @acl_id + 1), 0, 'EhOrganizations', NULL, 1, @acl_privilege_id, 1001, 'EhAclRoles', 0, 1, NOW());
 
 
+-- add more variables by janson
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1004', '0', '0', '', '0', '', 'currAllProcessorsName', '本节点处理人姓名', 'text', 'bean_id', 'flow-variable-curr-all-processors-name', '1');
 
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1005', '0', '0', '', '0', '', 'currAllProcessorsPhone', '本节点处理人手机号码', 'text', 'bean_id', 'flow-variable-curr-all-processors-phone', '1');
 
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1006', '0', '0', '', '0', '', 'prefixAllProcessorsName', '上一步处理人姓名', 'text', 'bean_id', 'flow-variable-prefix-all-processors-name', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1007', '0', '0', '', '0', '', 'prefixAllProcessorsPhone', '上一步处理人手机号码', 'text', 'bean_id', 'flow-variable-prefix-all-processors-phone', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1008', '0', '0', '', '0', '', 'transferTargetName', '被转交人姓名', 'text', 'bean_id', 'flow-variable-transfer-target-name', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('1009', '0', '0', '', '0', '', 'transferTargetPhone', '被转交人手机号', 'text', 'bean_id', 'flow-variable-transfer-target-phone', '1');
+
+UPDATE `eh_flow_variables` SET `label`='本节点操作执行人姓名' WHERE `id`='1002';
+UPDATE `eh_flow_variables` SET `label`='本节点操作执行人手机号' WHERE `id`='1003';
