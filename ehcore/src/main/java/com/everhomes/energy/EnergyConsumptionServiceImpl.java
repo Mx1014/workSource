@@ -412,7 +412,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 meter.setMeterNumber(cmd.getMeterNumber());
             }
             dbProvider.execute(r -> {
-                if (cmd.getPrice() != null) {
+                if (cmd.getPrice() != null || cmd.getConfigId() != null) {
                     this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, cmd);
                 }
                 if (cmd.getRate() != null) {
@@ -447,6 +447,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         log.setNamespaceId(currNamespaceId());
         switch (settingType) {
             case PRICE:
+                log.setCalculationType(cmd.getCalculationType());
                 if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(PriceCalculationType.fromCode(cmd.getCalculationType()))) {
                     log.setSettingValue(cmd.getPrice());
                 }
