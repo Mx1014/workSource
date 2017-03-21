@@ -618,7 +618,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     UpdateEnergyMeterCommand updateCmd = new UpdateEnergyMeterCommand();
                     updateCmd.setMeterId(r.getId());
                     // 价格
-                    if (cmd.getPrice() != null) {
+                    if (cmd.getPrice() != null || cmd.getConfigId() != null) {
                         updateCmd.setPrice(cmd.getPrice());
                         updateCmd.setStartTime(cmd.getPriceStart());
                         updateCmd.setEndTime(cmd.getPriceEnd());
