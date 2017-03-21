@@ -622,6 +622,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                         updateCmd.setPrice(cmd.getPrice());
                         updateCmd.setStartTime(cmd.getPriceStart());
                         updateCmd.setEndTime(cmd.getPriceEnd());
+                        updateCmd.setConfigId(cmd.getConfigId());
+                        updateCmd.setCalculationType(cmd.getCalculationType());
                         this.insertMeterSettingLog(EnergyMeterSettingType.PRICE, updateCmd);
                     }
                     // 倍率
