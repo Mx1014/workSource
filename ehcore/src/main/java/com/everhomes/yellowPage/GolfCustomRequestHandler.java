@@ -20,7 +20,7 @@ import com.everhomes.rest.yellowPage.GetRequestInfoResponse;
 import com.everhomes.rest.yellowPage.JumpType;
 import com.everhomes.rest.yellowPage.ServiceAllianceRequestNotificationTemplateCode;
 import com.everhomes.search.ServiceAllianceRequestInfoSearcher;
-import com.everhomes.server.schema.tables.pojos.EhServiceAllianceInvestRequests;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceGolfRequests;
 import com.everhomes.user.*;
 import com.everhomes.util.ConvertHelper;
 import com.mysql.jdbc.StringUtils;
@@ -236,7 +236,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 
 		List<RequestFieldDTO> list = new ArrayList<RequestFieldDTO>();
 		if(template != null && template.getDtos() != null && template.getDtos().size() > 0) {
-			EhServiceAllianceInvestRequests request = ConvertHelper.convert(field, EhServiceAllianceInvestRequests.class);
+			EhServiceAllianceGolfRequests request = ConvertHelper.convert(field, EhServiceAllianceGolfRequests.class);
 			Field[] fields = request.getClass().getDeclaredFields();
 			for (FieldDTO fieldDTO : template.getDtos()) {
 				RequestFieldDTO dto = new RequestFieldDTO();
@@ -251,7 +251,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 						if(requestField.getName().equals(fieldDTO.getFieldName())){
 							// 字段值
 							try {
-								if(requestField.get(request) != null)
+								if(requestField.get(request) != null  )
 									dto.setFieldValue(requestField.get(request).toString());
 								
 								break;
