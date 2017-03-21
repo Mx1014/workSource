@@ -1675,7 +1675,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                     EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
                     dto.setMeterId(value.getMeterId());
                     dto.setSettingValue(value.getSettingValue());
-                    dto.setFormulaName(value.getPlanName());
+                    dto.setPriceConfigName(value.getPlanName());
+//                    dto.setFormulaName(value.getPlanName());
                     dto.setStartTime(value.getTime());
                     EnergyMeterPriceDTO nextValue = maps.get(key_arr[i+1]);
                     dto.setEndTime(nextValue.getTime());
@@ -1691,7 +1692,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dto.setEndTime(nextValue.getTime());
 
                 dto.setSettingValue(nextValue.getSettingValue());
-                dto.setFormulaName(nextValue.getPlanName());
+                dto.setPriceConfigName(value.getPlanName());
 
                 dtos.add(dto);
             } else if(key_arr.length == 1) {
@@ -1700,7 +1701,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
                 dto.setMeterId(value.getMeterId());
                 dto.setStartTime(value.getTime());
                 dto.setSettingValue(value.getSettingValue());
-                dto.setFormulaName(value.getPlanName());
+                dto.setPriceConfigName(value.getPlanName());
 
                 dtos.add(dto);
             }
