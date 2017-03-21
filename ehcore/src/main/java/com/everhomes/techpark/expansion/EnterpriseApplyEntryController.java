@@ -295,7 +295,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	 */
 	@RequestMapping("checkIsLeaseIssuer")
 	@RestReturn(value=CheckIsLeaseIssuerDTO.class)
-	public RestResponse checkIsLeaseIssuer(){
+	public RestResponse checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd){
 
 		CheckIsLeaseIssuerDTO dto = enterpriseApplyEntryService.checkIsLeaseIssuer();
 		RestResponse response = new RestResponse(dto);
