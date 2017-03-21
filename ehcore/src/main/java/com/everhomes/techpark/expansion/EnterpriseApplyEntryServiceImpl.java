@@ -631,7 +631,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public boolean createLeasePromotion(CreateLeasePromotionCommand cmd){
 		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
-		leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
+        if (null != cmd.getEnterTime())
+		    leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
 		leasePromotion.setStatus(LeasePromotionStatus.RENTING.getCode());
 		if (null==cmd.getRentType())
