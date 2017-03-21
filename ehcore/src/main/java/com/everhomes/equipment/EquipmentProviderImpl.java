@@ -227,9 +227,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
 	@Caching(evict={@CacheEvict(value="findEquipmentByIdAndOwner", key="{#equipment.id, #equipment.ownerType, #equipment.ownerId}"),
-            @CacheEvict(value="findEquipmentById", key="#id"),
+            @CacheEvict(value="findEquipmentById", key="#equipment.id"),
 	        @CacheEvict(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'"),
-	        @CacheEvict(value="findEquipmentByQrCodeToken", key="#qrCodeToken")})
+	        @CacheEvict(value="findEquipmentByQrCodeToken", key="#equipment.qrCodeToken")})
 	@Override
 	public void creatEquipmentInspectionEquipment(
 			EquipmentInspectionEquipments equipment) {
@@ -287,9 +287,9 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 	}
 
     @Caching(evict={@CacheEvict(value="findEquipmentByIdAndOwner", key="{#equipment.id, #equipment.ownerType, #equipment.ownerId}"),
-            @CacheEvict(value="findEquipmentById", key="#id"),
+            @CacheEvict(value="findEquipmentById", key="#equipment.id"),
             @CacheEvict(value="listQualifiedEquipmentStandardEquipments", key="'AllEquipments'"),
-            @CacheEvict(value="findEquipmentByQrCodeToken", key="#qrCodeToken")})
+            @CacheEvict(value="findEquipmentByQrCodeToken", key="#equipment.qrCodeToken")})
 	@Override
 	public void updateEquipmentInspectionEquipment(
 			EquipmentInspectionEquipments equipment) {
