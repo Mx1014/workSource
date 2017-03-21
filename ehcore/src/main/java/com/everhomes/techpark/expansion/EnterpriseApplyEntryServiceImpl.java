@@ -875,7 +875,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
         List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
                 null, null);
-
+        dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
         if (0 != issuers.size()) {
             dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
         }
