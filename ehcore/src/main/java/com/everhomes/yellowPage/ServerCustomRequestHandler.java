@@ -84,7 +84,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 			request.setCreatorMobile(identifier.getIdentifierToken());
 
 		LOGGER.info("InvestCustomRequestHandler addCustomRequest request:" + request);
-		yellowPageProvider.createInvestRequests(request);
+		yellowPageProvider.createServerRequest(request);
 		ServiceAllianceRequestInfo requestInfo = ConvertHelper.convert(request, ServiceAllianceRequestInfo.class);
 		requestInfo.setTemplateType(cmd.getTemplateType());
 		requestInfo.setJumpType(JumpType.TEMPLATE.getCode());
@@ -165,7 +165,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	}
 
 
-	private String getNote(ServiceAllianceInvestRequests request) {
+	private String getNote(ServiceAllianceServerRequest request) {
 
 		List<RequestFieldDTO> fieldList = toFieldDTOList(request);
 		if(fieldList != null && fieldList.size() > 0) {
@@ -213,7 +213,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 
 	@Override
 	public GetRequestInfoResponse getCustomRequestInfo(Long id) {
-		ServiceAllianceInvestRequests request = yellowPageProvider.findInvestRequests(id);
+		ServiceAllianceServerRequest request = yellowPageProvider.findServerRequest(id);
 		List<RequestFieldDTO> fieldList = new ArrayList<RequestFieldDTO>();
 		if(request != null) {
 			fieldList = toFieldDTOList(request);
@@ -229,7 +229,7 @@ private static final Logger LOGGER=LoggerFactory.getLogger(ApartmentCustomReques
 	}
 
 
-	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceInvestRequests field) {
+	private List<RequestFieldDTO> toFieldDTOList(ServiceAllianceServerRequest field) {
 		GetCustomRequestTemplateCommand command = new GetCustomRequestTemplateCommand();
 		command.setTemplateType(field.getTemplateType());
 		RequestTemplateDTO template = userActivityService.getCustomRequestTemplate(command);
