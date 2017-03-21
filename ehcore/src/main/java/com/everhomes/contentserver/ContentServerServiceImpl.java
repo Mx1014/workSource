@@ -292,18 +292,24 @@ public class ContentServerServiceImpl implements ContentServerService {
 
         // https 默认端口443 by sfyan 20161226
         Integer port = cache.get(serverId).getPublicPort();
-        if(getScheme(port).equals(HTTPS)){
+        if(HTTPS.equals(getScheme(port))) {
             port = 443;
         }
 
-        String url = String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s&pxw=%d&pxh=%d",
-                getScheme(port), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId,
-                token, width, height);
+        String url = String.format("%s://%s:%d/%s?ownerType=%s&ownerId=%s&token=%s",
+                getScheme(port), cache.get(serverId).getPublicAddress(), port, uri, ownerType, ownerId, token);
 
-        if (quality != null) {
-            url += ("&q=" + quality);
+        StringBuilder urlSb = new StringBuilder(url);
+        if (width != null) {
+            urlSb.append("&w=").append(width);
         }
-        return url;
+        if (height != null) {
+            urlSb.append("&h=").append(height);
+        }
+        if (quality != null) {
+            urlSb.append("&q=").append(quality);
+        }
+        return urlSb.toString();
     }
 
     @Override
