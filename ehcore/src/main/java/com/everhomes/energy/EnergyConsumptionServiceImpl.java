@@ -1655,32 +1655,45 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
     private List<EnergyMeterSettingLogDTO> dealEnergyMeterPriceDTO(Map<Long, EnergyMeterPriceDTO> maps) {
         List<EnergyMeterSettingLogDTO> dtos = null;
         Object[] key_arr = maps.keySet().toArray();
-        Arrays.sort(key_arr);
-        for(int i = 0; i < key_arr.length-2; i++) {
-            EnergyMeterPriceDTO value = maps.get(key_arr[i]);
-            EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
-            dto.setMeterId(value.getMeterId());
-            dto.setSettingValue(value.getSettingValue());
-            dto.setFormulaName(value.getPlanName());
-            dto.setStartTime(value.getTime());
-            EnergyMeterPriceDTO nextValue = maps.get(key_arr[i+1]);
-            dto.setEndTime(nextValue.getTime());
+        if(key_arr.length > 0) {
+            Arrays.sort(key_arr);
+            if(key_arr.length >= 2) {
+                for(int i = 0; i < key_arr.length-2; i++) {
+                    EnergyMeterPriceDTO value = maps.get(key_arr[i]);
+                    EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+                    dto.setMeterId(value.getMeterId());
+                    dto.setSettingValue(value.getSettingValue());
+                    dto.setFormulaName(value.getPlanName());
+                    dto.setStartTime(value.getTime());
+                    EnergyMeterPriceDTO nextValue = maps.get(key_arr[i+1]);
+                    dto.setEndTime(nextValue.getTime());
 
-            dtos.add(dto);
+                    dtos.add(dto);
+                }
+
+                EnergyMeterPriceDTO value = maps.get(key_arr[key_arr.length-2]);
+                EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+                dto.setMeterId(value.getMeterId());
+                dto.setStartTime(value.getTime());
+                EnergyMeterPriceDTO nextValue = maps.get(key_arr[key_arr.length-1]);
+                dto.setEndTime(nextValue.getTime());
+
+                dto.setSettingValue(nextValue.getSettingValue());
+                dto.setFormulaName(nextValue.getPlanName());
+
+                dtos.add(dto);
+            } else if(key_arr.length == 1) {
+                EnergyMeterPriceDTO value = maps.get(key_arr[key_arr.length-1]);
+                EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
+                dto.setMeterId(value.getMeterId());
+                dto.setStartTime(value.getTime());
+                dto.setSettingValue(value.getSettingValue());
+                dto.setFormulaName(value.getPlanName());
+
+                dtos.add(dto);
+            }
+
         }
-
-        EnergyMeterPriceDTO value = maps.get(key_arr[key_arr.length-2]);
-        EnergyMeterSettingLogDTO dto = new EnergyMeterSettingLogDTO();
-        dto.setMeterId(value.getMeterId());
-        dto.setStartTime(value.getTime());
-        EnergyMeterPriceDTO nextValue = maps.get(key_arr[key_arr.length-1]);
-        dto.setEndTime(nextValue.getTime());
-
-        dto.setSettingValue(nextValue.getSettingValue());
-        dto.setFormulaName(nextValue.getPlanName());
-
-        dtos.add(dto);
-
         return dtos;
     }
 
