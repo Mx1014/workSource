@@ -856,9 +856,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
         LeasePromotionConfig config = enterpriseLeaseIssuerProvider.getLeasePromotionConfigByNamespaceId(cmd.getNamespaceId());
 
         if (null == config) {
-            LOGGER.error("LeaseIssuer not found, namespaceId={}", cmd.getNamespaceId());
+            LOGGER.error("LeaseIssuerConfig not found, namespaceId={}", cmd.getNamespaceId());
             throw errorWith(ErrorCodes.SCOPE_GENERAL, ErrorCodes.ERROR_INVALID_PARAMETER,
-                    "LeaseIssuer not found.");
+                    "LeaseIssuerConfig not found.");
         }
 
         return ConvertHelper.convert(config, LeasePromotionConfigDTO.class);
