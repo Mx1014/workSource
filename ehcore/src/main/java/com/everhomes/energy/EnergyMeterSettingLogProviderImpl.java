@@ -164,7 +164,7 @@ public class EnergyMeterSettingLogProviderImpl implements EnergyMeterSettingLogP
                 .and(EH_ENERGY_METER_SETTING_LOGS.STATUS.eq(EnergyCommonStatus.ACTIVE.getCode()))
                 .and(EH_ENERGY_METER_SETTING_LOGS.METER_ID.eq(meterId))
                 .and(EH_ENERGY_METER_SETTING_LOGS.SETTING_TYPE.eq(settingType))
-                .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.abs())
+                .orderBy(EH_ENERGY_METER_SETTING_LOGS.CREATE_TIME.asc())
                 .fetchInto(EnergyMeterSettingLog.class);
     }
 

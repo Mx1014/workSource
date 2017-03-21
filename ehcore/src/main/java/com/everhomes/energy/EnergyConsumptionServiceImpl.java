@@ -32,6 +32,7 @@ import com.everhomes.util.excel.SAXHandlerEventUserModel;
 import com.google.gson.Gson;
 import com.google.gson.reflect.TypeToken;
 import com.sun.org.apache.xpath.internal.operations.Bool;
+
 import org.apache.commons.lang.math.NumberUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -47,6 +48,7 @@ import javax.script.ScriptException;
 import javax.validation.ConstraintViolation;
 import javax.validation.Validation;
 import javax.validation.Validator;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.math.BigDecimal;
@@ -1626,15 +1628,18 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
 
     private Map<Long, EnergyMeterPriceDTO> mapEnergyMeterPriceDTO(List<EnergyMeterSettingLog> logs) {
         Map<Long, EnergyMeterPriceDTO> maps = new HashMap<>();
-        logs.stream().map(log -> {
+        logs.forEach(log -> {
             EnergyMeterPriceDTO dto = new EnergyMeterPriceDTO();
             //开始时间-创建时间-价钱    结束时间-创建时间-价钱
             dto.setMeterId(log.getMeterId());
             dto.setCreateTime(log.getCreateTime());
             dto.setTime(log.getStartTime());
             dto.setSettingValue(log.getSettingValue());
-            if(log.getFormulaId() != null && log.getFormulaId() > 0L) {
+            if(log.getConfigId() != null && log.getConfigId() > 0L) {
                 //价钱梯度表的方案名
+                EnergyMeterPriceConfig priceConfig = priceConfigProvider.findById(log.getConfigId());
+                if(priceConfig != null)
+                    dto.setPlanName(priceConfig.getName());
             }
             if(dto.getTime() != null) {
                 maps.put(dto.getTime().getTime(), dto);
@@ -1648,13 +1653,12 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             } else {
                 maps.put(Long.MAX_VALUE-1, dto);
             }
-            return null;
         });
         return maps;
     }
 
     private List<EnergyMeterSettingLogDTO> dealEnergyMeterPriceDTO(Map<Long, EnergyMeterPriceDTO> maps) {
-        List<EnergyMeterSettingLogDTO> dtos = null;
+        List<EnergyMeterSettingLogDTO> dtos = new ArrayList<EnergyMeterSettingLogDTO>();
         Object[] key_arr = maps.keySet().toArray();
         if(key_arr.length > 0) {
             Arrays.sort(key_arr);
