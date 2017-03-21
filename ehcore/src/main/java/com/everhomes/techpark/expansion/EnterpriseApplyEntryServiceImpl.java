@@ -614,9 +614,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
             }
 
             dto.setPosterUrl(contentServerService.parserUri(c.getPosterUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
-            List<BuildingForRentAttachmentDTO> attachments = dto.getAttachments();
+            List<LeasePromotionAttachment> attachments = c.getAttachments();
             if(null != attachments){
-                for (BuildingForRentAttachmentDTO leasePromotionAttachment : attachments) {
+                for (LeasePromotionAttachment leasePromotionAttachment : attachments) {
                     leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
                 }
             }
