@@ -1747,6 +1747,7 @@ long id = sequenceProvider.getNextSequence(key);
         result[0] = context.select().from(Tables.EH_PUNCH_RULE_OWNER_MAP)
             .where(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_ID.eq(targetId))
             .and(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_TYPE.eq(targetType))
+
             .and(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_ID.eq(ownerId))
             .and(Tables.EH_PUNCH_RULE_OWNER_MAP.OWNER_TYPE.eq(ownerType))
             .fetchAny().map((r) -> {
@@ -1759,7 +1760,26 @@ long id = sequenceProvider.getNextSequence(key);
             return null;
         }
     }
+    @Override
+    public PunchRuleOwnerMap getPunchRuleOwnerMapByTarget(String targetType , Long targetId) {
+        try {
+        PunchRuleOwnerMap[] result = new PunchRuleOwnerMap[1];
+        DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());
 
+        result[0] = context.select().from(Tables.EH_PUNCH_RULE_OWNER_MAP)
+            .where(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_ID.eq(targetId))
+            .and(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_TYPE.eq(targetType))
+ 
+            .fetchAny().map((r) -> {
+                return ConvertHelper.convert(r, PunchRuleOwnerMap.class);
+            });
+
+        return result[0];
+        } catch (Exception ex) {
+            //fetchAny() maybe return null
+            return null;
+        }
+    }
     @Override
     public List<PunchRuleOwnerMap> queryPunchRuleOwnerMaps(ListingLocator locator, int count, ListingQueryBuilderCallback queryBuilderCallback) {
         DSLContext context =  this.dbProvider.getDslContext(AccessSpec.readWrite());

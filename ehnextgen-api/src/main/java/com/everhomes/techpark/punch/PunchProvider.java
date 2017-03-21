@@ -280,6 +280,8 @@ public interface PunchProvider {
 
 	public Integer countPunchLogDevice(Long userId, Long companyId,
 			java.sql.Date beginDate , java.sql.Date endDate);
+
+	PunchRuleOwnerMap getPunchRuleOwnerMapByTarget(String targetType, Long targetId);
  
  
  
