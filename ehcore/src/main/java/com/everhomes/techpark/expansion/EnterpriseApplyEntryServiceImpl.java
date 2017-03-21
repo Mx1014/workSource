@@ -819,26 +819,28 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     "Invalid communityId param.");
         }
 
-        LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
-        leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
+        if (null != cmd.getEnterpriseIds()) {
+            for (Long id: cmd.getEnterpriseIds()) {
+                LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+                leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
+                leaseIssuer.setEnterpriseId(id);
+                enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
+            }
+        }else {
+            LeaseIssuer leaseIssuer = ConvertHelper.convert(cmd, LeaseIssuer.class);
+            leaseIssuer.setNamespaceId(UserContext.getCurrentNamespaceId());
+            //TODO:门牌地址
+            enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
 
-        //TODO:门牌地址
-        enterpriseLeaseIssuerProvider.createLeaseIssuer(leaseIssuer);
-
-        if (null != cmd.getEnterpriseId()) {
-//            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(cmd.getEnterpriseId());
-
-        }
-
-        if (null != cmd.getAddressIds()) {
-            for (Long id: cmd.getAddressIds()) {
-                LeaseIssuerAddress leaseIssuerAddress = new LeaseIssuerAddress();
-                leaseIssuerAddress.setAddressId(id);
-                leaseIssuerAddress.setLeaseIssuerId(leaseIssuer.getId());
-                createLeaseIssuerAddress(leaseIssuerAddress);
+            if (null != cmd.getAddressIds()) {
+                for (Long id: cmd.getAddressIds()) {
+                    LeaseIssuerAddress leaseIssuerAddress = new LeaseIssuerAddress();
+                    leaseIssuerAddress.setAddressId(id);
+                    leaseIssuerAddress.setLeaseIssuerId(leaseIssuer.getId());
+                    createLeaseIssuerAddress(leaseIssuerAddress);
+                }
             }
         }
-
 
     }
 

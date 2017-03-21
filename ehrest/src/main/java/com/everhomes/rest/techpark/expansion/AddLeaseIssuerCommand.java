@@ -16,7 +16,8 @@ public class AddLeaseIssuerCommand {
     private Long communityId;
     private String issuerContact;
     private String issuerName;
-    private Long enterpriseId;
+    @ItemType(Long.class)
+    private List<Long> enterpriseIds;
 
     public Long getCommunityId() {
         return communityId;
@@ -50,11 +51,11 @@ public class AddLeaseIssuerCommand {
         this.addressIds = addressIds;
     }
 
-    public Long getEnterpriseId() {
-        return enterpriseId;
+    public List<Long> getEnterpriseIds() {
+        return enterpriseIds;
     }
 
-    public void setEnterpriseId(Long enterpriseId) {
-        this.enterpriseId = enterpriseId;
+    public void setEnterpriseIds(List<Long> enterpriseIds) {
+        this.enterpriseIds = enterpriseIds;
     }
 }
