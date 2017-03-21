@@ -11,6 +11,7 @@ CREATE TABLE `eh_service_alliance_golf_requests` (
   `creator_mobile` varchar(128) DEFAULT NULL,
   `creator_organization_id` bigint(20) NOT NULL DEFAULT 0,
   `service_alliance_id` bigint(20) NOT NULL DEFAULT 0,
+  `create_time` datetime DEFAULT NULL,
 
   `user_name` varchar(128) DEFAULT NULL,
   `contact` varchar(128) DEFAULT NULL,
@@ -33,6 +34,7 @@ CREATE TABLE `eh_service_alliance_gym_requests` (
   `creator_mobile` varchar(128) DEFAULT NULL,
   `creator_organization_id` bigint(20) NOT NULL DEFAULT 0,
   `service_alliance_id` bigint(20) NOT NULL DEFAULT 0,
+  `create_time` datetime DEFAULT NULL,
 
   `user_name` varchar(128) DEFAULT NULL,
   `contact` varchar(128) DEFAULT NULL,
@@ -54,6 +56,7 @@ CREATE TABLE `eh_service_alliance_server_requests` (
   `creator_mobile` varchar(128) DEFAULT NULL,
   `creator_organization_id` bigint(20) NOT NULL DEFAULT 0,
   `service_alliance_id` bigint(20) NOT NULL DEFAULT 0,
+  `create_time` datetime DEFAULT NULL,
 
   `user_name` varchar(128) DEFAULT NULL,
   `contact` varchar(128) DEFAULT NULL,
