@@ -97,7 +97,7 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 		query.addConditions(Tables.EH_LEASE_ISSUERS.NAMESPACE_ID.eq(namespaceId));
 		if (StringUtils.isNotBlank(keyword)) {
 			keyword = "%" + keyword + "%";
-			query.addJoin(Tables.EH_ORGANIZATIONS, Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_LEASE_ISSUERS.ENTERPRISE_ID));
+			query.addJoin(Tables.EH_ORGANIZATIONS, JoinType.LEFT_OUTER_JOIN, Tables.EH_ORGANIZATIONS.ID.eq(Tables.EH_LEASE_ISSUERS.ENTERPRISE_ID));
 
 			query.addConditions(Tables.EH_LEASE_ISSUERS.ISSUER_CONTACT.like(keyword).or(
 					Tables.EH_LEASE_ISSUERS.ISSUER_NAME.like(keyword))
