@@ -110,6 +110,8 @@ CREATE TABLE `eh_asset_bill_notify_records` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
--- 修改服务联盟模块字段长度 add by sw 20170321
+-- 服务联盟 add by sw 20170321
 ALTER TABLE eh_service_alliance_jump_module MODIFY COLUMN module_url VARCHAR (512);
 ALTER TABLE eh_service_alliances MODIFY COLUMN module_url VARCHAR (512);
+update eh_configurations set `value` = '/service-alliance/index.html?hideNavigationBar=1#/service_detail/%s/%s?_k=%s&ownerType=%s&ownerId=%s' where name = 'serviceAlliance.serviceDetail.url';
+
