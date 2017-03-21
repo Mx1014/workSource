@@ -707,7 +707,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 				
 			}
-			
+
+			if (!StringUtils.isEmpty(sa.getButtonTitle())) {
+				response.setButtonTitle(sa.getButtonTitle());
+			}
+
 			this.processDetailUrl(dto);
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
