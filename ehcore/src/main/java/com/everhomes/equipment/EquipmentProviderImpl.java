@@ -2039,35 +2039,26 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 			Condition con5 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.OPERATOR_ID.eq(UserContext.current().getUser().getId());
 			con5 = con5.and(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.IN_MAINTENANCE.getCode()));
 
-//			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
-
 			con4 = con4.or(con5);
-//			con4 = con4.and(con3);
 			con = con4;
 		}
 
 		if(reviewStandardIds != null && reviewStandardIds.size() > 0) {
-			query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds));
+			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STANDARD_ID.in(reviewStandardIds);
 
 			//巡检完成关闭的任务
 			Condition con1 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.CLOSE.getCode());
 			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_RESULT.eq(ReviewResult.NONE.getCode()));
-//			con1 = con1.and( Tables.EH_EQUIPMENT_INSPECTION_TASKS.REVIEW_EXPIRED_DATE.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
 			//需维修待审核的任务
 			Condition con2 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.eq(EquipmentTaskStatus.NEED_MAINTENANCE.getCode());
-//			Condition con3 = Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime()));
-//			con3 = con3.or(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME.ge(new Timestamp(DateHelper.currentGMTTime().getTime())));
-//			con2 = con2.and(con3);
 
-//			Condition con = con1.or(con2);
-
+			con1 = con1.or(con2);
+			con3 = con3.and(con1);
 			if(con == null) {
-				con = con1.or(con2);
+				con = con3;
 			} else {
-				con = con.or(con1.or(con2));
+				con = con.or(con3);
 			}
-
 		}
 
 		if(con != null) {
