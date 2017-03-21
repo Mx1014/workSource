@@ -1465,3 +1465,7 @@ VALUES ('113972', '999983', '0', '0', '0', '/home', 'Bizs', '店铺管理', '店
 INSERT INTO `eh_launch_pad_items` (`id`, `namespace_id`, `app_id`, `scope_code`, `scope_id`, `item_location`, `item_group`, `item_name`, `item_label`, `icon_uri`, `item_width`, `item_height`, `action_type`, `action_data`, `default_order`, `apply_policy`, `min_version`, `display_flag`, `display_layout`, `bgcolor`, `tag`, `target_type`, `target_id`, `delete_flag`, `scene_type`, `scale_type`) 
 VALUES ('113973', '999983', '0', '0', '0', '/home', 'Bizs', '店铺管理', '店铺管理', 'cs://1/image/aW1hZ2UvTVRwaFlqUmpaVFkzTnpkalptVmxNelEyWXpjMlptUTFOek00WXpJM05ERTVOQQ', '1', '1', '14', '{\"url\":\"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp_ng%2Fshop%2Findex.html%3F_k%3Dzlbiz#sign_suffix"}', '0', '0', '1', '0', NULL, '0', NULL, '', '', '1', 'pm_admin', '1');
 
+
+
+-- 修改“餐饮”为跳转链接形式 add by xujuan 20170321
+update eh_launch_pad_items set action_type=14, action_data='{"url":"https://biz.zuolin.com/zl-ec/rest/service/front/logon?hideNavigationBar=1&sourceUrl=https%3A%2F%2Fbiz.zuolin.com%2Fnar%2Fbiz%2Fweb%2Fapp%2Fuser%2Findex.html%3Fisfromindex%3D0%23%2Fmicroshop%2Fhome%3F_k%3Dzlbiz#sign_suffix"}' where namespace_id=999983 and item_name='餐饮';
