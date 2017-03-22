@@ -38,6 +38,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.TransactionStatus;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.approval.ApprovalCategory;
 import com.everhomes.approval.ApprovalCategoryProvider;
@@ -114,7 +115,9 @@ import com.everhomes.rest.techpark.punch.PunchTimeRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchTimesPerDay;
 import com.everhomes.rest.techpark.punch.UpdatePunchRuleCommand;
 import com.everhomes.rest.techpark.punch.ViewFlags;
+import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
@@ -123,10 +126,14 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchPointsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchPointsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchDayDetailDTO;
@@ -135,6 +142,8 @@ import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchPointCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UserMonthLogsDTO;
@@ -4709,6 +4718,62 @@ public class PunchServiceImpl implements PunchService {
 		this.punchProvider.deletePunchWorkdayRuleByOwnerAndId(ownerType, ownerId, pr.getWorkdayRuleId());  
 		this.punchProvider.deletePunchHolidayByRuleId(pr.getWorkdayRuleId()); 
 		this.punchProvider.deletePunchRule(pr);
+	}
+	@Override
+	public void updatePunchPoint(UpdatePunchPointCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void addPunchPoint(AddPunchPointCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public ListPunchPointsResponse listPunchPoints(ListPunchPointsCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void addPunchWiFi(AddPunchWiFiCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void updatePunchWiFi(PunchWiFiDTO cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void deletePunchWiFi(PunchWiFiDTO cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public ListPunchSchedulingMonthResponse listPunchScheduling(ListPunchSchedulingMonthCommand cmd) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void updatePunchWiFiRules(UpdatePunchSchedulingMonthCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public HttpServletResponse exportPunchScheduling(ListPunchSchedulingMonthCommand cmd,
+			HttpServletResponse response) {
+		// TODO Auto-generated method stub
+		return null;
+	}
+	@Override
+	public void importPunchScheduling(MultipartFile[] files) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void updatePunchRuleMap(PunchRuleMapDTO cmd) {
+		// TODO Auto-generated method stub
+		
 	}
 	
 }
