@@ -707,7 +707,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 				}
 				
 			}
-			
+
+			if (!StringUtils.isEmpty(sa.getButtonTitle())) {
+				dto.setButtonTitle(sa.getButtonTitle());
+			}
+
 			this.processDetailUrl(dto);
 //			dto.setDisplayName(serviceAlliance.getNickName());
 			response.getDtos().add(dto);
@@ -1189,7 +1193,11 @@ public class YellowPageServiceImpl implements YellowPageService {
 //				long id = this.sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhServiceAllianceJumpModule.class));
 //				d.setId(id);
 							d.setModuleName(b.getShopName());
-							d.setModuleUrl(String.format("zl://browser/i/%s",b.getShopURL()));
+							try {
+								d.setModuleUrl(String.format("zl://browser/i?url=%s",URLEncoder.encode(b.getShopURL(), StandardCharsets.UTF_8.name())));
+							} catch (UnsupportedEncodingException e) {
+								e.printStackTrace();
+							}
 							d.setNamespaceId(namespaceId);
 							d.setParentId(bisModule.getId());
 							bizModules.add(d);

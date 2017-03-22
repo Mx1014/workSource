@@ -109,3 +109,8 @@ CREATE TABLE `eh_asset_bill_notify_records` (
 
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- 服务联盟 add by sw 20170321
+ALTER TABLE eh_service_alliance_jump_module MODIFY COLUMN module_url VARCHAR (512);
+ALTER TABLE eh_service_alliances MODIFY COLUMN module_url VARCHAR (512);
+
