@@ -712,6 +712,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						privilegeIds.addAll(ids);
 					}
 				}
+				ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), organizationId);
+				if(null != ids){
+					privilegeIds.addAll(ids);
+				}
 			}
 		}
 		return privilegeIds;
