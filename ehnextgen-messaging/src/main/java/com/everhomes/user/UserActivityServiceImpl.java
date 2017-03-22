@@ -1316,6 +1316,12 @@ public class UserActivityServiceImpl implements UserActivityService {
                 templateType = CustomRequestConstants.SETTLE_REQUEST_CUSTOM;
             } else if(templateType.startsWith(CustomRequestConstants.INVEST_REQUEST_CUSTOM)) {
                 templateType = CustomRequestConstants.INVEST_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.GOLF_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.GOLF_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.GYM_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.GYM_REQUEST_CUSTOM;
+            } else if(templateType.startsWith(CustomRequestConstants.SERVER_REQUEST_CUSTOM)) {
+                templateType = CustomRequestConstants.SERVER_REQUEST_CUSTOM;
             }
             handler = PlatformContext.getComponent(handlerPrefix + templateType);
         }
