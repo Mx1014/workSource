@@ -256,6 +256,14 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				if(null != contract)
 					dto.setContract(organizationService.processContract(contract));
 			}
+
+			//填充楼栋门牌
+            if (null != c.getAddressId()){
+                Address address = addressProvider.findAddressById(c.getAddressId());
+                dto.setApartmentName(address.getApartmentName());
+                dto.setBuildingName(address.getBuildingName());
+            }
+
 			return dto;
 		}).collect(Collectors.toList());
 		for (EnterpriseApplyEntryDTO dto : dtos) {

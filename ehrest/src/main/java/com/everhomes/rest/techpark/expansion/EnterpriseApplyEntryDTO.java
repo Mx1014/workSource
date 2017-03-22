@@ -67,8 +67,26 @@ public class EnterpriseApplyEntryDTO {
 
 	private String issuerType;
 	private Long buildingId;
+	private String buildingName;
 	private Long addressId;
+	private String apartmentName;
 	private Long flowcaseId;
+
+	public String getBuildingName() {
+		return buildingName;
+	}
+
+	public void setBuildingName(String buildingName) {
+		this.buildingName = buildingName;
+	}
+
+	public String getApartmentName() {
+		return apartmentName;
+	}
+
+	public void setApartmentName(String apartmentName) {
+		this.apartmentName = apartmentName;
+	}
 
 	public String getIssuerType() {
 		return issuerType;
