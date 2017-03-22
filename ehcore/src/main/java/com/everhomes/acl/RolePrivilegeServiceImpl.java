@@ -1870,6 +1870,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			groupTypes.add(OrganizationGroupType.GROUP.getCode());
 			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 			List<Long> targetIds = new ArrayList<>();
+			targetIds.add(cmd.getOrganizationId());
 			for (OrganizationDTO orgDTO: orgDTOs) {
 				targetIds.add(orgDTO.getId());
 			}
@@ -1895,6 +1896,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd) {
+
 		Long startTime1 = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1942,8 +1944,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			List<OrganizationDTO> orgDTOs = new ArrayList<>();
 
-
-
 			// 没有，则获取个人所在公司节点的业务模块下的项目
 			if(serviceModuleAssignments.size() == 0){
 				List<String> groupTypes = new ArrayList<>();
@@ -1952,6 +1952,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				groupTypes.add(OrganizationGroupType.GROUP.getCode());
 				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 				List<Long> targetIds = new ArrayList<>();
+				targetIds.add(cmd.getOrganizationId());
 				for (OrganizationDTO orgDTO: orgDTOs) {
 					targetIds.add(orgDTO.getId());
 				}
