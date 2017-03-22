@@ -95,10 +95,18 @@ public class BuildingDTO {
 	
 	private Timestamp createTime;
 	
-	
+	private String detailUrl;
 	
 	@ItemType(BuildingAttachmentDTO.class)
 	private List<BuildingAttachmentDTO> attachments;
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
 
 	public String getOperateNickName() {
 		return operateNickName;
