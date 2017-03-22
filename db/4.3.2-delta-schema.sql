@@ -130,10 +130,10 @@ CREATE TABLE `eh_service_alliance_golf_requests` (
   `service_alliance_id` bigint(20) NOT NULL DEFAULT 0,
   `create_time` datetime DEFAULT NULL,
 
-  `user_name` varchar(128) DEFAULT NULL,
-  `contact` varchar(128) DEFAULT NULL,
-  `enterprise_name` varchar(256) DEFAULT NULL,
-  `enterprise_floor` int(11) DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL,
+  `mobile` varchar(128) DEFAULT NULL,
+  `organization_name` varchar(128) DEFAULT NULL,
+  `organization_floor` int(11) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
@@ -153,9 +153,9 @@ CREATE TABLE `eh_service_alliance_gym_requests` (
   `service_alliance_id` bigint(20) NOT NULL DEFAULT 0,
   `create_time` datetime DEFAULT NULL,
 
-  `user_name` varchar(128) DEFAULT NULL,
-  `contact` varchar(128) DEFAULT NULL,
-  `enterprise_name` varchar(256) DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL,
+  `mobile` varchar(128) DEFAULT NULL,
+  `organization_name` varchar(128) DEFAULT NULL,
   `profession` varchar(128) DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
@@ -175,9 +175,9 @@ CREATE TABLE `eh_service_alliance_server_requests` (
   `service_alliance_id` bigint(20) NOT NULL DEFAULT 0,
   `create_time` datetime DEFAULT NULL,
 
-  `user_name` varchar(128) DEFAULT NULL,
-  `contact` varchar(128) DEFAULT NULL,
-  `enterprise_name` varchar(256) DEFAULT NULL,
+  `name` varchar(128) DEFAULT NULL,
+  `mobile` varchar(128) DEFAULT NULL,
+  `organization_name` varchar(128) DEFAULT NULL,
   `email` varchar(128) DEFAULT NULL,
   `destination` varchar(128) DEFAULT NULL,
   `departure_city` varchar(128) DEFAULT NULL,
