@@ -156,3 +156,19 @@ VALUES ('1009', '0', '0', '', '0', '', 'transferTargetPhone', '被转交人手�
 
 UPDATE `eh_flow_variables` SET `label`='本节点操作执行人姓名' WHERE `id`='1002';
 UPDATE `eh_flow_variables` SET `label`='本节点操作执行人手机号' WHERE `id`='1003';
+
+UPDATE `eh_flow_variables` SET `label`='上一个节点执行人' WHERE `id`='2001';
+UPDATE `eh_flow_variables` SET `label`='本节点执行人' WHERE `id`='2002';
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2007', '0', '0', '', '0', '', 'prefixProcessors', '上个节点处理人', 'node_user', 'bean_id', 'flow-variable-prefix-node-processors', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2008', '0', '0', '', '0', '', 'currProcessors', '本节点处理人', 'node_user', 'bean_id', 'flow-variable-curr-node-processors', '1');
+
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2009', '0', '0', '', '0', '', 'targetTransfer', '被转交人', 'node_user', 'bean_id', 'flow-variable-target-node-transfer', '1');
+

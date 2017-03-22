@@ -427,7 +427,7 @@ public interface FlowService {
 	 */
 	void deleteSnapshotProcessUser(Long flowId, Long userId);
 
-	List<Long> resolvUserSelections(FlowCaseState ctx,
+	List<Long> resolvUserSelections(FlowCaseState ctx, Map<String, Long> processedEntities,
 			FlowEntityType entityType, Long entityId,
 			List<FlowUserSelection> selections, int loopCnt);
 

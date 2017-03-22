@@ -2662,8 +2662,9 @@ public class FlowServiceImpl implements FlowService {
 	
 	@Override
 	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections) {
+		Map<String, Long> processedEntities = new HashMap<String, Long>();
 		// Remove dup users
-		List<Long> tmps = resolvUserSelections(ctx, entityType, entityId, selections, 1);
+		List<Long> tmps = resolvUserSelections(ctx, processedEntities, entityType, entityId, selections, 1);
 		List<Long> rlts = new ArrayList<>();
 		Map<Long, Long> maps = new HashMap<Long, Long>();
 		for(Long l : tmps) {
@@ -2677,12 +2678,30 @@ public class FlowServiceImpl implements FlowService {
 		return rlts;
 	}
 	
-	public List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
-		return resolvUserSelections(ctx, entityType, entityId, selections, loopCnt, 10000);
+	public List<Long> resolvUserSelections(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt) {
+		return resolvUserSelections(ctx, processedEntities, entityType, entityId, selections, loopCnt, 10000);
 	}
 	
-	private List<Long> resolvUserSelections(FlowCaseState ctx, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt, int maxCount) {
+	/**
+	 * <ul>此函数需要关注三个问题：
+	 * <li> 1. 变量引用，不能循环引用。 </li>
+	 * <li> 2. 不能过深的循环 </li>
+	 * <li> 3. 很多情况只需要求得部分值，不需要求得全部值 </li>
+	 * </ul>
+	 * @param ctx 当前工作流上下文
+	 * @param processedEntities 已经处理过的对象
+	 * @param entityType
+	 * @param entityId
+	 * @param selections
+	 * @param loopCnt
+	 * @param maxCount
+	 * @return
+	 * 
+	 */
+	private List<Long> resolvUserSelections(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType entityType, Long entityId, List<FlowUserSelection> selections, int loopCnt, int maxCount) {
 		List<Long> users = new ArrayList<Long>();
+		
+		//判断是否调用层次过深，避免让服务器崩溃
 		if(selections == null || loopCnt >= 5) {
 			return users;
 		}
@@ -2695,6 +2714,13 @@ public class FlowServiceImpl implements FlowService {
 				//为了加快处理的速度，有的情况不需要拿太多用户
 				break;
 			}
+			
+			//判断是否已经处理过，避免循环引用
+			String key = "sel:" + sel.getId();
+			if(processedEntities.containsKey(key)) {
+				continue;
+			}
+			processedEntities.put(key, 1l);
 			
 			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
@@ -2754,7 +2780,7 @@ public class FlowServiceImpl implements FlowService {
 //					variable.getScriptCls();
 					FlowVariableUserResolver ftr = PlatformContext.getComponent(variable.getScriptCls());
 		        	if(ftr != null) {
-		        		List<Long> tmp = ftr.variableUserResolve(ctx, entityType, entityId, sel, loopCnt + 1);
+		        		List<Long> tmp = ftr.variableUserResolve(ctx, processedEntities, entityType, entityId, sel, loopCnt + 1);
 		        		if(null != tmp) {
 		        			users.addAll(tmp);
 		        		}
@@ -3571,7 +3597,7 @@ public class FlowServiceImpl implements FlowService {
 			return userSels;
 		}
 		Long orgId = selections.get(0).getOrganizationId();
-		List<Long> users = resolvUserSelections(ctx, FlowEntityType.FLOW_NODE
+		List<Long> users = resolvUserSelections(ctx, new HashMap<String, Long>(), FlowEntityType.FLOW_NODE
 				, nodeId, selections, 1, 5);
 		for(Long u : users) {
 			UserInfo ui = userService.getUserSnapshotInfoWithPhone(u);
