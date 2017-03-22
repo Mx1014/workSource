@@ -15,7 +15,7 @@ import com.everhomes.util.StringHelper;
  * <li>pageSize: 每页的数量</li>
  * </ul>
  */
-public class ListPunchRulesCommonCommand {
+public class ListPunchPointsCommand {
 
 	@NotNull
 	private String ownerType;

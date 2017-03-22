@@ -11,11 +11,10 @@ import com.everhomes.util.StringHelper;
  * <li>ownerId：id</li>
  * <li>targetType: 填organization/user</li>
  * <li>targetId：对应设置目标的id比如机构比如人的id</li>
- * <li>pageAnchor: 分页的锚点，本次开始取的位置</li>
- * <li>pageSize: 每页的数量</li>
+ * <li>queryTime: 查询时间 数字时间戳</li>
  * </ul>
  */
-public class ListPunchRulesCommonCommand {
+public class ListPunchSchedulingMonthCommand {
 
 	@NotNull
 	private String ownerType;
@@ -24,8 +23,7 @@ public class ListPunchRulesCommonCommand {
 	private String targetType;
 	private Long targetId;
 
-	private Long pageAnchor;
-	private Integer pageSize;
+	private Long queryTime; 
 
 	@Override
 	public String toString() {
@@ -47,23 +45,7 @@ public class ListPunchRulesCommonCommand {
 	public void setOwnerId(Long ownerId) {
 		this.ownerId = ownerId;
 	}
-
-	public Long getPageAnchor() {
-		return pageAnchor;
-	}
-
-	public void setPageAnchor(Long pageAnchor) {
-		this.pageAnchor = pageAnchor;
-	}
-
-	public Integer getPageSize() {
-		return pageSize;
-	}
-
-	public void setPageSize(Integer pageSize) {
-		this.pageSize = pageSize;
-	}
-
+ 
 	public String getTargetType() {
 		return targetType;
 	}
@@ -78,6 +60,14 @@ public class ListPunchRulesCommonCommand {
 
 	public void setTargetId(Long targetId) {
 		this.targetId = targetId;
+	}
+
+	public Long getQueryTime() {
+		return queryTime;
+	}
+
+	public void setQueryTime(Long queryTime) {
+		this.queryTime = queryTime;
 	}
 
 }

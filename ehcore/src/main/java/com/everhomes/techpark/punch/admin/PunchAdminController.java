@@ -7,7 +7,9 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.everhomes.constants.ErrorCodes;
 import com.everhomes.controller.ControllerBase;
@@ -18,7 +20,9 @@ import com.everhomes.rest.techpark.punch.ListPunchCountCommand;
 import com.everhomes.rest.techpark.punch.ListPunchCountCommandResponse;
 import com.everhomes.rest.techpark.punch.PunchRuleDTO;
 import com.everhomes.rest.techpark.punch.PunchRuleMapDTO;
+import com.everhomes.rest.techpark.punch.admin.AddPunchPointCommand;
 import com.everhomes.rest.techpark.punch.admin.AddPunchTimeRuleCommand;
+import com.everhomes.rest.techpark.punch.admin.AddPunchWiFiCommand;
 import com.everhomes.rest.techpark.punch.admin.DeleteCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.DeletePunchRuleMapCommand;
 import com.everhomes.rest.techpark.punch.admin.GetTargetPunchAllRuleCommand;
@@ -27,16 +31,24 @@ import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchDetailsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchMonthLogsResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchPointsCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchPointsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRuleMapsResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRulesCommonCommand;
 import com.everhomes.rest.techpark.punch.admin.ListPunchRulesResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthCommand;
+import com.everhomes.rest.techpark.punch.admin.ListPunchSchedulingMonthResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWiFiRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.ListPunchWiFisResponse;
 import com.everhomes.rest.techpark.punch.admin.ListPunchWorkdayRuleListResponse;
 import com.everhomes.rest.techpark.punch.admin.PunchLocationRuleDTO;
+import com.everhomes.rest.techpark.punch.admin.PunchWiFiDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWiFiRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.PunchWorkdayRuleDTO;
 import com.everhomes.rest.techpark.punch.admin.QryPunchLocationRuleListResponse;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchPointCommand;
+import com.everhomes.rest.techpark.punch.admin.UpdatePunchSchedulingMonthCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdatePunchTimeRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.UpdateTargetPunchAllRuleCommand;
 import com.everhomes.rest.techpark.punch.admin.listPunchTimeRuleListResponse;
@@ -132,6 +144,55 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}	
+	/**
+	 * <b>URL: /punch/addPunchPoint</b>
+	 * <p>
+	 * 给对应的某个公司/人增加考勤点
+	 * </p>
+	 */
+	@RequestMapping("addPunchPoint")
+	@RestReturn(value = String.class)
+	public RestResponse addPunchPoint(@Valid AddPunchPointCommand cmd) {
+		punchService.addPunchPoint(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}	
+	
+	/**
+	 * <b>URL: /punch/updatePunchPoint</b>
+	 * <p>
+	 * 更新考勤点
+	 * </p>
+	 */
+	@RequestMapping("updatePunchPoint")
+	@RestReturn(value = String.class)
+	public RestResponse updatePunchPoint(@Valid UpdatePunchPointCommand cmd) {
+		punchService.updatePunchPoint(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}	
+
+	/**
+	 * <b>URL: /punch/listPunchPoints</b>
+	 * <p>
+	 * 查询公司地点考勤规则列表
+	 * </p>
+	 */
+	@RequestMapping("listPunchPoints")
+	@RestReturn(value = ListPunchPointsResponse.class)
+	public RestResponse listPunchPoints(@Valid ListPunchPointsCommand cmd) {
+		ListPunchPointsResponse resp = punchService.listPunchPoints(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
 	
 	/**
 	 * <b>URL: /punch/updatePunchLocationRule</b>
@@ -198,6 +259,70 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}	
+
+	/**
+	 * <b>URL: /punch/addPunchWiFi</b>
+	 * <p>
+	 * 添加target对象的WIFI考勤点
+	 * </p>
+	 */
+	@RequestMapping("addPunchWiFi")
+	@RestReturn(value = String.class)
+	public RestResponse addPunchWiFi(@Valid AddPunchWiFiCommand cmd) {
+		punchService.addPunchWiFi(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}	
+	
+	/**
+	 * <b>URL: /punch/updatePunchWiFi</b>
+	 * <p>
+	 * 修改target对象的WIFI考勤点
+	 * </p>
+	 */
+	@RequestMapping("addPunchWiFi")
+	@RestReturn(value = String.class)
+	public RestResponse updatePunchWiFi(@Valid PunchWiFiDTO cmd) {
+		punchService.updatePunchWiFi(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /punch/deletePunchWiFi</b>
+	 * <p>
+	 * 删除target对象的WIFI考勤点
+	 * </p>
+	 */
+	@RequestMapping("deletePunchWiFi")
+	@RestReturn(value = String.class)
+	public RestResponse deletePunchWiFi(@Valid PunchWiFiDTO cmd) {
+		punchService.deletePunchWiFi(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+
+	/**
+	 * <b>URL: /punch/listPunchWiFis</b>
+	 * <p>
+	 * 查询公司WIFI考勤规则列表
+	 * </p>
+	 */
+	@RequestMapping("listPunchWiFis")
+	@RestReturn(value = ListPunchWiFisResponse.class)
+	public RestResponse listPunchWiFis(@Valid ListPunchRulesCommonCommand cmd) {
+		ListPunchWiFiRuleListResponse resp = punchService.listPunchWiFiRule(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	/**
 	 * <b>URL: /punch/updatePunchWiFiRule</b>
@@ -250,6 +375,69 @@ public class PunchAdminController extends ControllerBase {
 
 	//排班规则
 
+	/**
+	 * <b>URL: /punch/listPunchScheduling</b>
+	 * <p>
+	 * 查询某个月的班次
+	 * </p>
+	 */
+	@RequestMapping("listPunchScheduling")
+	@RestReturn(value = ListPunchSchedulingMonthResponse.class)
+	public RestResponse listPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd) {
+		ListPunchSchedulingMonthResponse resp = punchService.listPunchScheduling(cmd);
+		RestResponse response = new RestResponse(resp);
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	/**
+	 * <b>URL: /punch/exportPunchScheduling</b>
+	 * <p>
+	 * 导出公司某个月的班次
+	 * </p>
+	 */
+	@RequestMapping("exportPunchScheduling")
+	public  HttpServletResponse exportPunchScheduling(@Valid ListPunchSchedulingMonthCommand cmd,HttpServletResponse response ) {
+		HttpServletResponse commandResponse = punchService.exportPunchScheduling(cmd, response );
+//		RestResponse response = new RestResponse(commandResponse);
+//		response.setErrorCode(ErrorCodes.SUCCESS);
+//		response.setErrorDescription("OK");
+		return commandResponse;
+	}
+
+    /**
+     * <b>URL: /punch/importPunchScheduling</b>
+     * <p>导入某个月的班次</p>
+     */
+    @RequestMapping("importPunchScheduling")
+    @RestReturn(value = String.class)
+    public RestResponse importPunchScheduling(@RequestParam(value = "attachment") MultipartFile[] files) {
+    	punchService.importPunchScheduling(files);
+        RestResponse response = new RestResponse("服务器正异步处理数据。请耐心等待。不能重复上传。");
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+
+	/**
+	 * <b>URL: /punch/listPunchScheduling</b>
+	 * <p>
+	 * 查询某个月的班次
+	 * </p>
+	 */
+	@RequestMapping("updatePunchWiFiRules")
+	@RestReturn(value = String.class)
+	public RestResponse updatePunchWiFiRules(@Valid UpdatePunchSchedulingMonthCommand cmd) {
+		punchService.updatePunchWiFiRules(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
+	
+	
+	
+	
 	/**
 	 * <b>URL: /punch/addPunchWorkdayRule</b>
 	 * <p>
@@ -399,7 +587,22 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}	
-	 
+	/**
+	 * <b>URL: /punch/addPunchRuleMap</b>
+	 * <p>
+	 * 更新考勤规则映射 -特殊个人设置
+	 * </p>
+	 */
+	@RequestMapping("updatePunchRuleMap")
+	@RestReturn(value = String.class)
+	public RestResponse updatePunchRuleMap(@Valid PunchRuleMapDTO cmd) {
+		punchService.updatePunchRuleMap(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}	
+	
 
 	/**
 	 * <b>URL: /punch/deletePunchRuleMap</b>
@@ -422,6 +625,7 @@ public class PunchAdminController extends ControllerBase {
 	 * <b>URL: /punch/listPunchRuleMaps</b>
 	 * <p>
 	 * 查询公司考勤规则列表
+	 * 列出设置了特殊规则的人
 	 * </p>
 	 */
 	@RequestMapping("listPunchRuleMaps")
@@ -433,6 +637,7 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	
 	
 	//统计
 	
