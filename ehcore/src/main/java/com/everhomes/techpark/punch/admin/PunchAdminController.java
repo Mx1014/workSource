@@ -282,7 +282,7 @@ public class PunchAdminController extends ControllerBase {
 	 * 修改target对象的WIFI考勤点
 	 * </p>
 	 */
-	@RequestMapping("addPunchWiFi")
+	@RequestMapping("updatePunchWiFi")
 	@RestReturn(value = String.class)
 	public RestResponse updatePunchWiFi(@Valid PunchWiFiDTO cmd) {
 		punchService.updatePunchWiFi(cmd);
