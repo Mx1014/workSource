@@ -6,9 +6,11 @@ import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.flow.FlowEntityType;
+import com.everhomes.rest.flow.FlowUserType;
 
 /**
  * <ul>
@@ -21,11 +23,24 @@ import com.everhomes.rest.flow.FlowEntityType;
 public class FlowVariableCurrentNodeProcessorsResolver implements FlowVariableUserResolver {
 	private static final Logger LOGGER = LoggerFactory.getLogger(FlowVariableCurrentNodeProcessorResolver.class);
 
+	@Autowired
+	FlowUserSelectionProvider flowUserSelectionProvider;
+	
+	@Autowired
+	FlowService flowService;
+	
 	@Override
 	public List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities,
 			FlowEntityType fromEntity, Long entityId,
 			FlowUserSelection userSelection, int loopCnt) {
-		//可能来之同步请求或者异步请求
+		if(ctx.getCurrentNode() != null && ctx.getFlowCase() != null) {
+			FlowNode node = ctx.getCurrentNode().getFlowNode();
+			List<FlowUserSelection> selections = flowUserSelectionProvider.findSelectionByBelong(node.getId()
+					, FlowEntityType.FLOW_NODE.getCode(), FlowUserType.PROCESSOR.getCode(), ctx.getFlowCase().getFlowVersion());
+			return flowService.resolvUserSelections(ctx, processedEntities, FlowEntityType.FLOW_NODE, node.getId(), selections, loopCnt);			
+		}
+
+		//empty results
 		return new ArrayList<Long>();
 	}
 }

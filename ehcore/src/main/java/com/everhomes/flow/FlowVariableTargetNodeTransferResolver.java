@@ -2,7 +2,10 @@ package com.everhomes.flow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
@@ -11,41 +14,44 @@ import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
 import com.everhomes.rest.user.UserInfo;
-import com.everhomes.user.UserService;
 
-@Component(FlowVariableTextResolver.TRANSFER_TARGET_PHONE)
-public class FlowVariableTransferTargetPhoneResolver implements FlowVariableTextResolver {
+@Component(FlowVariableUserResolver.TARGET_NODE_TRANSFER)
+public class FlowVariableTargetNodeTransferResolver implements FlowVariableUserResolver {
+	private static final Logger LOGGER = LoggerFactory.getLogger(FlowVariableTargetNodeTransferResolver.class);
+	
+	@Autowired
+	FlowUserSelectionProvider flowUserSelectionProvider;
+	
 	@Autowired
 	FlowService flowService;
 	
 	@Autowired
 	FlowEventLogProvider flowEventLogProvider;
-	
-	@Autowired
-	UserService userService;
-	
+
 	@Override
-	public String variableTextRender(FlowCaseState ctx, String variable) {
-		UserInfo ui = null;
+	public List<Long> variableUserResolve(FlowCaseState ctx,
+			Map<String, Long> processedEntities, FlowEntityType fromEntity,
+			Long entityId, FlowUserSelection userSelection, int loopCnt) {
+		Long uid = null;
 		if(FlowStepType.TRANSFER_STEP.getCode().equals(ctx.getStepType())) {
 			List<FlowEntitySel> sels = ctx.getCurrentEvent().getEntitySel();
 			if(sels == null || sels.size() == 0) {
 				return null;
 			}
-			ui = userService.getUserSnapshotInfoWithPhone(sels.get(0).getEntityId());
+			uid = sels.get(0).getEntityId();
 		} else {
 			//获取转交进入节点的日志
 			FlowEventLog log = flowEventLogProvider.getLastNodeEnterStep(ctx.getFlowCase());
 			if(log != null && FlowStepType.TRANSFER_STEP.getCode().equals(log.getButtonFiredStep())) {
-				ui = userService.getUserSnapshotInfoWithPhone(log.getFlowUserId());
+				uid = log.getFlowUserId();
 			}
 		}
 		
-		if(ui != null && ui.getPhones() != null && ui.getPhones().size() > 0) {
-			return ui.getPhones().get(0);
+		List<Long> rlts = new ArrayList<Long>();
+		if(uid != null) {
+			rlts.add(uid);
 		}
-		
-		return null;
+		return rlts;
 	}
-
+	
 }

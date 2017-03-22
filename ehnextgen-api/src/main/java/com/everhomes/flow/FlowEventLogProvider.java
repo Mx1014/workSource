@@ -61,4 +61,6 @@ public interface FlowEventLogProvider {
 	 */
 	FlowEventLog getLastNodeEnterStep(FlowCase flowCase);
 
+	List<FlowEventLog> findPrefixNodeEnterLogs(Long nodeId, Long caseId, Long stepCount);
+
 }

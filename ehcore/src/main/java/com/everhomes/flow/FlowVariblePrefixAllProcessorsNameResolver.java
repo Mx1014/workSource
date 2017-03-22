@@ -44,6 +44,8 @@ private static final Logger LOGGER = LoggerFactory.getLogger(FlowVaribleCurrAllP
 				}
 			}
 		}
+		
+		//TODO implement like FlowVariablePrefixNodeProcessorsResolver ?
 		if(node != null) {
 			List<UserInfo> users = flowService.listUserSelectionsByNode(ctx, node.getId());
 			if(users != null && users.size() > 0) {

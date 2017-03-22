@@ -465,4 +465,23 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 			}
     	});    	
     }
+    
+    @Override
+    public List<FlowEventLog> findPrefixNodeEnterLogs(Long nodeId, Long caseId, Long stepCount) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				//转交不算节点跳转 TODO <> 'node_enter'
+				query.addConditions(FlowEventCustomField.BUTTON_FIRED_STEP.getField().isNull());
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.le(stepCount-1));
+				
+				return query;
+			}
+    	});    	
+    }
 }
