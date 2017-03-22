@@ -1914,6 +1914,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         // Timestamp dayBeforeYestBegin = getDayBegin(cal);
         for(EnergyMeter meter : meters){
             try {
+
                 EnergyDateStatistic dayStat = ConvertHelper.convert(meter, EnergyDateStatistic.class);
                 // 前天的最后的读数
                 EnergyMeterReadingLog dayBeforeYestLastLog = meterReadingLogProvider.getLastMeterReadingLogByDate(meter.getId(),null,yesterdayBegin);
@@ -2206,6 +2207,8 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         Timestamp monthBegin = getDayBegin(cal);
         cal.add(Calendar.YEAR, -1);
         Timestamp lastYear = getDayBegin(cal);
+        BigDecimal zero = new BigDecimal(0);
+        ScriptEngineManager manager = new ScriptEngineManager();
         for(EnergyMeter meter : meters){
 
             //取月初的上次度数和月末的当前读数
@@ -2225,11 +2228,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             monthStat.setLastReading(monthBeginStat.getLastReading());
             //统计该表sum 用量和费用
-            monthStat.setCurrentAmount(energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
-            //固定收费
-            monthStat.setCurrentCost(energyDateStatisticProvider.getSumCostBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime())));
-            //阶梯收费xiongying
-//            monthStat.setCurrentCost(monthStat.getCurrentCost() + 阶梯收费);
+            BigDecimal currentAmount = energyDateStatisticProvider.getSumAmountBetweenDate(meter.getId(),new Date(monthBegin.getTime()),new Date(monthEnd.getTime()));
+            monthStat.setCurrentAmount(currentAmount);
+            //收费按最新规则算
+            EnergyMeterSettingLog priceSetting  = meterSettingLogProvider
+                    .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.PRICE,monthEnd);
+            EnergyMeterSettingLog costSetting   = meterSettingLogProvider
+                    .findCurrentSettingByMeterId(meter.getNamespaceId(),meter.getId(),EnergyMeterSettingType.COST_FORMULA ,monthEnd);
+
+            String costFormula = meterFormulaProvider.findById(costSetting.getNamespaceId(), costSetting.getFormulaId()).getExpression();
+
+            BigDecimal realCost = new BigDecimal(0);
+            if(PriceCalculationType.STANDING_CHARGE_TARIFF.equals(
+                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+                ScriptEngine engine = manager.getEngineByName("js");
+                engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), currentAmount);
+                realCost = calculateStandingChargeTariff(engine, priceSetting, costFormula);
+            }
+
+            if(PriceCalculationType.BLOCK_TARIFF.equals(
+                    PriceCalculationType.fromCode(priceSetting.getCalculationType()))) {
+                realCost = calculateBlockTariff(manager,priceSetting,currentAmount, costFormula);
+            }
+            monthStat.setCurrentCost(realCost);
+
             //delete
             energyMonthStatisticProvider.deleteEnergyMonthStatisticByDate(meter.getId(), monthSF.get().format(monthBegin));
             //写数据库
