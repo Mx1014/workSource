@@ -779,6 +779,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         engine.put(MeterFormulaVariable.AMOUNT.getCode(), 1);
         engine.put(MeterFormulaVariable.PRICE.getCode(), 2);
         engine.put(MeterFormulaVariable.TIMES.getCode(), 3);
+        engine.put(MeterFormulaVariable.REAL_AMOUNT.getCode(), 4);
 
         try {
             engine.eval(processedExpression);
