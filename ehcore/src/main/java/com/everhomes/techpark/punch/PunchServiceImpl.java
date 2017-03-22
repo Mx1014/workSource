@@ -3653,7 +3653,7 @@ public class PunchServiceImpl implements PunchService {
 			throw RuntimeErrorException.errorWith(PunchServiceErrorCode.SCOPE,
 					PunchServiceErrorCode.ERROR_ENTERPRISE_DIDNOT_SETTING,
 					"have no punch rule");
-		PunchRuleOwnerMap ruleMap = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(PunchOwnerType.ORGANIZATION.getCode(), ownerId,
+		PunchRuleOwnerMap ruleMap = this.punchProvider.getPunchRuleOwnerMapByTarget( 
 				PunchOwnerType.ORGANIZATION.getCode(), dept.getId());
 		if(null != ruleMap)
 			return ruleMap;
@@ -3680,7 +3680,7 @@ public class PunchServiceImpl implements PunchService {
 			int loopMax = 10;
 			OrganizationDTO deptDTO = findUserDepartment(userId, ownerId);
 			Organization dept =  ConvertHelper.convert(deptDTO, Organization.class);
-			map = getPunchRule(ownerId ,dept,loopMax);
+			map = getPunchRule(null ,dept,loopMax);
 		}
 		return this.punchProvider.getPunchRuleById(map.getPunchRuleId());
 		
