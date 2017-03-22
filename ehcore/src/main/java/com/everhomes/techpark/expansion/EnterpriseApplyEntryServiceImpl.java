@@ -2,6 +2,7 @@ package com.everhomes.techpark.expansion;
 
 import static com.everhomes.util.RuntimeErrorException.errorWith;
 
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
@@ -14,13 +15,16 @@ import java.util.stream.Collectors;
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
 import com.everhomes.community.CommunityService;
+import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.organization.*;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
+import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.user.UserIdentifier;
+import org.apache.commons.lang.math.RandomUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
 import org.slf4j.Logger;
@@ -614,6 +618,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
 
+            processDetailUrl(dto);
             Address address = addressProvider.findAddressById(c.getAddressId());
             if (null != address) {
                 dto.setApartmentName(address.getApartmentName());
@@ -642,9 +647,25 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return res;
 	}
 
+    private void processDetailUrl(BuildingForRentDTO dto) {
+        try {
+            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+            String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
+
+            detailUrl = String.format(detailUrl, dto.getId());
+
+//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+            dto.setDetailUrl(homeUrl + detailUrl);
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+    }
+
 	@Override
 	public boolean createLeasePromotion(CreateLeasePromotionCommand cmd){
-		LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
+        if (null == cmd.getIssuerType())
+            cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
+        LeasePromotion leasePromotion = ConvertHelper.convert(cmd, LeasePromotion.class);
         if (null != cmd.getEnterTime())
 		    leasePromotion.setEnterTime(new Timestamp(cmd.getEnterTime()));
 		leasePromotion.setCreateUid(UserContext.current().getUser().getId());
@@ -652,6 +673,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null==cmd.getRentType())
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		leasePromotion.setRentType(cmd.getRentType());
+
 		leasePromotion = enterpriseApplyEntryProvider.createLeasePromotion(leasePromotion);
 		
 		List<BuildingForRentAttachmentDTO> attachmentDTOs= cmd.getAttachments();
@@ -659,7 +681,6 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if(StringUtils.isEmpty(attachmentDTOs)){
 			return true;
 		}
-		
 		
 		/**
 		 * 重新添加

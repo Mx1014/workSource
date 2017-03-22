@@ -58,6 +58,15 @@ public class BuildingForRentDTO {
 	private String orientation;
 	private BigDecimal rentAmount;
 	private String issuerType;
+	private String detailUrl;
+
+	public String getDetailUrl() {
+		return detailUrl;
+	}
+
+	public void setDetailUrl(String detailUrl) {
+		this.detailUrl = detailUrl;
+	}
 
 	public Byte getEnterTimeFlag() {
 		return enterTimeFlag;

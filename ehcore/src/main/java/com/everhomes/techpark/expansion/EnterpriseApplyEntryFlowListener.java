@@ -1,6 +1,9 @@
 // @formatter:off
 package com.everhomes.techpark.expansion;
 
+import com.alibaba.fastjson.JSONObject;
+import com.everhomes.address.Address;
+import com.everhomes.address.AddressProvider;
 import com.everhomes.community.Building;
 import com.everhomes.community.CommunityProvider;
 import com.everhomes.flow.*;
@@ -11,13 +14,10 @@ import com.everhomes.locale.LocaleTemplateService;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowUserType;
-import com.everhomes.rest.techpark.expansion.ApplyEntryApplyType;
-import com.everhomes.rest.techpark.expansion.ApplyEntrySourceType;
-import com.everhomes.rest.techpark.expansion.EnterpriseOpRequestBuildingStatus;
-import com.everhomes.rest.techpark.expansion.ExpansionConst;
-import com.everhomes.rest.techpark.expansion.ExpansionLocalStringCode;
+import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Tuple;
 import com.everhomes.yellowPage.YellowPage;
@@ -59,7 +59,8 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Autowired
     private CommunityProvider communityProvider;
-
+    @Autowired
+    private AddressProvider addressProvider;
     @Override
     public void onFlowCaseStart(FlowCaseState ctx) {
 
@@ -109,6 +110,15 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
     public List<FlowCaseEntity> onFlowCaseDetailRender(FlowCase flowCase, FlowUserType flowUserType) {
         EnterpriseOpRequest applyEntry = enterpriseApplyEntryProvider.getApplyEntryById(flowCase.getReferId());
         if (applyEntry != null) {
+            EnterpriseApplyEntryDTO dto = ConvertHelper.convert(applyEntry, EnterpriseApplyEntryDTO.class);
+
+            if (null != applyEntry.getAddressId()){
+                Address address = addressProvider.findAddressById(applyEntry.getAddressId());
+                dto.setApartmentName(address.getApartmentName());
+                dto.setBuildingName(address.getBuildingName());
+            }
+            flowCase.setCustomObject(JSONObject.toJSONString(dto));
+
             String locale = UserContext.current().getUser().getLocale();
             Map<String, Object> map = new HashMap<>();
 
