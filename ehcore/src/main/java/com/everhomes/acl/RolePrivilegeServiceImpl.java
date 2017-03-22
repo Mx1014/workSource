@@ -1875,7 +1875,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				targetIds.add(orgDTO.getId());
 			}
 			if(targetIds.size() > 0){
-				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, null, moduleIds);
 			}
 		}
 		Long endTime3 = System.currentTimeMillis();
@@ -1929,7 +1929,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 		Long endTime3 = System.currentTimeMillis();
-		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
+		if(0 == projectDTOs.size()){
 			List<Long> moduleIds = new ArrayList<>();
 			moduleIds.add(0L);
 			for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
@@ -1957,7 +1957,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 					targetIds.add(orgDTO.getId());
 				}
 				if(targetIds.size() > 0){
-					serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+					serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, null, moduleIds);
 				}
 			}
 
@@ -1999,7 +1999,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long endTime5 = System.currentTimeMillis();
 		List<ProjectDTO> projects = new ArrayList<>();
 		if(0 != categoryIds.size()){
-			List<ProjectDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), categoryIds, ResourceCategoryType.CATEGORY.getCode())
+			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
 					.stream().map(r -> {
 						ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
 						dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
