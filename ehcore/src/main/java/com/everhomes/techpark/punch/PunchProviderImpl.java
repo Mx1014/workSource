@@ -1251,9 +1251,9 @@ long id = sequenceProvider.getNextSequence(key);
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectJoinStep<Record> step = context.select().from(
 				Tables.EH_PUNCH_GEOPOINTS);
-		Condition condition = Tables.EH_PUNCH_GEOPOINTS.LOCATION_RULE_ID.equal(ruleId)
-				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.eq(ownerId))
-				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_TYPE.eq(ownerType));
+		Condition condition = Tables.EH_PUNCH_GEOPOINTS.LOCATION_RULE_ID.equal(ruleId);
+//				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_ID.eq(ownerId))
+//				.and( Tables.EH_PUNCH_GEOPOINTS.OWNER_TYPE.eq(ownerType));
 		step.where(condition);
 		List<PunchGeopoint> result = step
 				.orderBy(Tables.EH_PUNCH_GEOPOINTS.ID.desc()).fetch()
