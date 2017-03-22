@@ -2402,6 +2402,30 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
         });
     }
 
+    @Override
+    public void createEnergyMeterDefaultSetting(CreateEnergyMeterDefaultSettingCommand cmd) {
+        if(cmd != null && cmd.getDefaultSettings() != null) {
+            cmd.getDefaultSettings().forEach(defaultSetting -> {
+                EnergyMeterDefaultSetting df = ConvertHelper.convert(defaultSetting, EnergyMeterDefaultSetting.class);
+                defaultSettingProvider.createEnergyMeterDefaultSetting(df);
+            });
+        }
+    }
+
+    @Override
+    public List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates() {
+        List<EnergyMeterDefaultSetting> defaultSettings = defaultSettingProvider.listDefaultSetting(0L, "", 0L, 0, null);
+        if(defaultSettings != null) {
+            List<EnergyMeterDefaultSettingTemplateDTO> dtos = defaultSettings.stream().map(defaultSetting -> {
+                EnergyMeterDefaultSettingTemplateDTO dto = ConvertHelper.convert(defaultSetting, EnergyMeterDefaultSettingTemplateDTO.class);
+                return dto;
+            }).collect(Collectors.toList());
+
+            return dtos;
+        }
+        return null;
+    }
+
     private EnergyMeterPriceConfigDTO toEnergyMeterPriceConfigDTO(EnergyMeterPriceConfig priceConfig) {
         EnergyMeterPriceConfigDTO dto = ConvertHelper.convert(priceConfig, EnergyMeterPriceConfigDTO.class);
 

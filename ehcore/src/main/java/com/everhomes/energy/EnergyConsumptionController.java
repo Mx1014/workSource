@@ -412,4 +412,27 @@ public class EnergyConsumptionController extends ControllerBase {
         energyConsumptionService.deleteEnergyMeterPriceConfig(cmd);
         return success();
     }
+
+    /**
+     * <p>新建表记的默认属性值</p>
+     * <b>URL: /energy/createEnergyMeterDefaultSetting</b>
+     */
+    @RestReturn(String.class)
+    @RequestMapping("createEnergyMeterDefaultSetting")
+    public RestResponse createEnergyMeterDefaultSetting(CreateEnergyMeterDefaultSettingCommand cmd) {
+        energyConsumptionService.createEnergyMeterDefaultSetting(cmd);
+        return success();
+    }
+
+    /**
+     * <p>获取默认设置</p>
+     * <b>URL: /energy/listEnergyDefaultSettingTemplates</b>
+     */
+    @RestReturn(value = EnergyMeterDefaultSettingTemplateDTO.class, collection = true)
+    @RequestMapping("listEnergyDefaultSettingTemplates")
+    public RestResponse listEnergyDefaultSettingTemplates() {
+        return response(energyConsumptionService.listEnergyDefaultSettingTemplates());
+    }
+
+
 }

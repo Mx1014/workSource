@@ -229,4 +229,8 @@ public interface EnergyConsumptionService {
      * 删除梯度价格方案
      * */
     void deleteEnergyMeterPriceConfig(DelelteEnergyMeterPriceConfigCommand cmd);
+
+    void createEnergyMeterDefaultSetting(CreateEnergyMeterDefaultSettingCommand cmd);
+
+    List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates();
 }

@@ -2,8 +2,11 @@ package com.everhomes.energy;
 
 import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DbProvider;
+import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.energy.EnergyCommonStatus;
 import com.everhomes.rest.energy.EnergyMeterSettingType;
+import com.everhomes.sequence.SequenceProvider;
+import com.everhomes.server.schema.tables.pojos.EhEnergyMeterDefaultSettings;
 import com.everhomes.server.schema.tables.daos.EhEnergyMeterDefaultSettingsDao;
 import com.everhomes.server.schema.tables.records.EhEnergyMeterDefaultSettingsRecord;
 import com.everhomes.user.UserContext;
@@ -27,8 +30,8 @@ public class EnergyMeterDefaultSettingProviderImpl implements EnergyMeterDefault
     @Autowired
     private DbProvider dbProvider;
 
-    // @Autowired
-    // private SequenceProvider sequenceProvider;
+     @Autowired
+     private SequenceProvider sequenceProvider;
 
     @Override
     public EnergyMeterDefaultSetting findById(Integer namespaceId, Long id) {
@@ -67,6 +70,15 @@ public class EnergyMeterDefaultSettingProviderImpl implements EnergyMeterDefault
                 .where(EH_ENERGY_METER_DEFAULT_SETTINGS.NAMESPACE_ID.eq(namespaceId))
                 .and(EH_ENERGY_METER_DEFAULT_SETTINGS.SETTING_TYPE.eq(settingType.getCode()))
                 .fetchAnyInto(EnergyMeterDefaultSetting.class);
+    }
+
+    @Override
+    public void createEnergyMeterDefaultSetting(EnergyMeterDefaultSetting setting) {
+        long id = sequenceProvider.getNextSequence(NameMapper.getSequenceDomainFromTablePojo(EhEnergyMeterDefaultSettings.class));
+        setting.setId(id);
+        setting.setCreatorUid(UserContext.current().getUser().getId());
+        setting.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        rwDao().insert(setting);
     }
 
     private DSLContext context() {

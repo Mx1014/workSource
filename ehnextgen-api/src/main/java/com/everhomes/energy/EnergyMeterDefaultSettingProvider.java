@@ -25,4 +25,9 @@ public interface EnergyMeterDefaultSettingProvider {
     List<EnergyMeterDefaultSetting> listDefaultSetting(Long ownerId, String ownerType, Long communityId, Integer namespaceId, Byte meterType);
 
     EnergyMeterDefaultSetting findBySettingType(Integer namespaceId, EnergyMeterSettingType settingType);
+
+    /**
+     * 新增默认设置
+     */
+    void createEnergyMeterDefaultSetting(EnergyMeterDefaultSetting setting);
 }
