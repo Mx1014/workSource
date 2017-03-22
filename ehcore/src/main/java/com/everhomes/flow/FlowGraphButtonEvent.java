@@ -164,10 +164,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			log.setFlowNodeId(next.getFlowNode().getId());
 			log.setParentId(0l);
 			log.setFlowCaseId(ctx.getFlowCase().getId());
-			log.setFlowUserId(cmd.getEntityId());
+			if(cmd.getEntitySel() != null && cmd.getEntitySel().size() == 1) {
+				log.setFlowUserId(cmd.getEntitySel().get(0).getEntityId());	
+			}
 			log.setStepCount(ctx.getFlowCase().getStepCount());
 			log.setLogType(FlowLogType.NODE_ENTER.getCode());
 			log.setLogTitle("");
+			log.setButtonFiredStep(nextStep.getCode());//mark as transfer log
 			ctx.getLogs().add(log);
 			log = null;
 			

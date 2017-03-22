@@ -28,6 +28,9 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	
 	public FlowGraphAutoStepEvent(FlowAutoStepDTO o) {
 		firedUserId = User.SYSTEM_UID;
+		if(o.getOperatorId() != null) {
+			firedUserId = o.getOperatorId();
+		}
 		this.stepDTO = o;
 		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
 		flowButtonProvider = PlatformContext.getComponent(FlowButtonProvider.class);

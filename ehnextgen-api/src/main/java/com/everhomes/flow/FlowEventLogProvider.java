@@ -54,4 +54,11 @@ public interface FlowEventLogProvider {
 
 	List<FlowEventLog> findPrefixStepEventLogs(Long caseId, Long stepCount);
 
+	/**
+	 * 获取最后一个进入的节点日志
+	 * @param flowCase
+	 * @return
+	 */
+	FlowEventLog getLastNodeEnterStep(FlowCase flowCase);
+
 }

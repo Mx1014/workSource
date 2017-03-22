@@ -259,6 +259,32 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	return null;
     }
     
+    /**
+     * 获取最后一个进入的节点日志
+     */
+    @Override
+    public FlowEventLog getLastNodeEnterStep(FlowCase flowCase) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowEventLog> objs = this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCase.getId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(flowCase.getStepCount()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(flowCase.getFlowVersion()));
+				
+				return query;
+			}
+    	});  
+    	
+    	if(objs != null && objs.size() > 0) {
+    		return objs.get(objs.size()-1);
+    	}
+    	
+    	return null;
+    }
+    
     private FlowCaseDetail convertRecordTODetail(Record r) {
     	FlowCaseDetail o = new FlowCaseDetail();
     	
