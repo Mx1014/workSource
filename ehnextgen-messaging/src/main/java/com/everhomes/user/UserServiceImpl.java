@@ -623,7 +623,7 @@ public class UserServiceImpl implements UserService {
 				try {
 					user.setPasswordHash(EncryptionUtils.hashPassword(String.format("%s%s",cmd.getInitialPassword(),salt)));
 				} catch (Exception e) {
-					LOGGER.error("encode password failed");
+					LOGGER.error("encode password failed", e);
 					throw RuntimeErrorException.errorWith(UserServiceErrorCode.SCOPE, UserServiceErrorCode.ERROR_INVALID_PASSWORD, "Unable to create password hash");
 
 				}
@@ -1363,7 +1363,7 @@ public class UserServiceImpl implements UserService {
 			day = (dateNow.getTime()-dateCompare.getTime())/(24*60*60*1000);
 		} catch (ParseException e) {
 			// TODO Auto-generated catch block
-			e.printStackTrace();
+			LOGGER.error("compareValue : {}", compareValue, e );
 		}
 
 
@@ -1541,7 +1541,7 @@ public class UserServiceImpl implements UserService {
 				}
 			}
 		} catch(Exception e) {
-			LOGGER.error("Failed to set default community, userId=" + userId + ", namespaceId=" + namespaceId);
+			LOGGER.error("Failed to set default community, userId=" + userId + ", namespaceId=" + namespaceId, e);
 		}
 
 		return communityId;
@@ -1659,7 +1659,7 @@ public class UserServiceImpl implements UserService {
 		}catch(Exception e){
 			//TODO
 			//skip all exception
-
+			LOGGER.warn("cmd : {}", cmd, e);
 		}
 
 		//get enum type
@@ -1906,7 +1906,7 @@ public class UserServiceImpl implements UserService {
 			String url=contentServerService.parserUri(avatarUri, EntityType.USER.getCode(), user.getId());
 			user.setAvatarUrl(url);
 		}catch(Exception e){
-			LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri);
+			LOGGER.error("Failed to parse avatar uri, userId=" + user.getId() + ", avatar=" + avatarUri, e);
 		}
 	}
 	@Override
@@ -2243,7 +2243,7 @@ public class UserServiceImpl implements UserService {
 							break;
 						}
 					} catch (Exception e) {
-						LOGGER.error("Invalid entity id, userId=" + userId + ", entity=" + entity);
+						LOGGER.error("Invalid entity id, userId=" + userId + ", entity=" + entity, e);
 					}
 				}
 			}
@@ -2959,7 +2959,7 @@ public class UserServiceImpl implements UserService {
                 user = this.userProvider.findUserById(id);
             }    
         } catch(Exception ex) {
-         LOGGER.info("try userId not found");   
+         LOGGER.info("try userId not found", ex);
         }
         
         if(user == null) {
@@ -3295,7 +3295,7 @@ public class UserServiceImpl implements UserService {
 			try{
 				return WebTokenGenerator.getInstance().fromWebToken(loginTokenString, LoginToken.class);
 			} catch (Exception e) {
-				LOGGER.error("Invalid login token.tokenString={}",loginTokenString);
+				LOGGER.error("Invalid login token.tokenString={}",loginTokenString, e);
 				return null;
 			}
 
