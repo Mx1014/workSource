@@ -42,7 +42,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 
 	@Override
 	public EnterpriseDetail getEnterpriseDetailById(Long id) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		
 		SelectQuery<EhEnterpriseDetailsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_DETAILS);
 		query.addConditions(Tables.EH_ENTERPRISE_DETAILS.ENTERPRISE_ID.eq(id));
@@ -72,7 +72,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	public EnterpriseOpRequest getEnterpriseOpRequestByBuildIdAndUserId(
 			Long id, Long userId) {
 		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		SelectQuery<EhEnterpriseOpRequestsRecord> query = context.selectQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_USER_ID.eq(userId));
 		if(null != id)
@@ -93,7 +93,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	@Override
 	public List<LeasePromotion> listLeasePromotions(LeasePromotion leasePromotion,
 			ListingLocator locator, int pageSize) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
 		pageSize = pageSize + 1;
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
@@ -134,7 +134,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	}
 	
 	private List<LeasePromotionAttachment> getAttachments(Long leaseId){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		
 		List<LeasePromotionAttachment> attachments = context.select().from(Tables.EH_LEASE_PROMOTION_ATTACHMENTS)
 		.where(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(leaseId))
@@ -161,7 +161,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public LeasePromotion getLeasePromotionById(Long id){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		LeasePromotion leasePromotion = ConvertHelper.convert(dao.findById(id), LeasePromotion.class);
 		
@@ -174,7 +174,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public EnterpriseOpRequest getApplyEntryById(Long id){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhEnterpriseOpRequestsDao dao = new EhEnterpriseOpRequestsDao(context.configuration());
 		EnterpriseOpRequest enterpriseOpRequest = ConvertHelper.convert(dao.findById(id), EnterpriseOpRequest.class);
 		return enterpriseOpRequest;
@@ -182,7 +182,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public boolean updateLeasePromotion(LeasePromotion leasePromotion){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		leasePromotion.setUpdateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
 		dao.update(leasePromotion);
@@ -192,7 +192,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public boolean deleteLeasePromotionAttachment(Long leaseId){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		DeleteQuery<EhLeasePromotionAttachmentsRecord> r = context.deleteQuery(Tables.EH_LEASE_PROMOTION_ATTACHMENTS);
 		r.addConditions(Tables.EH_LEASE_PROMOTION_ATTACHMENTS.LEASE_ID.eq(leaseId));
 		r.execute();
@@ -201,7 +201,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public boolean addPromotionAttachment(LeasePromotionAttachment attachment){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		long id = sequenceProvider.getNextSequence(NameMapper
 				.getSequenceDomainFromTablePojo(EhLeasePromotionAttachments.class));
 		attachment.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
@@ -214,7 +214,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public boolean updateLeasePromotionStatus(long id, byte status){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		UpdateQuery<EhLeasePromotionsRecord> r = context.updateQuery(Tables.EH_LEASE_PROMOTIONS);
 		r.addValue(Tables.EH_LEASE_PROMOTIONS.STATUS, status);
 		r.addConditions(Tables.EH_LEASE_PROMOTIONS.ID.eq(id));
@@ -224,17 +224,24 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public boolean updateApplyEntryStatus(long id, byte status){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		UpdateQuery<EhEnterpriseOpRequestsRecord> r = context.updateQuery(Tables.EH_ENTERPRISE_OP_REQUESTS);
 		r.addValue(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS, status);
 		r.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.eq(id));
 		r.execute();
 		return true;
 	}
+
+	@Override
+	public void updateApplyEntry(EnterpriseOpRequest request){
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
+		EhEnterpriseOpRequestsDao dao = new EhEnterpriseOpRequestsDao(context.configuration());
+		dao.update(request);
+	}
 	
 	@Override
 	public boolean deleteLeasePromotion(long id){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhLeasePromotionsDao dao = new EhLeasePromotionsDao(context.configuration());
 		dao.deleteById(id);
 		return true;
@@ -242,7 +249,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	
 	@Override
 	public boolean deleteApplyEntry(long id){
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		EhEnterpriseOpRequestsDao dao = new EhEnterpriseOpRequestsDao(context.configuration());
 		dao.deleteById(id);
 		return true;
@@ -250,7 +257,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 
 	@Override
 	public LeasePromotion getLeasePromotionByToken(Integer namespaceId, Long communityId, String namespaceType, String namespaceToken) {
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		Record record = context.select().from(Tables.EH_LEASE_PROMOTIONS)
 						.where(Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(namespaceId))
 						.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(communityId))
@@ -269,7 +276,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 	public List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request,
 			ListingLocator locator, int pageSize, List<Long> idList) {
 		List<EnterpriseOpRequest> enterpriseOpRequests = new ArrayList<EnterpriseOpRequest>();
-		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		pageSize = pageSize + 1;
 		Condition cond =  Tables.EH_ENTERPRISE_OP_REQUESTS.ID.gt(0L);
 

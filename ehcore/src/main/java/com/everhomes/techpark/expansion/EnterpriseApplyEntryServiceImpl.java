@@ -386,7 +386,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			projectType = EntityType.RESOURCE_CATEGORY.getCode();
     		}
 
-            return this.createFlowCase(request,projectId, projectType);
+    		if (LeaseIssuerType.ORGANIZATION.getCode().equals(cmd.getIssuerType())) {
+                FlowCase flowCase1 = this.createFlowCase(request,projectId, projectType);
+                request.setFlowcaseId(flowCase1.getId());
+                enterpriseApplyEntryProvider.updateApplyEntry(request);
+                return flowCase1;
+            }
+            return null;
         });
 
         // 查找联系人手机号的逻辑不正确，因为参数中的source id有可能是buildingId，也有可能是leasePromotionId，需要根据source type来区分  by lqs 20160813

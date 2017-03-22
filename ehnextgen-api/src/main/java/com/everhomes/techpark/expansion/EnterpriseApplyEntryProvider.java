@@ -45,4 +45,6 @@ public interface EnterpriseApplyEntryProvider {
 
 	List<EnterpriseOpRequest> listApplyEntrys(EnterpriseOpRequest request, ListingLocator locator,
 			int pageSize, List<Long> idList);
+
+	void updateApplyEntry(EnterpriseOpRequest request);
 }
