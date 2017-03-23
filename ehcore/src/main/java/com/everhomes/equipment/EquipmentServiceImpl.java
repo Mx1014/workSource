@@ -3300,13 +3300,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	                LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 	            }
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-					//取path后的第一个路径 为顶层公司
-					String[] path = organization.getPath().split("/");
-					Long organizationId = Long.valueOf(path[1]);
-					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organizationId);
-//					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if(LOGGER.isInfoEnabled()) {
-		                LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organizationId, maps);
+		                LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organization.getId(), maps);
 		            }
 					
 					if(maps != null && maps.size() > 0) {
@@ -3318,7 +3315,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
 							if(groupOrg != null) {
-								group.setGroupId(groupOrg.getDirectlyEnterpriseId());
+								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+								String[] path = organization.getPath().split("/");
+								Long organizationId = Long.valueOf(path[1]);
+
+								group.setGroupId(organizationId);
 								group.setPositionId(map.getJobPositionId());
 								groupDtos.add(group);
 							}
@@ -3575,7 +3576,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public EquipmentTaskDTO listTaskById(ListTaskByIdCommand cmd) {
-		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+//		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+		//分公司拿不到ownerId为总公司的数据 by xiongying20170323
+		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(cmd.getTaskId());
+
+		if(task == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST,
+					"任务不存在");
+		}
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
 		
 		return dto;
