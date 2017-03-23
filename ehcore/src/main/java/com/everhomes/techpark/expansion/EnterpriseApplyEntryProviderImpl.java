@@ -4,8 +4,6 @@ import com.everhomes.db.AccessSpec;
 import com.everhomes.db.DaoAction;
 import com.everhomes.db.DaoHelper;
 import com.everhomes.db.DbProvider;
-import com.everhomes.enterprise.EnterpriseAddress;
-import com.everhomes.listing.CrossShardListingLocator;
 import com.everhomes.listing.ListingLocator;
 import com.everhomes.naming.NameMapper;
 import com.everhomes.rest.techpark.expansion.ApplyEntryStatus;
@@ -77,6 +75,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.APPLY_USER_ID.eq(userId));
 		if(null != id)
 			query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.ID.eq(id));
+		//TODO:select status eq success
 		query.addConditions(Tables.EH_ENTERPRISE_OP_REQUESTS.STATUS.eq(ApplyEntryStatus.RESIDED_IN.getCode()));
 		
 		query.fetch().map((r) -> {

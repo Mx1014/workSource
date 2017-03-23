@@ -78,22 +78,13 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
     @Override
     public void onFlowCaseEnd(FlowCaseState ctx) {
-        // 不用做什么
-        /*ApplyEntryStatus status = null;
-        switch (ctx.getStepType()) {
-            case APPROVE_STEP:
-                status = ApplyEntryStatus.RESIDED_IN;
-                break;
-            case REJECT_STEP:
-                status = ApplyEntryStatus.INVALID;
-                break;
-            case ABSORT_STEP:
-                status = ApplyEntryStatus.INVALID;
-                break;
-        }
+        // 更新状态
+        FlowCase flowCase = ctx.getFlowCase();
+        Byte status = flowCase.getStatus();
+
         if (status != null) {
-            enterpriseApplyEntryProvider.updateApplyEntryStatus(ctx.getFlowCase().getReferId(), status.getCode());
-        }*/
+            enterpriseApplyEntryProvider.updateApplyEntryStatus(ctx.getFlowCase().getReferId(), status);
+        }
     }
 
     @Override
