@@ -3300,9 +3300,9 @@ public class EquipmentServiceImpl implements EquipmentService {
 	                LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 	            }
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-					//取path的第一个路径 为顶层公司
+					//取path后的第一个路径 为顶层公司
 					String[] path = organization.getPath().split("/");
-					Long organizationId = Long.valueOf(path[0]);
+					Long organizationId = Long.valueOf(path[1]);
 					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organizationId);
 //					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if(LOGGER.isInfoEnabled()) {
