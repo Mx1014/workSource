@@ -82,3 +82,13 @@ CREATE TABLE `eh_lease_configs` (
   PRIMARY KEY (`id`)
 ) ENGINE=INNODB DEFAULT CHARSET=utf8mb4;
 
+ALTER TABLE `eh_buildings` ADD COLUMN `traffic_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `lift_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `pm_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `parking_lot_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `environmental_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `power_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `telecommunication_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `air_condition_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `security_description` text;
+ALTER TABLE `eh_buildings` ADD COLUMN `fire_control_description` text;
