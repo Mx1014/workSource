@@ -173,7 +173,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		long startTime = System.currentTimeMillis();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId);
+		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId, cmd.getCurrentSceneType());
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
@@ -2270,7 +2270,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 	public List<ItemServiceCategryDTO> listItemServiceCategries(){
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
 		Long userId = UserContext.current().getUser().getId();
-		List<ItemServiceCategry> itemServiceCategries = launchPadProvider.listItemServiceCategries(namespaceId);
+		List<ItemServiceCategry> itemServiceCategries = launchPadProvider.listItemServiceCategries(namespaceId, null);
 		return itemServiceCategries.stream().map( r -> {
 			ItemServiceCategryDTO dto = ConvertHelper.convert(r, ItemServiceCategryDTO.class);
 			dto.setIconUrl(parserUri(r.getIconUri(), EntityType.USER.getCode(), userId));

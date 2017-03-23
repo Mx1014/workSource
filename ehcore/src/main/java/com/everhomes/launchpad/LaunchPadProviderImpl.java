@@ -440,7 +440,9 @@ public class LaunchPadProviderImpl implements LaunchPadProvider {
 		SelectQuery<EhItemServiceCategriesRecord> query = context.selectQuery(Tables.EH_ITEM_SERVICE_CATEGRIES);
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.STATUS.eq(ItemServiceCategryStatus.ACTIVE.getCode()));
 		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(sceneType));
+		if(null != sceneType){
+			query.addConditions(Tables.EH_ITEM_SERVICE_CATEGRIES.SCENE_TYPE.eq(sceneType));
+		}
 		query.addOrderBy(Tables.EH_ITEM_SERVICE_CATEGRIES.ORDER);
 		query.fetch().map(r -> {
 			result.add(ConvertHelper.convert(r, ItemServiceCategry.class));
