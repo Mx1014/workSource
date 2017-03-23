@@ -97,6 +97,7 @@ public class BuildingDTO {
 	
 	private String detailUrl;
 
+	private String floorCount;
 	private String trafficDescription;
 	private String liftDescription;
 	private String pmDescription;
@@ -429,5 +430,13 @@ public class BuildingDTO {
 
 	public void setFireControlDescription(String fireControlDescription) {
 		this.fireControlDescription = fireControlDescription;
+	}
+
+	public String getFloorCount() {
+		return floorCount;
+	}
+
+	public void setFloorCount(String floorCount) {
+		this.floorCount = floorCount;
 	}
 }

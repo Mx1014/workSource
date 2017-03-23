@@ -105,8 +105,10 @@ public class EnterpriseApplyEntryFlowListener implements FlowModuleListener {
 
             if (null != applyEntry.getAddressId()){
                 Address address = addressProvider.findAddressById(applyEntry.getAddressId());
-                dto.setApartmentName(address.getApartmentName());
-                dto.setBuildingName(address.getBuildingName());
+                if (null != address){
+                    dto.setApartmentName(address.getApartmentName());
+                    dto.setBuildingName(address.getBuildingName());
+                }
             }
             flowCase.setCustomObject(JSONObject.toJSONString(dto));
 

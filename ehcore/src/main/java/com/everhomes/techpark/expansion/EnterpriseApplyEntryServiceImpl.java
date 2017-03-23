@@ -400,8 +400,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     			projectType = EntityType.RESOURCE_CATEGORY.getCode();
     		}
 
-    		if (LeaseIssuerType.ORGANIZATION.getCode().equals(cmd.getIssuerType())) {
-                FlowCase flowCase1 = this.createFlowCase(request,projectId, projectType);
+    		if (null == cmd.getIssuerType() || LeaseIssuerType.ORGANIZATION.getCode().equals(cmd.getIssuerType())) {
+                FlowCase flowCase1 = this.createFlowCase(request, projectId, projectType);
                 request.setFlowcaseId(flowCase1.getId());
                 enterpriseApplyEntryProvider.updateApplyEntry(request);
                 return flowCase1;

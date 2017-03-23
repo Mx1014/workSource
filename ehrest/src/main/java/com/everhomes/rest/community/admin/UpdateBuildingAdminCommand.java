@@ -55,6 +55,7 @@ public class UpdateBuildingAdminCommand {
 	@ItemType(AttachmentDescriptor.class)
     private List<AttachmentDescriptor> attachments;
 
+	private String floorCount;
 	private String trafficDescription;
 	private String liftDescription;
 	private String pmDescription;
@@ -248,5 +249,13 @@ public class UpdateBuildingAdminCommand {
 
 	public void setFireControlDescription(String fireControlDescription) {
 		this.fireControlDescription = fireControlDescription;
+	}
+
+	public String getFloorCount() {
+		return floorCount;
+	}
+
+	public void setFloorCount(String floorCount) {
+		this.floorCount = floorCount;
 	}
 }
