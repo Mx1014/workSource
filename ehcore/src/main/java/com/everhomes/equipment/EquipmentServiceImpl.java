@@ -3300,14 +3300,13 @@ public class EquipmentServiceImpl implements EquipmentService {
 	                LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 	            }
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-					//是总公司的话 则把父公司id置为公司id
-					if(organization.getParentId().equals(0L)) {
-						organization.setParentId(organization.getId());
-					}
-					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getParentId());
+					//取path的第一个路径 为顶层公司
+					String[] path = organization.getPath().split("/");
+					Long organizationId = Long.valueOf(path[0]);
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organizationId);
 //					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if(LOGGER.isInfoEnabled()) {
-		                LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" ,organization.getParentId(), maps);
+		                LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organizationId, maps);
 		            }
 					
 					if(maps != null && maps.size() > 0) {
