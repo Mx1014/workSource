@@ -3064,7 +3064,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		if(organization != null) {
 			String[] path = organization.getPath().split("/");
-			for (int i = path.length - 1; i >= 0; i--) {
+			for (int i = path.length - 1; i > 0; i--) {
 				ownerIds.add(Long.valueOf(path[i]));
 			}
 		}
