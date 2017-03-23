@@ -333,6 +333,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	@Override
 	public ApplyEntryResponse applyEntry(EnterpriseApplyEntryCommand cmd) {
 		ApplyEntryResponse resp = new ApplyEntryResponse();
+
+        if (null == cmd.getIssuerType())
+            cmd.setIssuerType(LeaseIssuerType.ORGANIZATION.getCode());
+
 		EnterpriseOpRequest request = ConvertHelper.convert(cmd, EnterpriseOpRequest.class);
 		request.setApplyUserId(UserContext.current().getUser().getId());
 		if(null != cmd.getContactPhone())
