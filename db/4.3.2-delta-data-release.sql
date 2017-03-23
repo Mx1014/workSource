@@ -216,3 +216,7 @@ INSERT INTO `eh_request_templates` (`id`, `template_type`, `name`, `button_title
 UPDATE `eh_configurations` SET `value`='60' WHERE `name`='sms.verify.minDuration.seconds';
 UPDATE `eh_configurations` SET `value`='10' WHERE `name`='sms.verify.device.timesForAnHour';
 UPDATE `eh_configurations` SET `value`='20' WHERE `name`='sms.verify.device.timesForADay';
+
+
+-- 更新现网菜单“我的申请”的data_type（现网已执行）, add by tt, 20170323
+update eh_web_menus set data_type = replace(data_type, 'service', 'apply') where id in (80120, 80220, 80320, 80420, 80520);

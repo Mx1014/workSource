@@ -99,3 +99,22 @@ update eh_banners set action_type = 33 where name in("十乐生活合作预告")
 update eh_banners set action_data = concat('{"type":',@eh_service_alliance_categories,',"parentId":',@eh_service_alliance_categories,',"displayType": "list"}') where name = "十乐生活合作预告" and namespace_id = 999990;
 
 
+
+-- 更新现网菜单“我的申请”的data_type（现网已执行）, add by tt, 20170323
+update eh_web_menus set data_type = replace(data_type, 'service', 'apply') where id in (80120, 80220, 80320, 80420, 80520);
+
+
+-- 
+-- 删除正中会菜单（现网已执行）, add by tt, 20170323
+-- 1，删除运营服务及子菜单
+-- 2，删除内部管理的岗位管理和职级管理
+-- 3，系统管理下新增子菜单：管理员管理
+-- 4，删除园区服务下的厂房出租、公寓出租、医疗
+-- 5，删除园区服务-企业服务下的我的申请子菜单
+-- 
+delete from eh_acls where role_id = 1005 and privilege_id = 10145;
+
+delete from eh_web_menu_scopes where owner_type = 'EhNamespaces' and owner_id = 999983 and menu_id in (50200, 50210, 50220, 50300, 80300, 80310, 80320, 80400, 80410,80420, 80500, 80510,80520, 80220);
+
+select max(id) into @id from `eh_web_menu_scopes`;
+INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id+1, 60400, '', 'EhNamespaces', 999983, 2);
