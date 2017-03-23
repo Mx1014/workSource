@@ -320,11 +320,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
 		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
+
 			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
 			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
-
+			//分配任务
 			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
 
 			if (logs.size() != 0) {
@@ -338,6 +339,20 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				smsProvider.addToTupleList(variables, "operatorName", targetUser.getNickName());
 				smsProvider.addToTupleList(variables, "operatorPhone", targetIdentifier.getIdentifierToken());
 			}
+		}else if (SmsTemplateCode.PM_TASK_ACCEPTING_NODE_SUPERVISE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_NODE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_NODE_SUPERVISE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_PROCESSING_BUTTON_APPROVE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}
 
 	}

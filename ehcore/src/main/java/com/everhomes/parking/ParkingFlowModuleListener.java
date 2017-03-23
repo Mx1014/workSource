@@ -5,6 +5,8 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.sms.SmsTemplateCode;
+import com.everhomes.sms.SmsProvider;
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -44,14 +46,16 @@ import com.everhomes.util.Tuple;
 public class ParkingFlowModuleListener implements FlowModuleListener {
 	
     private static final Logger LOGGER = LoggerFactory.getLogger(ParkingFlowModuleListener.class);
+	private Long moduleId = ParkingFlowConstant.PARKING_RECHARGE_MODULE;
+
 	@Autowired
 	private FlowService flowService;
 	@Autowired
 	private FlowProvider flowProvider;
 	@Autowired
     private ParkingProvider parkingProvider;
-	
-	private Long moduleId = ParkingFlowConstant.PARKING_RECHARGE_MODULE;
+	@Autowired
+	private SmsProvider smsProvider;
 	@Autowired
     private ContentServerService contentServerService;
 	
@@ -309,7 +313,27 @@ public class ParkingFlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
 			List<Tuple<String, Object>> variables) {
-		// TODO Auto-generated method stub
-		
+		FlowCase flowCase = ctx.getFlowCase();
+		ParkingCardRequest parkingCardRequest = parkingProvider.findParkingCardRequestById(flowCase.getReferId());
+		ParkingLot parkingLot = parkingProvider.findParkingLotById(parkingCardRequest.getParkingLotId());
+
+		String parkingLotName = parkingLot.getName();
+		String plateNumber = parkingCardRequest.getPlateNumber();
+
+		if (SmsTemplateCode.PARKING_ENTER_QUEQUEING_NODE == templateId) {
+
+			smsProvider.addToTupleList(variables, "parkingLotName", parkingLotName);
+
+		}else if (SmsTemplateCode.PARKING_CANCEL_QUEQUEING == templateId){
+			smsProvider.addToTupleList(variables, "parkingLotName", parkingLotName);
+			smsProvider.addToTupleList(variables, "plateNumber", plateNumber);
+
+		}else if (SmsTemplateCode.PARKING_ENTER_PROCESSING_NODE == templateId){
+			smsProvider.addToTupleList(variables, "parkingLotName", parkingLotName);
+			smsProvider.addToTupleList(variables, "plateNumber", plateNumber);
+		}else if (SmsTemplateCode.PARKING_CANCEL_PROCESSING == templateId){
+			smsProvider.addToTupleList(variables, "parkingLotName", parkingLotName);
+			smsProvider.addToTupleList(variables, "plateNumber", plateNumber);
+		}
 	}
 }
