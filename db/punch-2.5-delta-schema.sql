@@ -21,8 +21,8 @@
 -- 增加字段
 ALTER TABLE `eh_punch_statistics` ADD COLUMN `exts` VARCHAR(1024) COMMENT 'json string exts:eq[{"name":"事假","timeCount":"1天2小时"},{"name":"丧假","timeCount":"3天2小时30分钟"}]';
 
-ALTER TABLE `eh_punch_time_rules` ADD COLUMN `start_early_time_long` TIME  COMMENT 'how early can i arrive';
-ALTER TABLE `eh_punch_time_rules` ADD COLUMN `start_late_time_long` TIME  COMMENT 'how late can i arrive ';
-ALTER TABLE `eh_punch_time_rules` ADD COLUMN `work_time_long` TIME  COMMENT 'how long do i must be work';
-ALTER TABLE `eh_punch_time_rules` ADD COLUMN `noon_leave_time_long` TIME ;
-ALTER TABLE `eh_punch_time_rules` ADD COLUMN `afternoon_arrive_time_long` TIME ;
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `start_early_time_long` BIGINT  COMMENT 'how early can i arrive';
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `start_late_time_long` BIGINT  COMMENT 'how late can i arrive ';
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `work_time_long` BIGINT  COMMENT 'how long do i must be work';
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `noon_leave_time_long` BIGINT ;
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `afternoon_arrive_time_long` BIGINT ;

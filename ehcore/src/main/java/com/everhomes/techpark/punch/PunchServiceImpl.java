@@ -2729,6 +2729,7 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 			PunchTimeRule punchTimeRule = ConvertHelper.convert(cmd, PunchTimeRule.class);
+			punchTimeRule.setAfternoonArriveTimeLong(cmd.getAfternoonArriveTime());
  			punchTimeRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
 			punchTimeRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
 			punchTimeRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
