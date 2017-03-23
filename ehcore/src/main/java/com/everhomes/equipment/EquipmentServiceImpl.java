@@ -3350,6 +3350,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 //		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
 		//分公司查不到总公司的设备 by xiongying20170323
 		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
+		if(equipment == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST,
+					"设备不存在");
+		}
 		EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
 		Community community = communityProvider.findCommunityById(dto.getTargetId());
 		if(community != null)
