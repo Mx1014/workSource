@@ -205,7 +205,7 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 		}
 		long startTime = System.currentTimeMillis();
 		List<CategryItemDTO> categryItemDTOs = new ArrayList<CategryItemDTO>();
-		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId);
+		List<ItemServiceCategry> categries = launchPadProvider.listItemServiceCategries(namespaceId, cmd.getCurrentSceneType());
 		for (ItemServiceCategry categry: categries) {
 			CategryItemDTO categryItemDTO = new CategryItemDTO();
 			categryItemDTO.setCategryId(categry.getId());
@@ -985,10 +985,19 @@ public class LaunchPadServiceImpl implements LaunchPadService {
                 });
             }
 
-			//查询全部的item的时候不需要排序 by sfyan 20161020
+			//一般按item的defaultOrder排序 by sfyan 20170323
 			if(null != itemDisplayFlag){
 				if(result != null && !result.isEmpty())
 					sortLaunchPadItems(result);
+			}else{
+				//查询全部的item的时候按moreOrder排序 by sfyan 20170323
+				if(result != null && !result.isEmpty())
+					Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+						@Override
+						public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+							return o1.getMoreOrder().intValue() - o2.getMoreOrder().intValue();
+						}
+					});
 			}
 
 
@@ -1219,12 +1228,13 @@ public class LaunchPadServiceImpl implements LaunchPadService {
 
 	private void sortLaunchPadItems(List<LaunchPadItemDTO> result){
 
-		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
-			@Override
-			public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
-				return o1.getId().intValue() - o2.getId().intValue();
-			}
-		});
+		// 按id排序 可以去掉 by sfyan
+//		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
+//			@Override
+//			public int compare(LaunchPadItemDTO o1, LaunchPadItemDTO o2){
+//				return o1.getId().intValue() - o2.getId().intValue();
+//			}
+//		});
 		//优先根据defaultOrder排序显示
 		Collections.sort(result, new Comparator<LaunchPadItemDTO>(){
 			@Override
