@@ -1,5 +1,4 @@
 -- by wuhan 资源预约2.5 增加字段
-ALTER TABLE eh_rentalv2_resources ADD COLUMN `confirmation_prompt` VARCHAR(200);
 ALTER TABLE eh_rentalv2_resources ADD COLUMN `offline_cashier_address` VARCHAR(200);
 ALTER TABLE eh_rentalv2_resources ADD COLUMN `offline_payee_uid` BIGINT ;
 ALTER TABLE eh_rentalv2_resource_types ADD COLUMN `pay_mode` TINYINT DEFAULT 0 COMMENT 'pay mode :0-online pay 1-offline';
@@ -24,13 +23,13 @@ CREATE TABLE `eh_asset_bills` (
   `tenant_type` VARCHAR(32) COMMENT 'bill tenant type: family、enterprise',
   `tenant_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'bill tenant id: family、enterprise id',
   `source` TINYINT NOT NULL DEFAULT 0 COMMENT '0: auto, 1: third party, 2: manual',
-  
+
   `account_period` DATETIME NOT NULL,
   `building_name` VARCHAR(128),
   `apartment_name` VARCHAR(128),
   `address_id` BIGINT NOT NULL,
   `contact_no` VARCHAR(32),
-  
+
   `rental` DECIMAL(10,2) COMMENT '租金',
   `property_management_fee` DECIMAL(10,2) COMMENT '物业管理费',
   `unit_maintenance_fund` DECIMAL(10,2) COMMENT '本体维修基金',
@@ -51,7 +50,7 @@ CREATE TABLE `eh_asset_bills` (
   `pressurized_fee` DECIMAL(10,2) COMMENT '加压费',
   `parking_fee` DECIMAL(10,2) COMMENT '停车费',
   `other` DECIMAL(10,2) COMMENT '其他',
-  
+
   `period_account_amount` DECIMAL(10,2),
   `period_unpaid_account_amount` DECIMAL(10,2),
   `status` TINYINT NOT NULL DEFAULT 1 COMMENT '0: inactive, 1: unpaid, 2: paid',
@@ -77,12 +76,12 @@ CREATE TABLE `eh_asset_bill_template_fields` (
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
   `required_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: optional, 1: required',
   `selected_flag` TINYINT NOT NULL DEFAULT 0 COMMENT '0: unselected, 1: selected',
-  
+
   `owner_type` VARCHAR(32) COMMENT 'template field owner type',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'template field owner id',
   `target_type` VARCHAR(32) COMMENT 'template field target type: community',
   `target_id` BIGINT NOT NULL COMMENT 'template field target id: community id',
-  
+
   `field_name` VARCHAR(64) NOT NULL,
   `field_display_name` VARCHAR(64) NOT NULL,
   `field_custom_name` VARCHAR(64),
@@ -98,12 +97,12 @@ CREATE TABLE `eh_asset_bill_template_fields` (
 CREATE TABLE `eh_asset_bill_notify_records` (
   `id` BIGINT NOT NULL AUTO_INCREMENT COMMENT 'id of the record',
   `namespace_id` INTEGER NOT NULL DEFAULT 0 COMMENT 'namespace of owner resource, redundant info to quick namespace related queries',
-  
+
   `owner_type` VARCHAR(32) COMMENT 'notify record owner type',
   `owner_id` BIGINT NOT NULL DEFAULT 0 COMMENT 'notify record owner id',
   `target_type` VARCHAR(32) COMMENT 'notify record target type: community',
   `target_id` BIGINT NOT NULL COMMENT 'notify record target id: community id',
-  
+
   `creator_uid` BIGINT,
   `create_time` DATETIME(3),
 
