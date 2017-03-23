@@ -264,8 +264,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 			//填充楼栋门牌
             if (null != c.getAddressId()){
                 Address address = addressProvider.findAddressById(c.getAddressId());
-                dto.setApartmentName(address.getApartmentName());
-                dto.setBuildingName(address.getBuildingName());
+                if (null != address){
+                    dto.setApartmentName(address.getApartmentName());
+                    dto.setBuildingName(address.getBuildingName());
+                }
             }
 
 			return dto;
