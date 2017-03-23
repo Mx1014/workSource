@@ -61,7 +61,11 @@ private static final Logger LOGGER = LoggerFactory.getLogger(EquipmentInspection
 
 		closeDelayTasks();
 		createTask();
-		sendTaskMsg();
+		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
+		if(notifyFlag) {
+			sendTaskMsg();
+		}
+
 	}
 	
 	private void createTask() {
