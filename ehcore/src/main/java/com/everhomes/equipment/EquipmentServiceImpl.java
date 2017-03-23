@@ -2896,7 +2896,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setTargetId(cmd.getTargetId());
 				equipment.setInspectionCategoryId(cmd.getInspectionCategoryId());
 				equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
-				
+				String tokenString = UUID.randomUUID().toString();
+				equipment.setQrCodeToken(tokenString);
 				equipment.setCreatorUid(userId);
 				equipment.setOperatorUid(userId);
 				LOGGER.info("add equipment");

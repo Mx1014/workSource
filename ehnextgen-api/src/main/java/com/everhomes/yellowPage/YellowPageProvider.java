@@ -97,4 +97,16 @@ public interface YellowPageProvider {
 	
 	List<ServiceAllianceAttachment> listAttachments(CrossShardListingLocator locator, int count, Long ownerId);
 
+	void createGolfRequest(ServiceAllianceGolfRequest request);
+
+	void createGymRequest(ServiceAllianceGymRequest request);
+
+	void createServerRequest(ServiceAllianceServerRequest request);
+
+	ServiceAllianceServerRequest findServerRequest(Long id);
+
+	ServiceAllianceGymRequest findGymRequest(Long id);
+
+	ServiceAllianceGolfRequest findGolfRequest(Long id);
+
 }

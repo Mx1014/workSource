@@ -1,6 +1,7 @@
 package com.everhomes.test.junit.acl;
 
 import com.everhomes.rest.RestResponseBase;
+import com.everhomes.rest.acl.ModuleAssignment;
 import com.everhomes.rest.acl.admin.AuthorizationServiceModule;
 import com.everhomes.rest.acl.admin.AuthorizationServiceModuleCommand;
 import com.everhomes.schema.tables.pojos.EhAcls;
@@ -46,25 +47,23 @@ public class AuthorizationServiceModuleTest extends BaseLoginAuthTestCase {
         cmd.setTargetId(1000751L);
         cmd.setOrganizationId(1000750L);
 
-        List<Long> moduleIds1 = new ArrayList<>();
-        moduleIds1.add(1L);
-        moduleIds1.add(2L);
-
-        List<Long> moduleIds2 = new ArrayList<>();
-        moduleIds2.add(3L);
-        moduleIds2.add(4L);
-        moduleIds2.add(5L);
+        List<ModuleAssignment> assignments1 = new ArrayList<>();
+        ModuleAssignment assignment1_1 = new ModuleAssignment();
+        assignments1.add(assignment1_1);
+        List<ModuleAssignment> assignments2 = new ArrayList<>();
+        ModuleAssignment assignment2_2 = new ModuleAssignment();
+        assignments1.add(assignment2_2);
 
         List<AuthorizationServiceModule> serviceModuleAuthorizations = new ArrayList<>();
         AuthorizationServiceModule serviceModuleAuthorization1 = new AuthorizationServiceModule();
         serviceModuleAuthorization1.setAllModuleFlag((byte)0);
-        serviceModuleAuthorization1.setModuleIds(moduleIds1);
+        serviceModuleAuthorization1.setAssignments(assignments1);
         serviceModuleAuthorization1.setResourceId(24210090697425925L);
         serviceModuleAuthorization1.setResourceType("EhCommunities");
         serviceModuleAuthorizations.add(serviceModuleAuthorization1);
         AuthorizationServiceModule serviceModuleAuthorization2 = new AuthorizationServiceModule();
         serviceModuleAuthorization2.setAllModuleFlag((byte)0);
-        serviceModuleAuthorization2.setModuleIds(moduleIds2);
+        serviceModuleAuthorization2.setAssignments(assignments2);
         serviceModuleAuthorization2.setResourceId(24210090697425926L);
         serviceModuleAuthorization2.setResourceType("EhCommunities");
         serviceModuleAuthorizations.add(serviceModuleAuthorization2);

@@ -732,50 +732,55 @@ public class AssetServiceImpl implements AssetService {
             LocaleString localeString = localeStringProvider.find(AssetServiceErrorCode.SCOPE, AssetServiceErrorCode.NOTIFY_FEE,
                     "zh_CN");
             String content = localeString.getText();
-            bills.stream().map(bill -> {
-                if(bill.getContactNo() != null) {
+            if(LOGGER.isDebugEnabled()) {
+                LOGGER.debug("unpaid bills = {}", bills);
+            }
+
+            for(AssetBill bill : bills) {
+                if (bill.getContactNo() != null) {
                     UserIdentifier identifier = userProvider.findClaimedIdentifierByToken(namespaceId, bill.getContactNo());
-                    if(identifier != null) {
+                    if (identifier != null) {
                         sendMessageToUser(identifier.getOwnerUid(), content);
                     }
                 } else {
                     //没有contactNo的家庭 通知所有家庭成员
-                    if(TenantType.FAMILY.equals(TenantType.fromCode(bill.getTenantType()))) {
+                    if (TenantType.FAMILY.equals(TenantType.fromCode(bill.getTenantType()))) {
                         List<GroupMember> groupMembers = groupProvider.findGroupMemberByGroupId(bill.getTenantId());
-                        if(groupMembers != null && groupMembers.size() > 0) {
-                            groupMembers.stream().map(groupMember -> {
-                                if(EntityType.USER.equals(EntityType.fromCode(groupMember.getMemberType()))) {
+                        if (groupMembers != null && groupMembers.size() > 0) {
+                            for(GroupMember groupMember : groupMembers) {
+                                if (EntityType.USER.equals(EntityType.fromCode(groupMember.getMemberType()))) {
                                     sendMessageToUser(groupMember.getMemberId(), content);
                                 }
-                                return null;
-                            });
+                            }
                         }
                     }
 
                     //没有contactNo的企业 通知所有企业管理员
-                    if(TenantType.ENTERPRISE.equals(TenantType.fromCode(bill.getTenantType()))) {
+                    if (TenantType.ENTERPRISE.equals(TenantType.fromCode(bill.getTenantType()))) {
                         ListServiceModuleAdministratorsCommand command = new ListServiceModuleAdministratorsCommand();
                         command.setOwnerId(bill.getTenantId());
                         command.setOwnerType(EntityType.ORGANIZATIONS.getCode());
                         command.setOrganizationId(bill.getTenantId());
                         List<OrganizationContactDTO> orgContact = rolePrivilegeService.listOrganizationAdministrators(command);
-                        if(orgContact != null && orgContact.size() > 0) {
-                            orgContact.stream().map(contact -> {
-                                if(OrganizationMemberTargetType.USER.equals(OrganizationMemberTargetType.fromCode(contact.getTargetType()))) {
+                        if (orgContact != null && orgContact.size() > 0) {
+                            for(OrganizationContactDTO contact : orgContact) {
+                                if (OrganizationMemberTargetType.USER.equals(OrganizationMemberTargetType.fromCode(contact.getTargetType()))) {
                                     sendMessageToUser(contact.getTargetId(), content);
                                 }
-                               return null;
-                            });
+                            }
 
                         }
                     }
                 }
-                return null;
-            });
+            }
         }
     }
 
     private void sendMessageToUser(Long userId, String content) {
+        if(LOGGER.isDebugEnabled()) {
+            LOGGER.debug("notify asset bills: userId = {}, content = {}", userId, content);
+        }
+
         MessageDTO messageDto = new MessageDTO();
         messageDto.setAppId(AppConstants.APPID_MESSAGING);
         messageDto.setSenderUid(User.SYSTEM_USER_LOGIN.getUserId());

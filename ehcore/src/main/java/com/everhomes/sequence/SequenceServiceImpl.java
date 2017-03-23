@@ -274,11 +274,14 @@ import com.everhomes.server.schema.tables.pojos.EhSearchTypes;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceApartmentRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceAttachments;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceCategories;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceGolfRequests;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceGymRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceInvestRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceJumpModule;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceNotifyTargets;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAllianceReservationRequests;
+import com.everhomes.server.schema.tables.pojos.EhServiceAllianceServerRequests;
 import com.everhomes.server.schema.tables.pojos.EhServiceAlliances;
 import com.everhomes.server.schema.tables.pojos.EhServiceHotlines;
 import com.everhomes.server.schema.tables.pojos.EhServiceModuleAssignments;
@@ -1564,7 +1567,15 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhDockingMappings.class, Tables.EH_DOCKING_MAPPINGS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_DOCKING_MAPPINGS.ID.max()).from(Tables.EH_DOCKING_MAPPINGS).fetchOne().value1();
-
+        });
+        syncTableSequence(null, EhServiceAllianceGolfRequests.class, Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_GOLF_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceGymRequests.class, Tables.EH_SERVICE_ALLIANCE_GYM_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_GYM_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_GYM_REQUESTS).fetchOne().value1();
+        });
+        syncTableSequence(null, EhServiceAllianceServerRequests.class, Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS).fetchOne().value1();
         });
     }
 

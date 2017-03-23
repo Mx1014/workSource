@@ -65,29 +65,29 @@ public class ListAuthorizationServiceModuleMembersTest extends BaseLoginAuthTest
         for (AuthorizationServiceModuleDTO dto: dtos) {
             assertEquals(true, cIds.contains(dto.getResourceId()));
             if(24210090697425925L == dto.getResourceId()){
-                assertNotNull(dto.getServiceModules());
-                assertEquals(1, dto.getServiceModules().size());
+                assertNotNull(dto.getAssignments());
+                assertEquals(1, dto.getAssignments().size());
                 List<Long> mIds = new ArrayList<>();
 
                 mIds.add(1L);
-                for (ServiceModuleDTO moduleDTO: dto.getServiceModules()) {
-                    assertEquals(true, mIds.contains(moduleDTO.getId()));
+                for (ServiceModuleAssignmentDTO serviceModuleAssignmentDTO: dto.getAssignments()) {
+                    assertEquals(true, mIds.contains(serviceModuleAssignmentDTO.getModuleId()));
                 }
             }
             if(24210090697425926L == dto.getResourceId()){
-                assertNotNull(dto.getServiceModules());
+                assertNotNull(dto.getAssignments());
                 List<Long> mIds = new ArrayList<>();
                 if("12000000010".equals(contactToken)){
                     mIds.add(2L);
-                    assertEquals(1, dto.getServiceModules().size());
+                    assertEquals(1, dto.getAssignments().size());
                 }else{
                     mIds.add(1L);
                     mIds.add(2L);
                     mIds.add(3L);
-                    assertEquals(3, dto.getServiceModules().size());
+                    assertEquals(3, dto.getAssignments().size());
                 }
-                for (ServiceModuleDTO moduleDTO: dto.getServiceModules()) {
-                    assertEquals(true, mIds.contains(moduleDTO.getId()));
+                for (ServiceModuleAssignmentDTO serviceModuleAssignmentDTO: dto.getAssignments()) {
+                    assertEquals(true, mIds.contains(serviceModuleAssignmentDTO.getModuleId()));
                 }
             }
         }
