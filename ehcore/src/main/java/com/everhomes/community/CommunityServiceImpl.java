@@ -885,7 +885,7 @@ public class CommunityServiceImpl implements CommunityService {
 	@Override
 	public BuildingDTO updateBuilding(UpdateBuildingAdminCommand cmd) {
 		
-		Building building = new Building();
+		Building building = ConvertHelper.convert(cmd, Building.class);
 		building.setAddress(cmd.getAddress());
 		building.setAliasName(cmd.getAliasName());
 		building.setAreaSize(cmd.getAreaSize());
