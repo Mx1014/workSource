@@ -49,6 +49,7 @@ public class ActivityDTO {
     private Long contentCategoryId;
     private String startTime;
     private String stopTime;
+    private Byte allDayFlag;
     private String signupEndTime;
     private String location;
     private Integer checkinFlag;
@@ -227,8 +228,16 @@ public class ActivityDTO {
     public void setStopTime(String stopTime) {
         this.stopTime = stopTime;
     }
+    
+    public Byte getAllDayFlag() {
+		return allDayFlag;
+	}
 
-    public String getLocation() {
+	public void setAllDayFlag(Byte allDayFlag) {
+		this.allDayFlag = allDayFlag;
+	}
+
+	public String getLocation() {
         return location;
     }
 

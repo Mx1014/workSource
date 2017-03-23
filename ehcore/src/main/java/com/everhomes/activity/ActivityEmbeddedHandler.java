@@ -1,6 +1,11 @@
 // @formatter:off
 package com.everhomes.activity;
 
+import java.sql.Timestamp;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.Date;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,6 +38,7 @@ import com.everhomes.search.HotTagSearcher;
 import com.everhomes.server.schema.tables.pojos.EhActivities;
 import com.everhomes.sharding.ShardingProvider;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.DateHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.StringHelper;
 import com.everhomes.util.Version;
@@ -251,6 +257,21 @@ public class ActivityEmbeddedHandler implements ForumEmbeddedHandler {
         cmd.setTargetTag(post.getTargetTag());
         cmd.setVisibleRegionType(post.getVisibleRegionType());
         cmd.setVisibleRegionId(post.getVisibleRegionId());
+        
+        
+        //运营要求：官方活动--如果开始时间早于当前时间，则设置创建时间为开始时间之前一天
+        try {
+        	if(cmd.getOfficialFlag() == OfficialFlag.YES.getCode() && null != cmd.getStartTime()){
+        		SimpleDateFormat f=new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        		Date startTime= f.parse(cmd.getStartTime());
+            	if(startTime.before(DateHelper.currentGMTTime())){
+            		post.setCreateTime(new Timestamp(startTime.getTime() - 24*60*60*1000));
+            	}
+        	}
+        	
+        } catch (ParseException e) {
+        	post.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+        }
         
         post.setEmbeddedJson(StringHelper.toJsonString(cmd));
         
