@@ -14,10 +14,12 @@ import com.everhomes.rest.enterprise.CreateEnterpriseCommand;
 import com.everhomes.rest.enterprise.UpdateEnterpriseCommand;
 import com.everhomes.rest.organization.ApplyForEnterpriseContactByEmailCommand;
 import com.everhomes.rest.organization.ListOrganizationsByEmailCommand;
+import com.everhomes.rest.organization.ListOrganizationsByEmailRestResponse;
 import com.everhomes.rest.organization.OrganizationDTO;
 import com.everhomes.rest.organization.OrganizationServiceErrorCode;
 import com.everhomes.rest.techpark.punch.PunchOwnerType;
 import com.everhomes.rest.ui.user.SceneDTO;
+import com.everhomes.rest.ui.user.UserListUserRelatedScenesRestResponse;
 import com.everhomes.server.schema.Tables;
 import com.everhomes.server.schema.tables.pojos.EhOrganizations;
 import com.everhomes.test.core.base.BaseLoginAuthTestCase;
@@ -158,7 +160,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		
 		ListOrganizationsByEmailCommand cmd = new ListOrganizationsByEmailCommand();
 		cmd.setEmail("abc@acc.com");
-		cmd.setSceneToken(getSceneToken());
+//		cmd.setSceneToken(getSceneToken());
 		
 		ListOrganizationsByEmailRestResponse response = httpClientService.restGet(LIST_ORGS_BY_EMAIL_URI, cmd, ListOrganizationsByEmailRestResponse.class, context);
 
@@ -175,7 +177,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		
 		ListOrganizationsByEmailCommand cmd = new ListOrganizationsByEmailCommand();
 		cmd.setEmail("han.wu@zuolin.com");
-		cmd.setSceneToken(getSceneToken());
+		//	cmd.setSceneToken(getSceneToken());
 		
 		ListOrganizationsByEmailRestResponse response = httpClientService.restGet(LIST_ORGS_BY_EMAIL_URI, cmd, ListOrganizationsByEmailRestResponse.class, context);
 
@@ -195,7 +197,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		ApplyForEnterpriseContactByEmailCommand cmd = new ApplyForEnterpriseContactByEmailCommand();
 		cmd.setEmail("han.wu@zuolin.com");
 		cmd.setOrganizationId(id);
-		cmd.setSceneToken(getSceneToken());
+		//cmd.setSceneToken(getSceneToken());
 		
 		RestResponse response = httpClientService.restGet(UPDATE_ENTERPRISE_URI, cmd, RestResponse.class, context);
 
