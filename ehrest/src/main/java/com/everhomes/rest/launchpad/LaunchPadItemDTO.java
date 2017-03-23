@@ -63,7 +63,7 @@ public class LaunchPadItemDTO {
     private Byte    scaleType;
     private Byte deleteFlag;
     private Byte editFlag;
-    private Long moreOrder;
+    private Integer moreOrder;
 
     public String getSelectedIconUri() {
 		return selectedIconUri;
@@ -265,11 +265,11 @@ public class LaunchPadItemDTO {
 		this.deleteFlag = deleteFlag;
 	}
 
-    public Long getMoreOrder() {
+    public Integer getMoreOrder() {
         return moreOrder;
     }
 
-    public void setMoreOrder(Long moreOrder) {
+    public void setMoreOrder(Integer moreOrder) {
         this.moreOrder = moreOrder;
     }
 
