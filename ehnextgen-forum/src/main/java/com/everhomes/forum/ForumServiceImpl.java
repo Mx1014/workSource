@@ -603,8 +603,10 @@ public class ForumServiceImpl implements ForumService {
 	                    populatePost(userId, post, communityId, isDetail, getByOwnerId);
 	                    return ConvertHelper.convert(post, PostDTO.class);
 	            	} else {
+	            		// 帖子被删除了抛出异常，add by tt, 20170323
 	            		LOGGER.error("Forum post already deleted, userId=" + userId + ", topicId=" + topicId);
-	            		return null;
+	            		throw RuntimeErrorException.errorWith(ForumServiceErrorCode.SCOPE,
+	                    		ForumServiceErrorCode.ERROR_FORUM_TOPIC_DELETED, "post was deleted"); 
 	            	}
 	            }
 	                //Added by Janson
