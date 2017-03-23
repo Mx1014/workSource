@@ -220,4 +220,6 @@ public interface PunchService {
 
 	public void deletePunchPoint(DeleteCommonCommand cmd);
 
+	public void updatePunchSchedulings(UpdatePunchSchedulingMonthCommand cmd);
+
 }

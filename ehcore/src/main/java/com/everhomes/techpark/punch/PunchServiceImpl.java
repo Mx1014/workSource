@@ -4775,5 +4775,15 @@ public class PunchServiceImpl implements PunchService {
 		// TODO Auto-generated method stub
 		
 	}
+	@Override
+	public void deletePunchPoint(DeleteCommonCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
+	@Override
+	public void updatePunchSchedulings(UpdatePunchSchedulingMonthCommand cmd) {
+		// TODO Auto-generated method stub
+		
+	}
 	
 }

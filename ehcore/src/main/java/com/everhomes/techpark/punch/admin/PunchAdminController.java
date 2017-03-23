@@ -437,15 +437,15 @@ public class PunchAdminController extends ControllerBase {
     }
 
 	/**
-	 * <b>URL: /punch/listPunchScheduling</b>
+	 * <b>URL: /punch/updatePunchSchedulings</b>
 	 * <p>
-	 * 查询某个月的班次
+	 * 更新某个月的班次
 	 * </p>
 	 */
-	@RequestMapping("updatePunchWiFiRules")
+	@RequestMapping("updatePunchSchedulings")
 	@RestReturn(value = String.class)
-	public RestResponse updatePunchWiFiRules(@Valid UpdatePunchSchedulingMonthCommand cmd) {
-		punchService.updatePunchWiFiRules(cmd);
+	public RestResponse updatePunchSchedulings(@Valid UpdatePunchSchedulingMonthCommand cmd) {
+		punchService.updatePunchSchedulings(cmd);
 		RestResponse response = new RestResponse();
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
