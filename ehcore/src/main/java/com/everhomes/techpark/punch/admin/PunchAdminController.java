@@ -346,6 +346,7 @@ public class PunchAdminController extends ControllerBase {
 	 * 删除公司WIFI考勤规则
 	 * </p>
 	 */
+	@Deprecated
 	@RequestMapping("deletePunchWiFiRule")
 	@RestReturn(value = String.class)
 	public RestResponse deletePunchWiFiRule(@Valid DeleteCommonCommand cmd) {
