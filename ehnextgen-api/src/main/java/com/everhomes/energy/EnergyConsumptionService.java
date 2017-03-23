@@ -2,6 +2,8 @@ package com.everhomes.energy;
 
 import com.everhomes.rest.energy.*;
 
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityByUserResponse;
+import com.everhomes.rest.pmtask.ListAuthorizationCommunityCommand;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.text.ParseException;
@@ -233,4 +235,6 @@ public interface EnergyConsumptionService {
     void createEnergyMeterDefaultSetting(CreateEnergyMeterDefaultSettingCommand cmd);
 
     List<EnergyMeterDefaultSettingTemplateDTO> listEnergyDefaultSettingTemplates();
+
+    ListAuthorizationCommunityByUserResponse listAuthorizationCommunityByUser(ListAuthorizationCommunityCommand cmd);
 }
