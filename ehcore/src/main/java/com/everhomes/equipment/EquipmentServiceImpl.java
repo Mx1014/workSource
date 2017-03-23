@@ -2896,7 +2896,8 @@ public class EquipmentServiceImpl implements EquipmentService {
 				equipment.setTargetId(cmd.getTargetId());
 				equipment.setInspectionCategoryId(cmd.getInspectionCategoryId());
 				equipment.setStatus(EquipmentStatus.INCOMPLETE.getCode());
-				
+				String tokenString = UUID.randomUUID().toString();
+				equipment.setQrCodeToken(tokenString);
 				equipment.setCreatorUid(userId);
 				equipment.setOperatorUid(userId);
 				LOGGER.info("add equipment");
@@ -3299,9 +3300,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 	                LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 	            }
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+					//是总公司的话 则把父公司id置为公司id
+					if(organization.getParentId().equals(0L)) {
+						organization.setParentId(organization.getId());
+					}
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getParentId());
+//					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if(LOGGER.isInfoEnabled()) {
-		                LOGGER.info("listUserRelateGroups, OrganizationJobPositionMaps = {}" + maps);
+		                LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" ,organization.getParentId(), maps);
 		            }
 					
 					if(maps != null && maps.size() > 0) {

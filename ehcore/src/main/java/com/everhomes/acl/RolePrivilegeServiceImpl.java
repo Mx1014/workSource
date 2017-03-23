@@ -712,6 +712,10 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 						privilegeIds.addAll(ids);
 					}
 				}
+				ids = this.getResourceAclPrivilegeIds(EntityType.COMMUNITY.getCode(), communityDTO.getId(), EntityType.ORGANIZATIONS.getCode(), organizationId);
+				if(null != ids){
+					privilegeIds.addAll(ids);
+				}
 			}
 		}
 		return privilegeIds;
@@ -1870,11 +1874,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			groupTypes.add(OrganizationGroupType.GROUP.getCode());
 			orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 			List<Long> targetIds = new ArrayList<>();
+			targetIds.add(cmd.getOrganizationId());
 			for (OrganizationDTO orgDTO: orgDTOs) {
 				targetIds.add(orgDTO.getId());
 			}
 			if(targetIds.size() > 0){
-				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+				serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, null, moduleIds);
 			}
 		}
 		Long endTime3 = System.currentTimeMillis();
@@ -1895,6 +1900,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 	@Override
 	public List<ProjectDTO> listUserRelatedProjectByMenuId(ListUserRelatedProjectByMenuIdCommand cmd) {
+
 		Long startTime1 = System.currentTimeMillis();
 		User user = UserContext.current().getUser();
 		Integer namespaceId = UserContext.getCurrentNamespaceId();
@@ -1927,7 +1933,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 			}
 		}
 		Long endTime3 = System.currentTimeMillis();
-		if(0 != communitydtos.size() && 0 == projectDTOs.size()){
+		if(0 == projectDTOs.size()){
 			List<Long> moduleIds = new ArrayList<>();
 			moduleIds.add(0L);
 			for (WebMenuPrivilege webMenuPrivilege: webMenuPrivileges) {
@@ -1942,8 +1948,6 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 
 			List<OrganizationDTO> orgDTOs = new ArrayList<>();
 
-
-
 			// 没有，则获取个人所在公司节点的业务模块下的项目
 			if(serviceModuleAssignments.size() == 0){
 				List<String> groupTypes = new ArrayList<>();
@@ -1952,11 +1956,12 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 				groupTypes.add(OrganizationGroupType.GROUP.getCode());
 				orgDTOs.addAll(organizationService.getOrganizationMemberGroups(groupTypes, user.getId(), cmd.getOrganizationId()));
 				List<Long> targetIds = new ArrayList<>();
+				targetIds.add(cmd.getOrganizationId());
 				for (OrganizationDTO orgDTO: orgDTOs) {
 					targetIds.add(orgDTO.getId());
 				}
 				if(targetIds.size() > 0){
-					serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, cmd.getOrganizationId(), moduleIds);
+					serviceModuleAssignments = serviceModuleProvider.listResourceAssignments(EntityType.ORGANIZATIONS.getCode(), targetIds, null, moduleIds);
 				}
 			}
 
@@ -1998,7 +2003,7 @@ public class RolePrivilegeServiceImpl implements RolePrivilegeService {
 		Long endTime5 = System.currentTimeMillis();
 		List<ProjectDTO> projects = new ArrayList<>();
 		if(0 != categoryIds.size()){
-			List<ProjectDTO> temp = communityProvider.listResourceCategory(cmd.getOwnerId(), cmd.getOwnerType(), categoryIds, ResourceCategoryType.CATEGORY.getCode())
+			List<ProjectDTO> temp = communityProvider.listResourceCategory(null, null, categoryIds, ResourceCategoryType.CATEGORY.getCode())
 					.stream().map(r -> {
 						ProjectDTO dto = ConvertHelper.convert(r, ProjectDTO.class);
 						dto.setProjectType(EntityType.RESOURCE_CATEGORY.getCode());
