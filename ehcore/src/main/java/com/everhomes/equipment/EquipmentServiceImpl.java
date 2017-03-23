@@ -3059,10 +3059,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<EquipmentInspectionTasks> allTasks = null;
 
+		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+		List<Long> ownerIds = new ArrayList<>();
+
+		if(organization != null) {
+			String[] path = organization.getPath().split("/");
+			for (int i = path.length - 1; i >= 0; i--) {
+				ownerIds.add(Long.valueOf(path[i]));
+			}
+		}
+
 		if(isAdmin) {
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), ownerIds,
 					cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, userId);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), ownerIds,
 					cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey);
 
 		}
@@ -3085,10 +3095,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), ownerIds,
 						cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, userId);
 
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), ownerIds,
 						cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
 
 		}
@@ -3146,7 +3156,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 
-	private String convertListEquipmentInspectionTasksCache(String ownerType, Long ownerId, Long inspectionCategoryId,
+	private String convertListEquipmentInspectionTasksCache(String ownerType, List<Long> ownerIds, Long inspectionCategoryId,
 		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
@@ -3159,7 +3169,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		sb.append("-");
 		sb.append(ownerType);
 		sb.append("-");
-		sb.append(ownerId);
+		sb.append(ownerIds);
 		sb.append("-community-");
 		if(targetId != null && targetId.size() > 0) {
 			sb.append(targetId.get(0));
