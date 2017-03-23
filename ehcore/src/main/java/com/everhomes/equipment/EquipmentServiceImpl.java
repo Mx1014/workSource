@@ -3059,10 +3059,20 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 		List<EquipmentInspectionTasks> allTasks = null;
 
+		Organization organization = organizationProvider.findOrganizationById(cmd.getOwnerId());
+		List<Long> ownerIds = new ArrayList<>();
+
+		if(organization != null) {
+			String[] path = organization.getPath().split("/");
+			for (int i = path.length - 1; i > 0; i--) {
+				ownerIds.add(Long.valueOf(path[i]));
+			}
+		}
+
 		if(isAdmin) {
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), ownerIds,
 					cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, userId);
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), ownerIds,
 					cmd.getInspectionCategoryId(), targetTypes, targetIds, null, null, offset, pageSize + 1, cacheKey);
 
 		}
@@ -3085,10 +3095,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 
 
-			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			String cacheKey = convertListEquipmentInspectionTasksCache(cmd.getOwnerType(), ownerIds,
 						cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, userId);
 
-			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), cmd.getOwnerId(),
+			allTasks = equipmentProvider.listEquipmentInspectionTasksUseCache(cmd.getOwnerType(), ownerIds,
 						cmd.getInspectionCategoryId(), targetTypes, targetIds, executeStandardIds, reviewStandardIds, offset, pageSize + 1, cacheKey);
 
 		}
@@ -3146,7 +3156,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 	}
 
 
-	private String convertListEquipmentInspectionTasksCache(String ownerType, Long ownerId, Long inspectionCategoryId,
+	private String convertListEquipmentInspectionTasksCache(String ownerType, List<Long> ownerIds, Long inspectionCategoryId,
 		List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Long userId) {
 
 		StringBuilder sb = new StringBuilder();
@@ -3159,7 +3169,7 @@ public class EquipmentServiceImpl implements EquipmentService {
 		sb.append("-");
 		sb.append(ownerType);
 		sb.append("-");
-		sb.append(ownerId);
+		sb.append(ownerIds);
 		sb.append("-community-");
 		if(targetId != null && targetId.size() > 0) {
 			sb.append(targetId.get(0));
@@ -3300,14 +3310,10 @@ public class EquipmentServiceImpl implements EquipmentService {
 	                LOGGER.info("listUserRelateGroups, organizationId=" + organization.getId());
 	            }
 				if(OrganizationGroupType.JOB_POSITION.equals(OrganizationGroupType.fromCode(organization.getGroupType()))) {
-					//是总公司的话 则把直属总公司id置为公司id
-					if(organization.getDirectlyEnterpriseId() == 0) {
-						organization.setDirectlyEnterpriseId(organization.getId());
-					}
-					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getDirectlyEnterpriseId());
-//					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
+
+					List<OrganizationJobPositionMap> maps = organizationProvider.listOrganizationJobPositionMaps(organization.getId());
 					if(LOGGER.isInfoEnabled()) {
-		                LOGGER.info("listUserRelateGroups, OrganizationJobPositionMaps = {}" + maps);
+		                LOGGER.info("listUserRelateGroups, organizationId = {}, OrganizationJobPositionMaps = {}" , organization.getId(), maps);
 		            }
 					
 					if(maps != null && maps.size() > 0) {
@@ -3319,7 +3325,11 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 							Organization groupOrg = organizationProvider.findOrganizationById(map.getOrganizationId());
 							if(groupOrg != null) {
-								group.setGroupId(groupOrg.getDirectlyEnterpriseId());
+								//取path后的第一个路径 为顶层公司 by xiongying 20170323
+								String[] path = organization.getPath().split("/");
+								Long organizationId = Long.valueOf(path[1]);
+
+								group.setGroupId(organizationId);
 								group.setPositionId(map.getJobPositionId());
 								groupDtos.add(group);
 							}
@@ -3348,7 +3358,14 @@ public class EquipmentServiceImpl implements EquipmentService {
 	@Override
 	public EquipmentsDTO findEquipment(DeleteEquipmentsCommand cmd) {
 
-		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
+//		EquipmentInspectionEquipments equipment = verifyEquipment(cmd.getEquipmentId(), cmd.getOwnerType(), cmd.getOwnerId());
+		//分公司查不到总公司的设备 by xiongying20170323
+		EquipmentInspectionEquipments equipment = equipmentProvider.findEquipmentById(cmd.getEquipmentId());
+		if(equipment == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_NOT_EXIST,
+					"设备不存在");
+		}
 		EquipmentsDTO dto = ConvertHelper.convert(equipment, EquipmentsDTO.class);
 		Community community = communityProvider.findCommunityById(dto.getTargetId());
 		if(community != null)
@@ -3569,7 +3586,15 @@ public class EquipmentServiceImpl implements EquipmentService {
 
 	@Override
 	public EquipmentTaskDTO listTaskById(ListTaskByIdCommand cmd) {
-		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+//		EquipmentInspectionTasks task = verifyEquipmentTask(cmd.getTaskId(), cmd.getOwnerType(), cmd.getOwnerId());
+		//分公司拿不到ownerId为总公司的数据 by xiongying20170323
+		EquipmentInspectionTasks task = equipmentProvider.findEquipmentTaskById(cmd.getTaskId());
+
+		if(task == null) {
+			throw RuntimeErrorException.errorWith(EquipmentServiceErrorCode.SCOPE,
+					EquipmentServiceErrorCode.ERROR_EQUIPMENT_TASK_NOT_EXIST,
+					"任务不存在");
+		}
 		EquipmentTaskDTO dto = convertEquipmentTaskToDTO(task);
 		
 		return dto;
