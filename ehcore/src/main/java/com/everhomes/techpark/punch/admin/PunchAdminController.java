@@ -191,6 +191,21 @@ public class PunchAdminController extends ControllerBase {
 		response.setErrorDescription("OK");
 		return response;
 	}
+	/**
+	 * <b>URL: /punch/deletePunchPoint</b>
+	 * <p>
+	 * 删除公司考勤地点
+	 * </p>
+	 */
+	@RequestMapping("deletePunchPoint")
+	@RestReturn(value = String.class)
+	public RestResponse deletePunchPoint(@Valid DeleteCommonCommand cmd) {
+		punchService.deletePunchPoint(cmd);
+		RestResponse response = new RestResponse();
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 	
 	
 	
@@ -343,6 +358,7 @@ public class PunchAdminController extends ControllerBase {
 	/**
 	 * <b>URL: /punch/deletePunchWiFiRule</b>
 	 * <p>
+	 * 
 	 * 删除公司WIFI考勤规则
 	 * </p>
 	 */

@@ -218,4 +218,6 @@ public interface PunchService {
 
 	public void updatePunchRuleMap(PunchRuleMapDTO cmd);
 
+	public void deletePunchPoint(DeleteCommonCommand cmd);
+
 }
