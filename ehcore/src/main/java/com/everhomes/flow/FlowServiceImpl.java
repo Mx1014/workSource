@@ -2271,6 +2271,7 @@ public class FlowServiceImpl implements FlowService {
 		FlowNode currNode = null;
 		boolean absorted = false;
 		for(FlowEventLog eventLog : stepLogs) {
+			//获取工作流经过的节点日志
 			if(currNode == null || !currNode.getId().equals(eventLog.getFlowNodeId())) {
 				currNode = nodeMap.get(eventLog.getFlowNodeId());
 				final FlowNodeLogDTO nodeLogDTO = new FlowNodeLogDTO();
@@ -2302,6 +2303,7 @@ public class FlowServiceImpl implements FlowService {
 		}
 		
 		if(!absorted) {
+			//表示已完成
 			int i = 1;
 			if(currNode != null) {
 				i = currNode.getNodeLevel() + 1;
@@ -2318,16 +2320,26 @@ public class FlowServiceImpl implements FlowService {
 			if(!flowCase.getStatus().equals(FlowCaseStatus.PROCESS.getCode())) {
 				getFlowNodeLogDTO(flowCase, flowUserType, nodes.get(nodes.size()-1), flowCase.getStepCount(), logDTO);
 				logDTO.setIsCurrentNode((byte)1);
+				if(logDTO.getLogs().size() == 0) {
+					for(int j = nodeDTOS.size() -1; j >= 0; j--) {
+						FlowNodeLogDTO tmpDTO = nodeDTOS.get(j);
+						if(tmpDTO.getLogs().size() > 0) {
+							logDTO.getLogs().add(tmpDTO.getLogs().get(tmpDTO.getLogs().size()-1));
+							tmpDTO.getLogs().remove(tmpDTO.getLogs().size()-1);
+							break;
+						}						
+					}
+				}
 			}
 			
 			nodeDTOS.add(logDTO);
 		} else {
-			//BUG 6052
-			for(int i = nodeDTOS.size() - 2; i >= 0; i--) {
-				logDTO = nodeDTOS.get(i);
-				if(logDTO.getLogs().size() > 0) {
-					nodeDTOS.get(nodeDTOS.size()-1).getLogs().add(logDTO.getLogs().get(logDTO.getLogs().size()-1));
-					logDTO.getLogs().remove(logDTO.getLogs().size()-1);
+			//异常结束 BUG 6052
+			for(int j = nodeDTOS.size() - 2; j >= 0; j--) {
+				FlowNodeLogDTO tmpDTO = nodeDTOS.get(j);
+				if(tmpDTO.getLogs().size() > 0) {
+					nodeDTOS.get(nodeDTOS.size()-1).getLogs().add(tmpDTO.getLogs().get(tmpDTO.getLogs().size()-1));
+					tmpDTO.getLogs().remove(tmpDTO.getLogs().size()-1);
 					break;
 				}
 			}
@@ -2349,8 +2361,9 @@ public class FlowServiceImpl implements FlowService {
 		return dto;
 	}
 	
+	//获取每个节点的跟踪日志，如果有文本，则格式化文本
 	private void getFlowNodeLogDTO(FlowCase flowCase, FlowUserType flowUserType, FlowNode currNode, Long stepCount, FlowNodeLogDTO nodeLogDTO) {
-		SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd HH:mm");
+//		SimpleDateFormat sdf1 = new SimpleDateFormat("MM-dd HH:mm");
 		List<FlowEventLog> trackerLogs = flowEventLogProvider.findEventLogsByNodeId(currNode.getId()
 				, flowCase.getId(), stepCount, flowUserType);
 		if(trackerLogs != null) {
@@ -2359,10 +2372,10 @@ public class FlowServiceImpl implements FlowService {
 				if(FlowStepType.EVALUATE_STEP.getCode().equals(t.getButtonFiredStep())) {
 					eventDTO.setIsEvaluate((byte)1);
 				}
-				if(eventDTO.getLogContent() != null) {
-					String dateStr = sdf1.format(new Date(eventDTO.getCreateTime().getTime()));
-					eventDTO.setLogContent(dateStr + " " + eventDTO.getLogContent());
-				}
+//				if(eventDTO.getLogContent() != null) {
+//					String dateStr = sdf1.format(new Date(eventDTO.getCreateTime().getTime()));
+//					eventDTO.setLogContent(dateStr + " " + eventDTO.getLogContent());
+//				}
 				nodeLogDTO.getLogs().add(eventDTO);			
 			});
 		}
@@ -2715,12 +2728,14 @@ public class FlowServiceImpl implements FlowService {
 				break;
 			}
 			
-			//判断是否已经处理过，避免循环引用
-			String key = "sel:" + sel.getId();
-			if(processedEntities.containsKey(key)) {
-				continue;
+			if(sel.getId() != null) {
+				//判断是否已经处理过，避免循环引用。如果直接是用户选择，则不需要判断
+				String key = "sel:" + sel.getId();
+				if(processedEntities.containsKey(key)) {
+					continue;
+				}
+				processedEntities.put(key, 1l);	
 			}
-			processedEntities.put(key, 1l);
 			
 			if(FlowUserSourceType.SOURCE_USER.getCode().equals(sel.getSourceTypeA())) {
 				users.add(sel.getSourceIdA());
@@ -2804,9 +2819,17 @@ public class FlowServiceImpl implements FlowService {
 		FlowGraphEvent evt = ctx.getCurrentEvent();
 		if(evt.getEntitySel() != null && evt.getEntitySel().size() > 0) {
 			for(FlowEntitySel sel : evt.getEntitySel()) {
-				if(sel.getEntityId() != null && FlowEntityType.FLOW_SELECTION.getCode().equals(sel.getFlowEntityType())) {
-					FlowUserSelection ul = flowUserSelectionProvider.getFlowUserSelectionById(sel.getEntityId());
-					selections.add(ul);
+				if(sel.getEntityId() != null) {
+					if(FlowEntityType.FLOW_SELECTION.getCode().equals(sel.getFlowEntityType())) {
+						FlowUserSelection ul = flowUserSelectionProvider.getFlowUserSelectionById(sel.getEntityId());
+						selections.add(ul);	
+					} else if(FlowEntityType.FLOW_USER.getCode().equals(sel.getFlowEntityType())) {
+						FlowUserSelection ul = new FlowUserSelection();
+						ul.setSourceIdA(sel.getEntityId());
+						ul.setSourceTypeA(FlowUserSourceType.SOURCE_USER.getCode());
+						selections.add(ul);
+					}
+					
 				}
 			}
 		} else {
