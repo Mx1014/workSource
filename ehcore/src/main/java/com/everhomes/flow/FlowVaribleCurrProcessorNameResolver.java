@@ -5,6 +5,13 @@ import org.springframework.stereotype.Component;
 
 import com.everhomes.rest.user.UserInfo;
 
+/**
+ * <ul>
+ * <li>当前节点执行人</li>
+ * </ul>
+ * @author janson
+ *
+ */
 @Component(FlowVariableTextResolver.CURR_PROCESSOR_NAME)
 public class FlowVaribleCurrProcessorNameResolver implements FlowVariableTextResolver {
 	@Autowired

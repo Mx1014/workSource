@@ -4,7 +4,7 @@ import com.everhomes.util.StringHelper;
 
 /**
  * <ul><li>
- * FlowUserType
+ * FlowUserType: 用户的选择类型：{@link com.everhomes.rest.flow.FlowUserType}
  * </li></ul>
  * @author janson
  *

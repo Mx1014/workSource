@@ -41,7 +41,9 @@ public class FlowGraphTrackerAction extends FlowGraphAction {
 		log.setFlowCaseId(ctx.getFlowCase().getId());
 		log.setFlowUserId(ctx.getOperator().getId());
 		log.setFlowUserName(ctx.getOperator().getNickName());
+		ctx.pushProcessType(FlowCaseStateStackType.TRACKER_ACTION);
 		log.setLogContent(flowService.parseActionTemplate(ctx, this.getFlowAction().getId(), this.getFlowAction().getRenderText()));
+		ctx.popProcessType();
 		log.setStepCount(ctx.getFlowCase().getStepCount());
 		log.setLogType(FlowLogType.NODE_TRACKER.getCode());
 		log.setTrackerApplier(this.getFlowAction().getTrackerApplier());

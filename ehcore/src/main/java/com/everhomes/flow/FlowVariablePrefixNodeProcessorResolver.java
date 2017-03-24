@@ -2,6 +2,7 @@ package com.everhomes.flow;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,7 +30,7 @@ public class FlowVariablePrefixNodeProcessorResolver implements FlowVariableUser
 	FlowEventLogProvider flowEventLogProvider;
 	
 	@Override
-	public List<Long> variableUserResolve(FlowCaseState ctx, FlowEntityType fromEntity, Long entityId,
+	public List<Long> variableUserResolve(FlowCaseState ctx, Map<String, Long> processedEntities, FlowEntityType fromEntity, Long entityId,
 			FlowUserSelection userSelection, int loopCnt) {
 		//上个节点处理人是自己
 		List<Long> users = new ArrayList<Long>();

@@ -27,6 +27,8 @@ import com.everhomes.rest.flow.ListButtonProcessorSelectionsCommand;
 import com.everhomes.rest.flow.ListFlowModulesCommand;
 import com.everhomes.rest.flow.ListFlowModulesResponse;
 import com.everhomes.rest.flow.ListFlowUserSelectionResponse;
+import com.everhomes.rest.flow.ListSelectUsersCommand;
+import com.everhomes.rest.flow.ListSelectUsersResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.user.UserContext;
@@ -131,6 +133,20 @@ public class FlowController extends ControllerBase {
     @RestReturn(value=ListFlowUserSelectionResponse.class)
     public RestResponse listButtonSelections(@Valid ListButtonProcessorSelectionsCommand cmd) {
         RestResponse response = new RestResponse(flowService.listButtonProcessorSelections(cmd));
+        response.setErrorCode(ErrorCodes.SUCCESS);
+        response.setErrorDescription("OK");
+        return response;
+    }
+    
+    /**
+     * <b>URL: /flow/listSelectionsById</b>
+     * <p> 获取选择的用户列表 </p>
+     * @return 返回用户选择的信息
+     */
+    @RequestMapping("listSelectUsers")
+    @RestReturn(value=ListSelectUsersResponse.class)
+    public RestResponse listSelectionsById(@Valid ListSelectUsersCommand cmd) {
+        RestResponse response = new RestResponse(flowService.listUserSelections(cmd));
         response.setErrorCode(ErrorCodes.SUCCESS);
         response.setErrorDescription("OK");
         return response;

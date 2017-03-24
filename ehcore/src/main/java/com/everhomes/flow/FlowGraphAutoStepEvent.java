@@ -1,7 +1,14 @@
 package com.everhomes.flow;
 
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+
 import com.everhomes.bootstrap.PlatformContext;
+import com.everhomes.rest.flow.FlowCaseStatus;
 import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowLogType;
@@ -9,7 +16,9 @@ import com.everhomes.rest.flow.FlowServiceErrorCode;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowAutoStepDTO;
 import com.everhomes.rest.flow.FlowUserType;
+import com.everhomes.rest.user.UserInfo;
 import com.everhomes.user.User;
+import com.everhomes.user.UserService;
 import com.everhomes.util.RuntimeErrorException;
 
 public class FlowGraphAutoStepEvent implements FlowGraphEvent {
@@ -17,6 +26,8 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	private Long firedUserId;
 	private FlowEventLogProvider flowEventLogProvider;
 	private FlowButtonProvider flowButtonProvider;
+	private UserService userService;
+	private FlowService flowService;
 	
 	public FlowGraphAutoStepEvent() {
 		this(null);
@@ -24,9 +35,14 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	
 	public FlowGraphAutoStepEvent(FlowAutoStepDTO o) {
 		firedUserId = User.SYSTEM_UID;
+		if(o.getOperatorId() != null) {
+			firedUserId = o.getOperatorId();
+		}
 		this.stepDTO = o;
 		flowEventLogProvider = PlatformContext.getComponent(FlowEventLogProvider.class);
 		flowButtonProvider = PlatformContext.getComponent(FlowButtonProvider.class);
+		userService = PlatformContext.getComponent(UserService.class);
+		flowService = PlatformContext.getComponent(FlowService.class);
 	}
 	@Override
 	public FlowUserType getUserType() {
@@ -53,13 +69,8 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 	}
 	
 	@Override
-	public Long getEntityId() {
-		return null;
-	}
-
-	@Override
-	public String getFlowEntityType() {
-		return null;
+	public List<FlowEntitySel> getEntitySel() {
+		return new ArrayList<FlowEntitySel>();
 	}
 	
 	@Override
@@ -68,11 +79,19 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 		ctx.setStepType(nextStep);
 		
 		FlowEventLog log = null;
+		FlowEventLog tracker = null;
 		FlowCase flowCase = ctx.getFlowCase();
 		
 		//current state change to next step
 		FlowGraphNode current = ctx.getCurrentNode();
 		FlowGraphNode next = null;
+		FlowSubject subject = null;
+		
+		UserInfo applier = userService.getUserSnapshotInfo(flowCase.getApplyUserId());
+		Map<String, Object> templateMap = new HashMap<String, Object>();
+		templateMap.put("nodeName", current.getFlowNode().getNodeName());
+		templateMap.put("applierName", applier.getNickName());
+		
 		switch(nextStep) {
 		case NO_STEP:
 			break;
@@ -89,27 +108,81 @@ public class FlowGraphAutoStepEvent implements FlowGraphEvent {
 				//get next level
 				next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()+1);
 			}
+			
+			tracker = new FlowEventLog();
+			tracker.setLogContent(flowService.getStepMessageTemplate(nextStep, next.getExpectStatus(), ctx.getCurrentEvent().getUserType(), templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			if(next.getExpectStatus() == FlowCaseStatus.FINISHED && subject == null) {
+				//显示任务跟踪语句
+				subject = new FlowSubject();
+			}
+			
 			ctx.setNextNode(next);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
+			
 			break;
 		case REJECT_STEP:
 			if(current.getFlowNode().getNodeLevel() < 1) {
 				throw RuntimeErrorException.errorWith(FlowServiceErrorCode.SCOPE, FlowServiceErrorCode.ERROR_FLOW_STEP_ERROR, "flow node step error");
 			}
+			
+			tracker = new FlowEventLog();
+			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			
 			next = ctx.getFlowGraph().getNodes().get(current.getFlowNode().getNodeLevel()-1);
 			ctx.setNextNode(next);
+			if(subject == null) {
+				subject = new FlowSubject();
+			}
 			
 			flowCase.setRejectNodeId(current.getFlowNode().getId());
 			flowCase.setRejectCount(flowCase.getRejectCount() + 1);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
 		case ABSORT_STEP:
+			tracker = new FlowEventLog();
+			if(ctx.getOperator() != null) {
+				templateMap.put("applierName", ctx.getOperator().getNickName());	
+			}
 			next = ctx.getFlowGraph().getNodes().get(ctx.getFlowGraph().getNodes().size()-1);
+			
+			tracker.setLogContent(flowService.getStepMessageTemplate(nextStep, next.getExpectStatus(), ctx.getCurrentEvent().getUserType(), templateMap));
+			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			if(subject == null) {
+				//显示任务跟踪语句
+				subject = new FlowSubject();
+			}
+			
 			ctx.setNextNode(next);
 			flowCase.setStepCount(flowCase.getStepCount() + 1l);
 			break;
 		default:
 			break;
+		}
+
+		if(tracker != null && subject != null) {
+			tracker.setId(flowEventLogProvider.getNextId());
+			tracker.setFlowMainId(ctx.getFlowGraph().getFlow().getFlowMainId());
+			tracker.setFlowVersion(ctx.getFlowGraph().getFlow().getFlowVersion());
+			tracker.setNamespaceId(ctx.getFlowGraph().getFlow().getNamespaceId());
+			tracker.setFlowNodeId(ctx.getCurrentNode().getFlowNode().getId());
+			tracker.setParentId(0l);
+			tracker.setFlowCaseId(ctx.getFlowCase().getId());
+			tracker.setFlowUserId(ctx.getOperator().getId());
+			tracker.setFlowUserName(ctx.getOperator().getNickName());
+			if(subject.getContent() != null && !subject.getContent().isEmpty()) {
+				tracker.setSubjectId(subject.getId());	
+			} else {
+				tracker.setSubjectId(0l);// BUG #5431
+			}
+			
+			tracker.setLogType(FlowLogType.NODE_TRACKER.getCode());
+			
+			tracker.setButtonFiredStep(nextStep.getCode());
+			tracker.setTrackerApplier(1l);
+			tracker.setTrackerProcessor(1l);	
+			ctx.getLogs().add(tracker);
 		}
 		
 		log = new FlowEventLog();

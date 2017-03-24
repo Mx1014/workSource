@@ -33,7 +33,7 @@ public interface FlowEventLogProvider {
 
 	List<FlowEventLog> findStepEventLogs(Long caseId);
 
-	FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount, FlowStepType fromStep);
+	FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount);
 
 	FlowEventLog isProcessor(Long userId, FlowCase flowCase);
 
@@ -51,5 +51,16 @@ public interface FlowEventLogProvider {
 	FlowEventLog getValidEnterStep(Long userId, FlowCase flowCase);
 
 	void updateFlowEventLogs(List<FlowEventLog> updateLogs);
+
+	List<FlowEventLog> findPrefixStepEventLogs(Long caseId, Long stepCount);
+
+	/**
+	 * 获取最后一个进入的节点日志
+	 * @param flowCase
+	 * @return
+	 */
+	FlowEventLog getLastNodeEnterStep(FlowCase flowCase);
+
+	List<FlowEventLog> findPrefixNodeEnterLogs(Long nodeId, Long caseId, Long stepCount);
 
 }
