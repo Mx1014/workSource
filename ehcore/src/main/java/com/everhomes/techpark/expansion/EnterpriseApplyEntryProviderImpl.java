@@ -94,7 +94,7 @@ public class EnterpriseApplyEntryProviderImpl implements
 			ListingLocator locator, int pageSize) {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readWrite());
 		List<LeasePromotion> leasePromotions = new ArrayList<LeasePromotion>();
-		pageSize = pageSize + 1;
+
 		Condition cond = Tables.EH_LEASE_PROMOTIONS.NAMESPACE_ID.eq(leasePromotion.getNamespaceId());
 		if(!StringUtils.isEmpty(leasePromotion.getCommunityId())){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.COMMUNITY_ID.eq(leasePromotion.getCommunityId()));
@@ -111,6 +111,19 @@ public class EnterpriseApplyEntryProviderImpl implements
 		if (!StringUtils.isEmpty(leasePromotion.getIssuerType())) {
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ISSUER_TYPE.eq(leasePromotion.getIssuerType()));
 		}
+		if (null != leasePromotion.getStartRentArea()) {
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.ge(String.valueOf(leasePromotion.getStartRentArea())));
+		}
+		if (null != leasePromotion.getEndRentArea()) {
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AREAS.le(String.valueOf(leasePromotion.getEndRentArea())));
+		}
+		if (null != leasePromotion.getStartRentAmount()) {
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AMOUNT.ge(leasePromotion.getStartRentAmount()));
+		}
+		if (null != leasePromotion.getEndRentAmount()) {
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AMOUNT.le(leasePromotion.getEndRentAmount()));
+		}
+
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ID.gt(locator.getAnchor()));
 		}
@@ -126,8 +139,9 @@ public class EnterpriseApplyEntryProviderImpl implements
 						});
 		
 		if(leasePromotions.size() >= pageSize) {
-			leasePromotions.remove(leasePromotions.size() - 1);
-            locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getId());
+			locator.setAnchor(leasePromotions.get(leasePromotions.size() - 1).getId());
+		}else {
+			locator.setAnchor(null);
 		}
 		return leasePromotions;
 	}
