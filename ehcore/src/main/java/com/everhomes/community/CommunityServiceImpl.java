@@ -3,10 +3,7 @@ package com.everhomes.community;
 
 import java.io.IOException;
 import java.sql.Timestamp;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import com.everhomes.acl.*;
@@ -1673,11 +1670,16 @@ public class CommunityServiceImpl implements CommunityService {
 			dto.setExecutiveFlag(user.getExecutiveTag());
 			dto.setIdentityNumber(user.getIdentityNumberTag());
 			dto.setPosition(user.getPositionTag());
+
+			Set<OrganizationDTO> organizationDTOs = new HashSet<>();
 			if(null != members){
 				for (OrganizationMember member : members) {
 					if(OrganizationMemberStatus.ACTIVE.getCode() == member.getStatus()){
 						dto.setIsAuth(1);
-						break;
+					}
+					Organization org = organizationProvider.findOrganizationById(member.getOrganizationId());
+					if (null != org) {
+						organizationDTOs.add(ConvertHelper.convert(org, OrganizationDTO.class));
 					}
 				}
 //				if(null != m){
@@ -1694,7 +1696,11 @@ public class CommunityServiceImpl implements CommunityService {
 //					}
 //				}
 			}
-			
+			List<OrganizationDTO> Organizations = new ArrayList<>();
+			Organizations.addAll(organizationDTOs);
+
+			dto.setOrganizations(Organizations);
+
 			if(0 != cmd.getIsAuth()){
 				if(cmd.getIsAuth().equals(dto.getIsAuth())){
 					dtos.add(dto);
