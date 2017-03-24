@@ -36,3 +36,8 @@ CREATE TABLE `eh_oauth2_servers` (
   `create_time` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHAR SET ='utf8mb4';
+
+-- 增加全部页面item排序
+ALTER TABLE eh_launch_pad_items ADD COLUMN  `more_order` INT NOT NULL DEFAULT 0;
+-- 按场景分类
+ALTER TABLE eh_item_service_categries ADD COLUMN `scene_type` VARCHAR(64) NOT NULL DEFAULT 'default';
