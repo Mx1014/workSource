@@ -1,5 +1,5 @@
 -- 对接工作流短信模版 add by sw 20170324
- INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
 	VALUES (1000000, 'sms.default.yzx', 23, 'zh_CN', '新建月卡申请', '34956');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
 	VALUES (1000000, 'sms.default.yzx', 24, 'zh_CN', '月卡申请驳回', '34957');
