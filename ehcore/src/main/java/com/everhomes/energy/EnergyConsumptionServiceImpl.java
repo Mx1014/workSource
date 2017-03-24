@@ -948,8 +948,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(NumberUtils.isNumber(result.getL())) {
                 meter.setCalculationType(Byte.valueOf(result.getL()));
             }
-            if(StringUtils.isEmpty(result.getM()) && !"".equals(result.getM()) && !" ".equals(result.getM())) {
-                LOGGER.info("M price config: " + result.getM());
+            if(StringUtils.isEmpty(result.getM()) && !"null".equals(result.getM())) {
                 EnergyMeterPriceConfig priceConfig = priceConfigProvider.findByName(result.getM(), cmd.getOwnerId(),
                                                             cmd.getOwnerType(), cmd.getCommunityId(), currNamespaceId());
                 if(priceConfig != null) {
