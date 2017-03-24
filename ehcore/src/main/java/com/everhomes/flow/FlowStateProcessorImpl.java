@@ -446,7 +446,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 	@Override
 	public void normalStepLeave(FlowCaseState ctx, FlowGraphNode to) throws FlowStepErrorException {
 		FlowStepType fromStep = ctx.getStepType();
-		FlowGraphNode curr = ctx.getCurrentNode();
 		switch(fromStep) {
 		case NO_STEP:
 			break;
@@ -455,10 +454,6 @@ public class FlowStateProcessorImpl implements FlowStateProcessor {
 		case REJECT_STEP:
 			break;
 		case TRANSFER_STEP:
-			if(curr.getTrackTransferLeave() != null) {
-				curr.getTrackTransferLeave().fireAction(ctx, null);	
-			}
-			
 			break;
 		case COMMENT_STEP:
 			break;

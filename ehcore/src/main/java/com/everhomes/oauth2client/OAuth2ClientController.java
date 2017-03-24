@@ -6,8 +6,7 @@ import com.everhomes.controller.ControllerBase;
 import com.everhomes.discover.RestReturn;
 import com.everhomes.discover.SuppressDiscover;
 import com.everhomes.rest.RestResponse;
-import com.everhomes.rest.oauth2client.OAuth2ClientApiCommand;
-import com.everhomes.rest.oauth2client.OAuth2ClientApiResponse;
+import com.everhomes.rest.oauth2client.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
@@ -62,5 +61,41 @@ public class OAuth2ClientController extends ControllerBase {
         response.setErrorDescription("OK");
         response.setErrorCode(ErrorCodes.SUCCESS);
         return response;
+    }
+
+    /**
+     * <p>修改oauth2server</p>
+     * <b>URL:/oauth2cli/updateOAuth2Server</b>
+     */
+    @RequestMapping("updateOAuth2Server")
+    @ResponseBody
+    @RestReturn(String.class)
+    public RestResponse updateOauth2Server(UpdateOAuth2ServerCommand cmd) {
+        oAuth2ClientService.updateOAuth2Server(cmd);
+        return new RestResponse();
+    }
+
+    /**
+     * <p>创建oauth2server</p>
+     * <b>URL:/oauth2cli/createOAuth2Server</b>
+     */
+    @RequestMapping("createOAuth2Server")
+    @ResponseBody
+    @RestReturn(OAuth2ServerDTO.class)
+    public RestResponse createOauth2Server(CreateOAuth2ServerCommand cmd) {
+        OAuth2ServerDTO dto = oAuth2ClientService.createOAuth2Server(cmd);
+        return new RestResponse(dto);
+    }
+
+    /**
+     * <p>获取oauth2server</p>
+     * <b>URL:/oauth2cli/getOAuth2Server</b>
+     */
+    @RequestMapping("getOAuth2Server")
+    @ResponseBody
+    @RestReturn(OAuth2ServerDTO.class)
+    public RestResponse getOauth2Server(GetOAuth2ServerCommand cmd) {
+        OAuth2ServerDTO dto = oAuth2ClientService.getOAuth2Server(cmd);
+        return new RestResponse(dto);
     }
 }

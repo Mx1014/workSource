@@ -1,8 +1,7 @@
 // @formatter:off
 package com.everhomes.oauth2client;
 
-import com.everhomes.rest.oauth2client.OAuth2ClientApiCommand;
-import com.everhomes.rest.oauth2client.OAuth2ClientApiResponse;
+import com.everhomes.rest.oauth2client.*;
 
 /**
  * Created by xq.tian on 2017/3/6.
@@ -23,4 +22,19 @@ public interface OAuth2ClientService {
      * 发送请求调用第三方接口
      */
     OAuth2ClientApiResponse api(String vendor, OAuth2ClientApiCommand cmd);
+
+    /**
+     * 根据id修改oauth2server
+     */
+    void updateOAuth2Server(UpdateOAuth2ServerCommand cmd);
+
+    /**
+     * 新建oauth2server
+     */
+    OAuth2ServerDTO createOAuth2Server(CreateOAuth2ServerCommand cmd);
+
+    /**
+     * 根据id获取oauth2server
+     */
+    OAuth2ServerDTO getOAuth2Server(GetOAuth2ServerCommand cmd);
 }
