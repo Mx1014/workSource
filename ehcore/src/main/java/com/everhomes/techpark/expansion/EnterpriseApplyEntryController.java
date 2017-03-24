@@ -3,8 +3,11 @@ package com.everhomes.techpark.expansion;
 import java.util.List;
 import java.util.stream.Collectors;
 
+import com.everhomes.rest.address.AddressDTO;
+import com.everhomes.rest.address.ListPropApartmentsByKeywordCommand;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.organization.pm.PropFamilyDTO;
 import com.everhomes.rest.techpark.expansion.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -20,6 +23,8 @@ import com.everhomes.rest.organization.ListEnterprisesCommand;
 import com.everhomes.rest.organization.ListEnterprisesCommandResponse;
 import com.everhomes.rest.organization.OrganizationDetailDTO;
 import com.everhomes.util.ConvertHelper;
+
+import javax.validation.Valid;
 
 @RestDoc(value = "entry controller", site = "ehcore")
 @RestController
@@ -297,7 +302,7 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	@RestReturn(value=CheckIsLeaseIssuerDTO.class)
 	public RestResponse checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd){
 
-		CheckIsLeaseIssuerDTO dto = enterpriseApplyEntryService.checkIsLeaseIssuer();
+		CheckIsLeaseIssuerDTO dto = enterpriseApplyEntryService.checkIsLeaseIssuer(cmd);
 		RestResponse response = new RestResponse(dto);
 		response.setErrorCode(ErrorCodes.SUCCESS);
 		response.setErrorDescription("OK");
@@ -319,5 +324,19 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 		response.setErrorDescription("OK");
 		return response;
 	}
-	
+
+	/**
+	 * <b>URL: /techpark/entry/listLeaseIssuerApartments</b>
+	 * <p>根据小区Id、楼栋号和关键字查询门牌(物业)</p>
+	 */
+	@RequestMapping("listLeaseIssuerApartments")
+	@RestReturn(value=AddressDTO.class, collection=true)
+	public RestResponse listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd) {
+		List<AddressDTO> results = enterpriseApplyEntryService.listLeaseIssuerApartments(cmd);
+		RestResponse response = new RestResponse(results);
+
+		response.setErrorCode(ErrorCodes.SUCCESS);
+		response.setErrorDescription("OK");
+		return response;
+	}
 }

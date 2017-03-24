@@ -123,6 +123,9 @@ public class EnterpriseApplyEntryProviderImpl implements
 		if (null != leasePromotion.getEndRentAmount()) {
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.RENT_AMOUNT.le(leasePromotion.getEndRentAmount()));
 		}
+		if (null != leasePromotion.getCreateUid()) {
+			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.CREATE_UID.le(leasePromotion.getCreateUid()));
+		}
 
 		if(null != locator.getAnchor()){
 			cond = cond.and(Tables.EH_LEASE_PROMOTIONS.ID.gt(locator.getAnchor()));

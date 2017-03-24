@@ -1,6 +1,9 @@
 package com.everhomes.techpark.expansion;
 
+import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.techpark.expansion.*;
+
+import java.util.List;
 
 
 public interface EnterpriseApplyEntryService {
@@ -37,8 +40,10 @@ public interface EnterpriseApplyEntryService {
 
 	LeasePromotionConfigDTO getLeasePromotionConfig(GetLeasePromotionConfigCommand cmd);
 
-	CheckIsLeaseIssuerDTO checkIsLeaseIssuer();
+	CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd);
 
 	ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd);
+
+	List<AddressDTO>  listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd);
 	
 }

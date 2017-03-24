@@ -15,6 +15,8 @@ public class ListLeaseIssuerBuildingsCommand {
 
     private Integer namespaceId;
 
+    private Long organizationId;
+
     private Long pageAnchor;
 
     private Integer pageSize;
@@ -49,5 +51,13 @@ public class ListLeaseIssuerBuildingsCommand {
 
     public void setNamespaceId(Integer namespaceId) {
         this.namespaceId = namespaceId;
+    }
+
+    public Long getOrganizationId() {
+        return organizationId;
+    }
+
+    public void setOrganizationId(Long organizationId) {
+        this.organizationId = organizationId;
     }
 }

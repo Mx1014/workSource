@@ -14,16 +14,20 @@ import java.util.stream.Collectors;
 
 import com.everhomes.address.Address;
 import com.everhomes.address.AddressProvider;
+import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.community.CommunityService;
 import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.organization.*;
+import com.everhomes.rest.acl.ListServiceModuleAdministratorsCommand;
 import com.everhomes.rest.address.AddressDTO;
 import com.everhomes.rest.community.ListBuildingCommand;
 import com.everhomes.rest.community.ListBuildingCommandResponse;
+import com.everhomes.rest.organization.OrganizationContactDTO;
 import com.everhomes.rest.techpark.expansion.*;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.rest.yellowPage.ServiceAllianceDTO;
 import com.everhomes.user.UserIdentifier;
+import com.everhomes.user.admin.SystemUserPrivilegeMgr;
 import org.apache.commons.lang.math.RandomUtils;
 import org.jooq.Record;
 import org.jooq.SelectQuery;
@@ -613,6 +617,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		if (null==cmd.getRentType())
 			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		LeasePromotion lease = ConvertHelper.convert(cmd, LeasePromotion.class);
+
+		lease.setCreateUid(cmd.getUserId());
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
 	    locator.setAnchor(cmd.getPageAnchor());
@@ -829,7 +835,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     return ConvertHelper.convert(address, AddressDTO.class);
                 }).collect(Collectors.toList()));
             }else {
-                List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(r.getId());
+                List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(r.getId(), null);
                 dto.setAddresses(addresses.stream().map(a -> {
                     Address address = addressProvider.findAddressById(a.getAddressId());
                     return ConvertHelper.convert(address, AddressDTO.class);
@@ -878,9 +884,13 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
             if (null != cmd.getAddressIds()) {
                 for (Long id: cmd.getAddressIds()) {
+					Address address = addressProvider.findAddressById(id);
+					com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+							address.getCommunityId(), address.getBuildingName());
                     LeaseIssuerAddress leaseIssuerAddress = new LeaseIssuerAddress();
                     leaseIssuerAddress.setAddressId(id);
                     leaseIssuerAddress.setLeaseIssuerId(leaseIssuer.getId());
+					leaseIssuerAddress.setBuildingId(building.getId());
                     createLeaseIssuerAddress(leaseIssuerAddress);
                 }
             }
@@ -912,19 +922,28 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     }
 
     @Override
-    public CheckIsLeaseIssuerDTO checkIsLeaseIssuer() {
+    public CheckIsLeaseIssuerDTO checkIsLeaseIssuer(CheckIsLeaseIssuerCommand cmd) {
         CheckIsLeaseIssuerDTO dto = new CheckIsLeaseIssuerDTO();
+		Long organizationId = cmd.getOrganizationId();
+		User user = UserContext.current().getUser();
+		dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
 
-        User user = UserContext.current().getUser();
-        Integer namespaceId = UserContext.getCurrentNamespaceId();
-        UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+		if (null == organizationId) {
+			Integer namespaceId = UserContext.getCurrentNamespaceId();
+			UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
 
-        List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
-                null, null);
-        dto.setFlag(LeasePromotionFlag.DISABLED.getCode());
-        if (0 != issuers.size()) {
-            dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
-        }
+			List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
+					null, null);
+			if (0 != issuers.size()) {
+				dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+			}
+		}else {
+//			List<OrganizationContactDTO> admins = organizationService.getAdmins(organizationId);
+			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+			if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+				dto.setFlag(LeasePromotionFlag.ENABLED.getCode());
+			}
+		}
 
         return dto;
     }
@@ -934,7 +953,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 //        ListBuildingCommand cmd2 = ConvertHelper.convert(cmd, ListBuildingCommand.class);
 //        ListBuildingCommandResponse buildings = communityService.listBuildings(cmd2);
         ListLeaseIssuerBuildingsResponse response = new ListLeaseIssuerBuildingsResponse();
-
+		Long organizationId = cmd.getOrganizationId();
         Integer namespaceId = UserContext.getCurrentNamespaceId();
         User user = UserContext.current().getUser();
         UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
@@ -943,31 +962,54 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                 null, null);
 
         if (0 != issuers.size()) {
-            List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(issuers.get(0).getId());
+            List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(issuers.get(0).getId(), null);
             response.setBuildings(addresses.stream().map(a -> {
                 Address address = addressProvider.findAddressById(a.getAddressId());
                 com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
                         address.getCommunityId(), address.getBuildingName());
                 return ConvertHelper.convert(building, BuildingDTO.class);
             }).collect(Collectors.toList()));
+
+			if (response.getBuildings().size() != 0)
+				return response;
         }
 
-//        if (null != r.getEnterpriseId()) {
-//            Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
-//            OrganizationDetail orgDetail = organizationProvider.findOrganizationDetailByOrganizationId(r.getEnterpriseId());
-//            if (null != orgDetail) {
-//                dto.setIssuerContact(orgDetail.getContact());
-//            }
-//
-//            dto.setIssuerName(org.getName());
-////                dto.setIssuerContact(org.get);
-//            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(r.getEnterpriseId());
-//            dto.setAddresses(organizationAddresses.stream().map(a -> {
-//                Address address = addressProvider.findAddressById(a.getAddressId());
-//                return ConvertHelper.convert(address, AddressDTO.class);
-//            }).collect(Collectors.toList()));
-//        }
+        if (null != organizationId) {
+			SystemUserPrivilegeMgr resolver = PlatformContext.getComponent("SystemUser");
+			if (resolver.checkOrganizationAdmin(user.getId(), organizationId)) {
+				List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(organizationId);
+
+				response.setBuildings(organizationAddresses.stream().map(a -> {
+					Address address = addressProvider.findAddressById(a.getAddressId());
+					com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+							address.getCommunityId(), address.getBuildingName());
+					return ConvertHelper.convert(building, BuildingDTO.class);
+				}).collect(Collectors.toList()));
+			}
+
+        }
 
         return response;
     }
+
+	@Override
+	public List<AddressDTO> listLeaseIssuerApartments(ListLeaseIssuerApartmentsCommand cmd) {
+		List<AddressDTO> dtos = new ArrayList<>();
+		Integer namespaceId = UserContext.getCurrentNamespaceId();
+		User user = UserContext.current().getUser();
+		UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+		List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
+				null, null);
+
+		if (0 != issuers.size()) {
+			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(issuers.get(0).getId(), cmd.getBuildingId());
+			addresses.stream().map(a -> {
+				Address address = addressProvider.findAddressById(a.getAddressId());
+				dtos.add(ConvertHelper.convert(address, AddressDTO.class));
+				return null;
+			});
+		}
+		return dtos;
+	}
 }

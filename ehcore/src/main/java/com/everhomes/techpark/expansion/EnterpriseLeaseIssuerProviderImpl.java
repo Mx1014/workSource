@@ -153,13 +153,16 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 	}
 
 	@Override
-	public List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId) {
+	public List<LeaseIssuerAddress> listLeaseIsserAddresses(Long leaseIssuerId, Long buildingId) {
 		List<LeaseIssuerAddress> result = new ArrayList<>();
 
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
 		SelectQuery<EhLeaseIssuerAddressesRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUER_ADDRESSES);
 		query.addConditions(Tables.EH_LEASE_ISSUER_ADDRESSES.LEASE_ISSUER_ID.eq(leaseIssuerId));
 
+		if (null != buildingId) {
+			query.addConditions(Tables.EH_LEASE_ISSUER_ADDRESSES.BUILDING_ID.eq(buildingId));
+		}
 		query.fetch().map((r) -> {
 			result.add(ConvertHelper.convert(r, LeaseIssuerAddress.class));
 			return null;
