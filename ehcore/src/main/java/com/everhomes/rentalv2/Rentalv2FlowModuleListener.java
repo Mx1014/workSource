@@ -518,6 +518,23 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 			//TODO: 给督办发短信
 		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_APPROVE_CODE == templateId){
 			//TODO：给被分配的人发短信
+			FlowGraphNode flowGraphNode = ctx.getPrefixNode();
+
+			FlowEventLog flowEventLog = null;
+			List<FlowEventLog> logs = ctx.getLogs();
+			for (FlowEventLog log: logs) {
+				if (FlowLogType.BUTTON_FIRED.getCode().equals(log.getLogType()))
+					flowEventLog = log;
+			}
+
+			if (null != flowEventLog) {
+				if (null != flowEventLog.getFlowSelectionId()) {
+					User entityUser = userProvider.findUserById(flowEventLog.getFlowSelectionId());
+					UserIdentifier entityIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(entityUser.getId(), IdentifierType.MOBILE.getCode());
+					smsProvider.addToTupleList(variables, "operatorName", entityUser.getNickName());
+					smsProvider.addToTupleList(variables, "operatorContact", entityIdentifier.getIdentifierToken());
+				}
+			}
 		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_ABSORT_CODE == templateId){
 			smsProvider.addToTupleList(variables, "resourceName", resourceName);
 
