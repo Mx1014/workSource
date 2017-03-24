@@ -1,127 +1,127 @@
 -- add more variables by janson
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('1004', '0', '0', '', '0', '', 'currAllProcessorsName', '±¾½Úµã´¦ÀíÈËĞÕÃû', 'text', 'bean_id', 'flow-variable-curr-all-processors-name', '1');
+VALUES ('1004', '0', '0', '', '0', '', 'currAllProcessorsName', 'æœ¬èŠ‚ç‚¹å¤„ç†äººå§“å', 'text', 'bean_id', 'flow-variable-curr-all-processors-name', '1');
 
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('1005', '0', '0', '', '0', '', 'currAllProcessorsPhone', '±¾½Úµã´¦ÀíÈËÊÖ»úºÅÂë', 'text', 'bean_id', 'flow-variable-curr-all-processors-phone', '1');
+VALUES ('1005', '0', '0', '', '0', '', 'currAllProcessorsPhone', 'æœ¬èŠ‚ç‚¹å¤„ç†äººæ‰‹æœºå·ç ', 'text', 'bean_id', 'flow-variable-curr-all-processors-phone', '1');
 
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('1006', '0', '0', '', '0', '', 'prefixAllProcessorsName', 'ÉÏÒ»²½´¦ÀíÈËĞÕÃû', 'text', 'bean_id', 'flow-variable-prefix-all-processors-name', '1');
+VALUES ('1006', '0', '0', '', '0', '', 'prefixAllProcessorsName', 'ä¸Šä¸€æ­¥å¤„ç†äººå§“å', 'text', 'bean_id', 'flow-variable-prefix-all-processors-name', '1');
 
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('1007', '0', '0', '', '0', '', 'prefixAllProcessorsPhone', 'ÉÏÒ»²½´¦ÀíÈËÊÖ»úºÅÂë', 'text', 'bean_id', 'flow-variable-prefix-all-processors-phone', '1');
+VALUES ('1007', '0', '0', '', '0', '', 'prefixAllProcessorsPhone', 'ä¸Šä¸€æ­¥å¤„ç†äººæ‰‹æœºå·ç ', 'text', 'bean_id', 'flow-variable-prefix-all-processors-phone', '1');
 
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('1008', '0', '0', '', '0', '', 'transferTargetName', '±»×ª½»ÈËĞÕÃû', 'text', 'bean_id', 'flow-variable-transfer-target-name', '1');
+VALUES ('1008', '0', '0', '', '0', '', 'transferTargetName', 'è¢«è½¬äº¤äººå§“å', 'text', 'bean_id', 'flow-variable-transfer-target-name', '1');
 
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('1009', '0', '0', '', '0', '', 'transferTargetPhone', '±»×ª½»ÈËÊÖ»úºÅ', 'text', 'bean_id', 'flow-variable-transfer-target-phone', '1');
+VALUES ('1009', '0', '0', '', '0', '', 'transferTargetPhone', 'è¢«è½¬äº¤äººæ‰‹æœºå·', 'text', 'bean_id', 'flow-variable-transfer-target-phone', '1');
 
-UPDATE `eh_flow_variables` SET `label`='±¾½Úµã²Ù×÷Ö´ĞĞÈËĞÕÃû' WHERE `id`='1002';
-UPDATE `eh_flow_variables` SET `label`='±¾½Úµã²Ù×÷Ö´ĞĞÈËÊÖ»úºÅ' WHERE `id`='1003';
+UPDATE `eh_flow_variables` SET `label`='æœ¬èŠ‚ç‚¹æ“ä½œæ‰§è¡Œäººå§“å' WHERE `id`='1002';
+UPDATE `eh_flow_variables` SET `label`='æœ¬èŠ‚ç‚¹æ“ä½œæ‰§è¡Œäººæ‰‹æœºå·' WHERE `id`='1003';
 
-UPDATE `eh_flow_variables` SET `label`='ÉÏÒ»¸ö½ÚµãÖ´ĞĞÈË' WHERE `id`='2001';
-UPDATE `eh_flow_variables` SET `label`='±¾½ÚµãÖ´ĞĞÈË' WHERE `id`='2002';
-
-INSERT INTO `eh_flow_variables`
-(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('2007', '0', '0', '', '0', '', 'prefixProcessors', 'ÉÏ¸ö½Úµã´¦ÀíÈË', 'node_user', 'bean_id', 'flow-variable-prefix-node-processors', '1');
+UPDATE `eh_flow_variables` SET `label`='ä¸Šä¸€ä¸ªèŠ‚ç‚¹æ‰§è¡Œäºº' WHERE `id`='2001';
+UPDATE `eh_flow_variables` SET `label`='æœ¬èŠ‚ç‚¹æ‰§è¡Œäºº' WHERE `id`='2002';
 
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('2008', '0', '0', '', '0', '', 'currProcessors', '±¾½Úµã´¦ÀíÈË', 'node_user', 'bean_id', 'flow-variable-curr-node-processors', '1');
+VALUES ('2007', '0', '0', '', '0', '', 'prefixProcessors', 'ä¸Šä¸ªèŠ‚ç‚¹å¤„ç†äºº', 'node_user', 'bean_id', 'flow-variable-prefix-node-processors', '1');
 
 INSERT INTO `eh_flow_variables`
 (`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
-VALUES ('2009', '0', '0', '', '0', '', 'targetTransfer', '±»×ª½»ÈË', 'node_user', 'bean_id', 'flow-variable-target-node-transfer', '1');
+VALUES ('2008', '0', '0', '', '0', '', 'currProcessors', 'æœ¬èŠ‚ç‚¹å¤„ç†äºº', 'node_user', 'bean_id', 'flow-variable-curr-node-processors', '1');
 
--- ¶Ô½Ó¹¤×÷Á÷¶ÌĞÅÄ£°æ add by sw 20170324
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 23, 'zh_CN', 'ĞÂ½¨ÔÂ¿¨ÉêÇë', '34956');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 24, 'zh_CN', 'ÔÂ¿¨ÉêÇë²µ»Ø', '34957');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 25, 'zh_CN', 'ÔÂ¿¨ÉêÇëÉóºËÍ¨¹ı', '34958');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 26, 'zh_CN', 'ÔÂ¿¨ÉêÇë°ìÀí³É¹¦', '34959');
+INSERT INTO `eh_flow_variables`
+(`id`, `namespace_id`, `owner_id`, `owner_type`, `module_id`, `module_type`, `name`, `label`, `var_type`, `script_type`, `script_cls`, `status`)
+VALUES ('2009', '0', '0', '', '0', '', 'targetTransfer', 'è¢«è½¬äº¤äºº', 'node_user', 'bean_id', 'flow-variable-target-node-transfer', '1');
 
+-- å¯¹æ¥å·¥ä½œæµçŸ­ä¿¡æ¨¡ç‰ˆ add by sw 20170324
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 35, 'zh_CN', 'ĞÂ½¨Ô°ÇøÈë×¤', '39496');
+	VALUES (1000000, 'sms.default.yzx', 23, 'zh_CN', 'æ–°å»ºæœˆå¡ç”³è¯·', '34956');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 36, 'zh_CN', 'Ô°ÇøÈë×¤ÒÑÊÜÀí', '39497');
+	VALUES (1000000, 'sms.default.yzx', 24, 'zh_CN', 'æœˆå¡ç”³è¯·é©³å›', '34957');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 37, 'zh_CN', 'Ô°ÇøÈë×¤ÉóºËÎ´Í¨¹ı', '39498');
+	VALUES (1000000, 'sms.default.yzx', 25, 'zh_CN', 'æœˆå¡ç”³è¯·å®¡æ ¸é€šè¿‡', '34958');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 38, 'zh_CN', 'Ô°ÇøÈë×¤´ß°ì', '39499');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 39, 'zh_CN', 'Ô°ÇøÈë×¤°ìÀí³É¹¦', '39500');
+	VALUES (1000000, 'sms.default.yzx', 26, 'zh_CN', 'æœˆå¡ç”³è¯·åŠç†æˆåŠŸ', '34959');
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 40, 'zh_CN', 'ĞÂ½¨×ÊÔ´Ô¤Ô¼', '39615');
+	VALUES (1000000, 'sms.default.yzx', 35, 'zh_CN', 'æ–°å»ºå›­åŒºå…¥é©»', '39496');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 41, 'zh_CN', '×ÊÔ´Ô¤Ô¼¶½°ì', '39616');
+	VALUES (1000000, 'sms.default.yzx', 36, 'zh_CN', 'å›­åŒºå…¥é©»å·²å—ç†', '39497');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 42, 'zh_CN', '×ÊÔ´Ô¤Ô¼ÒÑÊÜÀí', '39617');
+	VALUES (1000000, 'sms.default.yzx', 37, 'zh_CN', 'å›­åŒºå…¥é©»å®¡æ ¸æœªé€šè¿‡', '39498');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 43, 'zh_CN', '×ÊÔ´Ô¤Ô¼²µ»Ø', '39618');
+	VALUES (1000000, 'sms.default.yzx', 38, 'zh_CN', 'å›­åŒºå…¥é©»å‚¬åŠ', '39499');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 44, 'zh_CN', '×ÊÔ´Ô¤Ô¼´ß°ì', '39619');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 45, 'zh_CN', '×ÊÔ´Ô¤Ô¼°ìÀí³É¹¦', '39620');
+	VALUES (1000000, 'sms.default.yzx', 39, 'zh_CN', 'å›­åŒºå…¥é©»åŠç†æˆåŠŸ', '39500');
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 46, 'zh_CN', 'ÎïÒµ±¨ĞŞ¶½°ìÊÜÀí', '39721');
+	VALUES (1000000, 'sms.default.yzx', 40, 'zh_CN', 'æ–°å»ºèµ„æºé¢„çº¦', '39615');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 47, 'zh_CN', 'ÎïÒµ±¨ĞŞ´ı·ÖÅä', '39722');
+	VALUES (1000000, 'sms.default.yzx', 41, 'zh_CN', 'èµ„æºé¢„çº¦ç£åŠ', '39616');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 48, 'zh_CN', 'ÎïÒµ±¨ĞŞ¶½°ì·ÖÅä', '39723');
+	VALUES (1000000, 'sms.default.yzx', 42, 'zh_CN', 'èµ„æºé¢„çº¦å·²å—ç†', '39617');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'sms.default.yzx', 49, 'zh_CN', 'ÎïÒµ±¨ĞŞÒÑÍê³É', '39724');
+	VALUES (1000000, 'sms.default.yzx', 43, 'zh_CN', 'èµ„æºé¢„çº¦é©³å›', '39618');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'sms.default.yzx', 44, 'zh_CN', 'èµ„æºé¢„çº¦å‚¬åŠ', '39619');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'sms.default.yzx', 45, 'zh_CN', 'èµ„æºé¢„çº¦åŠç†æˆåŠŸ', '39620');
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40800', 23, 'zh_CN', 'ĞÂ½¨ÔÂ¿¨ÉêÇë', '34956');
+	VALUES (1000000, 'sms.default.yzx', 46, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®ç£åŠå—ç†', '39721');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40800', 24, 'zh_CN', 'ÔÂ¿¨ÉêÇë²µ»Ø', '34957');
+	VALUES (1000000, 'sms.default.yzx', 47, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®å¾…åˆ†é…', '39722');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40800', 25, 'zh_CN', 'ÔÂ¿¨ÉêÇëÉóºËÍ¨¹ı', '34958');
+	VALUES (1000000, 'sms.default.yzx', 48, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®ç£åŠåˆ†é…', '39723');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40800', 26, 'zh_CN', 'ÔÂ¿¨ÉêÇë°ìÀí³É¹¦', '34959');
+	VALUES (1000000, 'sms.default.yzx', 49, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®å·²å®Œæˆ', '39724');
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40100', 35, 'zh_CN', 'ĞÂ½¨Ô°ÇøÈë×¤', '39496');
+	VALUES (1000000, 'flow:40800', 23, 'zh_CN', 'æ–°å»ºæœˆå¡ç”³è¯·', '34956');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40100', 36, 'zh_CN', 'Ô°ÇøÈë×¤ÒÑÊÜÀí', '39497');
+	VALUES (1000000, 'flow:40800', 24, 'zh_CN', 'æœˆå¡ç”³è¯·é©³å›', '34957');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40100', 37, 'zh_CN', 'Ô°ÇøÈë×¤ÉóºËÎ´Í¨¹ı', '39498');
+	VALUES (1000000, 'flow:40800', 25, 'zh_CN', 'æœˆå¡ç”³è¯·å®¡æ ¸é€šè¿‡', '34958');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40100', 38, 'zh_CN', 'Ô°ÇøÈë×¤´ß°ì', '39499');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40100', 39, 'zh_CN', 'Ô°ÇøÈë×¤°ìÀí³É¹¦', '39500');
+	VALUES (1000000, 'flow:40800', 26, 'zh_CN', 'æœˆå¡ç”³è¯·åŠç†æˆåŠŸ', '34959');
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40400', 40, 'zh_CN', 'ĞÂ½¨×ÊÔ´Ô¤Ô¼', '39615');
+	VALUES (1000000, 'flow:40100', 35, 'zh_CN', 'æ–°å»ºå›­åŒºå…¥é©»', '39496');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40400', 41, 'zh_CN', '×ÊÔ´Ô¤Ô¼¶½°ì', '39616');
+	VALUES (1000000, 'flow:40100', 36, 'zh_CN', 'å›­åŒºå…¥é©»å·²å—ç†', '39497');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40400', 42, 'zh_CN', '×ÊÔ´Ô¤Ô¼ÒÑÊÜÀí', '39617');
+	VALUES (1000000, 'flow:40100', 37, 'zh_CN', 'å›­åŒºå…¥é©»å®¡æ ¸æœªé€šè¿‡', '39498');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40400', 43, 'zh_CN', '×ÊÔ´Ô¤Ô¼²µ»Ø', '39618');
+	VALUES (1000000, 'flow:40100', 38, 'zh_CN', 'å›­åŒºå…¥é©»å‚¬åŠ', '39499');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40400', 44, 'zh_CN', '×ÊÔ´Ô¤Ô¼´ß°ì', '39619');
-INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:40400', 45, 'zh_CN', '×ÊÔ´Ô¤Ô¼°ìÀí³É¹¦', '39620');
+	VALUES (1000000, 'flow:40100', 39, 'zh_CN', 'å›­åŒºå…¥é©»åŠç†æˆåŠŸ', '39500');
 
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:20100', 46, 'zh_CN', 'ÎïÒµ±¨ĞŞ¶½°ìÊÜÀí', '39721');
+	VALUES (1000000, 'flow:40400', 40, 'zh_CN', 'æ–°å»ºèµ„æºé¢„çº¦', '39615');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:20100', 47, 'zh_CN', 'ÎïÒµ±¨ĞŞ´ı·ÖÅä', '39722');
+	VALUES (1000000, 'flow:40400', 41, 'zh_CN', 'èµ„æºé¢„çº¦ç£åŠ', '39616');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:20100', 48, 'zh_CN', 'ÎïÒµ±¨ĞŞ¶½°ì·ÖÅä', '39723');
+	VALUES (1000000, 'flow:40400', 42, 'zh_CN', 'èµ„æºé¢„çº¦å·²å—ç†', '39617');
 INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
-	VALUES (1000000, 'flow:20100', 49, 'zh_CN', 'ÎïÒµ±¨ĞŞÒÑÍê³É', '39724');
+	VALUES (1000000, 'flow:40400', 43, 'zh_CN', 'èµ„æºé¢„çº¦é©³å›', '39618');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 44, 'zh_CN', 'èµ„æºé¢„çº¦å‚¬åŠ', '39619');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:40400', 45, 'zh_CN', 'èµ„æºé¢„çº¦åŠç†æˆåŠŸ', '39620');
+
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:20100', 46, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®ç£åŠå—ç†', '39721');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:20100', 47, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®å¾…åˆ†é…', '39722');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:20100', 48, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®ç£åŠåˆ†é…', '39723');
+INSERT INTO `eh_locale_templates`(`namespace_id`, `scope`, `code`,`locale`, `description`, `text`)
+	VALUES (1000000, 'flow:20100', 49, 'zh_CN', 'ç‰©ä¸šæŠ¥ä¿®å·²å®Œæˆ', '39724');
