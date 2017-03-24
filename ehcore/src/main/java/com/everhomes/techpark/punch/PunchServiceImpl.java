@@ -26,6 +26,7 @@ import java.util.stream.Collectors;
 
 import javax.servlet.http.HttpServletResponse;
 
+import org.apache.commons.collections4.Get;
 import org.apache.commons.lang.StringUtils;
 import org.apache.lucene.spatial.geohash.GeoHashUtils;
 import org.apache.poi.ss.usermodel.Row;
@@ -2742,7 +2743,8 @@ public class PunchServiceImpl implements PunchService {
 			punchTimeRule.setAfternoonArriveTimeLong(cmd.getAfternoonArriveTime());
 			punchTimeRule.setNoonLeaveTimeLong(cmd.getNoonLeaveTime());
 			punchTimeRule.setStartLateTimeLong(cmd.getStartLateTime());
-			
+			punchTimeRule.setDaySplitTimeLong(cmd.getDaySplitTime());
+ 
 			punchTimeRule.setCreatorUid(userId);
 			punchTimeRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
@@ -2807,7 +2809,7 @@ public class PunchServiceImpl implements PunchService {
 			punchTimeRule.setAfternoonArriveTimeLong(cmd.getAfternoonArriveTime());
 			punchTimeRule.setNoonLeaveTimeLong(cmd.getNoonLeaveTime());
 			punchTimeRule.setStartLateTimeLong(cmd.getStartLateTime());
-			
+			punchTimeRule.setDaySplitTimeLong(cmd.getDaySplitTime());
 			
 			punchTimeRule.setOperatorUid(userId);
 			punchTimeRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
@@ -2859,12 +2861,13 @@ public class PunchServiceImpl implements PunchService {
 	}
 	PunchTimeRuleDTO processTimeRuleDTO(PunchTimeRule other){
 		PunchTimeRuleDTO dto = ConvertHelper.convert(other, PunchTimeRuleDTO.class); 
-		dto.setAfternoonArriveTime(convertTimeToGMTMillisecond(other.getAfternoonArriveTime()));
-		dto.setNoonLeaveTime(convertTimeToGMTMillisecond(other.getNoonLeaveTime()));
-		dto.setStartEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()));
-		dto.setStartLateTime(convertTimeToGMTMillisecond(other.getStartLateTime()));
-		dto.setEndEarlyTime(convertTimeToGMTMillisecond(other.getStartEarlyTime()) + convertTimeToGMTMillisecond(other.getWorkTime()));
-		dto.setDaySplitTime(convertTimeToGMTMillisecond(other.getDaySplitTime()));
+		dto.setAfternoonArriveTime(null!=other.getAfternoonArriveTimeLong()?other.getAfternoonArriveTimeLong():convertTimeToGMTMillisecond(other.getAfternoonArriveTime()));
+		dto.setNoonLeaveTime(null!=other.getNoonLeaveTimeLong()?other.getNoonLeaveTimeLong():convertTimeToGMTMillisecond(other.getNoonLeaveTime()));
+		dto.setStartEarlyTime(null!=other.getStartEarlyTimeLong()?other.getStartEarlyTimeLong():convertTimeToGMTMillisecond(other.getStartEarlyTime()));
+		dto.setStartLateTime(null!=other.getStartLateTimeLong()?other.getStartLateTimeLong():convertTimeToGMTMillisecond(other.getStartLateTime()));
+		
+		dto.setEndEarlyTime(dto.getStartEarlyTime() + (null!=other.getWorkTimeLong()?other.getWorkTimeLong():convertTimeToGMTMillisecond(other.getWorkTime())));
+		dto.setDaySplitTime(null!=other.getDaySplitTimeLong()?other.getDaySplitTimeLong():convertTimeToGMTMillisecond(other.getDaySplitTime()));
 		return dto;
 	}
 	@Override
@@ -4735,35 +4738,158 @@ public class PunchServiceImpl implements PunchService {
 		this.punchProvider.deletePunchHolidayByRuleId(pr.getWorkdayRuleId()); 
 		this.punchProvider.deletePunchRule(pr);
 	}
+	public PunchRuleOwnerMap getOrCreateTargetRuleMap(String ownerType,Long ownerId,String targetType,Long targetId){
+		if (null == ownerId ||null == ownerType) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid owner type or  Id parameter in the command");
+		}
+		if (null == targetType ||null == targetId) {
+			LOGGER.error("Invalid owner type or  Id parameter in the command");
+			throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,ErrorCodes.ERROR_INVALID_PARAMETER,
+					"Invalid target type or  Id parameter in the command");
+		}
+		
+		PunchRuleOwnerMap map = this.punchProvider.getPunchRuleOwnerMapByOwnerAndTarget(ownerType, ownerId,
+				targetType, targetId);
+		if(map == null){
+			map = new PunchRuleOwnerMap();
+			map.setOwnerType(ownerType);
+			map.setOwnerId(ownerId);
+			map.setTargetId(targetId);
+			map.setTargetType(targetType);
+			map.setCreatorUid(UserContext.current().getUser().getId());
+			map.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			PunchRule pr = new PunchRule();
+			pr.setOwnerId(ownerId);
+			pr.setOwnerType(ownerType);
+			pr.setName(targetId+"rule");
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			this.punchProvider.createPunchRule(pr);
+			map.setPunchRuleId(pr.getId());
+			this.punchProvider.createPunchRuleOwnerMap(map);
+		}
+		return map;
+	}
 	@Override
-	public void updatePunchPoint(UpdatePunchPointCommand cmd) {
-		// TODO Auto-generated method stub
+	public void updatePunchPoint(UpdatePunchPointCommand cmd) { 
+		PunchGeopoint punchGeopoint = punchProvider.findPunchGeopointById(cmd.getId());
+		punchGeopoint.setLatitude(cmd.getLatitude());
+		punchGeopoint.setLongitude(cmd.getLongitude());
+		punchGeopoint.setDistance(cmd.getDistance());
+		punchGeopoint.setGeohash(GeoHashUtils.encode(
+				punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+		punchProvider.createPunchGeopoint(punchGeopoint);
+		
 		
 	}
 	@Override
-	public void addPunchPoint(AddPunchPointCommand cmd) {
-		// TODO Auto-generated method stub
+	public void addPunchPoint(AddPunchPointCommand cmd) { 
+		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
+		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
+		PunchLocationRule plr = null;
+		if(pr.getLocationRuleId()==null){
+			plr = new PunchLocationRule();
+			plr.setOwnerType(cmd.getOwnerType());
+			plr.setOwnerId(cmd.getOwnerId());
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			plr.setName("punch location rule "+cmd.getTargetId());
+			punchProvider.createPunchLocationRule(plr);
+			pr.setLocationRuleId(plr.getId());
+			punchProvider.updatePunchRule(pr);
+		}
+		else{
+			plr = punchProvider.getPunchLocationRuleById(pr.getLocationRuleId());
+		}
+		PunchGeopoint punchGeopoint = ConvertHelper.convert(cmd, PunchGeopoint.class);
+		punchGeopoint.setOwnerType(cmd.getOwnerType());
+		punchGeopoint.setOwnerId(cmd.getOwnerId()); 
+		punchGeopoint.setLocationRuleId(plr.getId());
+		punchGeopoint.setCreatorUid(UserContext.current().getUser().getId());
+		punchGeopoint.setCreateTime(new Timestamp(DateHelper.currentGMTTime().getTime()));
+		punchGeopoint.setGeohash(GeoHashUtils.encode(
+				punchGeopoint.getLatitude(), punchGeopoint.getLongitude()));
+		punchProvider.createPunchGeopoint(punchGeopoint);
 		
 	}
 	@Override
-	public ListPunchPointsResponse listPunchPoints(ListPunchPointsCommand cmd) {
-		// TODO Auto-generated method stub
-		return null;
+	public ListPunchPointsResponse listPunchPoints(ListPunchPointsCommand cmd) { 
+		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
+		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
+		PunchLocationRule plr = null;
+		if(pr.getLocationRuleId()==null){
+			plr = new PunchLocationRule();
+			plr.setOwnerType(cmd.getOwnerType());
+			plr.setOwnerId(cmd.getOwnerId());
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			plr.setName("punch location rule "+cmd.getTargetId());
+			punchProvider.createPunchLocationRule(plr);
+			pr.setLocationRuleId(plr.getId());
+			punchProvider.updatePunchRule(pr);
+		}
+		else{
+			plr = punchProvider.getPunchLocationRuleById(pr.getLocationRuleId());
+		}
+		
+		List<PunchGeopoint> geos = this.punchProvider.listPunchGeopointsByRuleId(cmd.getOwnerType(), cmd.getOwnerId(), plr.getId()) ;
+		ListPunchPointsResponse response = new ListPunchPointsResponse();
+		if(null != geos){
+			response.setPoints(new ArrayList<PunchGeoPointDTO>());
+			for(PunchGeopoint geo : geos){
+				PunchGeoPointDTO geoDTO = ConvertHelper.convert(geo, PunchGeoPointDTO.class);
+				response.getPoints().add(geoDTO);
+			} 
+		}
+		return response;
 	}
 	@Override
-	public void addPunchWiFi(AddPunchWiFiCommand cmd) {
-		// TODO Auto-generated method stub
+	public void addPunchWiFi(AddPunchWiFiCommand cmd) { 
+		PunchRuleOwnerMap map = getOrCreateTargetRuleMap(cmd.getOwnerType(), cmd.getOwnerId(), cmd.getTargetType(), cmd.getTargetId());
+		PunchRule pr = punchProvider.getPunchRuleById(map.getPunchRuleId());
+		PunchWifiRule pwr = null;
+		if(pr.getLocationRuleId()==null){
+			pwr = new PunchWifiRule();
+			pwr.setOwnerType(cmd.getOwnerType());
+			pwr.setOwnerId(cmd.getOwnerId());
+			pr.setCreatorUid(UserContext.current().getUser().getId());
+			pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+					.getTime()));
+			pwr.setName("punch location rule "+cmd.getTargetId());
+			punchProvider.createPunchWifiRule(pwr);
+			pr.setLocationRuleId(pwr.getId());
+			punchProvider.updatePunchRule(pr);
+		}
+		else{
+			pwr = punchProvider.getPunchWifiRuleById(pr.getWifiRuleId());
+		}
+		PunchWifi punchWifi = ConvertHelper.convert(cmd, PunchWifi.class);
+		punchWifi.setOwnerType(cmd.getOwnerType());
+		punchWifi.setOwnerId(cmd.getOwnerId());  
+		pr.setCreatorUid(UserContext.current().getUser().getId());
+		pr.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
+				.getTime()));
+		punchWifi.setWifiRuleId(pwr.getId());
+		punchProvider.createPunchWifi(punchWifi);
+	}
+	@Override
+	public void updatePunchWiFi(PunchWiFiDTO cmd) { 
+		PunchWifi punchWifi = punchProvider.getPunchWifiById(cmd.getId());
+		punchWifi.setSsid(cmd.getSsid());
+		punchWifi.setMacAddress(cmd.getMacAddress());
+		punchProvider.updatePunchWifi(punchWifi);
 		
 	}
 	@Override
-	public void updatePunchWiFi(PunchWiFiDTO cmd) {
-		// TODO Auto-generated method stub
-		
-	}
-	@Override
-	public void deletePunchWiFi(PunchWiFiDTO cmd) {
-		// TODO Auto-generated method stub
-		
+	public void deletePunchWiFi(PunchWiFiDTO cmd) { 
+		PunchWifi punchWifi = punchProvider.getPunchWifiById(cmd.getId());
+		punchProvider.deletePunchWifi(punchWifi);
 	}
 	@Override
 	public ListPunchSchedulingMonthResponse listPunchScheduling(ListPunchSchedulingMonthCommand cmd) {
@@ -4793,7 +4919,8 @@ public class PunchServiceImpl implements PunchService {
 	}
 	@Override
 	public void deletePunchPoint(DeleteCommonCommand cmd) {
-		// TODO Auto-generated method stub
+		PunchGeopoint punchGeopoint = punchProvider.findPunchGeopointById(cmd.getId());
+		punchProvider.deletePunchGeopoint(punchGeopoint);
 		
 	}
 	@Override

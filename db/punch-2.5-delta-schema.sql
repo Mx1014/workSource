@@ -1,7 +1,7 @@
  ALTER TABLE `eh_punch_time_rules` ADD COLUMN `description` VARCHAR(128)  COMMENT 'rule description';
  
  --  打卡排班表
- CREATE TABLE `eh_punch_scheduling` (
+ CREATE TABLE `eh_punch_schedulings` (
   `id` BIGINT NOT NULL COMMENT 'id',
   `owner_type` VARCHAR(128)  COMMENT 'owner resource(user/organization) type',
   `owner_id` BIGINT  COMMENT 'owner resource(user/organization) id',
