@@ -2,7 +2,7 @@
 --
 -- oauth2 client AccessToken
 --
-DROP TABLE IF EXISTS `eh_oauth2_client_tokens`;
+-- DROP TABLE IF EXISTS `eh_oauth2_client_tokens`;
 CREATE TABLE `eh_oauth2_client_tokens` (
   `id` BIGINT NOT NULL,
   `token_string` VARCHAR(128) NOT NULL COMMENT 'token string issued to requestor',
@@ -15,11 +15,10 @@ CREATE TABLE `eh_oauth2_client_tokens` (
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHAR SET ='utf8mb4';
 
-
 --
 -- oauth2 servers
 --
-DROP TABLE IF EXISTS `eh_oauth2_servers`;
+-- DROP TABLE IF EXISTS `eh_oauth2_servers`;
 CREATE TABLE `eh_oauth2_servers` (
   `id` BIGINT NOT NULL,
   `vendor` VARCHAR(32) NOT NULL COMMENT 'OAuth2 server name',
@@ -32,7 +31,6 @@ CREATE TABLE `eh_oauth2_servers` (
   `scope` VARCHAR(256) NULL DEFAULT NULL COMMENT 'space-delimited scope tokens per RFC 6749',
   `authorize_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'OAuth server provided authorize url',
   `token_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'OAuth server provided get token url',
-#   `service_url` VARCHAR(1024) NULL DEFAULT NULL COMMENT 'OAuth server provided authorize url',
   `create_time` DATETIME NULL DEFAULT NULL,
   PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHAR SET ='utf8mb4';
