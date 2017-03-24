@@ -931,11 +931,43 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
     @Override
     public ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd) {
-        ListBuildingCommand cmd2 = ConvertHelper.convert(cmd, ListBuildingCommand.class);
-        ListBuildingCommandResponse buildings = communityService.listBuildings(cmd2);
+//        ListBuildingCommand cmd2 = ConvertHelper.convert(cmd, ListBuildingCommand.class);
+//        ListBuildingCommandResponse buildings = communityService.listBuildings(cmd2);
         ListLeaseIssuerBuildingsResponse response = new ListLeaseIssuerBuildingsResponse();
 
-        response.setBuildings(buildings.getBuildings());
+        Integer namespaceId = UserContext.getCurrentNamespaceId();
+        User user = UserContext.current().getUser();
+        UserIdentifier identifier = userProvider.findClaimedIdentifierByOwnerAndType(user.getId(), IdentifierType.MOBILE.getCode());
+
+        List<LeaseIssuer> issuers = enterpriseLeaseIssuerProvider.listLeaseIssers(namespaceId, identifier.getIdentifierToken(),
+                null, null);
+
+        if (0 != issuers.size()) {
+            List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(issuers.get(0).getId());
+            response.setBuildings(addresses.stream().map(a -> {
+                Address address = addressProvider.findAddressById(a.getAddressId());
+                com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
+                        address.getCommunityId(), address.getBuildingName());
+                return ConvertHelper.convert(building, BuildingDTO.class);
+            }).collect(Collectors.toList()));
+        }
+
+//        if (null != r.getEnterpriseId()) {
+//            Organization org = organizationProvider.findOrganizationById(r.getEnterpriseId());
+//            OrganizationDetail orgDetail = organizationProvider.findOrganizationDetailByOrganizationId(r.getEnterpriseId());
+//            if (null != orgDetail) {
+//                dto.setIssuerContact(orgDetail.getContact());
+//            }
+//
+//            dto.setIssuerName(org.getName());
+////                dto.setIssuerContact(org.get);
+//            List<OrganizationAddress> organizationAddresses = organizationProvider.findOrganizationAddressByOrganizationId(r.getEnterpriseId());
+//            dto.setAddresses(organizationAddresses.stream().map(a -> {
+//                Address address = addressProvider.findAddressById(a.getAddressId());
+//                return ConvertHelper.convert(address, AddressDTO.class);
+//            }).collect(Collectors.toList()));
+//        }
+
         return response;
     }
 }
