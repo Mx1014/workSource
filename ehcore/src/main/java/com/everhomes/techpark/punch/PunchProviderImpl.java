@@ -1769,7 +1769,7 @@ long id = sequenceProvider.getNextSequence(key);
         result[0] = context.select().from(Tables.EH_PUNCH_RULE_OWNER_MAP)
             .where(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_ID.eq(targetId))
             .and(Tables.EH_PUNCH_RULE_OWNER_MAP.TARGET_TYPE.eq(targetType))
- 
+            .orderBy(Tables.EH_PUNCH_RULE_OWNER_MAP.ID.desc())
             .fetchAny().map((r) -> {
                 return ConvertHelper.convert(r, PunchRuleOwnerMap.class);
             });

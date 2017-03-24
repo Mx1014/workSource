@@ -1,7 +1,11 @@
 package com.everhomes.flow;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.everhomes.bootstrap.PlatformContext;
 import com.everhomes.rest.flow.FlowCaseStatus;
+import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowStepType;
 import com.everhomes.rest.flow.FlowUserType;
@@ -43,13 +47,8 @@ public class FlowGraphStartEvent implements FlowGraphEvent {
 	}
 
 	@Override
-	public Long getEntityId() {
-		return null;
-	}
-
-	@Override
-	public String getFlowEntityType() {
-		return null;
+	public List<FlowEntitySel> getEntitySel() {
+		return new ArrayList<FlowEntitySel>();
 	}
 
 }

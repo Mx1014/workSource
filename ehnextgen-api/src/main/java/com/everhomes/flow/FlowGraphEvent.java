@@ -1,5 +1,8 @@
 package com.everhomes.flow;
 
+import java.util.List;
+
+import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEventType;
 import com.everhomes.rest.flow.FlowUserType;
 
@@ -8,7 +11,6 @@ public interface FlowGraphEvent {
 	FlowEventType getEventType();
 	Long getFiredUserId();
 	Long getFiredButtonId();
-	public Long getEntityId();
-	public String getFlowEntityType();
+	public List<FlowEntitySel> getEntitySel();
 	void fire(FlowCaseState ctx);
 }

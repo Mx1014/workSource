@@ -31,7 +31,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
     @RequestMapping("/api/**")
     @RequireAuthentication(false)
     public String apiDiscover(HttpServletRequest request, HttpServletResponse response, Model model) {
-/*        
+        
         response.addHeader("Content-Type", "text/html; charset=utf-8");
         String uri = request.getRequestURI().toString();
         
@@ -44,7 +44,7 @@ public class ApiDiscoverHtmlController extends ControllerBase {
             else
                 model.addAttribute("index", "0");
                 
-            model.addAttribute("restMethods", ControllerBase.getRestMethodList());
+            model.addAttribute("restMethods", ControllerBase.getRestMethodList(javadocRoot, "core"));
             model.addAttribute("javadocRoot", javadocRoot);
             
             String contextPath = request.getContextPath();
@@ -59,14 +59,14 @@ public class ApiDiscoverHtmlController extends ControllerBase {
             model.addAttribute("contextPath", contextPath);            
             return "api-input";
         }
-*/
-        String uri = request.getRequestURI().toString();
-        int pos = uri.indexOf("/api");
-        if(uri.substring(pos + 4).length() > 0) {
-            return "redirect:/api";
-        }
+
+//        String uri = request.getRequestURI().toString();
+//        int pos = uri.indexOf("/api");
+//        if(uri.substring(pos + 4).length() > 0) {
+//            return "redirect:/api";
+//        }
         
-        return "api-react";
+//        return "api-react";
     }
     
     @SuppressDiscover

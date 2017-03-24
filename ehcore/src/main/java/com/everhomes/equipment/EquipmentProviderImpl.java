@@ -164,12 +164,15 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		}
 
 		//五分钟后启动通知
-		Long notifyTime = System.currentTimeMillis() + 300000;
-		String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
-		String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
-		String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
-		scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
-				notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+		Boolean notifyFlag = configurationProvider.getBooleanValue(ConfigConstants.EQUIPMENT_TASK_NOTIFY_FLAG, false);
+		if(notifyFlag) {
+			Long notifyTime = System.currentTimeMillis() + 300000;
+			String notifyCorn = CronDateUtils.getCron(new Timestamp(notifyTime));
+			String equipmentInspectionNotifyTriggerName = "EquipmentInspectionNotify ";
+			String equipmentInspectionNotifyJobName = "EquipmentInspectionNotify " + System.currentTimeMillis();
+			scheduleProvider.scheduleCronJob(equipmentInspectionNotifyTriggerName, equipmentInspectionNotifyJobName,
+					notifyCorn, EquipmentInspectionTaskNotifyScheduleJob.class, null);
+		}
 
 
 	}
@@ -1614,7 +1617,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnly());
 		SelectQuery<EhEquipmentInspectionCategoriesRecord> query = context.selectQuery(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES);
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.NAMESPACE_ID.eq(namespaceId));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
+		//仅按域空间区分 分公司拿不到总公司的类型 by xiongying20170324
+//		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_CATEGORIES.OWNER_ID.eq(ownerId));
 		 
 		List<EquipmentInspectionCategories> result = new ArrayList<EquipmentInspectionCategories>();
 		query.fetch().map((r) -> {
@@ -1990,7 +1994,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 	@Cacheable(value="listEquipmentInspectionTasksUseCache", key="{#cacheKey}", unless="#result.size() == 0")
 	@Override
-	public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(String ownerType, Long ownerId, Long inspectionCategoryId,
+	public List<EquipmentInspectionTasks> listEquipmentInspectionTasksUseCache(String ownerType, List<Long> ownerIds, Long inspectionCategoryId,
 			List<String> targetType, List<Long> targetId, List<Long> executeStandardIds, List<Long> reviewStandardIds, Integer offset, Integer pageSize, String cacheKey) {
 
 		long startTime = System.currentTimeMillis();
@@ -2003,7 +2007,7 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 //        }
 //
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_TYPE.eq(ownerType));
-		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.eq(ownerId));
+		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.OWNER_ID.in(ownerIds));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.NONE.getCode()));
 		query.addConditions(Tables.EH_EQUIPMENT_INSPECTION_TASKS.STATUS.ne(EquipmentTaskStatus.DELAY.getCode()));
 		if(targetType != null && targetType.size() > 0)
@@ -2068,7 +2072,8 @@ public class EquipmentProviderImpl implements EquipmentProvider {
 
 		query.addOrderBy(Tables.EH_EQUIPMENT_INSPECTION_TASKS.PROCESS_EXPIRE_TIME, Tables.EH_EQUIPMENT_INSPECTION_TASKS.EXECUTIVE_EXPIRE_TIME);
 //        query.addLimit(pageSize);
-		query.addLimit(offset * (pageSize-1), pageSize);
+		//由于app端没做分页 去掉limit条件 add by xiongying0170324
+//		query.addLimit(offset * (pageSize-1), pageSize);
 
 		if(LOGGER.isDebugEnabled()) {
 			LOGGER.debug("Query tasks by count, sql=" + query.getSQL());

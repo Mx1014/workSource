@@ -69,13 +69,15 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 	public void setSubject(FlowSubject subject) {
 		this.subject = subject;
 	}
-
-	public Long getEntityId() {
-		return cmd.getEntityId();
+	
+	@Override
+	public Long getFiredButtonId() {
+		return cmd.getButtonId();
 	}
 
-	public String getFlowEntityType() {
-		return cmd.getFlowEntityType();
+	@Override
+	public List<FlowEntitySel> getEntitySel() {
+		return cmd.getEntitySel();
 	}
 
 	@Override
@@ -162,10 +164,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			log.setFlowNodeId(next.getFlowNode().getId());
 			log.setParentId(0l);
 			log.setFlowCaseId(ctx.getFlowCase().getId());
-			log.setFlowUserId(cmd.getEntityId());
+			if(cmd.getEntitySel() != null && cmd.getEntitySel().size() == 1) {
+				log.setFlowUserId(cmd.getEntitySel().get(0).getEntityId());	
+			}
 			log.setStepCount(ctx.getFlowCase().getStepCount());
 			log.setLogType(FlowLogType.NODE_ENTER.getCode());
 			log.setLogTitle("");
+			log.setButtonFiredStep(nextStep.getCode());//mark as transfer log
 			ctx.getLogs().add(log);
 			log = null;
 			
@@ -305,9 +310,9 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		log.setFlowNodeId(next.getFlowNode().getId());
 		log.setParentId(0l);
 		log.setFlowUserName(firedUser.getNickName());
-		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
-			log.setFlowSelectionId(cmd.getEntityId());
-		}
+//		if(FlowEntityType.FLOW_SELECTION.getCode().equals(cmd.getFlowEntityType())) {
+//			log.setFlowSelectionId(cmd.getEntityId());
+//		}
 		
 		if(subject != null) {
 			log.setSubjectId(subject.getId());
@@ -318,10 +323,5 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 		
 		ctx.getLogs().add(log);	//added but not save to database now.
 
-	}
-
-	@Override
-	public Long getFiredButtonId() {
-		return cmd.getButtonId();
 	}
 }

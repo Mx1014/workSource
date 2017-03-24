@@ -5,6 +5,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
+import com.everhomes.contentserver.ResourceType;
 import org.elasticsearch.common.lang3.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -496,93 +497,55 @@ public class Rentalv2FlowModuleListener implements FlowModuleListener {
 	@Override
 	public void onFlowSMSVariableRender(FlowCaseState ctx, int templateId,
 			List<Tuple<String, Object>> variables) {
-		// TODO Auto-generated method stub
-		
+		FlowCase flowCase = ctx.getFlowCase();
+		RentalOrder order = rentalv2Provider.findRentalBillById(flowCase.getReferId());
+		Long resourceTypeId = order.getResourceTypeId();
+		RentalResourceType resourceType = rentalv2Provider.getRentalResourceTypeById(resourceTypeId);
+
+		UserIdentifier userIdentifier = this.userProvider.findClaimedIdentifierByOwnerAndType(order.getRentalUid(), IdentifierType.MOBILE.getCode()) ;
+		User user = this.userProvider.findUserById(order.getRentalUid());
+		String userName = user.getNickName();
+		String userPhone = userIdentifier.getIdentifierToken();
+		String resourceName = resourceType.getName();
+
+		if (SmsTemplateCode.RENTAL_PROCESSING_NODE_CODE == templateId) {
+
+			smsProvider.addToTupleList(variables, "userName", userName);
+			smsProvider.addToTupleList(variables, "userPhone", userPhone);
+			smsProvider.addToTupleList(variables, "resourceName", resourceName);
+
+		}else if (SmsTemplateCode.RENTAL_PROCESSING_NODE_SUPERVISE_CODE == templateId){
+			//TODO: 给督办发短信
+		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_APPROVE_CODE == templateId){
+			//TODO：给被分配的人发短信
+			FlowGraphNode flowGraphNode = ctx.getPrefixNode();
+
+			FlowEventLog flowEventLog = null;
+			List<FlowEventLog> logs = ctx.getLogs();
+			for (FlowEventLog log: logs) {
+				if (FlowLogType.BUTTON_FIRED.getCode().equals(log.getLogType()))
+					flowEventLog = log;
+			}
+
+			if (null != flowEventLog) {
+				if (null != flowEventLog.getFlowSelectionId()) {
+					User entityUser = userProvider.findUserById(flowEventLog.getFlowSelectionId());
+					UserIdentifier entityIdentifier = userProvider.findClaimedIdentifierByOwnerAndType(entityUser.getId(), IdentifierType.MOBILE.getCode());
+					smsProvider.addToTupleList(variables, "operatorName", entityUser.getNickName());
+					smsProvider.addToTupleList(variables, "operatorContact", entityIdentifier.getIdentifierToken());
+				}
+			}
+		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_ABSORT_CODE == templateId){
+			smsProvider.addToTupleList(variables, "resourceName", resourceName);
+
+		}else if (SmsTemplateCode.RENTAL_PROCESSING_BUTTON_REMINDER_CODE == templateId){
+			smsProvider.addToTupleList(variables, "userName", userName);
+			smsProvider.addToTupleList(variables, "userPhone", userPhone);
+			smsProvider.addToTupleList(variables, "resourceName", resourceName);
+		}else if (SmsTemplateCode.RENTAL_COMPLETED_CODE == templateId){
+			smsProvider.addToTupleList(variables, "resourceName", resourceName);
+
+		}
 	}
 
-	// @Override
-	// public void issueParkingCards(IssueParkingCardsCommand cmd) {
-	//
-	// if(cmd.getCount() == null) {
-	// LOGGER.error("Count cannot be null.");
-	// throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	// ErrorCodes.ERROR_INVALID_PARAMETER,
-	// "Count cannot be null.");
-	// }
-	// ParkingLot parkingLot = checkParkingLot(cmd.getOwnerType(),
-	// cmd.getOwnerId(), cmd.getParkingLotId());
-	//
-	// StringBuilder strBuilder = new StringBuilder();
-	// // 补上ownerType、ownerId、parkingLotId参数，以区分清楚是哪个小区哪个停车场的车牌，否则会发放其它园区的车牌 by
-	// lqs 20161103
-	// List<ParkingCardRequest> list =
-	// parkingProvider.listParkingCardRequests(null, cmd.getOwnerType(),
-	// cmd.getOwnerId(), cmd.getParkingLotId(), null,
-	// ParkingCardRequestStatus.QUEUEING.getCode(),
-	// null, null, cmd.getCount())
-	// .stream().map(r -> {
-	// r.setStatus(ParkingCardRequestStatus.NOTIFIED.getCode());
-	// if(strBuilder.length() > 0) {
-	// strBuilder.append(", ");
-	// }
-	// strBuilder.append(r.getId());
-	// return r;
-	// }).collect(Collectors.toList());
-	//
-	// parkingProvider.updateParkingCardRequest(list);
-	// // 添加日志，方便定位哪个车牌被修改状态了（即发放了） by lqs 20161103
-	// if(LOGGER.isDebugEnabled()) {
-	// LOGGER.debug("Issue parking cards, requestIds=[{}]",
-	// strBuilder.toString());
-	// }
-	// Integer namespaceId = UserContext.getCurrentNamespaceId();
-	// Map<String, Object> map = new HashMap<String, Object>();
-	// String deadline = deadline(parkingLot.getCardReserveDays());
-	// map.put("deadline", deadline);
-	// String scope = ParkingNotificationTemplateCode.SCOPE;
-	// int code = ParkingNotificationTemplateCode.USER_APPLY_CARD;
-	// String locale = "zh_CN";
-	// String notifyTextForApplicant =
-	// localeTemplateService.getLocaleTemplateString(namespaceId, scope, code,
-	// locale, map, "");
-	// list.forEach(applier -> {
-	// sendMessageToUser(applier.getRequestorUid(), notifyTextForApplicant);
-	// });
-	//
-	//
-	// }
-
-	// private void setParkingCardIssueFlag(SetParkingCardIssueFlagCommand cmd){
-	//
-	// checkParkingLot(cmd.getOwnerType(), cmd.getOwnerId(),
-	// cmd.getParkingLotId());
-	// if(cmd.getId() == null){
-	// LOGGER.error("Id cannot be null.");
-	// throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	// ErrorCodes.ERROR_INVALID_PARAMETER,
-	// "Id cannot be null.");
-	// }
-	//
-	// ParkingCardRequest parkingCardRequest =
-	// parkingProvider.findParkingCardRequestById(cmd.getId());
-	// if(parkingCardRequest == null){
-	// LOGGER.error("ParkingCardRequest not found, cmd={}", cmd);
-	// throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	// ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	// "ParkingCardRequest not found");
-	// }
-	// if(parkingCardRequest.getStatus() !=
-	// ParkingCardRequestStatus.NOTIFIED.getCode()){
-	// LOGGER.error("ParkingCardRequest status is not notified, cmd={}", cmd);
-	// throw RuntimeErrorException.errorWith(ErrorCodes.SCOPE_GENERAL,
-	// ErrorCodes.ERROR_GENERAL_EXCEPTION,
-	// "ParkingCardRequest status is not notified.");
-	// }
-	// //设置已领取状态和 领取时间
-	// parkingCardRequest.setStatus(ParkingCardRequestStatus.ISSUED.getCode());
-	// parkingCardRequest.setIssueFlag(ParkingCardIssueFlag.ISSUED.getCode());
-	// parkingCardRequest.setIssueTime(new
-	// Timestamp(System.currentTimeMillis()));
-	// parkingProvider.updateParkingCardRequest(Collections.singletonList(parkingCardRequest));
-	// }
 }

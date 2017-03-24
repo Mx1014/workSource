@@ -83,6 +83,7 @@ import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroupMembers;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContactGroups;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseContacts;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseDetails;
+import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequestBuildings;
 import com.everhomes.server.schema.tables.pojos.EhEnterpriseOpRequests;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessories;
 import com.everhomes.server.schema.tables.pojos.EhEquipmentInspectionAccessoryMap;
@@ -328,6 +329,7 @@ import com.everhomes.server.schema.tables.pojos.EhYellowPages;
 import com.everhomes.server.schema.tables.pojos.EhYzbDevices;
 import com.everhomes.user.User;
 import com.everhomes.user.UserProvider;
+
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -359,7 +361,7 @@ public class SequenceServiceImpl implements SequenceService {
             return dbContext.select(com.everhomes.schema.Tables.EH_ACL_PRIVILEGES.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACL_PRIVILEGES).fetchOne().value1();
         });
-
+        
         syncTableSequence(EhAcls.class, EhAclRoles.class, com.everhomes.schema.Tables.EH_ACL_ROLES.getName(), (dbContext) -> {
             return dbContext.select(com.everhomes.schema.Tables.EH_ACL_ROLES.ID.max())
                 .from(com.everhomes.schema.Tables.EH_ACL_ROLES).fetchOne().value1();
@@ -1576,6 +1578,14 @@ public class SequenceServiceImpl implements SequenceService {
         });
         syncTableSequence(null, EhServiceAllianceServerRequests.class, Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.getName(), (dbContext) -> {
             return dbContext.select(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhServiceAllianceServerRequests.class, Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS.ID.max()).from(Tables.EH_SERVICE_ALLIANCE_SERVER_REQUESTS).fetchOne().value1();
+        });
+        
+        syncTableSequence(null, EhEnterpriseOpRequestBuildings.class, Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.getName(), (dbContext) -> {
+            return dbContext.select(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS.ID.max()).from(Tables.EH_ENTERPRISE_OP_REQUEST_BUILDINGS).fetchOne().value1();
         });
     }
 

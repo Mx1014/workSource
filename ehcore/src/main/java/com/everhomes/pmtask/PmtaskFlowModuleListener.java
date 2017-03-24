@@ -7,13 +7,13 @@ import java.util.List;
 import com.everhomes.category.Category;
 import com.everhomes.category.CategoryProvider;
 import com.everhomes.rest.pmtask.*;
-
 import com.everhomes.rest.sms.SmsTemplateCode;
 import com.everhomes.rest.user.IdentifierType;
 import com.everhomes.sms.SmsProvider;
 import com.everhomes.user.User;
 import com.everhomes.user.UserIdentifier;
 import com.everhomes.user.UserProvider;
+
 import org.apache.commons.lang.StringUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,6 +37,7 @@ import com.everhomes.flow.FlowUserSelectionProvider;
 import com.everhomes.rest.flow.FlowCaseEntity;
 import com.everhomes.rest.flow.FlowCaseEntityType;
 import com.everhomes.rest.flow.FlowConstants;
+import com.everhomes.rest.flow.FlowEntitySel;
 import com.everhomes.rest.flow.FlowEntityType;
 import com.everhomes.rest.flow.FlowModuleDTO;
 import com.everhomes.rest.flow.FlowStepType;
@@ -261,26 +262,31 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		LOGGER.debug("update pmtask request, stepType={}, nodeType={}", stepType, nodeType);
 		if(FlowStepType.APPROVE_STEP.getCode().equals(stepType)) {
 			if ("ASSIGNING".equals(nodeType)) {
-				FlowGraphEvent evt = ctx.getCurrentEvent();
-				if(evt != null && evt.getEntityId() != null
-						&& FlowEntityType.FLOW_SELECTION.getCode().equals(evt.getFlowEntityType()) ) {
+					FlowGraphEvent evt = ctx.getCurrentEvent();
+					if(evt != null) {
+						for(FlowEntitySel es : evt.getEntitySel()) {
+							//update by janson
+							if(!FlowEntityType.FLOW_SELECTION.getCode().equals(es.getFlowEntityType())) {
+								continue;
+							}
+							PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
+							FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(es.getEntityId());
+							Long targetId = sel.getSourceIdA();
 
-					PmTask task = pmTaskProvider.findTaskById(flowCase.getReferId());
-					FlowUserSelection sel = flowUserSelectionProvider.getFlowUserSelectionById(evt.getEntityId());
-					Long targetId = sel.getSourceIdA();
+							PmTaskLog pmTaskLog = new PmTaskLog();
+							pmTaskLog.setNamespaceId(task.getNamespaceId());
+							pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
+							pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
+							pmTaskLog.setOwnerId(task.getOwnerId());
+							pmTaskLog.setOwnerType(task.getOwnerType());
+							pmTaskLog.setStatus(task.getStatus());
+							pmTaskLog.setTargetId(targetId);
+							pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
+							pmTaskLog.setTaskId(task.getId());
+							pmTaskProvider.createTaskLog(pmTaskLog);							
+						}
 
-					PmTaskLog pmTaskLog = new PmTaskLog();
-					pmTaskLog.setNamespaceId(task.getNamespaceId());
-					pmTaskLog.setOperatorTime(new Timestamp(System.currentTimeMillis()));
-					pmTaskLog.setOperatorUid(UserContext.current().getUser().getId());
-					pmTaskLog.setOwnerId(task.getOwnerId());
-					pmTaskLog.setOwnerType(task.getOwnerType());
-					pmTaskLog.setStatus(PmTaskFlowStatus.ASSIGNING.getCode());
-					pmTaskLog.setTargetId(targetId);
-					pmTaskLog.setTargetType(PmTaskTargetType.USER.getCode());
-					pmTaskLog.setTaskId(task.getId());
-					pmTaskProvider.createTaskLog(pmTaskLog);
-				}
+					}
 			}
 		}
 
@@ -320,11 +326,12 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 		Category category = categoryProvider.findCategoryById(task.getTaskCategoryId());
 
 		if (SmsTemplateCode.PM_TASK_CREATOR_CODE == templateId) {
+
 			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
 			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
 			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}else if (SmsTemplateCode.PM_TASK_FLOW_ASSIGN_CODE == templateId) {
-
+			//分配任务
 			List<PmTaskLog> logs = pmTaskProvider.listPmTaskLogs(task.getId(), PmTaskFlowStatus.ASSIGNING.getCode());
 
 			if (logs.size() != 0) {
@@ -338,6 +345,20 @@ public class PmtaskFlowModuleListener implements FlowModuleListener {
 				smsProvider.addToTupleList(variables, "operatorName", targetUser.getNickName());
 				smsProvider.addToTupleList(variables, "operatorPhone", targetIdentifier.getIdentifierToken());
 			}
+		}else if (SmsTemplateCode.PM_TASK_ACCEPTING_NODE_SUPERVISE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_NODE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_ASSIGN_NODE_SUPERVISE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "operatorName", task.getRequestorName());
+			smsProvider.addToTupleList(variables, "operatorPhone", task.getRequestorPhone());
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
+		}else if (SmsTemplateCode.PM_TASK_PROCESSING_BUTTON_APPROVE_CODE == templateId) {
+			smsProvider.addToTupleList(variables, "categoryName", category.getName());
 		}
 
 	}

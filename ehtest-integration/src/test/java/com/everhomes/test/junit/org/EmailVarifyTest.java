@@ -160,7 +160,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		
 		ListOrganizationsByEmailCommand cmd = new ListOrganizationsByEmailCommand();
 		cmd.setEmail("abc@acc.com");
-		cmd.setSceneToken(getSceneToken());
+//		cmd.setSceneToken(getSceneToken());
 		
 		ListOrganizationsByEmailRestResponse response = httpClientService.restGet(LIST_ORGS_BY_EMAIL_URI, cmd, ListOrganizationsByEmailRestResponse.class, context);
 
@@ -177,7 +177,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		
 		ListOrganizationsByEmailCommand cmd = new ListOrganizationsByEmailCommand();
 		cmd.setEmail("han.wu@zuolin.com");
-		cmd.setSceneToken(getSceneToken());
+		//	cmd.setSceneToken(getSceneToken());
 		
 		ListOrganizationsByEmailRestResponse response = httpClientService.restGet(LIST_ORGS_BY_EMAIL_URI, cmd, ListOrganizationsByEmailRestResponse.class, context);
 
@@ -197,7 +197,7 @@ public class EmailVarifyTest extends BaseLoginAuthTestCase {
 		ApplyForEnterpriseContactByEmailCommand cmd = new ApplyForEnterpriseContactByEmailCommand();
 		cmd.setEmail("han.wu@zuolin.com");
 		cmd.setOrganizationId(id);
-		cmd.setSceneToken(getSceneToken());
+		//cmd.setSceneToken(getSceneToken());
 		
 		RestResponse response = httpClientService.restGet(UPDATE_ENTERPRISE_URI, cmd, RestResponse.class, context);
 

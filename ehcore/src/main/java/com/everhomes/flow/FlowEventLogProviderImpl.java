@@ -259,6 +259,32 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
     	return null;
     }
     
+    /**
+     * 获取最后一个进入的节点日志
+     */
+    @Override
+    public FlowEventLog getLastNodeEnterStep(FlowCase flowCase) {
+    	ListingLocator locator = new ListingLocator();
+    	List<FlowEventLog> objs = this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(flowCase.getId()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(flowCase.getStepCount()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_VERSION.eq(flowCase.getFlowVersion()));
+				
+				return query;
+			}
+    	});  
+    	
+    	if(objs != null && objs.size() > 0) {
+    		return objs.get(objs.size()-1);
+    	}
+    	
+    	return null;
+    }
+    
     private FlowCaseDetail convertRecordTODetail(Record r) {
     	FlowCaseDetail o = new FlowCaseDetail();
     	
@@ -341,7 +367,7 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
      * 获取具体一个 FlowCase 是否经过某个节点
      */
     @Override
-    public FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount, FlowStepType fromStep) {
+    public FlowEventLog getStepEvent(Long caseId, Long flowNodeId, Long stepCount) {
     	ListingLocator locator = new ListingLocator();
     	List<FlowEventLog> logs = this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
 			@Override
@@ -351,8 +377,6 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(flowNodeId));
 				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.eq(stepCount));
-				query.addConditions(FlowEventCustomField.BUTTON_FIRED_FROM_NODE.getField().eq(fromStep));
-				
 				return query;
 			}
     	}); 
@@ -423,5 +447,41 @@ public class FlowEventLogProviderImpl implements FlowEventLogProvider {
 	        dao.update(objs.toArray(new FlowEventLog[objs.size()]));	
     	}
        
+    }
+    
+    
+    @Override
+    public List<FlowEventLog> findPrefixStepEventLogs(Long caseId, Long stepCount) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.STEP_TRACKER.getCode()));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.le(stepCount-1));
+				
+				return query;
+			}
+    	});    	
+    }
+    
+    @Override
+    public List<FlowEventLog> findPrefixNodeEnterLogs(Long nodeId, Long caseId, Long stepCount) {
+    	ListingLocator locator = new ListingLocator();
+    	return this.queryFlowEventLogs(locator, 100, new ListingQueryBuilderCallback() {
+			@Override
+			public SelectQuery<? extends Record> buildCondition(
+					ListingLocator locator, SelectQuery<? extends Record> query) {
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_NODE_ID.eq(nodeId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.FLOW_CASE_ID.eq(caseId));
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.LOG_TYPE.eq(FlowLogType.NODE_ENTER.getCode()));
+				//转交不算节点跳转 TODO <> 'node_enter'
+				query.addConditions(FlowEventCustomField.BUTTON_FIRED_STEP.getField().isNull());
+				query.addConditions(Tables.EH_FLOW_EVENT_LOGS.STEP_COUNT.le(stepCount-1));
+				
+				return query;
+			}
+    	});    	
     }
 }

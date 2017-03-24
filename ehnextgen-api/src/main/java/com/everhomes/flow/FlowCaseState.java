@@ -6,6 +6,7 @@ import com.everhomes.rest.user.UserInfo;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.Stack;
 import java.util.concurrent.ConcurrentHashMap;
 
 public class FlowCaseState {
@@ -22,12 +23,14 @@ public class FlowCaseState {
 	private List<FlowEventLog> logs;
 	private List<FlowEventLog> updateLogs;
 	private List<FlowTimeout> timeouts;
+	private Stack<FlowCaseStateStackType> processStack;
 	
 	public FlowCaseState() {
 		extra = new ConcurrentHashMap<String, Object>();
 		logs = new ArrayList<FlowEventLog>();
 		timeouts = new ArrayList<FlowTimeout>();
 		updateLogs = new ArrayList<FlowEventLog>();
+		processStack = new Stack<FlowCaseStateStackType>(); 
 	}
 
 	public String getModuleName() {
@@ -113,4 +116,19 @@ public class FlowCaseState {
 		return updateLogs;
 	}
 
+	public void pushProcessType(FlowCaseStateStackType processType) {
+		processStack.push(processType);
+	}
+	
+	public FlowCaseStateStackType popProcessType() {
+		return processStack.pop();
+	}
+	
+	public FlowCaseStateStackType peekProcessType() {
+		return processStack.peek();
+	}
+	
+	public FlowCaseStateStackType firstProcessType() {
+		return processStack.firstElement();
+	}
 }

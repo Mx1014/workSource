@@ -48,6 +48,8 @@ import com.everhomes.rest.flow.ListFlowModulesResponse;
 import com.everhomes.rest.flow.ListSMSTemplateCommand;
 import com.everhomes.rest.flow.ListScriptsCommand;
 import com.everhomes.rest.flow.ListScriptsResponse;
+import com.everhomes.rest.flow.ListSelectUsersCommand;
+import com.everhomes.rest.flow.ListSelectUsersResponse;
 import com.everhomes.rest.flow.SearchFlowCaseCommand;
 import com.everhomes.rest.flow.SearchFlowCaseResponse;
 import com.everhomes.rest.flow.ListFlowCaseLogsCommand;
@@ -62,6 +64,7 @@ import com.everhomes.rest.flow.UpdateFlowNodeCommand;
 import com.everhomes.rest.flow.UpdateFlowNodePriorityCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeReminderCommand;
 import com.everhomes.rest.flow.UpdateFlowNodeTrackerCommand;
+import com.everhomes.rest.user.UserInfo;
 
 public interface FlowService {
 	
@@ -424,7 +427,7 @@ public interface FlowService {
 	 */
 	void deleteSnapshotProcessUser(Long flowId, Long userId);
 
-	List<Long> resolvUserSelections(FlowCaseState ctx,
+	List<Long> resolvUserSelections(FlowCaseState ctx, Map<String, Long> processedEntities,
 			FlowEntityType entityType, Long entityId,
 			List<FlowUserSelection> selections, int loopCnt);
 
@@ -452,5 +455,9 @@ public interface FlowService {
 
 	String getStepMessageTemplate(FlowStepType fromStep,
 			FlowCaseStatus nextStatus, FlowUserType flowUserType, Map<String, Object> map);
+
+	ListSelectUsersResponse listUserSelections(ListSelectUsersCommand cmd);
+
+	List<UserInfo> listUserSelectionsByNode(FlowCaseState ctx, Long nodeId);
 	
 }

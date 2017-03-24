@@ -33,7 +33,7 @@ import java.util.stream.Collectors;
  * Created by xq.tian on 2017/2/16.
  */
 @Repository
-public class OsObjectProviderImpl implements OsObjectProvider {
+class OsObjectProviderImpl implements OsObjectProvider {
 
     @Autowired
     private DbProvider dbProvider;
