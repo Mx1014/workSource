@@ -1345,6 +1345,7 @@ public class FlowServiceImpl implements FlowService {
 	private FlowGraphButton getFlowGraphButton(FlowButton flowButton) {
 		FlowGraphButton graphBtn = new FlowGraphButton();
 		graphBtn.setFlowButton(flowButton);
+		
 		FlowGraphAction graphAction = null;
 		FlowAction action = flowActionProvider.findFlowActionByBelong(flowButton.getId(), FlowEntityType.FLOW_BUTTON.getCode()
 				, FlowActionType.MESSAGE.getCode(), FlowActionStepType.STEP_ENTER.getCode(), FlowStepType.NO_STEP.getCode());
@@ -1463,6 +1464,13 @@ public class FlowServiceImpl implements FlowService {
 		flowButton.setFlowMainId(flow.getFlowMainId());
 		flowButton.setFlowVersion(flow.getFlowVersion());
 		flowButton.setFlowNodeId(flowNode.getId());
+		if(!flowButton.getGotoNodeId().equals(0l)) {
+			//把 gotoNodeId 变成相对值 gotoLevel
+			FlowNode fn = flowNodeProvider.getFlowNodeById(flowButton.getGotoNodeId());
+			if(fn != null) {
+				flowButton.setGotoLevel(fn.getNodeLevel());
+			}
+		}
 		flowButtonProvider.createFlowButton(flowButton);
 		
 		//step4 create flowButton's actions

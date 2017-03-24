@@ -105,8 +105,8 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			break;
 		case APPROVE_STEP:
 			next = null;
-			if(!btn.getFlowButton().getGotoNodeId().equals(0)) {
-				next = ctx.getFlowGraph().getGraphNode(btn.getFlowButton().getGotoNodeId());
+			if(!btn.getFlowButton().getGotoLevel().equals(0) && btn.getFlowButton().getGotoLevel() < ctx.getFlowGraph().getNodes().size()) {
+				next = ctx.getFlowGraph().getNodes().get(btn.getFlowButton().getGotoLevel());
 			}
 			if(next == null) {
 				//get next level
@@ -149,9 +149,13 @@ public class FlowGraphButtonEvent implements FlowGraphEvent {
 			next = current;
 			ctx.setNextNode(next);
 			
-			tracker = new FlowEventLog();
-			tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
-			tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			if(current.getTrackTransferLeave() != null) {
+				current.getTrackTransferLeave().fireAction(ctx, null);	
+			} else {
+				tracker = new FlowEventLog();
+				tracker.setLogContent(flowService.getFireButtonTemplate(nextStep, templateMap));
+				tracker.setStepCount(ctx.getFlowCase().getStepCount());
+			}
 			
 			log = new FlowEventLog();
 			log.setId(flowEventLogProvider.getNextId());
