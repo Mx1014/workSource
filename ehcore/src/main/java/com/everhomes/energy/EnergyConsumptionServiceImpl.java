@@ -44,6 +44,7 @@ import com.google.gson.reflect.TypeToken;
 import com.sun.org.apache.xpath.internal.operations.Bool;
 
 import org.apache.commons.lang.math.NumberUtils;
+import org.apache.poi.util.StringUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -921,9 +922,10 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             }
             if (NumberUtils.isNumber(result.getH())) {
                 meter.setPrice(new BigDecimal(result.getH()));
-            } else {
-                meter.setStartReading(new BigDecimal("1"));
             }
+//            else {
+//                meter.setStartReading(new BigDecimal("1"));
+//            }
             if (NumberUtils.isNumber(result.getI())) {
                 meter.setRate(new BigDecimal(result.getI()));
             } else {
@@ -946,7 +948,7 @@ public class EnergyConsumptionServiceImpl implements EnergyConsumptionService {
             if(NumberUtils.isNumber(result.getL())) {
                 meter.setCalculationType(Byte.valueOf(result.getL()));
             }
-            if(StringUtils.isEmpty(result.getM())) {
+            if(StringUtils.isEmpty(result.getM()) && !"".equals(result.getM()) && !" ".equals(result.getM())) {
                 EnergyMeterPriceConfig priceConfig = priceConfigProvider.findByName(result.getM(), cmd.getOwnerId(),
                                                             cmd.getOwnerType(), cmd.getCommunityId(), currNamespaceId());
                 if(priceConfig != null) {
