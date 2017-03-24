@@ -1350,6 +1350,8 @@ public class PunchServiceImpl implements PunchService {
 		punchRule.setStartLateTime(convertTime(startLastTime));
 		Time endEarly = convertTime(endEarlyTime);
 		Long workTime = endEarly.getTime() - startEarly.getTime();
+
+		punchRule.setWorkTimeLong(workTime);
 		// long hours = (workTime/(1000* 60 * 60));
 		// long minutes = (workTime-hours*(1000* 60 * 60))/(1000* 60);
 //		String workTimeStr = getGMTtimeString("HH:mm:ss", workTime);
@@ -2729,12 +2731,18 @@ public class PunchServiceImpl implements PunchService {
 		}
 		else{
 			PunchTimeRule punchTimeRule = ConvertHelper.convert(cmd, PunchTimeRule.class);
-			punchTimeRule.setAfternoonArriveTimeLong(cmd.getAfternoonArriveTime());
  			punchTimeRule.setAfternoonArriveTime(convertTime(cmd.getAfternoonArriveTime()));
 			punchTimeRule.setPunchTimesPerDay(cmd.getPunchTimesPerDay());
 			punchTimeRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
 			punchTimeRule.setDaySplitTime(convertTime(cmd.getDaySplitTime()));
+			//计算work time 在下面方法中
 			convertTime(punchTimeRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
+
+			punchTimeRule.setStartEarlyTimeLong(cmd.getStartEarlyTime());
+			punchTimeRule.setAfternoonArriveTimeLong(cmd.getAfternoonArriveTime());
+			punchTimeRule.setNoonLeaveTimeLong(cmd.getNoonLeaveTime());
+			punchTimeRule.setStartLateTimeLong(cmd.getStartLateTime());
+			
 			punchTimeRule.setCreatorUid(userId);
 			punchTimeRule.setCreateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));
@@ -2794,6 +2802,13 @@ public class PunchServiceImpl implements PunchService {
 			punchTimeRule.setNoonLeaveTime(convertTime(cmd.getNoonLeaveTime())); 
 			punchTimeRule.setDaySplitTime(convertTime(cmd.getDaySplitTime()));
 			convertTime(punchTimeRule, cmd.getStartEarlyTime(), cmd.getStartLateTime(), cmd.getEndEarlyTime());
+
+			punchTimeRule.setStartEarlyTimeLong(cmd.getStartEarlyTime());
+			punchTimeRule.setAfternoonArriveTimeLong(cmd.getAfternoonArriveTime());
+			punchTimeRule.setNoonLeaveTimeLong(cmd.getNoonLeaveTime());
+			punchTimeRule.setStartLateTimeLong(cmd.getStartLateTime());
+			
+			
 			punchTimeRule.setOperatorUid(userId);
 			punchTimeRule.setOperateTime(new Timestamp(DateHelper.currentGMTTime()
 					.getTime()));

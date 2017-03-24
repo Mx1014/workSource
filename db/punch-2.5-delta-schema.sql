@@ -26,3 +26,4 @@ ALTER TABLE `eh_punch_time_rules` ADD COLUMN `start_late_time_long` BIGINT  COMM
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `work_time_long` BIGINT  COMMENT 'how long do i must be work';
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `noon_leave_time_long` BIGINT ;
 ALTER TABLE `eh_punch_time_rules` ADD COLUMN `afternoon_arrive_time_long` BIGINT ;
+ALTER TABLE `eh_punch_time_rules` ADD COLUMN `day_split_time` BIGINT DEFAULT 18000000 COMMENT 'the time a day begin'  ;
