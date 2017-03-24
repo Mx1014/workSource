@@ -305,14 +305,14 @@ public class EnterpriseApplyEntryController extends ControllerBase{
 	}
 
 	/**
-	 * <b>URL: /techpark/entry/listBuildings</b>
+	 * <b>URL: /techpark/entry/listLeaseIssuerBuildings</b>
 	 * <p>根据园区号查询楼栋列表</p>
 	 */
-	@RequestMapping("listBuildings")
-	@RestReturn(value=ListBuildingCommandResponse.class)
-	public RestResponse listBuildings(ListBuildingCommand cmd) {
+	@RequestMapping("listLeaseIssuerBuildings")
+	@RestReturn(value=ListLeaseIssuerBuildingsResponse.class)
+	public RestResponse listLeaseIssuerBuildings(ListLeaseIssuerBuildingsCommand cmd) {
 
-		ListBuildingCommandResponse buildings = enterpriseApplyEntryService.listBuildings(cmd);
+		ListLeaseIssuerBuildingsResponse buildings = enterpriseApplyEntryService.listBuildings(cmd);
 		RestResponse response =  new RestResponse(buildings);
 
 		response.setErrorCode(ErrorCodes.SUCCESS);

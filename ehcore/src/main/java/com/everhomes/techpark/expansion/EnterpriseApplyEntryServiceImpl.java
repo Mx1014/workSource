@@ -611,7 +611,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 	public ListBuildingForRentResponse listLeasePromotions(ListBuildingForRentCommand cmd) {
 		ListBuildingForRentResponse res = new ListBuildingForRentResponse();
 		if (null==cmd.getRentType())
-			cmd.setRentType( LeasePromotionType.ORDINARY.getCode());
+			cmd.setRentType(LeasePromotionType.ORDINARY.getCode());
 		LeasePromotion lease = ConvertHelper.convert(cmd, LeasePromotion.class);
 		int pageSize = PaginationConfigHelper.getPageSize(configurationProvider, cmd.getPageSize());
 		CrossShardListingLocator locator = new CrossShardListingLocator();
@@ -623,8 +623,8 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		
 		List<BuildingForRentDTO> dtos = leasePromotions.stream().map((c) ->{
             BuildingForRentDTO dto = ConvertHelper.convert(c, BuildingForRentDTO.class);
-
-            processDetailUrl(dto);
+            //TODO: set detail url
+//            processDetailUrl(dto);
             Address address = addressProvider.findAddressById(c.getAddressId());
             if (null != address) {
                 dto.setApartmentName(address.getApartmentName());
@@ -645,7 +645,7 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                     leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
                 }
             }
-
+            dto.setUnit("元/㎡/月");
             return dto;
 		}).collect(Collectors.toList());
 		
@@ -653,19 +653,19 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 		return res;
 	}
 
-    private void processDetailUrl(BuildingForRentDTO dto) {
-        try {
-            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
-            String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
-
-            detailUrl = String.format(detailUrl, dto.getId());
-
-//            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
-            dto.setDetailUrl(homeUrl + detailUrl);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
-    }
+//    private void processDetailUrl(BuildingForRentDTO dto) {
+//        try {
+//            String homeUrl = configurationProvider.getValue(ConfigConstants.HOME_URL, "");
+//            String detailUrl = configurationProvider.getValue(ConfigConstants.SERVICE_ALLIANCE_DETAIL_URL, "");
+//
+//            detailUrl = String.format(detailUrl, dto.getId());
+//
+////            detailUrl = String.format(detailUrl, dto.getId(), URLEncoder.encode(name, "UTF-8"), RandomUtils.nextInt(2));
+//            dto.setDetailUrl(homeUrl + detailUrl);
+//        } catch (Exception e) {
+//            e.printStackTrace();
+//        }
+//    }
 
 	@Override
 	public boolean createLeasePromotion(CreateLeasePromotionCommand cmd){
@@ -746,7 +746,10 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 				leasePromotionAttachment.setContentUrl(contentServerService.parserUri(leasePromotionAttachment.getContentUri(), EntityType.USER.getCode(), UserContext.current().getUser().getId()));
 			}
 		}
-		return ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+        BuildingForRentDTO dto = ConvertHelper.convert(leasePromotion, BuildingForRentDTO.class);
+        dto.setUnit("元/㎡/月");
+
+		return dto;
 	}
 	
 	@Override
@@ -927,8 +930,12 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
     }
 
     @Override
-    public ListBuildingCommandResponse listBuildings(ListBuildingCommand cmd) {
-        ListBuildingCommandResponse buildings = communityService.listBuildings(cmd);
-        return null;
+    public ListLeaseIssuerBuildingsResponse listBuildings(ListLeaseIssuerBuildingsCommand cmd) {
+        ListBuildingCommand cmd2 = ConvertHelper.convert(cmd, ListBuildingCommand.class);
+        ListBuildingCommandResponse buildings = communityService.listBuildings(cmd2);
+        ListLeaseIssuerBuildingsResponse response = new ListLeaseIssuerBuildingsResponse();
+
+        response.setBuildings(buildings.getBuildings());
+        return response;
     }
 }

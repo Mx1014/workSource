@@ -57,8 +57,25 @@ public class BuildingForRentDTO {
 	private String apartmentName;
 	private String orientation;
 	private BigDecimal rentAmount;
+	private String unit;
 	private String issuerType;
 	private String detailUrl;
+
+	public BigDecimal getRentAmount() {
+		return rentAmount;
+	}
+
+	public void setRentAmount(BigDecimal rentAmount) {
+		this.rentAmount = rentAmount;
+	}
+
+	public String getUnit() {
+		return unit;
+	}
+
+	public void setUnit(String unit) {
+		this.unit = unit;
+	}
 
 	public String getDetailUrl() {
 		return detailUrl;
@@ -98,14 +115,6 @@ public class BuildingForRentDTO {
 
 	public void setOrientation(String orientation) {
 		this.orientation = orientation;
-	}
-
-	public BigDecimal getRentAmount() {
-		return rentAmount;
-	}
-
-	public void setRentAmount(BigDecimal rentAmount) {
-		this.rentAmount = rentAmount;
 	}
 
 	public String getIssuerType() {
