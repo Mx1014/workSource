@@ -170,4 +170,21 @@ public class EnterpriseLeaseIssuerProviderImpl implements EnterpriseLeaseIssuerP
 
 		return result;
 	}
+
+	@Override
+	public List<LeaseIssuerAddress> listLeaseIsserBuildings(Long leaseIssuerId) {
+		List<LeaseIssuerAddress> result = new ArrayList<>();
+
+		DSLContext context = dbProvider.getDslContext(AccessSpec.readOnlyWith(EhLeaseIssuers.class));
+		SelectQuery<EhLeaseIssuerAddressesRecord> query = context.selectQuery(Tables.EH_LEASE_ISSUER_ADDRESSES);
+		query.addConditions(Tables.EH_LEASE_ISSUER_ADDRESSES.LEASE_ISSUER_ID.eq(leaseIssuerId));
+
+		query.addGroupBy(Tables.EH_LEASE_ISSUER_ADDRESSES.BUILDING_ID);
+		query.fetch().map((r) -> {
+			result.add(ConvertHelper.convert(r, LeaseIssuerAddress.class));
+			return null;
+		});
+
+		return result;
+	}
 }

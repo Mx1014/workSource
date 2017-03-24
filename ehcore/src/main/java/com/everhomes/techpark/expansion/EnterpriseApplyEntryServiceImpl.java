@@ -962,8 +962,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
                 null, null);
 
         if (0 != issuers.size()) {
-            List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(issuers.get(0).getId(), null);
-            response.setBuildings(addresses.stream().map(a -> {
+            List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserBuildings(issuers.get(0).getId());
+
+			response.setBuildings(addresses.stream().map(a -> {
                 Address address = addressProvider.findAddressById(a.getAddressId());
                 com.everhomes.building.Building building = buildingProvider.findBuildingByName(address.getNamespaceId(),
                         address.getCommunityId(), address.getBuildingName());
@@ -1004,10 +1005,9 @@ public class EnterpriseApplyEntryServiceImpl implements EnterpriseApplyEntryServ
 
 		if (0 != issuers.size()) {
 			List<LeaseIssuerAddress> addresses = enterpriseLeaseIssuerProvider.listLeaseIsserAddresses(issuers.get(0).getId(), cmd.getBuildingId());
-			addresses.stream().map(a -> {
+			addresses.forEach(a -> {
 				Address address = addressProvider.findAddressById(a.getAddressId());
 				dtos.add(ConvertHelper.convert(address, AddressDTO.class));
-				return null;
 			});
 		}
 		return dtos;
