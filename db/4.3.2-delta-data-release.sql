@@ -236,3 +236,8 @@ delete from eh_web_menu_scopes where owner_type = 'EhNamespaces' and owner_id = 
 
 select max(id) into @id from `eh_web_menu_scopes`;
 INSERT INTO `eh_web_menu_scopes` (`id`, `menu_id`, `menu_name`, `owner_type`, `owner_id`, `apply_policy`) VALUES (@id+1, 60400, '', 'EhNamespaces', 999983, 2);
+
+-- 更新物业报修工作流 add by sw 20170323
+UPDATE eh_flow_cases set owner_id = project_id where owner_type = 'PMTASK';
+UPDATE eh_flow_evaluates set owner_id = project_id where owner_type = 'PMTASK';
+UPDATE eh_flows set owner_id = project_id where owner_type = 'PMTASK';
