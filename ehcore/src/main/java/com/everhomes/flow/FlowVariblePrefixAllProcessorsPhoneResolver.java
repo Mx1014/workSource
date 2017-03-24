@@ -35,6 +35,7 @@ public class FlowVariblePrefixAllProcessorsPhoneResolver implements FlowVariable
 			for(int i = logs.size()-1; i >= 0; i--) {
 				FlowGraphNode gnode = ctx.getFlowGraph().getGraphNode(logs.get(i).getFlowNodeId());
 				if(gnode != null && gnode.getFlowNode().getNodeLevel() < currNode.getFlowNode().getNodeLevel()) {
+					node = gnode.getFlowNode();
 					break;
 				}
 			}
