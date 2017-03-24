@@ -8,12 +8,10 @@ import com.everhomes.configuration.ConfigConstants;
 import com.everhomes.configuration.ConfigurationProvider;
 import com.everhomes.oauth2client.handler.OAuth2ClientHandler;
 import com.everhomes.oauth2client.handler.OAuth2ClientHandlerConstant;
-import com.everhomes.rest.oauth2client.OAuth2ClientApiCommand;
-import com.everhomes.rest.oauth2client.OAuth2ClientApiResponse;
-import com.everhomes.rest.oauth2client.OAuth2ClientServiceErrorCode;
-import com.everhomes.rest.oauth2client.OAuth2ClientTokenType;
+import com.everhomes.rest.oauth2client.*;
 import com.everhomes.user.User;
 import com.everhomes.user.UserContext;
+import com.everhomes.util.ConvertHelper;
 import com.everhomes.util.RuntimeErrorException;
 import com.everhomes.util.Tuple;
 import org.slf4j.Logger;
@@ -143,6 +141,57 @@ public class OAuth2ClientServiceImpl implements OAuth2ClientService {
             accessToken = oAuth2ClientTokenProvider.findLastTokenByUserAndVendor(currUser.getId(), vendor, OAuth2ClientTokenType.ACCESS_TOKEN);
         }
         return handler.api(server, accessToken, cmd);
+    }
+
+    @Override
+    public void updateOAuth2Server(UpdateOAuth2ServerCommand cmd) {
+        if (cmd.getId() != null) {
+            OAuth2Server oAuth2Server = oAuth2ServerProvider.findOAuth2ServerByVendor(cmd.getVendor());
+            if (cmd.getVendor() != null) {
+                oAuth2Server.setVendor(cmd.getVendor());
+            }
+            if (cmd.getClientId() != null) {
+                oAuth2Server.setClientId(cmd.getClientId());
+            }
+            if (cmd.getClientSecret() != null) {
+                oAuth2Server.setClientSecret(cmd.getClientSecret());
+            }
+            if (cmd.getAuthorizeUrl() != null) {
+                oAuth2Server.setAuthorizeUrl(cmd.getAuthorizeUrl());
+            }
+            if (cmd.getTokenUrl() != null) {
+                oAuth2Server.setTokenUrl(cmd.getTokenUrl());
+            }
+            if (cmd.getGrantType() != null) {
+                oAuth2Server.setGrantType(cmd.getGrantType());
+            }
+            if (cmd.getRedirectUri() != null) {
+                oAuth2Server.setRedirectUri(cmd.getRedirectUri());
+            }
+            if (cmd.getResponseType() != null) {
+                oAuth2Server.setResponseType(cmd.getResponseType());
+            }
+            if (cmd.getScope() != null) {
+                oAuth2Server.setScope(cmd.getScope());
+            }
+            if (cmd.getState() != null) {
+                oAuth2Server.setState(cmd.getState());
+            }
+            oAuth2ServerProvider.updateOauth2Server(oAuth2Server);
+        }
+    }
+
+    @Override
+    public OAuth2ServerDTO createOAuth2Server(CreateOAuth2ServerCommand cmd) {
+        OAuth2Server oAuth2Server = ConvertHelper.convert(cmd, OAuth2Server.class);
+        oAuth2ServerProvider.createOAuth2Server(oAuth2Server);
+        return ConvertHelper.convert(oAuth2Server, OAuth2ServerDTO.class);
+    }
+
+    @Override
+    public OAuth2ServerDTO getOAuth2Server(GetOAuth2ServerCommand cmd) {
+        OAuth2Server oAuth2Server = oAuth2ServerProvider.findOAuth2ServerById(cmd.getId());
+        return ConvertHelper.convert(oAuth2Server, OAuth2ServerDTO.class);
     }
 
     private boolean refreshToken(String vendor, OAuth2Server server, OAuth2ClientHandler handler, OAuth2ClientToken accessToken) {

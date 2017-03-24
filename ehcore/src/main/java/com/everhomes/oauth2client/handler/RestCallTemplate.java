@@ -12,8 +12,6 @@ import org.springframework.http.converter.ByteArrayHttpMessageConverter;
 import org.springframework.http.converter.HttpMessageConverter;
 import org.springframework.http.converter.ResourceHttpMessageConverter;
 import org.springframework.http.converter.StringHttpMessageConverter;
-import org.springframework.http.converter.feed.AtomFeedHttpMessageConverter;
-import org.springframework.http.converter.feed.RssChannelHttpMessageConverter;
 import org.springframework.http.converter.json.MappingJackson2HttpMessageConverter;
 import org.springframework.http.converter.support.AllEncompassingFormHttpMessageConverter;
 import org.springframework.http.converter.xml.Jaxb2RootElementHttpMessageConverter;
@@ -82,8 +80,8 @@ public class RestCallTemplate {
         messageConverters.add(new AllEncompassingFormHttpMessageConverter());
 
         if (romePresent) {
-            messageConverters.add(new AtomFeedHttpMessageConverter());
-            messageConverters.add(new RssChannelHttpMessageConverter());
+            // messageConverters.add(new AtomFeedHttpMessageConverter());
+            // messageConverters.add(new RssChannelHttpMessageConverter());
         }
         if (jaxb2Present) {
             messageConverters.add(new Jaxb2RootElementHttpMessageConverter());
